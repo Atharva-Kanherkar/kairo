@@ -1,0 +1,13 @@
+schema_version = 1
+[llm_clients.localanth]
+format = "anthropic_messages"
+base_url = "http://127.0.0.1:9998"
+[llm_clients.localanth.extra_headers]
+x-api-key = "x"
+[targets.cap]
+id = "cap-anthropic"
+llm_client = "localanth"
+[routes.primary]
+id = "cap-anthropic"
+type = "passthrough"
+target = "cap"

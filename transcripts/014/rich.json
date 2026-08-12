@@ -1,0 +1,19 @@
+{
+  "model": "captured-model",
+  "max_tokens": 100,
+  "system": [
+    { "type": "text", "text": "You are a careful assistant." },
+    { "type": "text", "text": "SECOND SYSTEM BLOCK: always cite sources.", "cache_control": {"type": "ephemeral"} }
+  ],
+  "tools": [
+    { "name": "run", "description": "run a cmd", "input_schema": {"type":"object","properties":{"cmd":{"type":"string"}},"required":["cmd"]} }
+  ],
+  "messages": [
+    { "role": "user", "content": "run ls" },
+    { "role": "assistant", "content": [{"type":"tool_use","id":"toolu_1","name":"run","input":{"cmd":"ls"}}] },
+    { "role": "user", "content": [
+        { "type": "tool_result", "tool_use_id": "toolu_1", "is_error": true,
+          "content": [ {"type":"text","text":"permission denied"} ] }
+    ] }
+  ]
+}

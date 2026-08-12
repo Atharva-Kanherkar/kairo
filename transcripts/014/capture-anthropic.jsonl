@@ -1,0 +1,1 @@
+{"path": "/v1/messages", "body": {"max_tokens": 64000, "messages": [{"content": [{"cache_control": {"type": "ephemeral"}, "text": "hi", "type": "text"}], "role": "user"}], "model": "cap-anthropic"}}
