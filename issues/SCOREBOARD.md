@@ -18,9 +18,14 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 003 | `[DONE]` in tool args (retried on token-streaming Kimi) | LiteLLM 1.96.2 → Kimi | litellm#31562 | ⬜ still not repro (patched) |
 | 013 | parallel tool calls, Anthropic ingress | LiteLLM 1.96.2 → Gemini | — | ⬜ inconclusive (model returned 1 call under forced choice) |
 | 006 | Switchyard silently drops `is_error`, flattens system + drops `cache_control`, invents `max_tokens=64000`, drops `n>1` | Switchyard 0.2.0 (capture rig) | source-audit paths | ✅ 4 losses repro offline on CURRENT |
+| 007 | Switchyard stringifies image/document blocks in tool_result → model can't see them | Switchyard 0.2.0 (capture rig) | — | ✅ repro offline on CURRENT (browser/vision agents silently broken) |
+| 007 | Switchyard streaming tool-call translation (OpenAI→Anthropic split-delta) | Switchyard 0.2.0 | — | ⬜ CORRECT — honest negative, their streaming works |
 
-**Tally**: 10 distinct defects confirmed on the wire (9 on current releases)
+**Tally**: 11 distinct defects confirmed on the wire (10 on current releases)
 across LiteLLM AND Switchyard — counting 006 as its 4 independent field losses.
+Switchyard-specific confirmed bugs: 005 (id sanitizer), 006 (4 field losses),
+007 (multimodal stringified) = 6 distinct Switchyard defects. Its streaming
+translation is genuinely correct (honest negative in 007).
 Spanning 3 API dialects (Chat Completions, Anthropic Messages, Responses) and 3
 backends (Ollama, Gemini, Kimi). Findings stronger than their tickets: the
 id-smuggling (004) and the offline capture-rig losses (006). Non-reproductions

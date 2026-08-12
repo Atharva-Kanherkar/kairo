@@ -1,0 +1,3 @@
+{"id":"chatcmpl-cap","object":"chat.completion","created":0,"model":"captured",
+ "choices":[{"index":0,"finish_reason":"stop","message":{"role":"assistant","content":"ok"}}],
+ "usage":{"prompt_tokens":1,"completion_tokens":1,"total_tokens":2}}
