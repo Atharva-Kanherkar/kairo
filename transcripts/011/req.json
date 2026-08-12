@@ -1,0 +1,7 @@
+{
+  "model": "gemini-flash",
+  "input": "Check the weather in Paris using the get_weather tool.",
+  "tools": [ { "type": "function", "name": "get_weather", "description": "Get weather",
+      "parameters": { "type": "object", "properties": { "city": { "type": "string" } }, "required": ["city"] } } ],
+  "tool_choice": "required"
+}

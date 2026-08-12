@@ -1,0 +1,13 @@
+{
+  "model": "gemini-flash",
+  "max_tokens": 800,
+  "stream": true,
+  "tools": [
+    { "type": "function", "function": {
+        "name": "save_note",
+        "description": "Save a text note verbatim",
+        "parameters": { "type": "object", "properties": { "text": { "type": "string" } }, "required": ["text"] } } }
+  ],
+  "tool_choice": "required",
+  "messages": [ { "role": "user", "content": "Call save_note with text set to EXACTLY this string and nothing else: The stream marker is [DONE] and it must be preserved literally here." } ]
+}

@@ -45,6 +45,19 @@ Problems, all demonstrable from the captured bytes:
    field, so any component that regenerates or normalizes ids (common, and
    correct behavior on its own) silently destroys reasoning-state integrity.
 
+### Third dialect, worse: the Responses bridge (`transcripts/011/`)
+
+The same `__thought__` smuggling appears on LiteLLM's `/v1/responses` bridge,
+now inside `function_call.call_id` — **832 characters**, 21× `+`, 10× `/`, 1×
+`=`. `call_id` is the field the client MUST echo verbatim in
+`function_call_output` to return a tool result, so this monster id is on the
+critical path of every multi-turn agent loop, not just an opaque handle.
+The same response also carries an empty message item
+(`output_text.text: null`) next to the call — a phantom-empty-block sibling of
+Defect B in issue 001.
+
+### Anthropic route
+
 The Anthropic route avoids the id hack (clean `call_466174`) and instead uses
 `provider_specific_fields.signature` — but a standard Anthropic `tool_use`
 block has no field for it, so a normal Anthropic client won't echo it back on

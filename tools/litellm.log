@@ -46,3 +46,7 @@ INFO:     127.0.0.1:49613 - "POST /v1/chat/completions HTTP/1.1" 200 OK
 INFO:     127.0.0.1:49616 - "POST /v1/chat/completions HTTP/1.1" 200 OK
 INFO:     127.0.0.1:49649 - "POST /v1/messages HTTP/1.1" 200 OK
 INFO:     127.0.0.1:49695 - "POST /v1/messages HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49708 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49714 - "POST /v1/responses HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49717 - "POST /v1/responses HTTP/1.1" 200 OK
+[92m13:34:25 - LiteLLM Proxy:WARNING[0m: common_request_processing.py:2166 - Container ownership recording skipped on streaming /v1/responses: no completed_response on stream iterator HiddenParamsAsyncIteratorWrapper. If this stream created any tool container (e.g. code_interpreter), follow-up /v1/containers/<id>/files calls will 403 for non-admin keys.
