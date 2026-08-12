@@ -1,0 +1,25 @@
+{
+  "model": "qwen3-ollama-chat",
+  "max_tokens": 150,
+  "stream": true,
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_time",
+        "description": "current time, no args",
+        "parameters": {
+          "type": "object",
+          "properties": {}
+        }
+      }
+    }
+  ],
+  "tool_choice": "required",
+  "messages": [
+    {
+      "role": "user",
+      "content": "what time is it? call get_time"
+    }
+  ]
+}

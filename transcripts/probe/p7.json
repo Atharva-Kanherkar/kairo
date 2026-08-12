@@ -1,0 +1,27 @@
+{
+  "model": "gemini-flash",
+  "max_tokens": 200,
+  "tools": [
+    {
+      "name": "get_weather",
+      "description": "w",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ]
+      }
+    }
+  ],
+  "messages": [
+    {
+      "role": "user",
+      "content": "Get weather for Paris, Tokyo, and Cairo. Call the tool separately for each city."
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "model": "gemini-flash",
+  "max_tokens": 80,
+  "stream": true,
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_weather",
+        "description": "w",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "city"
+          ]
+        }
+      }
+    }
+  ],
+  "tool_choice": "required",
+  "messages": [
+    {
+      "role": "user",
+      "content": "weather in Paris"
+    }
+  ]
+}

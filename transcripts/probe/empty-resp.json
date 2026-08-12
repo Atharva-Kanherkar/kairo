@@ -1,0 +1,1 @@
+{"error":{"message":"litellm.APIError: APIError: OpenAIException - {\"id\": \"chatcmpl-x\", \"object\": \"chat.completion\", \"created\": 0, \"model\": \"m\", \"choices\": [], \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 0, \"total_tokens\": 1}}. Received Model Group=emptychoices\nAvailable Model Group Fallbacks=None","type":null,"param":null,"code":"200"}}

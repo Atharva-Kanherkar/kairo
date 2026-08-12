@@ -1,0 +1,63 @@
+{
+  "model": "gemini-flash",
+  "max_tokens": 150,
+  "tools": [
+    {
+      "name": "get_weather",
+      "description": "w",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ]
+      }
+    }
+  ],
+  "messages": [
+    {
+      "role": "user",
+      "content": "weather in Paris and Tokyo"
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "t1",
+          "name": "get_weather",
+          "input": {
+            "city": "Paris"
+          }
+        },
+        {
+          "type": "tool_use",
+          "id": "t2",
+          "name": "get_weather",
+          "input": {
+            "city": "Tokyo"
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "t1",
+          "content": "20C"
+        },
+        {
+          "type": "tool_result",
+          "tool_use_id": "t2",
+          "content": "15C"
+        }
+      ]
+    }
+  ]
+}

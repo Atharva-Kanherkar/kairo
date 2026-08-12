@@ -1,0 +1,11 @@
+{
+  "model": "gemini-flash",
+  "max_tokens": 2000,
+  "reasoning_effort": "low",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Think step by step: what is 17*23? Then answer."
+    }
+  ]
+}

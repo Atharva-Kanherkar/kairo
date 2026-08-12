@@ -1,0 +1,37 @@
+{
+  "model": "gemini-flash",
+  "max_tokens": 120,
+  "tools": [
+    {
+      "name": "set_val",
+      "description": "set a value",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "v": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              }
+            ]
+          }
+        },
+        "required": [
+          "v"
+        ]
+      }
+    }
+  ],
+  "tool_choice": {
+    "type": "any"
+  },
+  "messages": [
+    {
+      "role": "user",
+      "content": "set v to the number 42"
+    }
+  ]
+}

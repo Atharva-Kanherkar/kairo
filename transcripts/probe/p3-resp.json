@@ -1,0 +1,1 @@
+{"error":{"message":"/chat/completions: Missing required parameter: 'messages'.","type":"invalid_request_error","param":"messages","code":"400","provider_specific_fields":{"error":"/chat/completions: Missing required parameter: 'messages'."}}}

@@ -1,0 +1,31 @@
+{
+  "model": "gemini-flash",
+  "max_tokens": 80,
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_weather_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+        "description": "w",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "city"
+          ]
+        }
+      }
+    }
+  ],
+  "tool_choice": "required",
+  "messages": [
+    {
+      "role": "user",
+      "content": "weather"
+    }
+  ]
+}

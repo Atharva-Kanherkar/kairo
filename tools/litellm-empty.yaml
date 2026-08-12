@@ -1,0 +1,6 @@
+model_list:
+  - model_name: emptychoices
+    litellm_params:
+      model: openai/mockmodel
+      api_base: http://127.0.0.1:9997/v1
+      api_key: sk-x

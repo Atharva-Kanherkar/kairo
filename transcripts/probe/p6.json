@@ -1,0 +1,23 @@
+{
+  "model": "gemini-flash",
+  "input": "weather in Paris",
+  "tools": [
+    {
+      "type": "function",
+      "name": "get_weather",
+      "description": "w",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ]
+      }
+    }
+  ],
+  "tool_choice": "required"
+}
