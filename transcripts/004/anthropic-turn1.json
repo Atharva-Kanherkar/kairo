@@ -1,0 +1,10 @@
+{
+  "model": "gemini3",
+  "max_tokens": 500,
+  "tools": [
+    { "name": "get_weather", "description": "Get current weather for a city",
+      "input_schema": { "type": "object", "properties": { "city": { "type": "string" } }, "required": ["city"] } }
+  ],
+  "tool_choice": { "type": "any" },
+  "messages": [ { "role": "user", "content": "Check the weather in Paris using the get_weather tool." } ]
+}

@@ -1,0 +1,49 @@
+{
+  "model": "gemini3",
+  "max_tokens": 500,
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_weather",
+        "description": "Get current weather for a city",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "city"
+          ]
+        }
+      }
+    }
+  ],
+  "messages": [
+    {
+      "role": "user",
+      "content": "Check the weather in Paris using the get_weather tool."
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_154389__thought__EooCCocCARFNMg87gueD5Sfavjf4QIszhMe3vDlnFLNLabgIfBV8YMWNJ2oEqZ8QlxeQGqKgZyfv6g4cmyGvJuQDm7r41Ee7FzdEZZrT/a3c0QOMEHd4e84iK4fSbxW+CO0so+IWPu8q5oo2P1ShBAU4TdAVTO6fdg/OQBoY4lV/OypLmW8qsx0T3VBe2xhEafVwKJq0TrVMJJceY56QDOhlcIkhKt4wFHiYOLZ+dUWRTbtwJN4nr52l4v/b30a9SqHHYRoIO//FB65Qbe82cRGwZTwNj8+ShC+9LY64BQnqMcXgDq6Tz04DB6mFDeMBsFibf1HrFGu05kZLsfC8RvBNSQaOiDCAs+yYE4k=",
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "arguments": "{\"city\": \"Paris\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_154389__thought__EooCCocCARFNMg87gueD5Sfavjf4QIszhMe3vDlnFLNLabgIfBV8YMWNJ2oEqZ8QlxeQGqKgZyfv6g4cmyGvJuQDm7r41Ee7FzdEZZrT/a3c0QOMEHd4e84iK4fSbxW+CO0so+IWPu8q5oo2P1ShBAU4TdAVTO6fdg/OQBoY4lV/OypLmW8qsx0T3VBe2xhEafVwKJq0TrVMJJceY56QDOhlcIkhKt4wFHiYOLZ+dUWRTbtwJN4nr52l4v/b30a9SqHHYRoIO//FB65Qbe82cRGwZTwNj8+ShC+9LY64BQnqMcXgDq6Tz04DB6mFDeMBsFibf1HrFGu05kZLsfC8RvBNSQaOiDCAs+yYE4k=",
+      "content": "{\"temp_c\": 22, \"condition\": \"sunny\"}"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "model": "gemini3",
+  "max_tokens": 500,
+  "tools": [
+    {
+      "name": "get_weather",
+      "description": "Get current weather for a city",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ]
+      }
+    }
+  ],
+  "messages": [
+    {
+      "role": "user",
+      "content": "Check the weather in Paris using the get_weather tool."
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "call_466174",
+          "name": "get_weather",
+          "input": {
+            "city": "Paris"
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "call_466174",
+          "content": "{\"temp_c\":22,\"condition\":\"sunny\"}"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"id":"qih8aqWlGuWjqfkPicPQ0Q4","type":"message","role":"assistant","model":"gemini3","stop_sequence":null,"usage":{"input_tokens":93,"output_tokens":17},"content":[{"type":"text","text":"The weather in Paris is currently sunny with a temperature of 22°C."}],"stop_reason":"end_turn"}
