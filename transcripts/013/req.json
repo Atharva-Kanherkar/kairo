@@ -1,0 +1,10 @@
+{
+  "model": "gemini-flash",
+  "max_tokens": 600,
+  "tools": [
+    { "name": "get_weather", "description": "Weather for a city",
+      "input_schema": {"type":"object","properties":{"city":{"type":"string"}},"required":["city"]} }
+  ],
+  "tool_choice": { "type": "any", "disable_parallel_tool_use": false },
+  "messages": [ { "role": "user", "content": "Get the weather for Paris, Tokyo, and Cairo. Call get_weather three times, once per city, in parallel." } ]
+}

@@ -1,0 +1,9 @@
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1786522351-4tUFjqNthWJ96GmSnal4","object":"chat.completion","created":1786522351,"model":"moonshotai/kimi-k2","provider":"Novita","system_fingerprint":null,"service_tier":null,"choices":[{"index":0,"logprobs":null,"finish_reason":"tool_calls","native_finish_reason":"tool_calls","message":{"role":"assistant","content":null,"refusal":null,"reasoning":null,"tool_calls":[{"type":"function","index":0,"id":"functions.list_skills:0","function":{"name":"list_skills","arguments":"{\"user\": \"alice\"}"}}]}}],"usage":{"prompt_tokens":52,"completion_tokens":18,"total_tokens":70,"cost":0.00007104,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.00007104,"upstream_inference_prompt_cost":0.00002964,"upstream_inference_completions_cost":0.0000414},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0,"audio_tokens":0}}}

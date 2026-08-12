@@ -1,4 +1,8 @@
 /target
 .env
+tools/*/target
+tools/switchyard
+tools/*-env*
 transcripts/**/raw-keys*
 .DS_Store
+*.log

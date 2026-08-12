@@ -1,0 +1,1 @@
+{"error":{"message":"litellm.BadRequestError: GeminiException BadRequestError - {\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Multimodal function responses are not supported for this model.\",\n    \"status\": \"INVALID_ARGUMENT\"\n  }\n}\n. Received Model Group=gemini-flash\nAvailable Model Group Fallbacks=None","type":null,"param":null,"code":"400"}}

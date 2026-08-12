@@ -1,0 +1,15 @@
+schema_version = 1
+
+[llm_clients.openrouter]
+format = "openai_chat"
+base_url = "https://openrouter.ai/api/v1"
+api_key_env = "OPENROUTER_API_KEY"
+
+[targets.kimi]
+id = "moonshotai/kimi-k2"
+llm_client = "openrouter"
+
+[routes.primary]
+id = "moonshotai/kimi-k2"
+type = "passthrough"
+target = "kimi"

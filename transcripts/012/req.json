@@ -1,0 +1,67 @@
+{
+  "model": "gemini-flash",
+  "max_tokens": 400,
+  "tools": [
+    {
+      "name": "screenshot",
+      "description": "Take a screenshot",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "target"
+        ]
+      }
+    }
+  ],
+  "messages": [
+    {
+      "role": "user",
+      "content": "Take a screenshot of the homepage."
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "toolu_01abc",
+          "name": "screenshot",
+          "input": {
+            "target": "homepage"
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "toolu_01abc",
+          "content": [
+            {
+              "type": "text",
+              "text": "Screenshot captured, see image:"
+            },
+            {
+              "type": "image",
+              "source": {
+                "type": "base64",
+                "media_type": "image/png",
+                "data": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "What color dominates the screenshot I just gave you? Answer in one word."
+    }
+  ]
+}

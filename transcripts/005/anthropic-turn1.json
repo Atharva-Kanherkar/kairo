@@ -1,0 +1,10 @@
+{
+  "model": "moonshotai/kimi-k2",
+  "max_tokens": 500,
+  "tools": [
+    { "name": "list_skills", "description": "List available skills for a user",
+      "input_schema": {"type":"object","properties":{"user":{"type":"string"}},"required":["user"]} }
+  ],
+  "tool_choice": { "type": "any" },
+  "messages": [ { "role": "user", "content": "List the skills for user alice using the list_skills tool." } ]
+}

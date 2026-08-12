@@ -50,3 +50,161 @@ INFO:     127.0.0.1:49708 - "POST /v1/chat/completions HTTP/1.1" 200 OK
 INFO:     127.0.0.1:49714 - "POST /v1/responses HTTP/1.1" 200 OK
 INFO:     127.0.0.1:49717 - "POST /v1/responses HTTP/1.1" 200 OK
 [92m13:34:25 - LiteLLM Proxy:WARNING[0m: common_request_processing.py:2166 - Container ownership recording skipped on streaming /v1/responses: no completed_response on stream iterator HiddenParamsAsyncIteratorWrapper. If this stream created any tool container (e.g. code_interpreter), follow-up /v1/containers/<id>/files calls will 403 for non-admin keys.
+INFO:     127.0.0.1:49865 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+[92m13:39:37 - LiteLLM Proxy:ERROR[0m: endpoints.py:192 - litellm.proxy.proxy_server.anthropic_response(): Exception occured - litellm.BadRequestError: GeminiException BadRequestError - {
+  "error": {
+    "code": 400,
+    "message": "Multimodal function responses are not supported for this model.",
+    "status": "INVALID_ARGUMENT"
+  }
+}
+. Received Model Group=gemini-flash
+Available Model Group Fallbacks=None
+Traceback (most recent call last):
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py", line 2851, in async_completion
+    response = await client.post(
+               ^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+    )  # type: ignore
+    ^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/litellm_core_utils/logging_utils.py", line 289, in async_wrapper
+    result = await func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/llms/custom_httpx/http_handler.py", line 662, in post
+    await _raise_masked_async_error(e, stream)
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/llms/custom_httpx/http_handler.py", line 449, in _raise_masked_async_error
+    raise MaskedHTTPStatusError(e, message=_text, text=_text) from None
+litellm.llms.custom_httpx.http_handler.MaskedHTTPStatusError: Client error '400 Bad Request' for url 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/main.py", line 647, in acompletion
+    response = await init_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py", line 2860, in async_completion
+    raise VertexAIError(
+    ...<3 lines>...
+    )
+litellm.llms.vertex_ai.common_utils.VertexAIError: {
+  "error": {
+    "code": 400,
+    "message": "Multimodal function responses are not supported for this model.",
+    "status": "INVALID_ARGUMENT"
+  }
+}
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/proxy/anthropic_endpoints/endpoints.py", line 95, in anthropic_response
+    result = await base_llm_response_processor.base_process_llm_request(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<16 lines>...
+    )
+    ^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/proxy/common_request_processing.py", line 1752, in base_process_llm_request
+    responses = await llm_responses
+                ^^^^^^^^^^^^^^^^^^^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/router.py", line 5778, in async_wrapper
+    return await self._ageneric_api_call_with_fallbacks(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+    )
+    ^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/router.py", line 4429, in _ageneric_api_call_with_fallbacks
+    raise e
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/router.py", line 4416, in _ageneric_api_call_with_fallbacks
+    response = await self.async_function_with_fallbacks(**kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/router.py", line 6387, in async_function_with_fallbacks
+    return await self.async_function_with_fallbacks_common_utils(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/router.py", line 6349, in async_function_with_fallbacks_common_utils
+    raise original_exception
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/router.py", line 6378, in async_function_with_fallbacks
+    response = await self.async_function_with_retries(*args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/router.py", line 6527, in async_function_with_retries
+    self.should_retry_this_error(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        error=e,
+        ^^^^^^^^
+    ...<4 lines>...
+        content_policy_fallbacks=content_policy_fallbacks,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/router.py", line 6706, in should_retry_this_error
+    raise error
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/router.py", line 6480, in async_function_with_retries
+    response = await self.make_call(original_function, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/router.py", line 6638, in make_call
+    response = await response
+               ^^^^^^^^^^^^^^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/router.py", line 4547, in _ageneric_api_call_with_fallbacks_helper
+    raise e
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/router.py", line 4535, in _ageneric_api_call_with_fallbacks_helper
+    response = await response  # type: ignore
+               ^^^^^^^^^^^^^^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/utils.py", line 1864, in wrapper_async
+    raise e
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/utils.py", line 1681, in wrapper_async
+    result = await original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/llms/anthropic/experimental_pass_through/messages/handler.py", line 358, in anthropic_messages
+    response = await init_response
+               ^^^^^^^^^^^^^^^^^^^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/llms/anthropic/experimental_pass_through/adapters/handler.py", line 588, in async_anthropic_messages_handler
+    completion_response = await litellm.acompletion(**completion_kwargs)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/utils.py", line 1864, in wrapper_async
+    raise e
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/utils.py", line 1681, in wrapper_async
+    result = await original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/main.py", line 700, in acompletion
+    raise exception_type(
+          ~~~~~~~~~~~~~~^
+        model=model,
+        ^^^^^^^^^^^^
+    ...<3 lines>...
+        extra_kwargs=kwargs,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2505, in exception_type
+    raise e  # it's already mapped
+    ^^^^^^^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 2338, in exception_type
+    _map_vertex_exception(
+    ~~~~~~~~~~~~~~~~~~~~~^
+        model=model,
+        ^^^^^^^^^^^^
+    ...<5 lines>...
+        extra_information=extra_information,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/atharva/pipeproof/tools/litellm-env/lib/python3.13/site-packages/litellm/litellm_core_utils/exception_mapping_utils.py", line 1205, in _map_vertex_exception
+    raise BadRequestError(
+    ...<11 lines>...
+    )
+litellm.exceptions.BadRequestError: litellm.BadRequestError: GeminiException BadRequestError - {
+  "error": {
+    "code": 400,
+    "message": "Multimodal function responses are not supported for this model.",
+    "status": "INVALID_ARGUMENT"
+  }
+}
+. Received Model Group=gemini-flash
+Available Model Group Fallbacks=None
+INFO:     127.0.0.1:49884 - "POST /v1/messages HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:49899 - "POST /v1/messages HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49904 - "POST /v1/messages HTTP/1.1" 200 OK

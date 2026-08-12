@@ -1,0 +1,18 @@
+event: message_start
+data: {"type": "message_start", "message": {"id": "msg_ab7f1d2d-453f-4590-bb33-d7d78a8a39e5", "type": "message", "role": "assistant", "content": [], "model": "gemini-2.5-flash", "stop_reason": null, "stop_sequence": null, "usage": {"input_tokens": 0, "output_tokens": 0, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0}}}
+
+event: content_block_start
+data: {"type": "content_block_start", "index": 0, "content_block": {"type": "tool_use", "id": "call_f65699adffc54018b8b6aa44de82", "name": "get_weather", "input": {}, "provider_specific_fields": {"signature": "Cl8BEU0yDzYUJNn2KlsIDgO0e2zbtyD5zdVkX62RahXZIipUDYAsFPbqtFbmAcoCwFztACvHeYcZ8jHMTs5zQ2fQT/ZKlYfvIsF+PSoTQuUXEmLosijkACkiUov3YkWVGQqFAgERTTIPPIfsi3pjI2PhJPiHha5mqFFp4xFSvqkl8n6TSvqEaowkX6p2TcVpvoKWJ+x9s0PLUdwLSvGf1W7lYb11zsTvYA/ao5jP5jZQxcA1nCdLhkSjd6x3Qadqh14iNzJpkUKWeYPSPImgNTXnBLtUzQeMIjuZFiKl8J+mZJ2/LECjEHdylHLZKFgl+5HE0UAH/W/l1vd9mKeuU5rvOmS6Dqc1o6+Y8NsHRsNgT8HMS1Moq3I0e/aCPL8/M/HjMKawvmckC9/cHFC9RNAWa0ht1KkqCrcZo8G9TMCjVDHO3MB/EAiQHZ1Bk5uwY4rLq8P2FAAPCEy3J3vOcwdi5KabYLPN7QqdAgERTTIPbA5qUHiaP7XsxXaaX9SPPa2J3ivFQGTcP/HT3hCMguVzWkkE+QudZ9xBmbnUYU52OwwAEAXDmmxEWKA9ALkjYYmqsIaVMIV0t+zlL1xXNq8cL7OHfhxGSS69ZZntEn+u1rP5UeEdaAEctp79geD1qOhDVlr/LUfm5FsuKUrtPbfvIN9k/dh/ErdXOMs2AhKnx0EwBpxkaxtLJDppzB+AOHCXLugeEMU3nYaaiLxAe98XY2dn734p1Xr8bHAxtvwR+PC9LkY5Aojp0vR2EakkmKT627zCL8xDS+bz9ObO5VD97pKf2/r+RQYbQMtLlub8mVvCsWGd2fWoDa8wW3BeUNOQRRdtfLXUxsIdsMUAO/sPxFQrBfDFywq2AQERTTIPQBrB4TXooWI75kWnU4Z2Yg0zR2JVwqq8kFU62nM8ytLhJMEzi6pXZwtboJ9nidiknbUDX5YMLGVyMtpz9hCHRDAuMYcIX41NKQsbtrJOgKM6ucg8r4D2rI3EflqRil3LSZ533c95SOHv+FbG+dw0ayRlbNB+a7pET/E1U8rqu+cC6QcXpuYIYu74PjNtS36vKSj5m56z2ArEvtCSMYi4xRQsvlbPERIaByOkkP3JhLAmCkoBEU0yDxtv5yJOtxISn0k3awblFarWmPX+cKhKCv3Niyv+VlTbdkhKXphqL5j+nGiil5SMVo3LL75vYoE2lEUvmpwRE4sHBEBUQgoiARFNMg8WNLFM2WOUsIDxu3faTviKoC+IM6ilvXI4XCMQ8A=="}}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 0, "delta": {"type": "input_json_delta", "partial_json": "{\"city\": \"Paris\"}"}}
+
+event: content_block_stop
+data: {"type": "content_block_stop", "index": 0}
+
+event: message_delta
+data: {"type": "message_delta", "delta": {"stop_reason": "tool_use"}, "usage": {"input_tokens": 62, "output_tokens": 192}}
+
+event: message_stop
+data: {"type": "message_stop"}
+
