@@ -11,3 +11,9 @@ model_list:
     litellm_params:
       model: openrouter/moonshotai/kimi-k2
       api_key: os.environ/OPENROUTER_API_KEY
+  - model_name: qwen3-ollama-chat
+    litellm_params:
+      model: ollama_chat/qwen3:4b
+  - model_name: qwen3-ollama-compat
+    litellm_params:
+      model: ollama/qwen3:4b
