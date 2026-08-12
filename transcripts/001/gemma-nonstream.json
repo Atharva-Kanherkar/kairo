@@ -1,0 +1,1 @@
+{"id":"qx58auH-MLemg8UP7MyXgQ8","type":"message","role":"assistant","model":"gemma","stop_sequence":null,"usage":{"input_tokens":80,"output_tokens":16},"content":[{"type":"tool_use","id":"call_271666","name":"get_weather","input":{"city":"Paris"},"provider_specific_fields":{"signature":"EiYKJGUyNDgzMGE3LTVjZDYtNDJmZS05OThiLWVlNTM5ZTcyYjljMw=="}}],"stop_reason":"tool_use"}

@@ -1,0 +1,39 @@
+INFO:     Started server process [4133]
+INFO:     Waiting for application startup.
+
+   ██╗     ██╗████████╗███████╗██╗     ██╗     ███╗   ███╗
+   ██║     ██║╚══██╔══╝██╔════╝██║     ██║     ████╗ ████║
+   ██║     ██║   ██║   █████╗  ██║     ██║     ██╔████╔██║
+   ██║     ██║   ██║   ██╔══╝  ██║     ██║     ██║╚██╔╝██║
+   ███████╗██║   ██║   ███████╗███████╗███████╗██║ ╚═╝ ██║
+   ╚══════╝╚═╝   ╚═╝   ╚══════╝╚══════╝╚══════╝╚═╝     ╚═╝
+
+[92m12:49:58 - LiteLLM:WARNING[0m: utils.py:2722 - register_model: model=3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257 not in built-in cost map and no prefix/region variant matched; cache cost fields will default to 0. To track cache cost, add cache_creation_input_token_cost and cache_read_input_token_cost to model_info
+[92m12:49:58 - LiteLLM:WARNING[0m: utils.py:2722 - register_model: model=d27edfbfcce2fcfffc9a4d9ed825f0a150b69e499d8252efdd9b163aad1b9835 not in built-in cost map and no prefix/region variant matched; cache cost fields will default to 0. To track cache cost, add cache_creation_input_token_cost and cache_read_input_token_cost to model_info
+[92m12:49:58 - LiteLLM:WARNING[0m: utils.py:2722 - register_model: model=gemini/gemma-4-31b-it not in built-in cost map and no prefix/region variant matched; cache cost fields will default to 0. To track cache cost, add cache_creation_input_token_cost and cache_read_input_token_cost to model_info
+[92m12:49:58 - LiteLLM:WARNING[0m: utils.py:2722 - register_model: model=51eaf8a97e6c7787d720ecd33081f964d92b770e87092c92c3700a6b07cdf659 not in built-in cost map and no prefix/region variant matched; cache cost fields will default to 0. To track cache cost, add cache_creation_input_token_cost and cache_read_input_token_cost to model_info
+[92m12:49:58 - LiteLLM:WARNING[0m: utils.py:2722 - register_model: model=openrouter/moonshotai/kimi-k2 not in built-in cost map and no prefix/region variant matched; cache cost fields will default to 0. To track cache cost, add cache_creation_input_token_cost and cache_read_input_token_cost to model_info
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:4000 (Press CTRL+C to quit)
+
+[1;37m#------------------------------------------------------------#[0m
+[1;37m#                                                            #[0m
+[1;37m#            'The thing I wish you improved is...'            #[0m
+[1;37m#        https://github.com/BerriAI/litellm/issues/new        #[0m
+[1;37m#                                                            #[0m
+[1;37m#------------------------------------------------------------#[0m
+
+ Thank you for using LiteLLM! - Krrish & Ishaan
+
+
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+
+
+[32mLiteLLM: Proxy initialized with Config, Set models:[0m
+[32m    gemini-flash[0m
+[32m    gemma[0m
+[32m    kimi[0m
+INFO:     127.0.0.1:50180 - "GET /health/liveliness HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50182 - "POST /v1/messages HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50188 - "POST /v1/messages HTTP/1.1" 200 OK
