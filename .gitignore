@@ -1,0 +1,4 @@
+/target
+.env
+transcripts/**/raw-keys*
+.DS_Store
