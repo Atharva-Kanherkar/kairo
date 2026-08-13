@@ -1,0 +1,198 @@
+[
+  {
+    "run": 1,
+    "direct_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"ping\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 8,\n    \"candidatesTokenCount\": 1,\n    \"totalTokenCount\": 22,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 8\n      }\n    ],\n    \"thoughtsTokenCount\": 13,\n    \"serviceTier\": \"standard\"\n  },\n  \"modelVersion\": \"gemini-2.5-flash\",\n  \"responseId\": \"sr59ao2NBd_pjuMPscWTmA4\"\n}\n"
+    },
+    "direct_invalid_key": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key not valid. Please pass a valid API key.\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_INVALID\",\n        \"domain\": \"googleapis.com\",\n        \"metadata\": {\n          \"service\": \"generativelanguage.googleapis.com\"\n        }\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.LocalizedMessage\",\n        \"locale\": \"en-US\",\n        \"message\": \"API key not valid. Please pass a valid API key.\"\n      }\n    ]\n  }\n}\n"
+    },
+    "litellm_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"id\":\"s759asOQM8yqjuMPq6KB4QE\",\"created\":1786625715,\"model\":\"gemini-flash\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":null}}],\"usage\":{\"completion_tokens\":4,\"prompt_tokens\":8,\"total_tokens\":12,\"completion_tokens_details\":{\"reasoning_tokens\":4,\"text_tokens\":0},\"prompt_tokens_details\":{\"text_tokens\":8}},\"vertex_ai_grounding_metadata\":[],\"vertex_ai_url_context_metadata\":[],\"vertex_ai_safety_results\":[],\"vertex_ai_citation_metadata\":[],\"service_tier\":\"default\"}"
+    },
+    "litellm_api_key_override": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"litellm.AuthenticationError: GeminiException - {\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"API key not valid. Please pass a valid API key.\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.ErrorInfo\\\",\\n        \\\"reason\\\": \\\"API_KEY_INVALID\\\",\\n        \\\"domain\\\": \\\"googleapis.com\\\",\\n        \\\"metadata\\\": {\\n          \\\"service\\\": \\\"generativelanguage.googleapis.com\\\"\\n        }\\n      },\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.LocalizedMessage\\\",\\n        \\\"locale\\\": \\\"en-US\\\",\\n        \\\"message\\\": \\\"API key not valid. Please pass a valid API key.\\\"\\n      }\\n    ]\\n  }\\n}\\n. Received Model Group=gemini-flash\\nAvailable Model Group Fallbacks=None\",\"type\":nul"
+    },
+    "litellm_x_goog_header": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"id\":\"tb59atGxItrdg8UPy5-n0AQ\",\"created\":1786625717,\"model\":\"gemini-flash\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":null}}],\"usage\":{\"completion_tokens\":4,\"prompt_tokens\":8,\"total_tokens\":12,\"completion_tokens_details\":{\"reasoning_tokens\":4,\"text_tokens\":0},\"prompt_tokens_details\":{\"text_tokens\":8}},\"vertex_ai_grounding_metadata\":[],\"vertex_ai_url_context_metadata\":[],\"vertex_ai_safety_results\":[],\"vertex_ai_citation_metadata\":[],\"service_tier\":\"default\"}"
+    },
+    "litellm_bad_schema": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"litellm.BadRequestError: GeminiException BadRequestError - {\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\\\\\"not-a-real-schema-type\\\\\\\"\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.BadRequest\\\",\\n        \\\"fieldViolations\\\": [\\n          {\\n            \\\"field\\\": \\\"tools[0].function_declarations[0].parameters.type\\\",\\n            \\\"description\\\": \\\"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\\\\\"not-a-real-schema-type\\\\\\\"\\\"\\n          }\\n        ]\\n      }\\n    "
+    },
+    "direct_bad_schema": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\"not-a-real-schema-type\\\"\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.BadRequest\",\n        \"fieldViolations\": [\n          {\n            \"field\": \"tools[0].function_declarations[0].parameters.type\",\n            \"description\": \"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\"not-a-real-schema-type\\\"\"\n          }\n        ]\n      }\n    ]\n  }\n}\n"
+    }
+  },
+  {
+    "run": 2,
+    "direct_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"ping\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 8,\n    \"candidatesTokenCount\": 1,\n    \"totalTokenCount\": 31,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 8\n      }\n    ],\n    \"thoughtsTokenCount\": 22,\n    \"serviceTier\": \"standard\"\n  },\n  \"modelVersion\": \"gemini-2.5-flash\",\n  \"responseId\": \"t759ar7YEvq7g8UPppnW4Aw\"\n}\n"
+    },
+    "direct_invalid_key": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key not valid. Please pass a valid API key.\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_INVALID\",\n        \"domain\": \"googleapis.com\",\n        \"metadata\": {\n          \"service\": \"generativelanguage.googleapis.com\"\n        }\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.LocalizedMessage\",\n        \"locale\": \"en-US\",\n        \"message\": \"API key not valid. Please pass a valid API key.\"\n      }\n    ]\n  }\n}\n"
+    },
+    "litellm_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"id\":\"uL59arv0KMWBg8UPxq3w8AQ\",\"created\":1786625720,\"model\":\"gemini-flash\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":null}}],\"usage\":{\"completion_tokens\":4,\"prompt_tokens\":8,\"total_tokens\":12,\"completion_tokens_details\":{\"reasoning_tokens\":4,\"text_tokens\":0},\"prompt_tokens_details\":{\"text_tokens\":8}},\"vertex_ai_grounding_metadata\":[],\"vertex_ai_url_context_metadata\":[],\"vertex_ai_safety_results\":[],\"vertex_ai_citation_metadata\":[],\"service_tier\":\"default\"}"
+    },
+    "litellm_api_key_override": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"litellm.AuthenticationError: GeminiException - {\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"API key not valid. Please pass a valid API key.\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.ErrorInfo\\\",\\n        \\\"reason\\\": \\\"API_KEY_INVALID\\\",\\n        \\\"domain\\\": \\\"googleapis.com\\\",\\n        \\\"metadata\\\": {\\n          \\\"service\\\": \\\"generativelanguage.googleapis.com\\\"\\n        }\\n      },\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.LocalizedMessage\\\",\\n        \\\"locale\\\": \\\"en-US\\\",\\n        \\\"message\\\": \\\"API key not valid. Please pass a valid API key.\\\"\\n      }\\n    ]\\n  }\\n}\\n. Received Model Group=gemini-flash\\nAvailable Model Group Fallbacks=None\",\"type\":nul"
+    },
+    "litellm_x_goog_header": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"id\":\"ub59aruXLJnNjuMP5POX8A0\",\"created\":1786625721,\"model\":\"gemini-flash\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"content\":\"ping\",\"role\":\"assistant\",\"images\":[],\"thinking_blocks\":[]}}],\"usage\":{\"completion_tokens\":4,\"prompt_tokens\":8,\"total_tokens\":12,\"completion_tokens_details\":{\"reasoning_tokens\":3,\"text_tokens\":1},\"prompt_tokens_details\":{\"text_tokens\":8}},\"vertex_ai_grounding_metadata\":[],\"vertex_ai_url_context_metadata\":[],\"vertex_ai_safety_results\":[],\"vertex_ai_citation_metadata\":[],\"service_tier\":\"default\"}"
+    },
+    "litellm_bad_schema": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"litellm.BadRequestError: GeminiException BadRequestError - {\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\\\\\"not-a-real-schema-type\\\\\\\"\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.BadRequest\\\",\\n        \\\"fieldViolations\\\": [\\n          {\\n            \\\"field\\\": \\\"tools[0].function_declarations[0].parameters.type\\\",\\n            \\\"description\\\": \\\"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\\\\\"not-a-real-schema-type\\\\\\\"\\\"\\n          }\\n        ]\\n      }\\n    "
+    },
+    "direct_bad_schema": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\"not-a-real-schema-type\\\"\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.BadRequest\",\n        \"fieldViolations\": [\n          {\n            \"field\": \"tools[0].function_declarations[0].parameters.type\",\n            \"description\": \"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\"not-a-real-schema-type\\\"\"\n          }\n        ]\n      }\n    ]\n  }\n}\n"
+    }
+  },
+  {
+    "run": 3,
+    "direct_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"ping\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 8,\n    \"candidatesTokenCount\": 1,\n    \"totalTokenCount\": 26,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 8\n      }\n    ],\n    \"thoughtsTokenCount\": 17,\n    \"serviceTier\": \"standard\"\n  },\n  \"modelVersion\": \"gemini-2.5-flash\",\n  \"responseId\": \"u759au1H0r6DxQ_D34-QDA\"\n}\n"
+    },
+    "direct_invalid_key": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key not valid. Please pass a valid API key.\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_INVALID\",\n        \"domain\": \"googleapis.com\",\n        \"metadata\": {\n          \"service\": \"generativelanguage.googleapis.com\"\n        }\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.LocalizedMessage\",\n        \"locale\": \"en-US\",\n        \"message\": \"API key not valid. Please pass a valid API key.\"\n      }\n    ]\n  }\n}\n"
+    },
+    "litellm_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"id\":\"vL59avKnE9-ng8UP2OeEIQ\",\"created\":1786625724,\"model\":\"gemini-flash\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"content\":\"ping\",\"role\":\"assistant\",\"images\":[],\"thinking_blocks\":[]}}],\"usage\":{\"completion_tokens\":4,\"prompt_tokens\":8,\"total_tokens\":12,\"completion_tokens_details\":{\"reasoning_tokens\":3,\"text_tokens\":1},\"prompt_tokens_details\":{\"text_tokens\":8}},\"vertex_ai_grounding_metadata\":[],\"vertex_ai_url_context_metadata\":[],\"vertex_ai_safety_results\":[],\"vertex_ai_citation_metadata\":[],\"service_tier\":\"default\"}"
+    },
+    "litellm_api_key_override": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"litellm.AuthenticationError: GeminiException - {\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"API key not valid. Please pass a valid API key.\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.ErrorInfo\\\",\\n        \\\"reason\\\": \\\"API_KEY_INVALID\\\",\\n        \\\"domain\\\": \\\"googleapis.com\\\",\\n        \\\"metadata\\\": {\\n          \\\"service\\\": \\\"generativelanguage.googleapis.com\\\"\\n        }\\n      },\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.LocalizedMessage\\\",\\n        \\\"locale\\\": \\\"en-US\\\",\\n        \\\"message\\\": \\\"API key not valid. Please pass a valid API key.\\\"\\n      }\\n    ]\\n  }\\n}\\n. Received Model Group=gemini-flash\\nAvailable Model Group Fallbacks=None\",\"type\":nul"
+    },
+    "litellm_x_goog_header": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"id\":\"vb59aqSSJpGojuMPwoeb6A4\",\"created\":1786625725,\"model\":\"gemini-flash\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":null}}],\"usage\":{\"completion_tokens\":4,\"prompt_tokens\":8,\"total_tokens\":12,\"completion_tokens_details\":{\"reasoning_tokens\":4,\"text_tokens\":0},\"prompt_tokens_details\":{\"text_tokens\":8}},\"vertex_ai_grounding_metadata\":[],\"vertex_ai_url_context_metadata\":[],\"vertex_ai_safety_results\":[],\"vertex_ai_citation_metadata\":[],\"service_tier\":\"default\"}"
+    },
+    "litellm_bad_schema": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"litellm.BadRequestError: GeminiException BadRequestError - {\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\\\\\"not-a-real-schema-type\\\\\\\"\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.BadRequest\\\",\\n        \\\"fieldViolations\\\": [\\n          {\\n            \\\"field\\\": \\\"tools[0].function_declarations[0].parameters.type\\\",\\n            \\\"description\\\": \\\"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\\\\\"not-a-real-schema-type\\\\\\\"\\\"\\n          }\\n        ]\\n      }\\n    "
+    },
+    "direct_bad_schema": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\"not-a-real-schema-type\\\"\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.BadRequest\",\n        \"fieldViolations\": [\n          {\n            \"field\": \"tools[0].function_declarations[0].parameters.type\",\n            \"description\": \"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\"not-a-real-schema-type\\\"\"\n          }\n        ]\n      }\n    ]\n  }\n}\n"
+    }
+  },
+  {
+    "run": 4,
+    "direct_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"ping\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 8,\n    \"candidatesTokenCount\": 1,\n    \"totalTokenCount\": 26,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 8\n      }\n    ],\n    \"thoughtsTokenCount\": 17,\n    \"serviceTier\": \"standard\"\n  },\n  \"modelVersion\": \"gemini-2.5-flash\",\n  \"responseId\": \"vr59ap3JMLb6juMPza-BwQ0\"\n}\n"
+    },
+    "direct_invalid_key": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key not valid. Please pass a valid API key.\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_INVALID\",\n        \"domain\": \"googleapis.com\",\n        \"metadata\": {\n          \"service\": \"generativelanguage.googleapis.com\"\n        }\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.LocalizedMessage\",\n        \"locale\": \"en-US\",\n        \"message\": \"API key not valid. Please pass a valid API key.\"\n      }\n    ]\n  }\n}\n"
+    },
+    "litellm_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"id\":\"wL59apLOBLzpjuMP_J3DiA8\",\"created\":1786625727,\"model\":\"gemini-flash\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":null}}],\"usage\":{\"completion_tokens\":4,\"prompt_tokens\":8,\"total_tokens\":12,\"completion_tokens_details\":{\"reasoning_tokens\":4,\"text_tokens\":0},\"prompt_tokens_details\":{\"text_tokens\":8}},\"vertex_ai_grounding_metadata\":[],\"vertex_ai_url_context_metadata\":[],\"vertex_ai_safety_results\":[],\"vertex_ai_citation_metadata\":[],\"service_tier\":\"default\"}"
+    },
+    "litellm_api_key_override": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"litellm.AuthenticationError: GeminiException - {\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"API key not valid. Please pass a valid API key.\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.ErrorInfo\\\",\\n        \\\"reason\\\": \\\"API_KEY_INVALID\\\",\\n        \\\"domain\\\": \\\"googleapis.com\\\",\\n        \\\"metadata\\\": {\\n          \\\"service\\\": \\\"generativelanguage.googleapis.com\\\"\\n        }\\n      },\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.LocalizedMessage\\\",\\n        \\\"locale\\\": \\\"en-US\\\",\\n        \\\"message\\\": \\\"API key not valid. Please pass a valid API key.\\\"\\n      }\\n    ]\\n  }\\n}\\n. Received Model Group=gemini-flash\\nAvailable Model Group Fallbacks=None\",\"type\":nul"
+    },
+    "litellm_x_goog_header": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"id\":\"wb59asbuG6iE4-EP3-P1iQ4\",\"created\":1786625729,\"model\":\"gemini-flash\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":null}}],\"usage\":{\"completion_tokens\":4,\"prompt_tokens\":8,\"total_tokens\":12,\"completion_tokens_details\":{\"reasoning_tokens\":4,\"text_tokens\":0},\"prompt_tokens_details\":{\"text_tokens\":8}},\"vertex_ai_grounding_metadata\":[],\"vertex_ai_url_context_metadata\":[],\"vertex_ai_safety_results\":[],\"vertex_ai_citation_metadata\":[],\"service_tier\":\"default\"}"
+    },
+    "litellm_bad_schema": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"litellm.BadRequestError: GeminiException BadRequestError - {\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\\\\\"not-a-real-schema-type\\\\\\\"\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.BadRequest\\\",\\n        \\\"fieldViolations\\\": [\\n          {\\n            \\\"field\\\": \\\"tools[0].function_declarations[0].parameters.type\\\",\\n            \\\"description\\\": \\\"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\\\\\"not-a-real-schema-type\\\\\\\"\\\"\\n          }\\n        ]\\n      }\\n    "
+    },
+    "direct_bad_schema": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\"not-a-real-schema-type\\\"\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.BadRequest\",\n        \"fieldViolations\": [\n          {\n            \"field\": \"tools[0].function_declarations[0].parameters.type\",\n            \"description\": \"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\"not-a-real-schema-type\\\"\"\n          }\n        ]\n      }\n    ]\n  }\n}\n"
+    }
+  },
+  {
+    "run": 5,
+    "direct_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"ping\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 8,\n    \"candidatesTokenCount\": 1,\n    \"totalTokenCount\": 28,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 8\n      }\n    ],\n    \"thoughtsTokenCount\": 19,\n    \"serviceTier\": \"standard\"\n  },\n  \"modelVersion\": \"gemini-2.5-flash\",\n  \"responseId\": \"w759asyoA7vIjuMP7OGh8A0\"\n}\n"
+    },
+    "direct_invalid_key": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key not valid. Please pass a valid API key.\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_INVALID\",\n        \"domain\": \"googleapis.com\",\n        \"metadata\": {\n          \"service\": \"generativelanguage.googleapis.com\"\n        }\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.LocalizedMessage\",\n        \"locale\": \"en-US\",\n        \"message\": \"API key not valid. Please pass a valid API key.\"\n      }\n    ]\n  }\n}\n"
+    },
+    "litellm_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"id\":\"w759auSqO-G6g8UP__Kr8AQ\",\"created\":1786625731,\"model\":\"gemini-flash\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":null}}],\"usage\":{\"completion_tokens\":4,\"prompt_tokens\":8,\"total_tokens\":12,\"completion_tokens_details\":{\"reasoning_tokens\":4,\"text_tokens\":0},\"prompt_tokens_details\":{\"text_tokens\":8}},\"vertex_ai_grounding_metadata\":[],\"vertex_ai_url_context_metadata\":[],\"vertex_ai_safety_results\":[],\"vertex_ai_citation_metadata\":[],\"service_tier\":\"default\"}"
+    },
+    "litellm_api_key_override": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"litellm.AuthenticationError: GeminiException - {\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"API key not valid. Please pass a valid API key.\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.ErrorInfo\\\",\\n        \\\"reason\\\": \\\"API_KEY_INVALID\\\",\\n        \\\"domain\\\": \\\"googleapis.com\\\",\\n        \\\"metadata\\\": {\\n          \\\"service\\\": \\\"generativelanguage.googleapis.com\\\"\\n        }\\n      },\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.LocalizedMessage\\\",\\n        \\\"locale\\\": \\\"en-US\\\",\\n        \\\"message\\\": \\\"API key not valid. Please pass a valid API key.\\\"\\n      }\\n    ]\\n  }\\n}\\n. Received Model Group=gemini-flash\\nAvailable Model Group Fallbacks=None\",\"type\":nul"
+    },
+    "litellm_x_goog_header": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"id\":\"xb59aqHIEr-8qfkPwduDoQI\",\"created\":1786625733,\"model\":\"gemini-flash\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"content\":\"ping\",\"role\":\"assistant\",\"images\":[],\"thinking_blocks\":[]}}],\"usage\":{\"completion_tokens\":4,\"prompt_tokens\":8,\"total_tokens\":12,\"completion_tokens_details\":{\"reasoning_tokens\":3,\"text_tokens\":1},\"prompt_tokens_details\":{\"text_tokens\":8}},\"vertex_ai_grounding_metadata\":[],\"vertex_ai_url_context_metadata\":[],\"vertex_ai_safety_results\":[],\"vertex_ai_citation_metadata\":[],\"service_tier\":\"default\"}"
+    },
+    "litellm_bad_schema": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"litellm.BadRequestError: GeminiException BadRequestError - {\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\\\\\"not-a-real-schema-type\\\\\\\"\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.BadRequest\\\",\\n        \\\"fieldViolations\\\": [\\n          {\\n            \\\"field\\\": \\\"tools[0].function_declarations[0].parameters.type\\\",\\n            \\\"description\\\": \\\"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\\\\\"not-a-real-schema-type\\\\\\\"\\\"\\n          }\\n        ]\\n      }\\n    "
+    },
+    "direct_bad_schema": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\"not-a-real-schema-type\\\"\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.BadRequest\",\n        \"fieldViolations\": [\n          {\n            \"field\": \"tools[0].function_declarations[0].parameters.type\",\n            \"description\": \"Invalid value at 'tools[0].function_declarations[0].parameters.type' (type.googleapis.com/google.ai.generativelanguage.v1beta.Type), \\\"not-a-real-schema-type\\\"\"\n          }\n        ]\n      }\n    ]\n  }\n}\n"
+    }
+  },
+  {
+    "probe": "models",
+    "status": 200,
+    "leaks": [],
+    "body": "{\"data\":[{\"id\":\"gemini-flash\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"},{\"id\":\"gemma\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"},{\"id\":\"kimi\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"},{\"id\":\"qwen3-ollama-chat\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"},{\"id\":\"qwen3-ollama-compat\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"},{\"id\":\"gemini3\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"}],\"object\":\"list\"}"
+  }
+]

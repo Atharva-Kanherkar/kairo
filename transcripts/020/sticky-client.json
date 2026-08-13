@@ -1,0 +1,97 @@
+[
+  {
+    "run": 1,
+    "with": {
+      "status": 200,
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    },
+    "without": {
+      "status": 200,
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "run": 2,
+    "with": {
+      "status": 200,
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    },
+    "without": {
+      "status": 200,
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "run": 3,
+    "with": {
+      "status": 200,
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    },
+    "without": {
+      "status": 200,
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "run": 4,
+    "with": {
+      "status": 200,
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    },
+    "without": {
+      "status": 200,
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "run": 5,
+    "with": {
+      "status": 200,
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    },
+    "without": {
+      "status": 200,
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "run": 1,
+    "probe": "extra_body_api_key",
+    "client": {
+      "status": 200,
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "run": 2,
+    "probe": "extra_body_api_key",
+    "client": {
+      "status": 200,
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "run": 3,
+    "probe": "extra_body_api_key",
+    "client": {
+      "status": 200,
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "run": 4,
+    "probe": "extra_body_api_key",
+    "client": {
+      "status": 200,
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "run": 5,
+    "probe": "extra_body_api_key",
+    "client": {
+      "status": 200,
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  }
+]

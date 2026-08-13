@@ -1,0 +1,1101 @@
+[
+  {
+    "probe": "control_direct_plain",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "Server": "BaseHTTP/0.6 Python/3.9.6",
+        "Date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "content-type": "application/json",
+        "content-length": "310"
+      },
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "control_direct_headers",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "Server": "BaseHTTP/0.6 Python/3.9.6",
+        "Date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "content-type": "application/json",
+        "content-length": "310"
+      },
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "litellm_headers",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "5d0b6b2b-4f46-4f41-be7b-b32930137901",
+        "x-litellm-model-id": "bc99e2a33b7a3dc9af222b5d4ef5930d7fb9778d360771d9ac7b51b961bc7707",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "262.56600000000003",
+        "x-litellm-overhead-duration-ms": "8.423",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_api_base",
+    "run": 1,
+    "client": {
+      "ok": false,
+      "status": 500,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "76",
+        "content-type": "application/json",
+        "Connection": "close"
+      },
+      "body": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+    }
+  },
+  {
+    "probe": "litellm_api_key_body",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "96a9e156-025c-4058-9039-95995a963eee",
+        "x-litellm-model-id": "4de1994cf671c4186069a0b8747c744b10d0d8cbb76d5049e7c1447c251a153f",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "2.342",
+        "x-litellm-overhead-duration-ms": "0.795",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_mock_response",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "f6425c9d-5e24-4ef9-9b77-a63fccd9b724",
+        "x-litellm-model-id": "bc99e2a33b7a3dc9af222b5d4ef5930d7fb9778d360771d9ac7b51b961bc7707",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "2.686",
+        "x-litellm-overhead-duration-ms": "0.485",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_disable_guardrails",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "e2eb7513-a436-458f-95d3-bbb1bdc3d236",
+        "x-litellm-model-id": "bc99e2a33b7a3dc9af222b5d4ef5930d7fb9778d360771d9ac7b51b961bc7707",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "1.454",
+        "x-litellm-overhead-duration-ms": "0.436",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_api_base_and_key",
+    "run": 1,
+    "client": {
+      "ok": false,
+      "status": 500,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "76",
+        "content-type": "application/json",
+        "Connection": "close"
+      },
+      "body": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+    }
+  },
+  {
+    "probe": "control_direct_plain",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "Server": "BaseHTTP/0.6 Python/3.9.6",
+        "Date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "content-type": "application/json",
+        "content-length": "310"
+      },
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "control_direct_headers",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "Server": "BaseHTTP/0.6 Python/3.9.6",
+        "Date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "content-type": "application/json",
+        "content-length": "310"
+      },
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "litellm_headers",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "66052e49-3b4d-4496-af2e-47ee349d911b",
+        "x-litellm-model-id": "bc99e2a33b7a3dc9af222b5d4ef5930d7fb9778d360771d9ac7b51b961bc7707",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "2.258",
+        "x-litellm-overhead-duration-ms": "0.78",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_api_base",
+    "run": 2,
+    "client": {
+      "ok": false,
+      "status": 500,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "76",
+        "content-type": "application/json",
+        "Connection": "close"
+      },
+      "body": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+    }
+  },
+  {
+    "probe": "litellm_api_key_body",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "9fad37a1-5dd6-4fb1-aef6-e43516eb341f",
+        "x-litellm-model-id": "4de1994cf671c4186069a0b8747c744b10d0d8cbb76d5049e7c1447c251a153f",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "1.96",
+        "x-litellm-overhead-duration-ms": "0.582",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_mock_response",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "6786248a-97c8-4b48-b045-3bcee01edf65",
+        "x-litellm-model-id": "4de1994cf671c4186069a0b8747c744b10d0d8cbb76d5049e7c1447c251a153f",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "1.514",
+        "x-litellm-overhead-duration-ms": "0.459",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_disable_guardrails",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "4e402d6c-7a39-4469-a4cd-e1730bf216bc",
+        "x-litellm-model-id": "bc99e2a33b7a3dc9af222b5d4ef5930d7fb9778d360771d9ac7b51b961bc7707",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "1.477",
+        "x-litellm-overhead-duration-ms": "0.445",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_api_base_and_key",
+    "run": 2,
+    "client": {
+      "ok": false,
+      "status": 500,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "76",
+        "content-type": "application/json",
+        "Connection": "close"
+      },
+      "body": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+    }
+  },
+  {
+    "probe": "control_direct_plain",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "Server": "BaseHTTP/0.6 Python/3.9.6",
+        "Date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "content-type": "application/json",
+        "content-length": "310"
+      },
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "control_direct_headers",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "Server": "BaseHTTP/0.6 Python/3.9.6",
+        "Date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "content-type": "application/json",
+        "content-length": "310"
+      },
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "litellm_headers",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "eae0d6d8-bb17-48ac-9ace-aec2aca2e5bc",
+        "x-litellm-model-id": "bc99e2a33b7a3dc9af222b5d4ef5930d7fb9778d360771d9ac7b51b961bc7707",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "2.48",
+        "x-litellm-overhead-duration-ms": "0.84",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_api_base",
+    "run": 3,
+    "client": {
+      "ok": false,
+      "status": 500,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "76",
+        "content-type": "application/json",
+        "Connection": "close"
+      },
+      "body": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+    }
+  },
+  {
+    "probe": "litellm_api_key_body",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "555eeac9-54de-4f4b-be8c-8aee2a3b257a",
+        "x-litellm-model-id": "4de1994cf671c4186069a0b8747c744b10d0d8cbb76d5049e7c1447c251a153f",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "1.929",
+        "x-litellm-overhead-duration-ms": "0.57",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_mock_response",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "62561aae-a5b2-44e1-bc01-700ed4993be1",
+        "x-litellm-model-id": "4de1994cf671c4186069a0b8747c744b10d0d8cbb76d5049e7c1447c251a153f",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "1.603",
+        "x-litellm-overhead-duration-ms": "0.504",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_disable_guardrails",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "8f9b3e4e-3b83-4ffd-8099-582ec04b7993",
+        "x-litellm-model-id": "bc99e2a33b7a3dc9af222b5d4ef5930d7fb9778d360771d9ac7b51b961bc7707",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "2.126",
+        "x-litellm-overhead-duration-ms": "0.624",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_api_base_and_key",
+    "run": 3,
+    "client": {
+      "ok": false,
+      "status": 500,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "76",
+        "content-type": "application/json",
+        "Connection": "close"
+      },
+      "body": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+    }
+  },
+  {
+    "probe": "control_direct_plain",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "Server": "BaseHTTP/0.6 Python/3.9.6",
+        "Date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "content-type": "application/json",
+        "content-length": "310"
+      },
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "control_direct_headers",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "Server": "BaseHTTP/0.6 Python/3.9.6",
+        "Date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "content-type": "application/json",
+        "content-length": "310"
+      },
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "litellm_headers",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "3b27e72d-97db-4249-839c-9f075a2b1338",
+        "x-litellm-model-id": "4de1994cf671c4186069a0b8747c744b10d0d8cbb76d5049e7c1447c251a153f",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "2.474",
+        "x-litellm-overhead-duration-ms": "0.859",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_api_base",
+    "run": 4,
+    "client": {
+      "ok": false,
+      "status": 500,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:36 GMT",
+        "server": "uvicorn",
+        "content-length": "76",
+        "content-type": "application/json",
+        "Connection": "close"
+      },
+      "body": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+    }
+  },
+  {
+    "probe": "litellm_api_key_body",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "39c102f8-de94-4f0d-a1a6-b24185484ba2",
+        "x-litellm-model-id": "4de1994cf671c4186069a0b8747c744b10d0d8cbb76d5049e7c1447c251a153f",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "2.0709999999999997",
+        "x-litellm-overhead-duration-ms": "0.595",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_mock_response",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "4d33e9e4-45f5-415a-8c00-79084db6e4ff",
+        "x-litellm-model-id": "bc99e2a33b7a3dc9af222b5d4ef5930d7fb9778d360771d9ac7b51b961bc7707",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "1.5759999999999998",
+        "x-litellm-overhead-duration-ms": "0.477",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:38 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_disable_guardrails",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "3f38caa7-49f2-481f-95aa-a7aa9f90a7ef",
+        "x-litellm-model-id": "bc99e2a33b7a3dc9af222b5d4ef5930d7fb9778d360771d9ac7b51b961bc7707",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "1.366",
+        "x-litellm-overhead-duration-ms": "0.412",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:38 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_api_base_and_key",
+    "run": 4,
+    "client": {
+      "ok": false,
+      "status": 500,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "server": "uvicorn",
+        "content-length": "76",
+        "content-type": "application/json",
+        "Connection": "close"
+      },
+      "body": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+    }
+  },
+  {
+    "probe": "control_direct_plain",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "Server": "BaseHTTP/0.6 Python/3.9.6",
+        "Date": "Thu, 13 Aug 2026 12:52:38 GMT",
+        "content-type": "application/json",
+        "content-length": "310"
+      },
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "control_direct_headers",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "Server": "BaseHTTP/0.6 Python/3.9.6",
+        "Date": "Thu, 13 Aug 2026 12:52:38 GMT",
+        "content-type": "application/json",
+        "content-length": "310"
+      },
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "litellm_headers",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "6a5acb1f-eb93-4ada-b9d5-fc53c0e37e67",
+        "x-litellm-model-id": "bc99e2a33b7a3dc9af222b5d4ef5930d7fb9778d360771d9ac7b51b961bc7707",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "2.3770000000000002",
+        "x-litellm-overhead-duration-ms": "0.772",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:38 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_api_base",
+    "run": 5,
+    "client": {
+      "ok": false,
+      "status": 500,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "server": "uvicorn",
+        "content-length": "76",
+        "content-type": "application/json",
+        "Connection": "close"
+      },
+      "body": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+    }
+  },
+  {
+    "probe": "litellm_api_key_body",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "b1a3d37d-f2d2-4da1-993e-3cdeb5270417",
+        "x-litellm-model-id": "4de1994cf671c4186069a0b8747c744b10d0d8cbb76d5049e7c1447c251a153f",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "2.613",
+        "x-litellm-overhead-duration-ms": "0.786",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:38 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_mock_response",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "96fc3087-0438-427f-94c1-20e5f7a48ec2",
+        "x-litellm-model-id": "bc99e2a33b7a3dc9af222b5d4ef5930d7fb9778d360771d9ac7b51b961bc7707",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "2.2790000000000004",
+        "x-litellm-overhead-duration-ms": "0.694",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:38 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_disable_guardrails",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "server": "uvicorn",
+        "content-length": "309",
+        "content-type": "application/json",
+        "x-litellm-call-id": "b1640172-9376-4101-8d38-add19525e26c",
+        "x-litellm-model-id": "4de1994cf671c4186069a0b8747c744b10d0d8cbb76d5049e7c1447c251a153f",
+        "x-litellm-model-name": "openai/mockmodel",
+        "x-litellm-model-api-base": "http://127.0.0.1:9996/v1",
+        "x-litellm-version": "1.96.2",
+        "x-litellm-response-cost-original": "0.0",
+        "x-litellm-response-cost-discount-amount": "0.0",
+        "x-litellm-response-cost-margin-amount": "0.0",
+        "x-litellm-response-cost-margin-percent": "0.0",
+        "x-litellm-key-spend": "0.0",
+        "x-litellm-response-duration-ms": "1.5510000000000002",
+        "x-litellm-overhead-duration-ms": "0.455",
+        "x-litellm-callback-duration-ms": "0.0",
+        "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+        "llm_provider-date": "Thu, 13 Aug 2026 12:52:38 GMT",
+        "llm_provider-content-type": "application/json",
+        "llm_provider-content-length": "310",
+        "x-litellm-model-group": "mock",
+        "x-litellm-attempted-retries": "0",
+        "x-litellm-attempted-fallbacks": "0",
+        "x-frame-options": "DENY",
+        "content-security-policy": "frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "Connection": "close"
+      },
+      "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "litellm_api_base_and_key",
+    "run": 5,
+    "client": {
+      "ok": false,
+      "status": 500,
+      "headers": {
+        "date": "Thu, 13 Aug 2026 12:52:37 GMT",
+        "server": "uvicorn",
+        "content-length": "76",
+        "content-type": "application/json",
+        "Connection": "close"
+      },
+      "body": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+    }
+  },
+  {
+    "probe": "litellm_models",
+    "run": 0,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"data\":[{\"id\":\"mock\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"}],\"object\":\"list\"}"
+    }
+  }
+]
