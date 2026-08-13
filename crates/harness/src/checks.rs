@@ -423,6 +423,31 @@ pub fn upstream_bearer_is(forwarded_jsonl: &str, expected_bearer: &str) -> Verdi
     }
 }
 
+/// Invariant (bug 021): a proxy MUST NOT forward client secret-bearing
+/// headers (for example `x-goog-api-key`) to the upstream. The capture's
+/// header values must not contain `needle`.
+pub fn upstream_omits_header_value(forwarded_jsonl: &str, needle: &str) -> Verdict {
+    let line = forwarded_jsonl
+        .lines()
+        .find(|l| !l.trim().is_empty())
+        .unwrap_or("");
+    let v: Value = match serde_json::from_str(line) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("unparseable capture: {e}")),
+    };
+    let Some(headers) = v.get("headers").and_then(Value::as_object) else {
+        return Verdict::Violation("capture has no headers object".into());
+    };
+    for (name, val) in headers {
+        if val.as_str().is_some_and(|s| s.contains(needle)) {
+            return Verdict::Violation(format!(
+                "upstream header {name:?} contains client secret marker {needle:?}"
+            ));
+        }
+    }
+    Verdict::Conformant
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -457,5 +482,19 @@ mod tests {
         ));
         let ok = r#"{"path":"/v1/chat/completions","headers":{"authorization":"Bearer sk-x"},"body":{}}"#;
         assert_eq!(upstream_bearer_is(ok, "sk-x"), Verdict::Conformant);
+    }
+
+    #[test]
+    fn upstream_omits_header_value_flags_forwarded_canary() {
+        let cap = r#"{"headers":{"x-goog-api-key":"CANARY_X_GOOG_API_KEY"}}"#;
+        assert!(matches!(
+            upstream_omits_header_value(cap, "CANARY_X_GOOG_API_KEY"),
+            Verdict::Violation(_)
+        ));
+        let ok = r#"{"headers":{"authorization":"Bearer x"}}"#;
+        assert_eq!(
+            upstream_omits_header_value(ok, "CANARY_X_GOOG_API_KEY"),
+            Verdict::Conformant
+        );
     }
 }

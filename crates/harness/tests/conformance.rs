@@ -10,7 +10,8 @@ use kairo::checks::{
     is_error_forwarded, no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
     non_text_block_not_json_dumped, openai_stream_finish_reason, openai_toolcall_id_charset,
     parallel_tool_disable_preserved, reasoning_text_order_preserved,
-    thinking_not_leaked_as_visible_text, thinking_text_forwarded, upstream_bearer_is, Verdict,
+    thinking_not_leaked_as_visible_text, thinking_text_forwarded, upstream_bearer_is,
+    upstream_omits_header_value, Verdict,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -298,5 +299,44 @@ fn litellm_overridden_api_key_sticks_to_next_caller() {
     assert!(
         matches!(v, Verdict::Violation(_)),
         "a later request that did not send api_key must not inherit the previous caller's key: {v:?}"
+    );
+}
+
+// ---- bug 021: Switchyard forwards client x-* secrets to the upstream ----
+
+#[test]
+fn switchyard_control_does_not_invent_client_secret_headers() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/021/cap-control.jsonl"),
+        "CANARY_X_GOOG_API_KEY",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "a request with no extra headers should not grow a goog canary: {v:?}"
+    );
+}
+
+#[test]
+fn switchyard_forwards_x_goog_api_key() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/021/cap-headers.jsonl"),
+        "CANARY_X_GOOG_API_KEY",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "client x-goog-api-key must be caught on the upstream wire: {v:?}"
+    );
+}
+
+#[test]
+fn switchyard_forwards_x_goog_api_key_from_anthropic_ingress() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/021/cap-anthropic-headers.jsonl"),
+        "CANARY_X_GOOG_API_KEY",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "anthropic ingress must not be a bypass of the header leak: {v:?}"
     );
 }

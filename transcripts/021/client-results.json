@@ -1,0 +1,227 @@
+[
+  {
+    "probe": "control_direct_plain",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "control_direct_headers",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "switchyard_headers",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "switchyard_api_key_body",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "switchyard_anthropic_headers",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"content\":[{\"text\":\"ok\",\"type\":\"text\"}],\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"role\":\"assistant\",\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"type\":\"message\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}"
+    }
+  },
+  {
+    "probe": "control_direct_plain",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "control_direct_headers",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "switchyard_headers",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "switchyard_api_key_body",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "switchyard_anthropic_headers",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"content\":[{\"text\":\"ok\",\"type\":\"text\"}],\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"role\":\"assistant\",\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"type\":\"message\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}"
+    }
+  },
+  {
+    "probe": "control_direct_plain",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "control_direct_headers",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "switchyard_headers",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "switchyard_api_key_body",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "switchyard_anthropic_headers",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"content\":[{\"text\":\"ok\",\"type\":\"text\"}],\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"role\":\"assistant\",\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"type\":\"message\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}"
+    }
+  },
+  {
+    "probe": "control_direct_plain",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "control_direct_headers",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "switchyard_headers",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "switchyard_api_key_body",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "switchyard_anthropic_headers",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"content\":[{\"text\":\"ok\",\"type\":\"text\"}],\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"role\":\"assistant\",\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"type\":\"message\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}"
+    }
+  },
+  {
+    "probe": "control_direct_plain",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "control_direct_headers",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "switchyard_headers",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "switchyard_api_key_body",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "switchyard_anthropic_headers",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"content\":[{\"text\":\"ok\",\"type\":\"text\"}],\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"role\":\"assistant\",\"stop_reason\":\"end_turn\",\"stop_sequence\":null,\"type\":\"message\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}"
+    }
+  }
+]

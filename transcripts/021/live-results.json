@@ -1,0 +1,167 @@
+[
+  {
+    "run": 1,
+    "direct_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642783,\"id\":\"XwF-au-IJvn3juMPhI2oyQ8\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "direct_bearer_plus_invalid_x_goog": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642785,\"id\":\"YAF-aoefFd_pjuMPscWTmA4\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "direct_invalid_x_goog_only": {
+      "status": 400,
+      "leaks": [],
+      "body": "[{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Missing or invalid Authorization header.\",\n    \"status\": \"INVALID_ARGUMENT\"\n  }\n}\n]"
+    },
+    "switchyard_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642786,\"id\":\"YQF-apzeKMfXjuMPl5iPsQE\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "switchyard_x_goog_header": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642786,\"id\":\"YgF-apjiJfWwg8UPt8ztuAE\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "switchyard_api_key_body": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"Invalid JSON payload received. Unknown name \\\\\\\"api_key\\\\\\\": Cannot find field.\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.BadRequest\\\",\\n        \\\"fieldViolations\\\": [\\n          {\\n            \\\"description\\\": \\\"Invalid JSON payload received. Unknown name \\\\\\\"api_key\\\\\\\": Cannot find field.\\\"\\n          }\\n     "
+    }
+  },
+  {
+    "run": 2,
+    "direct_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642788,\"id\":\"YwF-armkGcTEjuMP3Nn6uA0\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "direct_bearer_plus_invalid_x_goog": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"content\":\"ping\",\"role\":\"assistant\"}}],\"created\":1786642789,\"id\":\"ZAF-avyPJcK7qfkPr6ed8Aw\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "direct_invalid_x_goog_only": {
+      "status": 400,
+      "leaks": [],
+      "body": "[{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Missing or invalid Authorization header.\",\n    \"status\": \"INVALID_ARGUMENT\"\n  }\n}\n]"
+    },
+    "switchyard_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642790,\"id\":\"ZQF-aqeKMq-ejuMPh9_v-A0\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "switchyard_x_goog_header": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642791,\"id\":\"ZgF-aujtMrbHg8UP6tP00A8\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "switchyard_api_key_body": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"Invalid JSON payload received. Unknown name \\\\\\\"api_key\\\\\\\": Cannot find field.\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.BadRequest\\\",\\n        \\\"fieldViolations\\\": [\\n          {\\n            \\\"description\\\": \\\"Invalid JSON payload received. Unknown name \\\\\\\"api_key\\\\\\\": Cannot find field.\\\"\\n          }\\n     "
+    }
+  },
+  {
+    "run": 3,
+    "direct_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642792,\"id\":\"ZwF-aoGbO4epjuMPnvWjuQQ\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "direct_bearer_plus_invalid_x_goog": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642793,\"id\":\"aQF-aqa8EoLGjuMPsPjRwA0\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "direct_invalid_x_goog_only": {
+      "status": 400,
+      "leaks": [],
+      "body": "[{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Missing or invalid Authorization header.\",\n    \"status\": \"INVALID_ARGUMENT\"\n  }\n}\n]"
+    },
+    "switchyard_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642794,\"id\":\"agF-aqW7GoCnjuMPgbyyOA\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "switchyard_x_goog_header": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642795,\"id\":\"awF-avWLDremg8UPp_CDiQE\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "switchyard_api_key_body": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"Invalid JSON payload received. Unknown name \\\\\\\"api_key\\\\\\\": Cannot find field.\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.BadRequest\\\",\\n        \\\"fieldViolations\\\": [\\n          {\\n            \\\"description\\\": \\\"Invalid JSON payload received. Unknown name \\\\\\\"api_key\\\\\\\": Cannot find field.\\\"\\n          }\\n     "
+    }
+  },
+  {
+    "run": 4,
+    "direct_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642796,\"id\":\"bAF-aqacEaiE4-EP3-P1iQ4\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "direct_bearer_plus_invalid_x_goog": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642797,\"id\":\"bQF-apSTEqCsg8UPxZXv2Qw\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "direct_invalid_x_goog_only": {
+      "status": 400,
+      "leaks": [],
+      "body": "[{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Missing or invalid Authorization header.\",\n    \"status\": \"INVALID_ARGUMENT\"\n  }\n}\n]"
+    },
+    "switchyard_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642798,\"id\":\"bgF-arWNB4XOjuMPzP-QiQo\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "switchyard_x_goog_header": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"content\":\"ping\",\"role\":\"assistant\"}}],\"created\":1786642799,\"id\":\"bwF-apbQA8Gq4-EP-4SpkAU\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "switchyard_api_key_body": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"Invalid JSON payload received. Unknown name \\\\\\\"api_key\\\\\\\": Cannot find field.\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.BadRequest\\\",\\n        \\\"fieldViolations\\\": [\\n          {\\n            \\\"description\\\": \\\"Invalid JSON payload received. Unknown name \\\\\\\"api_key\\\\\\\": Cannot find field.\\\"\\n          }\\n     "
+    }
+  },
+  {
+    "run": 5,
+    "direct_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642800,\"id\":\"cAF-auzoD9brjuMP8uz6gA0\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "direct_bearer_plus_invalid_x_goog": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642801,\"id\":\"cQF-ava9Guzcg8UPzu7jqA8\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "direct_invalid_x_goog_only": {
+      "status": 400,
+      "leaks": [],
+      "body": "[{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Missing or invalid Authorization header.\",\n    \"status\": \"INVALID_ARGUMENT\"\n  }\n}\n]"
+    },
+    "switchyard_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642803,\"id\":\"cgF-asXNFqS24-EPu9b5iA0\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "switchyard_x_goog_header": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786642804,\"id\":\"cwF-aszUFYCnjuMPgbyyOA\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "switchyard_api_key_body": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"Invalid JSON payload received. Unknown name \\\\\\\"api_key\\\\\\\": Cannot find field.\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.BadRequest\\\",\\n        \\\"fieldViolations\\\": [\\n          {\\n            \\\"description\\\": \\\"Invalid JSON payload received. Unknown name \\\\\\\"api_key\\\\\\\": Cannot find field.\\\"\\n          }\\n     "
+    }
+  }
+]
