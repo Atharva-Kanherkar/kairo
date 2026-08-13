@@ -1,0 +1,26 @@
+{
+  "model": "cap-anthropic",
+  "messages": [{"role": "user", "content": "hi"}],
+  "tools": [{
+    "type": "function",
+    "function": {
+      "name": "get_weather",
+      "description": "w",
+      "strict": true,
+      "parameters": {
+        "type": "object",
+        "properties": {"city": {"type": "string", "minLength": 1, "maxLength": 64}},
+        "required": ["city"],
+        "additionalProperties": false
+      }
+    }
+  }],
+  "tool_choice": "auto",
+  "parallel_tool_calls": false,
+  "seed": 42,
+  "frequency_penalty": 0.5,
+  "presence_penalty": 0.1,
+  "n": 2,
+  "logit_bias": {"123": -10},
+  "user": "agent-1"
+}

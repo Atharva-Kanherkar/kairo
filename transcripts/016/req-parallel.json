@@ -1,0 +1,10 @@
+{
+  "model": "captured-model",
+  "max_tokens": 80,
+  "tools": [
+    {"name": "a", "description": "a", "input_schema": {"type": "object", "properties": {"x": {"type": "string"}}}},
+    {"name": "b", "description": "b", "input_schema": {"type": "object", "properties": {"y": {"type": "string"}}}}
+  ],
+  "tool_choice": {"type": "auto", "disable_parallel_tool_use": true},
+  "messages": [{"role": "user", "content": "call both tools"}]
+}

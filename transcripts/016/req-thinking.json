@@ -1,0 +1,12 @@
+{
+  "model": "captured-model",
+  "max_tokens": 80,
+  "messages": [
+    {"role": "user", "content": "2+2?"},
+    {"role": "assistant", "content": [
+      {"type": "thinking", "thinking": "simple arithmetic", "signature": "SIGNATURE_ABC123"},
+      {"type": "text", "text": "4"}
+    ]},
+    {"role": "user", "content": "now 3+3"}
+  ]
+}

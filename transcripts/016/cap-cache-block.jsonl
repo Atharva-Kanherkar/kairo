@@ -1,0 +1,1 @@
+{"path": "/v1/chat/completions", "body": {"max_completion_tokens": 80, "messages": [{"content": "long context that should be cached", "role": "user"}], "model": "captured-model", "tools": [{"function": {"description": "run", "name": "run", "parameters": {"properties": {"cmd": {"type": "string"}}, "type": "object"}}, "type": "function"}]}}

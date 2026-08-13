@@ -35,5 +35,12 @@ or just open a PR (see CONTRIBUTING.md).
 - ollama#17429: role:"tool" message hangs the server (model-dependent)
 - ~~Switchyard #242: reasoning/content chunk reorder~~ DONE (issues/010)
 - ~~Switchyard #369: content_filter to end_turn~~ DONE (issues/010)
+- ~~thinking history dropped/leaked on Anthropic request translate~~ DONE (issues/016)
+- ~~disable_parallel_tool_use dropped~~ DONE (issues/017)
+- ~~user document block dumped or deleted~~ DONE (issues/018)
+- ~~Switchyard invents cache_control ephemeral~~ DONE (issues/019)
+- litellm#32214: sanitize_tool_use_ids breaks multi-turn on vLLM/Kimi (same class as 005)
+- litellm#27671: Responses streaming bridge, unregistered chatcmpl- text id
+- litellm#30053: fast_path skips tool-call continuation hook
 - bifrost#4065: Anthropic ingress returns end_turn instead of tool_use
 - Any tool-call issue in a translation layer we have not covered: bring it

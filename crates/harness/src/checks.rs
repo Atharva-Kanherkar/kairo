@@ -158,6 +158,223 @@ pub fn reasoning_text_order_preserved(source_order: &[&str], emitted_order: &[&s
     Verdict::Conformant
 }
 
+/// Parse the `body` object out of a capture-rig jsonl line
+/// (`{"path":..., "body": ...}`).
+fn capture_body(jsonl: &str) -> Result<Value, String> {
+    let line = jsonl.lines().find(|l| !l.trim().is_empty()).unwrap_or("");
+    let v: Value = serde_json::from_str(line).map_err(|e| format!("unparseable capture: {e}"))?;
+    Ok(v.get("body").cloned().unwrap_or(Value::Null))
+}
+
+fn body_dump(body: &Value) -> String {
+    serde_json::to_string(body).unwrap_or_default()
+}
+
+/// Walk a JSON value and collect every string.
+fn collect_strings(v: &Value, out: &mut Vec<String>) {
+    match v {
+        Value::String(s) => out.push(s.clone()),
+        Value::Array(a) => a.iter().for_each(|x| collect_strings(x, out)),
+        Value::Object(m) => m.values().for_each(|x| collect_strings(x, out)),
+        _ => {}
+    }
+}
+
+fn jsonl_contains_string(jsonl: &str, needle: &str) -> bool {
+    match capture_body(jsonl) {
+        Ok(body) => {
+            let mut strings = Vec::new();
+            collect_strings(&body, &mut strings);
+            strings.iter().any(|s| s.contains(needle)) || body_dump(&body).contains(needle)
+        }
+        Err(_) => jsonl.contains(needle),
+    }
+}
+
+/// Invariant (bug 016 / Switchyard): thinking text from an Anthropic request
+/// MUST appear in the forwarded body as reasoning, not vanish. A forwarded
+/// transcript that has dropped `thinking_text` entirely is a violation.
+pub fn thinking_text_forwarded(forwarded_jsonl: &str, thinking_text: &str) -> Verdict {
+    if jsonl_contains_string(forwarded_jsonl, thinking_text) {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation(format!(
+            "thinking text {thinking_text:?} is absent from the forwarded upstream body"
+        ))
+    }
+}
+
+/// Invariant (bug 016 / LiteLLM): private thinking MUST NOT be rewritten as
+/// ordinary visible assistant text (`output_text` / message `content`).
+pub fn thinking_not_leaked_as_visible_text(forwarded_jsonl: &str, thinking_text: &str) -> Verdict {
+    let Ok(body) = capture_body(forwarded_jsonl) else {
+        return Verdict::Violation("unparseable capture".into());
+    };
+    // Responses input items.
+    if let Some(input) = body.get("input").and_then(Value::as_array) {
+        for item in input {
+            if item.get("role").and_then(Value::as_str) == Some("assistant") {
+                if let Some(content) = item.get("content").and_then(Value::as_array) {
+                    for part in content {
+                        let ty = part.get("type").and_then(Value::as_str).unwrap_or("");
+                        let text = part.get("text").and_then(Value::as_str).unwrap_or("");
+                        if matches!(ty, "output_text" | "input_text" | "text")
+                            && text.contains(thinking_text)
+                        {
+                            return Verdict::Violation(format!(
+                                "thinking text leaked as visible {ty}: {thinking_text:?}"
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // OpenAI chat messages.
+    if let Some(messages) = body.get("messages").and_then(Value::as_array) {
+        for msg in messages {
+            if msg.get("role").and_then(Value::as_str) == Some("assistant") {
+                if let Some(content) = msg.get("content").and_then(Value::as_str) {
+                    if content.contains(thinking_text) {
+                        return Verdict::Violation(format!(
+                            "thinking text leaked as assistant content: {thinking_text:?}"
+                        ));
+                    }
+                }
+            }
+        }
+    }
+    Verdict::Conformant
+}
+
+/// Invariant (bug 017): `disable_parallel_tool_use: true` (Anthropic) MUST
+/// survive as `parallel_tool_calls: false` (OpenAI/Responses) or as the
+/// original Anthropic flag.
+pub fn parallel_tool_disable_preserved(forwarded_jsonl: &str) -> Verdict {
+    let Ok(body) = capture_body(forwarded_jsonl) else {
+        return Verdict::Violation("unparseable capture".into());
+    };
+    if body.get("parallel_tool_calls") == Some(&Value::Bool(false)) {
+        return Verdict::Conformant;
+    }
+    if body
+        .pointer("/tool_choice/disable_parallel_tool_use")
+        .and_then(Value::as_bool)
+        == Some(true)
+    {
+        return Verdict::Conformant;
+    }
+    Verdict::Violation(
+        "disable_parallel_tool_use was dropped; forwarded body has neither parallel_tool_calls=false nor disable_parallel_tool_use=true".into(),
+    )
+}
+
+/// Invariant (bug 018): a user-supplied document body's bytes MUST appear in
+/// the forwarded request. Silent deletion is a violation.
+pub fn document_body_forwarded(forwarded_jsonl: &str, document_body: &str) -> Verdict {
+    if jsonl_contains_string(forwarded_jsonl, document_body) {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation(format!(
+            "document body {document_body:?} is absent from the forwarded upstream body"
+        ))
+    }
+}
+
+/// Invariant (bugs 007 / 018): a non-text block MUST NOT be JSON-dumped into
+/// a text string. `marker` is a distinctive substring of that dump
+/// (e.g. `"type":"document"` or `"type":"image"`).
+pub fn non_text_block_not_json_dumped(forwarded_jsonl: &str, marker: &str) -> Verdict {
+    let Ok(body) = capture_body(forwarded_jsonl) else {
+        return Verdict::Violation("unparseable capture".into());
+    };
+    let mut strings = Vec::new();
+    collect_strings(&body, &mut strings);
+    if strings.iter().any(|s| s.contains(marker)) {
+        return Verdict::Violation(format!(
+            "non-text block JSON-dumped into a text string (contains {marker:?})"
+        ));
+    }
+    Verdict::Conformant
+}
+
+/// Invariant (bug 006): an Anthropic `is_error: true` tool result MUST leave
+/// an error marker the target model can see (`is_error`, or equivalent).
+pub fn is_error_forwarded(forwarded_jsonl: &str) -> Verdict {
+    let Ok(body) = capture_body(forwarded_jsonl) else {
+        return Verdict::Violation("unparseable capture".into());
+    };
+    let dump = body_dump(&body);
+    if dump.contains("\"is_error\":true") || dump.contains("\"is_error\": true") {
+        return Verdict::Conformant;
+    }
+    Verdict::Violation(
+        "is_error:true was dropped; forwarded body has no error marker on the tool result".into(),
+    )
+}
+
+/// Invariant (bug 019): a translator MUST NOT invent `cache_control` the
+/// client did not send.
+pub fn no_invented_cache_control(forwarded_jsonl: &str) -> Verdict {
+    let Ok(body) = capture_body(forwarded_jsonl) else {
+        return Verdict::Violation("unparseable capture".into());
+    };
+    if body_dump(&body).contains("cache_control") {
+        return Verdict::Violation(
+            "forwarded body contains cache_control the client did not send".into(),
+        );
+    }
+    Verdict::Conformant
+}
+
+/// Invariant (bug 009): a Responses `output` array MUST NOT contain a
+/// `message` item whose `output_text.text` is JSON null.
+pub fn no_phantom_null_output_text(response_json: &str) -> Verdict {
+    let v: Value = match serde_json::from_str(response_json) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("unparseable response: {e}")),
+    };
+    let Some(output) = v.get("output").and_then(Value::as_array) else {
+        return Verdict::Conformant;
+    };
+    for item in output {
+        if item.get("type").and_then(Value::as_str) != Some("message") {
+            continue;
+        }
+        if let Some(content) = item.get("content").and_then(Value::as_array) {
+            for part in content {
+                if part.get("type").and_then(Value::as_str) == Some("output_text")
+                    && part.get("text").map_or(true, Value::is_null)
+                {
+                    return Verdict::Violation(
+                        "Responses output contains a message item with output_text.text=null".into(),
+                    );
+                }
+            }
+        }
+    }
+    Verdict::Conformant
+}
+
+/// Invariant (bug 008): a translation failure MUST NOT surface as a raw
+/// Python `IndexError` (`"list index out of range"`).
+pub fn no_indexerror_leak(error_or_response_json: &str) -> Verdict {
+    let v: Value = match serde_json::from_str(error_or_response_json) {
+        Ok(v) => v,
+        Err(_) => return Verdict::Conformant,
+    };
+    let msg = v
+        .pointer("/error/message")
+        .and_then(Value::as_str)
+        .unwrap_or("");
+    if msg.contains("list index out of range") {
+        return Verdict::Violation(
+            "unhandled IndexError leaked to the client as 'list index out of range'".into(),
+        );
+    }
+    Verdict::Conformant
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

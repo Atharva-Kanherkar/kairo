@@ -32,21 +32,33 @@ dataset grows, the foundation for a router that fixes it.
 
 ## Two ways to help
 
-1. **Donate a broken transcript.** If you run one of these setups and tools
-   break, open a
-   [tool-call failure report](https://github.com/Atharva-Kanherkar/kairo/issues/new?template=tool-call-failure.md).
-   You do not need to know why it broke or write any code. A real example of a
-   real failure is the open data this project runs on.
+1. **Donate a broken transcript.** You do not need to know why it broke or
+   write any code. A real example of a real failure is the open data this
+   project runs on.
+
+   The easiest way: install the `/kairo-report` command into Claude Code once,
+
+   ```
+   mkdir -p ~/.claude/commands && curl -fsSL https://raw.githubusercontent.com/Atharva-Kanherkar/kairo/main/agent-commands/claude-code/kairo-report.md -o ~/.claude/commands/kairo-report.md
+   ```
+
+   then, the next time a tool call breaks, type `/kairo-report` in that same
+   session. Your agent gathers the evidence, redacts secrets, shows you the
+   report, and files it after you confirm. Zero copy-pasting.
+
+   Prefer the manual route? Open a
+   [tool-call failure report](https://github.com/Atharva-Kanherkar/kairo/issues/new?template=tool-call-failure.md)
+   and fill in what you can.
 2. **Reproduce and freeze a bug.** If you like breaking things, pick an
    unclaimed target and turn it into a checked, replayable test. Proving a bug
    is real is the whole contribution; no fix required.
 
 ## Status
 
-15 distinct defects reproduced and documented across LiteLLM and NVIDIA
+17 distinct defects reproduced and documented across LiteLLM and NVIDIA
 Switchyard (see [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md)). One is already
 filed upstream as [NVIDIA-NeMo/Switchyard#380](https://github.com/NVIDIA-NeMo/Switchyard/issues/380).
-The Rust harness is green with 10 tests, of which 6 are conformance checks
+The Rust harness is green with 24 tests, of which 21 are conformance checks
 wired to recorded transcripts. This is early and active; contributions of new
 reproductions are the fastest way to help.
 

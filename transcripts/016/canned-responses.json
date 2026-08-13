@@ -1,0 +1,1 @@
+{"id":"resp_cap","object":"response","created_at":0,"status":"completed","model":"mockmodel","output":[{"type":"message","id":"msg_1","status":"completed","role":"assistant","content":[{"type":"output_text","text":"ok"}]}],"usage":{"input_tokens":1,"output_tokens":1,"total_tokens":2}}

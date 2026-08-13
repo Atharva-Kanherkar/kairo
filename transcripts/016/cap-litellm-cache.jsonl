@@ -1,0 +1,1 @@
+{"path": "/v1/responses", "body": {"model": "mockmodel", "input": [{"type": "message", "role": "user", "content": [{"type": "input_text", "text": "long context that should be cached"}]}], "max_output_tokens": 80, "tools": [{"type": "function", "name": "run", "description": "run", "parameters": {"type": "object", "properties": {"cmd": {"type": "string"}}}}]}}

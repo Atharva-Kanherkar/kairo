@@ -1,0 +1,12 @@
+{
+  "model": "captured-model",
+  "max_tokens": 80,
+  "tools": [
+    {"name": "run", "description": "run", "input_schema": {"type": "object", "properties": {"cmd": {"type": "string"}}}, "cache_control": {"type": "ephemeral"}}
+  ],
+  "messages": [
+    {"role": "user", "content": [
+      {"type": "text", "text": "long context that should be cached", "cache_control": {"type": "ephemeral"}}
+    ]}
+  ]
+}

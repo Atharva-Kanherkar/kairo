@@ -25,16 +25,28 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 010A | Switchyard maps upstream `content_filter` finish to Anthropic `end_turn` (safety signal erased) | Switchyard 0.2.0 (rig) | [Switchyard#369](https://github.com/NVIDIA-NeMo/Switchyard/issues/369) | reproduced offline on CURRENT |
 | 010B | Switchyard reorders reasoning/text when both are in one chunk (text emitted before thinking) | Switchyard 0.2.0 (rig) | [Switchyard#242](https://github.com/NVIDIA-NeMo/Switchyard/issues/242) | reproduced offline on CURRENT |
 | P2/P4/P5/P7 | Gemini stream finish_reason; anyOf schema; multi-turn ordering; parallel ids | LiteLLM 1.96.2 → Gemini | #21041/#23870/#26755 | ⬜ not repro (patched / model-dependent), kept as data |
+| 016 | thinking history destroyed on Anthropic request translate (dropped vs leaked as `output_text`) | Switchyard 0.2.0 + LiteLLM 1.96.2 (capture rig) |, | ✅ both on CURRENT; LiteLLM also routes `/v1/messages` through `/v1/responses` |
+| 017 | `disable_parallel_tool_use` dropped (no `parallel_tool_calls: false`) | Switchyard 0.2.0 + LiteLLM 1.96.2 (capture rig) |, | ✅ both on CURRENT; LiteLLM same-format OpenAI chat is the control (keeps the flag) |
+| 018 | user `document` block JSON-dumped (Switchyard) or deleted (LiteLLM) | Switchyard 0.2.0 + LiteLLM 1.96.2 (capture rig) | 007 family | ✅ both on CURRENT |
+| 019 | Switchyard invents `cache_control: ephemeral` on every Anthropic-backend request | Switchyard 0.2.0 (capture rig) | `enable_anthropic_prompt_caching` | ✅ repro offline on CURRENT |
+| 006 | LiteLLM `/v1/messages` → Responses also drops `is_error` | LiteLLM 1.96.2 (capture rig) | 006 family | ✅ same loss as Switchyard, now on LiteLLM |
+| 007 | LiteLLM `/v1/messages` → Responses **deletes** image bytes in tool_result | LiteLLM 1.96.2 (capture rig) | 007 family | ✅ worse than Switchyard stringify: payload gone |
 
-**Tally**: 13 distinct defects confirmed on the wire (12 on current releases)
-across LiteLLM AND Switchyard, counting 006 as its 4 independent field losses.
-LiteLLM confirmed: 001 (stop_reason, 1.82), 002a (finish_reason), 002b (route
-drop), 004a (id smuggle), 004b (Responses call_id), 008 (IndexError crash), 009
-(phantom message) + 012 (image portability). Switchyard confirmed: 005 (id
-sanitizer), 006 (4 field losses), 007 (multimodal stringified). Honest
-negatives kept: 003, 013, P2/P4/P5/P7, and cited symptoms of 001/004, several
-cited bugs are genuinely patched on current, which is itself the argument for a
-permanent regression suite.
+**Tally**: 17 distinct defects confirmed on the wire (16 on current releases)
+across LiteLLM AND Switchyard, counting 006 as its 4 independent field losses
+plus the LiteLLM copy of that class. LiteLLM confirmed: 001 (stop_reason, 1.82),
+002a (finish_reason), 002b (route drop), 004a (id smuggle), 004b (Responses
+call_id), 008 (IndexError crash), 009 (phantom message), 012 (image
+portability), 016 (thinking leaked), 017 (parallel flag), 018 (document
+deleted), 006/007 (is_error + image deleted via Responses). Switchyard
+confirmed: 005 (id sanitizer), 006 (4 field losses), 007 (multimodal
+stringified), 016 (thinking dropped), 017 (parallel flag), 018 (document
+dumped), 019 (invented cache breakpoint). Honest negatives kept: 003, 013
+parallel-ids, P2/P4/P5/P7, and cited symptoms of 001/004. Several cited bugs
+are genuinely patched on current, which is itself the argument for a
+permanent regression suite. The 2026-08-13 capture-rig pass also showed
+LiteLLM's Anthropic adapter forwarding `/v1/messages` through OpenAI
+`/v1/responses` even when the configured backend is `openai/*`.
 Spanning 3 API dialects (Chat Completions, Anthropic Messages, Responses) and 3
 backends (Ollama, Gemini, Kimi). Findings stronger than their tickets: the
 id-smuggling (004) and the offline capture-rig losses (006). Non-reproductions
