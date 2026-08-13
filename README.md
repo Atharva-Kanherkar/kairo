@@ -13,6 +13,34 @@ deterministic replay test, and scores any translation layer against them. It is
 built from real, cited bugs in the tools people run in production, with the
 recorded bytes to prove each one.
 
+The end goal is a router that lets you run any coding agent on any model with
+tool calls that actually work. That router has to be built on data, not guesses,
+so this repo is also an open dataset of real tool-call failures.
+
+## Who this is for
+
+If you point Claude Code (or Cline, Cursor, Aider, OpenClaw) at a cheaper or
+local model to save money, DeepSeek, Kimi K2, GLM, Qwen, a local Ollama model,
+through a gateway like LiteLLM, OpenRouter, claude-code-router, or Switchyard,
+you have probably hit this: a tool call that silently does nothing, a file that
+never gets written, an agent that stalls after calling a tool. It usually is not
+the model. It is the gateway mistranslating the tool call between the client's
+format and the model's.
+
+kairo is, today, the receipts that explain why your setup is flaky, and, as the
+dataset grows, the foundation for a router that fixes it.
+
+## Two ways to help
+
+1. **Donate a broken transcript.** If you run one of these setups and tools
+   break, open a
+   [tool-call failure report](https://github.com/Atharva-Kanherkar/kairo/issues/new?template=tool-call-failure.md).
+   You do not need to know why it broke or write any code. A real example of a
+   real failure is the open data this project runs on.
+2. **Reproduce and freeze a bug.** If you like breaking things, pick an
+   unclaimed target and turn it into a checked, replayable test. Proving a bug
+   is real is the whole contribution; no fix required.
+
 ## Status
 
 15 distinct defects reproduced and documented across LiteLLM and NVIDIA
