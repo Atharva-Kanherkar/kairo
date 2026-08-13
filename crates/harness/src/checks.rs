@@ -47,12 +47,15 @@ pub fn anthropic_toolcall_stop_reason(sse: &str) -> Verdict {
     let stop_reason = events
         .iter()
         .filter(|e| e.get("type").and_then(Value::as_str) == Some("message_delta"))
-        .find_map(|e| e.pointer("/delta/stop_reason").and_then(Value::as_str).map(str::to_owned));
+        .find_map(|e| {
+            e.pointer("/delta/stop_reason")
+                .and_then(Value::as_str)
+                .map(str::to_owned)
+        });
     match stop_reason.as_deref() {
         Some("tool_use") => Verdict::Conformant,
         other => Verdict::Violation(format!(
-            "tool_use block present but stop_reason is {:?}, expected \"tool_use\"",
-            other
+            "tool_use block present but stop_reason is {other:?}, expected \"tool_use\""
         )),
     }
 }
@@ -64,22 +67,23 @@ pub fn openai_stream_finish_reason(sse: &str) -> Verdict {
     let has_toolcall_delta = chunks.iter().any(|c| {
         c.pointer("/choices/0/delta/tool_calls")
             .and_then(Value::as_array)
-            .map(|a| !a.is_empty())
-            .unwrap_or(false)
+            .is_some_and(|a| !a.is_empty())
     });
     if !has_toolcall_delta {
         return Verdict::Conformant;
     }
     let finish = chunks
         .iter()
-        .filter_map(|c| c.pointer("/choices/0/finish_reason").and_then(Value::as_str))
-        .last()
+        .filter_map(|c| {
+            c.pointer("/choices/0/finish_reason")
+                .and_then(Value::as_str)
+        })
+        .next_back()
         .map(str::to_owned);
     match finish.as_deref() {
         Some("tool_calls") => Verdict::Conformant,
         other => Verdict::Violation(format!(
-            "tool_calls delta present but finish_reason is {:?}, expected \"tool_calls\"",
-            other
+            "tool_calls delta present but finish_reason is {other:?}, expected \"tool_calls\""
         )),
     }
 }
@@ -89,7 +93,9 @@ pub fn openai_stream_finish_reason(sse: &str) -> Verdict {
 pub fn id_conforms(id: &str) -> bool {
     !id.is_empty()
         && id.len() <= 64
-        && id.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+        && id
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
 }
 
 /// Invariant (bug 004): every tool-call id an OpenAI chat response carries
@@ -100,7 +106,9 @@ pub fn openai_toolcall_id_charset(response_json: &str) -> Verdict {
         Ok(v) => v,
         Err(e) => return Verdict::Violation(format!("unparseable response: {e}")),
     };
-    let calls = v.pointer("/choices/0/message/tool_calls").and_then(Value::as_array);
+    let calls = v
+        .pointer("/choices/0/message/tool_calls")
+        .and_then(Value::as_array);
     let Some(calls) = calls else {
         return Verdict::Conformant; // no tool calls to check
     };
@@ -145,7 +153,7 @@ pub fn reasoning_text_order_preserved(source_order: &[&str], emitted_order: &[&s
     let keep = |seq: &[&str]| -> Vec<String> {
         seq.iter()
             .filter(|t| **t == "thinking" || **t == "text")
-            .map(|t| t.to_string())
+            .map(ToString::to_string)
             .collect()
     };
     let src = keep(source_order);
@@ -344,10 +352,11 @@ pub fn no_phantom_null_output_text(response_json: &str) -> Verdict {
         if let Some(content) = item.get("content").and_then(Value::as_array) {
             for part in content {
                 if part.get("type").and_then(Value::as_str) == Some("output_text")
-                    && part.get("text").map_or(true, Value::is_null)
+                    && part.get("text").is_none_or(Value::is_null)
                 {
                     return Verdict::Violation(
-                        "Responses output contains a message item with output_text.text=null".into(),
+                        "Responses output contains a message item with output_text.text=null"
+                            .into(),
                     );
                 }
             }
@@ -394,6 +403,9 @@ mod tests {
             data: {\"type\":\"content_block_start\",\"index\":0,\"content_block\":{\"type\":\"tool_use\",\"name\":\"x\"}}\n\n\
             event: message_delta\n\
             data: {\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"end_turn\"}}\n";
-        assert!(matches!(anthropic_toolcall_stop_reason(sse), Verdict::Violation(_)));
+        assert!(matches!(
+            anthropic_toolcall_stop_reason(sse),
+            Verdict::Violation(_)
+        ));
     }
 }

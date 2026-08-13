@@ -1,5 +1,6 @@
 //! Replay harness: feed a recorded provider transcript through a tool under
 //! test and diff what comes out against what a lossless pipe must emit.
+#![forbid(unsafe_code)]
 //!
 //! A transcript is the verbatim wire exchange captured from a real provider:
 //! the request body and the ordered SSE frames of the response. Tests never
@@ -55,7 +56,10 @@ mod tests {
         let t = Transcript {
             dialect: "openai-chat".into(),
             request: serde_json::json!({"model": "qwen3", "stream": true}),
-            frames: vec![SseFrame { event: None, data: "{\"choices\":[]}".into() }],
+            frames: vec![SseFrame {
+                event: None,
+                data: "{\"choices\":[]}".into(),
+            }],
             provenance: Provenance {
                 captured_at: "2026-08-12".into(),
                 endpoint: "http://localhost:11434/v1/chat/completions".into(),
