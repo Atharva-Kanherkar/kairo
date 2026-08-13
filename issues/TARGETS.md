@@ -21,3 +21,19 @@ Backlog (from the research book, add as capacity allows): llama.cpp#26359
 (server rejects its own id), litellm#32214 (sanitizer broke vLLM/Kimi),
 litellm#27671 / #30053 (Responses bridge), ollama#17429 (role:tool hangs),
 vllm#47903 (stream vs non-stream divergence on truncation).
+
+## Claim a target
+
+Unclaimed reproductions, roughly easiest first. Comment on the tracking issue
+or just open a PR (see CONTRIBUTING.md).
+
+- litellm#26755: Gemini multi-turn ordering violation via /v1/messages
+- litellm#35303: one malformed argument string triggers a retry storm
+- vllm#45167: literal </tool_call> inside a string argument drops the call
+  (needs a vLLM instance or the offline rig)
+- sglang#29441: empty content chunk before tool chunks breaks strict SDKs
+- ollama#17429: role:"tool" message hangs the server (model-dependent)
+- Switchyard #242: reasoning/content stream chunks reordered for Anthropic clients
+- Switchyard #369: content_filter silently translated to end_turn
+- bifrost#4065: Anthropic ingress returns end_turn instead of tool_use
+- Any tool-call issue in a translation layer we have not covered: bring it

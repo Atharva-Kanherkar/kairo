@@ -33,7 +33,7 @@ transcripts/       captured golden wire transcripts (provider ground truth)
 ## Quick start
 
 ```
-cp .env.example .env   # fill in your keys
+cp .env.example .env   # fill in your keys (capture only)
 cargo test             # replay suite (no keys needed)
 ```
 
@@ -51,3 +51,9 @@ Checkers so far: Anthropic tool-call `stop_reason`, OpenAI stream
 
 Status: 13 reproduced defects in `issues/` (one filed as Switchyard #380);
 harness green with 4 conformance checks wired to recorded bytes.
+
+## Contributing
+
+Proving a bug is real is the contribution; no fix required. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for the capture, control, replay method and
+[issues/TARGETS.md](issues/TARGETS.md) for unclaimed targets.
