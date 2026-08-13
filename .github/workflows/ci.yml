@@ -18,40 +18,56 @@ env:
   RUSTDOCFLAGS: -D warnings
 
 jobs:
-  rust:
-    name: fmt + clippy + conformance + doc
+  fmt:
+    name: Format
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Rust (stable, rustfmt, clippy)
-        uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          components: rustfmt, clippy
-
-      - name: Cache cargo
-        uses: Swatinem/rust-cache@v2
-
+          components: rustfmt
       - name: rustfmt
         run: cargo fmt --all -- --check
 
-      - name: clippy (all targets, warnings denied, pedantic)
+  clippy:
+    name: Clippy
+    needs: fmt
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: clippy (warnings denied, pedantic)
         run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 
-      # --lib: unit tests next to the checkers (src/)
-      # --tests: every integration file under tests/, including conformance.rs
-      #          and any future tests/*.rs added later. No CI edit required.
-      # --doc: rustdoc examples
+  test:
+    name: Tests
+    needs: fmt
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
       - name: unit tests
         run: cargo test --workspace --lib --locked --verbose
-
       - name: conformance and all other integration tests
         run: cargo test --workspace --tests --locked --verbose -- --nocapture
-
       - name: doc tests
         run: cargo test --workspace --doc --locked --verbose
 
-      - name: doc
+  docs:
+    name: Docs
+    needs: fmt
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: rustdoc
         run: cargo doc --workspace --no-deps --document-private-items
