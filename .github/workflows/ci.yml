@@ -19,7 +19,7 @@ env:
 
 jobs:
   rust:
-    name: fmt + clippy + test + doc
+    name: fmt + clippy + conformance + doc
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -40,8 +40,18 @@ jobs:
       - name: clippy (all targets, warnings denied, pedantic)
         run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 
-      - name: test (locked, all targets)
-        run: cargo test --workspace --all-targets --locked
+      # --lib: unit tests next to the checkers (src/)
+      # --tests: every integration file under tests/, including conformance.rs
+      #          and any future tests/*.rs added later. No CI edit required.
+      # --doc: rustdoc examples
+      - name: unit tests
+        run: cargo test --workspace --lib --locked --verbose
+
+      - name: conformance and all other integration tests
+        run: cargo test --workspace --tests --locked --verbose -- --nocapture
+
+      - name: doc tests
+        run: cargo test --workspace --doc --locked --verbose
 
       - name: doc
         run: cargo doc --workspace --no-deps --document-private-items
