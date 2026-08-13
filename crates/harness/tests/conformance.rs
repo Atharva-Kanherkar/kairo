@@ -9,8 +9,8 @@ use kairo::checks::{
     anthropic_toolcall_stop_reason, content_filter_preserved, document_body_forwarded,
     is_error_forwarded, no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
     non_text_block_not_json_dumped, openai_stream_finish_reason, openai_toolcall_id_charset,
-    parallel_tool_disable_preserved, reasoning_text_order_preserved, thinking_not_leaked_as_visible_text,
-    thinking_text_forwarded, Verdict,
+    parallel_tool_disable_preserved, reasoning_text_order_preserved,
+    thinking_not_leaked_as_visible_text, thinking_text_forwarded, Verdict,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -29,14 +29,21 @@ fn fixture(rel: &str) -> String {
 fn litellm_196_marks_toolcall_stop_reason_correctly() {
     // Current LiteLLM (1.96.2) is conformant on this path, the control.
     let v = anthropic_toolcall_stop_reason(&fixture("transcripts/001/gemma-stream.sse"));
-    assert_eq!(v, Verdict::Conformant, "1.96.2 should label the tool call stop_reason=tool_use");
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "1.96.2 should label the tool call stop_reason=tool_use"
+    );
 }
 
 #[test]
 fn litellm_182_violates_stop_reason_regression() {
     // LiteLLM 1.82.0 mislabels it end_turn, the frozen regression.
     let v = anthropic_toolcall_stop_reason(&fixture("transcripts/001/gemma-stream-182.sse"));
-    assert!(matches!(v, Verdict::Violation(_)), "1.82.0 should be caught: {v:?}");
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "1.82.0 should be caught: {v:?}"
+    );
 }
 
 // ---- bug 002a: ollama_chat/ stream finishes as "stop" ----
@@ -57,7 +64,10 @@ fn litellm_gemini_toolcall_id_charset_violation() {
     let v = openai_toolcall_id_charset(&fixture("transcripts/004/turn1-response.json"));
     match v {
         Verdict::Violation(reason) => {
-            assert!(reason.contains("length"), "should report the oversized id: {reason}");
+            assert!(
+                reason.contains("length"),
+                "should report the oversized id: {reason}"
+            );
         }
         Verdict::Conformant => panic!("the 382-char id must be caught"),
     }
@@ -69,7 +79,10 @@ fn litellm_gemini_toolcall_id_charset_violation() {
 fn switchyard_content_filter_erased_violation() {
     // Captured: upstream finish_reason content_filter, client got stop_reason end_turn.
     let v = content_filter_preserved("content_filter", "end_turn");
-    assert!(matches!(v, Verdict::Violation(_)), "content_filter erasure must be caught: {v:?}");
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "content_filter erasure must be caught: {v:?}"
+    );
 }
 
 // ---- bug 010B: Switchyard reorders reasoning/text within a chunk (their #242) ----
@@ -78,7 +91,10 @@ fn switchyard_content_filter_erased_violation() {
 fn switchyard_reasoning_text_reorder_violation() {
     // Captured: backend emitted thinking then text in one chunk; client got text then thinking.
     let v = reasoning_text_order_preserved(&["thinking", "text"], &["text", "thinking"]);
-    assert!(matches!(v, Verdict::Violation(_)), "reasoning/text reorder must be caught: {v:?}");
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "reasoning/text reorder must be caught: {v:?}"
+    );
 }
 
 #[test]
@@ -96,21 +112,33 @@ fn separate_chunk_order_is_conformant() {
 #[test]
 fn switchyard_drops_is_error() {
     let v = is_error_forwarded(&fixture("transcripts/014/capture.jsonl"));
-    assert!(matches!(v, Verdict::Violation(_)), "Switchyard must be caught dropping is_error: {v:?}");
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "Switchyard must be caught dropping is_error: {v:?}"
+    );
 }
 
 #[test]
 fn litellm_drops_is_error_on_messages_to_responses() {
     let v = is_error_forwarded(&fixture("transcripts/016/cap-litellm-is-error.jsonl"));
-    assert!(matches!(v, Verdict::Violation(_)), "LiteLLM must be caught dropping is_error: {v:?}");
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "LiteLLM must be caught dropping is_error: {v:?}"
+    );
 }
 
 // ---- bug 007: multimodal tool_result JSON-dumped (Switchyard) or deleted (LiteLLM) ----
 
 #[test]
 fn switchyard_json_dumps_image_in_tool_result() {
-    let v = non_text_block_not_json_dumped(&fixture("transcripts/007/capA.jsonl"), "\"type\":\"image\"");
-    assert!(matches!(v, Verdict::Violation(_)), "Switchyard must be caught dumping image JSON: {v:?}");
+    let v = non_text_block_not_json_dumped(
+        &fixture("transcripts/007/capA.jsonl"),
+        "\"type\":\"image\"",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "Switchyard must be caught dumping image JSON: {v:?}"
+    );
 }
 
 #[test]
@@ -130,7 +158,10 @@ fn litellm_deletes_image_in_tool_result() {
 #[test]
 fn litellm_indexerror_leak_violation() {
     let v = no_indexerror_leak(&fixture("transcripts/probe/bug008-clientbody.json"));
-    assert!(matches!(v, Verdict::Violation(_)), "IndexError leak must be caught: {v:?}");
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "IndexError leak must be caught: {v:?}"
+    );
 }
 
 // ---- bug 009: phantom null output_text on /v1/responses ----
@@ -138,14 +169,20 @@ fn litellm_indexerror_leak_violation() {
 #[test]
 fn litellm_phantom_null_output_text_violation() {
     let v = no_phantom_null_output_text(&fixture("transcripts/probe/resp009-1.json"));
-    assert!(matches!(v, Verdict::Violation(_)), "phantom null text must be caught: {v:?}");
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "phantom null text must be caught: {v:?}"
+    );
 }
 
 // ---- bug 016: thinking history destroyed ----
 
 #[test]
 fn switchyard_drops_thinking_from_request() {
-    let v = thinking_text_forwarded(&fixture("transcripts/016/cap-thinking.jsonl"), "simple arithmetic");
+    let v = thinking_text_forwarded(
+        &fixture("transcripts/016/cap-thinking.jsonl"),
+        "simple arithmetic",
+    );
     assert!(
         matches!(v, Verdict::Violation(_)),
         "Switchyard must be caught dropping thinking: {v:?}"
@@ -169,20 +206,32 @@ fn litellm_leaks_thinking_as_output_text() {
 #[test]
 fn switchyard_drops_disable_parallel_tool_use() {
     let v = parallel_tool_disable_preserved(&fixture("transcripts/016/cap-parallel.jsonl"));
-    assert!(matches!(v, Verdict::Violation(_)), "Switchyard must be caught dropping parallel disable: {v:?}");
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "Switchyard must be caught dropping parallel disable: {v:?}"
+    );
 }
 
 #[test]
 fn litellm_drops_disable_parallel_tool_use() {
     let v = parallel_tool_disable_preserved(&fixture("transcripts/016/cap-litellm-parallel.jsonl"));
-    assert!(matches!(v, Verdict::Violation(_)), "LiteLLM must be caught dropping parallel disable: {v:?}");
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "LiteLLM must be caught dropping parallel disable: {v:?}"
+    );
 }
 
 #[test]
 fn same_format_openai_preserves_parallel_tool_calls_false() {
     // Control: LiteLLM OpenAI-chat same-format keeps parallel_tool_calls: false.
-    let v = parallel_tool_disable_preserved(&fixture("transcripts/016/cap-litellm-openai-strict.jsonl"));
-    assert_eq!(v, Verdict::Conformant, "same-format OpenAI path should keep the flag: {v:?}");
+    let v = parallel_tool_disable_preserved(&fixture(
+        "transcripts/016/cap-litellm-openai-strict.jsonl",
+    ));
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "same-format OpenAI path should keep the flag: {v:?}"
+    );
 }
 
 // ---- bug 018: user document dropped or JSON-dumped ----
@@ -193,7 +242,10 @@ fn litellm_deletes_user_document() {
         &fixture("transcripts/016/cap-litellm-document.jsonl"),
         "THE DOCUMENT BODY",
     );
-    assert!(matches!(v, Verdict::Violation(_)), "LiteLLM must be caught deleting the document: {v:?}");
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "LiteLLM must be caught deleting the document: {v:?}"
+    );
 }
 
 #[test]
@@ -202,7 +254,10 @@ fn switchyard_json_dumps_user_document() {
         &fixture("transcripts/016/cap-document.jsonl"),
         "\"type\":\"document\"",
     );
-    assert!(matches!(v, Verdict::Violation(_)), "Switchyard must be caught dumping the document: {v:?}");
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "Switchyard must be caught dumping the document: {v:?}"
+    );
 }
 
 // ---- bug 019: Switchyard invents cache_control on Anthropic backends ----

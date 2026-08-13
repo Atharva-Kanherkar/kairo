@@ -5,3 +5,18 @@ members = ["crates/harness"]
 [workspace.package]
 edition = "2021"
 license = "Apache-2.0"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+unused_must_use = "deny"
+unused_imports = "deny"
+dead_code = "deny"
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+# Noise on this crate: checkers return Verdict by design; docs mention OpenAI.
+must_use_candidate = "allow"
+doc_markdown = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
