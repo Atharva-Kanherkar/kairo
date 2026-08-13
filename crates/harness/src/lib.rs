@@ -5,6 +5,8 @@
 //! the request body and the ordered SSE frames of the response. Tests never
 //! hit the network — the recorded frames are the ground truth.
 
+pub mod checks;
+
 use serde::{Deserialize, Serialize};
 
 /// One captured SSE frame, byte-faithful. `event` is None for data-only

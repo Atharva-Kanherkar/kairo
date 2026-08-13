@@ -1,9 +1,9 @@
-# pipeproof
+# kairo
 
 **Does the wire protocol survive the pipe?**
 
 Every LLM gateway, proxy, and OpenAI-compatible façade claims compatibility.
-None of them prove it. pipeproof is a regression-driven conformance harness —
+None of them prove it. kairo is a regression-driven conformance harness —
 and eventually the router that passes it — built from *real, cited, still-open
 bugs* in the tools people run in production.
 
@@ -37,5 +37,17 @@ cp .env.example .env   # fill in your keys
 cargo test             # replay suite (no keys needed)
 ```
 
-Status: scaffold. First targets: #002 (Ollama finish_reason) and #006
-(Ollama streaming tool drops) — local, zero-cost reproductions.
+## Conformance harness
+
+`crates/kairo/src/checks.rs` holds the invariant checkers; each returns
+`Conformant` or `Violation(reason)`. `crates/kairo/tests/conformance.rs` runs
+them against recorded transcripts and asserts the verdict — a `Violation`
+assertion is a reproduced bug, frozen. The same checker run against a correct
+implementation returns `Conformant`; that is how the suite scores any target.
+
+Checkers so far: Anthropic tool-call `stop_reason`, OpenAI stream
+`finish_reason`, tool-call id charset. Fixtures: LiteLLM 1.82 vs 1.96
+(regression pair), `ollama_chat/` stream, Gemini 3 signature-in-id.
+
+Status: 13 reproduced defects in `issues/` (one filed as Switchyard #380);
+harness green with 4 conformance checks wired to recorded bytes.
