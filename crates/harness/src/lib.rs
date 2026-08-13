@@ -3,7 +3,7 @@
 //!
 //! A transcript is the verbatim wire exchange captured from a real provider:
 //! the request body and the ordered SSE frames of the response. Tests never
-//! hit the network — the recorded frames are the ground truth.
+//! hit the network, the recorded frames are the ground truth.
 
 pub mod checks;
 

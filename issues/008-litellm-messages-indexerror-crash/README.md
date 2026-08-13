@@ -1,4 +1,4 @@
-# 008 — LiteLLM /v1/messages adapter: unhandled IndexError → HTTP 500 "list index out of range"
+# 008, LiteLLM /v1/messages adapter: unhandled IndexError → HTTP 500 "list index out of range"
 
 - **Upstream family**: [litellm#17904](https://github.com/BerriAI/litellm/issues/17904)
   (tool names >64 chars through the Anthropic adapter). This is the **crash**
@@ -49,7 +49,7 @@ IndexError: list index out of range
 ## Test invariants
 
 1. A tool name legal in the inbound dialect but too long for the target MUST be
-   handled (mapped/truncated with restoration) or rejected with a clear 4xx —
+   handled (mapped/truncated with restoration) or rejected with a clear 4xx -
    never crash.
 2. `response.choices[0]` in any translation path MUST be guarded; an empty
    choices list must produce a valid (possibly empty) message or a typed error,

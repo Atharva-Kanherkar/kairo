@@ -24,14 +24,14 @@ fn fixture(rel: &str) -> String {
 
 #[test]
 fn litellm_196_marks_toolcall_stop_reason_correctly() {
-    // Current LiteLLM (1.96.2) is conformant on this path — the control.
+    // Current LiteLLM (1.96.2) is conformant on this path, the control.
     let v = anthropic_toolcall_stop_reason(&fixture("transcripts/001/gemma-stream.sse"));
     assert_eq!(v, Verdict::Conformant, "1.96.2 should label the tool call stop_reason=tool_use");
 }
 
 #[test]
 fn litellm_182_violates_stop_reason_regression() {
-    // LiteLLM 1.82.0 mislabels it end_turn — the frozen regression.
+    // LiteLLM 1.82.0 mislabels it end_turn, the frozen regression.
     let v = anthropic_toolcall_stop_reason(&fixture("transcripts/001/gemma-stream-182.sse"));
     assert!(matches!(v, Verdict::Violation(_)), "1.82.0 should be caught: {v:?}");
 }

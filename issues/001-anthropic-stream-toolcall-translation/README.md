@@ -1,7 +1,7 @@
-# 001 — /v1/messages streaming translation defects, version-dependent
+# 001, /v1/messages streaming translation defects, version-dependent
 
 - **Upstream**: [litellm#25390](https://github.com/BerriAI/litellm/issues/25390) (OPEN),
-  [litellm#29491](https://github.com/BerriAI/litellm/issues/29491) (OPEN) — the
+  [litellm#29491](https://github.com/BerriAI/litellm/issues/29491) (OPEN), the
   "streaming drops tool_use.input" class, regressed 5× historically.
 - **Tools under test**: LiteLLM 1.96.2 (current) and 1.82.0 (the version #25390
   calls the regression), same config, same requests.
@@ -10,7 +10,7 @@
 
 ## What we found (wire evidence, `transcripts/001/`)
 
-### Defect A — stop_reason mismapped (1.82.0, FIXED by 1.96.2)
+### Defect A, stop_reason mismapped (1.82.0, FIXED by 1.96.2)
 
 Identical Anthropic-format streaming request, Gemma backend, forced tool call:
 
@@ -23,7 +23,7 @@ Identical Anthropic-format streaming request, Gemma backend, forced tool call:
 An Anthropic-SDK agent loop executes tools only when `stop_reason ==
 "tool_use"`. On 1.82.0 the loop terminates silently: the call is present but
 never runs. This is taxonomy failure mode 3 (finish-reason mismapping) captured
-live, and it co-occurs with a spurious zero-length text block (Defect B) —
+live, and it co-occurs with a spurious zero-length text block (Defect B) -
 the empty-chunk shape that broke the Vercel AI SDK in sglang#29441.
 
 ### Not reproduced on current version
@@ -31,10 +31,10 @@ the empty-chunk shape that broke the Vercel AI SDK in sglang#29441.
 The headline symptom of #25390/#29491 (empty `tool_use.input` under streaming)
 did **not** reproduce on 1.96.2 in 5/5 large-payload runs (Kimi, ~16KB args,
 ~690 deltas each: all reassembled to valid JSON, grammar legal) nor on the
-exact Gemma model. The open issues were filed against 1.82.x–1.85.x with
+exact Gemma model. The open issues were filed against 1.82.x-1.85.x with
 different intermediaries (cc-switch) and upstreams (SiliconFlow); the simple
 paths appear patched since. The 5× recurrence record still makes this class a
-mandatory regression test — that is the point of this corpus.
+mandatory regression test, that is the point of this corpus.
 
 ## Test invariants (to encode in `crates/harness`)
 

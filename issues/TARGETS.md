@@ -1,4 +1,4 @@
-# Target issues — verified open, most-cited, cross-project
+# Target issues, verified open, most-cited, cross-project
 
 Reproduction order favors: still open, recurred multiple times, breaks real
 agent loops, cheap to reproduce. States verified 2026-08-12; re-check before

@@ -1,4 +1,4 @@
-# 009 — LiteLLM /v1/responses bridge emits a phantom empty message item on every tool call
+# 009, LiteLLM /v1/responses bridge emits a phantom empty message item on every tool call
 
 - **Tool under test**: LiteLLM 1.96.2, OpenAI `/v1/responses` ingress →
   `gemini/gemini-3-flash-preview`.
@@ -18,7 +18,7 @@ whose **first** item is a `message` with null text, followed by the actual
 ]
 ```
 
-The leading `message` carries `output_text.text: null` — a phantom, empty
+The leading `message` carries `output_text.text: null`, a phantom, empty
 assistant message that the model never produced. 3/3 runs identical.
 
 ## Why it matters
