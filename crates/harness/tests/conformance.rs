@@ -10,7 +10,7 @@ use kairo::checks::{
     is_error_forwarded, no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
     non_text_block_not_json_dumped, openai_stream_finish_reason, openai_toolcall_id_charset,
     parallel_tool_disable_preserved, reasoning_text_order_preserved,
-    thinking_not_leaked_as_visible_text, thinking_text_forwarded, Verdict,
+    thinking_not_leaked_as_visible_text, thinking_text_forwarded, upstream_bearer_is, Verdict,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -268,5 +268,35 @@ fn switchyard_invents_cache_control_on_anthropic_backend() {
     assert!(
         matches!(v, Verdict::Violation(_)),
         "Switchyard must be caught inventing cache_control: {v:?}"
+    );
+}
+
+// ---- bug 020: client api_key overrides (and can stick to) the deployment key ----
+
+#[test]
+fn litellm_control_uses_deployment_key() {
+    let v = upstream_bearer_is(&fixture("transcripts/020/cap-control.jsonl"), "sk-x");
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "request without api_key should use the configured mock key: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_client_api_key_overrides_deployment() {
+    let v = upstream_bearer_is(&fixture("transcripts/020/cap-override.jsonl"), "sk-x");
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "client body api_key must be caught replacing the deployment key: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_overridden_api_key_sticks_to_next_caller() {
+    let v = upstream_bearer_is(&fixture("transcripts/020/cap-sticky.jsonl"), "sk-x");
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "a later request that did not send api_key must not inherit the previous caller's key: {v:?}"
     );
 }

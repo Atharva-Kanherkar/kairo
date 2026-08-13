@@ -384,6 +384,45 @@ pub fn no_indexerror_leak(error_or_response_json: &str) -> Verdict {
     Verdict::Conformant
 }
 
+/// Invariant (bug 020): the credential a proxy sends upstream MUST be the
+/// deployment's configured key. A client JSON field `api_key` must not
+/// replace it, and a later request that did not send `api_key` must not
+/// inherit a previous caller's key.
+pub fn upstream_bearer_is(forwarded_jsonl: &str, expected_bearer: &str) -> Verdict {
+    let line = forwarded_jsonl
+        .lines()
+        .find(|l| !l.trim().is_empty())
+        .unwrap_or("");
+    let v: Value = match serde_json::from_str(line) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("unparseable capture: {e}")),
+    };
+    let Some(headers) = v.get("headers").and_then(Value::as_object) else {
+        return Verdict::Violation("capture has no headers object".into());
+    };
+    let auth = headers.iter().find_map(|(k, val)| {
+        if k.eq_ignore_ascii_case("authorization") {
+            val.as_str().map(str::to_owned)
+        } else {
+            None
+        }
+    });
+    let Some(auth) = auth else {
+        return Verdict::Violation("upstream request has no Authorization header".into());
+    };
+    let got = auth
+        .strip_prefix("Bearer ")
+        .or_else(|| auth.strip_prefix("bearer "))
+        .unwrap_or(auth.as_str());
+    if got == expected_bearer {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation(format!(
+            "upstream Authorization used {got:?}, expected deployment key {expected_bearer:?}"
+        ))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -407,5 +446,16 @@ mod tests {
             anthropic_toolcall_stop_reason(sse),
             Verdict::Violation(_)
         ));
+    }
+
+    #[test]
+    fn upstream_bearer_flags_overridden_key() {
+        let cap = r#"{"path":"/v1/chat/completions","headers":{"authorization":"Bearer CANARY"},"body":{}}"#;
+        assert!(matches!(
+            upstream_bearer_is(cap, "sk-x"),
+            Verdict::Violation(_)
+        ));
+        let ok = r#"{"path":"/v1/chat/completions","headers":{"authorization":"Bearer sk-x"},"body":{}}"#;
+        assert_eq!(upstream_bearer_is(ok, "sk-x"), Verdict::Conformant);
     }
 }

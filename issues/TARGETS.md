@@ -39,6 +39,7 @@ or just open a PR (see CONTRIBUTING.md).
 - ~~disable_parallel_tool_use dropped~~ DONE (issues/017)
 - ~~user document block dumped or deleted~~ DONE (issues/018)
 - ~~Switchyard invents cache_control ephemeral~~ DONE (issues/019)
+- ~~LiteLLM client `api_key` overrides deployment key and can stick~~ DONE (issues/020)
 - litellm#32214: sanitize_tool_use_ids breaks multi-turn on vLLM/Kimi (same class as 005)
 - litellm#27671: Responses streaming bridge, unregistered chatcmpl- text id
 - litellm#30053: fast_path skips tool-call continuation hook
