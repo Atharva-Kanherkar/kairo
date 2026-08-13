@@ -22,6 +22,8 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 007 | Switchyard streaming tool-call translation (OpenAI→Anthropic split-delta) | Switchyard 0.2.0 |, | ⬜ CORRECT, honest negative, their streaming works |
 | 008 | LiteLLM `/v1/messages` crashes with unhandled IndexError → 500 "list index out of range" on >64-char tool name | LiteLLM 1.96.2 → Gemini | [litellm#17904](https://github.com/BerriAI/litellm/issues/17904) family | ✅ 5/5 on CURRENT; source line pinned (transformation.py:1326) |
 | 009 | LiteLLM `/v1/responses` emits phantom empty `message` item (text:null) on every tool call | LiteLLM 1.96.2 → Gemini 3 |, | ✅ 3/3 on CURRENT (new finding) |
+| 010A | Switchyard maps upstream `content_filter` finish to Anthropic `end_turn` (safety signal erased) | Switchyard 0.2.0 (rig) | [Switchyard#369](https://github.com/NVIDIA-NeMo/Switchyard/issues/369) | reproduced offline on CURRENT |
+| 010B | Switchyard reorders reasoning/text when both are in one chunk (text emitted before thinking) | Switchyard 0.2.0 (rig) | [Switchyard#242](https://github.com/NVIDIA-NeMo/Switchyard/issues/242) | reproduced offline on CURRENT |
 | P2/P4/P5/P7 | Gemini stream finish_reason; anyOf schema; multi-turn ordering; parallel ids | LiteLLM 1.96.2 → Gemini | #21041/#23870/#26755 | ⬜ not repro (patched / model-dependent), kept as data |
 
 **Tally**: 13 distinct defects confirmed on the wire (12 on current releases)

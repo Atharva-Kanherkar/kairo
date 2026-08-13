@@ -124,6 +124,40 @@ pub fn openai_toolcall_id_charset(response_json: &str) -> Verdict {
     Verdict::Conformant
 }
 
+/// Invariant (bug 010A): a backend `finish_reason` of `content_filter` must
+/// not be translated to Anthropic `end_turn`, which means the model finished
+/// naturally. Given the buffered OpenAI response and the translated Anthropic
+/// stop_reason, flag the erasure.
+pub fn content_filter_preserved(openai_finish: &str, anthropic_stop_reason: &str) -> Verdict {
+    if openai_finish == "content_filter" && anthropic_stop_reason == "end_turn" {
+        return Verdict::Violation(
+            "content_filter translated to end_turn: the safety signal is erased".into(),
+        );
+    }
+    Verdict::Conformant
+}
+
+/// Invariant (bug 010B): within an Anthropic stream, the relative order of
+/// `thinking` and `text` content blocks must match the order the backend
+/// emitted them. `source_order` and `emitted_order` are the block-type
+/// sequences (e.g. `["thinking", "text"]`). Flag any mismatch.
+pub fn reasoning_text_order_preserved(source_order: &[&str], emitted_order: &[&str]) -> Verdict {
+    let keep = |seq: &[&str]| -> Vec<String> {
+        seq.iter()
+            .filter(|t| **t == "thinking" || **t == "text")
+            .map(|t| t.to_string())
+            .collect()
+    };
+    let src = keep(source_order);
+    let out = keep(emitted_order);
+    if src != out {
+        return Verdict::Violation(format!(
+            "reasoning/text order changed: backend emitted {src:?}, client received {out:?}"
+        ));
+    }
+    Verdict::Conformant
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

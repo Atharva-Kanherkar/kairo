@@ -1,0 +1,6 @@
+data: {"id":"c","object":"chat.completion.chunk","created":0,"model":"m","choices":[{"index":0,"delta":{"role":"assistant","reasoning_content":"THINK-FIRST ","content":"TEXT-AFTER "},"finish_reason":null}]}
+
+data: {"id":"c","object":"chat.completion.chunk","created":0,"model":"m","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
+

@@ -6,8 +6,8 @@
 //! violating the invariant, this test flips and tells us.
 
 use kairo::checks::{
-    anthropic_toolcall_stop_reason, openai_stream_finish_reason, openai_toolcall_id_charset,
-    Verdict,
+    anthropic_toolcall_stop_reason, content_filter_preserved, openai_stream_finish_reason,
+    openai_toolcall_id_charset, reasoning_text_order_preserved, Verdict,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -58,4 +58,32 @@ fn litellm_gemini_toolcall_id_charset_violation() {
         }
         Verdict::Conformant => panic!("the 382-char id must be caught"),
     }
+}
+
+// ---- bug 010A: Switchyard maps content_filter to end_turn (their #369) ----
+
+#[test]
+fn switchyard_content_filter_erased_violation() {
+    // Captured: upstream finish_reason content_filter, client got stop_reason end_turn.
+    let v = content_filter_preserved("content_filter", "end_turn");
+    assert!(matches!(v, Verdict::Violation(_)), "content_filter erasure must be caught: {v:?}");
+}
+
+// ---- bug 010B: Switchyard reorders reasoning/text within a chunk (their #242) ----
+
+#[test]
+fn switchyard_reasoning_text_reorder_violation() {
+    // Captured: backend emitted thinking then text in one chunk; client got text then thinking.
+    let v = reasoning_text_order_preserved(&["thinking", "text"], &["text", "thinking"]);
+    assert!(matches!(v, Verdict::Violation(_)), "reasoning/text reorder must be caught: {v:?}");
+}
+
+#[test]
+fn separate_chunk_order_is_conformant() {
+    // Control: separate chunks preserve order.
+    let v = reasoning_text_order_preserved(
+        &["thinking", "text", "thinking", "text"],
+        &["thinking", "text", "thinking", "text"],
+    );
+    assert_eq!(v, Verdict::Conformant);
 }

@@ -33,7 +33,7 @@ or just open a PR (see CONTRIBUTING.md).
   (needs a vLLM instance or the offline rig)
 - sglang#29441: empty content chunk before tool chunks breaks strict SDKs
 - ollama#17429: role:"tool" message hangs the server (model-dependent)
-- Switchyard #242: reasoning/content stream chunks reordered for Anthropic clients
-- Switchyard #369: content_filter silently translated to end_turn
+- ~~Switchyard #242: reasoning/content chunk reorder~~ DONE (issues/010)
+- ~~Switchyard #369: content_filter to end_turn~~ DONE (issues/010)
 - bifrost#4065: Anthropic ingress returns end_turn instead of tool_use
 - Any tool-call issue in a translation layer we have not covered: bring it

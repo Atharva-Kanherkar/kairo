@@ -1,0 +1,1 @@
+{"path": "/v1/chat/completions", "body": {"max_completion_tokens": 50, "messages": [{"content": "hi", "role": "user"}], "model": "captured-model"}}

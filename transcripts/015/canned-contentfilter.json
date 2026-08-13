@@ -1,0 +1,3 @@
+{"id":"c","object":"chat.completion","created":0,"model":"m",
+ "choices":[{"index":0,"finish_reason":"content_filter","message":{"role":"assistant","content":"I cannot help with that."}}],
+ "usage":{"prompt_tokens":5,"completion_tokens":8,"total_tokens":13}}
