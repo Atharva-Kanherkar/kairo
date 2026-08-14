@@ -1,0 +1,512 @@
+[
+  {
+    "phase": "query-key",
+    "tag": "health r1",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "{\"status\":\"ok\"}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "models r1",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "{\"data\":[{\"capabilities\":{\"context_window\":null,\"streaming\":true,\"supported_inbound_formats\":[\"openai-chat-completions\",\"openai-responses\",\"anthropic-messages\"],\"tool_calling\":null},\"created\":0,\"display_name\":\"captured-model\",\"id\":\"captured-model\",\"object\":\"model\",\"owned_by\":\"switchyard\",\"type\":\"model\"}],\"default_model\":\"captured-model\",\"first_id\":\"captured-model\",\"has_more\":false,\"last_id\":\"captured-model\",\"model_pool\":[\"captured-model\"],\"models\":[{\"additional_speed_tiers\":[],\"apply_patch_tool_type\":\"freeform\",\"availability_nux\":null,\"base_instructions\":\"You are Codex, a coding agent.\",\"context_window\":null,\"default_reasoning_level\":null,\"default_reasoning_summary\":\"none\",\"default_verbosity\":null,\"description\":\"Switchyard-routed model.\",\"display_name\":\"captured-model\",\"effective_context_window_percent\":95,\"experimental_supported_tools\":[],\"input_modalities\":[\"text\"],\"max_context_window\":null,\"priority\":0,\"shell_type\":\"shell_command\",\"slug\":\"captured-model\",\"support_verbosity\":false,\"supported_in_api\":true,\"supported_reasoning_levels\":[],\"supports_image_detail_original\":false,\"supports_parallel_tool_calls\":true,\"supports_reasoning_summaries\":false,\"supports_search_tool\":false,\"truncation_policy\":{\"limit\":10000,\"mode\":\"tokens\"},\"upgrade\":null,\"visibility\":\"list\",\"web_search_tool_type\":\"text\"}],\"object\":\"list\"}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "stats r1",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "{\"total_requests\":0,\"total_errors\":0,\"total_tokens\":{\"prompt\":0,\"completion\":0,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":0},\"models\":{},\"routing_overhead\":{\"count\":0,\"total_ms\":0.0,\"min_ms\":0.0,\"max_ms\":0.0,\"avg_ms\":0.0,\"p50_ms\":0.0,\"p99_ms\":0.0},\"routing_fallbacks\":{\"context_window\":0,\"unavailable\":0},\"classifier\":{\"total_requests\":0,\"total_errors\":0,\"total_tokens\":{\"prompt\":0,\"completion\":0,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":0},\"models\":{}},\"algorithm_stats\":{}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "metrics r1",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "# TYPE switchyard_build_info gauge\nswitchyard_build_info{version=\"0.2.0\",otel_scope_name=\"switchyard\"} 1\n# TYPE switchyard_client_responses_total counter\nswitchyard_client_responses_total{outcome=\"other_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"success\",otel_scope_name=\"switchyard\"} 0\n# TYPE switchyard_router_retry_recovered_total counter\nswitchyard_router_retry_recovered_total{otel_scope_name=\"switchyard\"} 0\n# TYPE switchyard_total_errors gauge\nswitchyard_total_errors{otel_scope_name=\"switchyard\"} 0\n# TYPE switchyard_total_requests gauge\nswitchyard_total_requests{otel_scope_name=\"switchyard\"} 0\n# TYPE switchyard_upstream_attempts_total counter\nswitchyard_upstream_attempts_total{code=\"200\",outcome=\"success\",otel_scope_name=\"switchyard\"} 0\nswitchyard_upstream_attempts_total{code=\"404\",outcome=\"other_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_upstream_attempts_total{code=\"429\",outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_upstream_attempts_total{code=\"500\",outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_upstream_attempts_total{code=\"504\",outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_upstream_attempts_total{code=\"none\",outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 0\n# HELP target_info Target metadata\n# TYPE target_info gauge\ntarget_info{service_name=\"switchyard-server\",telemetry_sdk_language=\"rust\",telemetry_sdk_name=\"opentelemetry\",telemetry_sdk_version=\"0.32.1\"} 1\n"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_plain r1",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_bearer r1",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_x_api_key r1",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_api_key_hdr r1",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_json_key r1",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_stream r1",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "messages r1",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"api_error\"},\"type\":\"error\"}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "health r2",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "{\"status\":\"ok\"}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "models r2",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "{\"data\":[{\"capabilities\":{\"context_window\":null,\"streaming\":true,\"supported_inbound_formats\":[\"openai-chat-completions\",\"openai-responses\",\"anthropic-messages\"],\"tool_calling\":null},\"created\":0,\"display_name\":\"captured-model\",\"id\":\"captured-model\",\"object\":\"model\",\"owned_by\":\"switchyard\",\"type\":\"model\"}],\"default_model\":\"captured-model\",\"first_id\":\"captured-model\",\"has_more\":false,\"last_id\":\"captured-model\",\"model_pool\":[\"captured-model\"],\"models\":[{\"additional_speed_tiers\":[],\"apply_patch_tool_type\":\"freeform\",\"availability_nux\":null,\"base_instructions\":\"You are Codex, a coding agent.\",\"context_window\":null,\"default_reasoning_level\":null,\"default_reasoning_summary\":\"none\",\"default_verbosity\":null,\"description\":\"Switchyard-routed model.\",\"display_name\":\"captured-model\",\"effective_context_window_percent\":95,\"experimental_supported_tools\":[],\"input_modalities\":[\"text\"],\"max_context_window\":null,\"priority\":0,\"shell_type\":\"shell_command\",\"slug\":\"captured-model\",\"support_verbosity\":false,\"supported_in_api\":true,\"supported_reasoning_levels\":[],\"supports_image_detail_original\":false,\"supports_parallel_tool_calls\":true,\"supports_reasoning_summaries\":false,\"supports_search_tool\":false,\"truncation_policy\":{\"limit\":10000,\"mode\":\"tokens\"},\"upgrade\":null,\"visibility\":\"list\",\"web_search_tool_type\":\"text\"}],\"object\":\"list\"}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "stats r2",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "{\"total_requests\":7,\"total_errors\":7,\"total_tokens\":{\"prompt\":0,\"completion\":0,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":0},\"models\":{\"captured-model\":{\"calls\":0,\"errors\":7,\"request_pct\":0.0,\"prompt_tokens\":0,\"max_observed_context_tokens\":0,\"completion_tokens\":0,\"total_tokens\":0,\"token_pct\":0.0,\"cached_tokens\":0,\"cache_creation_tokens\":0,\"reasoning_tokens\":0,\"avg_prompt_tokens\":0.0,\"avg_completion_tokens\":0.0,\"cache_hit_rate\":0.0,\"theoretical_cache_hit_rate\":0.0,\"model_call_latency\":{\"count\":0,\"total_ms\":0.0,\"min_ms\":0.0,\"max_ms\":0.0,\"avg_ms\":0.0,\"p50_ms\":0.0,\"p99_ms\":0.0},\"total_latency\":{\"count\":0,\"total_ms\":0.0,\"min_ms\":0.0,\"max_ms\":0.0,\"avg_ms\":0.0,\"p50_ms\":0.0,\"p99_ms\":0.0}}},\"routing_overhead\":{\"count\":0,\"total_ms\":0.0,\"min_ms\":0.0,\"max_ms\":0.0,\"avg_ms\":0.0,\"p50_ms\":0.0,\"p99_ms\":0.0},\"routing_fallbacks\":{\"context_window\":0,\"unavailable\":0},\"classifier\":{\"total_requests\":0,\"total_errors\":0,\"total_tokens\":{\"prompt\":0,\"completion\":0,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":0},\"models\":{}},\"algorithm_stats\":{}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "metrics r2",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "# TYPE switchyard_build_info gauge\nswitchyard_build_info{version=\"0.2.0\",otel_scope_name=\"switchyard\"} 1\n# TYPE switchyard_client_responses_total counter\nswitchyard_client_responses_total{outcome=\"other_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 7\nswitchyard_client_responses_total{outcome=\"success\",otel_scope_name=\"switchyard\"} 0\n# TYPE switchyard_decisions_total counter\nswitchyard_decisions_total{algorithm=\"passthrough\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\"} 7\n# TYPE switchyard_errors_total counter\nswitchyard_errors_total{model=\"captured-model\",otel_scope_name=\"switchyard\"} 7\n# TYPE switchyard_llm_call_duration_ms histogram\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"0\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"5\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"10\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"25\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"50\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"75\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"100\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"250\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"500\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"750\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"1000\"} 7\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model...truncated..."
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_plain r2",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_bearer r2",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_x_api_key r2",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_api_key_hdr r2",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_json_key r2",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_stream r2",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "messages r2",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"api_error\"},\"type\":\"error\"}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "health r3",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "{\"status\":\"ok\"}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "models r3",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "{\"data\":[{\"capabilities\":{\"context_window\":null,\"streaming\":true,\"supported_inbound_formats\":[\"openai-chat-completions\",\"openai-responses\",\"anthropic-messages\"],\"tool_calling\":null},\"created\":0,\"display_name\":\"captured-model\",\"id\":\"captured-model\",\"object\":\"model\",\"owned_by\":\"switchyard\",\"type\":\"model\"}],\"default_model\":\"captured-model\",\"first_id\":\"captured-model\",\"has_more\":false,\"last_id\":\"captured-model\",\"model_pool\":[\"captured-model\"],\"models\":[{\"additional_speed_tiers\":[],\"apply_patch_tool_type\":\"freeform\",\"availability_nux\":null,\"base_instructions\":\"You are Codex, a coding agent.\",\"context_window\":null,\"default_reasoning_level\":null,\"default_reasoning_summary\":\"none\",\"default_verbosity\":null,\"description\":\"Switchyard-routed model.\",\"display_name\":\"captured-model\",\"effective_context_window_percent\":95,\"experimental_supported_tools\":[],\"input_modalities\":[\"text\"],\"max_context_window\":null,\"priority\":0,\"shell_type\":\"shell_command\",\"slug\":\"captured-model\",\"support_verbosity\":false,\"supported_in_api\":true,\"supported_reasoning_levels\":[],\"supports_image_detail_original\":false,\"supports_parallel_tool_calls\":true,\"supports_reasoning_summaries\":false,\"supports_search_tool\":false,\"truncation_policy\":{\"limit\":10000,\"mode\":\"tokens\"},\"upgrade\":null,\"visibility\":\"list\",\"web_search_tool_type\":\"text\"}],\"object\":\"list\"}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "stats r3",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "{\"total_requests\":14,\"total_errors\":14,\"total_tokens\":{\"prompt\":0,\"completion\":0,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":0},\"models\":{\"captured-model\":{\"calls\":0,\"errors\":14,\"request_pct\":0.0,\"prompt_tokens\":0,\"max_observed_context_tokens\":0,\"completion_tokens\":0,\"total_tokens\":0,\"token_pct\":0.0,\"cached_tokens\":0,\"cache_creation_tokens\":0,\"reasoning_tokens\":0,\"avg_prompt_tokens\":0.0,\"avg_completion_tokens\":0.0,\"cache_hit_rate\":0.0,\"theoretical_cache_hit_rate\":0.0,\"model_call_latency\":{\"count\":0,\"total_ms\":0.0,\"min_ms\":0.0,\"max_ms\":0.0,\"avg_ms\":0.0,\"p50_ms\":0.0,\"p99_ms\":0.0},\"total_latency\":{\"count\":0,\"total_ms\":0.0,\"min_ms\":0.0,\"max_ms\":0.0,\"avg_ms\":0.0,\"p50_ms\":0.0,\"p99_ms\":0.0}}},\"routing_overhead\":{\"count\":0,\"total_ms\":0.0,\"min_ms\":0.0,\"max_ms\":0.0,\"avg_ms\":0.0,\"p50_ms\":0.0,\"p99_ms\":0.0},\"routing_fallbacks\":{\"context_window\":0,\"unavailable\":0},\"classifier\":{\"total_requests\":0,\"total_errors\":0,\"total_tokens\":{\"prompt\":0,\"completion\":0,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":0},\"models\":{}},\"algorithm_stats\":{}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "metrics r3",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "# TYPE switchyard_build_info gauge\nswitchyard_build_info{version=\"0.2.0\",otel_scope_name=\"switchyard\"} 1\n# TYPE switchyard_client_responses_total counter\nswitchyard_client_responses_total{outcome=\"other_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 14\nswitchyard_client_responses_total{outcome=\"success\",otel_scope_name=\"switchyard\"} 0\n# TYPE switchyard_decisions_total counter\nswitchyard_decisions_total{algorithm=\"passthrough\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\"} 14\n# TYPE switchyard_errors_total counter\nswitchyard_errors_total{model=\"captured-model\",otel_scope_name=\"switchyard\"} 14\n# TYPE switchyard_llm_call_duration_ms histogram\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"0\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"5\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"10\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"25\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"50\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"75\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"100\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"250\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"500\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"750\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"1000\"} 14\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_m...truncated..."
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_plain r3",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_bearer r3",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_x_api_key r3",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_api_key_hdr r3",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_json_key r3",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_stream r3",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "messages r3",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"api_error\"},\"type\":\"error\"}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "health r4",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "{\"status\":\"ok\"}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "models r4",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "{\"data\":[{\"capabilities\":{\"context_window\":null,\"streaming\":true,\"supported_inbound_formats\":[\"openai-chat-completions\",\"openai-responses\",\"anthropic-messages\"],\"tool_calling\":null},\"created\":0,\"display_name\":\"captured-model\",\"id\":\"captured-model\",\"object\":\"model\",\"owned_by\":\"switchyard\",\"type\":\"model\"}],\"default_model\":\"captured-model\",\"first_id\":\"captured-model\",\"has_more\":false,\"last_id\":\"captured-model\",\"model_pool\":[\"captured-model\"],\"models\":[{\"additional_speed_tiers\":[],\"apply_patch_tool_type\":\"freeform\",\"availability_nux\":null,\"base_instructions\":\"You are Codex, a coding agent.\",\"context_window\":null,\"default_reasoning_level\":null,\"default_reasoning_summary\":\"none\",\"default_verbosity\":null,\"description\":\"Switchyard-routed model.\",\"display_name\":\"captured-model\",\"effective_context_window_percent\":95,\"experimental_supported_tools\":[],\"input_modalities\":[\"text\"],\"max_context_window\":null,\"priority\":0,\"shell_type\":\"shell_command\",\"slug\":\"captured-model\",\"support_verbosity\":false,\"supported_in_api\":true,\"supported_reasoning_levels\":[],\"supports_image_detail_original\":false,\"supports_parallel_tool_calls\":true,\"supports_reasoning_summaries\":false,\"supports_search_tool\":false,\"truncation_policy\":{\"limit\":10000,\"mode\":\"tokens\"},\"upgrade\":null,\"visibility\":\"list\",\"web_search_tool_type\":\"text\"}],\"object\":\"list\"}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "stats r4",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "{\"total_requests\":21,\"total_errors\":21,\"total_tokens\":{\"prompt\":0,\"completion\":0,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":0},\"models\":{\"captured-model\":{\"calls\":0,\"errors\":21,\"request_pct\":0.0,\"prompt_tokens\":0,\"max_observed_context_tokens\":0,\"completion_tokens\":0,\"total_tokens\":0,\"token_pct\":0.0,\"cached_tokens\":0,\"cache_creation_tokens\":0,\"reasoning_tokens\":0,\"avg_prompt_tokens\":0.0,\"avg_completion_tokens\":0.0,\"cache_hit_rate\":0.0,\"theoretical_cache_hit_rate\":0.0,\"model_call_latency\":{\"count\":0,\"total_ms\":0.0,\"min_ms\":0.0,\"max_ms\":0.0,\"avg_ms\":0.0,\"p50_ms\":0.0,\"p99_ms\":0.0},\"total_latency\":{\"count\":0,\"total_ms\":0.0,\"min_ms\":0.0,\"max_ms\":0.0,\"avg_ms\":0.0,\"p50_ms\":0.0,\"p99_ms\":0.0}}},\"routing_overhead\":{\"count\":0,\"total_ms\":0.0,\"min_ms\":0.0,\"max_ms\":0.0,\"avg_ms\":0.0,\"p50_ms\":0.0,\"p99_ms\":0.0},\"routing_fallbacks\":{\"context_window\":0,\"unavailable\":0},\"classifier\":{\"total_requests\":0,\"total_errors\":0,\"total_tokens\":{\"prompt\":0,\"completion\":0,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":0},\"models\":{}},\"algorithm_stats\":{}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "metrics r4",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "# TYPE switchyard_build_info gauge\nswitchyard_build_info{version=\"0.2.0\",otel_scope_name=\"switchyard\"} 1\n# TYPE switchyard_client_responses_total counter\nswitchyard_client_responses_total{outcome=\"other_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 21\nswitchyard_client_responses_total{outcome=\"success\",otel_scope_name=\"switchyard\"} 0\n# TYPE switchyard_decisions_total counter\nswitchyard_decisions_total{algorithm=\"passthrough\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\"} 21\n# TYPE switchyard_errors_total counter\nswitchyard_errors_total{model=\"captured-model\",otel_scope_name=\"switchyard\"} 21\n# TYPE switchyard_llm_call_duration_ms histogram\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"0\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"5\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"10\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"25\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"50\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"75\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"100\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"250\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"500\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"750\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"1000\"} 21\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_m...truncated..."
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_plain r4",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_bearer r4",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_x_api_key r4",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_api_key_hdr r4",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_json_key r4",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_stream r4",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "messages r4",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"api_error\"},\"type\":\"error\"}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "health r5",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "{\"status\":\"ok\"}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "models r5",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "{\"data\":[{\"capabilities\":{\"context_window\":null,\"streaming\":true,\"supported_inbound_formats\":[\"openai-chat-completions\",\"openai-responses\",\"anthropic-messages\"],\"tool_calling\":null},\"created\":0,\"display_name\":\"captured-model\",\"id\":\"captured-model\",\"object\":\"model\",\"owned_by\":\"switchyard\",\"type\":\"model\"}],\"default_model\":\"captured-model\",\"first_id\":\"captured-model\",\"has_more\":false,\"last_id\":\"captured-model\",\"model_pool\":[\"captured-model\"],\"models\":[{\"additional_speed_tiers\":[],\"apply_patch_tool_type\":\"freeform\",\"availability_nux\":null,\"base_instructions\":\"You are Codex, a coding agent.\",\"context_window\":null,\"default_reasoning_level\":null,\"default_reasoning_summary\":\"none\",\"default_verbosity\":null,\"description\":\"Switchyard-routed model.\",\"display_name\":\"captured-model\",\"effective_context_window_percent\":95,\"experimental_supported_tools\":[],\"input_modalities\":[\"text\"],\"max_context_window\":null,\"priority\":0,\"shell_type\":\"shell_command\",\"slug\":\"captured-model\",\"support_verbosity\":false,\"supported_in_api\":true,\"supported_reasoning_levels\":[],\"supports_image_detail_original\":false,\"supports_parallel_tool_calls\":true,\"supports_reasoning_summaries\":false,\"supports_search_tool\":false,\"truncation_policy\":{\"limit\":10000,\"mode\":\"tokens\"},\"upgrade\":null,\"visibility\":\"list\",\"web_search_tool_type\":\"text\"}],\"object\":\"list\"}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "stats r5",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "{\"total_requests\":28,\"total_errors\":28,\"total_tokens\":{\"prompt\":0,\"completion\":0,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":0},\"models\":{\"captured-model\":{\"calls\":0,\"errors\":28,\"request_pct\":0.0,\"prompt_tokens\":0,\"max_observed_context_tokens\":0,\"completion_tokens\":0,\"total_tokens\":0,\"token_pct\":0.0,\"cached_tokens\":0,\"cache_creation_tokens\":0,\"reasoning_tokens\":0,\"avg_prompt_tokens\":0.0,\"avg_completion_tokens\":0.0,\"cache_hit_rate\":0.0,\"theoretical_cache_hit_rate\":0.0,\"model_call_latency\":{\"count\":0,\"total_ms\":0.0,\"min_ms\":0.0,\"max_ms\":0.0,\"avg_ms\":0.0,\"p50_ms\":0.0,\"p99_ms\":0.0},\"total_latency\":{\"count\":0,\"total_ms\":0.0,\"min_ms\":0.0,\"max_ms\":0.0,\"avg_ms\":0.0,\"p50_ms\":0.0,\"p99_ms\":0.0}}},\"routing_overhead\":{\"count\":0,\"total_ms\":0.0,\"min_ms\":0.0,\"max_ms\":0.0,\"avg_ms\":0.0,\"p50_ms\":0.0,\"p99_ms\":0.0},\"routing_fallbacks\":{\"context_window\":0,\"unavailable\":0},\"classifier\":{\"total_requests\":0,\"total_errors\":0,\"total_tokens\":{\"prompt\":0,\"completion\":0,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":0},\"models\":{}},\"algorithm_stats\":{}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "metrics r5",
+    "status": 200,
+    "ok": true,
+    "hits": [],
+    "body": "# TYPE switchyard_build_info gauge\nswitchyard_build_info{version=\"0.2.0\",otel_scope_name=\"switchyard\"} 1\n# TYPE switchyard_client_responses_total counter\nswitchyard_client_responses_total{outcome=\"other_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 28\nswitchyard_client_responses_total{outcome=\"success\",otel_scope_name=\"switchyard\"} 0\n# TYPE switchyard_decisions_total counter\nswitchyard_decisions_total{algorithm=\"passthrough\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\"} 28\n# TYPE switchyard_errors_total counter\nswitchyard_errors_total{model=\"captured-model\",otel_scope_name=\"switchyard\"} 28\n# TYPE switchyard_llm_call_duration_ms histogram\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"0\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"5\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"10\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"25\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"50\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"75\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"100\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"250\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"500\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"750\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"1000\"} 28\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"error\",selected_m...truncated..."
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_plain r5",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_bearer r5",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_x_api_key r5",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_api_key_hdr r5",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_user_json_key r5",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "chat_stream r5",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"upstream_error\"}}"
+  },
+  {
+    "phase": "query-key",
+    "tag": "messages r5",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_ADMIN_QUERY_KEY"
+    ],
+    "body": "{\"error\":{\"message\":\"error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_ADMIN_QUERY_KEY/chat/completions)\",\"type\":\"api_error\"},\"type\":\"error\"}"
+  }
+]

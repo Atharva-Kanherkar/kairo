@@ -1,0 +1,25 @@
+{
+    "id": "chatcmpl-cap",
+    "created": 0,
+    "model": "mock",
+    "object": "chat.completion",
+    "choices": [
+        {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+                "content": "ok",
+                "role": "assistant",
+                "provider_specific_fields": {
+                    "refusal": null
+                }
+            },
+            "provider_specific_fields": {}
+        }
+    ],
+    "usage": {
+        "completion_tokens": 1,
+        "prompt_tokens": 1,
+        "total_tokens": 2
+    }
+}

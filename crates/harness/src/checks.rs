@@ -448,6 +448,20 @@ pub fn upstream_omits_header_value(forwarded_jsonl: &str, needle: &str) -> Verdi
     Verdict::Conformant
 }
 
+/// Invariant (bug 024): a proxy MUST NOT return deployment secrets
+/// (`extra_headers`, `aws_session_token`, query keys in `api_base`) in a
+/// client-visible response body. `/v1/models` and `/health/liveliness`
+/// are the controls that already satisfy this.
+pub fn response_omits_secret(body: &str, needle: &str) -> Verdict {
+    if body.contains(needle) {
+        Verdict::Violation(format!(
+            "response body contains deployment secret marker {needle:?}"
+        ))
+    } else {
+        Verdict::Conformant
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -494,6 +508,21 @@ mod tests {
         let ok = r#"{"headers":{"authorization":"Bearer x"}}"#;
         assert_eq!(
             upstream_omits_header_value(ok, "CANARY_AZURE_API_KEY"),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn response_omits_secret_flags_canary() {
+        assert!(matches!(
+            response_omits_secret(
+                r#"{"extra_headers":{"Authorization":"Bearer CANARY_EXTRA_HEADERS_AUTHORIZATION"}}"#,
+                "CANARY_EXTRA_HEADERS_AUTHORIZATION"
+            ),
+            Verdict::Violation(_)
+        ));
+        assert_eq!(
+            response_omits_secret(r#"{"id":"mock"}"#, "CANARY_EXTRA_HEADERS_AUTHORIZATION"),
             Verdict::Conformant
         );
     }

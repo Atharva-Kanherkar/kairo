@@ -1,0 +1,562 @@
+[
+  {
+    "tag": "ll_models r1",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_model_info r1",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "CANARY:CANARY_QUERY_KEY_IN_BASE",
+      "CANARY:CANARY_UNMASKED_HEADER_VALUE",
+      "CANARY:CANARY_HEADERS_FIELD_VALUE",
+      "CANARY:CANARY_OPENAI_ORG_ID",
+      "CANARY:CANARY_QUERY_KEY"
+    ]
+  },
+  {
+    "tag": "ll_v1_model_info r1",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "CANARY:CANARY_QUERY_KEY_IN_BASE",
+      "CANARY:CANARY_UNMASKED_HEADER_VALUE",
+      "CANARY:CANARY_HEADERS_FIELD_VALUE",
+      "CANARY:CANARY_OPENAI_ORG_ID",
+      "CANARY:CANARY_QUERY_KEY"
+    ]
+  },
+  {
+    "tag": "ll_v2_model_info r1",
+    "status": 500,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "ll_health r1",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "CANARY:CANARY_EXTRA_HEADERS_AUTHORIZATION",
+      "CANARY:CANARY_X_GOOG_API_KEY_VALUE",
+      "CANARY:CANARY_UNMASKED_HEADER_VALUE",
+      "CANARY:CANARY_AZURE_STYLE_API_KEY",
+      "CANARY:CANARY_HEADERS_FIELD_VALUE",
+      "CANARY:CANARY_OPENAI_ORG_ID",
+      "CANARY:CANARY_AWS_SESSION_TOKEN_VALUE"
+    ]
+  },
+  {
+    "tag": "ll_health_live r1",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_health_ready r1",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_credentials r1",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_chat_plain r1",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_chat_bad_model r1",
+    "status": 400,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "sy_stats r1",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_metrics r1",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_chat_transport r1",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_QUERY_KEY"
+    ]
+  },
+  {
+    "tag": "live_models r1",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "live_model_info r1",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_models r2",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_model_info r2",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "CANARY:CANARY_QUERY_KEY_IN_BASE",
+      "CANARY:CANARY_UNMASKED_HEADER_VALUE",
+      "CANARY:CANARY_HEADERS_FIELD_VALUE",
+      "CANARY:CANARY_OPENAI_ORG_ID",
+      "CANARY:CANARY_QUERY_KEY"
+    ]
+  },
+  {
+    "tag": "ll_v1_model_info r2",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "CANARY:CANARY_QUERY_KEY_IN_BASE",
+      "CANARY:CANARY_UNMASKED_HEADER_VALUE",
+      "CANARY:CANARY_HEADERS_FIELD_VALUE",
+      "CANARY:CANARY_OPENAI_ORG_ID",
+      "CANARY:CANARY_QUERY_KEY"
+    ]
+  },
+  {
+    "tag": "ll_v2_model_info r2",
+    "status": 500,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "ll_health r2",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "CANARY:CANARY_EXTRA_HEADERS_AUTHORIZATION",
+      "CANARY:CANARY_X_GOOG_API_KEY_VALUE",
+      "CANARY:CANARY_UNMASKED_HEADER_VALUE",
+      "CANARY:CANARY_AZURE_STYLE_API_KEY",
+      "CANARY:CANARY_HEADERS_FIELD_VALUE",
+      "CANARY:CANARY_OPENAI_ORG_ID",
+      "CANARY:CANARY_AWS_SESSION_TOKEN_VALUE"
+    ]
+  },
+  {
+    "tag": "ll_health_live r2",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_health_ready r2",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_credentials r2",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_chat_plain r2",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_chat_bad_model r2",
+    "status": 400,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "sy_stats r2",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_metrics r2",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_chat_transport r2",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_QUERY_KEY"
+    ]
+  },
+  {
+    "tag": "live_models r2",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "live_model_info r2",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_models r3",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_model_info r3",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "CANARY:CANARY_QUERY_KEY_IN_BASE",
+      "CANARY:CANARY_UNMASKED_HEADER_VALUE",
+      "CANARY:CANARY_HEADERS_FIELD_VALUE",
+      "CANARY:CANARY_OPENAI_ORG_ID",
+      "CANARY:CANARY_QUERY_KEY"
+    ]
+  },
+  {
+    "tag": "ll_v1_model_info r3",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "CANARY:CANARY_QUERY_KEY_IN_BASE",
+      "CANARY:CANARY_UNMASKED_HEADER_VALUE",
+      "CANARY:CANARY_HEADERS_FIELD_VALUE",
+      "CANARY:CANARY_OPENAI_ORG_ID",
+      "CANARY:CANARY_QUERY_KEY"
+    ]
+  },
+  {
+    "tag": "ll_v2_model_info r3",
+    "status": 500,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "ll_health r3",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "CANARY:CANARY_EXTRA_HEADERS_AUTHORIZATION",
+      "CANARY:CANARY_X_GOOG_API_KEY_VALUE",
+      "CANARY:CANARY_UNMASKED_HEADER_VALUE",
+      "CANARY:CANARY_AZURE_STYLE_API_KEY",
+      "CANARY:CANARY_HEADERS_FIELD_VALUE",
+      "CANARY:CANARY_OPENAI_ORG_ID",
+      "CANARY:CANARY_AWS_SESSION_TOKEN_VALUE"
+    ]
+  },
+  {
+    "tag": "ll_health_live r3",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_health_ready r3",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_credentials r3",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_chat_plain r3",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_chat_bad_model r3",
+    "status": 400,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "sy_stats r3",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_metrics r3",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_chat_transport r3",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_QUERY_KEY"
+    ]
+  },
+  {
+    "tag": "live_models r3",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "live_model_info r3",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_models r4",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_model_info r4",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "CANARY:CANARY_QUERY_KEY_IN_BASE",
+      "CANARY:CANARY_UNMASKED_HEADER_VALUE",
+      "CANARY:CANARY_HEADERS_FIELD_VALUE",
+      "CANARY:CANARY_OPENAI_ORG_ID",
+      "CANARY:CANARY_QUERY_KEY"
+    ]
+  },
+  {
+    "tag": "ll_v1_model_info r4",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "CANARY:CANARY_QUERY_KEY_IN_BASE",
+      "CANARY:CANARY_UNMASKED_HEADER_VALUE",
+      "CANARY:CANARY_HEADERS_FIELD_VALUE",
+      "CANARY:CANARY_OPENAI_ORG_ID",
+      "CANARY:CANARY_QUERY_KEY"
+    ]
+  },
+  {
+    "tag": "ll_v2_model_info r4",
+    "status": 500,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "ll_health r4",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "CANARY:CANARY_EXTRA_HEADERS_AUTHORIZATION",
+      "CANARY:CANARY_X_GOOG_API_KEY_VALUE",
+      "CANARY:CANARY_UNMASKED_HEADER_VALUE",
+      "CANARY:CANARY_AZURE_STYLE_API_KEY",
+      "CANARY:CANARY_HEADERS_FIELD_VALUE",
+      "CANARY:CANARY_OPENAI_ORG_ID",
+      "CANARY:CANARY_AWS_SESSION_TOKEN_VALUE"
+    ]
+  },
+  {
+    "tag": "ll_health_live r4",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_health_ready r4",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_credentials r4",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_chat_plain r4",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_chat_bad_model r4",
+    "status": 400,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "sy_stats r4",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_metrics r4",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_chat_transport r4",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_QUERY_KEY"
+    ]
+  },
+  {
+    "tag": "live_models r4",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "live_model_info r4",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_models r5",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_model_info r5",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "CANARY:CANARY_QUERY_KEY_IN_BASE",
+      "CANARY:CANARY_UNMASKED_HEADER_VALUE",
+      "CANARY:CANARY_HEADERS_FIELD_VALUE",
+      "CANARY:CANARY_OPENAI_ORG_ID",
+      "CANARY:CANARY_QUERY_KEY"
+    ]
+  },
+  {
+    "tag": "ll_v1_model_info r5",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "CANARY:CANARY_QUERY_KEY_IN_BASE",
+      "CANARY:CANARY_UNMASKED_HEADER_VALUE",
+      "CANARY:CANARY_HEADERS_FIELD_VALUE",
+      "CANARY:CANARY_OPENAI_ORG_ID",
+      "CANARY:CANARY_QUERY_KEY"
+    ]
+  },
+  {
+    "tag": "ll_v2_model_info r5",
+    "status": 500,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "ll_health r5",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "CANARY:CANARY_EXTRA_HEADERS_AUTHORIZATION",
+      "CANARY:CANARY_X_GOOG_API_KEY_VALUE",
+      "CANARY:CANARY_UNMASKED_HEADER_VALUE",
+      "CANARY:CANARY_AZURE_STYLE_API_KEY",
+      "CANARY:CANARY_HEADERS_FIELD_VALUE",
+      "CANARY:CANARY_OPENAI_ORG_ID",
+      "CANARY:CANARY_AWS_SESSION_TOKEN_VALUE"
+    ]
+  },
+  {
+    "tag": "ll_health_live r5",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_health_ready r5",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_credentials r5",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_chat_plain r5",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_chat_bad_model r5",
+    "status": 400,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "sy_stats r5",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_metrics r5",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_chat_transport r5",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "CANARY:CANARY_QUERY_KEY"
+    ]
+  },
+  {
+    "tag": "live_models r5",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "live_model_info r5",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  }
+]

@@ -1,0 +1,11 @@
+schema_version = 1
+[llm_clients.local]
+format = "openai_chat"
+base_url = "http://CANARY_ADMIN_USERINFO_KEY@127.0.0.1:19997/v1"
+[targets.cap]
+id = "captured-model"
+llm_client = "local"
+[routes.primary]
+id = "captured-model"
+type = "passthrough"
+target = "cap"

@@ -1,0 +1,1 @@
+{"method": "POST", "path": "/v1/chat/completions", "headers": {"content-type": "application/json", "user-agent": "curl/8.7.1", "accept": "*/*", "x-custom": "CANARY_EXTRA_HEADER", "authorization": "Bearer CANARY_ADMIN_ENV_KEY", "host": "127.0.0.1:9999", "content-length": "88"}, "body_len": 88}

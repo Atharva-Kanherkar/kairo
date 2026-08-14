@@ -1,0 +1,482 @@
+[
+  {
+    "tag": "ll_health r1",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "FULL:GEMINI_API_KEY"
+    ]
+  },
+  {
+    "tag": "ll_model_info r1",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "PREFIX_SUFFIX:GEMINI_API_KEY"
+    ]
+  },
+  {
+    "tag": "ll_models r1",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_chat r1",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_health r2",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "FULL:GEMINI_API_KEY"
+    ]
+  },
+  {
+    "tag": "ll_model_info r2",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "PREFIX_SUFFIX:GEMINI_API_KEY"
+    ]
+  },
+  {
+    "tag": "ll_models r2",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_chat r2",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_health r3",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "FULL:GEMINI_API_KEY"
+    ]
+  },
+  {
+    "tag": "ll_model_info r3",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "PREFIX_SUFFIX:GEMINI_API_KEY"
+    ]
+  },
+  {
+    "tag": "ll_models r3",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_chat r3",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_health r4",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "FULL:GEMINI_API_KEY"
+    ]
+  },
+  {
+    "tag": "ll_model_info r4",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "PREFIX_SUFFIX:GEMINI_API_KEY"
+    ]
+  },
+  {
+    "tag": "ll_models r4",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_chat r4",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_health r5",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "FULL:GEMINI_API_KEY"
+    ]
+  },
+  {
+    "tag": "ll_model_info r5",
+    "status": 200,
+    "ok": true,
+    "hits": [
+      "PREFIX_SUFFIX:GEMINI_API_KEY"
+    ]
+  },
+  {
+    "tag": "ll_models r5",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "ll_chat r5",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_openai_chat r1",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_openai_chat r2",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_openai_chat r3",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_openai_chat r4",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_openai_chat r5",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_gemini_chat r1",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_gemini_chat r2",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_gemini_chat r3",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_gemini_chat r4",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_gemini_chat r5",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_anthropic_chat r1",
+    "status": 404,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "sy_anthropic_chat r2",
+    "status": 404,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "sy_anthropic_chat r3",
+    "status": 404,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "sy_anthropic_chat r4",
+    "status": 404,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "sy_anthropic_chat r5",
+    "status": 404,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "sy_openrouter_chat r1",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_openrouter_chat r2",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_openrouter_chat r3",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_openrouter_chat r4",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_openrouter_chat r5",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_502_gemini r1",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:GEMINI_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_gemini r2",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:GEMINI_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_gemini r3",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:GEMINI_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_gemini r4",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:GEMINI_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_gemini r5",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:GEMINI_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_openai r1",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:OPENAI_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_openai r2",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:OPENAI_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_openai r3",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:OPENAI_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_openai r4",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:OPENAI_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_openai r5",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:OPENAI_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_anthropic r1",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_anthropic r2",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_anthropic r3",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_anthropic r4",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_anthropic r5",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_openrouter r1",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:OPENROUTER_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_openrouter r2",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:OPENROUTER_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_openrouter r3",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:OPENROUTER_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_openrouter r4",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:OPENROUTER_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_502_openrouter r5",
+    "status": 502,
+    "ok": false,
+    "hits": [
+      "FULL:OPENROUTER_API_KEY"
+    ]
+  },
+  {
+    "tag": "sy_anthropic_haiku r1",
+    "status": 404,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "sy_anthropic_haiku r2",
+    "status": 404,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "sy_anthropic_haiku r3",
+    "status": 404,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "sy_anthropic_haiku r4",
+    "status": 404,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "sy_anthropic_haiku r5",
+    "status": 404,
+    "ok": false,
+    "hits": []
+  },
+  {
+    "tag": "sy_anthropic_haiku45 r1",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_anthropic_haiku45 r2",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_anthropic_haiku45 r3",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_anthropic_haiku45 r4",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  },
+  {
+    "tag": "sy_anthropic_haiku45 r5",
+    "status": 200,
+    "ok": true,
+    "hits": []
+  }
+]

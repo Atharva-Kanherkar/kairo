@@ -1,0 +1,11 @@
+{
+    "data": [
+        {
+            "id": "mock",
+            "object": "model",
+            "created": 1677610602,
+            "owned_by": "openai"
+        }
+    ],
+    "object": "list"
+}

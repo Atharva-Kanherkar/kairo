@@ -1,0 +1,1 @@
+{"method": "GET", "path": "/v1/chat/completions", "headers": {"x-custom": "CANARY_EXTRA_HEADER", "user-agent": "curl/8.7.1", "accept": "*/*", "referer": "http://127.0.0.1:9999/v1/chat/completions", "host": "127.0.0.1:9998"}, "body": null}

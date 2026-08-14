@@ -1,0 +1,11 @@
+schema_version = 1
+[llm_clients.gemini]
+format = "openai_chat"
+base_url = "https://generativelanguage.googleapis.com/v1beta/openai?key=CANARY_GEMINI_QUERY_KEY"
+[targets.g]
+id = "gemini-2.5-flash"
+llm_client = "gemini"
+[routes.primary]
+id = "gemini-2.5-flash"
+type = "passthrough"
+target = "g"

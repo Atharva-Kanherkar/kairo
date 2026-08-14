@@ -1,0 +1,23 @@
+{
+  "healthy_endpoints": [
+    {
+      "use_in_pass_through": false,
+      "use_litellm_proxy": false,
+      "use_xai_oauth": false,
+      "merge_reasoning_content_in_choices": false,
+      "model": "gemini/gemini-2.5-flash",
+      "extra_headers": {
+        "x-goog-api-key": "REDACTED_GEMINI_API_KEY"
+      },
+      "aws_session_token": "CANARY_NOT_A_CLOUD_TOKEN",
+      "max_tokens": 16,
+      "cache": {
+        "no-cache": true
+      },
+      "model_id": "4e9fa1f33578d792d20bd47f5b0dd34979d4267aa4f6efe2b423d3083684bb96"
+    }
+  ],
+  "unhealthy_endpoints": [],
+  "healthy_count": 1,
+  "unhealthy_count": 0
+}
