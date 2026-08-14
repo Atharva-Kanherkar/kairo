@@ -1,0 +1,967 @@
+[
+  {
+    "probe": "ll_control",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_auth",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_goog",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_azure",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_org",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_default_headers_auth",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_headers_auth",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_organization",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_openai_organization",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_api_key_body",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_body_api_key",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_body_api_base",
+    "run": 1,
+    "status": 500,
+    "client_hits": [],
+    "client_body_prefix": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+  },
+  {
+    "probe": "ll_aws_session_token",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_down_chat",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-mock\",\"created\":0,\"model\":\"down\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"pong\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_control",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_header_x_goog",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_json_organization",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_json_api_key",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_json_extra_headers",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_down_health",
+    "run": 1,
+    "status": 200,
+    "client_hits": [
+      "CANARY_DOWN_X_GOOG"
+    ],
+    "client_body_prefix": "{\"healthy_endpoints\":[{\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/downmodel\",\"extra_headers\":{\"x-goog-api-key\":\"CANARY_DOWN_X_GOOG\"},\"max_tokens\":16,\"cache\":{\"no-cache\":true},\"model_id\":\"09d84e1c66d49076c49d246b359cc4df8ff1aba01e00e4e791ccf4c84322f419\"}],\"unhealthy_endpoints\":[],\"healthy_count\":1,\"unhealthy_count\":0}"
+  },
+  {
+    "probe": "ll_down_model_info",
+    "run": 1,
+    "status": 200,
+    "client_hits": [
+      "CANARY_DOWN_QUERY_KEY"
+    ],
+    "client_body_prefix": "{\"data\":[{\"model_name\":\"down\",\"litellm_params\":{\"api_base\":\"http://127.0.0.1:19999/v1?key=CANARY_DOWN_QUERY_KEY\",\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/downmodel\",\"extra_headers\":{\"x-goog-api-key\":\"CANA**********GOOG\"}},\"model_info\":{\"id\":\"09d84e1c66d49076c49d246b359cc4df8ff1aba01e00e4e791ccf4c84322f419\",\"db_model\":false,\"key\":\"openai/downmodel\",\"max_tokens\":null,\"max_input_tokens\":null,\"max_output_to"
+  },
+  {
+    "probe": "ll_down_models",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"data\":[{\"id\":\"down\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"}],\"object\":\"list\"}"
+  },
+  {
+    "probe": "ll_down_liveliness",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "\"I'm alive!\""
+  },
+  {
+    "probe": "ll_credentials",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"success\":true,\"credentials\":[]}"
+  },
+  {
+    "probe": "sy_health",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"status\":\"ok\"}"
+  },
+  {
+    "probe": "sy_models",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"data\":[{\"capabilities\":{\"context_window\":null,\"streaming\":true,\"supported_inbound_formats\":[\"openai-chat-completions\",\"openai-responses\",\"anthropic-messages\"],\"tool_calling\":null},\"created\":0,\"display_name\":\"captured-model\",\"id\":\"captured-model\",\"object\":\"model\",\"owned_by\":\"switchyard\",\"type\":\"model\"}],\"default_model\":\"captured-model\",\"first_id\":\"captured-model\",\"has_more\":false,\"last_id\":\"captured-model\",\"model_pool\":[\"captured-model\"],\"models\":[{\"additional_speed_tiers\":[],\"apply_patch_tool_"
+  },
+  {
+    "probe": "sy_stats",
+    "run": 1,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"total_requests\":5,\"total_errors\":0,\"total_tokens\":{\"prompt\":5,\"completion\":5,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":10},\"models\":{\"captured-model\":{\"calls\":5,\"errors\":0,\"request_pct\":100.0,\"prompt_tokens\":5,\"max_observed_context_tokens\":2,\"completion_tokens\":5,\"total_tokens\":10,\"token_pct\":100.0,\"cached_tokens\":0,\"cache_creation_tokens\":0,\"reasoning_tokens\":0,\"avg_prompt_tokens\":1.0,\"avg_completion_tokens\":1.0,\"cache_hit_rate\":0.0,\"theoretical_cache_hit_rate\":0.0,\"model_call_laten"
+  },
+  {
+    "probe": "ll_control",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_auth",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_goog",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_azure",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_org",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_default_headers_auth",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_headers_auth",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_organization",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_openai_organization",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_api_key_body",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_body_api_key",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_body_api_base",
+    "run": 2,
+    "status": 500,
+    "client_hits": [],
+    "client_body_prefix": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+  },
+  {
+    "probe": "ll_aws_session_token",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_down_chat",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-mock\",\"created\":0,\"model\":\"down\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"pong\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_control",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_header_x_goog",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_json_organization",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_json_api_key",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_json_extra_headers",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_down_health",
+    "run": 2,
+    "status": 200,
+    "client_hits": [
+      "CANARY_DOWN_X_GOOG"
+    ],
+    "client_body_prefix": "{\"healthy_endpoints\":[{\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/downmodel\",\"extra_headers\":{\"x-goog-api-key\":\"CANARY_DOWN_X_GOOG\"},\"max_tokens\":16,\"cache\":{\"no-cache\":true},\"model_id\":\"09d84e1c66d49076c49d246b359cc4df8ff1aba01e00e4e791ccf4c84322f419\"}],\"unhealthy_endpoints\":[],\"healthy_count\":1,\"unhealthy_count\":0}"
+  },
+  {
+    "probe": "ll_down_model_info",
+    "run": 2,
+    "status": 200,
+    "client_hits": [
+      "CANARY_DOWN_QUERY_KEY"
+    ],
+    "client_body_prefix": "{\"data\":[{\"model_name\":\"down\",\"litellm_params\":{\"api_base\":\"http://127.0.0.1:19999/v1?key=CANARY_DOWN_QUERY_KEY\",\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/downmodel\",\"extra_headers\":{\"x-goog-api-key\":\"CANA**********GOOG\"}},\"model_info\":{\"id\":\"09d84e1c66d49076c49d246b359cc4df8ff1aba01e00e4e791ccf4c84322f419\",\"db_model\":false,\"key\":\"openai/downmodel\",\"max_tokens\":null,\"max_input_tokens\":null,\"max_output_to"
+  },
+  {
+    "probe": "ll_down_models",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"data\":[{\"id\":\"down\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"}],\"object\":\"list\"}"
+  },
+  {
+    "probe": "ll_down_liveliness",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "\"I'm alive!\""
+  },
+  {
+    "probe": "ll_credentials",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"success\":true,\"credentials\":[]}"
+  },
+  {
+    "probe": "sy_health",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"status\":\"ok\"}"
+  },
+  {
+    "probe": "sy_models",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"data\":[{\"capabilities\":{\"context_window\":null,\"streaming\":true,\"supported_inbound_formats\":[\"openai-chat-completions\",\"openai-responses\",\"anthropic-messages\"],\"tool_calling\":null},\"created\":0,\"display_name\":\"captured-model\",\"id\":\"captured-model\",\"object\":\"model\",\"owned_by\":\"switchyard\",\"type\":\"model\"}],\"default_model\":\"captured-model\",\"first_id\":\"captured-model\",\"has_more\":false,\"last_id\":\"captured-model\",\"model_pool\":[\"captured-model\"],\"models\":[{\"additional_speed_tiers\":[],\"apply_patch_tool_"
+  },
+  {
+    "probe": "sy_stats",
+    "run": 2,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"total_requests\":10,\"total_errors\":0,\"total_tokens\":{\"prompt\":10,\"completion\":10,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":20},\"models\":{\"captured-model\":{\"calls\":10,\"errors\":0,\"request_pct\":100.0,\"prompt_tokens\":10,\"max_observed_context_tokens\":2,\"completion_tokens\":10,\"total_tokens\":20,\"token_pct\":100.0,\"cached_tokens\":0,\"cache_creation_tokens\":0,\"reasoning_tokens\":0,\"avg_prompt_tokens\":1.0,\"avg_completion_tokens\":1.0,\"cache_hit_rate\":0.0,\"theoretical_cache_hit_rate\":0.0,\"model_call"
+  },
+  {
+    "probe": "ll_control",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_auth",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_goog",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_azure",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_org",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_default_headers_auth",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_headers_auth",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_organization",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_openai_organization",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_api_key_body",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_body_api_key",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_body_api_base",
+    "run": 3,
+    "status": 500,
+    "client_hits": [],
+    "client_body_prefix": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+  },
+  {
+    "probe": "ll_aws_session_token",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_down_chat",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-mock\",\"created\":0,\"model\":\"down\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"pong\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_control",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_header_x_goog",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_json_organization",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_json_api_key",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_json_extra_headers",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_down_health",
+    "run": 3,
+    "status": 200,
+    "client_hits": [
+      "CANARY_DOWN_X_GOOG"
+    ],
+    "client_body_prefix": "{\"healthy_endpoints\":[{\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/downmodel\",\"extra_headers\":{\"x-goog-api-key\":\"CANARY_DOWN_X_GOOG\"},\"max_tokens\":16,\"cache\":{\"no-cache\":true},\"model_id\":\"09d84e1c66d49076c49d246b359cc4df8ff1aba01e00e4e791ccf4c84322f419\"}],\"unhealthy_endpoints\":[],\"healthy_count\":1,\"unhealthy_count\":0}"
+  },
+  {
+    "probe": "ll_down_model_info",
+    "run": 3,
+    "status": 200,
+    "client_hits": [
+      "CANARY_DOWN_QUERY_KEY"
+    ],
+    "client_body_prefix": "{\"data\":[{\"model_name\":\"down\",\"litellm_params\":{\"api_base\":\"http://127.0.0.1:19999/v1?key=CANARY_DOWN_QUERY_KEY\",\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/downmodel\",\"extra_headers\":{\"x-goog-api-key\":\"CANA**********GOOG\"}},\"model_info\":{\"id\":\"09d84e1c66d49076c49d246b359cc4df8ff1aba01e00e4e791ccf4c84322f419\",\"db_model\":false,\"key\":\"openai/downmodel\",\"max_tokens\":null,\"max_input_tokens\":null,\"max_output_to"
+  },
+  {
+    "probe": "ll_down_models",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"data\":[{\"id\":\"down\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"}],\"object\":\"list\"}"
+  },
+  {
+    "probe": "ll_down_liveliness",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "\"I'm alive!\""
+  },
+  {
+    "probe": "ll_credentials",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"success\":true,\"credentials\":[]}"
+  },
+  {
+    "probe": "sy_health",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"status\":\"ok\"}"
+  },
+  {
+    "probe": "sy_models",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"data\":[{\"capabilities\":{\"context_window\":null,\"streaming\":true,\"supported_inbound_formats\":[\"openai-chat-completions\",\"openai-responses\",\"anthropic-messages\"],\"tool_calling\":null},\"created\":0,\"display_name\":\"captured-model\",\"id\":\"captured-model\",\"object\":\"model\",\"owned_by\":\"switchyard\",\"type\":\"model\"}],\"default_model\":\"captured-model\",\"first_id\":\"captured-model\",\"has_more\":false,\"last_id\":\"captured-model\",\"model_pool\":[\"captured-model\"],\"models\":[{\"additional_speed_tiers\":[],\"apply_patch_tool_"
+  },
+  {
+    "probe": "sy_stats",
+    "run": 3,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"total_requests\":15,\"total_errors\":0,\"total_tokens\":{\"prompt\":15,\"completion\":15,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":30},\"models\":{\"captured-model\":{\"calls\":15,\"errors\":0,\"request_pct\":100.0,\"prompt_tokens\":15,\"max_observed_context_tokens\":2,\"completion_tokens\":15,\"total_tokens\":30,\"token_pct\":100.0,\"cached_tokens\":0,\"cache_creation_tokens\":0,\"reasoning_tokens\":0,\"avg_prompt_tokens\":1.0,\"avg_completion_tokens\":1.0,\"cache_hit_rate\":0.0,\"theoretical_cache_hit_rate\":0.0,\"model_call"
+  },
+  {
+    "probe": "ll_control",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_auth",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_goog",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_azure",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_org",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_default_headers_auth",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_headers_auth",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_organization",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_openai_organization",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_api_key_body",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_body_api_key",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_body_api_base",
+    "run": 4,
+    "status": 500,
+    "client_hits": [],
+    "client_body_prefix": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+  },
+  {
+    "probe": "ll_aws_session_token",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_down_chat",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-mock\",\"created\":0,\"model\":\"down\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"pong\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_control",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_header_x_goog",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_json_organization",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_json_api_key",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_json_extra_headers",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_down_health",
+    "run": 4,
+    "status": 200,
+    "client_hits": [
+      "CANARY_DOWN_X_GOOG"
+    ],
+    "client_body_prefix": "{\"healthy_endpoints\":[{\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/downmodel\",\"extra_headers\":{\"x-goog-api-key\":\"CANARY_DOWN_X_GOOG\"},\"max_tokens\":16,\"cache\":{\"no-cache\":true},\"model_id\":\"09d84e1c66d49076c49d246b359cc4df8ff1aba01e00e4e791ccf4c84322f419\"}],\"unhealthy_endpoints\":[],\"healthy_count\":1,\"unhealthy_count\":0}"
+  },
+  {
+    "probe": "ll_down_model_info",
+    "run": 4,
+    "status": 200,
+    "client_hits": [
+      "CANARY_DOWN_QUERY_KEY"
+    ],
+    "client_body_prefix": "{\"data\":[{\"model_name\":\"down\",\"litellm_params\":{\"api_base\":\"http://127.0.0.1:19999/v1?key=CANARY_DOWN_QUERY_KEY\",\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/downmodel\",\"extra_headers\":{\"x-goog-api-key\":\"CANA**********GOOG\"}},\"model_info\":{\"id\":\"09d84e1c66d49076c49d246b359cc4df8ff1aba01e00e4e791ccf4c84322f419\",\"db_model\":false,\"key\":\"openai/downmodel\",\"max_tokens\":null,\"max_input_tokens\":null,\"max_output_to"
+  },
+  {
+    "probe": "ll_down_models",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"data\":[{\"id\":\"down\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"}],\"object\":\"list\"}"
+  },
+  {
+    "probe": "ll_down_liveliness",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "\"I'm alive!\""
+  },
+  {
+    "probe": "ll_credentials",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"success\":true,\"credentials\":[]}"
+  },
+  {
+    "probe": "sy_health",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"status\":\"ok\"}"
+  },
+  {
+    "probe": "sy_models",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"data\":[{\"capabilities\":{\"context_window\":null,\"streaming\":true,\"supported_inbound_formats\":[\"openai-chat-completions\",\"openai-responses\",\"anthropic-messages\"],\"tool_calling\":null},\"created\":0,\"display_name\":\"captured-model\",\"id\":\"captured-model\",\"object\":\"model\",\"owned_by\":\"switchyard\",\"type\":\"model\"}],\"default_model\":\"captured-model\",\"first_id\":\"captured-model\",\"has_more\":false,\"last_id\":\"captured-model\",\"model_pool\":[\"captured-model\"],\"models\":[{\"additional_speed_tiers\":[],\"apply_patch_tool_"
+  },
+  {
+    "probe": "sy_stats",
+    "run": 4,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"total_requests\":20,\"total_errors\":0,\"total_tokens\":{\"prompt\":20,\"completion\":20,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":40},\"models\":{\"captured-model\":{\"calls\":20,\"errors\":0,\"request_pct\":100.0,\"prompt_tokens\":20,\"max_observed_context_tokens\":2,\"completion_tokens\":20,\"total_tokens\":40,\"token_pct\":100.0,\"cached_tokens\":0,\"cache_creation_tokens\":0,\"reasoning_tokens\":0,\"avg_prompt_tokens\":1.0,\"avg_completion_tokens\":1.0,\"cache_hit_rate\":0.0,\"theoretical_cache_hit_rate\":0.0,\"model_call"
+  },
+  {
+    "probe": "ll_control",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_auth",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_goog",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_azure",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_headers_org",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_default_headers_auth",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_headers_auth",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_organization",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_openai_organization",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_api_key_body",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_body_api_key",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_extra_body_api_base",
+    "run": 5,
+    "status": 500,
+    "client_hits": [],
+    "client_body_prefix": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+  },
+  {
+    "probe": "ll_aws_session_token",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_down_chat",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"id\":\"chatcmpl-mock\",\"created\":0,\"model\":\"down\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"pong\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_control",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_header_x_goog",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_json_organization",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_json_api_key",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "sy_json_extra_headers",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+  },
+  {
+    "probe": "ll_down_health",
+    "run": 5,
+    "status": 200,
+    "client_hits": [
+      "CANARY_DOWN_X_GOOG"
+    ],
+    "client_body_prefix": "{\"healthy_endpoints\":[{\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/downmodel\",\"extra_headers\":{\"x-goog-api-key\":\"CANARY_DOWN_X_GOOG\"},\"max_tokens\":16,\"cache\":{\"no-cache\":true},\"model_id\":\"09d84e1c66d49076c49d246b359cc4df8ff1aba01e00e4e791ccf4c84322f419\"}],\"unhealthy_endpoints\":[],\"healthy_count\":1,\"unhealthy_count\":0}"
+  },
+  {
+    "probe": "ll_down_model_info",
+    "run": 5,
+    "status": 200,
+    "client_hits": [
+      "CANARY_DOWN_QUERY_KEY"
+    ],
+    "client_body_prefix": "{\"data\":[{\"model_name\":\"down\",\"litellm_params\":{\"api_base\":\"http://127.0.0.1:19999/v1?key=CANARY_DOWN_QUERY_KEY\",\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/downmodel\",\"extra_headers\":{\"x-goog-api-key\":\"CANA**********GOOG\"}},\"model_info\":{\"id\":\"09d84e1c66d49076c49d246b359cc4df8ff1aba01e00e4e791ccf4c84322f419\",\"db_model\":false,\"key\":\"openai/downmodel\",\"max_tokens\":null,\"max_input_tokens\":null,\"max_output_to"
+  },
+  {
+    "probe": "ll_down_models",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"data\":[{\"id\":\"down\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"}],\"object\":\"list\"}"
+  },
+  {
+    "probe": "ll_down_liveliness",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "\"I'm alive!\""
+  },
+  {
+    "probe": "ll_credentials",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"success\":true,\"credentials\":[]}"
+  },
+  {
+    "probe": "sy_health",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"status\":\"ok\"}"
+  },
+  {
+    "probe": "sy_models",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"data\":[{\"capabilities\":{\"context_window\":null,\"streaming\":true,\"supported_inbound_formats\":[\"openai-chat-completions\",\"openai-responses\",\"anthropic-messages\"],\"tool_calling\":null},\"created\":0,\"display_name\":\"captured-model\",\"id\":\"captured-model\",\"object\":\"model\",\"owned_by\":\"switchyard\",\"type\":\"model\"}],\"default_model\":\"captured-model\",\"first_id\":\"captured-model\",\"has_more\":false,\"last_id\":\"captured-model\",\"model_pool\":[\"captured-model\"],\"models\":[{\"additional_speed_tiers\":[],\"apply_patch_tool_"
+  },
+  {
+    "probe": "sy_stats",
+    "run": 5,
+    "status": 200,
+    "client_hits": [],
+    "client_body_prefix": "{\"total_requests\":25,\"total_errors\":0,\"total_tokens\":{\"prompt\":25,\"completion\":25,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":50},\"models\":{\"captured-model\":{\"calls\":25,\"errors\":0,\"request_pct\":100.0,\"prompt_tokens\":25,\"max_observed_context_tokens\":2,\"completion_tokens\":25,\"total_tokens\":50,\"token_pct\":100.0,\"cached_tokens\":0,\"cache_creation_tokens\":0,\"reasoning_tokens\":0,\"avg_prompt_tokens\":1.0,\"avg_completion_tokens\":1.0,\"cache_hit_rate\":0.0,\"theoretical_cache_hit_rate\":0.0,\"model_call"
+  }
+]
