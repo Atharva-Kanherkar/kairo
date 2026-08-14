@@ -9,7 +9,7 @@ use kairo::checks::{
     anthropic_toolcall_stop_reason, content_filter_preserved, document_body_forwarded,
     is_error_forwarded, no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
     non_text_block_not_json_dumped, openai_stream_finish_reason, openai_toolcall_id_charset,
-    parallel_tool_disable_preserved, reasoning_text_order_preserved,
+    parallel_tool_disable_preserved, reasoning_text_order_preserved, response_omits_secret,
     thinking_not_leaked_as_visible_text, thinking_text_forwarded, upstream_bearer_is,
     upstream_omits_header_value, Verdict,
 };
@@ -351,5 +351,112 @@ fn switchyard_strips_reserved_x_api_key() {
         v,
         Verdict::Conformant,
         "reserved x-api-key should still be stripped: {v:?}"
+    );
+}
+
+// ---- bug 024: LiteLLM GET /health returns extra_headers and aws_session_token ----
+
+#[test]
+fn litellm_health_leaks_extra_headers() {
+    let v = response_omits_secret(
+        &fixture("transcripts/024/health.json"),
+        "CANARY_EXTRA_HEADERS_AUTHORIZATION",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "GET /health must be caught returning extra_headers.Authorization: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_health_leaks_aws_session_token() {
+    let v = response_omits_secret(
+        &fixture("transcripts/024/health.json"),
+        "CANARY_AWS_SESSION_TOKEN_VALUE",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "GET /health must be caught returning aws_session_token: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_models_control_omits_health_secrets() {
+    let body = fixture("transcripts/024/models-control.json");
+    assert_eq!(
+        response_omits_secret(&body, "CANARY_EXTRA_HEADERS_AUTHORIZATION"),
+        Verdict::Conformant,
+        "/v1/models must not grow extra_headers"
+    );
+    assert_eq!(
+        response_omits_secret(&body, "CANARY_AWS_SESSION_TOKEN_VALUE"),
+        Verdict::Conformant,
+        "/v1/models must not grow aws_session_token"
+    );
+}
+
+#[test]
+fn litellm_chat_control_omits_health_secrets() {
+    let v = response_omits_secret(
+        &fixture("transcripts/024/chat-control.json"),
+        "CANARY_EXTRA_HEADERS_AUTHORIZATION",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "a chat completion must not echo deployment extra_headers: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_liveliness_control_omits_health_secrets() {
+    let v = response_omits_secret(
+        &fixture("transcripts/024/liveliness-control.json"),
+        "CANARY_EXTRA_HEADERS_AUTHORIZATION",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "/health/liveliness must stay a boolean alive probe: {v:?}"
+    );
+}
+
+// ---- bug 025: Switchyard transport errors echo ?key= from base_url ----
+
+#[test]
+fn switchyard_transport_error_leaks_query_key() {
+    let v = response_omits_secret(
+        &fixture("transcripts/025/transport-query-key.json"),
+        "CANARY_ADMIN_QUERY_KEY",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "a transport 502 must be caught echoing base_url ?key=: {v:?}"
+    );
+}
+
+#[test]
+fn switchyard_transport_error_without_query_key_is_clean() {
+    let v = response_omits_secret(
+        &fixture("transcripts/025/transport-control.json"),
+        "CANARY_ADMIN_QUERY_KEY",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "a 502 whose base_url has no query key must not invent one: {v:?}"
+    );
+}
+
+#[test]
+fn switchyard_chat_control_omits_query_key() {
+    let v = response_omits_secret(
+        &fixture("transcripts/025/chat-control.json"),
+        "CANARY_ADMIN_QUERY_KEY",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "a successful chat completion must not echo a query key: {v:?}"
     );
 }

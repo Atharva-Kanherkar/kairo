@@ -1,0 +1,15 @@
+model_list:
+  - model_name: mock
+    litellm_params:
+      model: openai/mockmodel
+      api_base: http://127.0.0.1:9996/v1?key=CANARY_QUERY_KEY_IN_BASE
+      api_key: sk-x-CANARY_DEPLOYMENT_API_KEY
+      extra_headers:
+        Authorization: Bearer CANARY_EXTRA_HEADERS_AUTHORIZATION
+        x-goog-api-key: CANARY_X_GOOG_API_KEY_VALUE
+        x-custom-internal-header: CANARY_UNMASKED_HEADER_VALUE
+        api-key: CANARY_AZURE_STYLE_API_KEY
+      headers:
+        x-internal-trace: CANARY_HEADERS_FIELD_VALUE
+      openai_organization: CANARY_OPENAI_ORG_ID
+      aws_session_token: CANARY_AWS_SESSION_TOKEN_VALUE

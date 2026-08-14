@@ -1,0 +1,7 @@
+{
+    "error": {
+        "code": "upstream_error",
+        "message": "error sending request for url (http://127.0.0.1:19998/v1?key=CANARY_QUERY_KEY/chat/completions)",
+        "type": "upstream_error"
+    }
+}
