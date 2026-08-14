@@ -1,0 +1,23 @@
+{
+  "status": 200,
+  "headers": {
+    "content-type": "application/json",
+    "x-litellm-call-id": "7277fe6d-8b84-4c2a-ba51-f9ef69c7ca56",
+    "x-litellm-model-id": "0e28046ac596ab5dd5f66a54658154863ddf214b1d5ed7afc9c654c7c65be8fd",
+    "x-litellm-model-name": "openai/mockmodel",
+    "x-litellm-model-api-base": "http://127.0.0.1:9998/v1",
+    "x-litellm-version": "1.96.2",
+    "x-litellm-response-cost-original": "0.0",
+    "x-litellm-response-cost-discount-amount": "0.0",
+    "x-litellm-response-cost-margin-amount": "0.0",
+    "x-litellm-response-cost-margin-percent": "0.0",
+    "x-litellm-key-spend": "0.0",
+    "x-litellm-response-duration-ms": "2.242",
+    "x-litellm-overhead-duration-ms": "0.787",
+    "x-litellm-callback-duration-ms": "0.0",
+    "x-litellm-model-group": "mock",
+    "x-litellm-attempted-retries": "0",
+    "x-litellm-attempted-fallbacks": "0"
+  },
+  "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+}

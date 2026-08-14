@@ -1,0 +1,10 @@
+model_list:
+  - model_name: mock
+    litellm_params:
+      model: openai/mockmodel
+      api_base: http://127.0.0.1:9998/v1
+      api_key: sk-x-CANARY_DEPLOYMENT_API_KEY
+  - model_name: gemini-flash
+    litellm_params:
+      model: gemini/gemini-2.5-flash
+      api_key: os.environ/GEMINI_API_KEY

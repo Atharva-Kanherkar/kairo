@@ -569,3 +569,56 @@ fn switchyard_forwards_x_goog_api_key() {
         "client x-goog-api-key must be caught on the upstream wire: {v:?}"
     );
 }
+
+// ---- bug 028: LiteLLM /gemini pass-through copies ?key= in x-goog-upload-url ----
+
+#[test]
+fn litellm_gemini_passthrough_leaks_upload_url_key() {
+    let v = response_omits_secret(
+        &fixture("transcripts/028/pt-upload-leak.json"),
+        "CANARY_GEMINI_PASSTHROUGH_KEY",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "/gemini upload response headers must be caught echoing ?key=: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_chat_control_omits_gemini_passthrough_key() {
+    let v = response_omits_secret(
+        &fixture("transcripts/028/chat-control.json"),
+        "CANARY_GEMINI_PASSTHROUGH_KEY",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "a chat completion must not echo the pass-through query key: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_plain_upload_control_omits_gemini_passthrough_key() {
+    let v = response_omits_secret(
+        &fixture("transcripts/028/pt-upload-plain-control.json"),
+        "CANARY_GEMINI_PASSTHROUGH_KEY",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "a simple /gemini/upload without resumable headers must stay clean: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_closed_port_passthrough_omits_query_key() {
+    let v = response_omits_secret(
+        &fixture("transcripts/028/closed-port-control.json"),
+        "CANARY_CLOSED_PORT_KEY",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "a closed-port /gemini 500 must not echo ?key= the way Switchyard 025 does: {v:?}"
+    );
+}

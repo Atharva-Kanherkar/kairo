@@ -1,0 +1,78 @@
+{
+  "closed_canary_pt_generate": {
+    "n": 5,
+    "statuses": {
+      "500": 5
+    },
+    "leak_runs": 0,
+    "leak_headers": {}
+  },
+  "closed_live_pt_generate": {
+    "n": 5,
+    "statuses": {
+      "500": 5
+    },
+    "leak_runs": 0,
+    "leak_headers": {}
+  },
+  "closed_canary_pt_models": {
+    "n": 5,
+    "statuses": {
+      "500": 5
+    },
+    "leak_runs": 0,
+    "leak_headers": {}
+  },
+  "closed_live_pt_models": {
+    "n": 5,
+    "statuses": {
+      "500": 5
+    },
+    "leak_runs": 0,
+    "leak_headers": {}
+  },
+  "live_pt_upload_xpass_resumable": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "leak_runs": 5,
+    "leak_headers": {
+      "x-goog-upload-url": 5,
+      "x-goog-upload-control-url": 5
+    },
+    "leaks": [
+      "FULL:GEMINI_API_KEY"
+    ]
+  },
+  "live_pt_upload_plain": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "leak_runs": 0,
+    "leak_headers": {}
+  },
+  "direct_google_resumable": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "leak_runs": 5,
+    "leak_headers": {
+      "X-Goog-Upload-URL": 5,
+      "X-Goog-Upload-Control-URL": 5
+    },
+    "leaks": [
+      "FULL:GEMINI_API_KEY"
+    ]
+  },
+  "live_chat_control": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "leak_runs": 0,
+    "leak_headers": {}
+  }
+}

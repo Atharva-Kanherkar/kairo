@@ -1,0 +1,20 @@
+{
+  "status": 200,
+  "headers": {
+    "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+    "server": "uvicorn",
+    "content-type": "application/json",
+    "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+    "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+    "x-goog-upload-status": "active",
+    "x-litellm-call-id": "d79557d8-ed33-4654-babd-c08b324837af",
+    "x-litellm-model-api-base": "http://127.0.0.1:9996/upload/v1beta/files",
+    "x-litellm-key-spend": "0.0",
+    "content-length": "102",
+    "x-frame-options": "DENY",
+    "content-security-policy": "frame-ancestors 'none'",
+    "x-content-type-options": "nosniff",
+    "Connection": "close"
+  },
+  "body": "{\"ok\": true, \"echo_path\": \"/upload/v1beta/files\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}"
+}

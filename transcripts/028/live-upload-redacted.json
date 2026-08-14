@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "leaks": [
+    "FULL:GEMINI_API_KEY"
+  ],
+  "headers": {
+    "x-guploader-uploadid": "AKhXX7JuyHZCAmsfPRFtEpWbjA_Dtmdfa3uv2J4vKhHnuhpyIzH8jyz8o96XMf117-BLzNX1MgFQN5w8bQVZTreG9giOBIR8q_exRSxEVDVA_ss",
+    "x-goog-upload-status": "active",
+    "x-goog-upload-url": "https://generativelanguage.googleapis.com/upload/v1beta/files?key=REDACTED_GEMINI_API_KEY&upload_id=AKhXX7JuyHZCAmsfPRFtEpWbjA_Dtmdfa3uv2J4vKhHnuhpyIzH8jyz8o96XMf117-BLzNX1MgFQN5w8bQVZTreG9giOBIR8q_exRSxEVDVA_ss&upload_protocol=resumable",
+    "x-goog-upload-control-url": "https://generativelanguage.googleapis.com/upload/v1beta/files?key=REDACTED_GEMINI_API_KEY&upload_id=AKhXX7JuyHZCAmsfPRFtEpWbjA_Dtmdfa3uv2J4vKhHnuhpyIzH8jyz8o96XMf117-BLzNX1MgFQN5w8bQVZTreG9giOBIR8q_exRSxEVDVA_ss&upload_protocol=resumable",
+    "x-goog-upload-chunk-granularity": "8388608",
+    "x-goog-upload-header-x-google-esf-cloud-client-params": "backend_service_name: \"generativelanguage.googleapis.com\" backend_fully_qualified_method: \"google.ai.generativelanguage.v1beta.FileService.CreateFile\"",
+    "x-goog-upload-header-x-google-session-info": "GgQYECgLIAE6IxIhZ2VuZXJhdGl2ZWxhbmd1YWdlLmdvb2dsZWFwaXMuY29t",
+    "x-goog-upload-header-x-google-backends": "unix:/tmp/esfbackend.1786560216.858262.1301630",
+    "x-goog-upload-header-content-type": "application/json; charset=UTF-8",
+    "x-goog-upload-header-x-google-security-signals": "FRAMEWORK=ONE_PLATFORM,ENV=borg,ENV_DEBUG=borg_user:genai-api;borg_job:prod.genai-api",
+    "x-goog-upload-header-vary": "Origin, X-Origin, Referer",
+    "x-goog-upload-header-x-google-gfe-backend-request-cost": "44.6397",
+    "x-litellm-model-api-base": "https://generativelanguage.googleapis.com/upload/v1beta/files"
+  },
+  "body": ""
+}

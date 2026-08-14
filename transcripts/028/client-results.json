@@ -1,0 +1,2667 @@
+[
+  {
+    "probe": "ll_get_health",
+    "run": 1,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"healthy_endpoints\":[{\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/mockmodel\",\"max_tokens\":16,\"cache\":{\"no-cache\":true},\"model_id\":\"0e28046ac596ab5dd5f66a54658154863ddf214b1d5ed7afc9c654c7c65be8fd\"}],\"unhealthy_endpoints\":[{\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"gemini/gemini-2.5-flash\",\"max_tokens\":16,\"cache\":{\"no-cache\":true},\"error\":\"litellm.APIConnectionError: GeminiException - Error converting to valid response block=usageMetadata not found in completion_response. Got={'ok': True, 'echo_path': '/models/gemini-2.5-flash:generateContent', 'echo_key_in_body': ''}. File an issue if litellm error - https://github.com/BerriAI/litellm/issues\\nstack trace: Traceback (most recent call last):\\n  File \\\"/Users/atharva/kairo/tools/litellm-env/lib/python3.13/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py\\\", line 2472, in _transform_google_generate_content_to_openai_model_response\\n    usage = VertexGeminiConfig._calculate_usage(completion_response=completion_response)\\n  File \\\"",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "2351",
+      "content-type": "application/json",
+      "litellm-health-field-notice": "api_base and api_version are admin-only on this endpoint",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_health_liveliness",
+    "run": 1,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "\"I'm alive!\"",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "12",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_health_readiness",
+    "run": 1,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"status\":\"healthy\",\"db\":\"Not connected\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "41",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_v1_models",
+    "run": 1,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"data\":[{\"id\":\"mock\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"},{\"id\":\"gemini-flash\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"}],\"object\":\"list\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "178",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_model_info",
+    "run": 1,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"data\":[{\"model_name\":\"mock\",\"litellm_params\":{\"api_base\":\"http://127.0.0.1:9998/v1\",\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/mockmodel\"},\"model_info\":{\"id\":\"0e28046ac596ab5dd5f66a54658154863ddf214b1d5ed7afc9c654c7c65be8fd\",\"db_model\":false,\"key\":\"openai/mockmodel\",\"max_tokens\":null,\"max_input_tokens\":null,\"max_output_tokens\":null,\"input_cost_per_token\":0,\"input_cost_per_token_flex\":null,\"input_cost_per_token_priority\":null,\"cache_creation_input_token_cost\":null,\"cache_creation_input_token_cost_above_200k_tokens\":null,\"cache_creation_input_token_cost_above_272k_tokens\":null,\"cache_creation_input_token_cost_above_272k_tokens_priority\":null,\"cache_creation_input_token_cost_above_272k_tokens_flex\":null,\"cache_creation_input_token_cost_flex\":null,\"cache_creation_input_token_cost_priority\":null,\"cache_read_input_token_cost\":null,\"prompt_cache_min_tokens\":null,\"cache_read_input_token_cost_above_200k_tokens\":null,\"cache_read_input_token_cost_above_200k_tokens_priority\":null,\"cache_read_input_token_cost_above_272k_tokens\":null,\"cache_read_input_token_cost_above_272k_tokens_priority\":null,\"cache_r",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "9548",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_settings",
+    "run": 1,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"alerting\":\"None\",\"litellm.callbacks\":[\"<litellm.proxy.hooks.litellm_skills.main.SkillsInjectionHook object at 0x117daf770>\",\"<litellm.proxy.hooks.model_max_budget_limiter._PROXY_VirtualKeyModelMaxBudgetLimiter object at 0x11975fb60>\",\"<litellm.proxy.hooks.max_budget_limiter._PROXY_MaxBudgetLimiter object at 0x11a885950>\",\"<litellm.proxy.hooks.parallel_request_limiter_v3._PROXY_MaxParallelRequestsHandler_v3 object at 0x11a8f8050>\",\"<litellm.proxy.hooks.cache_control_check._PROXY_CacheControlCheck object at 0x11a885810>\",\"<litellm.proxy.hooks.responses_id_security.ResponsesIDSecurity object at 0x11a8f81a0>\",\"<litellm.proxy.hooks.max_iterations_limiter._PROXY_MaxIterationsHandler object at 0x11a8f82f0>\",\"<litellm.proxy.hooks.max_budget_per_session_limiter._PROXY_MaxBudgetPerSessionHandler object at 0x11a8f8440>\",\"<litellm.proxy.hooks.sensitive_data_routing._PROXY_SensitiveDataRoutingHandler object at 0x11a8f8590>\",\"<litellm._service_logger.ServiceLogging object at 0x11973fa80>\"],\"litellm.input_callback\":[\"cache\"],\"litellm.failure_callback\":[\"<bound method Router.deployment_callback_on_failure of <litellm.router.Router object at 0x11a812cf0>>\",\"<litellm.proxy.hooks.litellm_skills.mai",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "10750",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_metrics",
+    "run": 1,
+    "status": 404,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"detail\":\"Not Found\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "22",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_key_info",
+    "run": 1,
+    "status": 500,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"error\":{\"message\":\"Database not connected. Connect a database to your proxy - https://docs.litellm.ai/docs/simple_proxy#managing-auth---virtual-keys\",\"type\":\"internal_server_error\",\"param\":\"None\",\"code\":\"500\"}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "212",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_spend_logs",
+    "run": 1,
+    "status": 500,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"error\":{\"message\":\"/spend/logs ErrorDatabase not connected. Connect a database to your proxy - https://docs.litellm.ai/docs/simple_proxy#managing-auth---virtual-keys\",\"type\":\"internal_error\",\"param\":\"None\",\"code\":\"500\"}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "222",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_config_yaml",
+    "run": 1,
+    "status": 422,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\"],\"msg\":\"Field required\",\"input\":null}]}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "82",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_routes",
+    "run": 1,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"routes\":[{\"path\":\"/openapi.json\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"openapi\",\"endpoint\":\"openapi\"},{\"path\":\"/\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"swagger_ui_html\",\"endpoint\":\"swagger_ui_html\"},{\"path\":\"/docs/oauth2-redirect\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"swagger_ui_redirect\",\"endpoint\":\"swagger_ui_redirect\"},{\"path\":\"/redoc\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"redoc_html\",\"endpoint\":\"redoc_html\"},{\"path\":\"/vertex_ai/live\",\"methods\":null,\"name\":\"vertex_ai_live_passthrough_endpoint\",\"endpoint\":\"vertex_ai_live_passthrough_endpoint\"},{\"path\":\"/realtime\",\"methods\":null,\"name\":\"realtime_websocket_endpoint\",\"endpoint\":\"realtime_websocket_endpoint\"},{\"path\":\"/v1/realtime\",\"methods\":null,\"name\":\"realtime_websocket_endpoint\",\"endpoint\":\"realtime_websocket_endpoint\"},{\"path\":\"/openai/v1/realtime\",\"methods\":null,\"name\":\"realtime_websocket_endpoint\",\"endpoint\":\"realtime_websocket_endpoint\"},{\"path\":\"/fallback/login\",\"methods\":[\"GET\"],\"name\":\"fallback_login\",\"endpoint\":\"fallback_login\"},{\"path\":\"/onboarding/get_token\",\"methods\":[\"GET\"],\"name\":\"onboarding\",\"endpoint\":\"onboarding\"},{\"path\":\"/onboarding/claim_token\",\"methods\":[\"POST\"],\"name\":\"claim_onboarding_link\",\"endpoint\":\"claim_onboarding_link\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "57192",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_debug_asyncio-tasks",
+    "run": 1,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"total_active_tasks\":7,\"by_name\":{\"RequestResponseCycle.run_asgi\":1,\"SlackAlerting._run_scheduled_daily_report\":1,\"AlertingHangingRequestCheck.check_for_hanging_requests\":1,\"LifespanOn.main\":1,\"_adaptive_router_flusher_loop\":1,\"Server.serve\":1,\"LoggingWorker._worker_loop\":1}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "277",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_debug_memory_summary",
+    "run": 1,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"worker_pid\":84129,\"status\":\"healthy\",\"memory\":{\"error\":\"Install psutil for memory monitoring: pip install psutil\"},\"caches\":{\"total_items\":2,\"breakdown\":{\"user_api_keys\":{\"count\":0,\"count_readable\":\"0\",\"what_it_stores\":\"Validated API keys for faster authentication\"},\"llm_responses\":{\"count\":0,\"count_readable\":\"0\",\"what_it_stores\":\"LLM responses for identical requests\"},\"usage_tracking\":{\"count\":2,\"count_readable\":\"2\",\"what_it_stores\":\"Usage metrics before database write\"}}},\"garbage_collector\":{\"status\":\"enabled\",\"objects_awaiting_collection\":122}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "556",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_utils_supported_openai_params?model=mock",
+    "run": 1,
+    "status": 400,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"detail\":{\"error\":\"Could not map model=mock\"}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "47",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_chat_control",
+    "run": 1,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "309",
+      "content-type": "application/json",
+      "x-litellm-call-id": "7277fe6d-8b84-4c2a-ba51-f9ef69c7ca56",
+      "x-litellm-model-id": "0e28046ac596ab5dd5f66a54658154863ddf214b1d5ed7afc9c654c7c65be8fd",
+      "x-litellm-model-name": "openai/mockmodel",
+      "x-litellm-model-api-base": "http://127.0.0.1:9998/v1",
+      "x-litellm-version": "1.96.2",
+      "x-litellm-response-cost-original": "0.0",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-key-spend": "0.0",
+      "x-litellm-response-duration-ms": "2.242",
+      "x-litellm-overhead-duration-ms": "0.787",
+      "x-litellm-callback-duration-ms": "0.0",
+      "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+      "llm_provider-date": "Fri, 14 Aug 2026 14:24:22 GMT",
+      "llm_provider-content-type": "application/json",
+      "llm_provider-content-length": "263",
+      "x-litellm-model-group": "mock",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_chat_bad_model",
+    "run": 1,
+    "status": 400,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"error\":{\"message\":\"/chat/completions: Invalid model name passed in model=does-not-exist-canary. Call `/v1/models` to view available models for your key.\",\"type\":\"None\",\"param\":\"None\",\"code\":\"400\",\"provider_specific_fields\":{\"error\":\"/chat/completions: Invalid model name passed in model=does-not-exist-canary. Call `/v1/models` to view available models for your key.\"}}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "x-litellm-call-id": "70ea1b86-c66b-436b-b4ca-ebb1c6b60012",
+      "x-litellm-response-cost": "0",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "372",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_transform_request",
+    "run": 1,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"raw_request_api_base\":\"http://127.0.0.1:9996/models/gemini-2.5-flash:generateContent\",\"raw_request_body\":{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"ping\"}]}]},\"raw_request_headers\":{\"Content-Type\":\"application/json\",\"x-goog-api-key\":\"my****ey\"},\"error\":null}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "263",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_gemini_pt_generate",
+    "run": 1,
+    "status": 200,
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ],
+    "hit_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "body": "{\"ok\": true, \"echo_path\": \"/v1beta/models/gemini-2.5-flash:generateContent\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "f4ea8206-1179-4356-ba09-677fa1e8076c",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/v1beta/models/gemini-2.5-flash:generateContent",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "129",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_gemini_pt_upload",
+    "run": 1,
+    "status": 200,
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ],
+    "hit_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "body": "{\"ok\": true, \"echo_path\": \"/upload/v1beta/files\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "d79557d8-ed33-4654-babd-c08b324837af",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/upload/v1beta/files",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "102",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_gemini_pt_models",
+    "run": 1,
+    "status": 200,
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ],
+    "hit_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "body": "{\"ok\": true, \"echo_path\": \"/v1beta/models\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "13001268-ccee-48f3-b7e3-a57de2d21313",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/v1beta/models",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "96",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_anthropic_pt",
+    "run": 1,
+    "status": 401,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Ce2nyCdhB8YPmuQG9bsST\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "x-should-retry": "false",
+      "request-id": "req_011Ce2nyCdhB8YPmuQG9bsST",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "vary": "Accept-Encoding",
+      "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+      "cf-cache-status": "DYNAMIC",
+      "x-robots-tag": "none",
+      "cf-ray": "a2b09f6d6c79ffa5-BOM",
+      "x-litellm-call-id": "8319578e-527b-477a-9377-a5e1d05ce67e",
+      "x-litellm-model-api-base": "https://api.anthropic.com/v1/messages",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "130",
+      "x-frame-options": "DENY",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "sy_get_health",
+    "run": 1,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"status\":\"ok\"}",
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "15",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:22 GMT"
+    }
+  },
+  {
+    "probe": "sy_get_v1_models",
+    "run": 1,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"data\":[{\"capabilities\":{\"context_window\":null,\"streaming\":true,\"supported_inbound_formats\":[\"openai-chat-completions\",\"openai-responses\",\"anthropic-messages\"],\"tool_calling\":null},\"created\":0,\"display_name\":\"captured-model\",\"id\":\"captured-model\",\"object\":\"model\",\"owned_by\":\"switchyard\",\"type\":\"model\"}],\"default_model\":\"captured-model\",\"first_id\":\"captured-model\",\"has_more\":false,\"last_id\":\"captured-model\",\"model_pool\":[\"captured-model\"],\"models\":[{\"additional_speed_tiers\":[],\"apply_patch_tool_type\":\"freeform\",\"availability_nux\":null,\"base_instructions\":\"You are Codex, a coding agent.\",\"context_window\":null,\"default_reasoning_level\":null,\"default_reasoning_summary\":\"none\",\"default_verbosity\":null,\"description\":\"Switchyard-routed model.\",\"display_name\":\"captured-model\",\"effective_context_window_percent\":95,\"experimental_supported_tools\":[],\"input_modalities\":[\"text\"],\"max_context_window\":null,\"priority\":0,\"shell_type\":\"shell_command\",\"slug\":\"captured-model\",\"support_verbosity\":false,\"supported_in_api\":true,\"supported_reasoning_levels\":[],\"supports_image_detail_original\":false,\"supports_parallel_tool_calls\":true,\"supports_reasoning_summaries\":false,\"supports_search_tool\":false,\"trun",
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "1330",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:22 GMT"
+    }
+  },
+  {
+    "probe": "sy_get_v1_stats",
+    "run": 1,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"total_requests\":0,\"total_errors\":0,\"total_tokens\":{\"prompt\":0,\"completion\":0,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":0},\"models\":{},\"routing_overhead\":{\"count\":0,\"total_ms\":0.0,\"min_ms\":0.0,\"max_ms\":0.0,\"avg_ms\":0.0,\"p50_ms\":0.0,\"p99_ms\":0.0},\"routing_fallbacks\":{\"context_window\":0,\"unavailable\":0},\"classifier\":{\"total_requests\":0,\"total_errors\":0,\"total_tokens\":{\"prompt\":0,\"completion\":0,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":0},\"models\":{}},\"algorithm_stats\":{}}",
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "495",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:22 GMT"
+    }
+  },
+  {
+    "probe": "sy_get_metrics",
+    "run": 1,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "# TYPE switchyard_build_info gauge\nswitchyard_build_info{version=\"0.2.0\",otel_scope_name=\"switchyard\"} 1\n# TYPE switchyard_client_responses_total counter\nswitchyard_client_responses_total{outcome=\"other_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"success\",otel_scope_name=\"switchyard\"} 0\n# TYPE switchyard_router_retry_recovered_total counter\nswitchyard_router_retry_recovered_total{otel_scope_name=\"switchyard\"} 0\n# TYPE switchyard_total_errors gauge\nswitchyard_total_errors{otel_scope_name=\"switchyard\"} 0\n# TYPE switchyard_total_requests gauge\nswitchyard_total_requests{otel_scope_name=\"switchyard\"} 0\n# TYPE switchyard_upstream_attempts_total counter\nswitchyard_upstream_attempts_total{code=\"200\",outcome=\"success\",otel_scope_name=\"switchyard\"} 0\nswitchyard_upstream_attempts_total{code=\"404\",outcome=\"other_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_upstream_attempts_total{code=\"429\",outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_upstream_attempts_total{code=\"500\",outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_",
+    "headers": {
+      "content-type": "text/plain; version=0.0.4; charset=utf-8",
+      "content-length": "1602",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:22 GMT"
+    }
+  },
+  {
+    "probe": "sy_chat_control",
+    "run": 1,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}",
+    "headers": {
+      "content-type": "application/json",
+      "x-model-router-selected-model": "captured-model",
+      "x-model-router-rationale": "passthrough selected target 'captured-model'",
+      "content-length": "245",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:22 GMT"
+    }
+  },
+  {
+    "probe": "sy_header_x_amz_security_token",
+    "run": 1,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}",
+    "headers": {
+      "content-type": "application/json",
+      "x-model-router-selected-model": "captured-model",
+      "x-model-router-rationale": "passthrough selected target 'captured-model'",
+      "content-length": "245",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:22 GMT"
+    }
+  },
+  {
+    "probe": "ll_get_health",
+    "run": 2,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"healthy_endpoints\":[{\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/mockmodel\",\"max_tokens\":16,\"cache\":{\"no-cache\":true},\"model_id\":\"0e28046ac596ab5dd5f66a54658154863ddf214b1d5ed7afc9c654c7c65be8fd\"}],\"unhealthy_endpoints\":[{\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"gemini/gemini-2.5-flash\",\"max_tokens\":16,\"cache\":{\"no-cache\":true},\"error\":\"litellm.APIConnectionError: GeminiException - Error converting to valid response block=usageMetadata not found in completion_response. Got={'ok': True, 'echo_path': '/models/gemini-2.5-flash:generateContent', 'echo_key_in_body': ''}. File an issue if litellm error - https://github.com/BerriAI/litellm/issues\\nstack trace: Traceback (most recent call last):\\n  File \\\"/Users/atharva/kairo/tools/litellm-env/lib/python3.13/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py\\\", line 2472, in _transform_google_generate_content_to_openai_model_response\\n    usage = VertexGeminiConfig._calculate_usage(completion_response=completion_response)\\n  File \\\"",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "2345",
+      "content-type": "application/json",
+      "litellm-health-field-notice": "api_base and api_version are admin-only on this endpoint",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_health_liveliness",
+    "run": 2,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "\"I'm alive!\"",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "12",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_health_readiness",
+    "run": 2,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"status\":\"healthy\",\"db\":\"Not connected\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "41",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_v1_models",
+    "run": 2,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"data\":[{\"id\":\"mock\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"},{\"id\":\"gemini-flash\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"}],\"object\":\"list\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "178",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_model_info",
+    "run": 2,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"data\":[{\"model_name\":\"mock\",\"litellm_params\":{\"api_base\":\"http://127.0.0.1:9998/v1\",\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/mockmodel\"},\"model_info\":{\"id\":\"0e28046ac596ab5dd5f66a54658154863ddf214b1d5ed7afc9c654c7c65be8fd\",\"db_model\":false,\"key\":\"openai/mockmodel\",\"max_tokens\":null,\"max_input_tokens\":null,\"max_output_tokens\":null,\"input_cost_per_token\":0,\"input_cost_per_token_flex\":null,\"input_cost_per_token_priority\":null,\"cache_creation_input_token_cost\":null,\"cache_creation_input_token_cost_above_200k_tokens\":null,\"cache_creation_input_token_cost_above_272k_tokens\":null,\"cache_creation_input_token_cost_above_272k_tokens_priority\":null,\"cache_creation_input_token_cost_above_272k_tokens_flex\":null,\"cache_creation_input_token_cost_flex\":null,\"cache_creation_input_token_cost_priority\":null,\"cache_read_input_token_cost\":null,\"prompt_cache_min_tokens\":null,\"cache_read_input_token_cost_above_200k_tokens\":null,\"cache_read_input_token_cost_above_200k_tokens_priority\":null,\"cache_read_input_token_cost_above_272k_tokens\":null,\"cache_read_input_token_cost_above_272k_tokens_priority\":null,\"cache_r",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "9710",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_settings",
+    "run": 2,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"alerting\":\"None\",\"litellm.callbacks\":[\"<litellm.proxy.hooks.litellm_skills.main.SkillsInjectionHook object at 0x117daf770>\",\"<litellm.proxy.hooks.model_max_budget_limiter._PROXY_VirtualKeyModelMaxBudgetLimiter object at 0x11975fb60>\",\"<litellm.proxy.hooks.max_budget_limiter._PROXY_MaxBudgetLimiter object at 0x11a885950>\",\"<litellm.proxy.hooks.parallel_request_limiter_v3._PROXY_MaxParallelRequestsHandler_v3 object at 0x11a8f8050>\",\"<litellm.proxy.hooks.cache_control_check._PROXY_CacheControlCheck object at 0x11a885810>\",\"<litellm.proxy.hooks.responses_id_security.ResponsesIDSecurity object at 0x11a8f81a0>\",\"<litellm.proxy.hooks.max_iterations_limiter._PROXY_MaxIterationsHandler object at 0x11a8f82f0>\",\"<litellm.proxy.hooks.max_budget_per_session_limiter._PROXY_MaxBudgetPerSessionHandler object at 0x11a8f8440>\",\"<litellm.proxy.hooks.sensitive_data_routing._PROXY_SensitiveDataRoutingHandler object at 0x11a8f8590>\",\"<litellm._service_logger.ServiceLogging object at 0x11973fa80>\"],\"litellm.input_callback\":[\"cache\",\"<litellm.proxy.hooks.litellm_skills.main.SkillsInjectionHook object at 0x117daf770>\",\"<litellm.proxy.hooks.model_max_budget_limiter._PROXY_VirtualKeyModelMaxBudgetLimiter o",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "12654",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_metrics",
+    "run": 2,
+    "status": 404,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"detail\":\"Not Found\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "22",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_key_info",
+    "run": 2,
+    "status": 500,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"error\":{\"message\":\"Database not connected. Connect a database to your proxy - https://docs.litellm.ai/docs/simple_proxy#managing-auth---virtual-keys\",\"type\":\"internal_server_error\",\"param\":\"None\",\"code\":\"500\"}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "212",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_spend_logs",
+    "run": 2,
+    "status": 500,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"error\":{\"message\":\"/spend/logs ErrorDatabase not connected. Connect a database to your proxy - https://docs.litellm.ai/docs/simple_proxy#managing-auth---virtual-keys\",\"type\":\"internal_error\",\"param\":\"None\",\"code\":\"500\"}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "222",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_config_yaml",
+    "run": 2,
+    "status": 422,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\"],\"msg\":\"Field required\",\"input\":null}]}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "82",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_routes",
+    "run": 2,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"routes\":[{\"path\":\"/openapi.json\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"openapi\",\"endpoint\":\"openapi\"},{\"path\":\"/\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"swagger_ui_html\",\"endpoint\":\"swagger_ui_html\"},{\"path\":\"/docs/oauth2-redirect\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"swagger_ui_redirect\",\"endpoint\":\"swagger_ui_redirect\"},{\"path\":\"/redoc\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"redoc_html\",\"endpoint\":\"redoc_html\"},{\"path\":\"/vertex_ai/live\",\"methods\":null,\"name\":\"vertex_ai_live_passthrough_endpoint\",\"endpoint\":\"vertex_ai_live_passthrough_endpoint\"},{\"path\":\"/realtime\",\"methods\":null,\"name\":\"realtime_websocket_endpoint\",\"endpoint\":\"realtime_websocket_endpoint\"},{\"path\":\"/v1/realtime\",\"methods\":null,\"name\":\"realtime_websocket_endpoint\",\"endpoint\":\"realtime_websocket_endpoint\"},{\"path\":\"/openai/v1/realtime\",\"methods\":null,\"name\":\"realtime_websocket_endpoint\",\"endpoint\":\"realtime_websocket_endpoint\"},{\"path\":\"/fallback/login\",\"methods\":[\"GET\"],\"name\":\"fallback_login\",\"endpoint\":\"fallback_login\"},{\"path\":\"/onboarding/get_token\",\"methods\":[\"GET\"],\"name\":\"onboarding\",\"endpoint\":\"onboarding\"},{\"path\":\"/onboarding/claim_token\",\"methods\":[\"POST\"],\"name\":\"claim_onboarding_link\",\"endpoint\":\"claim_onboarding_link\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "57516",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_debug_asyncio-tasks",
+    "run": 2,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"total_active_tasks\":7,\"by_name\":{\"SlackAlerting._run_scheduled_daily_report\":1,\"AlertingHangingRequestCheck.check_for_hanging_requests\":1,\"RequestResponseCycle.run_asgi\":1,\"_adaptive_router_flusher_loop\":1,\"LifespanOn.main\":1,\"LoggingWorker._worker_loop\":1,\"Server.serve\":1}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "277",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_debug_memory_summary",
+    "run": 2,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"worker_pid\":84129,\"status\":\"healthy\",\"memory\":{\"error\":\"Install psutil for memory monitoring: pip install psutil\"},\"caches\":{\"total_items\":4,\"breakdown\":{\"user_api_keys\":{\"count\":0,\"count_readable\":\"0\",\"what_it_stores\":\"Validated API keys for faster authentication\"},\"llm_responses\":{\"count\":2,\"count_readable\":\"2\",\"what_it_stores\":\"LLM responses for identical requests\"},\"usage_tracking\":{\"count\":2,\"count_readable\":\"2\",\"what_it_stores\":\"Usage metrics before database write\"}}},\"garbage_collector\":{\"status\":\"enabled\",\"objects_awaiting_collection\":120}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "556",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_utils_supported_openai_params?model=mock",
+    "run": 2,
+    "status": 400,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"detail\":{\"error\":\"Could not map model=mock\"}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "47",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_chat_control",
+    "run": 2,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "309",
+      "content-type": "application/json",
+      "x-litellm-call-id": "c37fb324-278b-47b7-90a0-e3c9bad8fb3f",
+      "x-litellm-model-id": "0e28046ac596ab5dd5f66a54658154863ddf214b1d5ed7afc9c654c7c65be8fd",
+      "x-litellm-model-name": "openai/mockmodel",
+      "x-litellm-model-api-base": "http://127.0.0.1:9998/v1",
+      "x-litellm-version": "1.96.2",
+      "x-litellm-response-cost-original": "0.0",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-key-spend": "0.0",
+      "x-litellm-response-duration-ms": "1.873",
+      "x-litellm-overhead-duration-ms": "0.571",
+      "x-litellm-callback-duration-ms": "0.0",
+      "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+      "llm_provider-date": "Fri, 14 Aug 2026 14:24:22 GMT",
+      "llm_provider-content-type": "application/json",
+      "llm_provider-content-length": "263",
+      "x-litellm-model-group": "mock",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_chat_bad_model",
+    "run": 2,
+    "status": 400,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"error\":{\"message\":\"/chat/completions: Invalid model name passed in model=does-not-exist-canary. Call `/v1/models` to view available models for your key.\",\"type\":\"None\",\"param\":\"None\",\"code\":\"400\",\"provider_specific_fields\":{\"error\":\"/chat/completions: Invalid model name passed in model=does-not-exist-canary. Call `/v1/models` to view available models for your key.\"}}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "x-litellm-call-id": "c53fe36e-04f3-4c20-91f0-d8fe7989129d",
+      "x-litellm-response-cost": "0",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "372",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_transform_request",
+    "run": 2,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"raw_request_api_base\":\"http://127.0.0.1:9996/models/gemini-2.5-flash:generateContent\",\"raw_request_body\":{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"ping\"}]}]},\"raw_request_headers\":{\"Content-Type\":\"application/json\",\"x-goog-api-key\":\"my****ey\"},\"error\":null}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-length": "263",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_gemini_pt_generate",
+    "run": 2,
+    "status": 200,
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ],
+    "hit_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "body": "{\"ok\": true, \"echo_path\": \"/v1beta/models/gemini-2.5-flash:generateContent\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "7b84db24-22d0-4503-b842-0a06c405df2d",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/v1beta/models/gemini-2.5-flash:generateContent",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "129",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_gemini_pt_upload",
+    "run": 2,
+    "status": 200,
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ],
+    "hit_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "body": "{\"ok\": true, \"echo_path\": \"/upload/v1beta/files\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "d5c7c576-57fd-4dc5-b9f6-11fadbfe0d17",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/upload/v1beta/files",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "102",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_gemini_pt_models",
+    "run": 2,
+    "status": 200,
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ],
+    "hit_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "body": "{\"ok\": true, \"echo_path\": \"/v1beta/models\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "71e6d774-f472-40a0-bae5-b213fe9ead0e",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/v1beta/models",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "96",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_anthropic_pt",
+    "run": 2,
+    "status": 401,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Ce2nyEW4XkhRg6uiBrN8g\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:21 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "x-should-retry": "false",
+      "request-id": "req_011Ce2nyEW4XkhRg6uiBrN8g",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "vary": "Accept-Encoding",
+      "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+      "cf-cache-status": "DYNAMIC",
+      "x-robots-tag": "none",
+      "cf-ray": "a2b09f7018ee48e6-BOM",
+      "x-litellm-call-id": "ea73a930-2eaf-4a93-89cd-4cb6dae4642c",
+      "x-litellm-model-api-base": "https://api.anthropic.com/v1/messages",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "130",
+      "x-frame-options": "DENY",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "sy_get_health",
+    "run": 2,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"status\":\"ok\"}",
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "15",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT"
+    }
+  },
+  {
+    "probe": "sy_get_v1_models",
+    "run": 2,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"data\":[{\"capabilities\":{\"context_window\":null,\"streaming\":true,\"supported_inbound_formats\":[\"openai-chat-completions\",\"openai-responses\",\"anthropic-messages\"],\"tool_calling\":null},\"created\":0,\"display_name\":\"captured-model\",\"id\":\"captured-model\",\"object\":\"model\",\"owned_by\":\"switchyard\",\"type\":\"model\"}],\"default_model\":\"captured-model\",\"first_id\":\"captured-model\",\"has_more\":false,\"last_id\":\"captured-model\",\"model_pool\":[\"captured-model\"],\"models\":[{\"additional_speed_tiers\":[],\"apply_patch_tool_type\":\"freeform\",\"availability_nux\":null,\"base_instructions\":\"You are Codex, a coding agent.\",\"context_window\":null,\"default_reasoning_level\":null,\"default_reasoning_summary\":\"none\",\"default_verbosity\":null,\"description\":\"Switchyard-routed model.\",\"display_name\":\"captured-model\",\"effective_context_window_percent\":95,\"experimental_supported_tools\":[],\"input_modalities\":[\"text\"],\"max_context_window\":null,\"priority\":0,\"shell_type\":\"shell_command\",\"slug\":\"captured-model\",\"support_verbosity\":false,\"supported_in_api\":true,\"supported_reasoning_levels\":[],\"supports_image_detail_original\":false,\"supports_parallel_tool_calls\":true,\"supports_reasoning_summaries\":false,\"supports_search_tool\":false,\"trun",
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "1330",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT"
+    }
+  },
+  {
+    "probe": "sy_get_v1_stats",
+    "run": 2,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"total_requests\":2,\"total_errors\":0,\"total_tokens\":{\"prompt\":2,\"completion\":2,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":4},\"models\":{\"captured-model\":{\"calls\":2,\"errors\":0,\"request_pct\":100.0,\"prompt_tokens\":2,\"max_observed_context_tokens\":2,\"completion_tokens\":2,\"total_tokens\":4,\"token_pct\":100.0,\"cached_tokens\":0,\"cache_creation_tokens\":0,\"reasoning_tokens\":0,\"avg_prompt_tokens\":1.0,\"avg_completion_tokens\":1.0,\"cache_hit_rate\":0.0,\"theoretical_cache_hit_rate\":0.0,\"model_call_latency\":{\"count\":2,\"total_ms\":7.21,\"min_ms\":0.65,\"max_ms\":6.55,\"avg_ms\":3.6,\"p50_ms\":6.55,\"p99_ms\":6.55},\"total_latency\":{\"count\":2,\"total_ms\":12.44,\"min_ms\":0.77,\"max_ms\":11.67,\"avg_ms\":6.22,\"p50_ms\":11.67,\"p99_ms\":11.67}}},\"routing_overhead\":{\"count\":2,\"total_ms\":2.41,\"min_ms\":0.06,\"max_ms\":2.35,\"avg_ms\":1.2,\"p50_ms\":2.35,\"p99_ms\":2.35},\"routing_fallbacks\":{\"context_window\":0,\"unavailable\":0},\"classifier\":{\"total_requests\":0,\"total_errors\":0,\"total_tokens\":{\"prompt\":0,\"completion\":0,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":0},\"models\":{}},\"algorithm_stats\":{}}",
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "1073",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT"
+    }
+  },
+  {
+    "probe": "sy_get_metrics",
+    "run": 2,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "# TYPE switchyard_build_info gauge\nswitchyard_build_info{version=\"0.2.0\",otel_scope_name=\"switchyard\"} 1\n# TYPE switchyard_client_responses_total counter\nswitchyard_client_responses_total{outcome=\"other_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"success\",otel_scope_name=\"switchyard\"} 2\n# TYPE switchyard_completion_tokens_total counter\nswitchyard_completion_tokens_total{model=\"captured-model\",otel_scope_name=\"switchyard\"} 2\n# TYPE switchyard_decisions_total counter\nswitchyard_decisions_total{algorithm=\"passthrough\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\"} 2\n# TYPE switchyard_llm_call_duration_ms histogram\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"0\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"5\"} 1\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"1",
+    "headers": {
+      "content-type": "text/plain; version=0.0.4; charset=utf-8",
+      "content-length": "12841",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT"
+    }
+  },
+  {
+    "probe": "sy_chat_control",
+    "run": 2,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}",
+    "headers": {
+      "content-type": "application/json",
+      "x-model-router-selected-model": "captured-model",
+      "x-model-router-rationale": "passthrough selected target 'captured-model'",
+      "content-length": "245",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT"
+    }
+  },
+  {
+    "probe": "sy_header_x_amz_security_token",
+    "run": 2,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}",
+    "headers": {
+      "content-type": "application/json",
+      "x-model-router-selected-model": "captured-model",
+      "x-model-router-rationale": "passthrough selected target 'captured-model'",
+      "content-length": "245",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT"
+    }
+  },
+  {
+    "probe": "ll_get_health",
+    "run": 3,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"healthy_endpoints\":[{\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/mockmodel\",\"max_tokens\":16,\"cache\":{\"no-cache\":true},\"model_id\":\"0e28046ac596ab5dd5f66a54658154863ddf214b1d5ed7afc9c654c7c65be8fd\"}],\"unhealthy_endpoints\":[{\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"gemini/gemini-2.5-flash\",\"max_tokens\":16,\"cache\":{\"no-cache\":true},\"error\":\"litellm.APIConnectionError: GeminiException - Error converting to valid response block=usageMetadata not found in completion_response. Got={'ok': True, 'echo_path': '/models/gemini-2.5-flash:generateContent', 'echo_key_in_body': ''}. File an issue if litellm error - https://github.com/BerriAI/litellm/issues\\nstack trace: Traceback (most recent call last):\\n  File \\\"/Users/atharva/kairo/tools/litellm-env/lib/python3.13/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py\\\", line 2472, in _transform_google_generate_content_to_openai_model_response\\n    usage = VertexGeminiConfig._calculate_usage(completion_response=completion_response)\\n  File \\\"",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "2345",
+      "content-type": "application/json",
+      "litellm-health-field-notice": "api_base and api_version are admin-only on this endpoint",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_health_liveliness",
+    "run": 3,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "\"I'm alive!\"",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "12",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_health_readiness",
+    "run": 3,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"status\":\"healthy\",\"db\":\"Not connected\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "41",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_v1_models",
+    "run": 3,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"data\":[{\"id\":\"mock\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"},{\"id\":\"gemini-flash\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"}],\"object\":\"list\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "178",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_model_info",
+    "run": 3,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"data\":[{\"model_name\":\"mock\",\"litellm_params\":{\"api_base\":\"http://127.0.0.1:9998/v1\",\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/mockmodel\"},\"model_info\":{\"id\":\"0e28046ac596ab5dd5f66a54658154863ddf214b1d5ed7afc9c654c7c65be8fd\",\"db_model\":false,\"key\":\"openai/mockmodel\",\"max_tokens\":null,\"max_input_tokens\":null,\"max_output_tokens\":null,\"input_cost_per_token\":0,\"input_cost_per_token_flex\":null,\"input_cost_per_token_priority\":null,\"cache_creation_input_token_cost\":null,\"cache_creation_input_token_cost_above_200k_tokens\":null,\"cache_creation_input_token_cost_above_272k_tokens\":null,\"cache_creation_input_token_cost_above_272k_tokens_priority\":null,\"cache_creation_input_token_cost_above_272k_tokens_flex\":null,\"cache_creation_input_token_cost_flex\":null,\"cache_creation_input_token_cost_priority\":null,\"cache_read_input_token_cost\":null,\"prompt_cache_min_tokens\":null,\"cache_read_input_token_cost_above_200k_tokens\":null,\"cache_read_input_token_cost_above_200k_tokens_priority\":null,\"cache_read_input_token_cost_above_272k_tokens\":null,\"cache_read_input_token_cost_above_272k_tokens_priority\":null,\"cache_r",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "9710",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_settings",
+    "run": 3,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"alerting\":\"None\",\"litellm.callbacks\":[\"<litellm.proxy.hooks.litellm_skills.main.SkillsInjectionHook object at 0x117daf770>\",\"<litellm.proxy.hooks.model_max_budget_limiter._PROXY_VirtualKeyModelMaxBudgetLimiter object at 0x11975fb60>\",\"<litellm.proxy.hooks.max_budget_limiter._PROXY_MaxBudgetLimiter object at 0x11a885950>\",\"<litellm.proxy.hooks.parallel_request_limiter_v3._PROXY_MaxParallelRequestsHandler_v3 object at 0x11a8f8050>\",\"<litellm.proxy.hooks.cache_control_check._PROXY_CacheControlCheck object at 0x11a885810>\",\"<litellm.proxy.hooks.responses_id_security.ResponsesIDSecurity object at 0x11a8f81a0>\",\"<litellm.proxy.hooks.max_iterations_limiter._PROXY_MaxIterationsHandler object at 0x11a8f82f0>\",\"<litellm.proxy.hooks.max_budget_per_session_limiter._PROXY_MaxBudgetPerSessionHandler object at 0x11a8f8440>\",\"<litellm.proxy.hooks.sensitive_data_routing._PROXY_SensitiveDataRoutingHandler object at 0x11a8f8590>\",\"<litellm._service_logger.ServiceLogging object at 0x11973fa80>\"],\"litellm.input_callback\":[\"cache\",\"<litellm.proxy.hooks.litellm_skills.main.SkillsInjectionHook object at 0x117daf770>\",\"<litellm.proxy.hooks.model_max_budget_limiter._PROXY_VirtualKeyModelMaxBudgetLimiter o",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "12654",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_metrics",
+    "run": 3,
+    "status": 404,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"detail\":\"Not Found\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "22",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_key_info",
+    "run": 3,
+    "status": 500,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"error\":{\"message\":\"Database not connected. Connect a database to your proxy - https://docs.litellm.ai/docs/simple_proxy#managing-auth---virtual-keys\",\"type\":\"internal_server_error\",\"param\":\"None\",\"code\":\"500\"}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "212",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_spend_logs",
+    "run": 3,
+    "status": 500,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"error\":{\"message\":\"/spend/logs ErrorDatabase not connected. Connect a database to your proxy - https://docs.litellm.ai/docs/simple_proxy#managing-auth---virtual-keys\",\"type\":\"internal_error\",\"param\":\"None\",\"code\":\"500\"}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "222",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_config_yaml",
+    "run": 3,
+    "status": 422,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\"],\"msg\":\"Field required\",\"input\":null}]}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "82",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_routes",
+    "run": 3,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"routes\":[{\"path\":\"/openapi.json\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"openapi\",\"endpoint\":\"openapi\"},{\"path\":\"/\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"swagger_ui_html\",\"endpoint\":\"swagger_ui_html\"},{\"path\":\"/docs/oauth2-redirect\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"swagger_ui_redirect\",\"endpoint\":\"swagger_ui_redirect\"},{\"path\":\"/redoc\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"redoc_html\",\"endpoint\":\"redoc_html\"},{\"path\":\"/vertex_ai/live\",\"methods\":null,\"name\":\"vertex_ai_live_passthrough_endpoint\",\"endpoint\":\"vertex_ai_live_passthrough_endpoint\"},{\"path\":\"/realtime\",\"methods\":null,\"name\":\"realtime_websocket_endpoint\",\"endpoint\":\"realtime_websocket_endpoint\"},{\"path\":\"/v1/realtime\",\"methods\":null,\"name\":\"realtime_websocket_endpoint\",\"endpoint\":\"realtime_websocket_endpoint\"},{\"path\":\"/openai/v1/realtime\",\"methods\":null,\"name\":\"realtime_websocket_endpoint\",\"endpoint\":\"realtime_websocket_endpoint\"},{\"path\":\"/fallback/login\",\"methods\":[\"GET\"],\"name\":\"fallback_login\",\"endpoint\":\"fallback_login\"},{\"path\":\"/onboarding/get_token\",\"methods\":[\"GET\"],\"name\":\"onboarding\",\"endpoint\":\"onboarding\"},{\"path\":\"/onboarding/claim_token\",\"methods\":[\"POST\"],\"name\":\"claim_onboarding_link\",\"endpoint\":\"claim_onboarding_link\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "57516",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_debug_asyncio-tasks",
+    "run": 3,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"total_active_tasks\":7,\"by_name\":{\"RequestResponseCycle.run_asgi\":1,\"SlackAlerting._run_scheduled_daily_report\":1,\"AlertingHangingRequestCheck.check_for_hanging_requests\":1,\"_adaptive_router_flusher_loop\":1,\"LifespanOn.main\":1,\"LoggingWorker._worker_loop\":1,\"Server.serve\":1}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "277",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_debug_memory_summary",
+    "run": 3,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"worker_pid\":84129,\"status\":\"healthy\",\"memory\":{\"error\":\"Install psutil for memory monitoring: pip install psutil\"},\"caches\":{\"total_items\":4,\"breakdown\":{\"user_api_keys\":{\"count\":0,\"count_readable\":\"0\",\"what_it_stores\":\"Validated API keys for faster authentication\"},\"llm_responses\":{\"count\":2,\"count_readable\":\"2\",\"what_it_stores\":\"LLM responses for identical requests\"},\"usage_tracking\":{\"count\":2,\"count_readable\":\"2\",\"what_it_stores\":\"Usage metrics before database write\"}}},\"garbage_collector\":{\"status\":\"enabled\",\"objects_awaiting_collection\":120}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "556",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_utils_supported_openai_params?model=mock",
+    "run": 3,
+    "status": 400,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"detail\":{\"error\":\"Could not map model=mock\"}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "47",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_chat_control",
+    "run": 3,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "309",
+      "content-type": "application/json",
+      "x-litellm-call-id": "e2701a64-0a70-4285-b253-0f04dc42d88e",
+      "x-litellm-model-id": "0e28046ac596ab5dd5f66a54658154863ddf214b1d5ed7afc9c654c7c65be8fd",
+      "x-litellm-model-name": "openai/mockmodel",
+      "x-litellm-model-api-base": "http://127.0.0.1:9998/v1",
+      "x-litellm-version": "1.96.2",
+      "x-litellm-response-cost-original": "0.0",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-key-spend": "0.0",
+      "x-litellm-response-duration-ms": "1.8940000000000001",
+      "x-litellm-overhead-duration-ms": "0.591",
+      "x-litellm-callback-duration-ms": "0.0",
+      "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+      "llm_provider-date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "llm_provider-content-type": "application/json",
+      "llm_provider-content-length": "263",
+      "x-litellm-model-group": "mock",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_chat_bad_model",
+    "run": 3,
+    "status": 400,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"error\":{\"message\":\"/chat/completions: Invalid model name passed in model=does-not-exist-canary. Call `/v1/models` to view available models for your key.\",\"type\":\"None\",\"param\":\"None\",\"code\":\"400\",\"provider_specific_fields\":{\"error\":\"/chat/completions: Invalid model name passed in model=does-not-exist-canary. Call `/v1/models` to view available models for your key.\"}}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "x-litellm-call-id": "0a8127dc-3066-4e8f-b805-1d76932b2a44",
+      "x-litellm-response-cost": "0",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "372",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_transform_request",
+    "run": 3,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"raw_request_api_base\":\"http://127.0.0.1:9996/models/gemini-2.5-flash:generateContent\",\"raw_request_body\":{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"ping\"}]}]},\"raw_request_headers\":{\"Content-Type\":\"application/json\",\"x-goog-api-key\":\"my****ey\"},\"error\":null}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "263",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_gemini_pt_generate",
+    "run": 3,
+    "status": 200,
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ],
+    "hit_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "body": "{\"ok\": true, \"echo_path\": \"/v1beta/models/gemini-2.5-flash:generateContent\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "642715c1-3ce5-4eb5-b8c6-508746bbfb57",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/v1beta/models/gemini-2.5-flash:generateContent",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "129",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_gemini_pt_upload",
+    "run": 3,
+    "status": 200,
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ],
+    "hit_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "body": "{\"ok\": true, \"echo_path\": \"/upload/v1beta/files\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "a2819628-c15c-4848-a65a-c6e781b7a310",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/upload/v1beta/files",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "102",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_gemini_pt_models",
+    "run": 3,
+    "status": 200,
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ],
+    "hit_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "body": "{\"ok\": true, \"echo_path\": \"/v1beta/models\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "bcc0da43-2795-4f23-a78f-46b558a2c850",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/v1beta/models",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "96",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_anthropic_pt",
+    "run": 3,
+    "status": 401,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Ce2nyGJTVHZZgMECTHoPh\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "x-should-retry": "false",
+      "request-id": "req_011Ce2nyGJTVHZZgMECTHoPh",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "vary": "Accept-Encoding",
+      "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+      "cf-cache-status": "DYNAMIC",
+      "x-robots-tag": "none",
+      "cf-ray": "a2b09f72bc13c0d9-BOM",
+      "x-litellm-call-id": "7cf01d8b-2373-4342-af4e-04f4e2faf44c",
+      "x-litellm-model-api-base": "https://api.anthropic.com/v1/messages",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "130",
+      "x-frame-options": "DENY",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "sy_get_health",
+    "run": 3,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"status\":\"ok\"}",
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "15",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT"
+    }
+  },
+  {
+    "probe": "sy_get_v1_models",
+    "run": 3,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"data\":[{\"capabilities\":{\"context_window\":null,\"streaming\":true,\"supported_inbound_formats\":[\"openai-chat-completions\",\"openai-responses\",\"anthropic-messages\"],\"tool_calling\":null},\"created\":0,\"display_name\":\"captured-model\",\"id\":\"captured-model\",\"object\":\"model\",\"owned_by\":\"switchyard\",\"type\":\"model\"}],\"default_model\":\"captured-model\",\"first_id\":\"captured-model\",\"has_more\":false,\"last_id\":\"captured-model\",\"model_pool\":[\"captured-model\"],\"models\":[{\"additional_speed_tiers\":[],\"apply_patch_tool_type\":\"freeform\",\"availability_nux\":null,\"base_instructions\":\"You are Codex, a coding agent.\",\"context_window\":null,\"default_reasoning_level\":null,\"default_reasoning_summary\":\"none\",\"default_verbosity\":null,\"description\":\"Switchyard-routed model.\",\"display_name\":\"captured-model\",\"effective_context_window_percent\":95,\"experimental_supported_tools\":[],\"input_modalities\":[\"text\"],\"max_context_window\":null,\"priority\":0,\"shell_type\":\"shell_command\",\"slug\":\"captured-model\",\"support_verbosity\":false,\"supported_in_api\":true,\"supported_reasoning_levels\":[],\"supports_image_detail_original\":false,\"supports_parallel_tool_calls\":true,\"supports_reasoning_summaries\":false,\"supports_search_tool\":false,\"trun",
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "1330",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT"
+    }
+  },
+  {
+    "probe": "sy_get_v1_stats",
+    "run": 3,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"total_requests\":4,\"total_errors\":0,\"total_tokens\":{\"prompt\":4,\"completion\":4,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":8},\"models\":{\"captured-model\":{\"calls\":4,\"errors\":0,\"request_pct\":100.0,\"prompt_tokens\":4,\"max_observed_context_tokens\":2,\"completion_tokens\":4,\"total_tokens\":8,\"token_pct\":100.0,\"cached_tokens\":0,\"cache_creation_tokens\":0,\"reasoning_tokens\":0,\"avg_prompt_tokens\":1.0,\"avg_completion_tokens\":1.0,\"cache_hit_rate\":0.0,\"theoretical_cache_hit_rate\":0.0,\"model_call_latency\":{\"count\":4,\"total_ms\":8.99,\"min_ms\":0.65,\"max_ms\":6.55,\"avg_ms\":2.25,\"p50_ms\":1.09,\"p99_ms\":6.55},\"total_latency\":{\"count\":4,\"total_ms\":14.56,\"min_ms\":0.77,\"max_ms\":11.67,\"avg_ms\":3.64,\"p50_ms\":1.29,\"p99_ms\":11.67}}},\"routing_overhead\":{\"count\":4,\"total_ms\":2.6,\"min_ms\":0.06,\"max_ms\":2.35,\"avg_ms\":0.65,\"p50_ms\":0.12,\"p99_ms\":2.35},\"routing_fallbacks\":{\"context_window\":0,\"unavailable\":0},\"classifier\":{\"total_requests\":0,\"total_errors\":0,\"total_tokens\":{\"prompt\":0,\"completion\":0,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":0},\"models\":{}},\"algorithm_stats\":{}}",
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "1073",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT"
+    }
+  },
+  {
+    "probe": "sy_get_metrics",
+    "run": 3,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "# TYPE switchyard_build_info gauge\nswitchyard_build_info{version=\"0.2.0\",otel_scope_name=\"switchyard\"} 1\n# TYPE switchyard_client_responses_total counter\nswitchyard_client_responses_total{outcome=\"other_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"success\",otel_scope_name=\"switchyard\"} 4\n# TYPE switchyard_completion_tokens_total counter\nswitchyard_completion_tokens_total{model=\"captured-model\",otel_scope_name=\"switchyard\"} 4\n# TYPE switchyard_decisions_total counter\nswitchyard_decisions_total{algorithm=\"passthrough\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\"} 4\n# TYPE switchyard_llm_call_duration_ms histogram\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"0\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"5\"} 3\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"1",
+    "headers": {
+      "content-type": "text/plain; version=0.0.4; charset=utf-8",
+      "content-length": "12841",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT"
+    }
+  },
+  {
+    "probe": "sy_chat_control",
+    "run": 3,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}",
+    "headers": {
+      "content-type": "application/json",
+      "x-model-router-selected-model": "captured-model",
+      "x-model-router-rationale": "passthrough selected target 'captured-model'",
+      "content-length": "245",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT"
+    }
+  },
+  {
+    "probe": "sy_header_x_amz_security_token",
+    "run": 3,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}",
+    "headers": {
+      "content-type": "application/json",
+      "x-model-router-selected-model": "captured-model",
+      "x-model-router-rationale": "passthrough selected target 'captured-model'",
+      "content-length": "245",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT"
+    }
+  },
+  {
+    "probe": "ll_get_health",
+    "run": 4,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"healthy_endpoints\":[{\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/mockmodel\",\"max_tokens\":16,\"cache\":{\"no-cache\":true},\"model_id\":\"0e28046ac596ab5dd5f66a54658154863ddf214b1d5ed7afc9c654c7c65be8fd\"}],\"unhealthy_endpoints\":[{\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"gemini/gemini-2.5-flash\",\"max_tokens\":16,\"cache\":{\"no-cache\":true},\"error\":\"litellm.APIConnectionError: GeminiException - Error converting to valid response block=usageMetadata not found in completion_response. Got={'ok': True, 'echo_path': '/models/gemini-2.5-flash:generateContent', 'echo_key_in_body': ''}. File an issue if litellm error - https://github.com/BerriAI/litellm/issues\\nstack trace: Traceback (most recent call last):\\n  File \\\"/Users/atharva/kairo/tools/litellm-env/lib/python3.13/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py\\\", line 2472, in _transform_google_generate_content_to_openai_model_response\\n    usage = VertexGeminiConfig._calculate_usage(completion_response=completion_response)\\n  File \\\"",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "2351",
+      "content-type": "application/json",
+      "litellm-health-field-notice": "api_base and api_version are admin-only on this endpoint",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_health_liveliness",
+    "run": 4,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "\"I'm alive!\"",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "12",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_health_readiness",
+    "run": 4,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"status\":\"healthy\",\"db\":\"Not connected\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "41",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_v1_models",
+    "run": 4,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"data\":[{\"id\":\"mock\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"},{\"id\":\"gemini-flash\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"}],\"object\":\"list\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "178",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_model_info",
+    "run": 4,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"data\":[{\"model_name\":\"mock\",\"litellm_params\":{\"api_base\":\"http://127.0.0.1:9998/v1\",\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/mockmodel\"},\"model_info\":{\"id\":\"0e28046ac596ab5dd5f66a54658154863ddf214b1d5ed7afc9c654c7c65be8fd\",\"db_model\":false,\"key\":\"openai/mockmodel\",\"max_tokens\":null,\"max_input_tokens\":null,\"max_output_tokens\":null,\"input_cost_per_token\":0,\"input_cost_per_token_flex\":null,\"input_cost_per_token_priority\":null,\"cache_creation_input_token_cost\":null,\"cache_creation_input_token_cost_above_200k_tokens\":null,\"cache_creation_input_token_cost_above_272k_tokens\":null,\"cache_creation_input_token_cost_above_272k_tokens_priority\":null,\"cache_creation_input_token_cost_above_272k_tokens_flex\":null,\"cache_creation_input_token_cost_flex\":null,\"cache_creation_input_token_cost_priority\":null,\"cache_read_input_token_cost\":null,\"prompt_cache_min_tokens\":null,\"cache_read_input_token_cost_above_200k_tokens\":null,\"cache_read_input_token_cost_above_200k_tokens_priority\":null,\"cache_read_input_token_cost_above_272k_tokens\":null,\"cache_read_input_token_cost_above_272k_tokens_priority\":null,\"cache_r",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "9710",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_settings",
+    "run": 4,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"alerting\":\"None\",\"litellm.callbacks\":[\"<litellm.proxy.hooks.litellm_skills.main.SkillsInjectionHook object at 0x117daf770>\",\"<litellm.proxy.hooks.model_max_budget_limiter._PROXY_VirtualKeyModelMaxBudgetLimiter object at 0x11975fb60>\",\"<litellm.proxy.hooks.max_budget_limiter._PROXY_MaxBudgetLimiter object at 0x11a885950>\",\"<litellm.proxy.hooks.parallel_request_limiter_v3._PROXY_MaxParallelRequestsHandler_v3 object at 0x11a8f8050>\",\"<litellm.proxy.hooks.cache_control_check._PROXY_CacheControlCheck object at 0x11a885810>\",\"<litellm.proxy.hooks.responses_id_security.ResponsesIDSecurity object at 0x11a8f81a0>\",\"<litellm.proxy.hooks.max_iterations_limiter._PROXY_MaxIterationsHandler object at 0x11a8f82f0>\",\"<litellm.proxy.hooks.max_budget_per_session_limiter._PROXY_MaxBudgetPerSessionHandler object at 0x11a8f8440>\",\"<litellm.proxy.hooks.sensitive_data_routing._PROXY_SensitiveDataRoutingHandler object at 0x11a8f8590>\",\"<litellm._service_logger.ServiceLogging object at 0x11973fa80>\"],\"litellm.input_callback\":[\"cache\",\"<litellm.proxy.hooks.litellm_skills.main.SkillsInjectionHook object at 0x117daf770>\",\"<litellm.proxy.hooks.model_max_budget_limiter._PROXY_VirtualKeyModelMaxBudgetLimiter o",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "12654",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_metrics",
+    "run": 4,
+    "status": 404,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"detail\":\"Not Found\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "22",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_key_info",
+    "run": 4,
+    "status": 500,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"error\":{\"message\":\"Database not connected. Connect a database to your proxy - https://docs.litellm.ai/docs/simple_proxy#managing-auth---virtual-keys\",\"type\":\"internal_server_error\",\"param\":\"None\",\"code\":\"500\"}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "212",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_spend_logs",
+    "run": 4,
+    "status": 500,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"error\":{\"message\":\"/spend/logs ErrorDatabase not connected. Connect a database to your proxy - https://docs.litellm.ai/docs/simple_proxy#managing-auth---virtual-keys\",\"type\":\"internal_error\",\"param\":\"None\",\"code\":\"500\"}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "222",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_config_yaml",
+    "run": 4,
+    "status": 422,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\"],\"msg\":\"Field required\",\"input\":null}]}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "82",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_routes",
+    "run": 4,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"routes\":[{\"path\":\"/openapi.json\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"openapi\",\"endpoint\":\"openapi\"},{\"path\":\"/\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"swagger_ui_html\",\"endpoint\":\"swagger_ui_html\"},{\"path\":\"/docs/oauth2-redirect\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"swagger_ui_redirect\",\"endpoint\":\"swagger_ui_redirect\"},{\"path\":\"/redoc\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"redoc_html\",\"endpoint\":\"redoc_html\"},{\"path\":\"/vertex_ai/live\",\"methods\":null,\"name\":\"vertex_ai_live_passthrough_endpoint\",\"endpoint\":\"vertex_ai_live_passthrough_endpoint\"},{\"path\":\"/realtime\",\"methods\":null,\"name\":\"realtime_websocket_endpoint\",\"endpoint\":\"realtime_websocket_endpoint\"},{\"path\":\"/v1/realtime\",\"methods\":null,\"name\":\"realtime_websocket_endpoint\",\"endpoint\":\"realtime_websocket_endpoint\"},{\"path\":\"/openai/v1/realtime\",\"methods\":null,\"name\":\"realtime_websocket_endpoint\",\"endpoint\":\"realtime_websocket_endpoint\"},{\"path\":\"/fallback/login\",\"methods\":[\"GET\"],\"name\":\"fallback_login\",\"endpoint\":\"fallback_login\"},{\"path\":\"/onboarding/get_token\",\"methods\":[\"GET\"],\"name\":\"onboarding\",\"endpoint\":\"onboarding\"},{\"path\":\"/onboarding/claim_token\",\"methods\":[\"POST\"],\"name\":\"claim_onboarding_link\",\"endpoint\":\"claim_onboarding_link\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "57516",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_debug_asyncio-tasks",
+    "run": 4,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"total_active_tasks\":7,\"by_name\":{\"SlackAlerting._run_scheduled_daily_report\":1,\"AlertingHangingRequestCheck.check_for_hanging_requests\":1,\"_adaptive_router_flusher_loop\":1,\"RequestResponseCycle.run_asgi\":1,\"LifespanOn.main\":1,\"LoggingWorker._worker_loop\":1,\"Server.serve\":1}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "277",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_debug_memory_summary",
+    "run": 4,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"worker_pid\":84129,\"status\":\"healthy\",\"memory\":{\"error\":\"Install psutil for memory monitoring: pip install psutil\"},\"caches\":{\"total_items\":4,\"breakdown\":{\"user_api_keys\":{\"count\":0,\"count_readable\":\"0\",\"what_it_stores\":\"Validated API keys for faster authentication\"},\"llm_responses\":{\"count\":2,\"count_readable\":\"2\",\"what_it_stores\":\"LLM responses for identical requests\"},\"usage_tracking\":{\"count\":2,\"count_readable\":\"2\",\"what_it_stores\":\"Usage metrics before database write\"}}},\"garbage_collector\":{\"status\":\"enabled\",\"objects_awaiting_collection\":120}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "556",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_utils_supported_openai_params?model=mock",
+    "run": 4,
+    "status": 400,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"detail\":{\"error\":\"Could not map model=mock\"}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "47",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_chat_control",
+    "run": 4,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "309",
+      "content-type": "application/json",
+      "x-litellm-call-id": "6d40d551-6a5b-435a-8151-fbd9a7ba895d",
+      "x-litellm-model-id": "0e28046ac596ab5dd5f66a54658154863ddf214b1d5ed7afc9c654c7c65be8fd",
+      "x-litellm-model-name": "openai/mockmodel",
+      "x-litellm-model-api-base": "http://127.0.0.1:9998/v1",
+      "x-litellm-version": "1.96.2",
+      "x-litellm-response-cost-original": "0.0",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-key-spend": "0.0",
+      "x-litellm-response-duration-ms": "2.009",
+      "x-litellm-overhead-duration-ms": "0.63",
+      "x-litellm-callback-duration-ms": "0.0",
+      "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+      "llm_provider-date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "llm_provider-content-type": "application/json",
+      "llm_provider-content-length": "263",
+      "x-litellm-model-group": "mock",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_chat_bad_model",
+    "run": 4,
+    "status": 400,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"error\":{\"message\":\"/chat/completions: Invalid model name passed in model=does-not-exist-canary. Call `/v1/models` to view available models for your key.\",\"type\":\"None\",\"param\":\"None\",\"code\":\"400\",\"provider_specific_fields\":{\"error\":\"/chat/completions: Invalid model name passed in model=does-not-exist-canary. Call `/v1/models` to view available models for your key.\"}}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "x-litellm-call-id": "56b1ce1e-73ed-417b-a861-1737f657a4dc",
+      "x-litellm-response-cost": "0",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "372",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_transform_request",
+    "run": 4,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"raw_request_api_base\":\"http://127.0.0.1:9996/models/gemini-2.5-flash:generateContent\",\"raw_request_body\":{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"ping\"}]}]},\"raw_request_headers\":{\"Content-Type\":\"application/json\",\"x-goog-api-key\":\"my****ey\"},\"error\":null}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-length": "263",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_gemini_pt_generate",
+    "run": 4,
+    "status": 200,
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ],
+    "hit_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "body": "{\"ok\": true, \"echo_path\": \"/v1beta/models/gemini-2.5-flash:generateContent\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "2c0f63b8-6166-4e2a-869f-42210f2bfe54",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/v1beta/models/gemini-2.5-flash:generateContent",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "129",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_gemini_pt_upload",
+    "run": 4,
+    "status": 200,
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ],
+    "hit_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "body": "{\"ok\": true, \"echo_path\": \"/upload/v1beta/files\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "6bd20f26-92ee-4e1d-b567-f7ae555641cc",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/upload/v1beta/files",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "102",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_gemini_pt_models",
+    "run": 4,
+    "status": 200,
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ],
+    "hit_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "body": "{\"ok\": true, \"echo_path\": \"/v1beta/models\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "5f6c94ac-17fe-43f9-af76-c7e54ace36ee",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/v1beta/models",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "96",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_anthropic_pt",
+    "run": 4,
+    "status": 401,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Ce2nyJDZ43pxm56VLjYeY\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:23 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "x-should-retry": "false",
+      "request-id": "req_011Ce2nyJDZ43pxm56VLjYeY",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "vary": "Accept-Encoding",
+      "x-robots-tag": "none",
+      "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+      "cf-cache-status": "DYNAMIC",
+      "cf-ray": "a2b09f75585cfb88-BOM",
+      "x-litellm-call-id": "252e2e6e-5cca-4b85-984f-f18406f9b01f",
+      "x-litellm-model-api-base": "https://api.anthropic.com/v1/messages",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "130",
+      "x-frame-options": "DENY",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "sy_get_health",
+    "run": 4,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"status\":\"ok\"}",
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "15",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT"
+    }
+  },
+  {
+    "probe": "sy_get_v1_models",
+    "run": 4,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"data\":[{\"capabilities\":{\"context_window\":null,\"streaming\":true,\"supported_inbound_formats\":[\"openai-chat-completions\",\"openai-responses\",\"anthropic-messages\"],\"tool_calling\":null},\"created\":0,\"display_name\":\"captured-model\",\"id\":\"captured-model\",\"object\":\"model\",\"owned_by\":\"switchyard\",\"type\":\"model\"}],\"default_model\":\"captured-model\",\"first_id\":\"captured-model\",\"has_more\":false,\"last_id\":\"captured-model\",\"model_pool\":[\"captured-model\"],\"models\":[{\"additional_speed_tiers\":[],\"apply_patch_tool_type\":\"freeform\",\"availability_nux\":null,\"base_instructions\":\"You are Codex, a coding agent.\",\"context_window\":null,\"default_reasoning_level\":null,\"default_reasoning_summary\":\"none\",\"default_verbosity\":null,\"description\":\"Switchyard-routed model.\",\"display_name\":\"captured-model\",\"effective_context_window_percent\":95,\"experimental_supported_tools\":[],\"input_modalities\":[\"text\"],\"max_context_window\":null,\"priority\":0,\"shell_type\":\"shell_command\",\"slug\":\"captured-model\",\"support_verbosity\":false,\"supported_in_api\":true,\"supported_reasoning_levels\":[],\"supports_image_detail_original\":false,\"supports_parallel_tool_calls\":true,\"supports_reasoning_summaries\":false,\"supports_search_tool\":false,\"trun",
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "1330",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT"
+    }
+  },
+  {
+    "probe": "sy_get_v1_stats",
+    "run": 4,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"total_requests\":6,\"total_errors\":0,\"total_tokens\":{\"prompt\":6,\"completion\":6,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":12},\"models\":{\"captured-model\":{\"calls\":6,\"errors\":0,\"request_pct\":100.0,\"prompt_tokens\":6,\"max_observed_context_tokens\":2,\"completion_tokens\":6,\"total_tokens\":12,\"token_pct\":100.0,\"cached_tokens\":0,\"cache_creation_tokens\":0,\"reasoning_tokens\":0,\"avg_prompt_tokens\":1.0,\"avg_completion_tokens\":1.0,\"cache_hit_rate\":0.0,\"theoretical_cache_hit_rate\":0.0,\"model_call_latency\":{\"count\":6,\"total_ms\":10.61,\"min_ms\":0.65,\"max_ms\":6.55,\"avg_ms\":1.77,\"p50_ms\":0.97,\"p99_ms\":6.55},\"total_latency\":{\"count\":6,\"total_ms\":16.44,\"min_ms\":0.75,\"max_ms\":11.67,\"avg_ms\":2.74,\"p50_ms\":1.13,\"p99_ms\":11.67}}},\"routing_overhead\":{\"count\":6,\"total_ms\":2.77,\"min_ms\":0.06,\"max_ms\":2.35,\"avg_ms\":0.46,\"p50_ms\":0.1,\"p99_ms\":2.35},\"routing_fallbacks\":{\"context_window\":0,\"unavailable\":0},\"classifier\":{\"total_requests\":0,\"total_errors\":0,\"total_tokens\":{\"prompt\":0,\"completion\":0,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":0},\"models\":{}},\"algorithm_stats\":{}}",
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "1076",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT"
+    }
+  },
+  {
+    "probe": "sy_get_metrics",
+    "run": 4,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "# TYPE switchyard_build_info gauge\nswitchyard_build_info{version=\"0.2.0\",otel_scope_name=\"switchyard\"} 1\n# TYPE switchyard_client_responses_total counter\nswitchyard_client_responses_total{outcome=\"other_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"success\",otel_scope_name=\"switchyard\"} 6\n# TYPE switchyard_completion_tokens_total counter\nswitchyard_completion_tokens_total{model=\"captured-model\",otel_scope_name=\"switchyard\"} 6\n# TYPE switchyard_decisions_total counter\nswitchyard_decisions_total{algorithm=\"passthrough\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\"} 6\n# TYPE switchyard_llm_call_duration_ms histogram\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"0\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"5\"} 5\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"1",
+    "headers": {
+      "content-type": "text/plain; version=0.0.4; charset=utf-8",
+      "content-length": "12834",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT"
+    }
+  },
+  {
+    "probe": "sy_chat_control",
+    "run": 4,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}",
+    "headers": {
+      "content-type": "application/json",
+      "x-model-router-selected-model": "captured-model",
+      "x-model-router-rationale": "passthrough selected target 'captured-model'",
+      "content-length": "245",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT"
+    }
+  },
+  {
+    "probe": "sy_header_x_amz_security_token",
+    "run": 4,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}",
+    "headers": {
+      "content-type": "application/json",
+      "x-model-router-selected-model": "captured-model",
+      "x-model-router-rationale": "passthrough selected target 'captured-model'",
+      "content-length": "245",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT"
+    }
+  },
+  {
+    "probe": "ll_get_health",
+    "run": 5,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"healthy_endpoints\":[{\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/mockmodel\",\"max_tokens\":16,\"cache\":{\"no-cache\":true},\"model_id\":\"0e28046ac596ab5dd5f66a54658154863ddf214b1d5ed7afc9c654c7c65be8fd\"}],\"unhealthy_endpoints\":[{\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"gemini/gemini-2.5-flash\",\"max_tokens\":16,\"cache\":{\"no-cache\":true},\"error\":\"litellm.APIConnectionError: GeminiException - Error converting to valid response block=usageMetadata not found in completion_response. Got={'ok': True, 'echo_path': '/models/gemini-2.5-flash:generateContent', 'echo_key_in_body': ''}. File an issue if litellm error - https://github.com/BerriAI/litellm/issues\\nstack trace: Traceback (most recent call last):\\n  File \\\"/Users/atharva/kairo/tools/litellm-env/lib/python3.13/site-packages/litellm/llms/vertex_ai/gemini/vertex_and_google_ai_studio_gemini.py\\\", line 2472, in _transform_google_generate_content_to_openai_model_response\\n    usage = VertexGeminiConfig._calculate_usage(completion_response=completion_response)\\n  File \\\"",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-length": "2351",
+      "content-type": "application/json",
+      "litellm-health-field-notice": "api_base and api_version are admin-only on this endpoint",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_health_liveliness",
+    "run": 5,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "\"I'm alive!\"",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-length": "12",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_health_readiness",
+    "run": 5,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"status\":\"healthy\",\"db\":\"Not connected\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-length": "41",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_v1_models",
+    "run": 5,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"data\":[{\"id\":\"mock\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"},{\"id\":\"gemini-flash\",\"object\":\"model\",\"created\":1677610602,\"owned_by\":\"openai\"}],\"object\":\"list\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-length": "178",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_model_info",
+    "run": 5,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"data\":[{\"model_name\":\"mock\",\"litellm_params\":{\"api_base\":\"http://127.0.0.1:9998/v1\",\"use_in_pass_through\":false,\"use_litellm_proxy\":false,\"use_xai_oauth\":false,\"merge_reasoning_content_in_choices\":false,\"model\":\"openai/mockmodel\"},\"model_info\":{\"id\":\"0e28046ac596ab5dd5f66a54658154863ddf214b1d5ed7afc9c654c7c65be8fd\",\"db_model\":false,\"key\":\"openai/mockmodel\",\"max_tokens\":null,\"max_input_tokens\":null,\"max_output_tokens\":null,\"input_cost_per_token\":0,\"input_cost_per_token_flex\":null,\"input_cost_per_token_priority\":null,\"cache_creation_input_token_cost\":null,\"cache_creation_input_token_cost_above_200k_tokens\":null,\"cache_creation_input_token_cost_above_272k_tokens\":null,\"cache_creation_input_token_cost_above_272k_tokens_priority\":null,\"cache_creation_input_token_cost_above_272k_tokens_flex\":null,\"cache_creation_input_token_cost_flex\":null,\"cache_creation_input_token_cost_priority\":null,\"cache_read_input_token_cost\":null,\"prompt_cache_min_tokens\":null,\"cache_read_input_token_cost_above_200k_tokens\":null,\"cache_read_input_token_cost_above_200k_tokens_priority\":null,\"cache_read_input_token_cost_above_272k_tokens\":null,\"cache_read_input_token_cost_above_272k_tokens_priority\":null,\"cache_r",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-length": "9710",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_settings",
+    "run": 5,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"alerting\":\"None\",\"litellm.callbacks\":[\"<litellm.proxy.hooks.litellm_skills.main.SkillsInjectionHook object at 0x117daf770>\",\"<litellm.proxy.hooks.model_max_budget_limiter._PROXY_VirtualKeyModelMaxBudgetLimiter object at 0x11975fb60>\",\"<litellm.proxy.hooks.max_budget_limiter._PROXY_MaxBudgetLimiter object at 0x11a885950>\",\"<litellm.proxy.hooks.parallel_request_limiter_v3._PROXY_MaxParallelRequestsHandler_v3 object at 0x11a8f8050>\",\"<litellm.proxy.hooks.cache_control_check._PROXY_CacheControlCheck object at 0x11a885810>\",\"<litellm.proxy.hooks.responses_id_security.ResponsesIDSecurity object at 0x11a8f81a0>\",\"<litellm.proxy.hooks.max_iterations_limiter._PROXY_MaxIterationsHandler object at 0x11a8f82f0>\",\"<litellm.proxy.hooks.max_budget_per_session_limiter._PROXY_MaxBudgetPerSessionHandler object at 0x11a8f8440>\",\"<litellm.proxy.hooks.sensitive_data_routing._PROXY_SensitiveDataRoutingHandler object at 0x11a8f8590>\",\"<litellm._service_logger.ServiceLogging object at 0x11973fa80>\"],\"litellm.input_callback\":[\"cache\",\"<litellm.proxy.hooks.litellm_skills.main.SkillsInjectionHook object at 0x117daf770>\",\"<litellm.proxy.hooks.model_max_budget_limiter._PROXY_VirtualKeyModelMaxBudgetLimiter o",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-length": "12654",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_metrics",
+    "run": 5,
+    "status": 404,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"detail\":\"Not Found\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-length": "22",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_key_info",
+    "run": 5,
+    "status": 500,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"error\":{\"message\":\"Database not connected. Connect a database to your proxy - https://docs.litellm.ai/docs/simple_proxy#managing-auth---virtual-keys\",\"type\":\"internal_server_error\",\"param\":\"None\",\"code\":\"500\"}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-length": "212",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_spend_logs",
+    "run": 5,
+    "status": 500,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"error\":{\"message\":\"/spend/logs ErrorDatabase not connected. Connect a database to your proxy - https://docs.litellm.ai/docs/simple_proxy#managing-auth---virtual-keys\",\"type\":\"internal_error\",\"param\":\"None\",\"code\":\"500\"}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-length": "222",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_config_yaml",
+    "run": 5,
+    "status": 422,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"detail\":[{\"type\":\"missing\",\"loc\":[\"body\"],\"msg\":\"Field required\",\"input\":null}]}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-length": "82",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_routes",
+    "run": 5,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"routes\":[{\"path\":\"/openapi.json\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"openapi\",\"endpoint\":\"openapi\"},{\"path\":\"/\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"swagger_ui_html\",\"endpoint\":\"swagger_ui_html\"},{\"path\":\"/docs/oauth2-redirect\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"swagger_ui_redirect\",\"endpoint\":\"swagger_ui_redirect\"},{\"path\":\"/redoc\",\"methods\":[\"GET\",\"HEAD\"],\"name\":\"redoc_html\",\"endpoint\":\"redoc_html\"},{\"path\":\"/vertex_ai/live\",\"methods\":null,\"name\":\"vertex_ai_live_passthrough_endpoint\",\"endpoint\":\"vertex_ai_live_passthrough_endpoint\"},{\"path\":\"/realtime\",\"methods\":null,\"name\":\"realtime_websocket_endpoint\",\"endpoint\":\"realtime_websocket_endpoint\"},{\"path\":\"/v1/realtime\",\"methods\":null,\"name\":\"realtime_websocket_endpoint\",\"endpoint\":\"realtime_websocket_endpoint\"},{\"path\":\"/openai/v1/realtime\",\"methods\":null,\"name\":\"realtime_websocket_endpoint\",\"endpoint\":\"realtime_websocket_endpoint\"},{\"path\":\"/fallback/login\",\"methods\":[\"GET\"],\"name\":\"fallback_login\",\"endpoint\":\"fallback_login\"},{\"path\":\"/onboarding/get_token\",\"methods\":[\"GET\"],\"name\":\"onboarding\",\"endpoint\":\"onboarding\"},{\"path\":\"/onboarding/claim_token\",\"methods\":[\"POST\"],\"name\":\"claim_onboarding_link\",\"endpoint\":\"claim_onboarding_link\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-length": "57516",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_debug_asyncio-tasks",
+    "run": 5,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"total_active_tasks\":7,\"by_name\":{\"RequestResponseCycle.run_asgi\":1,\"SlackAlerting._run_scheduled_daily_report\":1,\"AlertingHangingRequestCheck.check_for_hanging_requests\":1,\"_adaptive_router_flusher_loop\":1,\"LifespanOn.main\":1,\"LoggingWorker._worker_loop\":1,\"Server.serve\":1}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-length": "277",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_debug_memory_summary",
+    "run": 5,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"worker_pid\":84129,\"status\":\"healthy\",\"memory\":{\"error\":\"Install psutil for memory monitoring: pip install psutil\"},\"caches\":{\"total_items\":4,\"breakdown\":{\"user_api_keys\":{\"count\":0,\"count_readable\":\"0\",\"what_it_stores\":\"Validated API keys for faster authentication\"},\"llm_responses\":{\"count\":2,\"count_readable\":\"2\",\"what_it_stores\":\"LLM responses for identical requests\"},\"usage_tracking\":{\"count\":2,\"count_readable\":\"2\",\"what_it_stores\":\"Usage metrics before database write\"}}},\"garbage_collector\":{\"status\":\"enabled\",\"objects_awaiting_collection\":120}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-length": "556",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_get_utils_supported_openai_params?model=mock",
+    "run": 5,
+    "status": 400,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"detail\":{\"error\":\"Could not map model=mock\"}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-length": "47",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_chat_control",
+    "run": 5,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"id\":\"chatcmpl-cap\",\"created\":0,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null}},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-length": "309",
+      "content-type": "application/json",
+      "x-litellm-call-id": "0117ca51-012a-406f-a372-6c7793b036c0",
+      "x-litellm-model-id": "0e28046ac596ab5dd5f66a54658154863ddf214b1d5ed7afc9c654c7c65be8fd",
+      "x-litellm-model-name": "openai/mockmodel",
+      "x-litellm-model-api-base": "http://127.0.0.1:9998/v1",
+      "x-litellm-version": "1.96.2",
+      "x-litellm-response-cost-original": "0.0",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-key-spend": "0.0",
+      "x-litellm-response-duration-ms": "1.8840000000000001",
+      "x-litellm-overhead-duration-ms": "0.573",
+      "x-litellm-callback-duration-ms": "0.0",
+      "llm_provider-server": "BaseHTTP/0.6 Python/3.9.6",
+      "llm_provider-date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "llm_provider-content-type": "application/json",
+      "llm_provider-content-length": "263",
+      "x-litellm-model-group": "mock",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_chat_bad_model",
+    "run": 5,
+    "status": 400,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"error\":{\"message\":\"/chat/completions: Invalid model name passed in model=does-not-exist-canary. Call `/v1/models` to view available models for your key.\",\"type\":\"None\",\"param\":\"None\",\"code\":\"400\",\"provider_specific_fields\":{\"error\":\"/chat/completions: Invalid model name passed in model=does-not-exist-canary. Call `/v1/models` to view available models for your key.\"}}}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "x-litellm-call-id": "f51e940d-8ad5-41f3-bf66-5e96cea88715",
+      "x-litellm-response-cost": "0",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "372",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_transform_request",
+    "run": 5,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"raw_request_api_base\":\"http://127.0.0.1:9996/models/gemini-2.5-flash:generateContent\",\"raw_request_body\":{\"contents\":[{\"role\":\"user\",\"parts\":[{\"text\":\"ping\"}]}]},\"raw_request_headers\":{\"Content-Type\":\"application/json\",\"x-goog-api-key\":\"my****ey\"},\"error\":null}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-length": "263",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_gemini_pt_generate",
+    "run": 5,
+    "status": 200,
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ],
+    "hit_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "body": "{\"ok\": true, \"echo_path\": \"/v1beta/models/gemini-2.5-flash:generateContent\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "0033b73b-75cf-4bca-8678-a99cad728e4d",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/v1beta/models/gemini-2.5-flash:generateContent",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "129",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_gemini_pt_upload",
+    "run": 5,
+    "status": 200,
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ],
+    "hit_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "body": "{\"ok\": true, \"echo_path\": \"/upload/v1beta/files\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "756450d8-1e37-4158-95b5-9e0cb02f96f7",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/upload/v1beta/files",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "102",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_gemini_pt_models",
+    "run": 5,
+    "status": 200,
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ],
+    "hit_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "body": "{\"ok\": true, \"echo_path\": \"/v1beta/models\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "3557ef96-2839-42a0-b0fa-fc5c674886e7",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/v1beta/models",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "96",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "ll_anthropic_pt",
+    "run": 5,
+    "status": 401,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"invalid x-api-key\"},\"request_id\":\"req_011Ce2nyKuzmEXK1VFvW8QhA\"}",
+    "headers": {
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "x-should-retry": "false",
+      "request-id": "req_011Ce2nyKuzmEXK1VFvW8QhA",
+      "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+      "vary": "Accept-Encoding",
+      "content-security-policy": "default-src 'none'; frame-ancestors 'none'",
+      "cf-cache-status": "DYNAMIC",
+      "x-robots-tag": "none",
+      "cf-ray": "a2b09f780ad885ae-BOM",
+      "x-litellm-call-id": "40d82175-3488-47cc-9f8f-34c71c31bf1b",
+      "x-litellm-model-api-base": "https://api.anthropic.com/v1/messages",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "130",
+      "x-frame-options": "DENY",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    }
+  },
+  {
+    "probe": "sy_get_health",
+    "run": 5,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"status\":\"ok\"}",
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "15",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT"
+    }
+  },
+  {
+    "probe": "sy_get_v1_models",
+    "run": 5,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"data\":[{\"capabilities\":{\"context_window\":null,\"streaming\":true,\"supported_inbound_formats\":[\"openai-chat-completions\",\"openai-responses\",\"anthropic-messages\"],\"tool_calling\":null},\"created\":0,\"display_name\":\"captured-model\",\"id\":\"captured-model\",\"object\":\"model\",\"owned_by\":\"switchyard\",\"type\":\"model\"}],\"default_model\":\"captured-model\",\"first_id\":\"captured-model\",\"has_more\":false,\"last_id\":\"captured-model\",\"model_pool\":[\"captured-model\"],\"models\":[{\"additional_speed_tiers\":[],\"apply_patch_tool_type\":\"freeform\",\"availability_nux\":null,\"base_instructions\":\"You are Codex, a coding agent.\",\"context_window\":null,\"default_reasoning_level\":null,\"default_reasoning_summary\":\"none\",\"default_verbosity\":null,\"description\":\"Switchyard-routed model.\",\"display_name\":\"captured-model\",\"effective_context_window_percent\":95,\"experimental_supported_tools\":[],\"input_modalities\":[\"text\"],\"max_context_window\":null,\"priority\":0,\"shell_type\":\"shell_command\",\"slug\":\"captured-model\",\"support_verbosity\":false,\"supported_in_api\":true,\"supported_reasoning_levels\":[],\"supports_image_detail_original\":false,\"supports_parallel_tool_calls\":true,\"supports_reasoning_summaries\":false,\"supports_search_tool\":false,\"trun",
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "1330",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT"
+    }
+  },
+  {
+    "probe": "sy_get_v1_stats",
+    "run": 5,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"total_requests\":8,\"total_errors\":0,\"total_tokens\":{\"prompt\":8,\"completion\":8,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":16},\"models\":{\"captured-model\":{\"calls\":8,\"errors\":0,\"request_pct\":100.0,\"prompt_tokens\":8,\"max_observed_context_tokens\":2,\"completion_tokens\":8,\"total_tokens\":16,\"token_pct\":100.0,\"cached_tokens\":0,\"cache_creation_tokens\":0,\"reasoning_tokens\":0,\"avg_prompt_tokens\":1.0,\"avg_completion_tokens\":1.0,\"cache_hit_rate\":0.0,\"theoretical_cache_hit_rate\":0.0,\"model_call_latency\":{\"count\":8,\"total_ms\":11.8,\"min_ms\":0.45,\"max_ms\":6.55,\"avg_ms\":1.47,\"p50_ms\":0.74,\"p99_ms\":6.55},\"total_latency\":{\"count\":8,\"total_ms\":17.81,\"min_ms\":0.52,\"max_ms\":11.67,\"avg_ms\":2.23,\"p50_ms\":0.85,\"p99_ms\":11.67}}},\"routing_overhead\":{\"count\":8,\"total_ms\":2.88,\"min_ms\":0.04,\"max_ms\":2.35,\"avg_ms\":0.36,\"p50_ms\":0.08,\"p99_ms\":2.35},\"routing_fallbacks\":{\"context_window\":0,\"unavailable\":0},\"classifier\":{\"total_requests\":0,\"total_errors\":0,\"total_tokens\":{\"prompt\":0,\"completion\":0,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":0},\"models\":{}},\"algorithm_stats\":{}}",
+    "headers": {
+      "content-type": "application/json",
+      "content-length": "1076",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT"
+    }
+  },
+  {
+    "probe": "sy_get_metrics",
+    "run": 5,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "# TYPE switchyard_build_info gauge\nswitchyard_build_info{version=\"0.2.0\",otel_scope_name=\"switchyard\"} 1\n# TYPE switchyard_client_responses_total counter\nswitchyard_client_responses_total{outcome=\"other_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"success\",otel_scope_name=\"switchyard\"} 8\n# TYPE switchyard_completion_tokens_total counter\nswitchyard_completion_tokens_total{model=\"captured-model\",otel_scope_name=\"switchyard\"} 8\n# TYPE switchyard_decisions_total counter\nswitchyard_decisions_total{algorithm=\"passthrough\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\"} 8\n# TYPE switchyard_llm_call_duration_ms histogram\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"0\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"5\"} 7\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"1",
+    "headers": {
+      "content-type": "text/plain; version=0.0.4; charset=utf-8",
+      "content-length": "12842",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT"
+    }
+  },
+  {
+    "probe": "sy_chat_control",
+    "run": 5,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}",
+    "headers": {
+      "content-type": "application/json",
+      "x-model-router-selected-model": "captured-model",
+      "x-model-router-rationale": "passthrough selected target 'captured-model'",
+      "content-length": "245",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT"
+    }
+  },
+  {
+    "probe": "sy_header_x_amz_security_token",
+    "run": 5,
+    "status": 200,
+    "hits": [],
+    "hit_headers": [],
+    "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}",
+    "headers": {
+      "content-type": "application/json",
+      "x-model-router-selected-model": "captured-model",
+      "x-model-router-rationale": "passthrough selected target 'captured-model'",
+      "content-length": "245",
+      "connection": "close",
+      "date": "Fri, 14 Aug 2026 14:24:24 GMT"
+    }
+  }
+]
