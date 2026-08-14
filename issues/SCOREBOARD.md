@@ -32,15 +32,17 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 006 | LiteLLM `/v1/messages` → Responses also drops `is_error` | LiteLLM 1.96.2 (capture rig) | 006 family | ✅ same loss as Switchyard, now on LiteLLM |
 | 007 | LiteLLM `/v1/messages` → Responses **deletes** image bytes in tool_result | LiteLLM 1.96.2 (capture rig) | 007 family | ✅ worse than Switchyard stringify: payload gone |
 | 020 | Client JSON `api_key` replaces the deployment key without `allow_client_side_credentials`; router upserts it so later callers can inherit it | LiteLLM 1.96.2 (mock + live Gemini) | Huntr 4001e1a2 leftover (`api_key` not banned) | ✅ override 5/5 mock and 5/5 live; sticky 4/5 on mock. No real keys leaked. Header `x-goog-api-key` not forwarded on default config |
+| 022 | JSON `extra_headers` / `headers` inject client secrets onto the upstream call and can replace provider auth, bypassing `forward_client_headers_to_llm_api` (default off) | LiteLLM 1.96.2 (mock + live Gemini) | Huntr 4001e1a2 leftover (`extra_headers`/`headers` not banned) | ✅ mock forward 5/5; live Gemini override 5/5 (`API_KEY_INVALID`). HTTP `x-goog-api-key` still dropped (200). Invalid extra_headers 401s the real deployment (later callers 429). No real keys leaked |
 
-**Tally**: 18 distinct defects confirmed on the wire (17 on current releases)
+**Tally**: 19 distinct defects confirmed on the wire (18 on current releases)
 across LiteLLM AND Switchyard, counting 006 as its 4 independent field losses
 plus the LiteLLM copy of that class. LiteLLM confirmed: 001 (stop_reason, 1.82),
 002a (finish_reason), 002b (route drop), 004a (id smuggle), 004b (Responses
 call_id), 008 (IndexError crash), 009 (phantom message), 012 (image
 portability), 016 (thinking leaked), 017 (parallel flag), 018 (document
 deleted), 006/007 (is_error + image deleted via Responses), 020 (client
-`api_key` override + sticky router upsert). Switchyard
+`api_key` override + sticky router upsert), 022 (JSON `extra_headers` /
+`headers` leak and auth override). Switchyard
 confirmed: 005 (id sanitizer), 006 (4 field losses), 007 (multimodal
 stringified), 016 (thinking dropped), 017 (parallel flag), 018 (document
 dumped), 019 (invented cache breakpoint). Honest negatives kept: 003, 013

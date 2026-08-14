@@ -1,0 +1,217 @@
+[
+  {
+    "run": 1,
+    "direct_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"ping\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 8,\n    \"candidatesTokenCount\": 1,\n    \"totalTokenCount\": 27,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 8\n      }\n    ],\n    \"thoughtsTokenCount\": 18,\n    \"serviceTier\": \"standard\"\n  },\n  \"modelVersion\": \"gemini-2.5-flash\",\n  \"responseId\": \"Va1-aoWqDqCE4-EPjKrjYA\"\n}\n"
+    },
+    "direct_invalid_x_goog": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key not valid. Please pass a valid API key.\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_INVALID\",\n        \"domain\": \"googleapis.com\",\n        \"metadata\": {\n          \"service\": \"generativelanguage.googleapis.com\"\n        }\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.LocalizedMessage\",\n        \"locale\": \"en-US\",\n        \"message\": \"API key not valid. Please pass a valid API key.\"\n      }\n    ]\n  }\n}\n"
+    },
+    "direct_real_bearer_plus_invalid_x_goog": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 401,\n    \"message\": \"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.\",\n    \"status\": \"UNAUTHENTICATED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_SERVICE_BLOCKED\",\n        \"metadata\": {\n          \"service\": \"generativelanguage.googleapis.com\",\n          \"method\": \"google.ai.generativelanguage.v1beta.GenerativeService.GenerateContent\"\n        }\n      }\n    ]\n  }\n}\n"
+    },
+    "litellm_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"id\":\"V61-atquENK-g8UP_N6PkAw\",\"created\":1786686806,\"model\":\"gemini-flash\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":null}}],\"usage\":{\"completion_tokens\":4,\"prompt_tokens\":8,\"total_tokens\":12,\"completion_tokens_details\":{\"reasoning_tokens\":4,\"text_tokens\":0},\"prompt_tokens_details\":{\"text_tokens\":8}},\"vertex_ai_grounding_metadata\":[],\"vertex_ai_url_context_metadata\":[],\"vertex_ai_safety_results\":[],\"vertex_ai_citation_metadata\":[],\"service_tier\":\"default\"}"
+    },
+    "litellm_extra_headers_x_goog": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"litellm.AuthenticationError: GeminiException - {\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"API key not valid. Please pass a valid API key.\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.ErrorInfo\\\",\\n        \\\"reason\\\": \\\"API_KEY_INVALID\\\",\\n        \\\"domain\\\": \\\"googleapis.com\\\",\\n        \\\"metadata\\\": {\\n          \\\"service\\\": \\\"generativelanguage.googleapis.com\\\"\\n        }\\n      },\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.LocalizedMessage\\\",\\n        \\\"locale\\\": \\\"en-US\\\",\\n        \\\"message\\\": \\\"API key not valid. Please pass a valid API key.\\\"\\n      }\\n    ]\\n  }\\n}\\n. Received Model Group=gemini-flash\\nAvailable Model Group Fallbacks=None\",\"type\":nul"
+    },
+    "litellm_headers_field_x_goog": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    },
+    "litellm_extra_headers_authorization": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    },
+    "litellm_http_x_goog_header": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    }
+  },
+  {
+    "run": 2,
+    "direct_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"ping\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 8,\n    \"candidatesTokenCount\": 1,\n    \"totalTokenCount\": 27,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 8\n      }\n    ],\n    \"thoughtsTokenCount\": 18,\n    \"serviceTier\": \"standard\"\n  },\n  \"modelVersion\": \"gemini-2.5-flash\",\n  \"responseId\": \"WK1-atW5I4u44-EPr9aG6A8\"\n}\n"
+    },
+    "direct_invalid_x_goog": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key not valid. Please pass a valid API key.\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_INVALID\",\n        \"domain\": \"googleapis.com\",\n        \"metadata\": {\n          \"service\": \"generativelanguage.googleapis.com\"\n        }\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.LocalizedMessage\",\n        \"locale\": \"en-US\",\n        \"message\": \"API key not valid. Please pass a valid API key.\"\n      }\n    ]\n  }\n}\n"
+    },
+    "direct_real_bearer_plus_invalid_x_goog": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 401,\n    \"message\": \"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.\",\n    \"status\": \"UNAUTHENTICATED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_SERVICE_BLOCKED\",\n        \"metadata\": {\n          \"service\": \"generativelanguage.googleapis.com\",\n          \"method\": \"google.ai.generativelanguage.v1beta.GenerativeService.GenerateContent\"\n        }\n      }\n    ]\n  }\n}\n"
+    },
+    "litellm_ok": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    },
+    "litellm_extra_headers_x_goog": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    },
+    "litellm_headers_field_x_goog": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    },
+    "litellm_extra_headers_authorization": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    },
+    "litellm_http_x_goog_header": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    }
+  },
+  {
+    "run": 3,
+    "direct_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"ping\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 8,\n    \"candidatesTokenCount\": 1,\n    \"totalTokenCount\": 29,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 8\n      }\n    ],\n    \"thoughtsTokenCount\": 20,\n    \"serviceTier\": \"standard\"\n  },\n  \"modelVersion\": \"gemini-2.5-flash\",\n  \"responseId\": \"Wq1-apTQELncg8UP-v-B2Q8\"\n}\n"
+    },
+    "direct_invalid_x_goog": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key not valid. Please pass a valid API key.\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_INVALID\",\n        \"domain\": \"googleapis.com\",\n        \"metadata\": {\n          \"service\": \"generativelanguage.googleapis.com\"\n        }\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.LocalizedMessage\",\n        \"locale\": \"en-US\",\n        \"message\": \"API key not valid. Please pass a valid API key.\"\n      }\n    ]\n  }\n}\n"
+    },
+    "direct_real_bearer_plus_invalid_x_goog": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 401,\n    \"message\": \"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.\",\n    \"status\": \"UNAUTHENTICATED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_SERVICE_BLOCKED\",\n        \"metadata\": {\n          \"method\": \"google.ai.generativelanguage.v1beta.GenerativeService.GenerateContent\",\n          \"service\": \"generativelanguage.googleapis.com\"\n        }\n      }\n    ]\n  }\n}\n"
+    },
+    "litellm_ok": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    },
+    "litellm_extra_headers_x_goog": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    },
+    "litellm_headers_field_x_goog": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    },
+    "litellm_extra_headers_authorization": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    },
+    "litellm_http_x_goog_header": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    }
+  },
+  {
+    "run": 4,
+    "direct_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"ping\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 8,\n    \"candidatesTokenCount\": 1,\n    \"totalTokenCount\": 38,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 8\n      }\n    ],\n    \"thoughtsTokenCount\": 29,\n    \"serviceTier\": \"standard\"\n  },\n  \"modelVersion\": \"gemini-2.5-flash\",\n  \"responseId\": \"XK1-aqyZBuX_juMPksjigA4\"\n}\n"
+    },
+    "direct_invalid_x_goog": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key not valid. Please pass a valid API key.\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_INVALID\",\n        \"domain\": \"googleapis.com\",\n        \"metadata\": {\n          \"service\": \"generativelanguage.googleapis.com\"\n        }\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.LocalizedMessage\",\n        \"locale\": \"en-US\",\n        \"message\": \"API key not valid. Please pass a valid API key.\"\n      }\n    ]\n  }\n}\n"
+    },
+    "direct_real_bearer_plus_invalid_x_goog": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 401,\n    \"message\": \"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.\",\n    \"status\": \"UNAUTHENTICATED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_SERVICE_BLOCKED\",\n        \"metadata\": {\n          \"method\": \"google.ai.generativelanguage.v1beta.GenerativeService.GenerateContent\",\n          \"service\": \"generativelanguage.googleapis.com\"\n        }\n      }\n    ]\n  }\n}\n"
+    },
+    "litellm_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"id\":\"Xa1-ar3CLJGBqfkP-sTNoAM\",\"created\":1786686813,\"model\":\"gemini-flash\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":null}}],\"usage\":{\"completion_tokens\":4,\"prompt_tokens\":8,\"total_tokens\":12,\"completion_tokens_details\":{\"reasoning_tokens\":4,\"text_tokens\":0},\"prompt_tokens_details\":{\"text_tokens\":8}},\"vertex_ai_grounding_metadata\":[],\"vertex_ai_url_context_metadata\":[],\"vertex_ai_safety_results\":[],\"vertex_ai_citation_metadata\":[],\"service_tier\":\"default\"}"
+    },
+    "litellm_extra_headers_x_goog": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"litellm.AuthenticationError: GeminiException - {\\n  \\\"error\\\": {\\n    \\\"code\\\": 400,\\n    \\\"message\\\": \\\"API key not valid. Please pass a valid API key.\\\",\\n    \\\"status\\\": \\\"INVALID_ARGUMENT\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.ErrorInfo\\\",\\n        \\\"reason\\\": \\\"API_KEY_INVALID\\\",\\n        \\\"domain\\\": \\\"googleapis.com\\\",\\n        \\\"metadata\\\": {\\n          \\\"service\\\": \\\"generativelanguage.googleapis.com\\\"\\n        }\\n      },\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.LocalizedMessage\\\",\\n        \\\"locale\\\": \\\"en-US\\\",\\n        \\\"message\\\": \\\"API key not valid. Please pass a valid API key.\\\"\\n      }\\n    ]\\n  }\\n}\\n. Received Model Group=gemini-flash\\nAvailable Model Group Fallbacks=None\",\"type\":nul"
+    },
+    "litellm_headers_field_x_goog": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    },
+    "litellm_extra_headers_authorization": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    },
+    "litellm_http_x_goog_header": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    }
+  },
+  {
+    "run": 5,
+    "direct_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"candidates\": [\n    {\n      \"content\": {\n        \"parts\": [\n          {\n            \"text\": \"ping\"\n          }\n        ],\n        \"role\": \"model\"\n      },\n      \"finishReason\": \"STOP\",\n      \"index\": 0\n    }\n  ],\n  \"usageMetadata\": {\n    \"promptTokenCount\": 8,\n    \"candidatesTokenCount\": 1,\n    \"totalTokenCount\": 34,\n    \"promptTokensDetails\": [\n      {\n        \"modality\": \"TEXT\",\n        \"tokenCount\": 8\n      }\n    ],\n    \"thoughtsTokenCount\": 25,\n    \"serviceTier\": \"standard\"\n  },\n  \"modelVersion\": \"gemini-2.5-flash\",\n  \"responseId\": \"Xq1-asjyNPz-juMPyo-i2Q4\"\n}\n"
+    },
+    "direct_invalid_x_goog": {
+      "status": 400,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"API key not valid. Please pass a valid API key.\",\n    \"status\": \"INVALID_ARGUMENT\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_INVALID\",\n        \"domain\": \"googleapis.com\",\n        \"metadata\": {\n          \"service\": \"generativelanguage.googleapis.com\"\n        }\n      },\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.LocalizedMessage\",\n        \"locale\": \"en-US\",\n        \"message\": \"API key not valid. Please pass a valid API key.\"\n      }\n    ]\n  }\n}\n"
+    },
+    "direct_real_bearer_plus_invalid_x_goog": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"code\": 401,\n    \"message\": \"Request had invalid authentication credentials. Expected OAuth 2 access token, login cookie or other valid authentication credential. See https://developers.google.com/identity/sign-in/web/devconsole-project.\",\n    \"status\": \"UNAUTHENTICATED\",\n    \"details\": [\n      {\n        \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\n        \"reason\": \"API_KEY_SERVICE_BLOCKED\",\n        \"metadata\": {\n          \"method\": \"google.ai.generativelanguage.v1beta.GenerativeService.GenerateContent\",\n          \"service\": \"generativelanguage.googleapis.com\"\n        }\n      }\n    ]\n  }\n}\n"
+    },
+    "litellm_ok": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    },
+    "litellm_extra_headers_x_goog": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    },
+    "litellm_headers_field_x_goog": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    },
+    "litellm_extra_headers_authorization": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    },
+    "litellm_http_x_goog_header": {
+      "status": 429,
+      "leaks": [],
+      "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+    }
+  }
+]

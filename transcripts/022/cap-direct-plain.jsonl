@@ -1,0 +1,1 @@
+{"method": "POST", "path": "/v1/chat/completions", "headers": {"Accept-Encoding": "identity", "Content-Length": "107", "Host": "127.0.0.1:9996", "User-Agent": "Python-urllib/3.9", "Content-Type": "application/json", "Connection": "close"}, "body": {"model": "mock", "messages": [{"role": "user", "content": "control_direct_plain run=1"}], "max_tokens": 8}}

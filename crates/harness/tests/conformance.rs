@@ -10,7 +10,8 @@ use kairo::checks::{
     is_error_forwarded, no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
     non_text_block_not_json_dumped, openai_stream_finish_reason, openai_toolcall_id_charset,
     parallel_tool_disable_preserved, reasoning_text_order_preserved,
-    thinking_not_leaked_as_visible_text, thinking_text_forwarded, upstream_bearer_is, Verdict,
+    thinking_not_leaked_as_visible_text, thinking_text_forwarded, upstream_bearer_is,
+    upstream_omits_header_value, Verdict,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -298,5 +299,68 @@ fn litellm_overridden_api_key_sticks_to_next_caller() {
     assert!(
         matches!(v, Verdict::Violation(_)),
         "a later request that did not send api_key must not inherit the previous caller's key: {v:?}"
+    );
+}
+
+// ---- bug 022: JSON extra_headers / headers inject secrets and can replace auth ----
+
+#[test]
+fn litellm_control_does_not_invent_extra_headers() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/022/cap-control.jsonl"),
+        "CANARY_X_GOOG_API_KEY",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "a request with no extra_headers should not grow a goog canary: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_extra_headers_forwards_x_goog_api_key() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/022/cap-extra-headers.jsonl"),
+        "CANARY_X_GOOG_API_KEY",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "JSON extra_headers x-goog-api-key must be caught on the upstream wire: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_headers_field_forwards_x_goog_api_key() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/022/cap-headers-field.jsonl"),
+        "CANARY_X_GOOG_API_KEY",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "JSON headers field must not be a bypass of the extra_headers leak: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_extra_headers_authorization_overrides_deployment() {
+    let v = upstream_bearer_is(
+        &fixture("transcripts/022/cap-extra-headers-auth.jsonl"),
+        "sk-x",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "JSON extra_headers Authorization must be caught replacing the deployment key: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_headers_field_authorization_overrides_deployment() {
+    let v = upstream_bearer_is(
+        &fixture("transcripts/022/cap-headers-field-auth.jsonl"),
+        "sk-x",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "JSON headers Authorization must be caught replacing the deployment key: {v:?}"
     );
 }
