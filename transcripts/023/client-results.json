@@ -1,0 +1,542 @@
+[
+  {
+    "probe": "control_direct",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "sy_plain",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_api_key",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_openai_org",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_x_api_key",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_authorization",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_extra_headers",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_headers",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_api_key",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_api_base",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_store",
+    "run": 1,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "control_direct",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "sy_plain",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_api_key",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_openai_org",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_x_api_key",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_authorization",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_extra_headers",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_headers",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_api_key",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_api_base",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_store",
+    "run": 2,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "control_direct",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "sy_plain",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_api_key",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_openai_org",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_x_api_key",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_authorization",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_extra_headers",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_headers",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_api_key",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_api_base",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_store",
+    "run": 3,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "control_direct",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "sy_plain",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_api_key",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_openai_org",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_x_api_key",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_authorization",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_extra_headers",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_headers",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_api_key",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_api_base",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_store",
+    "run": 4,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "control_direct",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\n  \"id\": \"chatcmpl-cap\",\n  \"object\": \"chat.completion\",\n  \"created\": 0,\n  \"model\": \"captured\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"finish_reason\": \"stop\",\n      \"message\": {\"role\": \"assistant\", \"content\": \"ok\"}\n    }\n  ],\n  \"usage\": {\"prompt_tokens\": 1, \"completion_tokens\": 1, \"total_tokens\": 2}\n}\n"
+    }
+  },
+  {
+    "probe": "sy_plain",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_api_key",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_openai_org",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_x_api_key",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_http_authorization",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_extra_headers",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_headers",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_api_key",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_api_base",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "sy_json_store",
+    "run": 5,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"created\":0,\"id\":\"chatcmpl-cap\",\"model\":\"captured-model\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":1,\"total_tokens\":2}}"
+    }
+  },
+  {
+    "probe": "models",
+    "run": 0,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"data\":[{\"capabilities\":{\"context_window\":null,\"streaming\":true,\"supported_inbound_formats\":[\"openai-chat-completions\",\"openai-responses\",\"anthropic-messages\"],\"tool_calling\":null},\"created\":0,\"display_name\":\"captured-model\",\"id\":\"captured-model\",\"object\":\"model\",\"owned_by\":\"switchyard\",\"type\":\"model\"}],\"default_model\":\"captured-model\",\"first_id\":\"captured-model\",\"has_more\":false,\"last_id\":\"captured-model\",\"model_pool\":[\"captured-model\"],\"models\":[{\"additional_speed_tiers\":[],\"apply_patch_tool_type\":\"freeform\",\"availability_nux\":null,\"base_instructions\":\"You are Codex, a coding agent.\",\"context_window\":null,\"default_reasoning_level\":null,\"default_reasoning_summary\":\"none\",\"default_verbosity\":null,\"description\":\"Switchyard-routed model.\",\"display_name\":\"captured-model\",\"effective_context_window_percent\":95,\"experimental_supported_tools\":[],\"input_modalities\":[\"text\"],\"max_context_window\":null,\"priority\":0,\"shell_type\":\"shell_command\",\"slug\":\"captured-model\",\"support_verbosity\":false,\"supported_in_api\":true,\"supported_reasoning_levels\":[],\"supports_image_detail_original\":false,\"supports_parallel_tool_calls\":true,\"supports_reasoning_summaries\":false,\"supports_search_tool\":false,\"truncation_policy\":{\"limit\":10000,\"mode\":\"tokens\"},\"upgrade\":null,\"visibility\":\"list\",\"web_search_tool_type\":\"text\"}],\"object\":\"list\"}"
+    }
+  },
+  {
+    "probe": "stats",
+    "run": 0,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"total_requests\":50,\"total_errors\":0,\"total_tokens\":{\"prompt\":50,\"completion\":50,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":100},\"models\":{\"captured-model\":{\"calls\":50,\"errors\":0,\"request_pct\":100.0,\"prompt_tokens\":50,\"max_observed_context_tokens\":2,\"completion_tokens\":50,\"total_tokens\":100,\"token_pct\":100.0,\"cached_tokens\":0,\"cache_creation_tokens\":0,\"reasoning_tokens\":0,\"avg_prompt_tokens\":1.0,\"avg_completion_tokens\":1.0,\"cache_hit_rate\":0.0,\"theoretical_cache_hit_rate\":0.0,\"model_call_latency\":{\"count\":50,\"total_ms\":23.04,\"min_ms\":0.2,\"max_ms\":5.53,\"avg_ms\":0.46,\"p50_ms\":0.34,\"p99_ms\":5.53},\"total_latency\":{\"count\":50,\"total_ms\":29.69,\"min_ms\":0.23,\"max_ms\":9.85,\"avg_ms\":0.59,\"p50_ms\":0.37,\"p99_ms\":9.85}}},\"routing_overhead\":{\"count\":50,\"total_ms\":3.44,\"min_ms\":0.02,\"max_ms\":1.93,\"avg_ms\":0.07,\"p50_ms\":0.03,\"p99_ms\":1.93},\"routing_fallbacks\":{\"context_window\":0,\"unavailable\":0},\"classifier\":{\"total_requests\":0,\"total_errors\":0,\"total_tokens\":{\"prompt\":0,\"completion\":0,\"cached\":0,\"cache_creation\":0,\"reasoning\":0,\"total\":0},\"models\":{}},\"algorithm_stats\":{}}"
+    }
+  },
+  {
+    "probe": "metrics",
+    "run": 0,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "# TYPE switchyard_build_info gauge\nswitchyard_build_info{version=\"0.2.0\",otel_scope_name=\"switchyard\"} 1\n# TYPE switchyard_client_responses_total counter\nswitchyard_client_responses_total{outcome=\"other_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_client_responses_total{outcome=\"success\",otel_scope_name=\"switchyard\"} 50\n# TYPE switchyard_completion_tokens_total counter\nswitchyard_completion_tokens_total{model=\"captured-model\",otel_scope_name=\"switchyard\"} 50\n# TYPE switchyard_decisions_total counter\nswitchyard_decisions_total{algorithm=\"passthrough\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\"} 50\n# TYPE switchyard_llm_call_duration_ms histogram\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"0\"} 0\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"5\"} 49\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"10\"} 50\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"25\"} 50\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"50\"} 50\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"75\"} 50\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"100\"} 50\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"250\"} 50\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"500\"} 50\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"750\"} 50\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"1000\"} 50\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"2500\"} 50\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"5000\"} 50\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"7500\"} 50\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"10000\"} 50\nswitchyard_llm_call_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"+Inf\"} 50\nswitchyard_llm_call_duration_ms_sum{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\"} 24.427250000000004\nswitchyard_llm_call_duration_ms_count{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\"} 50\n# TYPE switchyard_llm_calls_total counter\nswitchyard_llm_calls_total{algorithm=\"passthrough\",outcome=\"ok\",selected_model=\"captured-model\",otel_scope_name=\"switchyard\"} 50\n# TYPE switchyard_model_call_latency_ms histogram\nswitchyard_model_call_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"0\"} 0\nswitchyard_model_call_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"5\"} 49\nswitchyard_model_call_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"10\"} 50\nswitchyard_model_call_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"25\"} 50\nswitchyard_model_call_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"50\"} 50\nswitchyard_model_call_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"75\"} 50\nswitchyard_model_call_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"100\"} 50\nswitchyard_model_call_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"250\"} 50\nswitchyard_model_call_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"500\"} 50\nswitchyard_model_call_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"750\"} 50\nswitchyard_model_call_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"1000\"} 50\nswitchyard_model_call_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"2500\"} 50\nswitchyard_model_call_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"5000\"} 50\nswitchyard_model_call_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"7500\"} 50\nswitchyard_model_call_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"10000\"} 50\nswitchyard_model_call_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"+Inf\"} 50\nswitchyard_model_call_latency_ms_sum{model=\"captured-model\",otel_scope_name=\"switchyard\"} 24.427250000000004\nswitchyard_model_call_latency_ms_count{model=\"captured-model\",otel_scope_name=\"switchyard\"} 50\n# TYPE switchyard_prompt_tokens_total counter\nswitchyard_prompt_tokens_total{model=\"captured-model\",otel_scope_name=\"switchyard\"} 50\n# TYPE switchyard_requests_total counter\nswitchyard_requests_total{model=\"captured-model\",otel_scope_name=\"switchyard\"} 50\n# TYPE switchyard_router_retry_recovered_total counter\nswitchyard_router_retry_recovered_total{otel_scope_name=\"switchyard\"} 0\n# TYPE switchyard_routing_overhead_ms histogram\nswitchyard_routing_overhead_ms_bucket{algorithm=\"passthrough\",otel_scope_name=\"switchyard\",le=\"0.1\"} 49\nswitchyard_routing_overhead_ms_bucket{algorithm=\"passthrough\",otel_scope_name=\"switchyard\",le=\"0.25\"} 49\nswitchyard_routing_overhead_ms_bucket{algorithm=\"passthrough\",otel_scope_name=\"switchyard\",le=\"0.5\"} 49\nswitchyard_routing_overhead_ms_bucket{algorithm=\"passthrough\",otel_scope_name=\"switchyard\",le=\"1\"} 49\nswitchyard_routing_overhead_ms_bucket{algorithm=\"passthrough\",otel_scope_name=\"switchyard\",le=\"2.5\"} 50\nswitchyard_routing_overhead_ms_bucket{algorithm=\"passthrough\",otel_scope_name=\"switchyard\",le=\"5\"} 50\nswitchyard_routing_overhead_ms_bucket{algorithm=\"passthrough\",otel_scope_name=\"switchyard\",le=\"10\"} 50\nswitchyard_routing_overhead_ms_bucket{algorithm=\"passthrough\",otel_scope_name=\"switchyard\",le=\"25\"} 50\nswitchyard_routing_overhead_ms_bucket{algorithm=\"passthrough\",otel_scope_name=\"switchyard\",le=\"50\"} 50\nswitchyard_routing_overhead_ms_bucket{algorithm=\"passthrough\",otel_scope_name=\"switchyard\",le=\"100\"} 50\nswitchyard_routing_overhead_ms_bucket{algorithm=\"passthrough\",otel_scope_name=\"switchyard\",le=\"250\"} 50\nswitchyard_routing_overhead_ms_bucket{algorithm=\"passthrough\",otel_scope_name=\"switchyard\",le=\"500\"} 50\nswitchyard_routing_overhead_ms_bucket{algorithm=\"passthrough\",otel_scope_name=\"switchyard\",le=\"1000\"} 50\nswitchyard_routing_overhead_ms_bucket{algorithm=\"passthrough\",otel_scope_name=\"switchyard\",le=\"2500\"} 50\nswitchyard_routing_overhead_ms_bucket{algorithm=\"passthrough\",otel_scope_name=\"switchyard\",le=\"5000\"} 50\nswitchyard_routing_overhead_ms_bucket{algorithm=\"passthrough\",otel_scope_name=\"switchyard\",le=\"+Inf\"} 50\nswitchyard_routing_overhead_ms_sum{algorithm=\"passthrough\",otel_scope_name=\"switchyard\"} 3.4400399999999984\nswitchyard_routing_overhead_ms_count{algorithm=\"passthrough\",otel_scope_name=\"switchyard\"} 50\n# TYPE switchyard_run_duration_ms histogram\nswitchyard_run_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\",le=\"0\"} 0\nswitchyard_run_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\",le=\"5\"} 49\nswitchyard_run_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\",le=\"10\"} 50\nswitchyard_run_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\",le=\"25\"} 50\nswitchyard_run_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\",le=\"50\"} 50\nswitchyard_run_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\",le=\"75\"} 50\nswitchyard_run_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\",le=\"100\"} 50\nswitchyard_run_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\",le=\"250\"} 50\nswitchyard_run_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\",le=\"500\"} 50\nswitchyard_run_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\",le=\"750\"} 50\nswitchyard_run_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\",le=\"1000\"} 50\nswitchyard_run_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\",le=\"2500\"} 50\nswitchyard_run_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\",le=\"5000\"} 50\nswitchyard_run_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\",le=\"7500\"} 50\nswitchyard_run_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\",le=\"10000\"} 50\nswitchyard_run_duration_ms_bucket{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\",le=\"+Inf\"} 50\nswitchyard_run_duration_ms_sum{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\"} 25.469622999999988\nswitchyard_run_duration_ms_count{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\"} 50\n# TYPE switchyard_runs_total counter\nswitchyard_runs_total{algorithm=\"passthrough\",outcome=\"ok\",otel_scope_name=\"switchyard\"} 50\n# TYPE switchyard_total_errors gauge\nswitchyard_total_errors{otel_scope_name=\"switchyard\"} 0\n# TYPE switchyard_total_latency_ms histogram\nswitchyard_total_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"0\"} 0\nswitchyard_total_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"5\"} 49\nswitchyard_total_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"10\"} 50\nswitchyard_total_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"25\"} 50\nswitchyard_total_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"50\"} 50\nswitchyard_total_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"75\"} 50\nswitchyard_total_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"100\"} 50\nswitchyard_total_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"250\"} 50\nswitchyard_total_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"500\"} 50\nswitchyard_total_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"750\"} 50\nswitchyard_total_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"1000\"} 50\nswitchyard_total_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"2500\"} 50\nswitchyard_total_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"5000\"} 50\nswitchyard_total_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"7500\"} 50\nswitchyard_total_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"10000\"} 50\nswitchyard_total_latency_ms_bucket{model=\"captured-model\",otel_scope_name=\"switchyard\",le=\"+Inf\"} 50\nswitchyard_total_latency_ms_sum{model=\"captured-model\",otel_scope_name=\"switchyard\"} 29.689754000000008\nswitchyard_total_latency_ms_count{model=\"captured-model\",otel_scope_name=\"switchyard\"} 50\n# TYPE switchyard_total_requests gauge\nswitchyard_total_requests{otel_scope_name=\"switchyard\"} 50\n# TYPE switchyard_upstream_attempts_total counter\nswitchyard_upstream_attempts_total{code=\"200\",outcome=\"success\",otel_scope_name=\"switchyard\"} 50\nswitchyard_upstream_attempts_total{code=\"404\",outcome=\"other_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_upstream_attempts_total{code=\"429\",outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_upstream_attempts_total{code=\"500\",outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_upstream_attempts_total{code=\"504\",outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 0\nswitchyard_upstream_attempts_total{code=\"none\",outcome=\"retryable_error\",otel_scope_name=\"switchyard\"} 0\n# HELP target_info Target metadata\n# TYPE target_info gauge\ntarget_info{service_name=\"switchyard-server\",telemetry_sdk_language=\"rust\",telemetry_sdk_name=\"opentelemetry\",telemetry_sdk_version=\"0.32.1\"} 1\n"
+    }
+  },
+  {
+    "probe": "health",
+    "run": 0,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"status\":\"ok\"}"
+    }
+  },
+  {
+    "probe": "stats_reset",
+    "run": 0,
+    "client": {
+      "ok": true,
+      "status": 200,
+      "body": "{\"status\":\"reset\"}"
+    }
+  }
+]

@@ -1,0 +1,12 @@
+schema_version = 1
+[llm_clients.openai]
+format = "openai_chat"
+base_url = "https://api.openai.com/v1"
+api_key_env = "OPENAI_API_KEY"
+[targets.o]
+id = "gpt-4o-mini"
+llm_client = "openai"
+[routes.primary]
+id = "gpt-4o-mini"
+type = "passthrough"
+target = "o"
