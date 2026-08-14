@@ -10,7 +10,8 @@ use kairo::checks::{
     is_error_forwarded, no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
     non_text_block_not_json_dumped, openai_stream_finish_reason, openai_toolcall_id_charset,
     parallel_tool_disable_preserved, reasoning_text_order_preserved,
-    thinking_not_leaked_as_visible_text, thinking_text_forwarded, upstream_bearer_is, Verdict,
+    thinking_not_leaked_as_visible_text, thinking_text_forwarded, upstream_bearer_is,
+    upstream_omits_header_value, Verdict,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -298,5 +299,57 @@ fn litellm_overridden_api_key_sticks_to_next_caller() {
     assert!(
         matches!(v, Verdict::Violation(_)),
         "a later request that did not send api_key must not inherit the previous caller's key: {v:?}"
+    );
+}
+
+// ---- bug 023: Switchyard forwards api-key and OpenAI org/project headers ----
+
+#[test]
+fn switchyard_control_does_not_invent_api_key_header() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/023/cap-control.jsonl"),
+        "CANARY_AZURE_API_KEY",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "a request with no api-key header should not grow one: {v:?}"
+    );
+}
+
+#[test]
+fn switchyard_forwards_api_key_header() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/023/cap-api-key.jsonl"),
+        "CANARY_AZURE_API_KEY",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "client api-key must be caught on the upstream wire: {v:?}"
+    );
+}
+
+#[test]
+fn switchyard_forwards_openai_organization_header() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/023/cap-openai-org.jsonl"),
+        "CANARY_OPENAI_ORG",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "client OpenAI-Organization must be caught on the upstream wire: {v:?}"
+    );
+}
+
+#[test]
+fn switchyard_strips_reserved_x_api_key() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/023/cap-x-api-key-stripped.jsonl"),
+        "CANARY_X_API_KEY",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "reserved x-api-key should still be stripped: {v:?}"
     );
 }

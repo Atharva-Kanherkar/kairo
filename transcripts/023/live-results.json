@@ -1,0 +1,292 @@
+[
+  {
+    "run": 1,
+    "direct_gemini_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786687764,\"id\":\"E7F-apyGH_rZjuMP4f-FiQ4\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "direct_gemini_api_key_invalid": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786687764,\"id\":\"FLF-arnOJdK-g8UPtdmPkAw\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "sy_gemini_ok": {
+      "status": 404,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 404,\\n    \\\"message\\\": \\\"models/gemini-flash is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.\\\",\\n    \\\"status\\\": \\\"NOT_FOUND\\\"\\n  }\\n}\\n]\",\"type\":\"upstream_error\"}}"
+    },
+    "sy_gemini_api_key": {
+      "status": 404,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 404,\\n    \\\"message\\\": \\\"models/gemini-flash is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.\\\",\\n    \\\"status\\\": \\\"NOT_FOUND\\\"\\n  }\\n}\\n]\",\"type\":\"upstream_error\"}}"
+    },
+    "sy_gemini_org": {
+      "status": 404,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 404,\\n    \\\"message\\\": \\\"models/gemini-flash is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.\\\",\\n    \\\"status\\\": \\\"NOT_FOUND\\\"\\n  }\\n}\\n]\",\"type\":\"upstream_error\"}}"
+    },
+    "direct_openai_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"id\": \"chatcmpl-ECfOZjOR9mwTfGRRhG3AyF9qyK0e7\",\n  \"object\": \"chat.completion\",\n  \"created\": 1786687767,\n  \"model\": \"gpt-4o-mini-2024-07-18\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Ping.\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 14,\n    \"completion_tokens\": 2,\n    \"total_tokens\": 16,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": \"fp_9af"
+    },
+    "direct_openai_invalid_org": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"message\": \"OpenAI-Organization header should match organization for API key\",\n    \"type\": \"invalid_request_error\",\n    \"code\": \"mismatched_organization\",\n    \"param\": null\n  },\n  \"status\": 401\n}"
+    },
+    "direct_openai_api_key_invalid": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"id\": \"chatcmpl-ECfObkCRnFx00xTh2QCD4my6HPZ7W\",\n  \"object\": \"chat.completion\",\n  \"created\": 1786687769,\n  \"model\": \"gpt-4o-mini-2024-07-18\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Ping.\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 14,\n    \"completion_tokens\": 2,\n    \"total_tokens\": 16,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": \"fp_9af"
+    },
+    "sy_openai_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"annotations\":[],\"content\":\"Ping.\",\"refusal\":null,\"role\":\"assistant\"}}],\"created\":1786687770,\"id\":\"chatcmpl-ECfOc4QloXFv176P1NAROVVlI5h2k\",\"model\":\"gpt-4o-mini\",\"object\":\"chat.completion\",\"service_tier\":\"default\",\"system_fingerprint\":\"fp_9afcdcbeed\",\"usage\":{\"completion_tokens\":2,\"completion_tokens_details\":{\"accepted_prediction_tokens\":0,\"audio_tokens\":0,\"reasoning_tokens\":0,\"rejected_prediction_tokens\":0},\"prompt_tokens\":14,\"prompt_tokens_details\":{\"audio_tokens\":0,\"cached_tokens\":0},\"total_tokens\":16}}"
+    },
+    "sy_openai_invalid_org": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"OpenAI-Organization header should match organization for API key\",\"type\":\"upstream_error\"}}"
+    },
+    "sy_openai_api_key": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"annotations\":[],\"content\":\"Ping.\",\"refusal\":null,\"role\":\"assistant\"}}],\"created\":1786687771,\"id\":\"chatcmpl-ECfOdtHGk9rjbIFWGTf0Omm2GYGH4\",\"model\":\"gpt-4o-mini\",\"object\":\"chat.completion\",\"service_tier\":\"default\",\"system_fingerprint\":\"fp_9afcdcbeed\",\"usage\":{\"completion_tokens\":2,\"completion_tokens_details\":{\"accepted_prediction_tokens\":0,\"audio_tokens\":0,\"reasoning_tokens\":0,\"rejected_prediction_tokens\":0},\"prompt_tokens\":14,\"prompt_tokens_details\":{\"audio_tokens\":0,\"cached_tokens\":0},\"total_tokens\":16}}"
+    }
+  },
+  {
+    "run": 2,
+    "direct_gemini_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"content\":\"ping\",\"role\":\"assistant\"}}],\"created\":1786687772,\"id\":\"G7F-auiWPNi3juMPhuDlkA0\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "direct_gemini_api_key_invalid": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786687773,\"id\":\"HbF-ap-OAdK-g8UPwt-PkAw\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "sy_gemini_ok": {
+      "status": 404,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 404,\\n    \\\"message\\\": \\\"models/gemini-flash is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.\\\",\\n    \\\"status\\\": \\\"NOT_FOUND\\\"\\n  }\\n}\\n]\",\"type\":\"upstream_error\"}}"
+    },
+    "sy_gemini_api_key": {
+      "status": 404,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 404,\\n    \\\"message\\\": \\\"models/gemini-flash is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.\\\",\\n    \\\"status\\\": \\\"NOT_FOUND\\\"\\n  }\\n}\\n]\",\"type\":\"upstream_error\"}}"
+    },
+    "sy_gemini_org": {
+      "status": 404,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 404,\\n    \\\"message\\\": \\\"models/gemini-flash is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.\\\",\\n    \\\"status\\\": \\\"NOT_FOUND\\\"\\n  }\\n}\\n]\",\"type\":\"upstream_error\"}}"
+    },
+    "direct_openai_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"id\": \"chatcmpl-ECfOhasmsrRs1N8L3Qa2W0DQcQA05\",\n  \"object\": \"chat.completion\",\n  \"created\": 1786687775,\n  \"model\": \"gpt-4o-mini-2024-07-18\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Ping.\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 14,\n    \"completion_tokens\": 2,\n    \"total_tokens\": 16,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": \"fp_9af"
+    },
+    "direct_openai_invalid_org": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"message\": \"OpenAI-Organization header should match organization for API key\",\n    \"type\": \"invalid_request_error\",\n    \"code\": \"mismatched_organization\",\n    \"param\": null\n  },\n  \"status\": 401\n}"
+    },
+    "direct_openai_api_key_invalid": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"id\": \"chatcmpl-ECfOiybpzCajvdM1jcv8gCVR6BxLf\",\n  \"object\": \"chat.completion\",\n  \"created\": 1786687776,\n  \"model\": \"gpt-4o-mini-2024-07-18\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Ping.\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 14,\n    \"completion_tokens\": 2,\n    \"total_tokens\": 16,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": \"fp_9af"
+    },
+    "sy_openai_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"annotations\":[],\"content\":\"Ping.\",\"refusal\":null,\"role\":\"assistant\"}}],\"created\":1786687777,\"id\":\"chatcmpl-ECfOj16A6hSvcz29LSxS8m9Pc2LmW\",\"model\":\"gpt-4o-mini\",\"object\":\"chat.completion\",\"service_tier\":\"default\",\"system_fingerprint\":\"fp_9afcdcbeed\",\"usage\":{\"completion_tokens\":2,\"completion_tokens_details\":{\"accepted_prediction_tokens\":0,\"audio_tokens\":0,\"reasoning_tokens\":0,\"rejected_prediction_tokens\":0},\"prompt_tokens\":14,\"prompt_tokens_details\":{\"audio_tokens\":0,\"cached_tokens\":0},\"total_tokens\":16}}"
+    },
+    "sy_openai_invalid_org": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"OpenAI-Organization header should match organization for API key\",\"type\":\"upstream_error\"}}"
+    },
+    "sy_openai_api_key": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"annotations\":[],\"content\":\"Ping.\",\"refusal\":null,\"role\":\"assistant\"}}],\"created\":1786687778,\"id\":\"chatcmpl-ECfOk6JS0HJ2Z3i05H5QywKbCeTAh\",\"model\":\"gpt-4o-mini\",\"object\":\"chat.completion\",\"service_tier\":\"default\",\"system_fingerprint\":\"fp_9afcdcbeed\",\"usage\":{\"completion_tokens\":2,\"completion_tokens_details\":{\"accepted_prediction_tokens\":0,\"audio_tokens\":0,\"reasoning_tokens\":0,\"rejected_prediction_tokens\":0},\"prompt_tokens\":14,\"prompt_tokens_details\":{\"audio_tokens\":0,\"cached_tokens\":0},\"total_tokens\":16}}"
+    }
+  },
+  {
+    "run": 3,
+    "direct_gemini_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"content\":\"ping\",\"role\":\"assistant\"}}],\"created\":1786687779,\"id\":\"IrF-avrjPMGq4-EP-4SpkAU\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "direct_gemini_api_key_invalid": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"content\":\"ping\",\"role\":\"assistant\"}}],\"created\":1786687780,\"id\":\"JLF-aq1A_P6O4w_Kj6LZDg\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":1,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "sy_gemini_ok": {
+      "status": 404,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 404,\\n    \\\"message\\\": \\\"models/gemini-flash is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.\\\",\\n    \\\"status\\\": \\\"NOT_FOUND\\\"\\n  }\\n}\\n]\",\"type\":\"upstream_error\"}}"
+    },
+    "sy_gemini_api_key": {
+      "status": 404,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 404,\\n    \\\"message\\\": \\\"models/gemini-flash is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.\\\",\\n    \\\"status\\\": \\\"NOT_FOUND\\\"\\n  }\\n}\\n]\",\"type\":\"upstream_error\"}}"
+    },
+    "sy_gemini_org": {
+      "status": 404,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 404,\\n    \\\"message\\\": \\\"models/gemini-flash is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.\\\",\\n    \\\"status\\\": \\\"NOT_FOUND\\\"\\n  }\\n}\\n]\",\"type\":\"upstream_error\"}}"
+    },
+    "direct_openai_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"id\": \"chatcmpl-ECfOn8COmjXjDBPGuNpaypiHtyRsT\",\n  \"object\": \"chat.completion\",\n  \"created\": 1786687781,\n  \"model\": \"gpt-4o-mini-2024-07-18\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Ping.\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 14,\n    \"completion_tokens\": 2,\n    \"total_tokens\": 16,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": \"fp_9af"
+    },
+    "direct_openai_invalid_org": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"message\": \"OpenAI-Organization header should match organization for API key\",\n    \"type\": \"invalid_request_error\",\n    \"code\": \"mismatched_organization\",\n    \"param\": null\n  },\n  \"status\": 401\n}"
+    },
+    "direct_openai_api_key_invalid": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"id\": \"chatcmpl-ECfOplG6wX3R3sAZMcTgFFh8gMyuu\",\n  \"object\": \"chat.completion\",\n  \"created\": 1786687783,\n  \"model\": \"gpt-4o-mini-2024-07-18\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Ping.\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 14,\n    \"completion_tokens\": 2,\n    \"total_tokens\": 16,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": \"fp_9af"
+    },
+    "sy_openai_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"annotations\":[],\"content\":\"Ping.\",\"refusal\":null,\"role\":\"assistant\"}}],\"created\":1786687783,\"id\":\"chatcmpl-ECfOp0WMq1OpKT5vNQccMnFv5ioVV\",\"model\":\"gpt-4o-mini\",\"object\":\"chat.completion\",\"service_tier\":\"default\",\"system_fingerprint\":\"fp_9afcdcbeed\",\"usage\":{\"completion_tokens\":2,\"completion_tokens_details\":{\"accepted_prediction_tokens\":0,\"audio_tokens\":0,\"reasoning_tokens\":0,\"rejected_prediction_tokens\":0},\"prompt_tokens\":14,\"prompt_tokens_details\":{\"audio_tokens\":0,\"cached_tokens\":0},\"total_tokens\":16}}"
+    },
+    "sy_openai_invalid_org": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"OpenAI-Organization header should match organization for API key\",\"type\":\"upstream_error\"}}"
+    },
+    "sy_openai_api_key": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"annotations\":[],\"content\":\"Ping.\",\"refusal\":null,\"role\":\"assistant\"}}],\"created\":1786687784,\"id\":\"chatcmpl-ECfOqLDjcaGTdqd9uK2q1dZUW0DWk\",\"model\":\"gpt-4o-mini\",\"object\":\"chat.completion\",\"service_tier\":\"default\",\"system_fingerprint\":\"fp_9afcdcbeed\",\"usage\":{\"completion_tokens\":2,\"completion_tokens_details\":{\"accepted_prediction_tokens\":0,\"audio_tokens\":0,\"reasoning_tokens\":0,\"rejected_prediction_tokens\":0},\"prompt_tokens\":14,\"prompt_tokens_details\":{\"audio_tokens\":0,\"cached_tokens\":0},\"total_tokens\":16}}"
+    }
+  },
+  {
+    "run": 4,
+    "direct_gemini_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786687786,\"id\":\"KbF-ara4KIXOjuMPzP-QiQo\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "direct_gemini_api_key_invalid": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786687787,\"id\":\"KrF-aoqrMfv4juMPuZME\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "sy_gemini_ok": {
+      "status": 404,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 404,\\n    \\\"message\\\": \\\"models/gemini-flash is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.\\\",\\n    \\\"status\\\": \\\"NOT_FOUND\\\"\\n  }\\n}\\n]\",\"type\":\"upstream_error\"}}"
+    },
+    "sy_gemini_api_key": {
+      "status": 404,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 404,\\n    \\\"message\\\": \\\"models/gemini-flash is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.\\\",\\n    \\\"status\\\": \\\"NOT_FOUND\\\"\\n  }\\n}\\n]\",\"type\":\"upstream_error\"}}"
+    },
+    "sy_gemini_org": {
+      "status": 404,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 404,\\n    \\\"message\\\": \\\"models/gemini-flash is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.\\\",\\n    \\\"status\\\": \\\"NOT_FOUND\\\"\\n  }\\n}\\n]\",\"type\":\"upstream_error\"}}"
+    },
+    "direct_openai_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"id\": \"chatcmpl-ECfOuuLsKcZbRLxqsKP2cHD6JslKU\",\n  \"object\": \"chat.completion\",\n  \"created\": 1786687788,\n  \"model\": \"gpt-4o-mini-2024-07-18\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Ping.\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 14,\n    \"completion_tokens\": 2,\n    \"total_tokens\": 16,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": \"fp_9af"
+    },
+    "direct_openai_invalid_org": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"message\": \"OpenAI-Organization header should match organization for API key\",\n    \"type\": \"invalid_request_error\",\n    \"code\": \"mismatched_organization\",\n    \"param\": null\n  },\n  \"status\": 401\n}"
+    },
+    "direct_openai_api_key_invalid": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"id\": \"chatcmpl-ECfOwVsQZMpClT7o3SBJjld8xgOuS\",\n  \"object\": \"chat.completion\",\n  \"created\": 1786687790,\n  \"model\": \"gpt-4o-mini-2024-07-18\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Ping.\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 14,\n    \"completion_tokens\": 2,\n    \"total_tokens\": 16,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": \"fp_9af"
+    },
+    "sy_openai_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"annotations\":[],\"content\":\"Ping.\",\"refusal\":null,\"role\":\"assistant\"}}],\"created\":1786687790,\"id\":\"chatcmpl-ECfOwMkWJ0G0rCG2FmDSGVjxsWoCA\",\"model\":\"gpt-4o-mini\",\"object\":\"chat.completion\",\"service_tier\":\"default\",\"system_fingerprint\":\"fp_9afcdcbeed\",\"usage\":{\"completion_tokens\":2,\"completion_tokens_details\":{\"accepted_prediction_tokens\":0,\"audio_tokens\":0,\"reasoning_tokens\":0,\"rejected_prediction_tokens\":0},\"prompt_tokens\":14,\"prompt_tokens_details\":{\"audio_tokens\":0,\"cached_tokens\":0},\"total_tokens\":16}}"
+    },
+    "sy_openai_invalid_org": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"OpenAI-Organization header should match organization for API key\",\"type\":\"upstream_error\"}}"
+    },
+    "sy_openai_api_key": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"annotations\":[],\"content\":\"Ping.\",\"refusal\":null,\"role\":\"assistant\"}}],\"created\":1786687791,\"id\":\"chatcmpl-ECfOxDI35HNn18N4BCKto7GHTiaFo\",\"model\":\"gpt-4o-mini\",\"object\":\"chat.completion\",\"service_tier\":\"default\",\"system_fingerprint\":\"fp_9afcdcbeed\",\"usage\":{\"completion_tokens\":2,\"completion_tokens_details\":{\"accepted_prediction_tokens\":0,\"audio_tokens\":0,\"reasoning_tokens\":0,\"rejected_prediction_tokens\":0},\"prompt_tokens\":14,\"prompt_tokens_details\":{\"audio_tokens\":0,\"cached_tokens\":0},\"total_tokens\":16}}"
+    }
+  },
+  {
+    "run": 5,
+    "direct_gemini_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786687793,\"id\":\"MLF-apPWJ7bHg8UP6tP00A8\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "direct_gemini_api_key_invalid": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\"}}],\"created\":1786687794,\"id\":\"MbF-aq_NM6vdg8UPyZfBsAM\",\"model\":\"gemini-2.5-flash\",\"object\":\"chat.completion\",\"usage\":{\"completion_tokens\":0,\"prompt_tokens\":8,\"total_tokens\":12}}"
+    },
+    "sy_gemini_ok": {
+      "status": 404,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 404,\\n    \\\"message\\\": \\\"models/gemini-flash is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.\\\",\\n    \\\"status\\\": \\\"NOT_FOUND\\\"\\n  }\\n}\\n]\",\"type\":\"upstream_error\"}}"
+    },
+    "sy_gemini_api_key": {
+      "status": 404,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 404,\\n    \\\"message\\\": \\\"models/gemini-flash is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.\\\",\\n    \\\"status\\\": \\\"NOT_FOUND\\\"\\n  }\\n}\\n]\",\"type\":\"upstream_error\"}}"
+    },
+    "sy_gemini_org": {
+      "status": 404,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"[{\\n  \\\"error\\\": {\\n    \\\"code\\\": 404,\\n    \\\"message\\\": \\\"models/gemini-flash is not found for API version v1main, or is not supported for generateContent. Call ModelService.ListModels to see the list of available models and their supported methods.\\\",\\n    \\\"status\\\": \\\"NOT_FOUND\\\"\\n  }\\n}\\n]\",\"type\":\"upstream_error\"}}"
+    },
+    "direct_openai_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"id\": \"chatcmpl-ECfP1VMPZA2HYxzROUTSSUINrtHMU\",\n  \"object\": \"chat.completion\",\n  \"created\": 1786687795,\n  \"model\": \"gpt-4o-mini-2024-07-18\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Ping.\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 14,\n    \"completion_tokens\": 2,\n    \"total_tokens\": 16,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": \"fp_9af"
+    },
+    "direct_openai_invalid_org": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\n  \"error\": {\n    \"message\": \"OpenAI-Organization header should match organization for API key\",\n    \"type\": \"invalid_request_error\",\n    \"code\": \"mismatched_organization\",\n    \"param\": null\n  },\n  \"status\": 401\n}"
+    },
+    "direct_openai_api_key_invalid": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\n  \"id\": \"chatcmpl-ECfP2qnRRneRfmi48oy7Oe5xeJWvo\",\n  \"object\": \"chat.completion\",\n  \"created\": 1786687796,\n  \"model\": \"gpt-4o-mini-2024-07-18\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Ping.\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 14,\n    \"completion_tokens\": 2,\n    \"total_tokens\": 16,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": \"fp_9af"
+    },
+    "sy_openai_ok": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"annotations\":[],\"content\":\"Ping.\",\"refusal\":null,\"role\":\"assistant\"}}],\"created\":1786687797,\"id\":\"chatcmpl-ECfP3Vne0As6PpVUcaBCCHLRtu8AU\",\"model\":\"gpt-4o-mini\",\"object\":\"chat.completion\",\"service_tier\":\"default\",\"system_fingerprint\":\"fp_9afcdcbeed\",\"usage\":{\"completion_tokens\":2,\"completion_tokens_details\":{\"accepted_prediction_tokens\":0,\"audio_tokens\":0,\"reasoning_tokens\":0,\"rejected_prediction_tokens\":0},\"prompt_tokens\":14,\"prompt_tokens_details\":{\"audio_tokens\":0,\"cached_tokens\":0},\"total_tokens\":16}}"
+    },
+    "sy_openai_invalid_org": {
+      "status": 401,
+      "leaks": [],
+      "body": "{\"error\":{\"code\":\"upstream_error\",\"message\":\"OpenAI-Organization header should match organization for API key\",\"type\":\"upstream_error\"}}"
+    },
+    "sy_openai_api_key": {
+      "status": 200,
+      "leaks": [],
+      "body": "{\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"logprobs\":null,\"message\":{\"annotations\":[],\"content\":\"Ping.\",\"refusal\":null,\"role\":\"assistant\"}}],\"created\":1786687798,\"id\":\"chatcmpl-ECfP4cn85g7ka57EMsPQvdnxo4VuZ\",\"model\":\"gpt-4o-mini\",\"object\":\"chat.completion\",\"service_tier\":\"default\",\"system_fingerprint\":\"fp_9afcdcbeed\",\"usage\":{\"completion_tokens\":2,\"completion_tokens_details\":{\"accepted_prediction_tokens\":0,\"audio_tokens\":0,\"reasoning_tokens\":0,\"rejected_prediction_tokens\":0},\"prompt_tokens\":14,\"prompt_tokens_details\":{\"audio_tokens\":0,\"cached_tokens\":0},\"total_tokens\":16}}"
+    }
+  }
+]

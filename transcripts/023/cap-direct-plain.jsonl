@@ -1,0 +1,1 @@
+{"method": "POST", "path": "/v1/chat/completions", "headers": {"Accept-Encoding": "identity", "Content-Length": "111", "Host": "127.0.0.1:9999", "User-Agent": "Python-urllib/3.9", "Content-Type": "application/json", "Connection": "close"}, "body": {"model": "captured-model", "messages": [{"role": "user", "content": "control_direct run=1"}], "max_tokens": 8}}

@@ -1,0 +1,1 @@
+{"method": "POST", "path": "/v1/chat/completions", "headers": {"content-type": "application/json", "user-agent": "Python-urllib/3.9", "authorization": "Bearer x", "accept": "*/*", "host": "127.0.0.1:9999", "content-length": "97"}, "body": {"max_tokens": 8, "messages": [{"content": "sy_plain run=1", "role": "user"}], "model": "captured-model"}}
