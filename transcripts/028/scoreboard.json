@@ -1,0 +1,236 @@
+{
+  "ll_get_health": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "ll_get_health_liveliness": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "ll_get_health_readiness": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "ll_get_v1_models": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "ll_get_model_info": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "ll_get_settings": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "ll_get_metrics": {
+    "n": 5,
+    "statuses": {
+      "404": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "ll_get_key_info": {
+    "n": 5,
+    "statuses": {
+      "500": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "ll_get_spend_logs": {
+    "n": 5,
+    "statuses": {
+      "500": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "ll_get_config_yaml": {
+    "n": 5,
+    "statuses": {
+      "422": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "ll_get_routes": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "ll_get_debug_asyncio-tasks": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "ll_get_debug_memory_summary": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "ll_get_utils_supported_openai_params?model=mock": {
+    "n": 5,
+    "statuses": {
+      "400": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "ll_chat_control": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "ll_chat_bad_model": {
+    "n": 5,
+    "statuses": {
+      "400": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "ll_transform_request": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "ll_gemini_pt_generate": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 5,
+    "hit_headers": {
+      "location": 5,
+      "x-goog-upload-url": 5
+    },
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ]
+  },
+  "ll_gemini_pt_upload": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 5,
+    "hit_headers": {
+      "location": 5,
+      "x-goog-upload-url": 5
+    },
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ]
+  },
+  "ll_gemini_pt_models": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 5,
+    "hit_headers": {
+      "location": 5,
+      "x-goog-upload-url": 5
+    },
+    "hits": [
+      "CANARY_GEMINI_PASSTHROUGH_KEY"
+    ]
+  },
+  "ll_anthropic_pt": {
+    "n": 5,
+    "statuses": {
+      "401": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "sy_get_health": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "sy_get_v1_models": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "sy_get_v1_stats": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "sy_get_metrics": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "sy_chat_control": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  },
+  "sy_header_x_amz_security_token": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hit_headers": {}
+  }
+}

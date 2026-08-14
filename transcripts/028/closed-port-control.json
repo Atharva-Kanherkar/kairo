@@ -1,0 +1,7 @@
+{
+  "status": 500,
+  "headers": {
+    "x-litellm-model-api-base": "http://127.0.0.1:1/v1beta/models/gemini-2.5-flash:generateContent"
+  },
+  "body": "{\"error\":{\"message\":\"Cannot connect to host 127.0.0.1:1 ssl:<ssl.SSLContext object at 0x1130dddb0> [Connect call failed ('127.0.0.1', 1)]\",\"type\":\"None\",\"param\":\"None\",\"code\":\"500\"}}"
+}

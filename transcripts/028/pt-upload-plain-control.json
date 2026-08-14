@@ -1,0 +1,8 @@
+{
+  "status": 200,
+  "headers": {
+    "x-guploader-uploadid": "AKhXX7L6HJolqIKvXDonXic5wMbMaZkflukk6xiKwFiqOcuXcNlTwjRA9DThtxdBBzUKd4ck",
+    "x-litellm-model-api-base": "https://generativelanguage.googleapis.com/upload/v1beta/files"
+  },
+  "body": "{\n  \"file\": {\n    \"name\": \"files/b8aao0cs9js9\",\n    \"mimeType\": \"application/json\",\n    \"sizeBytes\": \"40\",\n    \"createTime\": \"2026-08-14T15:17:10.204536Z\",\n    \"updateTime\": \"2026-08-14T15:17:10.204536Z\",\n    \"expirationTime\": \"2026-08-16T15:17:09.032568403Z\",\n    \"sha256Hash\": \"NGJmZWM3YzVmMzdjODA0NWU0ZjQyMDA4ZWQ2MWE5N2ZmZDdlZWZlYTJjNjk5ZjNjY2ZiMzc3YmVlYjNjOGFmNQ==\",\n    \"uri\": \"https://generativ"
+}
