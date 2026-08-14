@@ -1,7 +1,7 @@
 # 027, Switchyard forwards client `x-goog-api-key` the reserved list missed
 
-- **Upstream**: no public ticket. NVIDIA `SECURITY.md` asks for mail to
-  `psirt@nvidia.com`. Adjacent to 023: `RESERVED_HEADERS` in
+- **Upstream**: [Switchyard#410](https://github.com/NVIDIA-NeMo/Switchyard/issues/410).
+  Adjacent to 023: `RESERVED_HEADERS` in
   `libsy-llm-client/src/client.rs` strips `authorization`, `x-api-key`,
   and `cookie`. It does not strip `x-goog-api-key` (Google's credential
   header). 023 already froze `api-key` and `OpenAI-Organization`. This is
