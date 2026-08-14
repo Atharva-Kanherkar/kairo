@@ -1,0 +1,222 @@
+{
+  "ll_control": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "ll_extra_headers_auth": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "ll_extra_headers_goog": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "ll_extra_headers_azure": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "ll_extra_headers_org": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "ll_default_headers_auth": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "ll_headers_auth": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "ll_organization": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "ll_openai_organization": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "ll_api_key_body": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "ll_extra_body_api_key": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "ll_extra_body_api_base": {
+    "n": 5,
+    "statuses": {
+      "500": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "ll_aws_session_token": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "ll_down_chat": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "sy_control": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "sy_header_x_goog": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "sy_json_organization": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "sy_json_api_key": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "sy_json_extra_headers": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "ll_down_health": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 5,
+    "hits": [
+      "CANARY_DOWN_X_GOOG"
+    ]
+  },
+  "ll_down_model_info": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 5,
+    "hits": [
+      "CANARY_DOWN_QUERY_KEY"
+    ]
+  },
+  "ll_down_models": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "ll_down_liveliness": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "ll_credentials": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "sy_health": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "sy_models": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  },
+  "sy_stats": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "hit_runs": 0,
+    "hits": []
+  }
+}

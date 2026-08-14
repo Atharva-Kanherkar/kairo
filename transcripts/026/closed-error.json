@@ -1,0 +1,32 @@
+[
+  {
+    "run": 1,
+    "status": 500,
+    "hits": [],
+    "body": "{\"error\":{\"message\":\"litellm.InternalServerError: InternalServerError: OpenAIException - Connection error.. Received Model Group=down\\nAvailable Model Group Fallbacks=None\",\"type\":null,\"param\":null,\"code\":\"500\"}}"
+  },
+  {
+    "run": 2,
+    "status": 500,
+    "hits": [],
+    "body": "{\"error\":{\"message\":\"litellm.InternalServerError: InternalServerError: OpenAIException - Connection error.. Received Model Group=down\\nAvailable Model Group Fallbacks=None\",\"type\":null,\"param\":null,\"code\":\"500\"}}"
+  },
+  {
+    "run": 3,
+    "status": 500,
+    "hits": [],
+    "body": "{\"error\":{\"message\":\"litellm.InternalServerError: InternalServerError: OpenAIException - Connection error.. Received Model Group=down\\nAvailable Model Group Fallbacks=None\",\"type\":null,\"param\":null,\"code\":\"500\"}}"
+  },
+  {
+    "run": 4,
+    "status": 500,
+    "hits": [],
+    "body": "{\"error\":{\"message\":\"litellm.InternalServerError: InternalServerError: OpenAIException - Connection error.. Received Model Group=down\\nAvailable Model Group Fallbacks=None\",\"type\":null,\"param\":null,\"code\":\"500\"}}"
+  },
+  {
+    "run": 5,
+    "status": 500,
+    "hits": [],
+    "body": "{\"error\":{\"message\":\"litellm.InternalServerError: InternalServerError: OpenAIException - Connection error.. Received Model Group=down\\nAvailable Model Group Fallbacks=None\",\"type\":null,\"param\":null,\"code\":\"500\"}}"
+  }
+]

@@ -460,3 +460,112 @@ fn switchyard_chat_control_omits_query_key() {
         "a successful chat completion must not echo a query key: {v:?}"
     );
 }
+
+// ---- bug 026: LiteLLM JSON extra_headers / headers / organization ----
+
+#[test]
+fn litellm_026_control_uses_deployment_key() {
+    let v = upstream_bearer_is(&fixture("transcripts/026/cap-control.jsonl"), "sk-x");
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "request without extra_headers should use the configured mock key: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_extra_headers_authorization_overrides_deployment() {
+    let v = upstream_bearer_is(
+        &fixture("transcripts/026/cap-extra-headers-auth.jsonl"),
+        "sk-x",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "JSON extra_headers.Authorization must be caught replacing the deployment key: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_headers_field_authorization_overrides_deployment() {
+    let v = upstream_bearer_is(&fixture("transcripts/026/cap-headers-auth.jsonl"), "sk-x");
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "JSON headers.Authorization must be caught replacing the deployment key: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_json_organization_becomes_openai_organization_header() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/026/cap-organization.jsonl"),
+        "CANARY_BODY_ORGANIZATION",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "JSON organization must be caught as upstream OpenAI-Organization: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_extra_headers_openai_org_forwarded() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/026/cap-extra-headers-org.jsonl"),
+        "CANARY_BODY_OPENAI_ORG",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "JSON extra_headers.OpenAI-Organization must be caught on the upstream wire: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_extra_headers_api_key_forwarded() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/026/cap-extra-headers-azure.jsonl"),
+        "CANARY_BODY_AZURE_API_KEY",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "JSON extra_headers.api-key must be caught on the upstream wire: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_026_control_omits_org_canary() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/026/cap-control.jsonl"),
+        "CANARY_BODY_ORGANIZATION",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "a request with no organization field should not grow one: {v:?}"
+    );
+}
+
+// ---- bug 027: Switchyard forwards x-goog-api-key ----
+
+#[test]
+fn switchyard_control_does_not_invent_x_goog_api_key() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/026/cap-sy-control.jsonl"),
+        "CANARY_SY_X_GOOG",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "a request with no x-goog-api-key should not grow one: {v:?}"
+    );
+}
+
+#[test]
+fn switchyard_forwards_x_goog_api_key() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/026/cap-sy-x-goog.jsonl"),
+        "CANARY_SY_X_GOOG",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "client x-goog-api-key must be caught on the upstream wire: {v:?}"
+    );
+}

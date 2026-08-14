@@ -1,0 +1,8 @@
+model_list:
+  - model_name: down
+    litellm_params:
+      model: openai/downmodel
+      api_base: http://127.0.0.1:19999/v1?key=CANARY_DOWN_QUERY_KEY
+      api_key: sk-x-CANARY_DOWN_API_KEY
+      extra_headers:
+        x-goog-api-key: CANARY_DOWN_X_GOOG

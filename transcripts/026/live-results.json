@@ -1,0 +1,282 @@
+[
+  {
+    "probe": "ll_openai_control",
+    "run": 1,
+    "status": 200,
+    "leaks": [],
+    "body": "{\"id\":\"chatcmpl-EClWUmbsIFnOe0htFcsN8t8kQJ49f\",\"created\":1786711322,\"model\":\"openai-mini\",\"object\":\"chat.completion\",\"system_fingerprint\":\"fp_9afcdcbeed\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"Ping.\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null},\"annotations\":[]},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":2,\"prompt_tokens\":14,\"total_tokens\":16,\"completion_tokens_details\":{\"accepted_prediction_tokens\":0,\"audio_tokens\":0,\"reasoning_tokens\":0,\"rejected_prediction_tokens\":0},\"prompt_tokens_details\":{\"audio_tokens\":0,\"cached_tokens\":0}},\"service_tier\":\"default\"}"
+  },
+  {
+    "probe": "ll_openai_organization",
+    "run": 1,
+    "status": 401,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"litellm.BadRequestError: OpenAIException - OpenAI-Organization header should match organization for API key. Received Model Group=openai-mini\\nAvailable Model Group Fallbacks=None\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"401\"}}"
+  },
+  {
+    "probe": "ll_openai_extra_headers_org",
+    "run": 1,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=openai-mini. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "direct_openai_control",
+    "run": 1,
+    "status": 200,
+    "leaks": [],
+    "body": "{\n  \"id\": \"chatcmpl-EClWWvwnqE2oR8ic0CIlAsnLoHFlP\",\n  \"object\": \"chat.completion\",\n  \"created\": 1786711324,\n  \"model\": \"gpt-4o-mini-2024-07-18\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Ping.\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 14,\n    \"completion_tokens\": 2,\n    \"total_tokens\": 16,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": \"fp_9afcdcbeed\"\n}\n"
+  },
+  {
+    "probe": "direct_openai_org",
+    "run": 1,
+    "status": 401,
+    "leaks": [],
+    "body": "{\n  \"error\": {\n    \"message\": \"OpenAI-Organization header should match organization for API key\",\n    \"type\": \"invalid_request_error\",\n    \"code\": \"mismatched_organization\",\n    \"param\": null\n  },\n  \"status\": 401\n}"
+  },
+  {
+    "probe": "ll_gemini_control",
+    "run": 1,
+    "status": 200,
+    "leaks": [],
+    "body": "{\"id\":\"Hg1_at3ZBIXOjuMPzP-QiQo\",\"created\":1786711325,\"model\":\"gemini-flash\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":null}}],\"usage\":{\"completion_tokens\":4,\"prompt_tokens\":8,\"total_tokens\":12,\"completion_tokens_details\":{\"reasoning_tokens\":4,\"text_tokens\":0},\"prompt_tokens_details\":{\"text_tokens\":8}},\"vertex_ai_grounding_metadata\":[],\"vertex_ai_url_context_metadata\":[],\"vertex_ai_safety_results\":[],\"vertex_ai_citation_metadata\":[],\"service_tier\":\"default\"}"
+  },
+  {
+    "probe": "ll_gemini_extra_headers_auth",
+    "run": 1,
+    "status": 401,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"litellm.AuthenticationError: GeminiException - {\\n  \\\"error\\\": {\\n    \\\"code\\\": 401,\\n    \\\"message\\\": \\\"API key for authentication is used with other authentication credentials. Expected only one form of authentication.\\\",\\n    \\\"status\\\": \\\"UNAUTHENTICATED\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.ErrorInfo\\\",\\n        \\\"reason\\\": \\\"OVERLOADED_CREDENTIALS\\\",\\n        \\\"metadata\\\": {\\n          \\\"method\\\": \\\"google.ai.generativelanguage.v1beta.GenerativeService.GenerateContent\\\",\\n          \\\"service\\\": \\\"generativelanguage.googleapis.com\\\"\\n        }\\n      }\\n    ]\\n  }\\n}\\n. Received Model Group=gemini-flash\\nAvailable Model Group Fallbacks=None\",\"type\":null,\"param\":null,\"code\":\"401\"}}"
+  },
+  {
+    "probe": "ll_gemini_extra_headers_goog",
+    "run": 1,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "ll_openai_control",
+    "run": 2,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=openai-mini. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "ll_openai_organization",
+    "run": 2,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=openai-mini. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "ll_openai_extra_headers_org",
+    "run": 2,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=openai-mini. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "direct_openai_control",
+    "run": 2,
+    "status": 200,
+    "leaks": [],
+    "body": "{\n  \"id\": \"chatcmpl-EClWZ9ILKsrev6XABwDGS1qWGF2fv\",\n  \"object\": \"chat.completion\",\n  \"created\": 1786711327,\n  \"model\": \"gpt-4o-mini-2024-07-18\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Ping.\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 14,\n    \"completion_tokens\": 2,\n    \"total_tokens\": 16,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": \"fp_9afcdcbeed\"\n}\n"
+  },
+  {
+    "probe": "direct_openai_org",
+    "run": 2,
+    "status": 401,
+    "leaks": [],
+    "body": "{\n  \"error\": {\n    \"message\": \"OpenAI-Organization header should match organization for API key\",\n    \"type\": \"invalid_request_error\",\n    \"code\": \"mismatched_organization\",\n    \"param\": null\n  },\n  \"status\": 401\n}"
+  },
+  {
+    "probe": "ll_gemini_control",
+    "run": 2,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "ll_gemini_extra_headers_auth",
+    "run": 2,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "ll_gemini_extra_headers_goog",
+    "run": 2,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "ll_openai_control",
+    "run": 3,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=openai-mini. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "ll_openai_organization",
+    "run": 3,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=openai-mini. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "ll_openai_extra_headers_org",
+    "run": 3,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=openai-mini. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "direct_openai_control",
+    "run": 3,
+    "status": 200,
+    "leaks": [],
+    "body": "{\n  \"id\": \"chatcmpl-EClWbCiATvWHSYb2slJUzZomLWb8f\",\n  \"object\": \"chat.completion\",\n  \"created\": 1786711329,\n  \"model\": \"gpt-4o-mini-2024-07-18\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Ping.\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 14,\n    \"completion_tokens\": 2,\n    \"total_tokens\": 16,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": \"fp_9afcdcbeed\"\n}\n"
+  },
+  {
+    "probe": "direct_openai_org",
+    "run": 3,
+    "status": 401,
+    "leaks": [],
+    "body": "{\n  \"error\": {\n    \"message\": \"OpenAI-Organization header should match organization for API key\",\n    \"type\": \"invalid_request_error\",\n    \"code\": \"mismatched_organization\",\n    \"param\": null\n  },\n  \"status\": 401\n}"
+  },
+  {
+    "probe": "ll_gemini_control",
+    "run": 3,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "ll_gemini_extra_headers_auth",
+    "run": 3,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "ll_gemini_extra_headers_goog",
+    "run": 3,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "ll_openai_control",
+    "run": 4,
+    "status": 200,
+    "leaks": [],
+    "body": "{\"id\":\"chatcmpl-EClWc99BwtSBMll2MMSkPLhgwVfM7\",\"created\":1786711330,\"model\":\"openai-mini\",\"object\":\"chat.completion\",\"system_fingerprint\":\"fp_9afcdcbeed\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"Ping.\",\"role\":\"assistant\",\"provider_specific_fields\":{\"refusal\":null},\"annotations\":[]},\"provider_specific_fields\":{}}],\"usage\":{\"completion_tokens\":2,\"prompt_tokens\":14,\"total_tokens\":16,\"completion_tokens_details\":{\"accepted_prediction_tokens\":0,\"audio_tokens\":0,\"reasoning_tokens\":0,\"rejected_prediction_tokens\":0},\"prompt_tokens_details\":{\"audio_tokens\":0,\"cached_tokens\":0}},\"service_tier\":\"default\"}"
+  },
+  {
+    "probe": "ll_openai_organization",
+    "run": 4,
+    "status": 401,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"litellm.BadRequestError: OpenAIException - OpenAI-Organization header should match organization for API key. Received Model Group=openai-mini\\nAvailable Model Group Fallbacks=None\",\"type\":\"invalid_request_error\",\"param\":null,\"code\":\"401\"}}"
+  },
+  {
+    "probe": "ll_openai_extra_headers_org",
+    "run": 4,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=openai-mini. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "direct_openai_control",
+    "run": 4,
+    "status": 200,
+    "leaks": [],
+    "body": "{\n  \"id\": \"chatcmpl-EClWe6uTjPsP0pbQYfJZB0x2SzHVJ\",\n  \"object\": \"chat.completion\",\n  \"created\": 1786711332,\n  \"model\": \"gpt-4o-mini-2024-07-18\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Ping.\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 14,\n    \"completion_tokens\": 2,\n    \"total_tokens\": 16,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": \"fp_9afcdcbeed\"\n}\n"
+  },
+  {
+    "probe": "direct_openai_org",
+    "run": 4,
+    "status": 401,
+    "leaks": [],
+    "body": "{\n  \"error\": {\n    \"message\": \"OpenAI-Organization header should match organization for API key\",\n    \"type\": \"invalid_request_error\",\n    \"code\": \"mismatched_organization\",\n    \"param\": null\n  },\n  \"status\": 401\n}"
+  },
+  {
+    "probe": "ll_gemini_control",
+    "run": 4,
+    "status": 200,
+    "leaks": [],
+    "body": "{\"id\":\"JQ1_aruVHuG9juMP-unagQ8\",\"created\":1786711333,\"model\":\"gemini-flash\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"length\",\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":null}}],\"usage\":{\"completion_tokens\":4,\"prompt_tokens\":8,\"total_tokens\":12,\"completion_tokens_details\":{\"reasoning_tokens\":4,\"text_tokens\":0},\"prompt_tokens_details\":{\"text_tokens\":8}},\"vertex_ai_grounding_metadata\":[],\"vertex_ai_url_context_metadata\":[],\"vertex_ai_safety_results\":[],\"vertex_ai_citation_metadata\":[],\"service_tier\":\"default\"}"
+  },
+  {
+    "probe": "ll_gemini_extra_headers_auth",
+    "run": 4,
+    "status": 401,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"litellm.AuthenticationError: GeminiException - {\\n  \\\"error\\\": {\\n    \\\"code\\\": 401,\\n    \\\"message\\\": \\\"API key for authentication is used with other authentication credentials. Expected only one form of authentication.\\\",\\n    \\\"status\\\": \\\"UNAUTHENTICATED\\\",\\n    \\\"details\\\": [\\n      {\\n        \\\"@type\\\": \\\"type.googleapis.com/google.rpc.ErrorInfo\\\",\\n        \\\"reason\\\": \\\"OVERLOADED_CREDENTIALS\\\",\\n        \\\"metadata\\\": {\\n          \\\"method\\\": \\\"google.ai.generativelanguage.v1beta.GenerativeService.GenerateContent\\\",\\n          \\\"service\\\": \\\"generativelanguage.googleapis.com\\\"\\n        }\\n      }\\n    ]\\n  }\\n}\\n. Received Model Group=gemini-flash\\nAvailable Model Group Fallbacks=None\",\"type\":null,\"param\":null,\"code\":\"401\"}}"
+  },
+  {
+    "probe": "ll_gemini_extra_headers_goog",
+    "run": 4,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "ll_openai_control",
+    "run": 5,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=openai-mini. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "ll_openai_organization",
+    "run": 5,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=openai-mini. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "ll_openai_extra_headers_org",
+    "run": 5,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=openai-mini. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "direct_openai_control",
+    "run": 5,
+    "status": 200,
+    "leaks": [],
+    "body": "{\n  \"id\": \"chatcmpl-EClWhnZBsGHdA15MqPpb9xopWq5cw\",\n  \"object\": \"chat.completion\",\n  \"created\": 1786711335,\n  \"model\": \"gpt-4o-mini-2024-07-18\",\n  \"choices\": [\n    {\n      \"index\": 0,\n      \"message\": {\n        \"role\": \"assistant\",\n        \"content\": \"Ping.\",\n        \"refusal\": null,\n        \"annotations\": []\n      },\n      \"logprobs\": null,\n      \"finish_reason\": \"stop\"\n    }\n  ],\n  \"usage\": {\n    \"prompt_tokens\": 14,\n    \"completion_tokens\": 2,\n    \"total_tokens\": 16,\n    \"prompt_tokens_details\": {\n      \"cached_tokens\": 0,\n      \"audio_tokens\": 0\n    },\n    \"completion_tokens_details\": {\n      \"reasoning_tokens\": 0,\n      \"audio_tokens\": 0,\n      \"accepted_prediction_tokens\": 0,\n      \"rejected_prediction_tokens\": 0\n    }\n  },\n  \"service_tier\": \"default\",\n  \"system_fingerprint\": \"fp_9afcdcbeed\"\n}\n"
+  },
+  {
+    "probe": "direct_openai_org",
+    "run": 5,
+    "status": 401,
+    "leaks": [],
+    "body": "{\n  \"error\": {\n    \"message\": \"OpenAI-Organization header should match organization for API key\",\n    \"type\": \"invalid_request_error\",\n    \"code\": \"mismatched_organization\",\n    \"param\": null\n  },\n  \"status\": 401\n}"
+  },
+  {
+    "probe": "ll_gemini_control",
+    "run": 5,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "ll_gemini_extra_headers_auth",
+    "run": 5,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  },
+  {
+    "probe": "ll_gemini_extra_headers_goog",
+    "run": 5,
+    "status": 429,
+    "leaks": [],
+    "body": "{\"error\":{\"message\":\"No deployments available for selected model, Try again in 5 seconds. Passed model=gemini-flash. pre-call-checks=False, cooldown_list=['f5680089e37d0afc5edd18fa1519b8a78311ef4827b329633c0b86da82b09988', '3ba196761c3f9a8cd51528b861ef1f6e270e81af362350df271fe291db664257']\",\"type\":\"None\",\"param\":\"None\",\"code\":\"429\"}}"
+  }
+]
