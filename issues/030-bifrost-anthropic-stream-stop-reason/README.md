@@ -47,12 +47,16 @@ this intermittent and hard to attribute from the client side.
 
 ### Control matrix (5 iterations each, same upstream turn)
 
+`Observed` is the terminal reason actually seen, with the number of iterations it
+was seen in. The expected reason therefore appears 5/5 on a conformant row and 0/5
+on the violating one.
+
 | Route | Mode | Expected | Observed | |
 |---|---|---|---|---|
 | `/v1/chat/completions` | non-stream | `finish_reason: tool_calls` | `tool_calls` 5/5 | ✅ |
 | `/v1/chat/completions` | stream | `finish_reason: tool_calls` | `tool_calls` 5/5 | ✅ |
 | `/anthropic/v1/messages` | non-stream | `stop_reason: tool_use` | `tool_use` 5/5 | ✅ |
-| `/anthropic/v1/messages` | **stream** | `stop_reason: tool_use` | **`end_turn` 0/5** | ❌ |
+| `/anthropic/v1/messages` | **stream** | `stop_reason: tool_use` | **`end_turn` 5/5** (expected reason 0/5) | ❌ |
 
 Three conformant controls on the same gateway, same upstream, same turn. Only the
 Anthropic **streaming** path loses the reason, which isolates the defect to the
@@ -125,6 +129,15 @@ itself a cost: it makes the bug read as model flakiness.
   isolates it to streaming.
 - `bifrost_openai_stream_control_keeps_toolcall_finish_reason` — the control that
   proves the upstream really did report a tool call.
+
+Both controls assert `Conformant`, and both checkers return `Conformant` for a turn
+that carries no tool call at all. A `Conformant` verdict is therefore not by itself
+evidence that the fixture still contains what the control claims to prove: a fixture
+that silently lost its tool call would keep passing. Each control also flips the
+reason in its own fixture and requires a `Violation`, which only the tool-call path
+can produce. Verified by rotting the transcripts locally: with the `tool_calls`
+deltas removed and the terminal `finish_reason: tool_calls` left intact, the checker
+returns `Conformant` and the guard fails the test rather than passing it green.
 
 The streaming assertion uses `anthropic_toolcall_stop_reason`, **the checker written
 for bug 001 against LiteLLM 1.82**, unchanged. The invariant is a property of the

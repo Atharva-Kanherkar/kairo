@@ -642,13 +642,30 @@ fn bifrost_anthropic_stream_loses_toolcall_stop_reason() {
 fn bifrost_anthropic_nonstream_control_keeps_toolcall_stop_reason() {
     // Same turn, same upstream, non-streaming: conformant. This is what isolates
     // the defect to the streaming serializer rather than the translation as a whole.
-    let v = anthropic_response_toolcall_stop_reason(&fixture(
-        "transcripts/030/anthropic-nonstream.json",
-    ));
+    let body = fixture("transcripts/030/anthropic-nonstream.json");
     assert_eq!(
-        v,
+        anthropic_response_toolcall_stop_reason(&body),
         Verdict::Conformant,
-        "the non-streaming Anthropic route maps the same turn correctly: {v:?}"
+        "the non-streaming Anthropic route maps the same turn correctly"
+    );
+    // Conformant alone is vacuous: the checker also returns it for a turn carrying no
+    // tool_use block at all. Flip the reason and require a Violation, which only the
+    // tool_use path can produce, so a fixture that lost its tool call fails here
+    // instead of passing as a silent false green.
+    let flipped = body.replace(
+        "\"stop_reason\": \"tool_use\"",
+        "\"stop_reason\": \"end_turn\"",
+    );
+    assert_ne!(
+        flipped, body,
+        "fixture no longer contains stop_reason tool_use"
+    );
+    assert!(
+        matches!(
+            anthropic_response_toolcall_stop_reason(&flipped),
+            Verdict::Violation(_)
+        ),
+        "control is vacuous: fixture carries no tool_use block for the checker to judge"
     );
 }
 
@@ -656,10 +673,25 @@ fn bifrost_anthropic_nonstream_control_keeps_toolcall_stop_reason() {
 fn bifrost_openai_stream_control_keeps_toolcall_finish_reason() {
     // The OpenAI-shaped streaming route on the same gateway and turn is conformant,
     // so the upstream really did report a tool call.
-    let v = openai_stream_finish_reason(&fixture("transcripts/030/openai-stream.sse"));
+    let sse = fixture("transcripts/030/openai-stream.sse");
     assert_eq!(
-        v,
+        openai_stream_finish_reason(&sse),
         Verdict::Conformant,
-        "the OpenAI streaming route preserves tool_calls on the same turn: {v:?}"
+        "the OpenAI streaming route preserves tool_calls on the same turn"
+    );
+    // Same vacuity guard: `openai_stream_finish_reason` short-circuits to Conformant
+    // when the stream has no tool_calls delta, so a text-only fixture would satisfy
+    // the assertion above without proving anything about the upstream.
+    let flipped = sse.replace(
+        "\"finish_reason\":\"tool_calls\"",
+        "\"finish_reason\":\"stop\"",
+    );
+    assert_ne!(
+        flipped, sse,
+        "fixture no longer contains finish_reason tool_calls"
+    );
+    assert!(
+        matches!(openai_stream_finish_reason(&flipped), Verdict::Violation(_)),
+        "control is vacuous: fixture carries no tool_calls delta for the checker to judge"
     );
 }
