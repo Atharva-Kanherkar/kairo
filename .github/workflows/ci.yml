@@ -18,6 +18,15 @@ env:
   RUSTDOCFLAGS: -D warnings
 
 jobs:
+  readme-counts:
+    name: Readme counts
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: README Status matches the issue and test counters
+        run: python3 tools/update-readme-counts.py --check
+
   fmt:
     name: Format
     runs-on: ubuntu-latest

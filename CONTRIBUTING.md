@@ -40,7 +40,11 @@ sales deck.
 5. If you can, add a checker in `crates/harness/src/checks.rs` and a test in
    `crates/harness/tests/conformance.rs` that asserts the verdict against your
    recorded bytes. `cargo test` must stay green.
-6. Open a PR. One bug per PR.
+6. Refresh the README counters so the Status bug and test numbers match the
+   repo: `python3 tools/update-readme-counts.py`. CI fails the PR if those
+   numbers are stale. On merge to main the same script runs again and commits
+   if anything drifted.
+7. Open a PR. One bug per PR.
 
 ## What makes a good target
 
