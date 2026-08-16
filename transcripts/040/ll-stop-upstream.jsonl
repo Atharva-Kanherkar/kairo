@@ -1,0 +1,5 @@
+{"path": "/v1/responses", "body": {"model": "mockmodel", "input": [{"type": "message", "role": "user", "content": [{"type": "input_text", "text": "hi"}]}], "max_output_tokens": 32}}
+{"path": "/v1/responses", "body": {"model": "mockmodel", "input": [{"type": "message", "role": "user", "content": [{"type": "input_text", "text": "hi"}]}], "max_output_tokens": 32}}
+{"path": "/v1/responses", "body": {"model": "mockmodel", "input": [{"type": "message", "role": "user", "content": [{"type": "input_text", "text": "hi"}]}], "max_output_tokens": 32}}
+{"path": "/v1/responses", "body": {"model": "mockmodel", "input": [{"type": "message", "role": "user", "content": [{"type": "input_text", "text": "hi"}]}], "max_output_tokens": 32}}
+{"path": "/v1/responses", "body": {"model": "mockmodel", "input": [{"type": "message", "role": "user", "content": [{"type": "input_text", "text": "hi"}]}], "max_output_tokens": 32}}

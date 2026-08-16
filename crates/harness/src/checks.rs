@@ -504,6 +504,19 @@ pub fn stop_sequence_forwarded(forwarded_jsonl: &str, sequence: &str) -> Verdict
     }
 }
 
+/// Structured output (`json_schema` / `output_format` / `response_format`) must
+/// still be named on the forwarded upstream body. A distinctive schema token
+/// in user text is not enough — the wire field itself has to survive.
+pub fn json_schema_forwarded(forwarded_jsonl: &str) -> Verdict {
+    if jsonl_contains_string(forwarded_jsonl, "json_schema") {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation(
+            "json_schema / structured output is absent from the forwarded upstream body".into(),
+        )
+    }
+}
+
 /// True when an upstream response says the turn was cut off at the output-token
 /// ceiling. Understands both spellings: Responses (`status: "incomplete"` with
 /// `incomplete_details.reason: "max_output_tokens"`) and Chat Completions
@@ -639,6 +652,22 @@ mod tests {
         );
         assert!(matches!(
             response_content_not_empty(r#"{"id":"x"}"#),
+            Verdict::Violation(_)
+        ));
+    }
+
+    #[test]
+    fn json_schema_forwarded_needs_the_wire_field() {
+        let present = r#"{"body":{"text":{"format":{"type":"json_schema"}}}}"#;
+        assert_eq!(json_schema_forwarded(present), Verdict::Conformant);
+        let openai = r#"{"body":{"response_format":{"type":"json_schema"}}}"#;
+        assert_eq!(json_schema_forwarded(openai), Verdict::Conformant);
+        // The token in user text is not enough — the field itself has to survive.
+        // jsonl_contains_string matches the string anywhere, so this fixture
+        // must not mention the token in the prompt.
+        let dropped = r#"{"body":{"model":"x","messages":[{"content":"ping"}]}}"#;
+        assert!(matches!(
+            json_schema_forwarded(dropped),
             Verdict::Violation(_)
         ));
     }
