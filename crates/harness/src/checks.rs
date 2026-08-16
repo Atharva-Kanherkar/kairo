@@ -504,18 +504,46 @@ pub fn stop_sequence_forwarded(forwarded_jsonl: &str, sequence: &str) -> Verdict
     }
 }
 
-/// Invariant (bug 035): a turn the upstream truncated MUST NOT be reported to an
+/// True when an upstream response says the turn was cut off at the output-token
+/// ceiling. Understands both spellings: Responses (`status: "incomplete"` with
+/// `incomplete_details.reason: "max_output_tokens"`) and Chat Completions
+/// (`finish_reason: "length"`).
+fn upstream_truncated(upstream: &Value) -> bool {
+    let responses_shape = upstream.get("status").and_then(Value::as_str) == Some("incomplete")
+        && upstream
+            .pointer("/incomplete_details/reason")
+            .and_then(Value::as_str)
+            .is_some_and(|r| r.contains("max_output_tokens") || r.contains("max_tokens"));
+    let chat_shape = upstream
+        .pointer("/choices/0/finish_reason")
+        .and_then(Value::as_str)
+        == Some("length");
+    responses_shape || chat_shape
+}
+
+/// Invariant (bug 035): a turn the UPSTREAM truncated MUST NOT be reported to an
 /// Anthropic client as `end_turn`. Anthropic spells truncation `max_tokens`;
 /// `end_turn` asserts the model finished on its own, so a caller cannot tell a
 /// complete answer from a cut-off one and will not know to continue.
-pub fn truncation_not_reported_as_end_turn(response_json: &str) -> Verdict {
-    let Ok(body) = serde_json::from_str::<Value>(response_json) else {
-        return Verdict::Violation("response body is not valid JSON".to_string());
+///
+/// Both halves of the exchange are required, and that is the point: `end_turn` is
+/// also the ordinary success value, so a checker that saw only the client response
+/// would flag every finished turn and could never have a passing control. The
+/// upstream payload is what makes "truncated" observable.
+pub fn truncation_preserved(upstream_response_json: &str, client_response_json: &str) -> Verdict {
+    let Ok(upstream) = serde_json::from_str::<Value>(upstream_response_json) else {
+        return Verdict::Violation("upstream body is not valid JSON".to_string());
     };
-    match body.get("stop_reason").and_then(Value::as_str) {
+    let Ok(client) = serde_json::from_str::<Value>(client_response_json) else {
+        return Verdict::Violation("client body is not valid JSON".to_string());
+    };
+    if !upstream_truncated(&upstream) {
+        return Verdict::Conformant; // nothing to preserve
+    }
+    match client.get("stop_reason").and_then(Value::as_str) {
         Some("end_turn") => Verdict::Violation(
-            "upstream truncated the turn but the client was told stop_reason \"end_turn\"; \
-             truncation is unreportable to the caller"
+            "upstream truncated the turn at the token ceiling but the client was told \
+             stop_reason \"end_turn\"; truncation is unreportable to the caller"
                 .to_string(),
         ),
         _ => Verdict::Conformant,
@@ -567,15 +595,36 @@ mod tests {
     }
 
     #[test]
-    fn truncation_checker_flags_end_turn() {
+    fn truncation_checker_needs_the_upstream_to_decide() {
+        let truncated =
+            r#"{"status":"incomplete","incomplete_details":{"reason":"max_output_tokens"}}"#;
+        let finished = r#"{"status":"completed"}"#;
+        let client_end_turn = r#"{"stop_reason":"end_turn"}"#;
+
+        // Truncated upstream reported as end_turn: the defect.
         assert!(matches!(
-            truncation_not_reported_as_end_turn(r#"{"stop_reason":"end_turn"}"#),
+            truncation_preserved(truncated, client_end_turn),
             Verdict::Violation(_)
         ));
+        // The SAME client body is conformant when the upstream did not truncate.
+        // A checker reading only the client side could not tell these apart.
         assert_eq!(
-            truncation_not_reported_as_end_turn(r#"{"stop_reason":"max_tokens"}"#),
+            truncation_preserved(finished, client_end_turn),
             Verdict::Conformant
         );
+        // Truncated and correctly reported.
+        assert_eq!(
+            truncation_preserved(truncated, r#"{"stop_reason":"max_tokens"}"#),
+            Verdict::Conformant
+        );
+        // Chat-completions spelling of the same upstream signal.
+        assert!(matches!(
+            truncation_preserved(
+                r#"{"choices":[{"finish_reason":"length"}]}"#,
+                client_end_turn
+            ),
+            Verdict::Violation(_)
+        ));
     }
 
     #[test]

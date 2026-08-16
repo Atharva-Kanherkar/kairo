@@ -148,6 +148,22 @@
       "stable": true
     },
     {
+      "id": "035c",
+      "title": "control: a turn the upstream did not truncate",
+      "field": "Anthropic stop_reason",
+      "conformant_value": "end_turn",
+      "observed": [
+        "end_turn",
+        "end_turn",
+        "end_turn",
+        "end_turn",
+        "end_turn"
+      ],
+      "matches_expected": 5,
+      "of": 5,
+      "stable": true
+    },
+    {
       "id": "036",
       "title": "refusal content preserved",
       "field": "Anthropic content block types",

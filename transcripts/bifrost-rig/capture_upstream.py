@@ -94,6 +94,11 @@ def pick(body_raw):
         return (cc_msg({"role": "assistant", "content": "trunc"}, finish="length"),
                 resp([out_text("trunc")], status="incomplete",
                      extra={"incomplete_details": {"reason": "max_output_tokens"}}))
+    if "SCENARIO_PLAIN_TEXT" in b:
+        # A complete, untruncated, text-only turn. The client should see end_turn,
+        # and that is CORRECT here — the control for the truncation invariant.
+        return (cc_msg({"role": "assistant", "content": "all done"}, finish="stop"),
+                resp([out_text("all done")]))
     if "SCENARIO_REFUSAL" in b:
         return (cc_msg({"role": "assistant", "content": None, "refusal": "I cannot help"}),
                 resp([{"type": "message", "id": "msg_1", "status": "completed",
@@ -127,14 +132,19 @@ class H(BaseHTTPRequestHandler):
     def do_POST(self):
         n = int(self.headers.get("content-length", 0))
         raw = self.rfile.read(n).decode("utf-8", "replace") if n else "{}"
-        rec = {"path": self.path,
-               "headers": {k.lower(): v for k, v in self.headers.items()},
-               "body": raw}
-        with open(CAPTURE, "a") as f:
-            f.write(json.dumps(rec) + "\n")
         chat, responses = pick(raw)
         is_responses = self.path.rstrip("/").endswith("/responses")
-        self._json(responses if is_responses else chat)
+        reply = responses if is_responses else chat
+        # Record the reply alongside the request. A response-side finding needs the
+        # upstream payload as evidence too: "the client was told X" only means
+        # something next to "the upstream said Y".
+        rec = {"path": self.path,
+               "headers": {k.lower(): v for k, v in self.headers.items()},
+               "body": raw,
+               "response": reply}
+        with open(CAPTURE, "a") as f:
+            f.write(json.dumps(rec) + "\n")
+        self._json(reply)
 
 
 if __name__ == "__main__":

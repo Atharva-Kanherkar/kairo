@@ -47,10 +47,15 @@ it is what happens to a refusal specifically.
 
 ## Root cause
 
-Not pinned to a line. Localized to the canonical → Anthropic response mapping of
-content parts: a `refusal` part has no case in the block conversion, so it is
-skipped, and because it was the turn's only content the array ends up empty. The
-`stop_reason` falls back to `end_turn` as in 034 and 035.
+Not pinned to a line, and no source was read. What the wire shows is that a turn
+whose only content was a `refusal` part arrives with an empty array, while a turn of
+ordinary parts arrives intact — so the loss is specific to that part type and
+happens somewhere in the canonical → Anthropic content mapping.
+
+A missing conversion case would explain it, and the empty array rather than a
+mangled block is consistent with a part being skipped rather than mistranslated, but
+that is a **hypothesis about the mechanism, not an observation**. The behaviour is
+what is established here.
 
 ## Confidence
 

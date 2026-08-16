@@ -63,14 +63,25 @@ def upstream_body():
     return json.loads(lines[0]["body"])
 
 
+def upstream_response():
+    """What the upstream actually replied, so response-side findings can freeze both
+    halves of the exchange rather than only what the client received."""
+    lines = [json.loads(l) for l in open(CAPTURE) if l.strip()]
+    return lines[0].get("response") if lines else None
+
+
 def write(rel, obj):
+    # A ("capture", body) pair carries its own path, recorded when the body was read.
+    cap_path = LAST_PATH["path"]
+    if isinstance(obj, tuple) and obj and obj[0] == "capture":
+        obj = obj[1]
     path = os.path.join(OUT, rel)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w") as f:
         if rel.endswith(".jsonl"):
             # kairo capture format: one {"path","body"} line, body as an object, so
             # the existing capture-rig checkers read these fixtures unchanged.
-            f.write(json.dumps({"path": LAST_PATH["path"], "body": obj}) + "\n")
+            f.write(json.dumps({"path": cap_path, "body": obj}) + "\n")
         else:
             f.write(obj if isinstance(obj, str) else json.dumps(obj, indent=2) + "\n")
 
@@ -171,7 +182,20 @@ def p034_control():
 
 def p035_truncation():
     d = _ant_scenario("SCENARIO_LENGTH")
-    return d.get("stop_reason"), d
+    return d.get("stop_reason"), {
+        "client_response": d,
+        "_extra_files": {"035/upstream-response.json": upstream_response()}}
+
+
+def p035_control():
+    """A complete, untruncated, text-only turn. The client is told `end_turn` and
+    that is CORRECT, so the checker must call this conformant. It is the control
+    that proves the invariant distinguishes a truncated turn from a finished one
+    rather than flagging every `end_turn`."""
+    d = _ant_scenario("SCENARIO_PLAIN_TEXT")
+    return d.get("stop_reason"), {
+        "client_response": d,
+        "_extra_files": {"035/control-upstream-response.json": upstream_response()}}
 
 
 def p036_refusal():
@@ -209,12 +233,13 @@ def p037_toolid_roundtrip():
                 {"type": "tool_result", "tool_use_id": client_id, "content": "12:00"}]}]},
         ANT)
     b = upstream_body()
-    # Freeze the turn-2 upstream request on its own, in capture format, so the
-    # id-restoration checker reads it the same way as any other capture fixture.
-    write("037/upstream-request-turn2.jsonl", b)
     sent = [i.get("call_id") for i in b.get("input", []) if "call_id" in i]
     restored = NASTY_ID in sent
-    return restored, {"upstream_original_id": NASTY_ID, "client_received_id": client_id,
+    # The turn-2 request is emitted through _extra_files so the runner writes it on
+    # the same iteration it writes roundtrip.json. Writing it here would rewrite it
+    # every run, leaving the two committed witnesses describing different turns.
+    return restored, {"_extra_files": {"037/upstream-request-turn2.jsonl": ("capture", b)},
+                      "upstream_original_id": NASTY_ID, "client_received_id": client_id,
                       "ids_sent_upstream_turn2": sent, "upstream_request_turn2": b}
 
 
@@ -241,6 +266,8 @@ PROBES = [
      "034/control-openai-response.json", "OpenAI finish_reason"),
     ("035", "truncation preserved to the client", p035_truncation, "max_tokens",
      "035/anthropic-response.json", "Anthropic stop_reason"),
+    ("035c", "control: a turn the upstream did not truncate", p035_control, "end_turn",
+     "035/control-anthropic-response.json", "Anthropic stop_reason"),
     ("036", "refusal content preserved", p036_refusal, ["text"],
      "036/anthropic-response.json", "Anthropic content block types"),
     ("036c", "control: a plain turn keeps its content", p036_control, ["text", "tool_use"],
@@ -263,11 +290,18 @@ def main():
     results = {"version": version, "model": MODEL, "n": N, "probes": []}
 
     for pid, title, fn, expected, evidence_path, field in PROBES:
-        seen, evidence = [], None
+        seen, evidence, extras = [], None, {}
         for i in range(N):
             got, ev = fn()
             seen.append(got)
             if i == 0:
+                # Freeze every witness for a probe from the SAME iteration, so two
+                # fixtures for one finding can never describe two different turns.
+                if isinstance(ev, dict) and "_extra_files" in ev:
+                    ev = dict(ev)
+                    extras = ev.pop("_extra_files")
+                    if set(ev.keys()) == {"client_response"}:
+                        ev = ev["client_response"]
                 evidence = ev
         agree = sum(1 for s in seen if s == expected)
         stable = all(s == seen[0] for s in seen)
@@ -279,6 +313,8 @@ def main():
             "observed": seen, "matches_expected": agree, "of": N, "stable": stable})
         if evidence is not None:
             write(evidence_path, evidence)
+        for rel, obj in extras.items():
+            write(rel, obj)
 
     write("bifrost-rig/results.json", results)
     unstable = [p for p in results["probes"] if not p["stable"]]

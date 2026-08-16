@@ -40,19 +40,34 @@ forwards `stop` intact.
 The gateway carries stop sequences perfectly well on one route and silently discards
 them on the other.
 
+**What the control does and does not prove.** Read the paths: the failing capture is
+`/v1/responses`, the control is `/v1/chat/completions`. Those are different upstream
+dialects, so the control proves the *gateway* can carry a stop sequence and that the
+concept survives to at least one backend — it does **not** prove the Responses API
+exposes an equivalent field that the Anthropic path is failing to populate. Whether
+Responses has a stop-sequence parameter at all was not verified here.
+
+That distinction changes the likely fix, not the finding. Either way the client's
+instruction is discarded in silence; whether the correct repair is "populate the
+field" or "refuse the request, or fall back to a dialect that supports it" depends
+on a question this rig did not answer.
+
 ## Root cause
 
-Not pinned to a line. Localized to the Anthropic → canonical request translation:
-`stop_sequences` has a direct equivalent on the OpenAI side (`stop`), which the
-gateway already emits on its own OpenAI route, so this is a missing mapping rather
-than an unrepresentable concept.
+Not pinned to a line. Localized to the Anthropic ingress request path, which reaches
+this upstream through the Responses API and emits no stop field. Whether that is a
+missing mapping onto an available field or a genuine gap in the target dialect is
+**unresolved** — see the note above.
 
 ## Confidence
 
 | Claim | Confidence | Basis |
 |---|---|---|
 | `stop_sequences` never reaches the upstream | **High** | Capture is ground truth, 5/5 |
-| A mapping exists and is simply not applied | **High** | The OpenAI route emits `stop` 5/5 |
+| The client instruction is discarded silently | **High** | No error, no warning, HTTP 200 |
+| The gateway can carry a stop sequence somewhere | **High** | Its OpenAI route emits `stop` 5/5 |
+| The Responses dialect exposes an equivalent field | **Unverified** | Control is a different dialect; not checked |
+| A mapping exists and is simply not applied | **Unresolved** | Follows from the row above |
 | Named source location | **Not established** | Behavioural isolation only |
 | Live-provider behaviour | **Untested** | Offline mock upstream, no keys |
 

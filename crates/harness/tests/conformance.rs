@@ -12,7 +12,7 @@ use kairo::checks::{
     non_text_block_not_json_dumped, openai_stream_finish_reason, openai_toolcall_id_charset,
     parallel_tool_disable_preserved, reasoning_text_order_preserved, response_content_not_empty,
     response_omits_secret, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
-    thinking_text_forwarded, toolcall_id_restored_upstream, truncation_not_reported_as_end_turn,
+    thinking_text_forwarded, toolcall_id_restored_upstream, truncation_preserved,
     upstream_bearer_is, upstream_omits_header_value, Verdict,
 };
 use std::fs;
@@ -779,13 +779,34 @@ fn bifrost_thinking_is_dropped_not_leaked() {
     );
 }
 
+/// Read one string field out of a frozen JSON transcript.
+fn json_str(rel: &str, pointer: &str) -> String {
+    let body: serde_json::Value =
+        serde_json::from_str(&fixture(rel)).unwrap_or_else(|e| panic!("{rel} is not JSON: {e}"));
+    body.pointer(pointer)
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or_else(|| panic!("{rel} has no string at {pointer}"))
+        .to_string()
+}
+
 #[test]
 fn bifrost_erases_content_filter_to_end_turn() {
-    // Upstream said content_filter; the Anthropic client was told end_turn.
-    let v = content_filter_preserved("content_filter", "end_turn");
+    // Both sides come off the frozen transcripts: the OpenAI-route control records
+    // what the upstream reported, the Anthropic transcript what the client was told.
+    // Nothing here is hardcoded, so mutating either fixture fails this test.
+    let upstream_finish = json_str(
+        "transcripts/034/control-openai-response.json",
+        "/choices/0/finish_reason",
+    );
+    let client_stop = json_str("transcripts/034/anthropic-response.json", "/stop_reason");
+    assert_eq!(
+        upstream_finish, "content_filter",
+        "the upstream transcript must still be the filtered turn"
+    );
+    let v = content_filter_preserved(&upstream_finish, &client_stop);
     assert!(
         matches!(v, Verdict::Violation(_)),
-        "the erased safety signal must be caught: {v:?}"
+        "upstream {upstream_finish:?} delivered as {client_stop:?} must be caught: {v:?}"
     );
 }
 
@@ -804,21 +825,48 @@ fn bifrost_openai_route_keeps_content_filter() {
         Some("content_filter"),
         "the OpenAI route must still report content_filter on the same turn"
     );
-    // And feeding that pair to the checker is what flags the Anthropic side.
-    let v = content_filter_preserved(finish.unwrap_or_default(), "end_turn");
-    assert!(
-        matches!(v, Verdict::Violation(_)),
-        "upstream content_filter against the observed Anthropic end_turn must flag: {v:?}"
+    // A route that passes the signal through must not be flagged.
+    assert_eq!(
+        content_filter_preserved(finish.unwrap_or_default(), finish.unwrap_or_default()),
+        Verdict::Conformant,
+        "the OpenAI route preserves the signal and must read conformant"
     );
 }
 
 #[test]
 fn bifrost_reports_truncation_as_end_turn() {
-    let v =
-        truncation_not_reported_as_end_turn(&fixture("transcripts/035/anthropic-response.json"));
+    // Both halves are frozen: the upstream that truncated, and the client body.
+    let v = truncation_preserved(
+        &fixture("transcripts/035/upstream-response.json"),
+        &fixture("transcripts/035/anthropic-response.json"),
+    );
     assert!(
         matches!(v, Verdict::Violation(_)),
         "a truncated turn reported as end_turn must be caught: {v:?}"
+    );
+}
+
+#[test]
+fn bifrost_untruncated_turn_reported_as_end_turn_is_fine() {
+    // The control the invariant needs. This client body carries the SAME `end_turn`
+    // as the violation above; only the upstream differs. Conformant here is what
+    // proves the checker judges truncation rather than flagging every end_turn.
+    assert_eq!(
+        json_str(
+            "transcripts/035/control-anthropic-response.json",
+            "/stop_reason"
+        ),
+        "end_turn",
+        "the control must itself be an end_turn body, or it proves nothing"
+    );
+    let v = truncation_preserved(
+        &fixture("transcripts/035/control-upstream-response.json"),
+        &fixture("transcripts/035/control-anthropic-response.json"),
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "an untruncated turn reported as end_turn is correct: {v:?}"
     );
 }
 
@@ -858,7 +906,18 @@ fn bifrost_does_not_restore_sanitized_toolcall_id() {
 #[test]
 fn bifrost_sanitized_id_is_charset_clean_for_the_client() {
     // The rewrite itself is correct and worth keeping: the id handed to the client
-    // satisfies the tool-call id contract that the raw upstream id violated.
-    assert!(!id_conforms("call/with+punct=and.dots:1"));
-    assert!(id_conforms("8d0701f3952e112c_call_with_punct_and_dots_1"));
+    // satisfies the tool-call id contract that the raw upstream id violated. Both
+    // ids are read from the frozen roundtrip, so a gateway that stopped sanitizing
+    // (or emitted a different client id) fails here instead of passing on literals.
+    let original = json_str("transcripts/037/roundtrip.json", "/upstream_original_id");
+    let client = json_str("transcripts/037/roundtrip.json", "/client_received_id");
+    assert!(
+        !id_conforms(&original),
+        "the raw upstream id {original:?} should violate the id contract"
+    );
+    assert!(
+        id_conforms(&client),
+        "the id handed to the client {client:?} must satisfy the id contract"
+    );
+    assert_ne!(original, client, "the rewrite must actually change the id");
 }

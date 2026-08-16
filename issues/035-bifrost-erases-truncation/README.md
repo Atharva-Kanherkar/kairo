@@ -30,16 +30,31 @@ the same apart from this field.
 
 ## Wire evidence
 
-`transcripts/035/anthropic-response.json` — what the client received for an
-upstream turn explicitly marked truncated:
+Both halves of the exchange are frozen, and both are needed: `end_turn` is also the
+ordinary success value, so the client body alone cannot distinguish a truncated turn
+from a finished one. Only the upstream payload makes "truncated" observable.
+
+`transcripts/035/upstream-response.json` — what the upstream returned:
+
+```json
+{"status":"incomplete","incomplete_details":{"reason":"max_output_tokens"}, ...}
+```
+
+`transcripts/035/anthropic-response.json` — what the client received:
 
 ```json
 {"content":[{"type":"text","text":"trunc"}], "stop_reason":"end_turn", ...}
 ```
 
-| Upstream said | Anthropic client was told | Correct value | |
+**The control** (`control-upstream-response.json` + `control-anthropic-response.json`)
+is the pair that makes this a defect rather than a normal value: a complete,
+untruncated turn whose client body carries the **same `end_turn`**. Same client-side
+value, opposite verdict, decided entirely by the upstream.
+
+| Upstream | Client was told | Verdict | |
 |---|---|---|---|
-| truncated at the token ceiling | `end_turn` 5/5 | `max_tokens` | ❌ |
+| `incomplete` / `max_output_tokens` | `end_turn` 5/5 | violation, should be `max_tokens` | ❌ |
+| `completed` | `end_turn` 5/5 | conformant, `end_turn` is correct | ✅ |
 
 ## Root cause
 
@@ -51,9 +66,10 @@ to `end_turn`.
 
 | Claim | Confidence | Basis |
 |---|---|---|
-| The client is told `end_turn` for a truncated turn | **High** | Our own captured bytes, 5/5 |
+| The client is told `end_turn` for a truncated turn | **High** | Both halves frozen, 5/5 |
+| An untruncated turn is correctly `end_turn` | **High** | Control pair, conformant 5/5 |
 | `max_tokens` is the correct value | **High** | It is Anthropic's dedicated truncation reason |
-| Same fallback as 034/036 | **Medium** | Consistent behaviour across three signals; not source-verified |
+| Same fallback as 034/036 | **Medium** | Consistent across three signals; not source-verified |
 | Named source location | **Not established** | Behavioural isolation only |
 | Live-provider behaviour | **Untested** | Offline mock upstream, no keys |
 
@@ -74,8 +90,15 @@ intermittent: the same prompt behaves correctly until output grows past
 
 ## Test
 
-`bifrost_reports_truncation_as_end_turn`, using the new
-`truncation_not_reported_as_end_turn` checker.
+`bifrost_reports_truncation_as_end_turn` (the frozen violation) and
+`bifrost_untruncated_turn_reported_as_end_turn_is_fine` (the control), using the new
+`truncation_preserved(upstream, client)` checker.
+
+The checker takes **both** payloads deliberately. One that read only the client body
+would have to treat every `end_turn` as a violation — flagging every finished turn,
+and making a passing control impossible to write. Taking the upstream is what turns
+"this response says `end_turn`" into "this response says `end_turn` about a turn that
+was cut off".
 
 Invariant: *a turn the upstream truncated is never reported to an Anthropic client
 as `end_turn`.*
