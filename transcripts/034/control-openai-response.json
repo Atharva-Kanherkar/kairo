@@ -1,0 +1,36 @@
+{
+  "id": "chatcmpl-hunt",
+  "choices": [
+    {
+      "index": 0,
+      "finish_reason": "content_filter",
+      "message": {
+        "role": "assistant",
+        "content": "blocked"
+      }
+    }
+  ],
+  "created": 1786904970,
+  "model": "mimo-v2.5",
+  "object": "chat.completion",
+  "system_fingerprint": "",
+  "usage": {
+    "prompt_tokens": 10,
+    "completion_tokens": 5,
+    "total_tokens": 15
+  },
+  "extra_fields": {
+    "request_type": "chat_completion",
+    "routing_info": {
+      "provider": "mockoai",
+      "model": "mimo-v2.5",
+      "key": "k1"
+    },
+    "provider": "mockoai",
+    "original_model_requested": "mimo-v2.5",
+    "resolved_model_used": "mimo-v2.5",
+    "latency": 0,
+    "upstream_latency": 0,
+    "chunk_index": 0
+  }
+}

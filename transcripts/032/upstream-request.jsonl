@@ -1,0 +1,1 @@
+{"path": "/v1/responses", "body": {"model": "mimo-v2.5", "max_output_tokens": 100, "input": [{"type": "message", "role": "user", "content": [{"type": "input_text", "text": "hi"}]}]}}

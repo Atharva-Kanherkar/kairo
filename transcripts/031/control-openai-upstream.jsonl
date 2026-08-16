@@ -1,0 +1,1 @@
+{"path": "/v1/chat/completions", "body": {"model": "mimo-v2.5", "max_completion_tokens": 100, "parallel_tool_calls": false, "messages": [{"role": "user", "content": "time?"}], "tools": [{"type": "function", "function": {"name": "get_time", "description": "t", "parameters": {"type": "object", "properties": {}}}}]}}

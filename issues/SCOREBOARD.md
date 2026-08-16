@@ -39,8 +39,15 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 027 | Switchyard forwards client `x-goog-api-key`; that name is missing from `RESERVED_HEADERS` (`x-api-key` and `Authorization` are stripped). JSON `api_key`/`organization`/`extra_headers` stay in the body and do not swap Authorization | Switchyard 0.2.0 (capture rig) | [Switchyard#410](https://github.com/NVIDIA-NeMo/Switchyard/issues/410) | ✅ mock forward 5/5. Authorization stays the deployment Bearer. Live Gemini prefers Bearer (021/023 pass, HTTP 200). The leak is the header leaving the proxy |
 | 028 | LiteLLM `/gemini` pass-through injects env `GEMINI_API_KEY` as `?key=` and copies Google `x-goog-upload-url` / `x-goog-upload-control-url` to the caller. `x-pass-` forwards resumable-start headers that `forward_headers=false` would drop | LiteLLM 1.96.2 (capture mock + live Google) | pass-through header copy; `x-litellm-model-api-base` already strips `?` | ✅ mock canary 5/5. Live full `GEMINI_API_KEY` in both upload URLs 5/5. Direct Google same 5/5. Plain upload, chat, and closed-port 500 stay clean. Rotate Gemini. |
 | 030 | Bifrost `/anthropic/v1/messages` **streaming** ends a text + tool-call turn with `stop_reason: end_turn` while emitting a valid `tool_use` block. Non-streaming Anthropic, and both OpenAI-route modes, are correct | Bifrost 1.6.11 (capture mock, no keys) | [bifrost#6123](https://github.com/maximhq/bifrost/issues/6123), regression of #3638 (fixed by #3640 in 1.5.4) | ✅ 5/5 on CURRENT; 3 control cells 5/5 conformant. Caught by the bug-001 checker unchanged. Repro went via the Responses upstream path (see writeup) |
+| 031 | Bifrost drops `disable_parallel_tool_use` on the Anthropic ingress; forwarded `tool_choice` is bare `"auto"` with no `parallel_tool_calls` | Bifrost 1.6.11 (capture rig, no keys) | 017 family, third gateway | ✅ 5/5 on CURRENT. Control: same gateway's OpenAI route forwards `parallel_tool_calls: false` 5/5. Caught by the 017 checker unchanged |
+| 032 | Bifrost drops `stop_sequences` on the Anthropic ingress; forwarded body has no stop field at all | Bifrost 1.6.11 (capture rig, no keys) | new, 006 family | ✅ 5/5 on CURRENT. Control: same gateway's OpenAI route forwards `stop` 5/5, so a mapping exists and is simply not applied |
+| 033 | Bifrost drops assistant `thinking` blocks + signature from replayed history; only the visible text survives | Bifrost 1.6.11 (capture rig, no keys) | 016 family; adjacent [bifrost#5274](https://github.com/maximhq/bifrost/issues/5274) | ✅ 5/5 on CURRENT. Dropped, NOT leaked (unlike LiteLLM). Control: `is_error` → `status: incomplete` survives the same translator 5/5. Caught by the 016 checker unchanged |
+| 034 | Bifrost reports upstream `content_filter` to Anthropic clients as `stop_reason: end_turn`, erasing the safety signal | Bifrost 1.6.11 (capture rig, no keys) | 010A family ([Switchyard#369](https://github.com/NVIDIA-NeMo/Switchyard/issues/369)), second gateway | ✅ 5/5 on CURRENT. Control: same gateway's OpenAI route reports `content_filter` 5/5. Caught by the 010A checker unchanged |
+| 035 | Bifrost reports an upstream-truncated turn to Anthropic clients as `end_turn` instead of `max_tokens`; truncation is unreportable to the caller | Bifrost 1.6.11 (capture rig, no keys) | new; adjacent [bifrost#6081](https://github.com/maximhq/bifrost/issues/6081) | ✅ 5/5 on CURRENT. Sibling of 034/036: the same everything-becomes-`end_turn` fallback |
+| 036 | Bifrost delivers an upstream refusal to Anthropic clients as `content: []` with `end_turn`: both the refusal reason AND its text are erased | Bifrost 1.6.11 (capture rig, no keys) | new, 034/035 sibling | ✅ 5/5 on CURRENT. Control: an ordinary turn keeps `["text","tool_use"]` 5/5, so empty content is refusal-specific |
+| 037 | Bifrost sanitizes a punctuation-bearing upstream tool-call id for the client (correctly) but forwards the sanitized form back upstream; the rewrite has no inverse | Bifrost 1.6.11 (capture rig, no keys) | 005 family (Switchyard sanitizer) | ✅ 5/5 on CURRENT. Sanitized id is charset-clean (asserted); the finding is the missing inverse. Live-provider rejection untested |
 
-**Tally**: 25 distinct defects confirmed on the wire (24 on current releases)
+**Tally**: 32 distinct defects confirmed on the wire (31 on current releases)
 across LiteLLM, Switchyard AND Bifrost, counting 006 as its 4 independent field losses
 plus the LiteLLM copy of that class. LiteLLM confirmed: 001 (stop_reason, 1.82),
 002a (finish_reason), 002b (route drop), 004a (id smuggle), 004b (Responses
@@ -56,7 +63,24 @@ dumped), 019 (invented cache breakpoint), 023 (`api-key` and OpenAI
 org/project header forward), 025 (transport 502 echoes `?key=`), 027
 (`x-goog-api-key` header forward). Bifrost confirmed: 030 (Anthropic streaming
 ends a tool-call turn as `end_turn`, a regression of their own fixed #3638,
-caught by the bug-001 checker unchanged). Honest negatives kept: 003, 013
+caught by the bug-001 checker unchanged), 031 (parallel flag dropped), 032
+(`stop_sequences` dropped), 033 (thinking history dropped), 034 (`content_filter`
+erased), 035 (truncation erased), 036 (refusal content emptied), 037 (tool-id
+sanitizer has no inverse).
+
+**Bifrost honest negatives (2026-08-16 sweep)**, all 5/5 and kept as data because
+they are the same probes that caught the other two gateways: client `Authorization`
+/ `x-api-key` / `api-key` / `OpenAI-Organization` headers are NOT forwarded upstream
+(unlike Switchyard 023); a client JSON `api_key` does NOT override the deployment
+key (unlike LiteLLM 020); malformed bodies, a 300-char tool name, a `tool_result`
+with no matching `tool_use`, and a negative `max_tokens` all return clean 4xx/200
+with no stack trace, panic, or 500 (unlike LiteLLM 008); `is_error` on a tool result
+IS carried (as `function_call_output.status`), and image and document bytes in
+tool results ARE forwarded intact (unlike Switchyard 007/018 and LiteLLM's copies).
+Bifrost's security surface and multimodal handling are genuinely better than both
+incumbents; its Anthropic-ingress translation is worse.
+
+Honest negatives kept: 003, 013
 parallel-ids, P2/P4/P5/P7, and cited symptoms of 001/004. Several cited bugs
 are genuinely patched on current, which is itself the argument for a
 permanent regression suite. The 2026-08-13 capture-rig pass also showed

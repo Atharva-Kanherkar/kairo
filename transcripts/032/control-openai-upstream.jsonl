@@ -1,0 +1,1 @@
+{"path": "/v1/chat/completions", "body": {"model": "mimo-v2.5", "max_completion_tokens": 100, "stop": ["STOPPROBE"], "messages": [{"role": "user", "content": "hi"}]}}

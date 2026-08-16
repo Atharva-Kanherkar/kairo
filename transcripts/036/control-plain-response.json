@@ -1,0 +1,29 @@
+{
+  "id": "resp_hunt",
+  "type": "message",
+  "role": "assistant",
+  "content": [
+    {
+      "type": "text",
+      "text": "I will check the time."
+    },
+    {
+      "type": "tool_use",
+      "id": "call_gt1",
+      "name": "get_time",
+      "input": {}
+    }
+  ],
+  "model": "mimo-v2.5",
+  "stop_reason": "tool_use",
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "cache_creation": {
+      "ephemeral_5m_input_tokens": 0,
+      "ephemeral_1h_input_tokens": 0
+    },
+    "output_tokens": 5
+  }
+}

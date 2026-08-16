@@ -1,0 +1,17 @@
+{
+  "$schema": "https://www.getbifrost.ai/schema",
+  "config_store": { "enabled": false },
+  "client": {
+    "enable_logging": true,
+    "initial_pool_size": 50
+  },
+  "providers": {
+    "mockoai": {
+      "keys": [
+        { "name": "k1", "value": "sk-DEPLOYMENT-KEY-CANARY", "weight": 1, "models": ["*"] }
+      ],
+      "network_config": { "base_url": "http://localhost:9911" },
+      "custom_provider_config": { "base_provider_type": "openai" }
+    }
+  }
+}

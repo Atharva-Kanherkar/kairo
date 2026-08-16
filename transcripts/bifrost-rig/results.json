@@ -1,0 +1,219 @@
+{
+  "version": "\"v1.6.11\"",
+  "model": "mockoai/mimo-v2.5",
+  "n": 5,
+  "probes": [
+    {
+      "id": "031",
+      "title": "disable_parallel_tool_use reaches upstream",
+      "field": "parallel_tool_calls == false",
+      "conformant_value": false,
+      "observed": [
+        "<absent>",
+        "<absent>",
+        "<absent>",
+        "<absent>",
+        "<absent>"
+      ],
+      "matches_expected": 0,
+      "of": 5,
+      "stable": true
+    },
+    {
+      "id": "031c",
+      "title": "control: OpenAI route forwards parallel_tool_calls",
+      "field": "parallel_tool_calls == false",
+      "conformant_value": false,
+      "observed": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "matches_expected": 5,
+      "of": 5,
+      "stable": true
+    },
+    {
+      "id": "032",
+      "title": "stop_sequences reaches upstream",
+      "field": "STOPPROBE present upstream",
+      "conformant_value": true,
+      "observed": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "matches_expected": 0,
+      "of": 5,
+      "stable": true
+    },
+    {
+      "id": "032c",
+      "title": "control: OpenAI route forwards stop",
+      "field": "STOPPROBE present upstream",
+      "conformant_value": true,
+      "observed": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "matches_expected": 5,
+      "of": 5,
+      "stable": true
+    },
+    {
+      "id": "033",
+      "title": "thinking history reaches upstream",
+      "field": "THINKPROBE present upstream",
+      "conformant_value": true,
+      "observed": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "matches_expected": 0,
+      "of": 5,
+      "stable": true
+    },
+    {
+      "id": "033c",
+      "title": "control: is_error survives the same translator",
+      "field": "function_call_output.status",
+      "conformant_value": "incomplete",
+      "observed": [
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete",
+        "incomplete"
+      ],
+      "matches_expected": 5,
+      "of": 5,
+      "stable": true
+    },
+    {
+      "id": "034",
+      "title": "content_filter preserved to the client",
+      "field": "Anthropic stop_reason",
+      "conformant_value": "refusal",
+      "observed": [
+        "end_turn",
+        "end_turn",
+        "end_turn",
+        "end_turn",
+        "end_turn"
+      ],
+      "matches_expected": 0,
+      "of": 5,
+      "stable": true
+    },
+    {
+      "id": "034c",
+      "title": "control: OpenAI route keeps content_filter",
+      "field": "OpenAI finish_reason",
+      "conformant_value": "content_filter",
+      "observed": [
+        "content_filter",
+        "content_filter",
+        "content_filter",
+        "content_filter",
+        "content_filter"
+      ],
+      "matches_expected": 5,
+      "of": 5,
+      "stable": true
+    },
+    {
+      "id": "035",
+      "title": "truncation preserved to the client",
+      "field": "Anthropic stop_reason",
+      "conformant_value": "max_tokens",
+      "observed": [
+        "end_turn",
+        "end_turn",
+        "end_turn",
+        "end_turn",
+        "end_turn"
+      ],
+      "matches_expected": 0,
+      "of": 5,
+      "stable": true
+    },
+    {
+      "id": "036",
+      "title": "refusal content preserved",
+      "field": "Anthropic content block types",
+      "conformant_value": [
+        "text"
+      ],
+      "observed": [
+        [],
+        [],
+        [],
+        [],
+        []
+      ],
+      "matches_expected": 0,
+      "of": 5,
+      "stable": true
+    },
+    {
+      "id": "036c",
+      "title": "control: a plain turn keeps its content",
+      "field": "Anthropic content block types",
+      "conformant_value": [
+        "text",
+        "tool_use"
+      ],
+      "observed": [
+        [
+          "text",
+          "tool_use"
+        ],
+        [
+          "text",
+          "tool_use"
+        ],
+        [
+          "text",
+          "tool_use"
+        ],
+        [
+          "text",
+          "tool_use"
+        ],
+        [
+          "text",
+          "tool_use"
+        ]
+      ],
+      "matches_expected": 5,
+      "of": 5,
+      "stable": true
+    },
+    {
+      "id": "037",
+      "title": "sanitized tool id restored for upstream",
+      "field": "original upstream id restored",
+      "conformant_value": true,
+      "observed": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "matches_expected": 0,
+      "of": 5,
+      "stable": true
+    }
+  ]
+}
