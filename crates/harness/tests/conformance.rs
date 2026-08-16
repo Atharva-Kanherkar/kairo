@@ -7,11 +7,13 @@
 
 use kairo::checks::{
     anthropic_response_toolcall_stop_reason, anthropic_toolcall_stop_reason,
-    content_filter_preserved, document_body_forwarded, is_error_forwarded, no_indexerror_leak,
-    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
-    openai_stream_finish_reason, openai_toolcall_id_charset, parallel_tool_disable_preserved,
-    reasoning_text_order_preserved, response_omits_secret, thinking_not_leaked_as_visible_text,
-    thinking_text_forwarded, upstream_bearer_is, upstream_omits_header_value, Verdict,
+    content_filter_preserved, document_body_forwarded, id_conforms, is_error_forwarded,
+    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
+    non_text_block_not_json_dumped, openai_stream_finish_reason, openai_toolcall_id_charset,
+    parallel_tool_disable_preserved, reasoning_text_order_preserved, response_content_not_empty,
+    response_omits_secret, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
+    thinking_text_forwarded, toolcall_id_restored_upstream, truncation_preserved,
+    upstream_bearer_is, upstream_omits_header_value, Verdict,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -694,4 +696,228 @@ fn bifrost_openai_stream_control_keeps_toolcall_finish_reason() {
         matches!(openai_stream_finish_reason(&flipped), Verdict::Violation(_)),
         "control is vacuous: fixture carries no tool_calls delta for the checker to judge"
     );
+}
+
+// ---- bugs 031-037: Bifrost Anthropic-ingress translation losses ----
+//
+// All frozen from one offline rig (transcripts/bifrost-rig/): a Bifrost gateway
+// whose only provider is a capture upstream, so no provider keys are involved and
+// every fixture is replayable. Request-side fixtures are capture-format JSONL and
+// are read by the SAME checkers written for LiteLLM and Switchyard, unchanged.
+
+#[test]
+fn bifrost_drops_disable_parallel_tool_use() {
+    let v = parallel_tool_disable_preserved(&fixture("transcripts/031/upstream-request.jsonl"));
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "Bifrost must be caught dropping disable_parallel_tool_use: {v:?}"
+    );
+}
+
+#[test]
+fn bifrost_openai_route_keeps_parallel_tool_calls() {
+    // Control: the same gateway forwards the flag on its OpenAI route, so the loss
+    // above is specific to the Anthropic ingress and not a limit of the upstream.
+    let v =
+        parallel_tool_disable_preserved(&fixture("transcripts/031/control-openai-upstream.jsonl"));
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "the OpenAI route forwards parallel_tool_calls=false: {v:?}"
+    );
+}
+
+#[test]
+fn bifrost_drops_stop_sequences() {
+    let v = stop_sequence_forwarded(
+        &fixture("transcripts/032/upstream-request.jsonl"),
+        "STOPPROBE",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "Bifrost must be caught dropping stop_sequences: {v:?}"
+    );
+}
+
+#[test]
+fn bifrost_openai_route_keeps_stop_sequences() {
+    let v = stop_sequence_forwarded(
+        &fixture("transcripts/032/control-openai-upstream.jsonl"),
+        "STOPPROBE",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "the OpenAI route forwards stop: {v:?}"
+    );
+}
+
+#[test]
+fn bifrost_drops_thinking_history() {
+    let v = thinking_text_forwarded(
+        &fixture("transcripts/033/upstream-request.jsonl"),
+        "THINKPROBE",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "Bifrost must be caught dropping the assistant thinking block: {v:?}"
+    );
+}
+
+#[test]
+fn bifrost_thinking_is_dropped_not_leaked() {
+    // Which failure mode matters: Switchyard drops thinking, LiteLLM leaks it as
+    // visible text. Bifrost drops it, so the leak checker is conformant here.
+    let v = thinking_not_leaked_as_visible_text(
+        &fixture("transcripts/033/upstream-request.jsonl"),
+        "THINKPROBE",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "thinking is dropped, not leaked into visible text: {v:?}"
+    );
+}
+
+/// Read one string field out of a frozen JSON transcript.
+fn json_str(rel: &str, pointer: &str) -> String {
+    let body: serde_json::Value =
+        serde_json::from_str(&fixture(rel)).unwrap_or_else(|e| panic!("{rel} is not JSON: {e}"));
+    body.pointer(pointer)
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or_else(|| panic!("{rel} has no string at {pointer}"))
+        .to_string()
+}
+
+#[test]
+fn bifrost_erases_content_filter_to_end_turn() {
+    // Both sides come off the frozen transcripts: the OpenAI-route control records
+    // what the upstream reported, the Anthropic transcript what the client was told.
+    // Nothing here is hardcoded, so mutating either fixture fails this test.
+    let upstream_finish = json_str(
+        "transcripts/034/control-openai-response.json",
+        "/choices/0/finish_reason",
+    );
+    let client_stop = json_str("transcripts/034/anthropic-response.json", "/stop_reason");
+    assert_eq!(
+        upstream_finish, "content_filter",
+        "the upstream transcript must still be the filtered turn"
+    );
+    let v = content_filter_preserved(&upstream_finish, &client_stop);
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "upstream {upstream_finish:?} delivered as {client_stop:?} must be caught: {v:?}"
+    );
+}
+
+#[test]
+fn bifrost_openai_route_keeps_content_filter() {
+    // Control: the same gateway, same upstream turn, on its OpenAI route still
+    // reports content_filter. The signal exists; only the Anthropic mapping loses it.
+    let body: serde_json::Value =
+        serde_json::from_str(&fixture("transcripts/034/control-openai-response.json"))
+            .expect("control fixture is valid JSON");
+    let finish = body
+        .pointer("/choices/0/finish_reason")
+        .and_then(serde_json::Value::as_str);
+    assert_eq!(
+        finish,
+        Some("content_filter"),
+        "the OpenAI route must still report content_filter on the same turn"
+    );
+    // A route that passes the signal through must not be flagged.
+    assert_eq!(
+        content_filter_preserved(finish.unwrap_or_default(), finish.unwrap_or_default()),
+        Verdict::Conformant,
+        "the OpenAI route preserves the signal and must read conformant"
+    );
+}
+
+#[test]
+fn bifrost_reports_truncation_as_end_turn() {
+    // Both halves are frozen: the upstream that truncated, and the client body.
+    let v = truncation_preserved(
+        &fixture("transcripts/035/upstream-response.json"),
+        &fixture("transcripts/035/anthropic-response.json"),
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "a truncated turn reported as end_turn must be caught: {v:?}"
+    );
+}
+
+#[test]
+fn bifrost_untruncated_turn_reported_as_end_turn_is_fine() {
+    // The control the invariant needs. This client body carries the SAME `end_turn`
+    // as the violation above; only the upstream differs. Conformant here is what
+    // proves the checker judges truncation rather than flagging every end_turn.
+    assert_eq!(
+        json_str(
+            "transcripts/035/control-anthropic-response.json",
+            "/stop_reason"
+        ),
+        "end_turn",
+        "the control must itself be an end_turn body, or it proves nothing"
+    );
+    let v = truncation_preserved(
+        &fixture("transcripts/035/control-upstream-response.json"),
+        &fixture("transcripts/035/control-anthropic-response.json"),
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "an untruncated turn reported as end_turn is correct: {v:?}"
+    );
+}
+
+#[test]
+fn bifrost_drops_refusal_content_entirely() {
+    let v = response_content_not_empty(&fixture("transcripts/036/anthropic-response.json"));
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "an emptied refusal turn must be caught: {v:?}"
+    );
+}
+
+#[test]
+fn bifrost_plain_turn_keeps_content() {
+    // Control: an ordinary turn through the same route keeps its blocks, so the
+    // empty array above is not simply how this gateway answers.
+    let v = response_content_not_empty(&fixture("transcripts/036/control-plain-response.json"));
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "a plain turn keeps its content blocks: {v:?}"
+    );
+}
+
+#[test]
+fn bifrost_does_not_restore_sanitized_toolcall_id() {
+    let v = toolcall_id_restored_upstream(
+        &fixture("transcripts/037/upstream-request-turn2.jsonl"),
+        "call/with+punct=and.dots:1",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "the sanitized id must be caught going back upstream unrestored: {v:?}"
+    );
+}
+
+#[test]
+fn bifrost_sanitized_id_is_charset_clean_for_the_client() {
+    // The rewrite itself is correct and worth keeping: the id handed to the client
+    // satisfies the tool-call id contract that the raw upstream id violated. Both
+    // ids are read from the frozen roundtrip, so a gateway that stopped sanitizing
+    // (or emitted a different client id) fails here instead of passing on literals.
+    let original = json_str("transcripts/037/roundtrip.json", "/upstream_original_id");
+    let client = json_str("transcripts/037/roundtrip.json", "/client_received_id");
+    assert!(
+        !id_conforms(&original),
+        "the raw upstream id {original:?} should violate the id contract"
+    );
+    assert!(
+        id_conforms(&client),
+        "the id handed to the client {client:?} must satisfy the id contract"
+    );
+    assert_ne!(original, client, "the rewrite must actually change the id");
 }

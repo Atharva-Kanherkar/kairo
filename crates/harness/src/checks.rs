@@ -491,6 +491,96 @@ pub fn anthropic_response_toolcall_stop_reason(response_json: &str) -> Verdict {
     }
 }
 
+/// Invariant (bug 032): a client-supplied stop sequence MUST reach the upstream.
+/// A gateway that drops it silently changes where the model stops generating,
+/// and the client cannot detect that its instruction was discarded.
+pub fn stop_sequence_forwarded(forwarded_jsonl: &str, sequence: &str) -> Verdict {
+    if jsonl_contains_string(forwarded_jsonl, sequence) {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation(format!(
+            "stop sequence {sequence:?} is absent from the forwarded upstream body"
+        ))
+    }
+}
+
+/// True when an upstream response says the turn was cut off at the output-token
+/// ceiling. Understands both spellings: Responses (`status: "incomplete"` with
+/// `incomplete_details.reason: "max_output_tokens"`) and Chat Completions
+/// (`finish_reason: "length"`).
+fn upstream_truncated(upstream: &Value) -> bool {
+    let responses_shape = upstream.get("status").and_then(Value::as_str) == Some("incomplete")
+        && upstream
+            .pointer("/incomplete_details/reason")
+            .and_then(Value::as_str)
+            .is_some_and(|r| r.contains("max_output_tokens") || r.contains("max_tokens"));
+    let chat_shape = upstream
+        .pointer("/choices/0/finish_reason")
+        .and_then(Value::as_str)
+        == Some("length");
+    responses_shape || chat_shape
+}
+
+/// Invariant (bug 035): a turn the UPSTREAM truncated MUST NOT be reported to an
+/// Anthropic client as `end_turn`. Anthropic spells truncation `max_tokens`;
+/// `end_turn` asserts the model finished on its own, so a caller cannot tell a
+/// complete answer from a cut-off one and will not know to continue.
+///
+/// Both halves of the exchange are required, and that is the point: `end_turn` is
+/// also the ordinary success value, so a checker that saw only the client response
+/// would flag every finished turn and could never have a passing control. The
+/// upstream payload is what makes "truncated" observable.
+pub fn truncation_preserved(upstream_response_json: &str, client_response_json: &str) -> Verdict {
+    let Ok(upstream) = serde_json::from_str::<Value>(upstream_response_json) else {
+        return Verdict::Violation("upstream body is not valid JSON".to_string());
+    };
+    let Ok(client) = serde_json::from_str::<Value>(client_response_json) else {
+        return Verdict::Violation("client body is not valid JSON".to_string());
+    };
+    if !upstream_truncated(&upstream) {
+        return Verdict::Conformant; // nothing to preserve
+    }
+    match client.get("stop_reason").and_then(Value::as_str) {
+        Some("end_turn") => Verdict::Violation(
+            "upstream truncated the turn at the token ceiling but the client was told \
+             stop_reason \"end_turn\"; truncation is unreportable to the caller"
+                .to_string(),
+        ),
+        _ => Verdict::Conformant,
+    }
+}
+
+/// Invariant (bug 036): a non-empty upstream turn MUST NOT reach the client as an
+/// empty `content` array. Whatever the upstream said (text, a refusal, a tool
+/// call), the client has to receive something; an empty turn is indistinguishable
+/// from the model saying nothing at all.
+pub fn response_content_not_empty(response_json: &str) -> Verdict {
+    let Ok(body) = serde_json::from_str::<Value>(response_json) else {
+        return Verdict::Violation("response body is not valid JSON".to_string());
+    };
+    match body.get("content").and_then(Value::as_array) {
+        Some(blocks) if blocks.is_empty() => Verdict::Violation(
+            "client received an empty content array for a turn the upstream filled".to_string(),
+        ),
+        Some(_) => Verdict::Conformant,
+        None => Verdict::Violation("response has no content array".to_string()),
+    }
+}
+
+/// Invariant (bug 037): when a gateway rewrites an upstream tool-call id to satisfy
+/// a client-side charset contract, it MUST reverse the rewrite before sending the
+/// id back upstream. The upstream never issued the sanitized id; echoing it breaks
+/// the multi-turn tool loop against any provider that validates call ids.
+pub fn toolcall_id_restored_upstream(forwarded_jsonl: &str, original_id: &str) -> Verdict {
+    if jsonl_contains_string(forwarded_jsonl, original_id) {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation(format!(
+            "upstream id {original_id:?} was not restored; the sanitized form was sent back instead"
+        ))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -502,6 +592,70 @@ mod tests {
         assert!(!id_conforms("functions.list_skills:0")); // dot and colon
         assert!(!id_conforms(&"x".repeat(65))); // too long
         assert!(!id_conforms("")); // empty
+    }
+
+    #[test]
+    fn truncation_checker_needs_the_upstream_to_decide() {
+        let truncated =
+            r#"{"status":"incomplete","incomplete_details":{"reason":"max_output_tokens"}}"#;
+        let finished = r#"{"status":"completed"}"#;
+        let client_end_turn = r#"{"stop_reason":"end_turn"}"#;
+
+        // Truncated upstream reported as end_turn: the defect.
+        assert!(matches!(
+            truncation_preserved(truncated, client_end_turn),
+            Verdict::Violation(_)
+        ));
+        // The SAME client body is conformant when the upstream did not truncate.
+        // A checker reading only the client side could not tell these apart.
+        assert_eq!(
+            truncation_preserved(finished, client_end_turn),
+            Verdict::Conformant
+        );
+        // Truncated and correctly reported.
+        assert_eq!(
+            truncation_preserved(truncated, r#"{"stop_reason":"max_tokens"}"#),
+            Verdict::Conformant
+        );
+        // Chat-completions spelling of the same upstream signal.
+        assert!(matches!(
+            truncation_preserved(
+                r#"{"choices":[{"finish_reason":"length"}]}"#,
+                client_end_turn
+            ),
+            Verdict::Violation(_)
+        ));
+    }
+
+    #[test]
+    fn empty_content_checker_flags_empty_array() {
+        assert!(matches!(
+            response_content_not_empty(r#"{"content":[]}"#),
+            Verdict::Violation(_)
+        ));
+        assert_eq!(
+            response_content_not_empty(r#"{"content":[{"type":"text","text":"hi"}]}"#),
+            Verdict::Conformant
+        );
+        assert!(matches!(
+            response_content_not_empty(r#"{"id":"x"}"#),
+            Verdict::Violation(_)
+        ));
+    }
+
+    #[test]
+    fn toolcall_id_restore_checker() {
+        let restored = r#"{"path":"/v1/responses","body":{"input":[{"call_id":"call/a+b"}]}}"#;
+        assert_eq!(
+            toolcall_id_restored_upstream(restored, "call/a+b"),
+            Verdict::Conformant
+        );
+        let sanitized =
+            r#"{"path":"/v1/responses","body":{"input":[{"call_id":"hash_call_a_b"}]}}"#;
+        assert!(matches!(
+            toolcall_id_restored_upstream(sanitized, "call/a+b"),
+            Verdict::Violation(_)
+        ));
     }
 
     #[test]
