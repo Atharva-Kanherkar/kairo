@@ -46,8 +46,10 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 035 | Bifrost reports an upstream-truncated turn to Anthropic clients as `end_turn` instead of `max_tokens`; truncation is unreportable to the caller | Bifrost 1.6.11 (capture rig, no keys) | new; adjacent [bifrost#6081](https://github.com/maximhq/bifrost/issues/6081) | ✅ 5/5 on CURRENT. Both halves of the exchange frozen. Control: an untruncated turn carrying the SAME `end_turn` is conformant 5/5. Sibling of 034/036 |
 | 036 | Bifrost delivers an upstream refusal to Anthropic clients as `content: []` with `end_turn`: both the refusal reason AND its text are erased | Bifrost 1.6.11 (capture rig, no keys) | new, 034/035 sibling | ✅ 5/5 on CURRENT. Control: an ordinary turn keeps `["text","tool_use"]` 5/5, so empty content is refusal-specific |
 | 037 | Bifrost sanitizes a punctuation-bearing upstream tool-call id for the client (correctly) but forwards the sanitized form back upstream; the rewrite has no inverse | Bifrost 1.6.11 (capture rig, no keys) | 005 family (Switchyard sanitizer) | ✅ 5/5 on CURRENT. Sanitized id is charset-clean (asserted); the finding is the missing inverse. Live-provider rejection untested |
+| 040 | Switchyard drops Anthropic `output_format` / json_schema on `/v1/messages`; OpenAI `response_format` on the same process is forwarded. Live Gemini: LiteLLM returns strict JSON, Switchyard returns a markdown fence | Switchyard 0.2.0 + LiteLLM 1.96.2 (capture + live Gemini) | 006/032 family | ✅ capture 5/5 both routes. Live Gemini 3/3. LiteLLM `/v1/messages` is the working control (`text.format json_schema`) |
+| 041 | LiteLLM `/v1/messages` drops `stop_sequences` on the Responses hop (`model`/`input`/`max_output_tokens` only). Same process `/v1/chat/completions` and Switchyard `/v1/messages` both forward `stop` | LiteLLM 1.96.2 (capture) + Switchyard 0.2.0 + live Anthropic Haiku | 032 family, LiteLLM's own mapping docs | ✅ LiteLLM drop 5/5. LiteLLM OpenAI control 5/5. Switchyard Anthropic control 5/5. Direct Anthropic `stop_reason=stop_sequence` 3/3 |
 
-**Tally**: 32 distinct defects confirmed on the wire (31 on current releases)
+**Tally**: 34 distinct defects confirmed on the wire (33 on current releases)
 across LiteLLM, Switchyard AND Bifrost, counting 006 as its 4 independent field losses
 plus the LiteLLM copy of that class. LiteLLM confirmed: 001 (stop_reason, 1.82),
 002a (finish_reason), 002b (route drop), 004a (id smuggle), 004b (Responses
@@ -56,12 +58,13 @@ portability), 016 (thinking leaked), 017 (parallel flag), 018 (document
 deleted), 006/007 (is_error + image deleted via Responses), 020 (client
 `api_key` override + sticky router upsert), 024 (`/health` extra_headers
 and `aws_session_token` leak), 026 (JSON `extra_headers`/`headers`/`organization`
-passthrough), 028 (`/gemini` pass-through copies `x-goog-upload-url ?key=`). Switchyard
+passthrough), 028 (`/gemini` pass-through copies `x-goog-upload-url ?key=`),
+041 (`/v1/messages` drops `stop_sequences`). Switchyard
 confirmed: 005 (id sanitizer), 006 (4 field losses), 007 (multimodal
 stringified), 016 (thinking dropped), 017 (parallel flag), 018 (document
 dumped), 019 (invented cache breakpoint), 023 (`api-key` and OpenAI
 org/project header forward), 025 (transport 502 echoes `?key=`), 027
-(`x-goog-api-key` header forward). Bifrost confirmed: 030 (Anthropic streaming
+(`x-goog-api-key` header forward), 040 (Anthropic `output_format` dropped). Bifrost confirmed: 030 (Anthropic streaming
 ends a tool-call turn as `end_turn`, a regression of their own fixed #3638,
 caught by the bug-001 checker unchanged), 031 (parallel flag dropped), 032
 (`stop_sequences` dropped), 033 (thinking history dropped), 034 (`content_filter`

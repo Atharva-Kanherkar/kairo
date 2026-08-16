@@ -1,0 +1,5 @@
+{"path": "/v1/chat/completions", "body": {"max_completion_tokens": 64, "messages": [{"content": "ping", "role": "user"}], "model": "captured-model"}}
+{"path": "/v1/chat/completions", "body": {"max_completion_tokens": 64, "messages": [{"content": "ping", "role": "user"}], "model": "captured-model"}}
+{"path": "/v1/chat/completions", "body": {"max_completion_tokens": 64, "messages": [{"content": "ping", "role": "user"}], "model": "captured-model"}}
+{"path": "/v1/chat/completions", "body": {"max_completion_tokens": 64, "messages": [{"content": "ping", "role": "user"}], "model": "captured-model"}}
+{"path": "/v1/chat/completions", "body": {"max_completion_tokens": 64, "messages": [{"content": "ping", "role": "user"}], "model": "captured-model"}}

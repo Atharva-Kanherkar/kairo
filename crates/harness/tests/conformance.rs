@@ -8,12 +8,12 @@
 use kairo::checks::{
     anthropic_response_toolcall_stop_reason, anthropic_toolcall_stop_reason,
     content_filter_preserved, document_body_forwarded, id_conforms, is_error_forwarded,
-    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
-    non_text_block_not_json_dumped, openai_stream_finish_reason, openai_toolcall_id_charset,
-    parallel_tool_disable_preserved, reasoning_text_order_preserved, response_content_not_empty,
-    response_omits_secret, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
-    thinking_text_forwarded, toolcall_id_restored_upstream, truncation_preserved,
-    upstream_bearer_is, upstream_omits_header_value, Verdict,
+    json_schema_forwarded, no_indexerror_leak, no_invented_cache_control,
+    no_phantom_null_output_text, non_text_block_not_json_dumped, openai_stream_finish_reason,
+    openai_toolcall_id_charset, parallel_tool_disable_preserved, reasoning_text_order_preserved,
+    response_content_not_empty, response_omits_secret, stop_sequence_forwarded,
+    thinking_not_leaked_as_visible_text, thinking_text_forwarded, toolcall_id_restored_upstream,
+    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, Verdict,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -749,6 +749,79 @@ fn bifrost_openai_route_keeps_stop_sequences() {
         v,
         Verdict::Conformant,
         "the OpenAI route forwards stop: {v:?}"
+    );
+}
+
+// ---- bug 040: Switchyard drops Anthropic output_format ----
+
+#[test]
+fn switchyard_drops_anthropic_output_format() {
+    let v = json_schema_forwarded(&fixture("transcripts/040/sy-output-format-upstream.jsonl"));
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "Switchyard Anthropic ingress must be caught dropping output_format: {v:?}"
+    );
+}
+
+#[test]
+fn switchyard_openai_route_keeps_response_format() {
+    let v = json_schema_forwarded(&fixture(
+        "transcripts/040/sy-openai-response-format-upstream.jsonl",
+    ));
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "Switchyard OpenAI route forwards response_format: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_messages_keeps_output_format() {
+    let v = json_schema_forwarded(&fixture("transcripts/040/ll-output-format-upstream.jsonl"));
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "LiteLLM /v1/messages maps output_format onto Responses text.format: {v:?}"
+    );
+}
+
+// ---- bug 041: LiteLLM /v1/messages drops stop_sequences ----
+
+#[test]
+fn litellm_messages_drops_stop_sequences() {
+    let v = stop_sequence_forwarded(
+        &fixture("transcripts/040/ll-stop-upstream.jsonl"),
+        "STOPPROBE",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "LiteLLM /v1/messages must be caught dropping stop_sequences: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_openai_route_keeps_stop_sequences() {
+    let v = stop_sequence_forwarded(
+        &fixture("transcripts/040/ll-openai-stop-upstream.jsonl"),
+        "STOPPROBE",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "LiteLLM OpenAI route forwards stop: {v:?}"
+    );
+}
+
+#[test]
+fn switchyard_messages_keeps_stop_sequences() {
+    let v = stop_sequence_forwarded(
+        &fixture("transcripts/040/sy-stop-upstream.jsonl"),
+        "STOPPROBE",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "Switchyard Anthropic ingress forwards stop: {v:?}"
     );
 }
 
