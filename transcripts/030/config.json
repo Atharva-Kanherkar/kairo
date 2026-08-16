@@ -1,0 +1,23 @@
+{
+  "$schema": "https://www.getbifrost.ai/schema",
+  "config_store": { "enabled": false },
+  "client": {
+    "enable_logging": true,
+    "initial_pool_size": 50,
+    "compat": {
+      "convert_text_to_chat": true,
+      "convert_chat_to_responses": false,
+      "should_drop_params": true,
+      "should_convert_params": false
+    }
+  },
+  "providers": {
+    "mockoai": {
+      "keys": [
+        { "name": "k1", "value": "sk-dummy-not-a-real-key", "weight": 1, "models": ["*"] }
+      ],
+      "network_config": { "base_url": "http://localhost:9911" },
+      "custom_provider_config": { "base_provider_type": "openai" }
+    }
+  }
+}

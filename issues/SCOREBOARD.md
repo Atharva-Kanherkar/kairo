@@ -38,9 +38,10 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 026 | LiteLLM honors JSON `extra_headers` / `headers` / `organization` without `forward_client_headers_to_llm_api`. Authorization in those fields replaces the deployment Bearer on the OpenAI path; `organization` becomes `OpenAI-Organization`; a 401 then cools the deployment so later callers get 429 | LiteLLM 1.96.2 (mock + live OpenAI/Gemini) | Huntr 4001e1a2 leftover (`extra_headers`/`organization` not banned) | ✅ mock 5/5. Live OpenAI invalid `organization` 401 2/2 then cooldown 429. Live Gemini `extra_headers.Authorization` 401 dual-auth 2/2 then cooldown 429. Direct OpenAI invalid org 401 5/5. No real keys leaked. Closed-port errors do not echo `?key=` |
 | 027 | Switchyard forwards client `x-goog-api-key`; that name is missing from `RESERVED_HEADERS` (`x-api-key` and `Authorization` are stripped). JSON `api_key`/`organization`/`extra_headers` stay in the body and do not swap Authorization | Switchyard 0.2.0 (capture rig) | [Switchyard#410](https://github.com/NVIDIA-NeMo/Switchyard/issues/410) | ✅ mock forward 5/5. Authorization stays the deployment Bearer. Live Gemini prefers Bearer (021/023 pass, HTTP 200). The leak is the header leaving the proxy |
 | 028 | LiteLLM `/gemini` pass-through injects env `GEMINI_API_KEY` as `?key=` and copies Google `x-goog-upload-url` / `x-goog-upload-control-url` to the caller. `x-pass-` forwards resumable-start headers that `forward_headers=false` would drop | LiteLLM 1.96.2 (capture mock + live Google) | pass-through header copy; `x-litellm-model-api-base` already strips `?` | ✅ mock canary 5/5. Live full `GEMINI_API_KEY` in both upload URLs 5/5. Direct Google same 5/5. Plain upload, chat, and closed-port 500 stay clean. Rotate Gemini. |
+| 030 | Bifrost `/anthropic/v1/messages` **streaming** ends a text + tool-call turn with `stop_reason: end_turn` while emitting a valid `tool_use` block. Non-streaming Anthropic, and both OpenAI-route modes, are correct | Bifrost 1.6.11 (capture mock, no keys) | [bifrost#6123](https://github.com/maximhq/bifrost/issues/6123), regression of #3638 (fixed by #3640 in 1.5.4) | ✅ 5/5 on CURRENT; 3 control cells 5/5 conformant. Caught by the bug-001 checker unchanged. Repro went via the Responses upstream path (see writeup) |
 
-**Tally**: 24 distinct defects confirmed on the wire (23 on current releases)
-across LiteLLM AND Switchyard, counting 006 as its 4 independent field losses
+**Tally**: 25 distinct defects confirmed on the wire (24 on current releases)
+across LiteLLM, Switchyard AND Bifrost, counting 006 as its 4 independent field losses
 plus the LiteLLM copy of that class. LiteLLM confirmed: 001 (stop_reason, 1.82),
 002a (finish_reason), 002b (route drop), 004a (id smuggle), 004b (Responses
 call_id), 008 (IndexError crash), 009 (phantom message), 012 (image
@@ -53,7 +54,9 @@ confirmed: 005 (id sanitizer), 006 (4 field losses), 007 (multimodal
 stringified), 016 (thinking dropped), 017 (parallel flag), 018 (document
 dumped), 019 (invented cache breakpoint), 023 (`api-key` and OpenAI
 org/project header forward), 025 (transport 502 echoes `?key=`), 027
-(`x-goog-api-key` header forward). Honest negatives kept: 003, 013
+(`x-goog-api-key` header forward). Bifrost confirmed: 030 (Anthropic streaming
+ends a tool-call turn as `end_turn`, a regression of their own fixed #3638,
+caught by the bug-001 checker unchanged). Honest negatives kept: 003, 013
 parallel-ids, P2/P4/P5/P7, and cited symptoms of 001/004. Several cited bugs
 are genuinely patched on current, which is itself the argument for a
 permanent regression suite. The 2026-08-13 capture-rig pass also showed
