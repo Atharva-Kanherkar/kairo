@@ -43,6 +43,8 @@ or just open a PR (see CONTRIBUTING.md).
 - ~~LiteLLM JSON extra_headers / headers / organization passthrough~~ DONE (issues/026)
 - ~~Switchyard forwards x-goog-api-key~~ DONE (issues/027)
 - ~~LiteLLM /gemini pass-through copies x-goog-upload-url ?key=~~ DONE (issues/028)
+- ~~GoModel /v1/messages drops output_format~~ DONE (issues/042)
+- ~~GoModel /v1/messages drops disable_parallel_tool_use~~ DONE (issues/043)
 - litellm#32214: sanitize_tool_use_ids breaks multi-turn on vLLM/Kimi (same class as 005)
 - litellm#27671: Responses streaming bridge, unregistered chatcmpl- text id
 - litellm#30053: fast_path skips tool-call continuation hook

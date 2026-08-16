@@ -825,6 +825,52 @@ fn switchyard_messages_keeps_stop_sequences() {
     );
 }
 
+// ---- bug 042: GoModel drops Anthropic output_format ----
+
+#[test]
+fn gomodel_drops_anthropic_output_format() {
+    let v = json_schema_forwarded(&fixture("transcripts/042/gm-output-format-upstream.jsonl"));
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "GoModel Anthropic ingress must be caught dropping output_format: {v:?}"
+    );
+}
+
+#[test]
+fn gomodel_openai_route_keeps_response_format() {
+    let v = json_schema_forwarded(&fixture(
+        "transcripts/042/gm-openai-response-format-upstream.jsonl",
+    ));
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "GoModel OpenAI route forwards response_format: {v:?}"
+    );
+}
+
+// ---- bug 043: GoModel drops disable_parallel_tool_use ----
+
+#[test]
+fn gomodel_drops_disable_parallel_tool_use() {
+    let v = parallel_tool_disable_preserved(&fixture("transcripts/042/gm-parallel-upstream.jsonl"));
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "GoModel must be caught dropping disable_parallel_tool_use: {v:?}"
+    );
+}
+
+#[test]
+fn gomodel_openai_route_keeps_parallel_tool_calls() {
+    let v = parallel_tool_disable_preserved(&fixture(
+        "transcripts/042/gm-openai-parallel-upstream.jsonl",
+    ));
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "the OpenAI route forwards parallel_tool_calls=false: {v:?}"
+    );
+}
+
 #[test]
 fn bifrost_drops_thinking_history() {
     let v = thinking_text_forwarded(

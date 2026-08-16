@@ -1,0 +1,12 @@
+server:
+  port: "8080"
+  master_key: "kairo-gm"
+  enable_passthrough_routes: true
+
+providers:
+  mock:
+    type: openai
+    base_url: "http://127.0.0.1:9996/v1"
+    api_key: "sk-x"
+    models:
+      - id: captured-model
