@@ -6,12 +6,12 @@
 //! violating the invariant, this test flips and tells us.
 
 use kairo::checks::{
-    anthropic_toolcall_stop_reason, content_filter_preserved, document_body_forwarded,
-    is_error_forwarded, no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
-    non_text_block_not_json_dumped, openai_stream_finish_reason, openai_toolcall_id_charset,
-    parallel_tool_disable_preserved, reasoning_text_order_preserved, response_omits_secret,
-    thinking_not_leaked_as_visible_text, thinking_text_forwarded, upstream_bearer_is,
-    upstream_omits_header_value, Verdict,
+    anthropic_response_toolcall_stop_reason, anthropic_toolcall_stop_reason,
+    content_filter_preserved, document_body_forwarded, is_error_forwarded, no_indexerror_leak,
+    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
+    openai_stream_finish_reason, openai_toolcall_id_charset, parallel_tool_disable_preserved,
+    reasoning_text_order_preserved, response_omits_secret, thinking_not_leaked_as_visible_text,
+    thinking_text_forwarded, upstream_bearer_is, upstream_omits_header_value, Verdict,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -620,5 +620,46 @@ fn litellm_closed_port_passthrough_omits_query_key() {
         v,
         Verdict::Conformant,
         "a closed-port /gemini 500 must not echo ?key= the way Switchyard 025 does: {v:?}"
+    );
+}
+
+// ---- bug 030: Bifrost /anthropic/v1/messages streaming drops stop_reason=tool_use ----
+//
+// Third tool under test. The streaming checker below is the SAME one written for
+// bug 001 against LiteLLM: the invariant is a property of the Anthropic wire
+// contract, not of any one gateway, so it ports to Bifrost unchanged.
+
+#[test]
+fn bifrost_anthropic_stream_loses_toolcall_stop_reason() {
+    let v = anthropic_toolcall_stop_reason(&fixture("transcripts/030/anthropic-stream.sse"));
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "Bifrost v1.6.11 streaming must be caught ending a tool_use turn as end_turn: {v:?}"
+    );
+}
+
+#[test]
+fn bifrost_anthropic_nonstream_control_keeps_toolcall_stop_reason() {
+    // Same turn, same upstream, non-streaming: conformant. This is what isolates
+    // the defect to the streaming serializer rather than the translation as a whole.
+    let v = anthropic_response_toolcall_stop_reason(&fixture(
+        "transcripts/030/anthropic-nonstream.json",
+    ));
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "the non-streaming Anthropic route maps the same turn correctly: {v:?}"
+    );
+}
+
+#[test]
+fn bifrost_openai_stream_control_keeps_toolcall_finish_reason() {
+    // The OpenAI-shaped streaming route on the same gateway and turn is conformant,
+    // so the upstream really did report a tool call.
+    let v = openai_stream_finish_reason(&fixture("transcripts/030/openai-stream.sse"));
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "the OpenAI streaming route preserves tool_calls on the same turn: {v:?}"
     );
 }

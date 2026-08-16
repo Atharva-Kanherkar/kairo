@@ -462,6 +462,35 @@ pub fn response_omits_secret(body: &str, needle: &str) -> Verdict {
     }
 }
 
+/// Invariant (bug 030): the non-streaming sibling of
+/// [`anthropic_toolcall_stop_reason`]. If a non-streamed Anthropic Messages
+/// response carries a `tool_use` content block, its top-level `stop_reason`
+/// MUST be `tool_use`. Pairing the two checkers is what isolates a defect to
+/// the streaming serializer: same turn, same upstream, one shape conformant
+/// and the other not.
+pub fn anthropic_response_toolcall_stop_reason(response_json: &str) -> Verdict {
+    let Ok(body) = serde_json::from_str::<Value>(response_json) else {
+        return Verdict::Violation("response body is not valid JSON".to_string());
+    };
+    let has_tool_use = body
+        .get("content")
+        .and_then(Value::as_array)
+        .is_some_and(|blocks| {
+            blocks
+                .iter()
+                .any(|b| b.get("type").and_then(Value::as_str) == Some("tool_use"))
+        });
+    if !has_tool_use {
+        return Verdict::Conformant; // nothing to check
+    }
+    match body.get("stop_reason").and_then(Value::as_str) {
+        Some("tool_use") => Verdict::Conformant,
+        other => Verdict::Violation(format!(
+            "tool_use block present but stop_reason is {other:?}, expected \"tool_use\""
+        )),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -473,6 +502,26 @@ mod tests {
         assert!(!id_conforms("functions.list_skills:0")); // dot and colon
         assert!(!id_conforms(&"x".repeat(65))); // too long
         assert!(!id_conforms("")); // empty
+    }
+
+    #[test]
+    fn response_stop_reason_checker_flags_end_turn() {
+        let violating = r#"{"content":[{"type":"tool_use","name":"x"}],"stop_reason":"end_turn"}"#;
+        assert!(matches!(
+            anthropic_response_toolcall_stop_reason(violating),
+            Verdict::Violation(_)
+        ));
+        let conformant = r#"{"content":[{"type":"tool_use","name":"x"}],"stop_reason":"tool_use"}"#;
+        assert_eq!(
+            anthropic_response_toolcall_stop_reason(conformant),
+            Verdict::Conformant
+        );
+        // A turn with no tool_use block has nothing to check.
+        let text_only = r#"{"content":[{"type":"text","text":"hi"}],"stop_reason":"end_turn"}"#;
+        assert_eq!(
+            anthropic_response_toolcall_stop_reason(text_only),
+            Verdict::Conformant
+        );
     }
 
     #[test]

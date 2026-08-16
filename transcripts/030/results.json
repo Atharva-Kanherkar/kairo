@@ -1,0 +1,75 @@
+{
+  "gateway": "http://localhost:8080",
+  "version": "\"v1.6.11\"",
+  "model": "mockoai/mimo-v2.5",
+  "n": 5,
+  "cells": [
+    {
+      "route": "/v1/chat/completions",
+      "mode": "non-stream",
+      "expected": "tool_calls",
+      "observed": [
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls"
+      ],
+      "agree": 5,
+      "of": 5,
+      "pass": true
+    },
+    {
+      "route": "/v1/chat/completions",
+      "mode": "stream",
+      "expected": "tool_calls",
+      "observed": [
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls",
+        "tool_calls"
+      ],
+      "agree": 5,
+      "of": 5,
+      "pass": true
+    },
+    {
+      "route": "/anthropic/v1/messages",
+      "mode": "non-stream",
+      "expected": "tool_use",
+      "observed": [
+        "tool_use",
+        "tool_use",
+        "tool_use",
+        "tool_use",
+        "tool_use"
+      ],
+      "agree": 5,
+      "of": 5,
+      "pass": true
+    },
+    {
+      "route": "/anthropic/v1/messages",
+      "mode": "stream",
+      "expected": "tool_use",
+      "observed": [
+        "end_turn",
+        "end_turn",
+        "end_turn",
+        "end_turn",
+        "end_turn"
+      ],
+      "agree": 0,
+      "of": 5,
+      "pass": false,
+      "tool_use_block_present": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    }
+  ]
+}
