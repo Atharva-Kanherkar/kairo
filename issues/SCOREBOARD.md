@@ -48,9 +48,11 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 037 | Bifrost sanitizes a punctuation-bearing upstream tool-call id for the client (correctly) but forwards the sanitized form back upstream; the rewrite has no inverse | Bifrost 1.6.11 (capture rig, no keys) | 005 family (Switchyard sanitizer) | ✅ 5/5 on CURRENT. Sanitized id is charset-clean (asserted); the finding is the missing inverse. Live-provider rejection untested |
 | 040 | Switchyard drops Anthropic `output_format` / json_schema on `/v1/messages`; OpenAI `response_format` on the same process is forwarded. Live Gemini: LiteLLM returns strict JSON, Switchyard returns a markdown fence | Switchyard 0.2.0 + LiteLLM 1.96.2 (capture + live Gemini) | 006/032 family | ✅ capture 5/5 both routes. Live Gemini 3/3. LiteLLM `/v1/messages` is the working control (`text.format json_schema`) |
 | 041 | LiteLLM `/v1/messages` drops `stop_sequences` on the Responses hop (`model`/`input`/`max_output_tokens` only). Same process `/v1/chat/completions` and Switchyard `/v1/messages` both forward `stop` | LiteLLM 1.96.2 (capture) + Switchyard 0.2.0 + live Anthropic Haiku | 032 family, LiteLLM's own mapping docs | ✅ LiteLLM drop 5/5. LiteLLM OpenAI control 5/5. Switchyard Anthropic control 5/5. Direct Anthropic `stop_reason=stop_sequence` 3/3 |
+| 042 | GoModel drops Anthropic `output_format` / json_schema on `/v1/messages`; OpenAI `response_format` on the same process is forwarded. Live Gemini returns a markdown fence | GoModel 0.1.77 (capture + live Gemini) | 040 family, third gateway | ✅ capture 5/5 both routes. Live Gemini 3/3 fenced/truncated. LiteLLM `/v1/messages` remains the working translation |
+| 043 | GoModel drops `disable_parallel_tool_use` on the Anthropic ingress; forwarded `tool_choice` is bare `"auto"` with no `parallel_tool_calls` | GoModel 0.1.77 (capture rig, no keys) | 017/031 family, fourth gateway | ✅ 5/5 on CURRENT. Control: same gateway's OpenAI route forwards `parallel_tool_calls: false` 5/5. Caught by the 017 checker unchanged |
 
-**Tally**: 34 distinct defects confirmed on the wire (33 on current releases)
-across LiteLLM, Switchyard AND Bifrost, counting 006 as its 4 independent field losses
+**Tally**: 36 distinct defects confirmed on the wire (35 on current releases)
+across LiteLLM, Switchyard, Bifrost, AND GoModel, counting 006 as its 4 independent field losses
 plus the LiteLLM copy of that class. LiteLLM confirmed: 001 (stop_reason, 1.82),
 002a (finish_reason), 002b (route drop), 004a (id smuggle), 004b (Responses
 call_id), 008 (IndexError crash), 009 (phantom message), 012 (image
@@ -69,7 +71,8 @@ ends a tool-call turn as `end_turn`, a regression of their own fixed #3638,
 caught by the bug-001 checker unchanged), 031 (parallel flag dropped), 032
 (`stop_sequences` dropped), 033 (thinking history dropped), 034 (`content_filter`
 erased), 035 (truncation erased), 036 (refusal content emptied), 037 (tool-id
-sanitizer has no inverse).
+sanitizer has no inverse). GoModel confirmed: 042 (Anthropic `output_format`
+dropped), 043 (parallel flag dropped).
 
 **Bifrost honest negatives (2026-08-16 sweep)**, all 5/5 and kept as data because
 they are the same probes that caught the other two gateways: client `Authorization`

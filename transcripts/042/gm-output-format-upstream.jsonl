@@ -1,0 +1,5 @@
+{"path": "/v1/chat/completions", "body": {"max_tokens": 64, "model": "captured-model", "messages": [{"role": "user", "content": "hi"}]}}
+{"path": "/v1/chat/completions", "body": {"max_tokens": 64, "model": "captured-model", "messages": [{"role": "user", "content": "hi"}]}}
+{"path": "/v1/chat/completions", "body": {"max_tokens": 64, "model": "captured-model", "messages": [{"role": "user", "content": "hi"}]}}
+{"path": "/v1/chat/completions", "body": {"max_tokens": 64, "model": "captured-model", "messages": [{"role": "user", "content": "hi"}]}}
+{"path": "/v1/chat/completions", "body": {"max_tokens": 64, "model": "captured-model", "messages": [{"role": "user", "content": "hi"}]}}
