@@ -1,5 +1,5 @@
-{"path": "/v1/chat/completions", "body": {"max_completion_tokens": 64, "messages": [{"content": "say STOPPROBE then continue", "role": "user"}], "model": "captured-model", "stop": ["STOPPROBE"]}}
-{"path": "/v1/chat/completions", "body": {"max_completion_tokens": 64, "messages": [{"content": "say STOPPROBE then continue", "role": "user"}], "model": "captured-model", "stop": ["STOPPROBE"]}}
-{"path": "/v1/chat/completions", "body": {"max_completion_tokens": 64, "messages": [{"content": "say STOPPROBE then continue", "role": "user"}], "model": "captured-model", "stop": ["STOPPROBE"]}}
-{"path": "/v1/chat/completions", "body": {"max_completion_tokens": 64, "messages": [{"content": "say STOPPROBE then continue", "role": "user"}], "model": "captured-model", "stop": ["STOPPROBE"]}}
-{"path": "/v1/chat/completions", "body": {"max_completion_tokens": 64, "messages": [{"content": "say STOPPROBE then continue", "role": "user"}], "model": "captured-model", "stop": ["STOPPROBE"]}}
+{"path": "/v1/chat/completions", "body": {"max_completion_tokens": 64, "messages": [{"content": "hi", "role": "user"}], "model": "captured-model", "stop": ["STOPPROBE"]}}
+{"path": "/v1/chat/completions", "body": {"max_completion_tokens": 64, "messages": [{"content": "hi", "role": "user"}], "model": "captured-model", "stop": ["STOPPROBE"]}}
+{"path": "/v1/chat/completions", "body": {"max_completion_tokens": 64, "messages": [{"content": "hi", "role": "user"}], "model": "captured-model", "stop": ["STOPPROBE"]}}
+{"path": "/v1/chat/completions", "body": {"max_completion_tokens": 64, "messages": [{"content": "hi", "role": "user"}], "model": "captured-model", "stop": ["STOPPROBE"]}}
+{"path": "/v1/chat/completions", "body": {"max_completion_tokens": 64, "messages": [{"content": "hi", "role": "user"}], "model": "captured-model", "stop": ["STOPPROBE"]}}

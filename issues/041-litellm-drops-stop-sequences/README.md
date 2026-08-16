@@ -47,6 +47,7 @@ flowchart LR
    Forwards `stop: ["STOPPROBE"]` 5/5.
 3. **Control: Switchyard `/v1/messages`**
    (`transcripts/040/sy-stop-upstream.jsonl`)
+   User text is `hi` (so `STOPPROBE` is not in the prompt).
    Forwards `stop: ["STOPPROBE"]` 5/5.
 4. **Control: direct Anthropic**
    `stop_reason: stop_sequence` 3/3 on Haiku with the same token.
