@@ -168,8 +168,22 @@ pub fn reasoning_text_order_preserved(source_order: &[&str], emitted_order: &[&s
 
 /// Parse the `body` object out of a capture-rig jsonl line
 /// (`{"path":..., "body": ...}`).
-fn capture_body(jsonl: &str) -> Result<Value, String> {
+pub fn capture_body(jsonl: &str) -> Result<Value, String> {
     let line = jsonl.lines().find(|l| !l.trim().is_empty()).unwrap_or("");
+    parse_capture_line(line)
+}
+
+/// Every non-empty jsonl record as `(line, body)`. Use this when a fixture
+/// claims N/N: `capture_body` (and checkers that call it) only read line 1.
+pub fn capture_records(jsonl: &str) -> Result<Vec<(String, Value)>, String> {
+    jsonl
+        .lines()
+        .filter(|l| !l.trim().is_empty())
+        .map(|line| parse_capture_line(line).map(|body| (line.to_string(), body)))
+        .collect()
+}
+
+fn parse_capture_line(line: &str) -> Result<Value, String> {
     let v: Value = serde_json::from_str(line).map_err(|e| format!("unparseable capture: {e}"))?;
     Ok(v.get("body").cloned().unwrap_or(Value::Null))
 }
@@ -766,6 +780,10 @@ mod tests {
             json_schema_forwarded(in_user_text),
             Verdict::Violation(JSON_SCHEMA_ABSENT.into())
         );
+        let two = capture_records("{\"body\":{\"a\":1}}\n{\"body\":{\"b\":2}}\n").unwrap();
+        assert_eq!(two.len(), 2);
+        assert_eq!(two[0].1.get("a").and_then(Value::as_i64), Some(1));
+        assert_eq!(two[1].1.get("b").and_then(Value::as_i64), Some(2));
     }
 
     #[test]

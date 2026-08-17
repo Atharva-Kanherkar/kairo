@@ -51,7 +51,9 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 042 | GoModel drops Anthropic `output_format` / json_schema on `/v1/messages`; OpenAI `response_format` on the same process is forwarded. Live Gemini returns a markdown fence | GoModel 0.1.77 (capture + live Gemini) | 040 family, third gateway | ✅ capture 5/5 both routes. Live Gemini 3/3 fenced/truncated. LiteLLM `/v1/messages` remains the working translation |
 | 043 | GoModel drops `disable_parallel_tool_use` on the Anthropic ingress; forwarded `tool_choice` is bare `"auto"` with no `parallel_tool_calls` | GoModel 0.1.77 (capture rig, no keys) | 017/031 family, fourth gateway | ✅ 5/5 on CURRENT. Control: same gateway's OpenAI route forwards `parallel_tool_calls: false` 5/5. Caught by the 017 checker unchanged |
 | 045 | Switchyard `/v1/messages` non-stream invents empty `{"type":"text","text":""}` before every `tool_use` when the backend is OpenAI-shaped (`content: null` + `tool_calls`). Stream and same-format Anthropic are clean | Switchyard 0.2.0 (capture mock + live Gemini 2.5 Flash) | sibling of 009 | ✅ canned 3/3, live Gemini 3/3. Control: Haiku same-format 3/3 and Gemini stream 3/3 |
-| 051 | AxonHub drops Anthropic `output_format` / json_schema on `/v1/messages`; OpenAI `response_format` on the same process is forwarded | AxonHub v1.0.0-beta7 (capture rig, no keys) | 040/042 family, fourth gateway | ✅ capture 5/5 both routes. Caught by the 040 checker unchanged |
+| 051 | AxonHub drops Anthropic `output_format` / json_schema on `/v1/messages`; OpenAI `response_format` on the same process is forwarded | AxonHub v1.0.0-beta7 (capture rig, no keys) | 040/042 family, third gateway | ✅ capture 5/5 both routes. Caught by the 040 checker unchanged |
+
+Numbers 046-050 are reserved for unpublished GoModel round-2 findings (one bug per PR). They are not missing SCOREBOARD rows.
 
 **Tally**: 38 distinct defects confirmed on the wire (37 on current releases)
 across LiteLLM, Switchyard, Bifrost, GoModel, AND AxonHub, counting 006 as its 4 independent field losses
