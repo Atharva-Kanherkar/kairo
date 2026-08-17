@@ -1,0 +1,26 @@
+{
+  "content": [
+    {
+      "text": "",
+      "type": "text"
+    },
+    {
+      "id": "function-call-4935385054739856960",
+      "input": {
+        "file_path": "/Users/atharva/kairo/README.md"
+      },
+      "name": "Read",
+      "type": "tool_use"
+    }
+  ],
+  "id": "dL2Cap7FGKXQjuMPt-vxmQ8",
+  "model": "gemini-2.5-flash",
+  "role": "assistant",
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+    "input_tokens": 416,
+    "output_tokens": 25
+  }
+}

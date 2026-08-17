@@ -1,0 +1,34 @@
+{
+  "content": [
+    {
+      "caller": {
+        "type": "direct"
+      },
+      "id": "toolu_013KRKgjAQHVHg5Ry142UHoq",
+      "input": {
+        "file_path": "/Users/atharva/kairo/README.md"
+      },
+      "name": "Read",
+      "type": "tool_use"
+    }
+  ],
+  "id": "msg_011Ce7xTM72sitq2X89KwhWQ",
+  "model": "claude-haiku-4-5",
+  "role": "assistant",
+  "stop_details": null,
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "inference_geo": "not_available",
+    "input_tokens": 1120,
+    "output_tokens": 50,
+    "service_tier": "standard"
+  }
+}

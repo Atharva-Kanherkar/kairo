@@ -8,12 +8,13 @@
 use kairo::checks::{
     anthropic_response_toolcall_stop_reason, anthropic_toolcall_stop_reason,
     content_filter_preserved, document_body_forwarded, id_conforms, is_error_forwarded,
-    json_schema_forwarded, no_indexerror_leak, no_invented_cache_control,
-    no_phantom_null_output_text, non_text_block_not_json_dumped, openai_stream_finish_reason,
-    openai_toolcall_id_charset, parallel_tool_disable_preserved, reasoning_text_order_preserved,
-    response_content_not_empty, response_omits_secret, stop_sequence_forwarded,
-    thinking_not_leaked_as_visible_text, thinking_text_forwarded, toolcall_id_restored_upstream,
-    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, Verdict,
+    json_schema_forwarded, no_empty_text_alongside_tool_use, no_indexerror_leak,
+    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
+    openai_stream_finish_reason, openai_toolcall_id_charset, parallel_tool_disable_preserved,
+    reasoning_text_order_preserved, response_content_not_empty, response_omits_secret,
+    stop_sequence_forwarded, thinking_not_leaked_as_visible_text, thinking_text_forwarded,
+    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    upstream_omits_header_value, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -1039,4 +1040,116 @@ fn bifrost_sanitized_id_is_charset_clean_for_the_client() {
         "the id handed to the client {client:?} must satisfy the id contract"
     );
     assert_ne!(original, client, "the rewrite must actually change the id");
+}
+
+// ---- bug 045: Switchyard invents an empty text block on non-stream tool calls ----
+
+fn anthropic_messages_content(rel: &str) -> Vec<serde_json::Value> {
+    let body: serde_json::Value =
+        serde_json::from_str(&fixture(rel)).unwrap_or_else(|e| panic!("{rel} is not JSON: {e}"));
+    let content = body
+        .get("content")
+        .and_then(serde_json::Value::as_array)
+        .cloned()
+        .unwrap_or_else(|| panic!("{rel} has no content array"));
+    assert!(
+        content
+            .iter()
+            .any(|b| b.get("type").and_then(serde_json::Value::as_str) == Some("tool_use")),
+        "{rel} must contain a tool_use block or the checker is vacuous"
+    );
+    content
+}
+
+fn content_has_empty_text(content: &[serde_json::Value]) -> bool {
+    content.iter().any(|b| {
+        b.get("type").and_then(serde_json::Value::as_str) == Some("text")
+            && b.get("text")
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or("")
+                .is_empty()
+    })
+}
+
+fn assert_phantom_empty_text(rel: &str) {
+    let content = anthropic_messages_content(rel);
+    assert!(
+        content_has_empty_text(&content),
+        "{rel} must still carry the phantom empty text block"
+    );
+    assert_eq!(
+        no_empty_text_alongside_tool_use(&fixture(rel)),
+        Verdict::Violation(EMPTY_TEXT_ALONGSIDE_TOOL_USE.into()),
+        "{rel} must be the 045 phantom, not a parse error"
+    );
+}
+
+#[test]
+fn switchyard_nonstrm_invents_empty_text_before_tool_use() {
+    assert_phantom_empty_text("transcripts/045/phantom-empty-text.json");
+}
+
+#[test]
+fn switchyard_live_gemini_nonstrm_invents_empty_text() {
+    assert_phantom_empty_text("transcripts/045/gemini-nonstrm-phantom.json");
+}
+
+#[test]
+fn switchyard_anthropic_passthrough_has_no_empty_text() {
+    let rel = "transcripts/045/anthropic-haiku-tool-only.json";
+    let content = anthropic_messages_content(rel);
+    assert!(
+        !content_has_empty_text(&content),
+        "Haiku control must not already carry an empty text block"
+    );
+    let body = fixture(rel);
+    assert_eq!(
+        no_empty_text_alongside_tool_use(&body),
+        Verdict::Conformant,
+        "same-format Anthropic backend emits only tool_use"
+    );
+    // Conformant alone is vacuous: the checker also returns it for `{}`. Inject
+    // the phantom and require the 045 reason, so a fixture that lost its
+    // tool_use fails here instead of passing as a silent false green.
+    let mut flipped: serde_json::Value =
+        serde_json::from_str(&body).expect("Haiku control is JSON");
+    flipped["content"]
+        .as_array_mut()
+        .unwrap()
+        .insert(0, serde_json::json!({"type":"text","text":""}));
+    assert_eq!(
+        no_empty_text_alongside_tool_use(&flipped.to_string()),
+        Verdict::Violation(EMPTY_TEXT_ALONGSIDE_TOOL_USE.into()),
+        "control is vacuous: fixture carries no tool_use block for the checker to judge"
+    );
+}
+
+#[test]
+fn switchyard_live_gemini_stream_has_no_empty_text() {
+    // The production Claude Code path. A streaming regression that started
+    // emitting an empty text block would leave the non-stream tests green.
+    let sse = fixture("transcripts/045/gemini-stream-clean.sse");
+    assert!(
+        sse.contains("\"type\":\"tool_use\""),
+        "stream fixture must start a tool_use block"
+    );
+    assert!(
+        !sse.contains("\"type\":\"text\""),
+        "stream fixture must not already carry a text block"
+    );
+    assert_eq!(
+        no_empty_text_alongside_tool_use(&sse),
+        Verdict::Conformant,
+        "live Gemini stream must start at tool_use with no empty text event"
+    );
+    let flipped = format!(
+        "event: content_block_start\n\
+         data: {{\"type\":\"content_block_start\",\"content_block\":{{\"type\":\"text\",\"text\":\"\"}}}}\n\n\
+         {sse}"
+    );
+    assert_eq!(
+        no_empty_text_alongside_tool_use(&flipped),
+        Verdict::Violation(EMPTY_TEXT_ALONGSIDE_TOOL_USE.into()),
+        "control is vacuous: stream fixture carries no tool_use block for the checker to judge"
+    );
 }

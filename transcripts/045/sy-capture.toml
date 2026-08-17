@@ -1,0 +1,13 @@
+schema_version = 1
+[llm_clients.local]
+format = "openai_chat"
+base_url = "http://127.0.0.1:9994/v1"
+[llm_clients.local.extra_headers]
+authorization = "Bearer SY-CAPTURE"
+[targets.cap]
+id = "captured-model"
+llm_client = "local"
+[routes.primary]
+id = "captured-model"
+type = "passthrough"
+target = "cap"

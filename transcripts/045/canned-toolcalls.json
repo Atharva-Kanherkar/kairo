@@ -1,0 +1,37 @@
+{
+  "id": "chatcmpl-cap",
+  "object": "chat.completion",
+  "created": 0,
+  "model": "captured",
+  "choices": [
+    {
+      "index": 0,
+      "finish_reason": "tool_calls",
+      "message": {
+        "role": "assistant",
+        "content": null,
+        "tool_calls": [
+          {
+            "id": "functions.Read:0",
+            "type": "function",
+            "index": 0,
+            "function": {
+              "name": "Read",
+              "arguments": "{\"file_path\":\"README.md\"}"
+            }
+          },
+          {
+            "id": "functions.Grep:1",
+            "type": "function",
+            "index": 1,
+            "function": {
+              "name": "Grep",
+              "arguments": "{\"pattern\":\"TODO\",\"path\":\"src\"}"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "usage": {"prompt_tokens": 8, "completion_tokens": 24, "total_tokens": 32}
+}
