@@ -573,6 +573,10 @@ pub fn stop_sequence_forwarded(forwarded_jsonl: &str, sequence: &str) -> Verdict
     }
 }
 
+/// 040 / 042 / 051 finding. Parse errors must not pass as this reason.
+pub const JSON_SCHEMA_ABSENT: &str =
+    "json_schema / structured output is absent from the forwarded upstream body";
+
 /// Structured output must still be named on the forwarded upstream body.
 /// A distinctive schema token in user text is not enough: the wire field
 /// itself has to survive (`type: json_schema` or a `json_schema` key),
@@ -580,9 +584,7 @@ pub fn stop_sequence_forwarded(forwarded_jsonl: &str, sequence: &str) -> Verdict
 pub fn json_schema_forwarded(forwarded_jsonl: &str) -> Verdict {
     match capture_body(forwarded_jsonl) {
         Ok(body) if has_json_schema_wire_field(&body) => Verdict::Conformant,
-        Ok(_) => Verdict::Violation(
-            "json_schema / structured output is absent from the forwarded upstream body".into(),
-        ),
+        Ok(_) => Verdict::Violation(JSON_SCHEMA_ABSENT.into()),
         Err(_) => Verdict::Violation("unparseable capture".into()),
     }
 }
@@ -753,17 +755,17 @@ mod tests {
         let openai = r#"{"body":{"response_format":{"type":"json_schema"}}}"#;
         assert_eq!(json_schema_forwarded(openai), Verdict::Conformant);
         let dropped = r#"{"body":{"model":"x","messages":[{"content":"ping"}]}}"#;
-        assert!(matches!(
+        assert_eq!(
             json_schema_forwarded(dropped),
-            Verdict::Violation(_)
-        ));
+            Verdict::Violation(JSON_SCHEMA_ABSENT.into())
+        );
         // Prompt text naming the token is not a surviving wire field.
         let in_user_text =
             r#"{"body":{"model":"x","messages":[{"content":"please use json_schema"}]}}"#;
-        assert!(matches!(
+        assert_eq!(
             json_schema_forwarded(in_user_text),
-            Verdict::Violation(_)
-        ));
+            Verdict::Violation(JSON_SCHEMA_ABSENT.into())
+        );
     }
 
     #[test]

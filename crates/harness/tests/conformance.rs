@@ -14,7 +14,7 @@ use kairo::checks::{
     reasoning_text_order_preserved, response_content_not_empty, response_omits_secret,
     stop_sequence_forwarded, thinking_not_leaked_as_visible_text, thinking_text_forwarded,
     toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
-    upstream_omits_header_value, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
+    upstream_omits_header_value, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -869,6 +869,75 @@ fn gomodel_openai_route_keeps_parallel_tool_calls() {
         v,
         Verdict::Conformant,
         "the OpenAI route forwards parallel_tool_calls=false: {v:?}"
+    );
+}
+
+// ---- bug 051: AxonHub drops Anthropic output_format ----
+
+fn capture_jsonl_body(rel: &str) -> serde_json::Value {
+    let raw = fixture(rel);
+    let line = raw.lines().find(|l| !l.trim().is_empty()).unwrap_or("");
+    let rec: serde_json::Value =
+        serde_json::from_str(line).unwrap_or_else(|e| panic!("{rel} is not JSON: {e}"));
+    rec.get("body")
+        .cloned()
+        .unwrap_or_else(|| panic!("{rel} has no body"))
+}
+
+#[test]
+fn axonhub_drops_anthropic_output_format() {
+    let rel = "transcripts/051/ah-output-format-upstream.jsonl";
+    let body = capture_jsonl_body(rel);
+    assert!(
+        body.get("model")
+            .and_then(serde_json::Value::as_str)
+            .is_some(),
+        "{rel} must still be a chat-completions request"
+    );
+    assert!(
+        body.get("messages")
+            .and_then(serde_json::Value::as_array)
+            .is_some(),
+        "{rel} must still carry messages or the drop is unobservable"
+    );
+    assert!(
+        body.get("response_format").is_none() && body.get("json_schema").is_none(),
+        "{rel} must still be the dropped form"
+    );
+    assert_eq!(
+        json_schema_forwarded(&fixture(rel)),
+        Verdict::Violation(JSON_SCHEMA_ABSENT.into()),
+        "{rel} must be the 051 drop, not a parse error"
+    );
+}
+
+#[test]
+fn axonhub_openai_route_keeps_response_format() {
+    let rel = "transcripts/051/ah-chat-format-upstream.jsonl";
+    let body = capture_jsonl_body(rel);
+    assert!(
+        body.get("response_format")
+            .and_then(|rf| rf.get("json_schema"))
+            .is_some(),
+        "{rel} must still carry response_format.json_schema"
+    );
+    assert_eq!(
+        json_schema_forwarded(&fixture(rel)),
+        Verdict::Conformant,
+        "AxonHub OpenAI route forwards response_format: {:?}",
+        json_schema_forwarded(&fixture(rel))
+    );
+    // Conformant alone is vacuous: the checker also returns it when the
+    // schema is present. Strip the field and require the 051 reason so a
+    // fixture that lost its schema fails here instead of passing as a
+    // silent false green.
+    let mut flipped = body;
+    flipped.as_object_mut().unwrap().remove("response_format");
+    let rec = serde_json::json!({"body": flipped});
+    assert_eq!(
+        json_schema_forwarded(&rec.to_string()),
+        Verdict::Violation(JSON_SCHEMA_ABSENT.into()),
+        "control is vacuous: fixture carries no json_schema field for the checker to judge"
     );
 }
 
