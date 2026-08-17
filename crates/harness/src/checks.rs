@@ -335,6 +335,39 @@ pub fn no_invented_cache_control(forwarded_jsonl: &str) -> Verdict {
     Verdict::Conformant
 }
 
+/// Invariant (bug 045): an Anthropic Messages body that contains `tool_use`
+/// MUST NOT also contain a fabricated empty `text` block. OpenAI-shaped
+/// upstreams send `content: null` with `tool_calls`; a lossless translator
+/// emits only the tool_use blocks. An empty text block is a phantom turn.
+pub fn no_empty_text_alongside_tool_use(response_json: &str) -> Verdict {
+    let v: Value = match serde_json::from_str(response_json) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("unparseable response: {e}")),
+    };
+    let Some(content) = v.get("content").and_then(Value::as_array) else {
+        return Verdict::Conformant;
+    };
+    let has_tool_use = content
+        .iter()
+        .any(|b| b.get("type").and_then(Value::as_str) == Some("tool_use"));
+    if !has_tool_use {
+        return Verdict::Conformant;
+    }
+    for b in content {
+        if b.get("type").and_then(Value::as_str) != Some("text") {
+            continue;
+        }
+        let text = b.get("text").and_then(Value::as_str).unwrap_or("");
+        if text.is_empty() {
+            return Verdict::Violation(
+                "Anthropic tool-call response contains an empty text block the model did not emit"
+                    .into(),
+            );
+        }
+    }
+    Verdict::Conformant
+}
+
 /// Invariant (bug 009): a Responses `output` array MUST NOT contain a
 /// `message` item whose `output_text.text` is JSON null.
 pub fn no_phantom_null_output_text(response_json: &str) -> Verdict {
@@ -767,6 +800,17 @@ mod tests {
             upstream_omits_header_value(ok, "CANARY_AZURE_API_KEY"),
             Verdict::Conformant
         );
+    }
+
+    #[test]
+    fn empty_text_alongside_tool_use_flags_phantom() {
+        let bad = r#"{"content":[{"type":"text","text":""},{"type":"tool_use","name":"Read","id":"x","input":{}}],"stop_reason":"tool_use"}"#;
+        assert!(matches!(
+            no_empty_text_alongside_tool_use(bad),
+            Verdict::Violation(_)
+        ));
+        let ok = r#"{"content":[{"type":"tool_use","name":"Read","id":"x","input":{}}],"stop_reason":"tool_use"}"#;
+        assert_eq!(no_empty_text_alongside_tool_use(ok), Verdict::Conformant);
     }
 
     #[test]

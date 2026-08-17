@@ -8,12 +8,13 @@
 use kairo::checks::{
     anthropic_response_toolcall_stop_reason, anthropic_toolcall_stop_reason,
     content_filter_preserved, document_body_forwarded, id_conforms, is_error_forwarded,
-    json_schema_forwarded, no_indexerror_leak, no_invented_cache_control,
-    no_phantom_null_output_text, non_text_block_not_json_dumped, openai_stream_finish_reason,
-    openai_toolcall_id_charset, parallel_tool_disable_preserved, reasoning_text_order_preserved,
-    response_content_not_empty, response_omits_secret, stop_sequence_forwarded,
-    thinking_not_leaked_as_visible_text, thinking_text_forwarded, toolcall_id_restored_upstream,
-    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, Verdict,
+    json_schema_forwarded, no_empty_text_alongside_tool_use, no_indexerror_leak,
+    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
+    openai_stream_finish_reason, openai_toolcall_id_charset, parallel_tool_disable_preserved,
+    reasoning_text_order_preserved, response_content_not_empty, response_omits_secret,
+    stop_sequence_forwarded, thinking_not_leaked_as_visible_text, thinking_text_forwarded,
+    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    upstream_omits_header_value, Verdict,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -1039,4 +1040,37 @@ fn bifrost_sanitized_id_is_charset_clean_for_the_client() {
         "the id handed to the client {client:?} must satisfy the id contract"
     );
     assert_ne!(original, client, "the rewrite must actually change the id");
+}
+
+// ---- bug 045: Switchyard invents an empty text block on non-stream tool calls ----
+
+#[test]
+fn switchyard_nonstrm_invents_empty_text_before_tool_use() {
+    let v = no_empty_text_alongside_tool_use(&fixture("transcripts/045/phantom-empty-text.json"));
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "canned OpenAI null-content tool_calls must become a phantom empty text block: {v:?}"
+    );
+}
+
+#[test]
+fn switchyard_live_gemini_nonstrm_invents_empty_text() {
+    let v =
+        no_empty_text_alongside_tool_use(&fixture("transcripts/045/gemini-nonstrm-phantom.json"));
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "live Gemini through /v1/messages non-stream must be caught: {v:?}"
+    );
+}
+
+#[test]
+fn switchyard_anthropic_passthrough_has_no_empty_text() {
+    let v = no_empty_text_alongside_tool_use(&fixture(
+        "transcripts/045/anthropic-haiku-tool-only.json",
+    ));
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "same-format Anthropic backend emits only tool_use: {v:?}"
+    );
 }

@@ -56,8 +56,8 @@ dataset grows, the foundation for a router that fixes it.
 ## Status
 
 <!-- kairo-counts:start -->
-32 distinct defects reproduced and documented across LiteLLM, NVIDIA Switchyard, Bifrost, and GoModel (see [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md)). One is already filed upstream as [NVIDIA-NeMo/Switchyard#380](https://github.com/NVIDIA-NeMo/Switchyard/issues/380).
-The Rust harness is green with 87 tests, of which 76 are conformance checks wired to recorded transcripts. This is early and active; contributions of new reproductions are the fastest way to help.
+33 distinct defects reproduced and documented across LiteLLM, NVIDIA Switchyard, Bifrost, and GoModel (see [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md)). One is already filed upstream as [NVIDIA-NeMo/Switchyard#380](https://github.com/NVIDIA-NeMo/Switchyard/issues/380).
+The Rust harness is green with 91 tests, of which 79 are conformance checks wired to recorded transcripts. This is early and active; contributions of new reproductions are the fastest way to help.
 <!-- kairo-counts:end -->
 
 ## How it works

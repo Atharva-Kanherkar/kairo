@@ -1,0 +1,35 @@
+{
+  "content": [
+    {
+      "text": "",
+      "type": "text"
+    },
+    {
+      "id": "functions_Read_0",
+      "input": {
+        "file_path": "README.md"
+      },
+      "name": "Read",
+      "type": "tool_use"
+    },
+    {
+      "id": "functions_Grep_1",
+      "input": {
+        "path": "src",
+        "pattern": "TODO"
+      },
+      "name": "Grep",
+      "type": "tool_use"
+    }
+  ],
+  "id": "chatcmpl-cap",
+  "model": "captured-model",
+  "role": "assistant",
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+    "input_tokens": 8,
+    "output_tokens": 24
+  }
+}
