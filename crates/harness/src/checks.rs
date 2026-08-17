@@ -335,37 +335,73 @@ pub fn no_invented_cache_control(forwarded_jsonl: &str) -> Verdict {
     Verdict::Conformant
 }
 
+/// Reason returned when a `tool_use` turn also carries a fabricated empty
+/// `text` block. Tests match this string so a parse error cannot pass as the
+/// 045 finding.
+pub const EMPTY_TEXT_ALONGSIDE_TOOL_USE: &str =
+    "Anthropic tool-call response contains an empty text block the model did not emit";
+
+fn is_anthropic_sse(body: &str) -> bool {
+    body.lines()
+        .any(|line| line.starts_with("event: ") || line.starts_with("data: "))
+}
+
+fn block_is_tool_use(b: &Value) -> bool {
+    b.get("type").and_then(Value::as_str) == Some("tool_use")
+}
+
+fn block_is_empty_text(b: &Value) -> bool {
+    b.get("type").and_then(Value::as_str) == Some("text")
+        && b.get("text")
+            .and_then(Value::as_str)
+            .unwrap_or("")
+            .is_empty()
+}
+
+fn empty_text_with_tool_use(content: &[Value]) -> Verdict {
+    if !content.iter().any(block_is_tool_use) {
+        return Verdict::Conformant;
+    }
+    if content.iter().any(block_is_empty_text) {
+        return Verdict::Violation(EMPTY_TEXT_ALONGSIDE_TOOL_USE.into());
+    }
+    Verdict::Conformant
+}
+
 /// Invariant (bug 045): an Anthropic Messages body that contains `tool_use`
 /// MUST NOT also contain a fabricated empty `text` block. OpenAI-shaped
 /// upstreams send `content: null` with `tool_calls`; a lossless translator
 /// emits only the tool_use blocks. An empty text block is a phantom turn.
-pub fn no_empty_text_alongside_tool_use(response_json: &str) -> Verdict {
-    let v: Value = match serde_json::from_str(response_json) {
+///
+/// Accepts a non-stream JSON Messages body or an Anthropic SSE stream.
+/// Streaming is judged on `content_block_start` events: an empty `text`
+/// delta is normal, an empty `text` *block* next to `tool_use` is not.
+pub fn no_empty_text_alongside_tool_use(response: &str) -> Verdict {
+    if is_anthropic_sse(response) {
+        return no_empty_text_alongside_tool_use_sse(response);
+    }
+    let v: Value = match serde_json::from_str(response) {
         Ok(v) => v,
         Err(e) => return Verdict::Violation(format!("unparseable response: {e}")),
     };
     let Some(content) = v.get("content").and_then(Value::as_array) else {
         return Verdict::Conformant;
     };
-    let has_tool_use = content
-        .iter()
-        .any(|b| b.get("type").and_then(Value::as_str) == Some("tool_use"));
-    if !has_tool_use {
-        return Verdict::Conformant;
-    }
-    for b in content {
-        if b.get("type").and_then(Value::as_str) != Some("text") {
+    empty_text_with_tool_use(content)
+}
+
+fn no_empty_text_alongside_tool_use_sse(sse: &str) -> Verdict {
+    let events = sse_data_json(sse);
+    let mut blocks = Vec::new();
+    for e in &events {
+        if e.get("type").and_then(Value::as_str) != Some("content_block_start") {
             continue;
         }
-        let text = b.get("text").and_then(Value::as_str).unwrap_or("");
-        if text.is_empty() {
-            return Verdict::Violation(
-                "Anthropic tool-call response contains an empty text block the model did not emit"
-                    .into(),
-            );
+        if let Some(block) = e.get("content_block") {
+            blocks.push(block.clone());
         }
     }
-    Verdict::Conformant
+    empty_text_with_tool_use(&blocks)
 }
 
 /// Invariant (bug 009): a Responses `output` array MUST NOT contain a
@@ -805,12 +841,40 @@ mod tests {
     #[test]
     fn empty_text_alongside_tool_use_flags_phantom() {
         let bad = r#"{"content":[{"type":"text","text":""},{"type":"tool_use","name":"Read","id":"x","input":{}}],"stop_reason":"tool_use"}"#;
-        assert!(matches!(
+        assert_eq!(
             no_empty_text_alongside_tool_use(bad),
-            Verdict::Violation(_)
-        ));
+            Verdict::Violation(EMPTY_TEXT_ALONGSIDE_TOOL_USE.into())
+        );
         let ok = r#"{"content":[{"type":"tool_use","name":"Read","id":"x","input":{}}],"stop_reason":"tool_use"}"#;
         assert_eq!(no_empty_text_alongside_tool_use(ok), Verdict::Conformant);
+        assert_ne!(
+            no_empty_text_alongside_tool_use("not-json"),
+            Verdict::Violation(EMPTY_TEXT_ALONGSIDE_TOOL_USE.into()),
+            "malformed JSON must not be reported as the 045 phantom"
+        );
+        let sse_ok = "event: content_block_start\n\
+            data: {\"type\":\"content_block_start\",\"content_block\":{\"type\":\"tool_use\",\"name\":\"Read\"}}\n\n";
+        assert_eq!(
+            no_empty_text_alongside_tool_use(sse_ok),
+            Verdict::Conformant
+        );
+        let sse_bad = "event: content_block_start\n\
+            data: {\"type\":\"content_block_start\",\"content_block\":{\"type\":\"text\",\"text\":\"\"}}\n\n\
+            event: content_block_start\n\
+            data: {\"type\":\"content_block_start\",\"content_block\":{\"type\":\"tool_use\",\"name\":\"Read\"}}\n\n";
+        assert_eq!(
+            no_empty_text_alongside_tool_use(sse_bad),
+            Verdict::Violation(EMPTY_TEXT_ALONGSIDE_TOOL_USE.into())
+        );
+        let sse_empty_delta = "event: content_block_start\n\
+            data: {\"type\":\"content_block_start\",\"content_block\":{\"type\":\"text\",\"text\":\"\"}}\n\n\
+            event: content_block_delta\n\
+            data: {\"type\":\"content_block_delta\",\"delta\":{\"type\":\"text_delta\",\"text\":\"\"}}\n\n";
+        assert_eq!(
+            no_empty_text_alongside_tool_use(sse_empty_delta),
+            Verdict::Conformant,
+            "empty text without tool_use is not 045"
+        );
     }
 
     #[test]

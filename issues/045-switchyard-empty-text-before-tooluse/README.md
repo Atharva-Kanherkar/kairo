@@ -93,9 +93,12 @@ following `tool_use`. Silent, HTTP 200. Streaming Claude Code is not hit.
 ## Test
 
 `no_empty_text_alongside_tool_use`. Invariant: *if an Anthropic Messages
-body contains `tool_use`, it must not also contain a text block whose text
-is empty.*
+body (JSON or SSE) contains `tool_use`, it must not also contain a text
+block whose text is empty.* Tests match the specific reason string, so a
+parse error cannot pass as this finding, and each control fixture is
+required to still carry `tool_use`.
 
 `switchyard_nonstrm_invents_empty_text_before_tool_use` (violation, canned),
 `switchyard_live_gemini_nonstrm_invents_empty_text` (violation, live),
-`switchyard_anthropic_passthrough_has_no_empty_text` (control).
+`switchyard_anthropic_passthrough_has_no_empty_text` (control),
+`switchyard_live_gemini_stream_has_no_empty_text` (stream control).
