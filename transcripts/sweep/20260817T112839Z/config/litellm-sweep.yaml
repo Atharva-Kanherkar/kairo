@@ -1,0 +1,6 @@
+model_list:
+  - model_name: mock
+    litellm_params:
+      model: openai/captured-model
+      api_base: http://127.0.0.1:9990/v1
+      api_key: sk-x
