@@ -202,6 +202,9 @@ class Bifrost(Gateway):
     name = "bifrost"
     port = 8085
     binary = "npx"
+    # Bifrost namespaces its non-native ingress: POST /v1/messages is a 405.
+    # Same path the frozen 031-037 rig uses.
+    messages_path = "/anthropic/v1/messages"
     model = "mockoai/captured-model"
 
     def write_config(self):

@@ -175,6 +175,22 @@ class Sweep:
         if not gw.wait_for_port(self.args.mock_port, 10):
             raise SystemExit(f"capture mock never came up on :{self.args.mock_port}")
 
+    @staticmethod
+    def probe_records(recs):
+        """Keep only records that look like the forwarded probe.
+
+        Bifrost polls its backend for a model list in the background, so the
+        capture interleaves those with the request under test. Filtering to
+        POSTs carrying a chat-shaped body is what stops a model-list poll from
+        being scored as "the gateway dropped `messages`".
+        """
+        hits = [r for r in recs
+                if r.get("method") == "POST"
+                and isinstance(r.get("body"), dict)
+                and ("messages" in r["body"] or "prompt" in r["body"]
+                     or "input" in r["body"])]
+        return hits or recs
+
     def drain(self):
         """Return upstream records written since the last call."""
         with open(self.capture) as f:
@@ -200,11 +216,12 @@ class Sweep:
         headers = g.messages_headers(probe.headers)
         url = g.base_url() + g.messages_path
         status, raw = post(url, body, headers, timeout=self.args.timeout)
-        recs = self.drain()
+        recs = self.probe_records(self.drain())
 
         cell = {
             "gateway": g.name, "probe": probe.id, "field": probe.field,
-            "axis": probe.axis, "severity": probe.severity, "known": probe.known,
+            "axis": probe.axis, "severity": probe.severity,
+            "known": (probe.known or {}).get(g.name),
             "status": status, "upstream_records": len(recs),
         }
 
@@ -246,7 +263,7 @@ class Sweep:
         body = g.shape_body(probe.control)
         status, raw = post(g.base_url() + g.chat_path, body,
                            g.chat_headers(), timeout=self.args.timeout)
-        recs = self.drain()
+        recs = self.probe_records(self.drain())
         if status >= 400 or not recs:
             return {"verdict": P.SKIPPED, "status": status,
                     "detail": "OpenAI ingress unavailable on this gateway"}
@@ -285,7 +302,7 @@ class Sweep:
                     self.cells[key] = {
                         "gateway": g.name, "probe": probe.id, "field": probe.field,
                         "axis": probe.axis, "severity": probe.severity,
-                        "known": probe.known, "verdict": P.SKIPPED,
+                        "known": (probe.known or {}).get(g.name), "verdict": P.SKIPPED,
                         "detail": g.skip_reason, "runs": 0,
                     }
                     continue
@@ -293,7 +310,7 @@ class Sweep:
                     self.cells[key] = {
                         "gateway": g.name, "probe": probe.id, "field": probe.field,
                         "axis": probe.axis, "severity": probe.severity,
-                        "known": probe.known, "verdict": P.SKIPPED,
+                        "known": (probe.known or {}).get(g.name), "verdict": P.SKIPPED,
                         "detail": "phase 1 budget exhausted before this cell",
                         "runs": 0,
                     }

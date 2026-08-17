@@ -102,16 +102,18 @@ def write_matrix(sweep, args):
         if not probes:
             continue
         lines.append(f"\n## {title}\n")
-        lines.append("| field | issue | " + " | ".join(gnames) + " |")
-        lines.append("|---|---|" + "---|" * len(gnames))
+        lines.append("| field | " + " | ".join(gnames) + " |")
+        lines.append("|---|" + "---|" * len(gnames))
         for p in probes:
-            row = [f"`{p.field}`", p.known or ""]
+            row = [f"`{p.field}`"]
             for g in gnames:
                 c = sweep.cells.get((g, p.id))
                 if not c:
                     row.append("--")
                     continue
                 tok = GLYPH.get(c["verdict"], "?")
+                if c.get("known"):
+                    tok += f" [{c['known']}]"
                 if c.get("runs", 0) > 1 and c.get("determinism"):
                     tok += f" {c['determinism']}"
                 if c.get("control", {}).get("verdict") in CLEAN:
@@ -119,6 +121,11 @@ def write_matrix(sweep, args):
                 row.append(tok)
             lines.append("| " + " | ".join(row) + " |")
 
+    lines.append(
+        "\nA bracketed number is the kairo issue that documents this loss on "
+        "**that** gateway. It is per gateway on purpose: 012 is a LiteLLM "
+        "issue, so Bifrost passing the same probe is a result, not a "
+        "regression.\n")
     lines.append(
         "\n`ctl` marks a cell where the same gateway's own OpenAI "
         "`/v1/chat/completions` ingress carried the field in the same process. "

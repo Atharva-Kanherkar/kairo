@@ -13,7 +13,8 @@
 #   CANNED_PATH ending in .sse is streamed as text/event-stream.
 import json
 import sys
-from http.server import BaseHTTPRequestHandler, HTTPServer
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 DEFAULT_JSON = {
     "id": "chatcmpl-sweep",
@@ -32,6 +33,8 @@ DEFAULT_JSON = {
 
 
 def make_handler(outfile, canned_path):
+    write_lock = threading.Lock()
+
     class H(BaseHTTPRequestHandler):
         protocol_version = "HTTP/1.1"
 
@@ -51,7 +54,7 @@ def make_handler(outfile, canned_path):
                 "headers": {k: v for k, v in self.headers.items()},
                 "body": body,
             }
-            with open(outfile, "a") as f:
+            with write_lock, open(outfile, "a") as f:
                 f.write(json.dumps(rec) + "\n")
 
         def _reply(self):
@@ -59,6 +62,14 @@ def make_handler(outfile, canned_path):
                 data = open(canned_path, "rb").read()
             except OSError:
                 data = json.dumps(DEFAULT_JSON).encode()
+            # Gateways pool connections and hang up mid-write; a broken pipe
+            # is the client's business, not a mock crash.
+            try:
+                self._write(data)
+            except (BrokenPipeError, ConnectionResetError):
+                pass
+
+        def _write(self, data):
             if canned_path.endswith(".sse"):
                 self.send_response(200)
                 self.send_header("content-type", "text/event-stream")
@@ -89,7 +100,14 @@ def make_handler(outfile, canned_path):
 
 
 def serve(port, outfile, canned_path):
-    HTTPServer(("127.0.0.1", port), make_handler(outfile, canned_path)).serve_forever()
+    # Threading matters: gateways keep pooled HTTP/1.1 connections open, so a
+    # single-threaded server serializes every gateway behind whichever one is
+    # holding a connection. With two gateways in one sweep that shows up as
+    # one column of timeouts and 4xx, which reads exactly like a gateway
+    # defect and is not one.
+    srv = ThreadingHTTPServer(("127.0.0.1", port), make_handler(outfile, canned_path))
+    srv.daemon_threads = True
+    srv.serve_forever()
 
 
 if __name__ == "__main__":

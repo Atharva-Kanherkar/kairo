@@ -11,9 +11,11 @@
 #   header   - a request header (including ones that must NOT be forwarded)
 #   response - an upstream reply shape, checked against what the client sees
 #
-# `known` names the kairo issue that already documents this loss, when one
-# exists. Those probes are the positive controls: a sweep where they come back
-# PRESERVED means the rig is broken, not that the bugs were fixed.
+# `known` maps gateway name to the kairo issue that documents this loss on
+# THAT gateway. Attribution matters: 012 is a LiteLLM issue, so Bifrost passing
+# the same probe is a result, not a regression. Per gateway, its own known
+# probes are the positive controls: if 032 comes back clean on Bifrost, the rig
+# is not exercising the path, not that the bug was fixed.
 from __future__ import annotations
 
 import json
@@ -80,6 +82,28 @@ def has_key(body, *names, skip=("messages", "input", "content")):
     return rec(body)
 
 
+def has_json_schema(body):
+    """Port of checks.rs::has_json_schema_wire_field.
+
+    Matches a `json_schema` key OR `type: "json_schema"` as a value, skipping
+    prompt-bearing fields. The `type` clause is what catches the Responses API
+    spelling, `text.format.type = "json_schema"`, which is how LiteLLM and
+    Bifrost both carry an Anthropic schema.
+    """
+    skip = ("messages", "input", "content")
+
+    def rec(v):
+        if isinstance(v, dict):
+            if "json_schema" in v or v.get("type") == "json_schema":
+                return True
+            return any(rec(c) for k, c in v.items() if k not in skip)
+        if isinstance(v, list):
+            return any(rec(c) for c in v)
+        return False
+
+    return rec(body)
+
+
 def value_at(body, path, default=None):
     cur = body
     for part in path.split("."):
@@ -101,12 +125,23 @@ def any_value(body, needle):
 
 
 def system_text_present(body, needle):
-    """True when the system prompt survived, in either OpenAI spelling."""
-    for m in value_at(body, "messages", []) or []:
-        if isinstance(m, dict) and m.get("role") in ("system", "developer"):
-            if needle in json.dumps(m.get("content", "")):
-                return True
-    return needle in json.dumps(value_at(body, "system", "") or "")
+    """True when the system prompt survived, in any OpenAI-side spelling.
+
+    Four shapes in the wild: a `system`/`developer` role message inside
+    `messages` (Chat Completions) or inside `input` (Responses), a top-level
+    `system`, and top-level `instructions` (Responses). LiteLLM uses
+    `instructions`; Bifrost uses a system-role entry in `input`. Scanning only
+    `messages` reads both of those as a dropped system prompt.
+    """
+    for field in ("messages", "input"):
+        for m in value_at(body, field, []) or []:
+            if isinstance(m, dict) and m.get("role") in ("system", "developer"):
+                if needle in json.dumps(m.get("content", "")):
+                    return True
+    for field in ("system", "instructions"):
+        if needle in json.dumps(value_at(body, field, "") or ""):
+            return True
+    return False
 
 
 # ---------- probe definition ----------
@@ -176,11 +211,14 @@ PROBES = [
         lambda fwd, hdr, cli: PRESERVED if value_at(fwd, "model") else DROPPED,
         severity="sanity", note="rig sanity check"),
     req("req.messages", "messages", base(),
-        lambda fwd, hdr, cli: PRESERVED if value_at(fwd, "messages") else DROPPED,
-        severity="sanity", note="rig sanity check"),
+        lambda fwd, hdr, cli: PRESERVED
+        if value_at(fwd, "messages") or value_at(fwd, "input") else DROPPED,
+        severity="sanity",
+        note="`input` is the Responses spelling; both ingresses use it"),
     req("req.max_tokens", "max_tokens", base(),
         lambda fwd, hdr, cli: PRESERVED
-        if has_key(fwd, "max_tokens", "max_completion_tokens") else DROPPED,
+        if has_key(fwd, "max_tokens", "max_completion_tokens",
+                   "max_output_tokens") else DROPPED,
         severity="high"),
 
     # ---- top-level request parameters ----
@@ -191,7 +229,7 @@ PROBES = [
     req("req.stop_sequences", "stop_sequences", base(stop_sequences=["STOPPROBE"]),
         lambda fwd, hdr, cli: PRESERVED if any_value(value_at(fwd, "stop", ""), "STOPPROBE")
         or any_value(value_at(fwd, "stop_sequences", ""), "STOPPROBE") else DROPPED,
-        severity="high", known="032/041",
+        severity="high", known={"bifrost": "032", "litellm": "041"},
         control=dict(model="M", max_tokens=64, stop=["STOPPROBE"],
                      messages=[{"role": "user", "content": "hi"}])),
     req("req.temperature", "temperature", base(temperature=0.3),
@@ -216,9 +254,8 @@ PROBES = [
     req("req.output_config.format", "output_config.format",
         base(output_config={"format": {"type": "json_schema", "name": "city",
                                        "schema": SCHEMA}}),
-        lambda fwd, hdr, cli: PRESERVED if has_key(fwd, "json_schema", "response_format")
-        else DROPPED,
-        severity="high", known="040/042/051",
+        lambda fwd, hdr, cli: PRESERVED if has_json_schema(fwd) else DROPPED,
+        severity="high", known={"switchyard": "040", "gomodel": "042", "axonhub": "051"},
         control=dict(model="M", max_tokens=64,
                      messages=[{"role": "user", "content": "hi"}],
                      response_format={"type": "json_schema",
@@ -226,9 +263,8 @@ PROBES = [
                                                       "strict": True}})),
     req("req.output_format.legacy", "output_format (deprecated spelling)",
         base(output_format={"type": "json_schema", "schema": SCHEMA}),
-        lambda fwd, hdr, cli: PRESERVED if has_key(fwd, "json_schema", "response_format")
-        else DROPPED,
-        severity="high", known="040/042/051",
+        lambda fwd, hdr, cli: PRESERVED if has_json_schema(fwd) else DROPPED,
+        severity="high", known={"switchyard": "040", "gomodel": "042", "axonhub": "051"},
         note="the spelling the 040 family was frozen against"),
     req("req.output_config.effort", "output_config.effort",
         base(output_config={"effort": "low"}),
@@ -262,12 +298,14 @@ PROBES = [
     req("req.tool_choice.auto", "tool_choice: auto",
         base(tools=[TOOL], tool_choice={"type": "auto"}),
         lambda fwd, hdr, cli: PRESERVED
-        if value_at(fwd, "tool_choice") in ("auto", {"type": "auto"}) else MANGLED,
+        if value_at(fwd, "tool_choice") in ("auto", {"type": "auto"})
+        or value_at(fwd, "tool_choice.type") == "auto" else MANGLED,
         severity="medium"),
     req("req.tool_choice.any", "tool_choice: any -> required",
         base(tools=[TOOL], tool_choice={"type": "any"}),
         lambda fwd, hdr, cli: PRESERVED
-        if value_at(fwd, "tool_choice") in ("required", "any") else MANGLED,
+        if value_at(fwd, "tool_choice") in ("required", "any")
+        or value_at(fwd, "tool_choice.type") in ("required", "any") else MANGLED,
         severity="high"),
     req("req.tool_choice.named", "tool_choice: tool(name)",
         base(tools=[TOOL], tool_choice={"type": "tool", "name": "get_weather"}),
@@ -279,7 +317,7 @@ PROBES = [
              tool_choice={"type": "auto", "disable_parallel_tool_use": True}),
         lambda fwd, hdr, cli: PRESERVED
         if value_at(fwd, "parallel_tool_calls") is False else DROPPED,
-        severity="high", known="017/031/043",
+        severity="high", known={"switchyard": "017", "litellm": "017", "bifrost": "031", "gomodel": "043"},
         control=dict(model="M", max_tokens=64,
                      messages=[{"role": "user", "content": "hi"}],
                      parallel_tool_calls=False,
@@ -313,7 +351,7 @@ PROBES = [
                 {"type": "text", "text": "hi"}]}]),
             lambda fwd, hdr, cli: PRESERVED
             if has_key(fwd, "image_url", skip=()) else DROPPED,
-            severity="high", known="012"),
+            severity="high", known={"litellm": "012"}),
     content("content.document.pdf", "document (pdf base64)",
             base(messages=[{"role": "user", "content": [
                 {"type": "document", "source": {"type": "base64",
@@ -322,7 +360,7 @@ PROBES = [
                 {"type": "text", "text": "hi"}]}]),
             lambda fwd, hdr, cli: PRESERVED
             if has_key(fwd, "file", "input_file", "file_data", skip=()) else DROPPED,
-            severity="high", known="018"),
+            severity="high", known={"switchyard": "018", "litellm": "018"}),
     content("content.tool_result.is_error", "tool_result.is_error",
             base(messages=[
                 {"role": "user", "content": "hi"},
@@ -335,7 +373,7 @@ PROBES = [
                  tools=[TOOL]),
             lambda fwd, hdr, cli: PRESERVED
             if has_key(fwd, "is_error", skip=()) or any_value(fwd, "ERRPROBE") else DROPPED,
-            severity="high", known="006",
+            severity="high", known={"switchyard": "006", "litellm": "006"},
             note="OpenAI has no is_error; surfacing the text is the minimum bar"),
     content("content.tool_result.image", "tool_result with image block",
             base(messages=[
@@ -351,7 +389,7 @@ PROBES = [
                  tools=[TOOL]),
             lambda fwd, hdr, cli: PRESERVED
             if has_key(fwd, "image_url", skip=()) else MANGLED,
-            severity="high", known="007",
+            severity="high", known={"switchyard": "007", "litellm": "007"},
             note="007 froze this being JSON-stringified into a text blob"),
     content("content.thinking.history", "thinking block in history",
             base(messages=[
@@ -363,7 +401,7 @@ PROBES = [
                 {"role": "user", "content": "again"}]),
             lambda fwd, hdr, cli: PRESERVED
             if any_value(fwd, "THINKPROBE-9021") else DROPPED,
-            severity="high", known="016/033"),
+            severity="high", known={"switchyard": "016", "litellm": "016", "bifrost": "033"}),
     content("content.cache_control.block", "cache_control on a content block",
             base(messages=[{"role": "user", "content": [
                 {"type": "text", "text": "hi",
@@ -383,26 +421,26 @@ PROBES = [
                  tools=[TOOL]),
             lambda fwd, hdr, cli: PRESERVED
             if any_value(fwd, "IDPROBE_8899") else MANGLED,
-            severity="high", known="005/037",
+            severity="high", known={"switchyard": "005", "bifrost": "037"},
             note="a sanitizer with no inverse shows up here as MANGLED"),
 
     # ---- headers: the ones that must NOT be forwarded ----
     header("header.client_authorization", "client Authorization must not leak",
            base(), lambda fwd, hdr, cli: DROPPED
            if "CLIENTSECRET-3311" in json.dumps(hdr) else PRESERVED,
-           severity="high", known="020",
+           severity="high", known={"litellm": "020"},
            headers={"authorization": "Bearer CLIENTSECRET-3311"},
            note="inverted: DROPPED here means the secret WAS forwarded"),
     header("header.client_x_api_key", "client x-api-key must not leak",
            base(), lambda fwd, hdr, cli: DROPPED
            if "XKEYSECRET-7742" in json.dumps(hdr) else PRESERVED,
-           severity="high", known="023/027",
+           severity="high", known={"switchyard": "023/027"},
            headers={"x-api-key": "XKEYSECRET-7742"},
            note="inverted: DROPPED here means the secret WAS forwarded"),
     header("header.openai_organization", "openai-organization must not leak",
            base(), lambda fwd, hdr, cli: DROPPED
            if "ORGSECRET-5150" in json.dumps(hdr) else PRESERVED,
-           severity="high", known="026",
+           severity="high", known={"litellm": "026"},
            headers={"openai-organization": "ORGSECRET-5150"},
            note="inverted: DROPPED here means the header WAS forwarded"),
     header("header.anthropic_beta", "anthropic-beta forwarded or mapped",
@@ -420,7 +458,7 @@ PROBES = [
                         "total_tokens": 2}},
              lambda fwd, hdr, cli: PRESERVED
              if value_at(cli, "stop_reason") == "end_turn" else MANGLED,
-             severity="high", known="001/002"),
+             severity="high", known={"litellm": "001/002"}),
     response("resp.finish_reason.length", "finish_reason length -> max_tokens",
              {"id": "c", "object": "chat.completion", "created": 0, "model": "m",
               "choices": [{"index": 0, "finish_reason": "length",
@@ -429,7 +467,7 @@ PROBES = [
                         "total_tokens": 2}},
              lambda fwd, hdr, cli: PRESERVED
              if value_at(cli, "stop_reason") == "max_tokens" else MANGLED,
-             severity="high", known="035"),
+             severity="high", known={"bifrost": "035"}),
     response("resp.finish_reason.content_filter", "content_filter signal survives",
              {"id": "c", "object": "chat.completion", "created": 0, "model": "m",
               "choices": [{"index": 0, "finish_reason": "content_filter",
@@ -438,7 +476,7 @@ PROBES = [
                         "total_tokens": 1}},
              lambda fwd, hdr, cli: PRESERVED
              if value_at(cli, "stop_reason") not in ("end_turn", None) else MANGLED,
-             severity="high", known="034",
+             severity="high", known={"switchyard": "010A", "bifrost": "034"},
              note="erasing a safety signal into end_turn is the 034 defect"),
     response("resp.empty_text_before_tool_use", "no invented empty text block",
              {"id": "c", "object": "chat.completion", "created": 0, "model": "m",
@@ -454,7 +492,7 @@ PROBES = [
              if any(b.get("type") == "text" and b.get("text") == ""
                     for b in (value_at(cli, "content") or [])
                     if isinstance(b, dict)) else PRESERVED,
-             severity="high", known="009/045",
+             severity="high", known={"litellm": "009", "switchyard": "045"},
              note="inverted: MANGLED means an empty text block was invented"),
     response("resp.refusal", "upstream refusal content survives",
              {"id": "c", "object": "chat.completion", "created": 0, "model": "m",
@@ -465,7 +503,7 @@ PROBES = [
                         "total_tokens": 2}},
              lambda fwd, hdr, cli: PRESERVED
              if any_value(cli, "REFUSALPROBE") else DROPPED,
-             severity="high", known="036"),
+             severity="high", known={"bifrost": "036"}),
     response("resp.tool_call_id", "upstream tool_call id reaches the client",
              {"id": "c", "object": "chat.completion", "created": 0, "model": "m",
               "choices": [{"index": 0, "finish_reason": "tool_calls",
@@ -479,7 +517,7 @@ PROBES = [
                         "total_tokens": 2}},
              lambda fwd, hdr, cli: PRESERVED
              if any_value(cli, "IDECHO_6001") else MANGLED,
-             severity="high", known="004/037"),
+             severity="high", known={"litellm": "004", "bifrost": "037"}),
     response("resp.usage", "usage counts survive translation",
              {"id": "c", "object": "chat.completion", "created": 0, "model": "m",
               "choices": [{"index": 0, "finish_reason": "stop",
