@@ -25,6 +25,7 @@ GATEWAYS = (
     ("switchyard", "NVIDIA Switchyard"),
     ("bifrost", "Bifrost"),
     ("gomodel", "GoModel"),
+    ("axonhub", "AxonHub"),
 )
 
 TEST_RE = re.compile(r"^\s*#\[test\]", re.M)

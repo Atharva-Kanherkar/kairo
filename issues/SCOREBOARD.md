@@ -51,9 +51,12 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 042 | GoModel drops Anthropic `output_format` / json_schema on `/v1/messages`; OpenAI `response_format` on the same process is forwarded. Live Gemini returns a markdown fence | GoModel 0.1.77 (capture + live Gemini) | 040 family, third gateway | ✅ capture 5/5 both routes. Live Gemini 3/3 fenced/truncated. LiteLLM `/v1/messages` remains the working translation |
 | 043 | GoModel drops `disable_parallel_tool_use` on the Anthropic ingress; forwarded `tool_choice` is bare `"auto"` with no `parallel_tool_calls` | GoModel 0.1.77 (capture rig, no keys) | 017/031 family, fourth gateway | ✅ 5/5 on CURRENT. Control: same gateway's OpenAI route forwards `parallel_tool_calls: false` 5/5. Caught by the 017 checker unchanged |
 | 045 | Switchyard `/v1/messages` non-stream invents empty `{"type":"text","text":""}` before every `tool_use` when the backend is OpenAI-shaped (`content: null` + `tool_calls`). Stream and same-format Anthropic are clean | Switchyard 0.2.0 (capture mock + live Gemini 2.5 Flash) | sibling of 009 | ✅ canned 3/3, live Gemini 3/3. Control: Haiku same-format 3/3 and Gemini stream 3/3 |
+| 051 | AxonHub drops Anthropic `output_format` / json_schema on `/v1/messages`; OpenAI `response_format` on the same process is forwarded | AxonHub v1.0.0-beta7 (capture rig, no keys) | 040/042 family, third gateway | ✅ capture 5/5 both routes. Caught by the 040 checker unchanged |
 
-**Tally**: 37 distinct defects confirmed on the wire (36 on current releases)
-across LiteLLM, Switchyard, Bifrost, AND GoModel, counting 006 as its 4 independent field losses
+Numbers 046-050 are reserved for unpublished GoModel round-2 findings (one bug per PR). They are not missing SCOREBOARD rows.
+
+**Tally**: 38 distinct defects confirmed on the wire (37 on current releases)
+across LiteLLM, Switchyard, Bifrost, GoModel, AND AxonHub, counting 006 as its 4 independent field losses
 plus the LiteLLM copy of that class. LiteLLM confirmed: 001 (stop_reason, 1.82),
 002a (finish_reason), 002b (route drop), 004a (id smuggle), 004b (Responses
 call_id), 008 (IndexError crash), 009 (phantom message), 012 (image
@@ -73,7 +76,8 @@ caught by the bug-001 checker unchanged), 031 (parallel flag dropped), 032
 (`stop_sequences` dropped), 033 (thinking history dropped), 034 (`content_filter`
 erased), 035 (truncation erased), 036 (refusal content emptied), 037 (tool-id
 sanitizer has no inverse). GoModel confirmed: 042 (Anthropic `output_format`
-dropped), 043 (parallel flag dropped).
+dropped), 043 (parallel flag dropped). AxonHub confirmed: 051 (Anthropic
+`output_format` dropped).
 
 **Bifrost honest negatives (2026-08-16 sweep)**, all 5/5 and kept as data because
 they are the same probes that caught the other two gateways: client `Authorization`

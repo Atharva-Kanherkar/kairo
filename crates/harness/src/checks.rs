@@ -168,8 +168,22 @@ pub fn reasoning_text_order_preserved(source_order: &[&str], emitted_order: &[&s
 
 /// Parse the `body` object out of a capture-rig jsonl line
 /// (`{"path":..., "body": ...}`).
-fn capture_body(jsonl: &str) -> Result<Value, String> {
+pub fn capture_body(jsonl: &str) -> Result<Value, String> {
     let line = jsonl.lines().find(|l| !l.trim().is_empty()).unwrap_or("");
+    parse_capture_line(line)
+}
+
+/// Every non-empty jsonl record as `(line, body)`. Use this when a fixture
+/// claims N/N: `capture_body` (and checkers that call it) only read line 1.
+pub fn capture_records(jsonl: &str) -> Result<Vec<(String, Value)>, String> {
+    jsonl
+        .lines()
+        .filter(|l| !l.trim().is_empty())
+        .map(|line| parse_capture_line(line).map(|body| (line.to_string(), body)))
+        .collect()
+}
+
+fn parse_capture_line(line: &str) -> Result<Value, String> {
     let v: Value = serde_json::from_str(line).map_err(|e| format!("unparseable capture: {e}"))?;
     Ok(v.get("body").cloned().unwrap_or(Value::Null))
 }
@@ -573,6 +587,10 @@ pub fn stop_sequence_forwarded(forwarded_jsonl: &str, sequence: &str) -> Verdict
     }
 }
 
+/// 040 / 042 / 051 finding. Parse errors must not pass as this reason.
+pub const JSON_SCHEMA_ABSENT: &str =
+    "json_schema / structured output is absent from the forwarded upstream body";
+
 /// Structured output must still be named on the forwarded upstream body.
 /// A distinctive schema token in user text is not enough: the wire field
 /// itself has to survive (`type: json_schema` or a `json_schema` key),
@@ -580,9 +598,7 @@ pub fn stop_sequence_forwarded(forwarded_jsonl: &str, sequence: &str) -> Verdict
 pub fn json_schema_forwarded(forwarded_jsonl: &str) -> Verdict {
     match capture_body(forwarded_jsonl) {
         Ok(body) if has_json_schema_wire_field(&body) => Verdict::Conformant,
-        Ok(_) => Verdict::Violation(
-            "json_schema / structured output is absent from the forwarded upstream body".into(),
-        ),
+        Ok(_) => Verdict::Violation(JSON_SCHEMA_ABSENT.into()),
         Err(_) => Verdict::Violation("unparseable capture".into()),
     }
 }
@@ -753,17 +769,21 @@ mod tests {
         let openai = r#"{"body":{"response_format":{"type":"json_schema"}}}"#;
         assert_eq!(json_schema_forwarded(openai), Verdict::Conformant);
         let dropped = r#"{"body":{"model":"x","messages":[{"content":"ping"}]}}"#;
-        assert!(matches!(
+        assert_eq!(
             json_schema_forwarded(dropped),
-            Verdict::Violation(_)
-        ));
+            Verdict::Violation(JSON_SCHEMA_ABSENT.into())
+        );
         // Prompt text naming the token is not a surviving wire field.
         let in_user_text =
             r#"{"body":{"model":"x","messages":[{"content":"please use json_schema"}]}}"#;
-        assert!(matches!(
+        assert_eq!(
             json_schema_forwarded(in_user_text),
-            Verdict::Violation(_)
-        ));
+            Verdict::Violation(JSON_SCHEMA_ABSENT.into())
+        );
+        let two = capture_records("{\"body\":{\"a\":1}}\n{\"body\":{\"b\":2}}\n").unwrap();
+        assert_eq!(two.len(), 2);
+        assert_eq!(two[0].1.get("a").and_then(Value::as_i64), Some(1));
+        assert_eq!(two[1].1.get("b").and_then(Value::as_i64), Some(2));
     }
 
     #[test]

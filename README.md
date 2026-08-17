@@ -21,7 +21,8 @@ so this repo is also an open dataset of real tool-call failures.
 
 If you point Claude Code (or Cline, Cursor, Aider, OpenClaw) at a cheaper or
 local model to save money, DeepSeek, Kimi K2, GLM, Qwen, a local Ollama model,
-through a gateway like LiteLLM, OpenRouter, claude-code-router, or Switchyard,
+through a gateway like LiteLLM, OpenRouter, claude-code-router, Switchyard,
+or AxonHub,
 you have probably hit this: a tool call that silently does nothing, a file that
 never gets written, an agent that stalls after calling a tool. It usually is not
 the model. It is the gateway mistranslating the tool call between the client's
@@ -56,8 +57,8 @@ dataset grows, the foundation for a router that fixes it.
 ## Status
 
 <!-- kairo-counts:start -->
-33 distinct defects reproduced and documented across LiteLLM, NVIDIA Switchyard, Bifrost, and GoModel (see [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md)). One is already filed upstream as [NVIDIA-NeMo/Switchyard#380](https://github.com/NVIDIA-NeMo/Switchyard/issues/380).
-The Rust harness is green with 92 tests, of which 80 are conformance checks wired to recorded transcripts. This is early and active; contributions of new reproductions are the fastest way to help.
+34 distinct defects reproduced and documented across LiteLLM, NVIDIA Switchyard, Bifrost, GoModel, and AxonHub (see [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md)). One is already filed upstream as [NVIDIA-NeMo/Switchyard#380](https://github.com/NVIDIA-NeMo/Switchyard/issues/380).
+The Rust harness is green with 94 tests, of which 82 are conformance checks wired to recorded transcripts. This is early and active; contributions of new reproductions are the fastest way to help.
 <!-- kairo-counts:end -->
 
 ## How it works
