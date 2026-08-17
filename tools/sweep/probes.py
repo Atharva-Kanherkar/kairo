@@ -190,6 +190,11 @@ def header(pid, field, body, expect, **kw):
     return Probe(pid, "header", field, body, expect, **kw)
 
 
+def cred(pid, field, body, expect, **kw):
+    """A credential-leak probe. Always inverted: PRESERVED means no leak."""
+    return Probe(pid, "credential", field, body, expect, **kw)
+
+
 def response(pid, field, canned, expect, **kw):
     return Probe(pid, "response", field, dict(model="M", max_tokens=64, messages=HI),
                  expect, canned=canned, **kw)
@@ -289,7 +294,12 @@ PROBES = [
 
     # ---- tools ----
     req("req.tools.schema", "tools[].input_schema", base(tools=[TOOL]),
-        lambda fwd, hdr, cli: PRESERVED if any_value(fwd, "get_weather") else DROPPED,
+        # The field under test is the schema, not the name. A gateway that
+        # echoes `get_weather` into tool_choice while dropping `parameters`
+        # would otherwise score as preserved.
+        lambda fwd, hdr, cli: PRESERVED
+        if (has_key(fwd, "parameters", "input_schema", skip=())
+            and any_value(fwd, "location")) else DROPPED,
         severity="high"),
     req("req.tools.strict", "tools[].strict",
         base(tools=[dict(TOOL, strict=True)]),
@@ -424,25 +434,64 @@ PROBES = [
             severity="high", known={"switchyard": "005", "bifrost": "037"},
             note="a sanitizer with no inverse shows up here as MANGLED"),
 
-    # ---- headers: the ones that must NOT be forwarded ----
-    header("header.client_authorization", "client Authorization must not leak",
-           base(), lambda fwd, hdr, cli: DROPPED
-           if "CLIENTSECRET-3311" in json.dumps(hdr) else PRESERVED,
-           severity="high", known={"litellm": "020"},
-           headers={"authorization": "Bearer CLIENTSECRET-3311"},
-           note="inverted: DROPPED here means the secret WAS forwarded"),
-    header("header.client_x_api_key", "client x-api-key must not leak",
-           base(), lambda fwd, hdr, cli: DROPPED
-           if "XKEYSECRET-7742" in json.dumps(hdr) else PRESERVED,
-           severity="high", known={"switchyard": "023/027"},
-           headers={"x-api-key": "XKEYSECRET-7742"},
-           note="inverted: DROPPED here means the secret WAS forwarded"),
-    header("header.openai_organization", "openai-organization must not leak",
-           base(), lambda fwd, hdr, cli: DROPPED
-           if "ORGSECRET-5150" in json.dumps(hdr) else PRESERVED,
-           severity="high", known={"litellm": "026"},
-           headers={"openai-organization": "ORGSECRET-5150"},
-           note="inverted: DROPPED here means the header WAS forwarded"),
+    # ---- credential handling ----
+    # Vector matters more than name. Reviewing against the issue writeups:
+    # 020 and 026 are JSON *body* bypasses, and both writeups say the
+    # same-named HTTP headers are correctly dropped on the default config, so
+    # a header probe tests the control and can never reproduce the defect.
+    # 023 names `api-key` / `OpenAI-Organization` / `OpenAI-Project` and 027
+    # names `x-goog-api-key`; neither is the Anthropic `x-api-key`.
+    #
+    # Every probe below is inverted: PRESERVED means the gateway did NOT leak.
+    cred("cred.body.api_key", "body `api_key` must not become upstream auth",
+         base(api_key="BODYKEYCANARY-7788"),
+         lambda fwd, hdr, cli: DROPPED
+         if "BODYKEYCANARY-7788" in json.dumps(hdr) else PRESERVED,
+         severity="high", known={"litellm": "020"},
+         note="020's actual vector: body api_key forwarded as Authorization"),
+    cred("cred.body.extra_headers", "body `extra_headers` must not reach the wire",
+         base(extra_headers={"OpenAI-Organization": "ORGCANARY-5150",
+                             "Authorization": "Bearer EHCANARY-6620"},
+              organization="ORGCANARY-5150"),
+         lambda fwd, hdr, cli: DROPPED
+         if ("ORGCANARY-5150" in json.dumps(hdr)
+             or "EHCANARY-6620" in json.dumps(hdr)) else PRESERVED,
+         severity="high", known={"litellm": "026"},
+         note="026's actual vector: JSON extra_headers / organization"),
+    cred("cred.header.api_key", "client `api-key` header must not be forwarded",
+         base(), lambda fwd, hdr, cli: DROPPED
+         if "APIKEYCANARY-2301" in json.dumps(hdr) else PRESERVED,
+         severity="high", known={"switchyard": "023"},
+         headers={"api-key": "APIKEYCANARY-2301"},
+         note="023: Azure-style credential header, not reserved, forwarded"),
+    cred("cred.header.x_goog_api_key", "client `x-goog-api-key` must not be forwarded",
+         base(), lambda fwd, hdr, cli: DROPPED
+         if "GOOGCANARY-9944" in json.dumps(hdr) else PRESERVED,
+         severity="high", known={"switchyard": "027"},
+         headers={"x-goog-api-key": "GOOGCANARY-9944"}),
+    cred("cred.header.openai_organization",
+         "client `openai-organization` must not be forwarded",
+         base(), lambda fwd, hdr, cli: DROPPED
+         if "ORGHDRCANARY-5150" in json.dumps(hdr) else PRESERVED,
+         severity="high", known={"switchyard": "023"},
+         headers={"openai-organization": "ORGHDRCANARY-5150"},
+         note="LiteLLM drops this by default; that is 020/026's stated control"),
+    cred("cred.header.authorization",
+         "client `Authorization` must not be forwarded",
+         base(), lambda fwd, hdr, cli: DROPPED
+         if "CLIENTSECRET-3311" in json.dumps(hdr) else PRESERVED,
+         severity="high",
+         headers={"authorization": "Bearer CLIENTSECRET-3311"},
+         note="no issue claims this; it is 020's documented control path"),
+    cred("cred.header.anthropic_x_api_key",
+         "client `x-api-key` must not be forwarded",
+         base(), lambda fwd, hdr, cli: DROPPED
+         if "XKEYSECRET-7742" in json.dumps(hdr) else PRESERVED,
+         severity="high",
+         headers={"x-api-key": "XKEYSECRET-7742"},
+         note="the Anthropic client credential; distinct from 023's api-key"),
+
+    # ---- headers ----
     header("header.anthropic_beta", "anthropic-beta forwarded or mapped",
            base(), lambda fwd, hdr, cli: PRESERVED
            if "context-management-2025-06-27" in json.dumps(hdr) else DROPPED,
@@ -543,9 +592,7 @@ def by_id(pid):
 
 # Probes whose expectation is inverted: a "clean" result means the gateway did
 # NOT do the bad thing. Reported separately so the matrix reads correctly.
-INVERTED = {
-    "header.client_authorization",
-    "header.client_x_api_key",
-    "header.openai_organization",
-    "resp.empty_text_before_tool_use",
-}
+# Probes whose expectation is inverted: PRESERVED means the gateway did NOT do
+# the bad thing. Every credential probe is inverted by construction.
+INVERTED = ({p.id for p in PROBES if p.axis == "credential"}
+            | {"resp.empty_text_before_tool_use"})

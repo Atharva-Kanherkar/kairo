@@ -47,19 +47,33 @@ LEGEND = (
 )
 
 INVERTED_NOTE = (
-    "Four probes are inverted, and the matrix already accounts for the "
-    "inversion: the three credential-leak headers and the invented-empty-text "
-    "response check report `OK` when the gateway did **not** do the bad thing. "
-    "A `DROP` on `header.client_authorization` means the client's credential "
-    "was forwarded upstream.\n"
+    "Every probe in the **Credential handling** section is inverted, as is the "
+    "invented-empty-text response check: `OK` means the gateway did **not** do "
+    "the bad thing, and `DROP` means it did. A `DROP` on "
+    "`cred.body.api_key` means the planted credential reached the upstream "
+    "request.\n\n"
+    "Vector is part of the probe. 020 and 026 are JSON *body* bypasses, and "
+    "both writeups state that the same-named HTTP headers are correctly "
+    "dropped by default; a header probe there tests the control and can never "
+    "reproduce the defect. 023 names `api-key` / `OpenAI-Organization` and "
+    "027 names `x-goog-api-key`, neither of which is the Anthropic "
+    "`x-api-key`.\n"
 )
 
 
 def _stats(sweep, gname):
+    """Preserved, expected-loss, measurable, total.
+
+    `EXPECTED_LOSS` is the format boundary, not survival, so it is reported in
+    its own column and excluded from the denominator. Folding it into
+    "preserved" inflates the rate by counting fields that were never carryable
+    in the first place.
+    """
     cells = [c for (g, _), c in sweep.cells.items() if g == gname]
     scored = [c for c in cells if c["verdict"] not in (P.SKIPPED, P.ERROR)]
-    ok = [c for c in scored if c["verdict"] in CLEAN]
-    return len(ok), len(scored), len(cells)
+    na = [c for c in scored if c["verdict"] == P.EXPECTED_LOSS]
+    ok = [c for c in scored if c["verdict"] == P.PRESERVED]
+    return len(ok), len(na), len(scored) - len(na), len(cells)
 
 
 def write_matrix(sweep, args):
@@ -77,18 +91,23 @@ def write_matrix(sweep, args):
         "result, not an absence of one.\n")
 
     lines.append("\n## Preservation rate\n")
-    lines.append("| gateway | preserved | scored cells | rate | not run |")
-    lines.append("|---|---:|---:|---:|---:|")
+    lines.append("| gateway | preserved | measurable | rate | no equivalent "
+                 "(`na`) | not run |")
+    lines.append("|---|---:|---:|---:|---:|---:|")
     for g in gnames:
-        ok, scored, total = _stats(sweep, g)
-        rate = f"{100.0 * ok / scored:.0f}%" if scored else "n/a"
-        lines.append(f"| {g} | {ok} | {scored} | {rate} | {total - scored} |")
+        ok, na, measurable, total = _stats(sweep, g)
+        rate = f"{100.0 * ok / measurable:.0f}%" if measurable else "n/a"
+        lines.append(f"| {g} | {ok} | {measurable} | {rate} | {na} | "
+                     f"{total - measurable - na} |")
     lines.append("")
     lines.append(
-        "`scored cells` excludes cells that were not run and cells whose probe "
-        "errored, so the rate is over what was actually measured. The `not run` "
-        "column is the honest remainder: a gateway that could not be started "
-        "shows up here rather than disappearing from the table.\n")
+        "`measurable` is the denominator: cells that were run, did not error, "
+        "and had a target-format equivalent to survive into. `na` cells are "
+        "counted separately because they are the format boundary rather than "
+        "survival, and folding them into `preserved` would inflate the rate "
+        "with fields that were never carryable. The `not run` column is the "
+        "honest remainder: a gateway that could not be started shows up here "
+        "rather than disappearing from the table.\n")
 
     lines.append("\n## Legend\n")
     lines.append(LEGEND)
@@ -96,6 +115,7 @@ def write_matrix(sweep, args):
 
     for axis, title in (("request", "Request parameters"),
                         ("content", "Message content blocks"),
+                        ("credential", "Credential handling (inverted)"),
                         ("header", "Headers"),
                         ("response", "Response translation")):
         probes = [p for p in P.PROBES if p.axis == axis]
@@ -131,6 +151,33 @@ def write_matrix(sweep, args):
         "`/v1/chat/completions` ingress carried the field in the same process. "
         "That is the control leg: the mapping exists on this machine and the "
         "Anthropic path is not applying it.\n")
+
+    # Positive controls, generated rather than hand-written so it cannot drift
+    # from the cells above.
+    controls = [c for c in sweep.cells.values() if c.get("known")]
+    if controls:
+        repro = [c for c in controls if c["verdict"] not in CLEAN]
+        clean = [c for c in controls if c["verdict"] in CLEAN]
+        lines.append("\n## Positive controls\n")
+        lines.append(
+            f"{len(repro)} of {len(controls)} probes whose defect is documented "
+            "for that specific gateway reproduced in this run. Those are the "
+            "cells that say the rig is exercising the path it claims to.\n")
+        if clean:
+            lines.append(
+                "\nThe rest came back clean. **Do not read a clean control as "
+                "a fix.** The likelier explanations, in order: the probe's "
+                "backend format does not match the one the issue was frozen "
+                "against (a defect reproduced against Gemini cannot be caught "
+                "by an OpenAI-shaped mock), the probe uses a different vector "
+                "than the writeup, or the version under test differs. Each one "
+                "needs a human read against its issue folder before it means "
+                "anything.\n")
+            lines.append("\n| gateway | issue | field |")
+            lines.append("|---|---|---|")
+            for c in sorted(clean, key=lambda c: (c["gateway"], c["known"])):
+                lines.append(f"| {c['gateway']} | {c['known']} | `{c['field']}` |")
+            lines.append("")
 
     if sweep.notes:
         lines.append("\n## What this run did not cover\n")
@@ -256,8 +303,13 @@ def open_pr(sweep, paths, args):
         return
     c = _run(["python3", "tools/update-readme-counts.py", "--check"], check=False)
     if c.returncode != 0:
-        print("  README counters are stale; running the updater")
-        _run(["python3", "tools/update-readme-counts.py"])
+        # Documented as a gate, so it is a gate. Silently running the updater
+        # and continuing would land a README diff nobody asked this command to
+        # make, in a PR that is supposed to be about the sweep.
+        print("  README counters are stale; not opening a PR")
+        print("  run `python3 tools/update-readme-counts.py`, commit, retry")
+        print(c.stdout or c.stderr)
+        return
 
     _run(["git", "checkout", "-b", new_branch])
     _run(["git", "add", "issues/MATRIX.md", "issues/CANDIDATES.md",

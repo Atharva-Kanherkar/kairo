@@ -119,9 +119,19 @@ def obs_stop_sequences(model):
     }
 
     def score(resp):
-        return "6" not in _text_of(resp)  # generation actually stopped at 5
+        # "6 is absent" alone is satisfied by an empty body, a refusal, or
+        # prose, which would report the stop sequence as honored when it was
+        # ignored. Require positive evidence that generation happened AND
+        # stopped: an early digit present, the stop token and everything
+        # after it absent.
+        text = _text_of(resp).strip()
+        if not text:
+            return False
+        generated = any(d in text for d in ("1", "2", "3", "4"))
+        stopped = not any(d in text for d in ("5", "6", "7", "8", "9", "10"))
+        return generated and stopped
 
-    return ("stop_sequences: generation stops at the sequence",
+    return ("stop_sequences: generation runs and stops at the sequence",
             a_body, o_body, score)
 
 

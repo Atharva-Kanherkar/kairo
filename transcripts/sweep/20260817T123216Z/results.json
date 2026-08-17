@@ -13,7 +13,7 @@
   "cells": [
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-model.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-model.jsonl",
       "field": "model",
       "forwarded_keys": [
         "input",
@@ -34,7 +34,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-messages.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-messages.jsonl",
       "field": "messages",
       "forwarded_keys": [
         "input",
@@ -55,7 +55,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-max_tokens.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-max_tokens.jsonl",
       "field": "max_tokens",
       "forwarded_keys": [
         "input",
@@ -76,7 +76,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-system.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-system.jsonl",
       "field": "system",
       "forwarded_keys": [
         "input",
@@ -103,7 +103,7 @@
         "verdict": "PRESERVED"
       },
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-stop_sequences.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-stop_sequences.jsonl",
       "field": "stop_sequences",
       "forwarded_keys": [
         "input",
@@ -129,7 +129,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-temperature.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-temperature.jsonl",
       "field": "temperature",
       "forwarded_keys": [
         "input",
@@ -151,7 +151,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-top_p.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-top_p.jsonl",
       "field": "top_p",
       "forwarded_keys": [
         "input",
@@ -173,7 +173,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-top_k.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-top_k.jsonl",
       "field": "top_k",
       "forwarded_keys": [
         "input",
@@ -194,7 +194,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-metadata-user_id.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-metadata-user_id.jsonl",
       "field": "metadata.user_id",
       "forwarded_keys": [
         "input",
@@ -216,7 +216,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-service_tier.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-service_tier.jsonl",
       "field": "service_tier",
       "forwarded_keys": [
         "input",
@@ -238,7 +238,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-stream.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-stream.jsonl",
       "field": "stream",
       "forwarded_keys": [
         "input",
@@ -260,7 +260,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-output_config-format.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-output_config-format.jsonl",
       "field": "output_config.format",
       "forwarded_keys": [
         "input",
@@ -282,7 +282,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-output_format-legacy.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-output_format-legacy.jsonl",
       "field": "output_format (deprecated spelling)",
       "forwarded_keys": [
         "input",
@@ -305,7 +305,7 @@
     {
       "axis": "request",
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-output_config-effort.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-output_config-effort.jsonl",
       "field": "output_config.effort",
       "forwarded_keys": [
         "input",
@@ -332,7 +332,7 @@
     {
       "axis": "request",
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-thinking-adaptive.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-thinking-adaptive.jsonl",
       "field": "thinking (adaptive)",
       "forwarded_keys": [
         "input",
@@ -358,7 +358,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-thinking-disabled.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-thinking-disabled.jsonl",
       "field": "thinking (disabled)",
       "forwarded_keys": [
         "input",
@@ -379,7 +379,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-thinking-budget_tokens.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-thinking-budget_tokens.jsonl",
       "field": "thinking.budget_tokens (legacy)",
       "forwarded_keys": [
         "input",
@@ -401,7 +401,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-tools-schema.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-tools-schema.jsonl",
       "field": "tools[].input_schema",
       "forwarded_keys": [
         "input",
@@ -424,7 +424,7 @@
     {
       "axis": "request",
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-tools-strict.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-tools-strict.jsonl",
       "field": "tools[].strict",
       "forwarded_keys": [
         "input",
@@ -451,7 +451,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-tool_choice-auto.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-tool_choice-auto.jsonl",
       "field": "tool_choice: auto",
       "forwarded_keys": [
         "input",
@@ -474,7 +474,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-tool_choice-any.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-tool_choice-any.jsonl",
       "field": "tool_choice: any -> required",
       "forwarded_keys": [
         "input",
@@ -497,7 +497,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-tool_choice-named.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-tool_choice-named.jsonl",
       "field": "tool_choice: tool(name)",
       "forwarded_keys": [
         "input",
@@ -525,7 +525,7 @@
         "verdict": "PRESERVED"
       },
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-disable_parallel_tool_use.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-disable_parallel_tool_use.jsonl",
       "field": "tool_choice.disable_parallel_tool_use",
       "forwarded_keys": [
         "input",
@@ -553,7 +553,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-mcp_servers.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-mcp_servers.jsonl",
       "field": "mcp_servers",
       "forwarded_keys": [
         "input",
@@ -574,7 +574,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-context_management.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-context_management.jsonl",
       "field": "context_management",
       "forwarded_keys": [
         "input",
@@ -595,7 +595,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--req-cache_control-toplevel.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-cache_control-toplevel.jsonl",
       "field": "cache_control (top-level)",
       "forwarded_keys": [
         "input",
@@ -616,7 +616,7 @@
     },
     {
       "axis": "content",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--content-image-base64.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--content-image-base64.jsonl",
       "field": "image (base64)",
       "forwarded_keys": [
         "input",
@@ -638,7 +638,7 @@
     {
       "axis": "content",
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--content-document-pdf.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--content-document-pdf.jsonl",
       "field": "document (pdf base64)",
       "forwarded_keys": [
         "input",
@@ -664,7 +664,7 @@
     },
     {
       "axis": "content",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--content-tool_result-is_error.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--content-tool_result-is_error.jsonl",
       "field": "tool_result.is_error",
       "forwarded_keys": [
         "input",
@@ -687,7 +687,7 @@
     {
       "axis": "content",
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--content-tool_result-image.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--content-tool_result-image.jsonl",
       "field": "tool_result with image block",
       "forwarded_keys": [
         "input",
@@ -714,7 +714,7 @@
     },
     {
       "axis": "content",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--content-thinking-history.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--content-thinking-history.jsonl",
       "field": "thinking block in history",
       "forwarded_keys": [
         "input",
@@ -735,7 +735,7 @@
     },
     {
       "axis": "content",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--content-cache_control-block.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--content-cache_control-block.jsonl",
       "field": "cache_control on a content block",
       "forwarded_keys": [
         "input",
@@ -756,7 +756,7 @@
     },
     {
       "axis": "content",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--content-tool_use-id.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--content-tool_use-id.jsonl",
       "field": "tool_use.id round trip",
       "forwarded_keys": [
         "input",
@@ -777,9 +777,10 @@
       ]
     },
     {
-      "axis": "header",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--header-client_authorization.jsonl",
-      "field": "client Authorization must not leak",
+      "axis": "credential",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--cred-body-api_key.jsonl",
+      "field": "body `api_key` must not become upstream auth",
       "forwarded_keys": [
         "input",
         "max_output_tokens",
@@ -787,41 +788,26 @@
       ],
       "gateway": "litellm",
       "known": "020",
-      "probe": "header.client_authorization",
-      "runs": 1,
+      "probe": "cred.body.api_key",
+      "runs": 5,
       "severity": "high",
+      "stable": true,
       "status": 200,
       "upstream_records": 1,
-      "verdict": "PRESERVED",
+      "verdict": "DROPPED",
       "verdicts": [
-        "PRESERVED"
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED"
       ]
     },
     {
-      "axis": "header",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--header-client_x_api_key.jsonl",
-      "field": "client x-api-key must not leak",
-      "forwarded_keys": [
-        "input",
-        "max_output_tokens",
-        "model"
-      ],
-      "gateway": "litellm",
-      "known": null,
-      "probe": "header.client_x_api_key",
-      "runs": 1,
-      "severity": "high",
-      "status": 200,
-      "upstream_records": 1,
-      "verdict": "PRESERVED",
-      "verdicts": [
-        "PRESERVED"
-      ]
-    },
-    {
-      "axis": "header",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--header-openai_organization.jsonl",
-      "field": "openai-organization must not leak",
+      "axis": "credential",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--cred-body-extra_headers.jsonl",
+      "field": "body `extra_headers` must not reach the wire",
       "forwarded_keys": [
         "input",
         "max_output_tokens",
@@ -829,7 +815,117 @@
       ],
       "gateway": "litellm",
       "known": "026",
-      "probe": "header.openai_organization",
+      "probe": "cred.body.extra_headers",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "DROPPED",
+      "verdicts": [
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--cred-header-api_key.jsonl",
+      "field": "client `api-key` header must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "cred.header.api_key",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--cred-header-x_goog_api_key.jsonl",
+      "field": "client `x-goog-api-key` must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "cred.header.x_goog_api_key",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--cred-header-openai_organization.jsonl",
+      "field": "client `openai-organization` must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "cred.header.openai_organization",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--cred-header-authorization.jsonl",
+      "field": "client `Authorization` must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "cred.header.authorization",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--cred-header-anthropic_x_api_key.jsonl",
+      "field": "client `x-api-key` must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "cred.header.anthropic_x_api_key",
       "runs": 1,
       "severity": "high",
       "status": 200,
@@ -842,7 +938,7 @@
     {
       "axis": "header",
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--header-anthropic_beta.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--header-anthropic_beta.jsonl",
       "field": "anthropic-beta forwarded or mapped",
       "forwarded_keys": [
         "input",
@@ -869,7 +965,7 @@
     {
       "axis": "response",
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--resp-finish_reason-stop.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--resp-finish_reason-stop.jsonl",
       "field": "finish_reason stop -> end_turn",
       "forwarded_keys": [
         "input",
@@ -896,7 +992,7 @@
     {
       "axis": "response",
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--resp-finish_reason-length.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--resp-finish_reason-length.jsonl",
       "field": "finish_reason length -> max_tokens",
       "forwarded_keys": [
         "input",
@@ -923,7 +1019,7 @@
     {
       "axis": "response",
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--resp-finish_reason-content_filter.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--resp-finish_reason-content_filter.jsonl",
       "field": "content_filter signal survives",
       "forwarded_keys": [
         "input",
@@ -949,7 +1045,7 @@
     },
     {
       "axis": "response",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--resp-empty_text_before_tool_use.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--resp-empty_text_before_tool_use.jsonl",
       "field": "no invented empty text block",
       "forwarded_keys": [
         "input",
@@ -970,7 +1066,7 @@
     },
     {
       "axis": "response",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--resp-refusal.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--resp-refusal.jsonl",
       "field": "upstream refusal content survives",
       "forwarded_keys": [
         "input",
@@ -991,7 +1087,7 @@
     },
     {
       "axis": "response",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--resp-tool_call_id.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--resp-tool_call_id.jsonl",
       "field": "upstream tool_call id reaches the client",
       "forwarded_keys": [
         "input",
@@ -1013,7 +1109,7 @@
     {
       "axis": "response",
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/litellm--resp-usage.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--resp-usage.jsonl",
       "field": "usage counts survive translation",
       "forwarded_keys": [
         "input",
@@ -1039,7 +1135,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-model.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-model.jsonl",
       "field": "model",
       "forwarded_keys": [
         "input",
@@ -1060,7 +1156,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-messages.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-messages.jsonl",
       "field": "messages",
       "forwarded_keys": [
         "input",
@@ -1081,7 +1177,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-max_tokens.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-max_tokens.jsonl",
       "field": "max_tokens",
       "forwarded_keys": [
         "input",
@@ -1102,7 +1198,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-system.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-system.jsonl",
       "field": "system",
       "forwarded_keys": [
         "input",
@@ -1128,7 +1224,7 @@
         "verdict": "PRESERVED"
       },
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-stop_sequences.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-stop_sequences.jsonl",
       "field": "stop_sequences",
       "forwarded_keys": [
         "input",
@@ -1154,7 +1250,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-temperature.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-temperature.jsonl",
       "field": "temperature",
       "forwarded_keys": [
         "input",
@@ -1176,7 +1272,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-top_p.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-top_p.jsonl",
       "field": "top_p",
       "forwarded_keys": [
         "input",
@@ -1198,7 +1294,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-top_k.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-top_k.jsonl",
       "field": "top_k",
       "forwarded_keys": [
         "input",
@@ -1219,7 +1315,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-metadata-user_id.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-metadata-user_id.jsonl",
       "field": "metadata.user_id",
       "forwarded_keys": [
         "input",
@@ -1242,7 +1338,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-service_tier.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-service_tier.jsonl",
       "field": "service_tier",
       "forwarded_keys": [
         "input",
@@ -1286,7 +1382,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-output_config-format.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-output_config-format.jsonl",
       "field": "output_config.format",
       "forwarded_keys": [
         "input",
@@ -1308,7 +1404,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-output_format-legacy.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-output_format-legacy.jsonl",
       "field": "output_format (deprecated spelling)",
       "forwarded_keys": [
         "input",
@@ -1330,7 +1426,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-output_config-effort.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-output_config-effort.jsonl",
       "field": "output_config.effort",
       "forwarded_keys": [
         "input",
@@ -1352,7 +1448,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-thinking-adaptive.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-thinking-adaptive.jsonl",
       "field": "thinking (adaptive)",
       "forwarded_keys": [
         "input",
@@ -1374,7 +1470,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-thinking-disabled.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-thinking-disabled.jsonl",
       "field": "thinking (disabled)",
       "forwarded_keys": [
         "input",
@@ -1396,7 +1492,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-thinking-budget_tokens.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-thinking-budget_tokens.jsonl",
       "field": "thinking.budget_tokens (legacy)",
       "forwarded_keys": [
         "input",
@@ -1418,7 +1514,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-tools-schema.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-tools-schema.jsonl",
       "field": "tools[].input_schema",
       "forwarded_keys": [
         "input",
@@ -1440,7 +1536,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-tools-strict.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-tools-strict.jsonl",
       "field": "tools[].strict",
       "forwarded_keys": [
         "input",
@@ -1462,7 +1558,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-tool_choice-auto.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-tool_choice-auto.jsonl",
       "field": "tool_choice: auto",
       "forwarded_keys": [
         "input",
@@ -1485,7 +1581,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-tool_choice-any.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-tool_choice-any.jsonl",
       "field": "tool_choice: any -> required",
       "forwarded_keys": [
         "input",
@@ -1508,7 +1604,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-tool_choice-named.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-tool_choice-named.jsonl",
       "field": "tool_choice: tool(name)",
       "forwarded_keys": [
         "input",
@@ -1536,7 +1632,7 @@
         "verdict": "PRESERVED"
       },
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-disable_parallel_tool_use.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-disable_parallel_tool_use.jsonl",
       "field": "tool_choice.disable_parallel_tool_use",
       "forwarded_keys": [
         "input",
@@ -1564,7 +1660,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-mcp_servers.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-mcp_servers.jsonl",
       "field": "mcp_servers",
       "forwarded_keys": [
         "input",
@@ -1586,7 +1682,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-context_management.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-context_management.jsonl",
       "field": "context_management",
       "forwarded_keys": [
         "input",
@@ -1607,7 +1703,7 @@
     },
     {
       "axis": "request",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--req-cache_control-toplevel.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-cache_control-toplevel.jsonl",
       "field": "cache_control (top-level)",
       "forwarded_keys": [
         "input",
@@ -1628,7 +1724,7 @@
     },
     {
       "axis": "content",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--content-image-base64.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--content-image-base64.jsonl",
       "field": "image (base64)",
       "forwarded_keys": [
         "input",
@@ -1649,7 +1745,7 @@
     },
     {
       "axis": "content",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--content-document-pdf.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--content-document-pdf.jsonl",
       "field": "document (pdf base64)",
       "forwarded_keys": [
         "input",
@@ -1670,7 +1766,7 @@
     },
     {
       "axis": "content",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--content-tool_result-is_error.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--content-tool_result-is_error.jsonl",
       "field": "tool_result.is_error",
       "forwarded_keys": [
         "input",
@@ -1692,7 +1788,7 @@
     },
     {
       "axis": "content",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--content-tool_result-image.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--content-tool_result-image.jsonl",
       "field": "tool_result with image block",
       "forwarded_keys": [
         "input",
@@ -1715,7 +1811,7 @@
     {
       "axis": "content",
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--content-thinking-history.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--content-thinking-history.jsonl",
       "field": "thinking block in history",
       "forwarded_keys": [
         "input",
@@ -1741,7 +1837,7 @@
     },
     {
       "axis": "content",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--content-cache_control-block.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--content-cache_control-block.jsonl",
       "field": "cache_control on a content block",
       "forwarded_keys": [
         "input",
@@ -1762,7 +1858,7 @@
     },
     {
       "axis": "content",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--content-tool_use-id.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--content-tool_use-id.jsonl",
       "field": "tool_use.id round trip",
       "forwarded_keys": [
         "input",
@@ -1783,9 +1879,9 @@
       ]
     },
     {
-      "axis": "header",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--header-client_authorization.jsonl",
-      "field": "client Authorization must not leak",
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--cred-body-api_key.jsonl",
+      "field": "body `api_key` must not become upstream auth",
       "forwarded_keys": [
         "input",
         "max_output_tokens",
@@ -1793,7 +1889,7 @@
       ],
       "gateway": "bifrost",
       "known": null,
-      "probe": "header.client_authorization",
+      "probe": "cred.body.api_key",
       "runs": 1,
       "severity": "high",
       "status": 200,
@@ -1804,9 +1900,9 @@
       ]
     },
     {
-      "axis": "header",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--header-client_x_api_key.jsonl",
-      "field": "client x-api-key must not leak",
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--cred-body-extra_headers.jsonl",
+      "field": "body `extra_headers` must not reach the wire",
       "forwarded_keys": [
         "input",
         "max_output_tokens",
@@ -1814,7 +1910,7 @@
       ],
       "gateway": "bifrost",
       "known": null,
-      "probe": "header.client_x_api_key",
+      "probe": "cred.body.extra_headers",
       "runs": 1,
       "severity": "high",
       "status": 200,
@@ -1825,9 +1921,9 @@
       ]
     },
     {
-      "axis": "header",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--header-openai_organization.jsonl",
-      "field": "openai-organization must not leak",
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--cred-header-api_key.jsonl",
+      "field": "client `api-key` header must not be forwarded",
       "forwarded_keys": [
         "input",
         "max_output_tokens",
@@ -1835,7 +1931,91 @@
       ],
       "gateway": "bifrost",
       "known": null,
-      "probe": "header.openai_organization",
+      "probe": "cred.header.api_key",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--cred-header-x_goog_api_key.jsonl",
+      "field": "client `x-goog-api-key` must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "cred.header.x_goog_api_key",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--cred-header-openai_organization.jsonl",
+      "field": "client `openai-organization` must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "cred.header.openai_organization",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--cred-header-authorization.jsonl",
+      "field": "client `Authorization` must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "cred.header.authorization",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--cred-header-anthropic_x_api_key.jsonl",
+      "field": "client `x-api-key` must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "cred.header.anthropic_x_api_key",
       "runs": 1,
       "severity": "high",
       "status": 200,
@@ -1848,7 +2028,7 @@
     {
       "axis": "header",
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--header-anthropic_beta.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--header-anthropic_beta.jsonl",
       "field": "anthropic-beta forwarded or mapped",
       "forwarded_keys": [
         "input",
@@ -1874,7 +2054,7 @@
     },
     {
       "axis": "response",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--resp-finish_reason-stop.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--resp-finish_reason-stop.jsonl",
       "field": "finish_reason stop -> end_turn",
       "forwarded_keys": [
         "input",
@@ -1896,7 +2076,7 @@
     {
       "axis": "response",
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--resp-finish_reason-length.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--resp-finish_reason-length.jsonl",
       "field": "finish_reason length -> max_tokens",
       "forwarded_keys": [
         "input",
@@ -1923,7 +2103,7 @@
     {
       "axis": "response",
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--resp-finish_reason-content_filter.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--resp-finish_reason-content_filter.jsonl",
       "field": "content_filter signal survives",
       "forwarded_keys": [
         "input",
@@ -1949,7 +2129,7 @@
     },
     {
       "axis": "response",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--resp-empty_text_before_tool_use.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--resp-empty_text_before_tool_use.jsonl",
       "field": "no invented empty text block",
       "forwarded_keys": [
         "input",
@@ -1971,7 +2151,7 @@
     {
       "axis": "response",
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--resp-refusal.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--resp-refusal.jsonl",
       "field": "upstream refusal content survives",
       "forwarded_keys": [
         "input",
@@ -1998,7 +2178,7 @@
     {
       "axis": "response",
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--resp-tool_call_id.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--resp-tool_call_id.jsonl",
       "field": "upstream tool_call id reaches the client",
       "forwarded_keys": [
         "input",
@@ -2025,7 +2205,7 @@
     {
       "axis": "response",
       "determinism": "5/5",
-      "evidence": "transcripts/sweep/20260817T112839Z/bifrost--resp-usage.jsonl",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--resp-usage.jsonl",
       "field": "usage counts survive translation",
       "forwarded_keys": [
         "input",
@@ -2053,13 +2233,13 @@
   "notes": [
     "Live impact leg not run: no provider keys in the environment."
   ],
-  "probes": 44,
-  "run": "20260817T112839Z",
+  "probes": 48,
+  "run": "20260817T123216Z",
   "summary": {
-    "DROPPED": 12,
+    "DROPPED": 14,
     "EXPECTED_LOSS": 11,
     "MANGLED": 9,
-    "PRESERVED": 55,
+    "PRESERVED": 61,
     "REJECTED": 1
   }
 }

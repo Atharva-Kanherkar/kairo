@@ -75,11 +75,24 @@ class Gateway:
     def launch_argv(self, cfg):
         raise NotImplementedError
 
+    # Every provider credential the sweep knows how to redact is also a
+    # credential the child must not inherit. Popping two names left the rest
+    # of them live in a gateway process during a run advertised as keyless.
+    SCRUB_ENV = (
+        "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "OPENAI_API_KEY",
+        "OPENAI_ORGANIZATION", "GEMINI_API_KEY", "GOOGLE_API_KEY",
+        "GOOGLE_APPLICATION_CREDENTIALS", "OPENROUTER_API_KEY", "AXONHUB_KEY",
+        "GROQ_API_KEY", "MISTRAL_API_KEY", "DEEPSEEK_API_KEY",
+        "MOONSHOT_API_KEY", "COHERE_API_KEY", "TOGETHER_API_KEY",
+        "AZURE_API_KEY", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY",
+        "AWS_SESSION_TOKEN", "GITHUB_TOKEN", "HF_TOKEN",
+    )
+
     def launch_env(self):
         env = dict(os.environ)
-        env.pop("ANTHROPIC_API_KEY", None)  # never hand real keys to the rig
-        env.pop("OPENAI_API_KEY", None)
-        env["OPENAI_API_KEY"] = "sk-x"
+        for name in self.SCRUB_ENV:
+            env.pop(name, None)
+        env["OPENAI_API_KEY"] = "sk-x"  # the only credential the capture rig uses
         return env
 
     def start(self):

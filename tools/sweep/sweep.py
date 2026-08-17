@@ -157,7 +157,11 @@ class Sweep:
     # -- mock -----------------------------------------------------------
 
     def _stage_canned(self, obj):
-        with open(self.canned, "w") as f:
+        # Written to a sibling then renamed: os.replace is atomic, so a
+        # background poll never observes a truncated or half-written file.
+        # The mock re-reads this path on every request by design.
+        tmp = self.canned + ".tmp"
+        with open(tmp, "w") as f:
             json.dump(obj if obj is not None else P.PROBES and
                       {"id": "chatcmpl-sweep", "object": "chat.completion",
                        "created": 0, "model": "captured",
@@ -166,6 +170,7 @@ class Sweep:
                                                 "content": "ok"}}],
                        "usage": {"prompt_tokens": 1, "completion_tokens": 1,
                                  "total_tokens": 2}}, f)
+        os.replace(tmp, self.canned)
 
     def start_mock(self):
         t = threading.Thread(
@@ -183,20 +188,29 @@ class Sweep:
         capture interleaves those with the request under test. Filtering to
         POSTs carrying a chat-shaped body is what stops a model-list poll from
         being scored as "the gateway dropped `messages`".
+
+        There is deliberately no `or recs` fallback. Falling back to the
+        unfiltered list when nothing matches restores the bug in exactly the
+        case the filter exists for: no chat-shaped POST means the gateway
+        forwarded nothing, which is an ERROR, not a poll to score.
         """
-        hits = [r for r in recs
+        return [r for r in recs
                 if r.get("method") == "POST"
                 and isinstance(r.get("body"), dict)
                 and ("messages" in r["body"] or "prompt" in r["body"]
                      or "input" in r["body"])]
-        return hits or recs
 
     def drain(self):
         """Return upstream records written since the last call."""
         with open(self.capture) as f:
             f.seek(self.offset)
             chunk = f.read()
-            self.offset = f.tell()
+            # Stop at the last newline. A concurrent append can leave a torn
+            # final line; advancing past it would lose the completed record
+            # forever, since the parse loop below swallows decode errors.
+            cut = chunk.rfind("\n") + 1
+            self.offset += len(chunk[:cut].encode())
+            chunk = chunk[:cut]
         out = []
         for line in chunk.splitlines():
             if line.strip():
@@ -345,7 +359,10 @@ class Sweep:
                 again = self.run_cell(g, probe)
                 cell["verdicts"].append(again["verdict"])
                 cell["runs"] += 1
-            cell["stable"] = len(set(cell["verdicts"])) == 1
+            # One run is a lead, not a proof: phase 2's whole premise. Without
+            # the runs guard a deadline break leaves stable=True on a singleton.
+            cell["stable"] = (cell["runs"] >= 2
+                              and len(set(cell["verdicts"])) == 1)
             cell["determinism"] = (
                 f"{cell['verdicts'].count(cell['verdict'])}/{cell['runs']}")
 
@@ -477,7 +494,14 @@ def dry_run():
         "tool_choice": {"type": "function", "function": {"name": "get_weather"}},
         "mcp_servers": [{}], "context_management": {}, "cache_control": {},
         "response_format": {"type": "json_schema", "json_schema": {"name": "city"}},
-        "tools": [{"type": "function", "function": {"name": "get_weather"}}],
+        # A real schema, not just the tool name: req.tools.schema tests that
+        # `parameters` survives, and a name-only fixture cannot distinguish a
+        # gateway that carries the schema from one that echoes the name.
+        "tools": [{"type": "function", "function": {
+            "name": "get_weather",
+            "parameters": {"type": "object",
+                           "properties": {"location": {"type": "string"}},
+                           "required": ["location"]}}}],
         "image_url": {"url": "data:image/png;base64,x"}, "file": {"file_data": "x"},
         "is_error": True, "_probe_echo": ("ERRPROBE THINKPROBE-9021 IDPROBE_8899"),
     }
@@ -492,6 +516,19 @@ def dry_run():
         "req.tool_choice.auto": {"tool_choice": "auto"},
         "req.tool_choice.any": {"tool_choice": "required"},
     }
+    # A gateway that leaks every credential vector and invents an empty text
+    # block. Every inverted probe must fire against this.
+    CANARIES = ["BODYKEYCANARY-7788", "ORGCANARY-5150", "EHCANARY-6620",
+                "APIKEYCANARY-2301", "GOOGCANARY-9944", "ORGHDRCANARY-5150",
+                "CLIENTSECRET-3311", "XKEYSECRET-7742"]
+    LEAKY_HDR = {f"leaked-{i}": c for i, c in enumerate(CANARIES)}
+    LEAKY_FWD = dict(perfect_fwd, **{f"leaked_{i}": c
+                                     for i, c in enumerate(CANARIES)})
+    LEAKY_CLI = {"stop_reason": "tool_use",
+                 "content": [{"type": "text", "text": ""},
+                             {"type": "tool_use", "id": "t", "name": "x",
+                              "input": {}}]}
+
     bad = 0
     for p in P.PROBES:
         try:
@@ -516,7 +553,26 @@ def dry_run():
             bad += 1
             continue
         if p.id in P.INVERTED:
-            continue  # inverted probes are clean on empty input by design
+            # Inverted probes are clean on empty input by design, so the
+            # generic null/perfect assertions say nothing about them. Assert
+            # instead that they FIRE against a gateway that does leak: a
+            # checker that can never detect a leak would otherwise sail
+            # through dry-run and publish clean cells forever.
+            try:
+                v_leak = p.expect(LEAKY_FWD, LEAKY_HDR, LEAKY_CLI)
+            except Exception as e:
+                print(f"  FAIL {p.id}: inverted checker raised on leak: {e}")
+                bad += 1
+                continue
+            if v_leak in CLEAN:
+                print(f"  FAIL {p.id}: inverted probe cannot detect a leak "
+                      f"(got {v_leak} against a gateway that leaks everything)")
+                bad += 1
+            if v_perfect not in CLEAN:
+                print(f"  WARN {p.id}: inverted probe fires on a clean gateway "
+                      f"({v_perfect})")
+                bad += 1
+            continue
         if v_null in CLEAN and v_null != P.EXPECTED_LOSS:
             print(f"  WARN {p.id}: passes against a gateway that forwards nothing")
             bad += 1
