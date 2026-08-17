@@ -1,0 +1,2245 @@
+{
+  "args": {
+    "dry_run": false,
+    "gateways": "litellm,bifrost",
+    "live": false,
+    "live_trials": 5,
+    "minutes": 30.0,
+    "mock_port": 9990,
+    "open_pr": false,
+    "repeats": 5,
+    "timeout": 25.0
+  },
+  "cells": [
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-model.jsonl",
+      "field": "model",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.model",
+      "runs": 1,
+      "severity": "sanity",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-messages.jsonl",
+      "field": "messages",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.messages",
+      "runs": 1,
+      "severity": "sanity",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-max_tokens.jsonl",
+      "field": "max_tokens",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.max_tokens",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-system.jsonl",
+      "field": "system",
+      "forwarded_keys": [
+        "input",
+        "instructions",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.system",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "control": {
+        "status": 200,
+        "verdict": "PRESERVED"
+      },
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-stop_sequences.jsonl",
+      "field": "stop_sequences",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": "041",
+      "probe": "req.stop_sequences",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "DROPPED",
+      "verdicts": [
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-temperature.jsonl",
+      "field": "temperature",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "temperature"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.temperature",
+      "runs": 1,
+      "severity": "medium",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-top_p.jsonl",
+      "field": "top_p",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "top_p"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.top_p",
+      "runs": 1,
+      "severity": "medium",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-top_k.jsonl",
+      "field": "top_k",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.top_k",
+      "runs": 1,
+      "severity": "low",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "EXPECTED_LOSS",
+      "verdicts": [
+        "EXPECTED_LOSS"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-metadata-user_id.jsonl",
+      "field": "metadata.user_id",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "user"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.metadata.user_id",
+      "runs": 1,
+      "severity": "medium",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-service_tier.jsonl",
+      "field": "service_tier",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "service_tier"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.service_tier",
+      "runs": 1,
+      "severity": "low",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-stream.jsonl",
+      "field": "stream",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "stream"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.stream",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-output_config-format.jsonl",
+      "field": "output_config.format",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "text"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.output_config.format",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-output_format-legacy.jsonl",
+      "field": "output_format (deprecated spelling)",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "text"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.output_format.legacy",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-output_config-effort.jsonl",
+      "field": "output_config.effort",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.output_config.effort",
+      "runs": 5,
+      "severity": "medium",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "DROPPED",
+      "verdicts": [
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED"
+      ]
+    },
+    {
+      "axis": "request",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-thinking-adaptive.jsonl",
+      "field": "thinking (adaptive)",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.thinking.adaptive",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "DROPPED",
+      "verdicts": [
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-thinking-disabled.jsonl",
+      "field": "thinking (disabled)",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.thinking.disabled",
+      "runs": 1,
+      "severity": "low",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "EXPECTED_LOSS",
+      "verdicts": [
+        "EXPECTED_LOSS"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-thinking-budget_tokens.jsonl",
+      "field": "thinking.budget_tokens (legacy)",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "reasoning"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.thinking.budget_tokens",
+      "runs": 1,
+      "severity": "medium",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-tools-schema.jsonl",
+      "field": "tools[].input_schema",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tools"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.tools.schema",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-tools-strict.jsonl",
+      "field": "tools[].strict",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tools"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.tools.strict",
+      "runs": 5,
+      "severity": "medium",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "DROPPED",
+      "verdicts": [
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-tool_choice-auto.jsonl",
+      "field": "tool_choice: auto",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tool_choice",
+        "tools"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.tool_choice.auto",
+      "runs": 1,
+      "severity": "medium",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-tool_choice-any.jsonl",
+      "field": "tool_choice: any -> required",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tool_choice",
+        "tools"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.tool_choice.any",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-tool_choice-named.jsonl",
+      "field": "tool_choice: tool(name)",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tool_choice",
+        "tools"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.tool_choice.named",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "control": {
+        "status": 200,
+        "verdict": "PRESERVED"
+      },
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-disable_parallel_tool_use.jsonl",
+      "field": "tool_choice.disable_parallel_tool_use",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tool_choice",
+        "tools"
+      ],
+      "gateway": "litellm",
+      "known": "017",
+      "probe": "req.disable_parallel_tool_use",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "DROPPED",
+      "verdicts": [
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-mcp_servers.jsonl",
+      "field": "mcp_servers",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.mcp_servers",
+      "runs": 1,
+      "severity": "low",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "EXPECTED_LOSS",
+      "verdicts": [
+        "EXPECTED_LOSS"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-context_management.jsonl",
+      "field": "context_management",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.context_management",
+      "runs": 1,
+      "severity": "low",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "EXPECTED_LOSS",
+      "verdicts": [
+        "EXPECTED_LOSS"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--req-cache_control-toplevel.jsonl",
+      "field": "cache_control (top-level)",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "req.cache_control.toplevel",
+      "runs": 1,
+      "severity": "low",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "EXPECTED_LOSS",
+      "verdicts": [
+        "EXPECTED_LOSS"
+      ]
+    },
+    {
+      "axis": "content",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--content-image-base64.jsonl",
+      "field": "image (base64)",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": "012",
+      "probe": "content.image.base64",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "content",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--content-document-pdf.jsonl",
+      "field": "document (pdf base64)",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": "018",
+      "probe": "content.document.pdf",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "DROPPED",
+      "verdicts": [
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED"
+      ]
+    },
+    {
+      "axis": "content",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--content-tool_result-is_error.jsonl",
+      "field": "tool_result.is_error",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tools"
+      ],
+      "gateway": "litellm",
+      "known": "006",
+      "probe": "content.tool_result.is_error",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "content",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--content-tool_result-image.jsonl",
+      "field": "tool_result with image block",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tools"
+      ],
+      "gateway": "litellm",
+      "known": "007",
+      "probe": "content.tool_result.image",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "MANGLED",
+      "verdicts": [
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED"
+      ]
+    },
+    {
+      "axis": "content",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--content-thinking-history.jsonl",
+      "field": "thinking block in history",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": "016",
+      "probe": "content.thinking.history",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "content",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--content-cache_control-block.jsonl",
+      "field": "cache_control on a content block",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "content.cache_control.block",
+      "runs": 1,
+      "severity": "low",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "EXPECTED_LOSS",
+      "verdicts": [
+        "EXPECTED_LOSS"
+      ]
+    },
+    {
+      "axis": "content",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--content-tool_use-id.jsonl",
+      "field": "tool_use.id round trip",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tools"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "content.tool_use.id",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--cred-body-api_key.jsonl",
+      "field": "body `api_key` must not become upstream auth",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": "020",
+      "probe": "cred.body.api_key",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "DROPPED",
+      "verdicts": [
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--cred-body-extra_headers.jsonl",
+      "field": "body `extra_headers` must not reach the wire",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": "026",
+      "probe": "cred.body.extra_headers",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "DROPPED",
+      "verdicts": [
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--cred-header-api_key.jsonl",
+      "field": "client `api-key` header must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "cred.header.api_key",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--cred-header-x_goog_api_key.jsonl",
+      "field": "client `x-goog-api-key` must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "cred.header.x_goog_api_key",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--cred-header-openai_organization.jsonl",
+      "field": "client `openai-organization` must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "cred.header.openai_organization",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--cred-header-authorization.jsonl",
+      "field": "client `Authorization` must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "cred.header.authorization",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--cred-header-anthropic_x_api_key.jsonl",
+      "field": "client `x-api-key` must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "cred.header.anthropic_x_api_key",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "header",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--header-anthropic_beta.jsonl",
+      "field": "anthropic-beta forwarded or mapped",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "header.anthropic_beta",
+      "runs": 5,
+      "severity": "medium",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "DROPPED",
+      "verdicts": [
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED"
+      ]
+    },
+    {
+      "axis": "response",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--resp-finish_reason-stop.jsonl",
+      "field": "finish_reason stop -> end_turn",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": "001/002",
+      "probe": "resp.finish_reason.stop",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "MANGLED",
+      "verdicts": [
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED"
+      ]
+    },
+    {
+      "axis": "response",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--resp-finish_reason-length.jsonl",
+      "field": "finish_reason length -> max_tokens",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "resp.finish_reason.length",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "MANGLED",
+      "verdicts": [
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED"
+      ]
+    },
+    {
+      "axis": "response",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--resp-finish_reason-content_filter.jsonl",
+      "field": "content_filter signal survives",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "resp.finish_reason.content_filter",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "MANGLED",
+      "verdicts": [
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED"
+      ]
+    },
+    {
+      "axis": "response",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--resp-empty_text_before_tool_use.jsonl",
+      "field": "no invented empty text block",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": "009",
+      "probe": "resp.empty_text_before_tool_use",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "response",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--resp-refusal.jsonl",
+      "field": "upstream refusal content survives",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "resp.refusal",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "response",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--resp-tool_call_id.jsonl",
+      "field": "upstream tool_call id reaches the client",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": "004",
+      "probe": "resp.tool_call_id",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "response",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/litellm--resp-usage.jsonl",
+      "field": "usage counts survive translation",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "litellm",
+      "known": null,
+      "probe": "resp.usage",
+      "runs": 5,
+      "severity": "medium",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "MANGLED",
+      "verdicts": [
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-model.jsonl",
+      "field": "model",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.model",
+      "runs": 1,
+      "severity": "sanity",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-messages.jsonl",
+      "field": "messages",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.messages",
+      "runs": 1,
+      "severity": "sanity",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-max_tokens.jsonl",
+      "field": "max_tokens",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.max_tokens",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-system.jsonl",
+      "field": "system",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.system",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "control": {
+        "status": 200,
+        "verdict": "PRESERVED"
+      },
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-stop_sequences.jsonl",
+      "field": "stop_sequences",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": "032",
+      "probe": "req.stop_sequences",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "DROPPED",
+      "verdicts": [
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-temperature.jsonl",
+      "field": "temperature",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "temperature"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.temperature",
+      "runs": 1,
+      "severity": "medium",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-top_p.jsonl",
+      "field": "top_p",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "top_p"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.top_p",
+      "runs": 1,
+      "severity": "medium",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-top_k.jsonl",
+      "field": "top_k",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.top_k",
+      "runs": 1,
+      "severity": "low",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "EXPECTED_LOSS",
+      "verdicts": [
+        "EXPECTED_LOSS"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-metadata-user_id.jsonl",
+      "field": "metadata.user_id",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "prompt_cache_key",
+        "user"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.metadata.user_id",
+      "runs": 1,
+      "severity": "medium",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-service_tier.jsonl",
+      "field": "service_tier",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "service_tier"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.service_tier",
+      "runs": 1,
+      "severity": "low",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "detail": "{\"type\":\"error\",\"error\":{\"type\":\"api_error\",\"message\":\"Error reading stream: provider returned non-SSE response for streaming request\"}}",
+      "determinism": "5/5",
+      "field": "stream",
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.stream",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 500,
+      "upstream_records": 1,
+      "verdict": "REJECTED",
+      "verdicts": [
+        "REJECTED",
+        "REJECTED",
+        "REJECTED",
+        "REJECTED",
+        "REJECTED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-output_config-format.jsonl",
+      "field": "output_config.format",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "text"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.output_config.format",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-output_format-legacy.jsonl",
+      "field": "output_format (deprecated spelling)",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "text"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.output_format.legacy",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-output_config-effort.jsonl",
+      "field": "output_config.effort",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "reasoning"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.output_config.effort",
+      "runs": 1,
+      "severity": "medium",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-thinking-adaptive.jsonl",
+      "field": "thinking (adaptive)",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "reasoning"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.thinking.adaptive",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-thinking-disabled.jsonl",
+      "field": "thinking (disabled)",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "reasoning"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.thinking.disabled",
+      "runs": 1,
+      "severity": "low",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-thinking-budget_tokens.jsonl",
+      "field": "thinking.budget_tokens (legacy)",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "reasoning"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.thinking.budget_tokens",
+      "runs": 1,
+      "severity": "medium",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-tools-schema.jsonl",
+      "field": "tools[].input_schema",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tools"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.tools.schema",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-tools-strict.jsonl",
+      "field": "tools[].strict",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tools"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.tools.strict",
+      "runs": 1,
+      "severity": "medium",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-tool_choice-auto.jsonl",
+      "field": "tool_choice: auto",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tool_choice",
+        "tools"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.tool_choice.auto",
+      "runs": 1,
+      "severity": "medium",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-tool_choice-any.jsonl",
+      "field": "tool_choice: any -> required",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tool_choice",
+        "tools"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.tool_choice.any",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-tool_choice-named.jsonl",
+      "field": "tool_choice: tool(name)",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tool_choice",
+        "tools"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.tool_choice.named",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "request",
+      "control": {
+        "status": 200,
+        "verdict": "PRESERVED"
+      },
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-disable_parallel_tool_use.jsonl",
+      "field": "tool_choice.disable_parallel_tool_use",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tool_choice",
+        "tools"
+      ],
+      "gateway": "bifrost",
+      "known": "031",
+      "probe": "req.disable_parallel_tool_use",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "DROPPED",
+      "verdicts": [
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-mcp_servers.jsonl",
+      "field": "mcp_servers",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tools"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.mcp_servers",
+      "runs": 1,
+      "severity": "low",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "EXPECTED_LOSS",
+      "verdicts": [
+        "EXPECTED_LOSS"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-context_management.jsonl",
+      "field": "context_management",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.context_management",
+      "runs": 1,
+      "severity": "low",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "EXPECTED_LOSS",
+      "verdicts": [
+        "EXPECTED_LOSS"
+      ]
+    },
+    {
+      "axis": "request",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--req-cache_control-toplevel.jsonl",
+      "field": "cache_control (top-level)",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "req.cache_control.toplevel",
+      "runs": 1,
+      "severity": "low",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "EXPECTED_LOSS",
+      "verdicts": [
+        "EXPECTED_LOSS"
+      ]
+    },
+    {
+      "axis": "content",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--content-image-base64.jsonl",
+      "field": "image (base64)",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "content.image.base64",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "content",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--content-document-pdf.jsonl",
+      "field": "document (pdf base64)",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "content.document.pdf",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "content",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--content-tool_result-is_error.jsonl",
+      "field": "tool_result.is_error",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tools"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "content.tool_result.is_error",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "content",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--content-tool_result-image.jsonl",
+      "field": "tool_result with image block",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tools"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "content.tool_result.image",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "content",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--content-thinking-history.jsonl",
+      "field": "thinking block in history",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": "033",
+      "probe": "content.thinking.history",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "DROPPED",
+      "verdicts": [
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED"
+      ]
+    },
+    {
+      "axis": "content",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--content-cache_control-block.jsonl",
+      "field": "cache_control on a content block",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "content.cache_control.block",
+      "runs": 1,
+      "severity": "low",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "EXPECTED_LOSS",
+      "verdicts": [
+        "EXPECTED_LOSS"
+      ]
+    },
+    {
+      "axis": "content",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--content-tool_use-id.jsonl",
+      "field": "tool_use.id round trip",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model",
+        "tools"
+      ],
+      "gateway": "bifrost",
+      "known": "037",
+      "probe": "content.tool_use.id",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--cred-body-api_key.jsonl",
+      "field": "body `api_key` must not become upstream auth",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "cred.body.api_key",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--cred-body-extra_headers.jsonl",
+      "field": "body `extra_headers` must not reach the wire",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "cred.body.extra_headers",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--cred-header-api_key.jsonl",
+      "field": "client `api-key` header must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "cred.header.api_key",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--cred-header-x_goog_api_key.jsonl",
+      "field": "client `x-goog-api-key` must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "cred.header.x_goog_api_key",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--cred-header-openai_organization.jsonl",
+      "field": "client `openai-organization` must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "cred.header.openai_organization",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--cred-header-authorization.jsonl",
+      "field": "client `Authorization` must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "cred.header.authorization",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "credential",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--cred-header-anthropic_x_api_key.jsonl",
+      "field": "client `x-api-key` must not be forwarded",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "cred.header.anthropic_x_api_key",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "header",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--header-anthropic_beta.jsonl",
+      "field": "anthropic-beta forwarded or mapped",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "header.anthropic_beta",
+      "runs": 5,
+      "severity": "medium",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "DROPPED",
+      "verdicts": [
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED"
+      ]
+    },
+    {
+      "axis": "response",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--resp-finish_reason-stop.jsonl",
+      "field": "finish_reason stop -> end_turn",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "resp.finish_reason.stop",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "response",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--resp-finish_reason-length.jsonl",
+      "field": "finish_reason length -> max_tokens",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": "035",
+      "probe": "resp.finish_reason.length",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "MANGLED",
+      "verdicts": [
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED"
+      ]
+    },
+    {
+      "axis": "response",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--resp-finish_reason-content_filter.jsonl",
+      "field": "content_filter signal survives",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": "034",
+      "probe": "resp.finish_reason.content_filter",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "MANGLED",
+      "verdicts": [
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED"
+      ]
+    },
+    {
+      "axis": "response",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--resp-empty_text_before_tool_use.jsonl",
+      "field": "no invented empty text block",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "resp.empty_text_before_tool_use",
+      "runs": 1,
+      "severity": "high",
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "PRESERVED",
+      "verdicts": [
+        "PRESERVED"
+      ]
+    },
+    {
+      "axis": "response",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--resp-refusal.jsonl",
+      "field": "upstream refusal content survives",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": "036",
+      "probe": "resp.refusal",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "DROPPED",
+      "verdicts": [
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED",
+        "DROPPED"
+      ]
+    },
+    {
+      "axis": "response",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--resp-tool_call_id.jsonl",
+      "field": "upstream tool_call id reaches the client",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": "037",
+      "probe": "resp.tool_call_id",
+      "runs": 5,
+      "severity": "high",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "MANGLED",
+      "verdicts": [
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED"
+      ]
+    },
+    {
+      "axis": "response",
+      "determinism": "5/5",
+      "evidence": "transcripts/sweep/20260817T123216Z/bifrost--resp-usage.jsonl",
+      "field": "usage counts survive translation",
+      "forwarded_keys": [
+        "input",
+        "max_output_tokens",
+        "model"
+      ],
+      "gateway": "bifrost",
+      "known": null,
+      "probe": "resp.usage",
+      "runs": 5,
+      "severity": "medium",
+      "stable": true,
+      "status": 200,
+      "upstream_records": 1,
+      "verdict": "MANGLED",
+      "verdicts": [
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED",
+        "MANGLED"
+      ]
+    }
+  ],
+  "notes": [
+    "Live impact leg not run: no provider keys in the environment."
+  ],
+  "probes": 48,
+  "run": "20260817T123216Z",
+  "summary": {
+    "DROPPED": 14,
+    "EXPECTED_LOSS": 11,
+    "MANGLED": 9,
+    "PRESERVED": 61,
+    "REJECTED": 1
+  }
+}
