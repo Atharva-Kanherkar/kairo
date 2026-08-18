@@ -1233,3 +1233,84 @@ fn switchyard_live_gemini_stream_has_no_empty_text() {
         "control is vacuous: stream fixture carries no tool_use block for the checker to judge"
     );
 }
+
+// ---- bugs 057-061: any-llm Messages bridge encode-side losses ----
+
+#[test]
+fn any_llm_drops_thinking_history() {
+    let v = thinking_text_forwarded(
+        &fixture("transcripts/057/al-thinking-history-upstream.jsonl"),
+        "THINKPROBE",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "any-llm must be caught dropping assistant thinking blocks: {v:?}"
+    );
+}
+
+#[test]
+fn any_llm_thinking_is_dropped_not_leaked() {
+    let v = thinking_not_leaked_as_visible_text(
+        &fixture("transcripts/057/al-thinking-history-upstream.jsonl"),
+        "THINKPROBE",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "any-llm drops thinking rather than leaking it as visible text: {v:?}"
+    );
+}
+
+#[test]
+fn any_llm_drops_disable_parallel_tool_use() {
+    let v = parallel_tool_disable_preserved(&fixture("transcripts/057/al-parallel-upstream.jsonl"));
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "any-llm Messages bridge must be caught dropping disable_parallel_tool_use: {v:?}"
+    );
+}
+
+#[test]
+fn any_llm_completion_keeps_parallel_tool_calls() {
+    let v = parallel_tool_disable_preserved(&fixture(
+        "transcripts/057/al-completion-control-upstream.jsonl",
+    ));
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "any-llm completion() forwards parallel_tool_calls: false: {v:?}"
+    );
+}
+
+#[test]
+fn any_llm_drops_is_error_on_tool_result() {
+    let v = is_error_forwarded(&fixture("transcripts/057/al-is-error-upstream.jsonl"));
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "any-llm must be caught dropping is_error on tool results: {v:?}"
+    );
+}
+
+#[test]
+fn any_llm_drops_image_in_tool_result() {
+    let v = document_body_forwarded(
+        &fixture("transcripts/057/al-toolresult-image-upstream.jsonl"),
+        "iVBORw0KGgo",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "any-llm must be caught deleting image bytes in tool results: {v:?}"
+    );
+}
+
+#[test]
+fn any_llm_drops_document_in_tool_result() {
+    let v = document_body_forwarded(
+        &fixture("transcripts/057/al-toolresult-document-upstream.jsonl"),
+        "DOCBODY",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "any-llm must be caught deleting document bytes in tool results: {v:?}"
+    );
+}

@@ -1,0 +1,122 @@
+{
+  "thinking_history": {
+    "n": 5,
+    "think": 0,
+    "is_error": 0,
+    "png": 0,
+    "doc": 0,
+    "image_url": 0,
+    "schema": 0,
+    "parallel": 0,
+    "disable_parallel": 0,
+    "stop": 0
+  },
+  "output_format": {
+    "n": 5,
+    "think": 0,
+    "is_error": 0,
+    "png": 0,
+    "doc": 0,
+    "image_url": 0,
+    "schema": 5,
+    "parallel": 0,
+    "disable_parallel": 0,
+    "stop": 0
+  },
+  "parallel": {
+    "n": 5,
+    "think": 0,
+    "is_error": 0,
+    "png": 0,
+    "doc": 0,
+    "image_url": 0,
+    "schema": 0,
+    "parallel": 0,
+    "disable_parallel": 0,
+    "stop": 0
+  },
+  "stop": {
+    "n": 5,
+    "think": 0,
+    "is_error": 0,
+    "png": 0,
+    "doc": 0,
+    "image_url": 0,
+    "schema": 0,
+    "parallel": 0,
+    "disable_parallel": 0,
+    "stop": 5
+  },
+  "is_error": {
+    "n": 5,
+    "think": 0,
+    "is_error": 0,
+    "png": 0,
+    "doc": 0,
+    "image_url": 0,
+    "schema": 0,
+    "parallel": 0,
+    "disable_parallel": 0,
+    "stop": 0
+  },
+  "tool_result_image": {
+    "n": 5,
+    "think": 0,
+    "is_error": 0,
+    "png": 0,
+    "doc": 0,
+    "image_url": 0,
+    "schema": 0,
+    "parallel": 0,
+    "disable_parallel": 0,
+    "stop": 0
+  },
+  "tool_result_document": {
+    "n": 5,
+    "think": 0,
+    "is_error": 0,
+    "png": 0,
+    "doc": 0,
+    "image_url": 0,
+    "schema": 0,
+    "parallel": 0,
+    "disable_parallel": 0,
+    "stop": 0
+  },
+  "user_document": {
+    "n": 5,
+    "think": 0,
+    "is_error": 0,
+    "png": 0,
+    "doc": 5,
+    "image_url": 0,
+    "schema": 0,
+    "parallel": 0,
+    "disable_parallel": 0,
+    "stop": 0
+  },
+  "cache_control": {
+    "n": 5,
+    "think": 0,
+    "is_error": 0,
+    "png": 0,
+    "doc": 0,
+    "image_url": 0,
+    "schema": 0,
+    "parallel": 0,
+    "disable_parallel": 0,
+    "stop": 0
+  },
+  "ctrl_completion": {
+    "n": 5,
+    "think": 0,
+    "is_error": 0,
+    "png": 0,
+    "doc": 0,
+    "image_url": 0,
+    "schema": 0,
+    "parallel": 5,
+    "disable_parallel": 0,
+    "stop": 5
+  }
+}
