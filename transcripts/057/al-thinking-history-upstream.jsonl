@@ -1,0 +1,5 @@
+{"path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "2+2?"}, {"role": "assistant", "content": "4"}, {"role": "user", "content": "now 3+3"}], "model": "captured-model", "max_completion_tokens": 64}}
+{"path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "2+2?"}, {"role": "assistant", "content": "4"}, {"role": "user", "content": "now 3+3"}], "model": "captured-model", "max_completion_tokens": 64}}
+{"path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "2+2?"}, {"role": "assistant", "content": "4"}, {"role": "user", "content": "now 3+3"}], "model": "captured-model", "max_completion_tokens": 64}}
+{"path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "2+2?"}, {"role": "assistant", "content": "4"}, {"role": "user", "content": "now 3+3"}], "model": "captured-model", "max_completion_tokens": 64}}
+{"path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "2+2?"}, {"role": "assistant", "content": "4"}, {"role": "user", "content": "now 3+3"}], "model": "captured-model", "max_completion_tokens": 64}}

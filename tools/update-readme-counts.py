@@ -26,6 +26,7 @@ GATEWAYS = (
     ("bifrost", "Bifrost"),
     ("gomodel", "GoModel"),
     ("axonhub", "AxonHub"),
+    ("any-llm", "any-llm"),
 )
 
 TEST_RE = re.compile(r"^\s*#\[test\]", re.M)
