@@ -6,7 +6,11 @@
   handles `text` and `tool_use` only).
 - **Tool under test**: mozilla-ai/any-llm **1.26.0** (`any-llm-sdk` on PyPI).
   Messages API bridged to an OpenAI-compatible backend via `provider="openai"`
-  and `api_base` pointed at a capture mock. Otari routes through this SDK.
+  and `api_base` pointed at a capture mock.
+- **Blast radius**: Otari (`mozilla-ai/otari`, depends on `any-llm-sdk[all]>=1.24.0`)
+  exposes `POST /v1/messages` for Claude Code. This bridge runs for **non-Anthropic
+  backends only**; the native Anthropic provider overrides `_amessages` and never
+  hits `messages_compat`.
 - **Reproduced**: 2026-08-18. Capture 5/5. Evidence: `transcripts/057/`.
 - **Not a credential incident**: no keys in the frozen files.
 
@@ -17,6 +21,12 @@ send assistant turns containing `thinking` blocks plus a signature. The model
 needs that block (or its signature) on the next turn. any-llm's Messages
 bridge forwards only the visible `"4"` text; `THINKPROBE` and the signature
 vanish. HTTP 200, no warning.
+
+The inconsistency is worse than a one-way drop: `chat_completion_to_message_response`
+in the same file **decodes** upstream `msg.reasoning` into an Anthropic
+`thinking` block for the client, but `_convert_assistant_blocks_to_openai` will
+not re-encode that block on the next request. A client that reads thinking out
+of any-llm's own Messages response cannot hand it back to any-llm.
 
 ## Wire evidence
 
@@ -31,22 +41,22 @@ The thinking block and signature are absent. Visible assistant text survives.
 ## Root cause
 
 `any_llm/utils/messages_compat.py`, `_convert_assistant_blocks_to_openai`:
-the loop over content blocks ignores `type: thinking`.
+the loop over content blocks ignores `type: thinking`. The same module maps
+`params.thinking` (request config) onto `reasoning_effort` while dropping
+thinking history.
 
 ## Test
 
-`any_llm_drops_thinking_history` using `thinking_text_forwarded` with probe
-`THINKPROBE`. Control: `thinking_not_leaked_as_visible_text` on the same
-fixture (dropped, not leaked).
-
-Invariant: *private thinking text from replayed history appears somewhere in
-the request the bridge forwards upstream.*
+`any_llm_drops_thinking_history` walks all five capture lines and requires
+the exact `thinking_text_forwarded` violation string. Control:
+`any_llm_thinking_is_dropped_not_leaked` on the same fixture.
 
 ## Repro
 
 ```
-python3 -m venv /tmp/kairo-venv && /tmp/kairo-venv/bin/pip install 'any-llm-sdk[openai]'
-python3 tools/mock_upstream.py 9996 /tmp/cap.jsonl transcripts/057/canned-ok.json &
-python3 transcripts/057/hunt.py
-# or run the thinking_history case only from hunt.py
+python3 -m venv /tmp/kairo-venv
+/tmp/kairo-venv/bin/pip install 'any-llm-sdk[openai]'
+/tmp/kairo-venv/bin/python3 transcripts/057/hunt.py
 ```
+
+Do not start a separate mock on port 9996; the hunt spawns its own.

@@ -1,0 +1,1211 @@
+{
+  "thinking_history": [
+    {
+      "label": "thinking_history 1",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"2+2?\"}, {\"role\": \"assistant\", \"content\": \"4\"}, {\"role\": \"user\", \"content\": \"now 3+3\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "thinking_history 2",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"2+2?\"}, {\"role\": \"assistant\", \"content\": \"4\"}, {\"role\": \"user\", \"content\": \"now 3+3\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "thinking_history 3",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"2+2?\"}, {\"role\": \"assistant\", \"content\": \"4\"}, {\"role\": \"user\", \"content\": \"now 3+3\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "thinking_history 4",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"2+2?\"}, {\"role\": \"assistant\", \"content\": \"4\"}, {\"role\": \"user\", \"content\": \"now 3+3\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "thinking_history 5",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"2+2?\"}, {\"role\": \"assistant\", \"content\": \"4\"}, {\"role\": \"user\", \"content\": \"now 3+3\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    }
+  ],
+  "output_format_wrong_shape": [
+    {
+      "label": "output_format_wrong_shape 1",
+      "status": 0,
+      "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"response_format\": {\"type\": \"json_schema\", \"json_schema\": {\"name\": \"structured_output\", \"schema\": {}}}}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "response_format"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "output_format_wrong_shape 2",
+      "status": 0,
+      "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"response_format\": {\"type\": \"json_schema\", \"json_schema\": {\"name\": \"structured_output\", \"schema\": {}}}}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "response_format"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "output_format_wrong_shape 3",
+      "status": 0,
+      "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"response_format\": {\"type\": \"json_schema\", \"json_schema\": {\"name\": \"structured_output\", \"schema\": {}}}}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "response_format"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "output_format_wrong_shape 4",
+      "status": 0,
+      "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"response_format\": {\"type\": \"json_schema\", \"json_schema\": {\"name\": \"structured_output\", \"schema\": {}}}}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "response_format"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "output_format_wrong_shape 5",
+      "status": 0,
+      "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"response_format\": {\"type\": \"json_schema\", \"json_schema\": {\"name\": \"structured_output\", \"schema\": {}}}}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "response_format"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    }
+  ],
+  "output_format_control": [
+    {
+      "label": "output_format_control 1",
+      "status": 0,
+      "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"response_format\": {\"type\": \"json_schema\", \"json_schema\": {\"name\": \"CityOut\", \"schema\": {\"title\": \"CityOut\", \"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}, \"ok\": {\"type\": \"boolean\"}}, \"required\": [\"city\", \"ok\"], \"additionalProperties\": false}}}}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "response_format"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": true,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "output_format_control 2",
+      "status": 0,
+      "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"response_format\": {\"type\": \"json_schema\", \"json_schema\": {\"name\": \"CityOut\", \"schema\": {\"title\": \"CityOut\", \"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}, \"ok\": {\"type\": \"boolean\"}}, \"required\": [\"city\", \"ok\"], \"additionalProperties\": false}}}}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "response_format"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": true,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "output_format_control 3",
+      "status": 0,
+      "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"response_format\": {\"type\": \"json_schema\", \"json_schema\": {\"name\": \"CityOut\", \"schema\": {\"title\": \"CityOut\", \"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}, \"ok\": {\"type\": \"boolean\"}}, \"required\": [\"city\", \"ok\"], \"additionalProperties\": false}}}}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "response_format"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": true,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "output_format_control 4",
+      "status": 0,
+      "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"response_format\": {\"type\": \"json_schema\", \"json_schema\": {\"name\": \"CityOut\", \"schema\": {\"title\": \"CityOut\", \"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}, \"ok\": {\"type\": \"boolean\"}}, \"required\": [\"city\", \"ok\"], \"additionalProperties\": false}}}}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "response_format"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": true,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "output_format_control 5",
+      "status": 0,
+      "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"response_format\": {\"type\": \"json_schema\", \"json_schema\": {\"name\": \"CityOut\", \"schema\": {\"title\": \"CityOut\", \"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}, \"ok\": {\"type\": \"boolean\"}}, \"required\": [\"city\", \"ok\"], \"additionalProperties\": false}}}}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "response_format"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": true,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    }
+  ],
+  "parallel": [
+    {
+      "label": "parallel 1",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tool_choice\": \"auto\", \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tool_choice",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "parallel 2",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tool_choice\": \"auto\", \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tool_choice",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "parallel 3",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tool_choice\": \"auto\", \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tool_choice",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "parallel 4",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tool_choice\": \"auto\", \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tool_choice",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "parallel 5",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tool_choice\": \"auto\", \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tool_choice",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    }
+  ],
+  "stop": [
+    {
+      "label": "stop 1",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"stop\": [\"STOPPROBE\"]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "stop"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": true
+    },
+    {
+      "label": "stop 2",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"stop\": [\"STOPPROBE\"]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "stop"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": true
+    },
+    {
+      "label": "stop 3",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"stop\": [\"STOPPROBE\"]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "stop"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": true
+    },
+    {
+      "label": "stop 4",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"stop\": [\"STOPPROBE\"]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "stop"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": true
+    },
+    {
+      "label": "stop 5",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"stop\": [\"STOPPROBE\"]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "stop"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": true
+    }
+  ],
+  "is_error": [
+    {
+      "label": "is_error 1",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"run ls\"}, {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"toolu_1\", \"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"arguments\": \"{\\\"city\\\": \\\"x\\\"}\"}}]}, {\"role\": \"tool\", \"tool_call_id\": \"toolu_1\", \"content\": \"permission denied\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "is_error 2",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"run ls\"}, {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"toolu_1\", \"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"arguments\": \"{\\\"city\\\": \\\"x\\\"}\"}}]}, {\"role\": \"tool\", \"tool_call_id\": \"toolu_1\", \"content\": \"permission denied\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "is_error 3",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"run ls\"}, {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"toolu_1\", \"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"arguments\": \"{\\\"city\\\": \\\"x\\\"}\"}}]}, {\"role\": \"tool\", \"tool_call_id\": \"toolu_1\", \"content\": \"permission denied\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "is_error 4",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"run ls\"}, {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"toolu_1\", \"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"arguments\": \"{\\\"city\\\": \\\"x\\\"}\"}}]}, {\"role\": \"tool\", \"tool_call_id\": \"toolu_1\", \"content\": \"permission denied\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "is_error 5",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"run ls\"}, {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"toolu_1\", \"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"arguments\": \"{\\\"city\\\": \\\"x\\\"}\"}}]}, {\"role\": \"tool\", \"tool_call_id\": \"toolu_1\", \"content\": \"permission denied\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    }
+  ],
+  "tool_result_image": [
+    {
+      "label": "tool_result_image 1",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"screenshot\"}, {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"toolu_1\", \"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"arguments\": \"{\\\"city\\\": \\\"x\\\"}\"}}]}, {\"role\": \"tool\", \"tool_call_id\": \"toolu_1\", \"content\": \"here it is:\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "tool_result_image 2",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"screenshot\"}, {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"toolu_1\", \"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"arguments\": \"{\\\"city\\\": \\\"x\\\"}\"}}]}, {\"role\": \"tool\", \"tool_call_id\": \"toolu_1\", \"content\": \"here it is:\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "tool_result_image 3",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"screenshot\"}, {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"toolu_1\", \"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"arguments\": \"{\\\"city\\\": \\\"x\\\"}\"}}]}, {\"role\": \"tool\", \"tool_call_id\": \"toolu_1\", \"content\": \"here it is:\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "tool_result_image 4",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"screenshot\"}, {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"toolu_1\", \"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"arguments\": \"{\\\"city\\\": \\\"x\\\"}\"}}]}, {\"role\": \"tool\", \"tool_call_id\": \"toolu_1\", \"content\": \"here it is:\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "tool_result_image 5",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"screenshot\"}, {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"toolu_1\", \"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"arguments\": \"{\\\"city\\\": \\\"x\\\"}\"}}]}, {\"role\": \"tool\", \"tool_call_id\": \"toolu_1\", \"content\": \"here it is:\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    }
+  ],
+  "tool_result_document": [
+    {
+      "label": "tool_result_document 1",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"read doc\"}, {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"toolu_1\", \"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"arguments\": \"{\\\"city\\\": \\\"x\\\"}\"}}]}, {\"role\": \"tool\", \"tool_call_id\": \"toolu_1\", \"content\": \"result text\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "tool_result_document 2",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"read doc\"}, {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"toolu_1\", \"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"arguments\": \"{\\\"city\\\": \\\"x\\\"}\"}}]}, {\"role\": \"tool\", \"tool_call_id\": \"toolu_1\", \"content\": \"result text\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "tool_result_document 3",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"read doc\"}, {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"toolu_1\", \"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"arguments\": \"{\\\"city\\\": \\\"x\\\"}\"}}]}, {\"role\": \"tool\", \"tool_call_id\": \"toolu_1\", \"content\": \"result text\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "tool_result_document 4",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"read doc\"}, {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"toolu_1\", \"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"arguments\": \"{\\\"city\\\": \\\"x\\\"}\"}}]}, {\"role\": \"tool\", \"tool_call_id\": \"toolu_1\", \"content\": \"result text\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "tool_result_document 5",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"read doc\"}, {\"role\": \"assistant\", \"content\": null, \"tool_calls\": [{\"id\": \"toolu_1\", \"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"arguments\": \"{\\\"city\\\": \\\"x\\\"}\"}}]}, {\"role\": \"tool\", \"tool_call_id\": \"toolu_1\", \"content\": \"result text\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64, \"tools\": [{\"type\": \"function\", \"function\": {\"name\": \"lookup_city\", \"description\": \"Look up a city code\", \"parameters\": {\"type\": \"object\", \"properties\": {\"city\": {\"type\": \"string\"}}, \"required\": [\"city\"]}}}]}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens",
+        "tools"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    }
+  ],
+  "user_document": [
+    {
+      "label": "user_document 1",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"summarize\"}, {\"type\": \"document\", \"source\": {\"type\": \"text\", \"media_type\": \"text/plain\", \"data\": \"DOCBODY\"}}]}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": true,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "user_document 2",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"summarize\"}, {\"type\": \"document\", \"source\": {\"type\": \"text\", \"media_type\": \"text/plain\", \"data\": \"DOCBODY\"}}]}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": true,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "user_document 3",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"summarize\"}, {\"type\": \"document\", \"source\": {\"type\": \"text\", \"media_type\": \"text/plain\", \"data\": \"DOCBODY\"}}]}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": true,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "user_document 4",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"summarize\"}, {\"type\": \"document\", \"source\": {\"type\": \"text\", \"media_type\": \"text/plain\", \"data\": \"DOCBODY\"}}]}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": true,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "user_document 5",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"summarize\"}, {\"type\": \"document\", \"source\": {\"type\": \"text\", \"media_type\": \"text/plain\", \"data\": \"DOCBODY\"}}]}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": true,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    }
+  ],
+  "user_image": [
+    {
+      "label": "user_image 1",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"what is this\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==\"}}]}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": true,
+      "has_doc": false,
+      "has_image_url": true,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "user_image 2",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"what is this\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==\"}}]}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": true,
+      "has_doc": false,
+      "has_image_url": true,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "user_image 3",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"what is this\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==\"}}]}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": true,
+      "has_doc": false,
+      "has_image_url": true,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "user_image 4",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"what is this\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==\"}}]}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": true,
+      "has_doc": false,
+      "has_image_url": true,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "user_image 5",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"what is this\"}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==\"}}]}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": true,
+      "has_doc": false,
+      "has_image_url": true,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    }
+  ],
+  "cache_control": [
+    {
+      "label": "cache_control 1",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"system\", \"content\": \"sys1sys2\"}, {\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "cache_control 2",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"system\", \"content\": \"sys1sys2\"}, {\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "cache_control 3",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"system\", \"content\": \"sys1sys2\"}, {\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "cache_control 4",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"system\", \"content\": \"sys1sys2\"}, {\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    },
+    {
+      "label": "cache_control 5",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"system\", \"content\": \"sys1sys2\"}, {\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 64}}",
+      "upstream_keys": [
+        "messages",
+        "model",
+        "max_completion_tokens"
+      ],
+      "has_thinkprobe": false,
+      "has_is_error": false,
+      "has_png": false,
+      "has_doc": false,
+      "has_image_url": false,
+      "has_schema_city": false,
+      "has_parallel_false": false,
+      "has_stop_probe": false
+    }
+  ],
+  "ctrl_completion": [
+    {
+      "label": "ctrl completion 1",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 16, \"parallel_tool_calls\": false, \"stop\": [\"STOPPROBE\"]}}",
+      "has_parallel_false": true,
+      "has_stop_probe": true
+    },
+    {
+      "label": "ctrl completion 2",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 16, \"parallel_tool_calls\": false, \"stop\": [\"STOPPROBE\"]}}",
+      "has_parallel_false": true,
+      "has_stop_probe": true
+    },
+    {
+      "label": "ctrl completion 3",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 16, \"parallel_tool_calls\": false, \"stop\": [\"STOPPROBE\"]}}",
+      "has_parallel_false": true,
+      "has_stop_probe": true
+    },
+    {
+      "label": "ctrl completion 4",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 16, \"parallel_tool_calls\": false, \"stop\": [\"STOPPROBE\"]}}",
+      "has_parallel_false": true,
+      "has_stop_probe": true
+    },
+    {
+      "label": "ctrl completion 5",
+      "status": 200,
+      "error": "",
+      "reached_upstream": true,
+      "upstream_jsonl": "{\"path\": \"/v1/chat/completions\", \"body\": {\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}], \"model\": \"captured-model\", \"max_completion_tokens\": 16, \"parallel_tool_calls\": false, \"stop\": [\"STOPPROBE\"]}}",
+      "has_parallel_false": true,
+      "has_stop_probe": true
+    }
+  ]
+}

@@ -56,11 +56,12 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 058 | any-llm Messages bridge drops `disable_parallel_tool_use`; forwards bare `tool_choice: auto` | any-llm-sdk 1.26.0 (capture mock, no keys) | 017/043 family; adjacent any-llm#646 | ✅ 5/5 on CURRENT. Control: same SDK `completion()` keeps `parallel_tool_calls: false` 5/5 |
 | 059 | any-llm Messages bridge drops `is_error` on tool results; plain string only | any-llm-sdk 1.26.0 (capture mock, no keys) | 006 family | ✅ 5/5 on CURRENT |
 | 060 | any-llm Messages bridge drops image bytes inside tool results | any-llm-sdk 1.26.0 (capture mock, no keys) | 007 family; adjacent any-llm#1295 | ✅ 5/5 on CURRENT |
-| 061 | any-llm Messages bridge drops document bytes inside tool results | any-llm-sdk 1.26.0 (capture mock, no keys) | 018 family | ✅ 5/5 on CURRENT |
+| 061 | any-llm Messages bridge drops document bytes inside tool results | any-llm-sdk 1.26.0 (capture mock, no keys) | 018 family | ✅ 5/5 on CURRENT. Control: user-content document route keeps DOCBODY 5/5 |
+| 062 | any-llm accepts bare `{type, schema}` output_format, forwards empty `schema: {}` shell | any-llm-sdk 1.26.0 (capture mock, no keys) | 040 family, silent-loss variant | ✅ 5/5 on CURRENT. Control: documented `output_config.format` shape keeps `city` 5/5 |
 
-Numbers 046-050 are reserved for unpublished GoModel round-2 findings (one bug per PR). They are not missing SCOREBOARD rows.
+Numbers 046-050 are reserved for unpublished GoModel round-2 findings (one bug per PR). Issues 052-056 (AxonHub round 2) land on sibling branches, not missing rows here.
 
-**Tally**: 43 distinct defects confirmed on the wire (42 on current releases)
+**Tally**: 44 distinct defects confirmed on the wire (43 on current releases)
 across LiteLLM, Switchyard, Bifrost, GoModel, AxonHub, and any-llm, counting 006 as its 4 independent field losses
 plus the LiteLLM copy of that class. LiteLLM confirmed: 001 (stop_reason, 1.82),
 002a (finish_reason), 002b (route drop), 004a (id smuggle), 004b (Responses
@@ -84,13 +85,14 @@ sanitizer has no inverse). GoModel confirmed: 042 (Anthropic `output_format`
 dropped), 043 (parallel flag dropped). AxonHub confirmed: 051 (Anthropic
 `output_format` dropped). any-llm confirmed: 057 (thinking history dropped),
 058 (parallel flag dropped), 059 (`is_error` dropped), 060 (image in tool
-result dropped), 061 (document in tool result dropped).
+result dropped), 061 (document in tool result dropped), 062 (wrong
+`output_format` shape forwards empty schema shell).
 
-**any-llm honest negatives (2026-08-18 sweep)**, 5/5: Anthropic `output_format`
-maps to `response_format.json_schema` on the Messages bridge (unlike GoModel,
-AxonHub, Switchyard 040/042/051); `stop_sequences` maps to `stop` (unlike
-GoModel/Bifrost 032). Otari inherits any-llm's translation; these encode-side
-losses apply to the Mozilla gateway stack until fixed upstream.
+**any-llm honest negatives (2026-08-18 sweep)**, 5/5: Anthropic `stop_sequences`
+maps to `stop` (unlike GoModel/Bifrost 032). Documented `output_config.format`
+shape maps to a full `response_format.json_schema` (see 062 control); the bare
+`{type, schema}` mistake forwards an empty shell instead. Otari inherits
+any-llm's translation on **non-Anthropic backends** until fixed upstream.
 
 **Bifrost honest negatives (2026-08-16 sweep)**, all 5/5 and kept as data because
 they are the same probes that caught the other two gateways: client `Authorization`

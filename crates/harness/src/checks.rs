@@ -603,6 +603,34 @@ pub fn json_schema_forwarded(forwarded_jsonl: &str) -> Verdict {
     }
 }
 
+/// Parse errors must not pass as this reason.
+pub const JSON_SCHEMA_PROPERTY_ABSENT: &str =
+    "json_schema.schema is present but a client-supplied property was dropped from it";
+
+/// Invariant (062 / any-llm): a property the client placed in
+/// `output_format` / `response_format.json_schema.schema` MUST survive on the
+/// wire, not just an empty `{}` schema shell.
+pub fn json_schema_property_forwarded(forwarded_jsonl: &str, property: &str) -> Verdict {
+    let Ok(body) = capture_body(forwarded_jsonl) else {
+        return Verdict::Violation("unparseable capture".into());
+    };
+    if schema_properties(&body)
+        .and_then(|p| p.get(property))
+        .is_some()
+    {
+        return Verdict::Conformant;
+    }
+    Verdict::Violation(JSON_SCHEMA_PROPERTY_ABSENT.into())
+}
+
+fn schema_properties(body: &Value) -> Option<&serde_json::Map<String, Value>> {
+    body.get("response_format")
+        .and_then(|rf| rf.get("json_schema"))
+        .and_then(|js| js.get("schema"))
+        .and_then(|s| s.get("properties"))
+        .and_then(Value::as_object)
+}
+
 /// True when `json_schema` is a request field, not a word in the prompt.
 /// Skips `messages` / `input` / `content` so a user string cannot mint Conformant.
 fn has_json_schema_wire_field(v: &Value) -> bool {

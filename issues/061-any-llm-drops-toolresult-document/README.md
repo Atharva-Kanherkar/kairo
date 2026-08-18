@@ -3,6 +3,7 @@
 - **Upstream**: no ticket, not yet filed. Same class as kairo 018 (user
   document dropped or dumped on gateways).
 - **Tool under test**: mozilla-ai/any-llm **1.26.0** (`any-llm-sdk`).
+- **Blast radius**: Otari `/v1/messages` on non-Anthropic backends (see 057).
 - **Reproduced**: 2026-08-18. Capture 5/5. Evidence: `transcripts/057/`.
 - **Not a credential incident**: synthetic `DOCBODY` probe only.
 
@@ -14,13 +15,16 @@ alongside summary text. any-llm forwards only `"result text"` and deletes
 
 ## Wire evidence
 
-`transcripts/057/al-toolresult-document-upstream.jsonl` (5/5):
+Violation — `transcripts/057/al-toolresult-document-upstream.jsonl` (5/5):
 
 ```json
 {"role":"tool","tool_call_id":"toolu_1","content":"result text"}
 ```
 
-`DOCBODY` is absent from the forwarded body.
+Control — `transcripts/057/al-user-document-upstream.jsonl` (5/5): `DOCBODY`
+survives on the user-content route (forwarded verbatim as an Anthropic-shaped
+`document` block inside OpenAI content; likely a 400 on a real backend, a
+third variant of the 018 class).
 
 ## Root cause
 
@@ -29,9 +33,11 @@ blocks only inside list-shaped tool results; `type: document` is ignored.
 
 ## Test
 
-`any_llm_drops_document_in_tool_result` using `document_body_forwarded` with
-probe `DOCBODY`.
+`any_llm_drops_document_in_tool_result` (5/5). Control:
+`any_llm_user_document_control_keeps_docbody`.
 
 ## Repro
 
-See `transcripts/057/hunt.py` (`tool_result_document` case).
+```
+/tmp/kairo-venv/bin/python3 transcripts/057/hunt.py
+```

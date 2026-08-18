@@ -15,6 +15,7 @@ use kairo::checks::{
     stop_sequence_forwarded, thinking_not_leaked_as_visible_text, thinking_text_forwarded,
     toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
     upstream_omits_header_value, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT,
+    JSON_SCHEMA_PROPERTY_ABSENT, json_schema_property_forwarded,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -1234,83 +1235,232 @@ fn switchyard_live_gemini_stream_has_no_empty_text() {
     );
 }
 
-// ---- bugs 057-061: any-llm Messages bridge encode-side losses ----
+// ---- bugs 057-062: any-llm Messages bridge encode-side losses ----
+
+fn assert_any_llm_records(rel: &str) -> Vec<(String, serde_json::Value)> {
+    let records = capture_records(&fixture(rel)).unwrap_or_else(|e| panic!("{rel}: {e}"));
+    assert_eq!(
+        records.len(),
+        5,
+        "{rel} must still be the 5/5 capture, not a single leftover line"
+    );
+    records
+}
 
 #[test]
 fn any_llm_drops_thinking_history() {
-    let v = thinking_text_forwarded(
-        &fixture("transcripts/057/al-thinking-history-upstream.jsonl"),
-        "THINKPROBE",
-    );
-    assert!(
-        matches!(v, Verdict::Violation(_)),
-        "any-llm must be caught dropping assistant thinking blocks: {v:?}"
-    );
+    let rel = "transcripts/057/al-thinking-history-upstream.jsonl";
+    let think_absent = format!("thinking text {:?} is absent from the forwarded upstream body", "THINKPROBE");
+    for (i, (line, body)) in assert_any_llm_records(rel).iter().enumerate() {
+        assert!(
+            body.get("messages")
+                .and_then(serde_json::Value::as_array)
+                .is_some(),
+            "{rel} line {} must still carry messages",
+            i + 1
+        );
+        assert_eq!(
+            thinking_text_forwarded(line, "THINKPROBE"),
+            Verdict::Violation(think_absent.clone()),
+            "{rel} line {} must still drop thinking history",
+            i + 1
+        );
+    }
 }
 
 #[test]
 fn any_llm_thinking_is_dropped_not_leaked() {
-    let v = thinking_not_leaked_as_visible_text(
-        &fixture("transcripts/057/al-thinking-history-upstream.jsonl"),
-        "THINKPROBE",
-    );
-    assert_eq!(
-        v,
-        Verdict::Conformant,
-        "any-llm drops thinking rather than leaking it as visible text: {v:?}"
-    );
+    let rel = "transcripts/057/al-thinking-history-upstream.jsonl";
+    for (i, (line, _)) in assert_any_llm_records(rel).iter().enumerate() {
+        assert_eq!(
+            thinking_not_leaked_as_visible_text(line, "THINKPROBE"),
+            Verdict::Conformant,
+            "{rel} line {} drops thinking rather than leaking it",
+            i + 1
+        );
+    }
 }
 
 #[test]
 fn any_llm_drops_disable_parallel_tool_use() {
-    let v = parallel_tool_disable_preserved(&fixture("transcripts/057/al-parallel-upstream.jsonl"));
-    assert!(
-        matches!(v, Verdict::Violation(_)),
-        "any-llm Messages bridge must be caught dropping disable_parallel_tool_use: {v:?}"
-    );
+    let rel = "transcripts/057/al-parallel-upstream.jsonl";
+    let dropped = "disable_parallel_tool_use was dropped; forwarded body has neither parallel_tool_calls=false nor disable_parallel_tool_use=true".to_string();
+    for (i, (line, body)) in assert_any_llm_records(rel).iter().enumerate() {
+        assert!(
+            body.get("tools").and_then(serde_json::Value::as_array).is_some(),
+            "{rel} line {} must still carry tools",
+            i + 1
+        );
+        assert_eq!(
+            parallel_tool_disable_preserved(line),
+            Verdict::Violation(dropped.clone()),
+            "{rel} line {} must still drop disable_parallel_tool_use",
+            i + 1
+        );
+    }
 }
 
 #[test]
 fn any_llm_completion_keeps_parallel_tool_calls() {
-    let v = parallel_tool_disable_preserved(&fixture(
-        "transcripts/057/al-completion-control-upstream.jsonl",
-    ));
-    assert_eq!(
-        v,
-        Verdict::Conformant,
-        "any-llm completion() forwards parallel_tool_calls: false: {v:?}"
-    );
+    let rel = "transcripts/057/al-completion-control-upstream.jsonl";
+    for (i, (line, _)) in assert_any_llm_records(rel).iter().enumerate() {
+        assert_eq!(
+            parallel_tool_disable_preserved(line),
+            Verdict::Conformant,
+            "{rel} line {} forwards parallel_tool_calls: false",
+            i + 1
+        );
+    }
 }
 
 #[test]
 fn any_llm_drops_is_error_on_tool_result() {
-    let v = is_error_forwarded(&fixture("transcripts/057/al-is-error-upstream.jsonl"));
-    assert!(
-        matches!(v, Verdict::Violation(_)),
-        "any-llm must be caught dropping is_error on tool results: {v:?}"
-    );
+    let rel = "transcripts/057/al-is-error-upstream.jsonl";
+    let dropped = "is_error:true was dropped; forwarded body has no error marker on the tool result".to_string();
+    for (i, (line, body)) in assert_any_llm_records(rel).iter().enumerate() {
+        assert!(
+            body.get("messages")
+                .and_then(serde_json::Value::as_array)
+                .map(|m| m.iter().any(|msg| msg.get("role") == Some(&serde_json::json!("tool"))))
+                .unwrap_or(false),
+            "{rel} line {} must still carry a tool result",
+            i + 1
+        );
+        assert_eq!(
+            is_error_forwarded(line),
+            Verdict::Violation(dropped.clone()),
+            "{rel} line {} must still drop is_error",
+            i + 1
+        );
+    }
 }
 
 #[test]
 fn any_llm_drops_image_in_tool_result() {
-    let v = document_body_forwarded(
-        &fixture("transcripts/057/al-toolresult-image-upstream.jsonl"),
-        "iVBORw0KGgo",
-    );
-    assert!(
-        matches!(v, Verdict::Violation(_)),
-        "any-llm must be caught deleting image bytes in tool results: {v:?}"
-    );
+    let rel = "transcripts/057/al-toolresult-image-upstream.jsonl";
+    let png_absent = "document body \"iVBORw0KGgo\" is absent from the forwarded upstream body".to_string();
+    for (i, (line, body)) in assert_any_llm_records(rel).iter().enumerate() {
+        assert!(
+            body.get("messages")
+                .and_then(serde_json::Value::as_array)
+                .map(|m| m.iter().any(|msg| msg.get("role") == Some(&serde_json::json!("tool"))))
+                .unwrap_or(false),
+            "{rel} line {} must still carry a tool result",
+            i + 1
+        );
+        assert_eq!(
+            document_body_forwarded(line, "iVBORw0KGgo"),
+            Verdict::Violation(png_absent.clone()),
+            "{rel} line {} must still drop PNG bytes",
+            i + 1
+        );
+        assert!(
+            !line.contains("image_url"),
+            "{rel} line {} must not map the tool-result image to image_url",
+            i + 1
+        );
+    }
+}
+
+#[test]
+fn any_llm_user_image_control_keeps_png_bytes() {
+    let rel = "transcripts/057/al-user-image-upstream.jsonl";
+    for (i, (line, _)) in assert_any_llm_records(rel).iter().enumerate() {
+        assert_eq!(
+            document_body_forwarded(line, "iVBORw0KGgo"),
+            Verdict::Conformant,
+            "{rel} line {} forwards user-content PNG bytes",
+            i + 1
+        );
+        assert!(
+            line.contains("image_url"),
+            "{rel} line {} must map user-content image to image_url",
+            i + 1
+        );
+    }
 }
 
 #[test]
 fn any_llm_drops_document_in_tool_result() {
-    let v = document_body_forwarded(
-        &fixture("transcripts/057/al-toolresult-document-upstream.jsonl"),
-        "DOCBODY",
-    );
-    assert!(
-        matches!(v, Verdict::Violation(_)),
-        "any-llm must be caught deleting document bytes in tool results: {v:?}"
-    );
+    let rel = "transcripts/057/al-toolresult-document-upstream.jsonl";
+    let doc_absent = "document body \"DOCBODY\" is absent from the forwarded upstream body".to_string();
+    for (i, (line, body)) in assert_any_llm_records(rel).iter().enumerate() {
+        assert!(
+            body.get("messages")
+                .and_then(serde_json::Value::as_array)
+                .map(|m| m.iter().any(|msg| msg.get("role") == Some(&serde_json::json!("tool"))))
+                .unwrap_or(false),
+            "{rel} line {} must still carry a tool result",
+            i + 1
+        );
+        assert_eq!(
+            document_body_forwarded(line, "DOCBODY"),
+            Verdict::Violation(doc_absent.clone()),
+            "{rel} line {} must still drop DOCBODY",
+            i + 1
+        );
+    }
+}
+
+#[test]
+fn any_llm_user_document_control_keeps_docbody() {
+    let rel = "transcripts/057/al-user-document-upstream.jsonl";
+    for (i, (line, _)) in assert_any_llm_records(rel).iter().enumerate() {
+        assert_eq!(
+            document_body_forwarded(line, "DOCBODY"),
+            Verdict::Conformant,
+            "{rel} line {} forwards user-content DOCBODY",
+            i + 1
+        );
+    }
+}
+
+#[test]
+fn any_llm_wrong_output_format_shape_forwards_empty_schema() {
+    let rel = "transcripts/057/al-output-format-empty-schema-upstream.jsonl";
+    for (i, (line, body)) in assert_any_llm_records(rel).iter().enumerate() {
+        assert!(
+            body.get("response_format").is_some(),
+            "{rel} line {} must still carry response_format (the silent-loss trap)",
+            i + 1
+        );
+        assert_eq!(
+            json_schema_forwarded(line),
+            Verdict::Conformant,
+            "{rel} line {} still names json_schema on the wire",
+            i + 1
+        );
+        assert_eq!(
+            json_schema_property_forwarded(line, "city"),
+            Verdict::Violation(JSON_SCHEMA_PROPERTY_ABSENT.into()),
+            "{rel} line {} must still forward an empty schema shell",
+            i + 1
+        );
+    }
+}
+
+#[test]
+fn any_llm_output_config_shape_keeps_schema() {
+    let rel = "transcripts/057/al-output-format-control-upstream.jsonl";
+    for (i, (line, _)) in assert_any_llm_records(rel).iter().enumerate() {
+        assert_eq!(
+            json_schema_property_forwarded(line, "city"),
+            Verdict::Conformant,
+            "{rel} line {} forwards the full schema on the documented output_config path",
+            i + 1
+        );
+    }
+}
+
+#[test]
+fn any_llm_stop_sequences_honest_negative() {
+    let rel = "transcripts/057/al-stop-upstream.jsonl";
+    for (i, (line, _)) in assert_any_llm_records(rel).iter().enumerate() {
+        assert_eq!(
+            stop_sequence_forwarded(line, "STOPPROBE"),
+            Verdict::Conformant,
+            "{rel} line {} maps stop_sequences to stop",
+            i + 1
+        );
+    }
 }

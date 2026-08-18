@@ -5,8 +5,9 @@
   [any-llm#1295](https://github.com/mozilla-ai/any-llm/issues/1295) (Gemini
   inline_data loss on a different path).
 - **Tool under test**: mozilla-ai/any-llm **1.26.0** (`any-llm-sdk`).
+- **Blast radius**: Otari `/v1/messages` on non-Anthropic backends (see 057).
 - **Reproduced**: 2026-08-18. Capture 5/5. Evidence: `transcripts/057/`.
-- **Not a credential incident**: no PNG payload is secret; bytes are synthetic.
+- **Not a credential incident**: synthetic PNG probe only.
 
 ## What breaks
 
@@ -16,13 +17,17 @@ PNG. The upstream model never sees the image. HTTP 200.
 
 ## Wire evidence
 
-`transcripts/057/al-toolresult-image-upstream.jsonl` (5/5):
+Violation — `transcripts/057/al-toolresult-image-upstream.jsonl` (5/5):
 
 ```json
 {"role":"tool","tool_call_id":"toolu_1","content":"here it is:"}
 ```
 
-The base64 PNG probe (`iVBORw0KGgo...`) is absent. No `image_url` field.
+The base64 PNG probe is absent. No `image_url` field on the tool message.
+
+Control — `transcripts/057/al-user-image-upstream.jsonl` (5/5): the same PNG
+in plain user content maps to `image_url` with the bytes intact. The loss is
+specific to `tool_result`, not "any-llm can't do multimodal."
 
 ## Root cause
 
@@ -32,9 +37,11 @@ The base64 PNG probe (`iVBORw0KGgo...`) is absent. No `image_url` field.
 
 ## Test
 
-`any_llm_drops_image_in_tool_result` using `document_body_forwarded` with
-the PNG probe prefix `iVBORw0KGgo`.
+`any_llm_drops_image_in_tool_result` (5/5, exact violation string, asserts
+no `image_url`). Control: `any_llm_user_image_control_keeps_png_bytes`.
 
 ## Repro
 
-See `transcripts/057/hunt.py` (`tool_result_image` case).
+```
+/tmp/kairo-venv/bin/python3 transcripts/057/hunt.py
+```
