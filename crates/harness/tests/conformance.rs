@@ -1247,6 +1247,15 @@ fn assert_any_llm_records(rel: &str) -> Vec<(String, serde_json::Value)> {
     records
 }
 
+fn has_tool_role_message(body: &serde_json::Value) -> bool {
+    body.get("messages")
+        .and_then(serde_json::Value::as_array)
+        .is_some_and(|m| {
+            m.iter()
+                .any(|msg| msg.get("role") == Some(&serde_json::json!("tool")))
+        })
+}
+
 #[test]
 fn any_llm_drops_thinking_history() {
     let rel = "transcripts/057/al-thinking-history-upstream.jsonl";
@@ -1326,12 +1335,7 @@ fn any_llm_drops_is_error_on_tool_result() {
             .to_string();
     for (i, (line, body)) in assert_any_llm_records(rel).iter().enumerate() {
         assert!(
-            body.get("messages")
-                .and_then(serde_json::Value::as_array)
-                .map(|m| m
-                    .iter()
-                    .any(|msg| msg.get("role") == Some(&serde_json::json!("tool"))))
-                .unwrap_or(false),
+            has_tool_role_message(body),
             "{rel} line {} must still carry a tool result",
             i + 1
         );
@@ -1351,12 +1355,7 @@ fn any_llm_drops_image_in_tool_result() {
         "document body \"iVBORw0KGgo\" is absent from the forwarded upstream body".to_string();
     for (i, (line, body)) in assert_any_llm_records(rel).iter().enumerate() {
         assert!(
-            body.get("messages")
-                .and_then(serde_json::Value::as_array)
-                .map(|m| m
-                    .iter()
-                    .any(|msg| msg.get("role") == Some(&serde_json::json!("tool"))))
-                .unwrap_or(false),
+            has_tool_role_message(body),
             "{rel} line {} must still carry a tool result",
             i + 1
         );
@@ -1399,12 +1398,7 @@ fn any_llm_drops_document_in_tool_result() {
         "document body \"DOCBODY\" is absent from the forwarded upstream body".to_string();
     for (i, (line, body)) in assert_any_llm_records(rel).iter().enumerate() {
         assert!(
-            body.get("messages")
-                .and_then(serde_json::Value::as_array)
-                .map(|m| m
-                    .iter()
-                    .any(|msg| msg.get("role") == Some(&serde_json::json!("tool"))))
-                .unwrap_or(false),
+            has_tool_role_message(body),
             "{rel} line {} must still carry a tool result",
             i + 1
         );
