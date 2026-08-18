@@ -8,14 +8,14 @@
 use kairo::checks::{
     anthropic_response_toolcall_stop_reason, anthropic_toolcall_stop_reason, capture_records,
     content_filter_preserved, document_body_forwarded, id_conforms, is_error_forwarded,
-    json_schema_forwarded, no_empty_text_alongside_tool_use, no_indexerror_leak,
-    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
-    openai_stream_finish_reason, openai_toolcall_id_charset, parallel_tool_disable_preserved,
-    reasoning_text_order_preserved, response_content_not_empty, response_omits_secret,
-    stop_sequence_forwarded, thinking_not_leaked_as_visible_text, thinking_text_forwarded,
-    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
-    upstream_omits_header_value, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT,
-    JSON_SCHEMA_PROPERTY_ABSENT, json_schema_property_forwarded,
+    json_schema_forwarded, json_schema_property_forwarded, no_empty_text_alongside_tool_use,
+    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
+    non_text_block_not_json_dumped, openai_stream_finish_reason, openai_toolcall_id_charset,
+    parallel_tool_disable_preserved, reasoning_text_order_preserved, response_content_not_empty,
+    response_omits_secret, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
+    thinking_text_forwarded, toolcall_id_restored_upstream, truncation_preserved,
+    upstream_bearer_is, upstream_omits_header_value, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
+    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -1250,7 +1250,10 @@ fn assert_any_llm_records(rel: &str) -> Vec<(String, serde_json::Value)> {
 #[test]
 fn any_llm_drops_thinking_history() {
     let rel = "transcripts/057/al-thinking-history-upstream.jsonl";
-    let think_absent = format!("thinking text {:?} is absent from the forwarded upstream body", "THINKPROBE");
+    let think_absent = format!(
+        "thinking text {:?} is absent from the forwarded upstream body",
+        "THINKPROBE"
+    );
     for (i, (line, body)) in assert_any_llm_records(rel).iter().enumerate() {
         assert!(
             body.get("messages")
@@ -1287,7 +1290,9 @@ fn any_llm_drops_disable_parallel_tool_use() {
     let dropped = "disable_parallel_tool_use was dropped; forwarded body has neither parallel_tool_calls=false nor disable_parallel_tool_use=true".to_string();
     for (i, (line, body)) in assert_any_llm_records(rel).iter().enumerate() {
         assert!(
-            body.get("tools").and_then(serde_json::Value::as_array).is_some(),
+            body.get("tools")
+                .and_then(serde_json::Value::as_array)
+                .is_some(),
             "{rel} line {} must still carry tools",
             i + 1
         );
@@ -1316,12 +1321,16 @@ fn any_llm_completion_keeps_parallel_tool_calls() {
 #[test]
 fn any_llm_drops_is_error_on_tool_result() {
     let rel = "transcripts/057/al-is-error-upstream.jsonl";
-    let dropped = "is_error:true was dropped; forwarded body has no error marker on the tool result".to_string();
+    let dropped =
+        "is_error:true was dropped; forwarded body has no error marker on the tool result"
+            .to_string();
     for (i, (line, body)) in assert_any_llm_records(rel).iter().enumerate() {
         assert!(
             body.get("messages")
                 .and_then(serde_json::Value::as_array)
-                .map(|m| m.iter().any(|msg| msg.get("role") == Some(&serde_json::json!("tool"))))
+                .map(|m| m
+                    .iter()
+                    .any(|msg| msg.get("role") == Some(&serde_json::json!("tool"))))
                 .unwrap_or(false),
             "{rel} line {} must still carry a tool result",
             i + 1
@@ -1338,12 +1347,15 @@ fn any_llm_drops_is_error_on_tool_result() {
 #[test]
 fn any_llm_drops_image_in_tool_result() {
     let rel = "transcripts/057/al-toolresult-image-upstream.jsonl";
-    let png_absent = "document body \"iVBORw0KGgo\" is absent from the forwarded upstream body".to_string();
+    let png_absent =
+        "document body \"iVBORw0KGgo\" is absent from the forwarded upstream body".to_string();
     for (i, (line, body)) in assert_any_llm_records(rel).iter().enumerate() {
         assert!(
             body.get("messages")
                 .and_then(serde_json::Value::as_array)
-                .map(|m| m.iter().any(|msg| msg.get("role") == Some(&serde_json::json!("tool"))))
+                .map(|m| m
+                    .iter()
+                    .any(|msg| msg.get("role") == Some(&serde_json::json!("tool"))))
                 .unwrap_or(false),
             "{rel} line {} must still carry a tool result",
             i + 1
@@ -1383,12 +1395,15 @@ fn any_llm_user_image_control_keeps_png_bytes() {
 #[test]
 fn any_llm_drops_document_in_tool_result() {
     let rel = "transcripts/057/al-toolresult-document-upstream.jsonl";
-    let doc_absent = "document body \"DOCBODY\" is absent from the forwarded upstream body".to_string();
+    let doc_absent =
+        "document body \"DOCBODY\" is absent from the forwarded upstream body".to_string();
     for (i, (line, body)) in assert_any_llm_records(rel).iter().enumerate() {
         assert!(
             body.get("messages")
                 .and_then(serde_json::Value::as_array)
-                .map(|m| m.iter().any(|msg| msg.get("role") == Some(&serde_json::json!("tool"))))
+                .map(|m| m
+                    .iter()
+                    .any(|msg| msg.get("role") == Some(&serde_json::json!("tool"))))
                 .unwrap_or(false),
             "{rel} line {} must still carry a tool result",
             i + 1
