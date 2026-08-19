@@ -2,7 +2,7 @@ schema_version = 1
 [llm_clients.anth]
 format = "anthropic_messages"
 base_url = "http://127.0.0.1:19320"
-api_key_env = "SY_HUNT_ANTH_KEY"
+api_key_env = "ANTHROPIC_API_KEY"
 [targets.cap]
 id = "claude-hunt"
 llm_client = "anth"

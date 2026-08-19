@@ -7,15 +7,17 @@
   provider-specific headers to another origin." The default
   `api_key_env` client still follows redirects.
 - **Tool under test**: Switchyard `switchyard-server` 0.2.0 (kairo
-  binary, 2026-08-12) and `origin/main` at `6babb3b` (2026-08-19
-  local build).
-- **Not a credential incident**: probes used fake canaries. No real
-  keys. No rotation needed.
-- **Reproduced**: 2026-08-19. Anthropic `x-api-key` on the redirect
-  sink 5/5 (0.2.0 extra_headers) and 3/3 (`main` `api_key_env`).
-  Gemini `x-goog-api-key` extra header on the sink 1/1 both builds.
-  OpenAI `Authorization: Bearer` is stripped on the same 307. Evidence:
-  `transcripts/063/`.
+  binary, 2026-08-12).
+- **Credential incident (local, this hunt)**: a 307 from the configured
+  `base_url` to another origin delivered the live Anthropic key in
+  `x-api-key` 5/5 (`api_key_env` and `extra_headers`) and the live
+  Gemini key in `extra_headers.x-goog-api-key` 5/5. The live OpenAI
+  Bearer was present on the origin hop and stripped on the sink 5/5.
+  Transcripts are redacted (`REDACTED_ANTHROPIC_API_KEY`,
+  `REDACTED_GEMINI_API_KEY`, `REDACTED_OPENAI_API_KEY`). Rotate
+  Anthropic and Gemini keys used in this hunt.
+- **Reproduced**: 2026-08-19. Live keys, local 307 pair, HTTP 200.
+  Evidence: `transcripts/063/`.
 
 ## What breaks
 
@@ -24,7 +26,7 @@ origin. Reqwest strips `Authorization` on that hop. It does not strip
 `x-api-key` or `x-goog-api-key`.
 
 Anthropic auth is `x-api-key`, not Bearer. A 307 from the configured
-`base_url` to a different host therefore carries the Anthropic
+`base_url` to a different host therefore carries the live Anthropic
 deployment key. Gemini deployments that put the Google key in
 `extra_headers.x-goog-api-key` (common next to a Bearer) leak that
 header the same way, even while the Bearer is dropped.
@@ -50,40 +52,44 @@ the control that shows they know this class. `api_key_env` and
 ```mermaid
 flowchart LR
   caller["caller POST /v1/messages"] --> sy["Switchyard default reqwest client"]
-  sy -->|"POST, x-api-key"| origin["configured base_url"]
+  sy -->|"POST, live x-api-key"| origin["configured base_url"]
   origin -->|"307 Location=http://sink/..."| sy
-  sy -->|"follows, still holding x-api-key"| sink["attacker-controlled origin"]
+  sy -->|"follows, still holding the live key"| sink["attacker-controlled origin"]
 ```
 
 ## Wire evidence
 
-Three legs.
+Three legs. Live keys from the repo `.env`. Captures redacted before
+commit. Scoreboard: `transcripts/063/live-real-scoreboard.json`.
 
-1. **Switchyard Anthropic**
-   - 0.2.0, `extra_headers.x-api-key = CANARY_ANTHROPIC_X_API_KEY`,
-     origin `127.0.0.1:19220` 307 to `127.0.0.1:19221`. Sink
-     `x-api-key` is the canary. HTTP 200. 5/5.
-     `transcripts/063/v020-anth-307-sink.jsonl`.
-   - `origin/main` `6babb3b`, `api_key_env` (not extra_headers). Sink
-     `x-api-key = CANARY_ANTHROPIC_API_KEY_ENV`. HTTP 200. 3/3.
-     `transcripts/063/main-anth-307-sink.jsonl`.
-2. **Control: OpenAI Bearer on the same 307 shape**
-   - `origin/main`, `api_key_env` Bearer. Origin hop has
-     `Authorization: Bearer CANARY_OPENAI_API_KEY_ENV`. Sink hop has
-     no `Authorization`. HTTP 200.
-     `transcripts/063/main-openai-307-sink-control.jsonl`.
-   - Same process, Gemini extra header: origin has Bearer and
-     `x-goog-api-key`. Sink has `x-goog-api-key` only.
-     `transcripts/063/main-goog-307-origin.jsonl`,
-     `transcripts/063/main-goog-307-sink.jsonl`.
+1. **Switchyard Anthropic (0.2.0)**
+   - `api_key_env = ANTHROPIC_API_KEY`. Origin `127.0.0.1:19420` 307 to
+     `127.0.0.1:19421`. Sink `x-api-key` is the live Anthropic key.
+     Client HTTP 200. 5/5. `FULL:ANTHROPIC_API_KEY` on the sink. The
+     client body has no key.
+     `transcripts/063/live-anth-api-key-env-sink.jsonl`.
+   - Same live key via `extra_headers.x-api-key`. Sink still holds it.
+     HTTP 200. 5/5.
+     `transcripts/063/live-anth-extra-header-sink.jsonl`.
+2. **Control: live OpenAI Bearer on the same 307 shape**
+   - `api_key_env = OPENAI_API_KEY`. Origin hop has
+     `Authorization: Bearer` with the live OpenAI key (`FULL:OPENAI_API_KEY`).
+     Sink hop has no `Authorization`. HTTP 200. 5/5.
+     `transcripts/063/live-openai-bearer-origin.jsonl`,
+     `transcripts/063/live-openai-bearer-sink.jsonl`.
+   - Same process, live Gemini extra header: origin has Bearer and
+     `x-goog-api-key`. Sink has `x-goog-api-key` only
+     (`FULL:GEMINI_API_KEY`). HTTP 200. 5/5.
+     `transcripts/063/live-goog-extra-header-origin.jsonl`,
+     `transcripts/063/live-goog-extra-header-sink.jsonl`.
 3. **Determinism**
    - Distinct ports, so the Location is a different origin.
-   - 0.2.0 extra_headers and `main` `api_key_env` both leak. This is
-     the header name, not one config spelling.
+   - `api_key_env` and `extra_headers` both leak the live Anthropic key.
+     This is the header name, not one config spelling.
 
 ## Root cause (in Switchyard source)
 
-`crates/libsy-llm-client/src/client.rs` (`origin/main`):
+`crates/libsy-llm-client/src/client.rs`:
 
 - Default client: `reqwest::Client::builder()` (follows redirects).
 - `forward_auth` client: `.redirect(Policy::none())` with the comment
@@ -100,66 +106,52 @@ same path.
 
 ## Test
 
-`upstream_omits_header_value` on the sink capture. The invariant: a
-cross-origin follow MUST NOT still hold the provider key.
+`upstream_omits_header_value` on the redacted sink capture. The
+invariant: a cross-origin follow MUST NOT still hold the provider key.
 
-- `switchyard_redirect_sink_keeps_anthropic_x_api_key` (violation, `api_key_env`)
-- `switchyard_redirect_sink_keeps_anthropic_extra_header` (violation, 0.2.0 extra_headers spelling)
-- `switchyard_redirect_sink_keeps_goog_extra_header` (violation)
-- `switchyard_redirect_sink_strips_openai_bearer` (control)
+- `switchyard_redirect_sink_keeps_live_anthropic_api_key` (violation)
+- `switchyard_redirect_sink_keeps_live_anthropic_extra_header` (violation)
+- `switchyard_redirect_sink_keeps_live_goog_extra_header` (violation)
+- `switchyard_redirect_sink_strips_live_openai_bearer` (control: origin
+  has the live Bearer, sink does not)
+- `switchyard_redirect_live_scoreboard_5_of_5` (live N/N)
 
 ## How to reproduce
 
-Needs a local `switchyard-server` (kairo 0.2.0 binary or a current main
-build). Canaries only. No provider keys.
+Needs a local `switchyard-server` (kairo 0.2.0 binary) and live keys in
+the repo `.env`: `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`.
+The script redacts before writing under `transcripts/063/`. Rotate
+those keys after you run it.
 
 ```bash
 # from the kairo repo root
 export SWITCHYARD_BIN=/path/to/switchyard-server
-./transcripts/063/repro.sh
+python3 transcripts/063/live_real.py
 ```
 
 Expected on stdout:
 
 ```
-=== Anthropic api_key_env 307 (expect sink x-api-key canary) ===
-http 200
-sink x-api-key CANARY_ANTHROPIC_API_KEY_ENV
-=== OpenAI Bearer 307 control (expect sink Authorization absent) ===
-http 200
-sink authorization None
-=== Gemini extra_headers x-goog-api-key 307 (expect sink goog canary, no Bearer) ===
-http 200
-sink authorization None
-sink x-goog-api-key CANARY_GOOG_EXTRA_HEADER
+repeat 5
+sy_anth_api_key_env     n=5  status=[200]  sink=['FULL:ANTHROPIC_API_KEY']
+sy_anth_extra_header    n=5  status=[200]  sink=['FULL:ANTHROPIC_API_KEY']
+sy_openai_bearer        n=5  status=[200]  sink=[]
+sy_goog_extra_header    n=5  status=[200]  sink=['FULL:GEMINI_API_KEY']
 ```
 
 What the script starts, per provider:
 
 1. `redirect_pair.py` sink on one port (records request headers, returns a canned 200).
 2. `redirect_pair.py` origin on another port (records, replies HTTP 307 to the sink). Distinct ports, so the Location is a different origin.
-3. `switchyard-server` with the matching toml (`sy-anth.toml`, `sy-openai.toml`, `sy-goog.toml`). `base_url` is the origin.
-4. One `curl` into Switchyard. The frozen checkers then look at the sink capture.
+3. `switchyard-server` with a temp toml. Anthropic `api_key_env` reads
+   `ANTHROPIC_API_KEY`. Gemini `extra_headers.x-goog-api-key` is the
+   live `GEMINI_API_KEY`. OpenAI `api_key_env` reads `OPENAI_API_KEY`.
+4. Five POSTs into Switchyard. Frozen checkers look at the redacted
+   sink capture and at `live-real-scoreboard.json`.
 
-Manual Anthropic-only variant (same bytes as `repro.sh`'s first cell):
+Or `./transcripts/063/repro.sh`.
 
-```bash
-python3 transcripts/063/redirect_pair.py sink 19321 transcripts/063/repro-anth-sink.jsonl &
-python3 transcripts/063/redirect_pair.py origin 19320 transcripts/063/repro-anth-origin.jsonl \
-  http://127.0.0.1:19321/v1/messages 307 &
-export SY_HUNT_ANTH_KEY=CANARY_ANTHROPIC_API_KEY_ENV
-"$SWITCHYARD_BIN" --config transcripts/063/sy-anth.toml --host 127.0.0.1 -p 19322 &
-curl -sS http://127.0.0.1:19322/v1/messages \
-  -H 'anthropic-version: 2023-06-01' -H 'content-type: application/json' \
-  -d '{"model":"claude-hunt","max_tokens":16,"messages":[{"role":"user","content":"hi"}]}'
-# transcripts/063/repro-anth-sink.jsonl headers.x-api-key is CANARY_ANTHROPIC_API_KEY_ENV
-```
-
-OpenAI control toml: `transcripts/063/sy-openai.toml`. Gemini extra header:
-`transcripts/063/sy-goog.toml`. Generated `repro-*-{sink,origin}.jsonl` files
-are local and gitignored.
-
-Frozen checkers (no Switchyard binary required):
+Frozen checkers (no Switchyard binary, no keys):
 
 ```bash
 cargo test --test conformance switchyard_redirect

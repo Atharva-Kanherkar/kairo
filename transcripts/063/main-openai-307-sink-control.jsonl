@@ -1,1 +1,0 @@
-{"kind": "sink", "method": "POST", "path": "/v1/chat/completions", "headers": {"content-type": "application/json", "user-agent": "curl/8.7.1", "accept": "*/*", "referer": "http://127.0.0.1:19330/v1/chat/completions", "host": "127.0.0.1:19331", "content-length": "64"}, "body_len": 64}

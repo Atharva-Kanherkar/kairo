@@ -1474,37 +1474,53 @@ fn any_llm_stop_sequences_honest_negative() {
     }
 }
 
-// ---- bug 063: Switchyard follows redirects with x-api-key / x-goog-api-key ----
+// ---- bug 063: Switchyard follows redirects with live x-api-key / x-goog-api-key ----
+
+fn switchyard_redirect_live_rows(prefix: &str) -> Vec<serde_json::Value> {
+    let v: serde_json::Value =
+        serde_json::from_str(&fixture("transcripts/063/live-real-scoreboard.json"))
+            .expect("063 live-real-scoreboard.json");
+    v.as_array()
+        .expect("scoreboard array")
+        .iter()
+        .filter(|row| {
+            row.get("tag")
+                .and_then(|t| t.as_str())
+                .is_some_and(|t| t.starts_with(prefix))
+        })
+        .cloned()
+        .collect()
+}
 
 #[test]
-fn switchyard_redirect_sink_keeps_anthropic_x_api_key() {
+fn switchyard_redirect_sink_keeps_live_anthropic_api_key() {
     let v = upstream_omits_header_value(
-        &fixture("transcripts/063/main-anth-307-sink.jsonl"),
-        "CANARY_ANTHROPIC_API_KEY_ENV",
+        &fixture("transcripts/063/live-anth-api-key-env-sink.jsonl"),
+        "REDACTED_ANTHROPIC_API_KEY",
     );
     assert!(
         matches!(v, Verdict::Violation(_)),
-        "a 307 sink must be caught still holding Anthropic x-api-key: {v:?}"
+        "a 307 sink must be caught still holding the live Anthropic x-api-key: {v:?}"
     );
 }
 
 #[test]
-fn switchyard_redirect_sink_keeps_anthropic_extra_header() {
+fn switchyard_redirect_sink_keeps_live_anthropic_extra_header() {
     let v = upstream_omits_header_value(
-        &fixture("transcripts/063/v020-anth-307-sink.jsonl"),
-        "CANARY_ANTHROPIC_X_API_KEY",
+        &fixture("transcripts/063/live-anth-extra-header-sink.jsonl"),
+        "REDACTED_ANTHROPIC_API_KEY",
     );
     assert!(
         matches!(v, Verdict::Violation(_)),
-        "0.2.0 extra_headers x-api-key must also arrive on the 307 sink: {v:?}"
+        "extra_headers x-api-key must also arrive on the 307 sink: {v:?}"
     );
 }
 
 #[test]
-fn switchyard_redirect_sink_keeps_goog_extra_header() {
+fn switchyard_redirect_sink_keeps_live_goog_extra_header() {
     let v = upstream_omits_header_value(
-        &fixture("transcripts/063/main-goog-307-sink.jsonl"),
-        "CANARY_GOOG_EXTRA_HEADER",
+        &fixture("transcripts/063/live-goog-extra-header-sink.jsonl"),
+        "REDACTED_GEMINI_API_KEY",
     );
     assert!(
         matches!(v, Verdict::Violation(_)),
@@ -1513,14 +1529,56 @@ fn switchyard_redirect_sink_keeps_goog_extra_header() {
 }
 
 #[test]
-fn switchyard_redirect_sink_strips_openai_bearer() {
+fn switchyard_redirect_sink_strips_live_openai_bearer() {
     let v = upstream_omits_header_value(
-        &fixture("transcripts/063/main-openai-307-sink-control.jsonl"),
-        "CANARY_OPENAI_API_KEY_ENV",
+        &fixture("transcripts/063/live-openai-bearer-sink.jsonl"),
+        "REDACTED_OPENAI_API_KEY",
     );
     assert_eq!(
         v,
         Verdict::Conformant,
-        "the OpenAI Bearer control must not appear on the 307 sink: {v:?}"
+        "the live OpenAI Bearer control must not appear on the 307 sink: {v:?}"
     );
+    let origin = upstream_omits_header_value(
+        &fixture("transcripts/063/live-openai-bearer-origin.jsonl"),
+        "REDACTED_OPENAI_API_KEY",
+    );
+    assert!(
+        matches!(origin, Verdict::Violation(_)),
+        "the origin hop must still have been holding the live Bearer: {origin:?}"
+    );
+}
+
+#[test]
+fn switchyard_redirect_live_scoreboard_5_of_5() {
+    for (prefix, sink_hit) in [
+        ("sy_anth_api_key_env", "FULL:ANTHROPIC_API_KEY"),
+        ("sy_anth_extra_header", "FULL:ANTHROPIC_API_KEY"),
+        ("sy_goog_extra_header", "FULL:GEMINI_API_KEY"),
+    ] {
+        let rows = switchyard_redirect_live_rows(prefix);
+        assert_eq!(rows.len(), 5, "{prefix} must be 5 live runs");
+        for row in &rows {
+            assert_eq!(row["status"], 200, "{prefix} client HTTP");
+            let hits = row["sink_hits"]
+                .as_array()
+                .expect("sink_hits")
+                .iter()
+                .filter_map(|h| h.as_str())
+                .collect::<Vec<_>>();
+            assert!(
+                hits.contains(&sink_hit),
+                "{prefix} sink must contain {sink_hit}, got {hits:?}"
+            );
+            assert!(row["client_hits"].as_array().is_some_and(Vec::is_empty));
+        }
+    }
+    let oa = switchyard_redirect_live_rows("sy_openai_bearer");
+    assert_eq!(oa.len(), 5);
+    for row in &oa {
+        assert_eq!(row["status"], 200);
+        assert!(row["sink_hits"].as_array().is_some_and(Vec::is_empty));
+        assert_eq!(row["origin_has_authorization"], true);
+        assert_eq!(row["sink_has_authorization"], false);
+    }
 }
