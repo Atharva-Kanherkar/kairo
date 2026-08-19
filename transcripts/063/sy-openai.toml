@@ -1,0 +1,12 @@
+schema_version = 1
+[llm_clients.oa]
+format = "openai_chat"
+base_url = "http://127.0.0.1:19330/v1"
+api_key_env = "OPENAI_API_KEY"
+[targets.cap]
+id = "gpt-hunt"
+llm_client = "oa"
+[routes.primary]
+id = "gpt-hunt"
+type = "passthrough"
+target = "cap"

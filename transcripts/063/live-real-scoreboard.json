@@ -1,0 +1,317 @@
+[
+  {
+    "tag": "sy_anth_api_key_env r1",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "origin_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": false,
+    "sink_has_x_api_key": true,
+    "sink_has_x_goog_api_key": false
+  },
+  {
+    "tag": "sy_anth_api_key_env r2",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "origin_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": false,
+    "sink_has_x_api_key": true,
+    "sink_has_x_goog_api_key": false
+  },
+  {
+    "tag": "sy_anth_api_key_env r3",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "origin_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": false,
+    "sink_has_x_api_key": true,
+    "sink_has_x_goog_api_key": false
+  },
+  {
+    "tag": "sy_anth_api_key_env r4",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "origin_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": false,
+    "sink_has_x_api_key": true,
+    "sink_has_x_goog_api_key": false
+  },
+  {
+    "tag": "sy_anth_api_key_env r5",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "origin_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": false,
+    "sink_has_x_api_key": true,
+    "sink_has_x_goog_api_key": false
+  },
+  {
+    "tag": "sy_anth_extra_header r1",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "origin_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": false,
+    "sink_has_x_api_key": true,
+    "sink_has_x_goog_api_key": false
+  },
+  {
+    "tag": "sy_anth_extra_header r2",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "origin_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": false,
+    "sink_has_x_api_key": true,
+    "sink_has_x_goog_api_key": false
+  },
+  {
+    "tag": "sy_anth_extra_header r3",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "origin_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": false,
+    "sink_has_x_api_key": true,
+    "sink_has_x_goog_api_key": false
+  },
+  {
+    "tag": "sy_anth_extra_header r4",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "origin_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": false,
+    "sink_has_x_api_key": true,
+    "sink_has_x_goog_api_key": false
+  },
+  {
+    "tag": "sy_anth_extra_header r5",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "origin_hits": [
+      "FULL:ANTHROPIC_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": false,
+    "sink_has_x_api_key": true,
+    "sink_has_x_goog_api_key": false
+  },
+  {
+    "tag": "sy_openai_bearer r1",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [],
+    "origin_hits": [
+      "FULL:OPENAI_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": true,
+    "sink_has_x_api_key": false,
+    "sink_has_x_goog_api_key": false
+  },
+  {
+    "tag": "sy_openai_bearer r2",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [],
+    "origin_hits": [
+      "FULL:OPENAI_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": true,
+    "sink_has_x_api_key": false,
+    "sink_has_x_goog_api_key": false
+  },
+  {
+    "tag": "sy_openai_bearer r3",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [],
+    "origin_hits": [
+      "FULL:OPENAI_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": true,
+    "sink_has_x_api_key": false,
+    "sink_has_x_goog_api_key": false
+  },
+  {
+    "tag": "sy_openai_bearer r4",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [],
+    "origin_hits": [
+      "FULL:OPENAI_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": true,
+    "sink_has_x_api_key": false,
+    "sink_has_x_goog_api_key": false
+  },
+  {
+    "tag": "sy_openai_bearer r5",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [],
+    "origin_hits": [
+      "FULL:OPENAI_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": true,
+    "sink_has_x_api_key": false,
+    "sink_has_x_goog_api_key": false
+  },
+  {
+    "tag": "sy_goog_extra_header r1",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [
+      "FULL:GEMINI_API_KEY"
+    ],
+    "origin_hits": [
+      "FULL:OPENAI_API_KEY",
+      "FULL:GEMINI_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": true,
+    "sink_has_x_api_key": false,
+    "sink_has_x_goog_api_key": true
+  },
+  {
+    "tag": "sy_goog_extra_header r2",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [
+      "FULL:GEMINI_API_KEY"
+    ],
+    "origin_hits": [
+      "FULL:OPENAI_API_KEY",
+      "FULL:GEMINI_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": true,
+    "sink_has_x_api_key": false,
+    "sink_has_x_goog_api_key": true
+  },
+  {
+    "tag": "sy_goog_extra_header r3",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [
+      "FULL:GEMINI_API_KEY"
+    ],
+    "origin_hits": [
+      "FULL:OPENAI_API_KEY",
+      "FULL:GEMINI_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": true,
+    "sink_has_x_api_key": false,
+    "sink_has_x_goog_api_key": true
+  },
+  {
+    "tag": "sy_goog_extra_header r4",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [
+      "FULL:GEMINI_API_KEY"
+    ],
+    "origin_hits": [
+      "FULL:OPENAI_API_KEY",
+      "FULL:GEMINI_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": true,
+    "sink_has_x_api_key": false,
+    "sink_has_x_goog_api_key": true
+  },
+  {
+    "tag": "sy_goog_extra_header r5",
+    "status": 200,
+    "ok": true,
+    "sink_hits": [
+      "FULL:GEMINI_API_KEY"
+    ],
+    "origin_hits": [
+      "FULL:OPENAI_API_KEY",
+      "FULL:GEMINI_API_KEY"
+    ],
+    "client_hits": [],
+    "sink_has_authorization": false,
+    "origin_has_authorization": true,
+    "sink_has_x_api_key": false,
+    "sink_has_x_goog_api_key": true
+  }
+]
