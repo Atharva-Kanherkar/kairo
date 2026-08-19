@@ -58,10 +58,11 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 060 | any-llm Messages bridge drops image bytes inside tool results | any-llm-sdk 1.26.0 (capture mock, no keys) | 007 family; adjacent any-llm#1295 | ✅ 5/5 on CURRENT |
 | 061 | any-llm Messages bridge drops document bytes inside tool results | any-llm-sdk 1.26.0 (capture mock, no keys) | 018 family | ✅ 5/5 on CURRENT. Control: user-content document route keeps DOCBODY 5/5 |
 | 062 | any-llm accepts bare `{type, schema}` output_format, forwards empty `schema: {}` shell | any-llm-sdk 1.26.0 (capture mock, no keys) | 040 family, silent-loss variant | ✅ 5/5 on CURRENT. Control: documented `output_config.format` shape keeps `city` 5/5 |
+| 063 | Switchyard follows HTTP 307 to another origin still holding Anthropic `x-api-key` and Gemini `extra_headers.x-goog-api-key`. OpenAI `Authorization` is stripped | Switchyard 0.2.0 extra_headers + origin/main `6babb3b` `api_key_env` (local 307 pair, canaries) | reqwest follows redirects; `forward_auth` already uses `Policy::none()` | ✅ Anthropic sink 5/5 (0.2.0) and 3/3 (main). Gemini extra header on sink, Bearer dropped. OpenAI Bearer control clean. |
 
 Numbers 046-050 are reserved for unpublished GoModel round-2 findings (one bug per PR). Issues 052-056 (AxonHub round 2) land on sibling branches, not missing rows here.
 
-**Tally**: 44 distinct defects confirmed on the wire (43 on current releases)
+**Tally**: 45 distinct defects confirmed on the wire (44 on current releases)
 across LiteLLM, Switchyard, Bifrost, GoModel, AxonHub, and any-llm, counting 006 as its 4 independent field losses
 plus the LiteLLM copy of that class. LiteLLM confirmed: 001 (stop_reason, 1.82),
 002a (finish_reason), 002b (route drop), 004a (id smuggle), 004b (Responses
@@ -76,7 +77,7 @@ confirmed: 005 (id sanitizer), 006 (4 field losses), 007 (multimodal
 stringified), 016 (thinking dropped), 017 (parallel flag), 018 (document
 dumped), 019 (invented cache breakpoint), 023 (`api-key` and OpenAI
 org/project header forward), 025 (transport 502 echoes `?key=`), 027
-(`x-goog-api-key` header forward), 040 (Anthropic `output_format` dropped), 045 (empty text block before non-stream `tool_use`). Bifrost confirmed: 030 (Anthropic streaming
+(`x-goog-api-key` header forward), 040 (Anthropic `output_format` dropped), 045 (empty text block before non-stream `tool_use`), 063 (307 follow keeps `x-api-key` / `x-goog-api-key`). Bifrost confirmed: 030 (Anthropic streaming
 ends a tool-call turn as `end_turn`, a regression of their own fixed #3638,
 caught by the bug-001 checker unchanged), 031 (parallel flag dropped), 032
 (`stop_sequences` dropped), 033 (thinking history dropped), 034 (`content_filter`

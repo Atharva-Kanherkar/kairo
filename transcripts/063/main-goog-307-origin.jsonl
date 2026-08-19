@@ -1,0 +1,1 @@
+{"kind": "origin", "method": "POST", "path": "/v1/chat/completions", "headers": {"content-type": "application/json", "user-agent": "curl/8.7.1", "accept": "*/*", "x-goog-api-key": "CANARY_GOOG_EXTRA_HEADER", "authorization": "Bearer CANARY_OPENAI_API_KEY_ENV", "host": "127.0.0.1:19340", "content-length": "67"}, "body_len": 67}

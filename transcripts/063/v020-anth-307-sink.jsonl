@@ -1,0 +1,1 @@
+{"kind": "sink", "method": "POST", "path": "/v1/messages", "headers": {"content-type": "application/json", "user-agent": "curl/8.7.1", "accept": "*/*", "x-api-key": "CANARY_ANTHROPIC_X_API_KEY", "anthropic-version": "2023-06-01", "referer": "http://127.0.0.1:19220/v1/messages", "host": "127.0.0.1:19221", "content-length": "145"}, "body_len": 145}

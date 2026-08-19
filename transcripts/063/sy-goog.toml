@@ -1,0 +1,14 @@
+schema_version = 1
+[llm_clients.g]
+format = "openai_chat"
+base_url = "http://127.0.0.1:19340/v1"
+api_key_env = "SY_HUNT_OA_KEY"
+[llm_clients.g.extra_headers]
+x-goog-api-key = "CANARY_GOOG_EXTRA_HEADER"
+[targets.cap]
+id = "gemini-hunt"
+llm_client = "g"
+[routes.primary]
+id = "gemini-hunt"
+type = "passthrough"
+target = "cap"

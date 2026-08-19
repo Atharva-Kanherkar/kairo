@@ -1473,3 +1473,54 @@ fn any_llm_stop_sequences_honest_negative() {
         );
     }
 }
+
+// ---- bug 063: Switchyard follows redirects with x-api-key / x-goog-api-key ----
+
+#[test]
+fn switchyard_redirect_sink_keeps_anthropic_x_api_key() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/063/main-anth-307-sink.jsonl"),
+        "CANARY_ANTHROPIC_API_KEY_ENV",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "a 307 sink must be caught still holding Anthropic x-api-key: {v:?}"
+    );
+}
+
+#[test]
+fn switchyard_redirect_sink_keeps_anthropic_extra_header() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/063/v020-anth-307-sink.jsonl"),
+        "CANARY_ANTHROPIC_X_API_KEY",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "0.2.0 extra_headers x-api-key must also arrive on the 307 sink: {v:?}"
+    );
+}
+
+#[test]
+fn switchyard_redirect_sink_keeps_goog_extra_header() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/063/main-goog-307-sink.jsonl"),
+        "CANARY_GOOG_EXTRA_HEADER",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "a 307 sink must be caught still holding extra_headers x-goog-api-key: {v:?}"
+    );
+}
+
+#[test]
+fn switchyard_redirect_sink_strips_openai_bearer() {
+    let v = upstream_omits_header_value(
+        &fixture("transcripts/063/main-openai-307-sink-control.jsonl"),
+        "CANARY_OPENAI_API_KEY_ENV",
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "the OpenAI Bearer control must not appear on the 307 sink: {v:?}"
+    );
+}
