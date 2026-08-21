@@ -7,15 +7,16 @@
 
 use kairo::checks::{
     anthropic_response_toolcall_stop_reason, anthropic_toolcall_stop_reason, capture_records,
-    content_filter_preserved, document_body_forwarded, id_conforms, is_error_forwarded,
-    json_schema_forwarded, json_schema_property_forwarded, no_empty_text_alongside_tool_use,
-    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
-    non_text_block_not_json_dumped, openai_stream_finish_reason, openai_toolcall_id_charset,
-    parallel_tool_disable_preserved, reasoning_text_order_preserved, response_content_not_empty,
-    response_omits_secret, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
-    thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
-    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, FunctionToolFormat,
-    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    content_filter_preserved, document_body_forwarded, id_conforms, instruction_messages_preserved,
+    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
+    no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
+    no_phantom_null_output_text, non_text_block_not_json_dumped, openai_stream_finish_reason,
+    openai_toolcall_id_charset, parallel_tool_disable_preserved, reasoning_text_order_preserved,
+    response_content_not_empty, response_omits_secret, stop_sequence_forwarded,
+    thinking_not_leaked_as_visible_text, thinking_text_forwarded, tool_strict_forwarded,
+    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
+    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -874,6 +875,53 @@ fn responses_tool_strictness_direct_control() {
         Verdict::Conformant,
         "Responses-native function tools must carry strict at the tool level: {v:?}"
     );
+}
+
+// ---- bug 065: Switchyard demotes Responses instruction messages ----
+
+#[test]
+fn switchyard_responses_instruction_loss() {
+    let records = capture_records(&fixture(
+        "transcripts/065/responses-instruction-loss-upstream.jsonl",
+    ))
+    .expect("065 captures parse");
+    assert_eq!(records.len(), 5);
+    let expected = [
+        ("system", "SYSTEM-INSTRUCTION"),
+        ("developer", "DEVELOPER-INSTRUCTION"),
+        ("user", "USER-INPUT"),
+    ];
+    for (line, _) in &records {
+        assert!(matches!(
+            instruction_messages_preserved(line, &expected),
+            Verdict::Violation(_)
+        ));
+    }
+    let results: serde_json::Value = serde_json::from_str(&fixture(
+        "transcripts/065/responses-instruction-loss-results.json",
+    ))
+    .expect("065 client results parse");
+    assert!(results.as_array().is_some_and(|rows| rows.len() == 5
+        && rows.iter().all(|row| {
+            row["client_request"]["input"][0]["role"] == "system"
+                && row["client_request"]["input"][1]["role"] == "developer"
+                && row["upstream_messages"][0]["role"] == "user"
+                && row["upstream_messages"][1]["role"] == "user"
+                && row["client_response"]["http_status"] == 200
+                && row["client_response"]["status"] == "completed"
+        })));
+}
+
+#[test]
+fn switchyard_responses_string_instruction_control() {
+    let v = instruction_messages_preserved(
+        &fixture("transcripts/065/responses-string-instruction-control.jsonl"),
+        &[
+            ("system", "TOP-STRING-INSTRUCTION"),
+            ("user", "USER-CONTROL"),
+        ],
+    );
+    assert_eq!(v, Verdict::Conformant);
 }
 
 #[test]

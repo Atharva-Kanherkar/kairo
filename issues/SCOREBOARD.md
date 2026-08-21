@@ -60,10 +60,11 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 062 | any-llm accepts bare `{type, schema}` output_format, forwards empty `schema: {}` shell | any-llm-sdk 1.26.0 (capture mock, no keys) | 040 family, silent-loss variant | ✅ 5/5 on CURRENT. Control: documented `output_config.format` shape keeps `city` 5/5 |
 | 063 | Switchyard follows HTTP 307 to another origin still holding Anthropic `x-api-key` and Gemini `extra_headers.x-goog-api-key`. OpenAI `Authorization` is stripped | Switchyard 0.2.0 (local 307 pair, live Anthropic / Gemini / OpenAI keys, transcripts redacted) | reqwest follows redirects; `forward_auth` already uses `Policy::none()` | ✅ Live Anthropic key on sink 5/5 (`api_key_env` and extra_headers). Live Gemini extra header on sink 5/5. Live OpenAI Bearer origin-only, stripped on sink 5/5. |
 | 064 | LiteLLM `/v1/messages` drops `tools[].strict` while mapping Anthropic tools to OpenAI Responses; schema and name survive but the strict constraint does not | LiteLLM 1.96.2 (keyless capture rig) | adjacent [litellm#27490](https://github.com/BerriAI/litellm/issues/27490), reverse direction | ✅ capture 5/5, client HTTP 200 5/5. Same-proxy OpenAI ingress and direct Responses controls preserve `strict: true`. |
+| 065 | Switchyard Responses to Chat drops array instructions and demotes inline `system` / `developer` input items to `user` | Switchyard main `053a61e` (keyless capture rig) | no matching upstream issue | ✅ capture 5/5, client HTTP 200 5/5. String-instructions control stays a Chat `system` message. |
 
 Numbers 046-050 are reserved for unpublished GoModel round-2 findings (one bug per PR). Issues 052-056 (AxonHub round 2) land on sibling branches, not missing rows here.
 
-**Coverage**: 42 documented issue folders covering 46 distinct defects confirmed on the wire (45 on current releases)
+**Coverage**: 43 documented issue folders covering 47 distinct defects confirmed on the wire (46 on current releases)
 across LiteLLM, Switchyard, Bifrost, GoModel, AxonHub, and any-llm, counting 006 as its 4 independent field losses
 plus the LiteLLM copy of that class. LiteLLM confirmed: 001 (stop_reason, 1.82),
 002a (finish_reason), 002b (route drop), 004a (id smuggle), 004b (Responses
