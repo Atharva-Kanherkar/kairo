@@ -15,6 +15,12 @@ pub enum Verdict {
     Violation(String),
 }
 
+#[derive(Clone, Copy)]
+pub enum FunctionToolFormat {
+    OpenAiResponses,
+    OpenAiChat,
+}
+
 impl Verdict {
     pub fn is_conformant(&self) -> bool {
         matches!(self, Verdict::Conformant)
@@ -333,6 +339,47 @@ pub fn is_error_forwarded(forwarded_jsonl: &str) -> Verdict {
     Verdict::Violation(
         "is_error:true was dropped; forwarded body has no error marker on the tool result".into(),
     )
+}
+
+/// Invariant (bug 064): a strict function-tool constraint must survive as
+/// `strict: true` on the target format's function tool.
+pub fn tool_strict_forwarded(
+    forwarded_jsonl: &str,
+    tool_name: &str,
+    target_format: FunctionToolFormat,
+) -> Verdict {
+    let Ok(body) = capture_body(forwarded_jsonl) else {
+        return Verdict::Violation("unparseable capture".into());
+    };
+    let Some(tools) = body.get("tools").and_then(Value::as_array) else {
+        return Verdict::Violation("forwarded body has no tools array".into());
+    };
+    let Some(tool) = tools.iter().find(|tool| {
+        tool.get("type").and_then(Value::as_str) == Some("function")
+            && match target_format {
+                FunctionToolFormat::OpenAiResponses => {
+                    tool.get("name").and_then(Value::as_str) == Some(tool_name)
+                }
+                FunctionToolFormat::OpenAiChat => {
+                    tool.pointer("/function/name").and_then(Value::as_str) == Some(tool_name)
+                }
+            }
+    }) else {
+        return Verdict::Violation(format!(
+            "forwarded body has no function tool named {tool_name:?}"
+        ));
+    };
+    let strict = match target_format {
+        FunctionToolFormat::OpenAiResponses => tool.get("strict").and_then(Value::as_bool),
+        FunctionToolFormat::OpenAiChat => tool.pointer("/function/strict").and_then(Value::as_bool),
+    };
+    if strict == Some(true) {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation(format!(
+            "strict:true was dropped from forwarded function tool {tool_name:?}"
+        ))
+    }
 }
 
 /// Invariant (bug 019): a translator MUST NOT invent `cache_control` the
@@ -938,5 +985,52 @@ mod tests {
             response_omits_secret(r#"{"id":"mock"}"#, "CANARY_EXTRA_HEADERS_AUTHORIZATION"),
             Verdict::Conformant
         );
+    }
+
+    #[test]
+    fn tool_strict_checker_requires_the_function_tool_field() {
+        let missing =
+            r#"{"body":{"tools":[{"type":"function","name":"x","parameters":{"strict":true}}]}}"#;
+        assert!(matches!(
+            tool_strict_forwarded(missing, "x", FunctionToolFormat::OpenAiResponses),
+            Verdict::Violation(_)
+        ));
+        let responses = r#"{"body":{"tools":[{"type":"function","name":"x","strict":true}]}}"#;
+        assert_eq!(
+            tool_strict_forwarded(responses, "x", FunctionToolFormat::OpenAiResponses),
+            Verdict::Conformant
+        );
+        let chat =
+            r#"{"body":{"tools":[{"type":"function","function":{"name":"x","strict":true}}]}}"#;
+        assert_eq!(
+            tool_strict_forwarded(chat, "x", FunctionToolFormat::OpenAiChat),
+            Verdict::Conformant
+        );
+        let unrelated = r#"{"body":{"tools":[{"type":"function","name":"other","strict":true},{"type":"function","name":"x"}]}}"#;
+        assert!(matches!(
+            tool_strict_forwarded(unrelated, "x", FunctionToolFormat::OpenAiResponses),
+            Verdict::Violation(_)
+        ));
+        let non_function = r#"{"body":{"tools":[{"type":"custom","name":"x","strict":true}]}}"#;
+        assert!(matches!(
+            tool_strict_forwarded(non_function, "x", FunctionToolFormat::OpenAiResponses),
+            Verdict::Violation(_)
+        ));
+        let responses_wrong_place =
+            r#"{"body":{"tools":[{"type":"function","name":"x","function":{"strict":true}}]}}"#;
+        assert!(matches!(
+            tool_strict_forwarded(
+                responses_wrong_place,
+                "x",
+                FunctionToolFormat::OpenAiResponses
+            ),
+            Verdict::Violation(_)
+        ));
+        let chat_wrong_place =
+            r#"{"body":{"tools":[{"type":"function","strict":true,"function":{"name":"x"}}]}}"#;
+        assert!(matches!(
+            tool_strict_forwarded(chat_wrong_place, "x", FunctionToolFormat::OpenAiChat),
+            Verdict::Violation(_)
+        ));
     }
 }

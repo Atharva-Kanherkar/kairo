@@ -78,7 +78,7 @@ Vector is part of the probe. 020 and 026 are JSON *body* bypasses, and both writ
 | `thinking (disabled)` | OK | na |
 | `thinking.budget_tokens (legacy)` | OK | OK |
 | `tools[].input_schema` | OK | OK |
-| `tools[].strict` | OK | DROP 5/5 |
+| `tools[].strict` | OK | DROP [064] 5/5 ctl |
 | `tool_choice: auto` | OK | OK |
 | `tool_choice: any -> required` | OK | OK |
 | `tool_choice: tool(name)` | OK | OK |
@@ -134,6 +134,9 @@ A bracketed number is the kairo issue that documents this loss on **that** gatew
 
 `ctl` marks a cell where the same gateway's own OpenAI `/v1/chat/completions` ingress carried the field in the same process. That is the control leg: the mapping exists on this machine and the Anthropic path is not applying it.
 
+Issue 064 is an independent LiteLLM 1.96.2 rerun. It does not change this
+1.83.9 sweep's denominator or preservation-rate table.
+
 
 ## Positive controls
 
@@ -156,4 +159,3 @@ The rest came back clean. **Do not read a clean control as a fix.** The likelier
 ## What this run did not cover
 
 - Live impact leg not run: no provider keys in the environment.
-

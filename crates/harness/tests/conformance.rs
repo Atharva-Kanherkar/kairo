@@ -13,9 +13,9 @@ use kairo::checks::{
     non_text_block_not_json_dumped, openai_stream_finish_reason, openai_toolcall_id_charset,
     parallel_tool_disable_preserved, reasoning_text_order_preserved, response_content_not_empty,
     response_omits_secret, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
-    thinking_text_forwarded, toolcall_id_restored_upstream, truncation_preserved,
-    upstream_bearer_is, upstream_omits_header_value, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
-    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
+    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, FunctionToolFormat,
+    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -811,6 +811,68 @@ fn litellm_openai_route_keeps_stop_sequences() {
         v,
         Verdict::Conformant,
         "LiteLLM OpenAI route forwards stop: {v:?}"
+    );
+}
+
+// ---- bug 064: LiteLLM /v1/messages drops function-tool strictness ----
+
+#[test]
+fn litellm_drops_anthropic_tool_strictness() {
+    let records = capture_records(&fixture(
+        "transcripts/064/litellm-messages-strict-upstream.jsonl",
+    ))
+    .expect("064 captures parse");
+    assert_eq!(records.len(), 5, "064 must retain five live capture runs");
+    for (line, _) in &records {
+        let capture: serde_json::Value = serde_json::from_str(line).expect("064 capture record");
+        assert_eq!(
+            capture["path"], "/v1/responses",
+            "064 Messages ingress must target Responses"
+        );
+        let v = tool_strict_forwarded(line, "strict_probe", FunctionToolFormat::OpenAiResponses);
+        assert!(
+            matches!(v, Verdict::Violation(_)),
+            "LiteLLM Anthropic ingress must be caught dropping strict: {v:?}"
+        );
+    }
+    let results: serde_json::Value =
+        serde_json::from_str(&fixture("transcripts/064/litellm-messages-results.json"))
+            .expect("064 client results parse");
+    let rows = results.as_array().expect("064 client results array");
+    assert_eq!(rows.len(), 5, "064 must retain five client results");
+    assert!(
+        rows.iter().all(|row| row["status"] == 200),
+        "064 must remain a silent HTTP 200 loss"
+    );
+}
+
+#[test]
+fn litellm_openai_route_keeps_tool_strictness() {
+    let fixture = fixture("transcripts/064/litellm-openai-strict-control.jsonl");
+    let capture: serde_json::Value = serde_json::from_str(&fixture).expect("064 OpenAI control");
+    assert_eq!(capture["path"], "/v1/chat/completions");
+    let v = tool_strict_forwarded(&fixture, "strict_probe", FunctionToolFormat::OpenAiChat);
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "LiteLLM OpenAI ingress must keep function strictness: {v:?}"
+    );
+}
+
+#[test]
+fn responses_tool_strictness_direct_control() {
+    let fixture = fixture("transcripts/064/responses-strict-direct-control.jsonl");
+    let capture: serde_json::Value = serde_json::from_str(&fixture).expect("064 direct control");
+    assert_eq!(capture["path"], "/v1/responses");
+    let v = tool_strict_forwarded(
+        &fixture,
+        "strict_probe",
+        FunctionToolFormat::OpenAiResponses,
+    );
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "Responses-native function tools must carry strict at the tool level: {v:?}"
     );
 }
 

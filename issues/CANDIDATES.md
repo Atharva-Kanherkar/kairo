@@ -13,7 +13,6 @@ Per CONTRIBUTING, one bug per PR. Promote these one at a time.
 |---|---|---|---:|---|---|
 | litellm | `output_config.effort` | DROPPED | 5/5 | not probed | `transcripts/sweep/20260817T123216Z/litellm--req-output_config-effort.jsonl` |
 | litellm | `thinking (adaptive)` | DROPPED | 5/5 | not probed | `transcripts/sweep/20260817T123216Z/litellm--req-thinking-adaptive.jsonl` |
-| litellm | `tools[].strict` | DROPPED | 5/5 | not probed | `transcripts/sweep/20260817T123216Z/litellm--req-tools-strict.jsonl` |
 | litellm | `anthropic-beta forwarded or mapped` | DROPPED | 5/5 | not probed | `transcripts/sweep/20260817T123216Z/litellm--header-anthropic_beta.jsonl` |
 | litellm | `finish_reason length -> max_tokens` | MANGLED | 5/5 | not probed | `transcripts/sweep/20260817T123216Z/litellm--resp-finish_reason-length.jsonl` |
 | litellm | `content_filter signal survives` | MANGLED | 5/5 | not probed | `transcripts/sweep/20260817T123216Z/litellm--resp-finish_reason-content_filter.jsonl` |
@@ -33,4 +32,3 @@ Each of these is either fixed upstream since it was frozen, or the rig is not ex
 | litellm | `no invented empty text block` | 009 |
 | litellm | `upstream tool_call id reaches the client` | 004 |
 | bifrost | `tool_use.id round trip` | 037 |
-

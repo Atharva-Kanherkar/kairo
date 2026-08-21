@@ -82,7 +82,7 @@ def render(counts: dict) -> str:
     gateways = join_and(counts["gateways"])
     return (
         f"{START}\n"
-        f"{counts['bugs']} distinct defects reproduced and documented across "
+        f"{counts['bugs']} reproduced issue folders documented across "
         f"{gateways} (see [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md)). "
         f"One is already filed upstream as "
         f"[NVIDIA-NeMo/Switchyard#380](https://github.com/NVIDIA-NeMo/Switchyard/issues/380).\n"

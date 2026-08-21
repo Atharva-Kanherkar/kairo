@@ -9,7 +9,7 @@
 
 ## Unit Tests
 
-- `tool_strict_forwarded` reports `Violation` when a captured Responses function tool omits `strict`.
+- `tool_strict_forwarded` reports `Violation` when the named captured Responses function tool omits `strict`.
 - `tool_strict_forwarded` reports `Conformant` for Responses and OpenAI Chat control tool shapes that contain `strict: true`.
 
 ## Integration Tests
@@ -20,7 +20,7 @@
 
 ## Smoke Tests
 
-- `cargo test --test conformance litellm_tool_strict` passes.
+- `cargo test --test conformance tool_strictness` passes.
 - `python3 tools/update-readme-counts.py` leaves README status counters current.
 
 ## E2E Tests
