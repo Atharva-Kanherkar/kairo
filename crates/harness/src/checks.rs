@@ -382,6 +382,33 @@ pub fn tool_strict_forwarded(
     }
 }
 
+/// Invariant (bug 065): translated instruction messages retain their roles,
+/// content, and precedence order on the OpenAI Chat wire.
+pub fn instruction_messages_preserved(forwarded_jsonl: &str, expected: &[(&str, &str)]) -> Verdict {
+    let Ok(body) = capture_body(forwarded_jsonl) else {
+        return Verdict::Violation("unparseable capture".into());
+    };
+    let Some(messages) = body.get("messages").and_then(Value::as_array) else {
+        return Verdict::Violation("forwarded body has no messages array".into());
+    };
+    let observed = messages
+        .iter()
+        .map(|message| {
+            (
+                message.get("role").and_then(Value::as_str).unwrap_or(""),
+                message.get("content").and_then(Value::as_str).unwrap_or(""),
+            )
+        })
+        .collect::<Vec<_>>();
+    if observed == expected {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation(format!(
+            "instruction messages changed: expected {expected:?}, observed {observed:?}"
+        ))
+    }
+}
+
 /// Invariant (bug 019): a translator MUST NOT invent `cache_control` the
 /// client did not send.
 pub fn no_invented_cache_control(forwarded_jsonl: &str) -> Verdict {

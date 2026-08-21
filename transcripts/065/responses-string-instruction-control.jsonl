@@ -1,0 +1,1 @@
+{"path":"/v1/chat/completions","body":{"model":"captured-model","messages":[{"role":"system","content":"TOP-STRING-INSTRUCTION"},{"role":"user","content":"USER-CONTROL"}]}}
