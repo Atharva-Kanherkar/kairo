@@ -1,0 +1,1 @@
+{"path":"/v1/responses","body":{"model":"mockmodel","input":"hi","tools":[{"type":"function","name":"strict_probe","strict":true,"parameters":{"type":"object","properties":{"city":{"type":"string"}},"required":["city"],"additionalProperties":false}}]}}

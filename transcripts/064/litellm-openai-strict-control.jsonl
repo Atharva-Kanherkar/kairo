@@ -1,0 +1,1 @@
+{"path":"/v1/chat/completions","body":{"messages":[{"role":"user","content":"hi"}],"model":"mockmodel","tools":[{"type":"function","function":{"name":"strict_probe","description":"strictness must survive translation","strict":true,"parameters":{"type":"object","properties":{"city":{"type":"string"}},"required":["city"],"additionalProperties":false}}}]}}
