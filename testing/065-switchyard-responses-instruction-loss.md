@@ -2,8 +2,8 @@
 
 ## Functional Behavior
 
-- Responses instruction arrays and inline `system` and `developer` messages must retain their precedence when forwarded to OpenAI Chat.
-- The five-run current Switchyard capture must report a violation: the top-level instruction is absent and both inline instruction roles become `user`, despite completed client responses.
+- Inline Responses `system` and `developer` messages must retain their precedence when forwarded to OpenAI Chat.
+- The five-run current Switchyard capture must report a violation: both inline instruction roles become `user`, despite completed client responses.
 - A string `instructions` control must remain a preceding OpenAI Chat `system` message.
 
 ## Unit Tests
@@ -28,5 +28,5 @@ N/A. The keyless local capture rig exercises the full proxy translation path.
 ## Manual Tests
 
 - Run the current Switchyard server with an OpenAI Chat capture backend.
-- Send a Responses request containing array instructions plus inline `system` and `developer` messages five times.
+- Send a Responses request containing inline `system` and `developer` messages five times.
 - Confirm each forwarded Chat body contains only the three messages as `user`; compare with a string-instructions control.
