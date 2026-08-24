@@ -1,0 +1,5 @@
+{"path":"/v1/chat/completions","body":{"model":"captured-model","messages":[{"role":"user","content":"SYSTEM-INSTRUCTION"},{"role":"user","content":"DEVELOPER-INSTRUCTION"},{"role":"user","content":"USER-INPUT"}]}}
+{"path":"/v1/chat/completions","body":{"model":"captured-model","messages":[{"role":"user","content":"SYSTEM-INSTRUCTION"},{"role":"user","content":"DEVELOPER-INSTRUCTION"},{"role":"user","content":"USER-INPUT"}]}}
+{"path":"/v1/chat/completions","body":{"model":"captured-model","messages":[{"role":"user","content":"SYSTEM-INSTRUCTION"},{"role":"user","content":"DEVELOPER-INSTRUCTION"},{"role":"user","content":"USER-INPUT"}]}}
+{"path":"/v1/chat/completions","body":{"model":"captured-model","messages":[{"role":"user","content":"SYSTEM-INSTRUCTION"},{"role":"user","content":"DEVELOPER-INSTRUCTION"},{"role":"user","content":"USER-INPUT"}]}}
+{"path":"/v1/chat/completions","body":{"model":"captured-model","messages":[{"role":"user","content":"SYSTEM-INSTRUCTION"},{"role":"user","content":"DEVELOPER-INSTRUCTION"},{"role":"user","content":"USER-INPUT"}]}}
