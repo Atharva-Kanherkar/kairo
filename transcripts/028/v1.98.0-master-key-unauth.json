@@ -1,0 +1,25 @@
+{
+  "litellm_version": "1.98.0",
+  "master_key": "REDACTED_MASTER_KEY (fake local test key, not a real secret)",
+  "auth": "none",
+  "note": "Unauthenticated caller (no Authorization, no x-goog-api-key, no ?key=). master_key set => request rejected before upstream is called; canary NOT returned. 400 body is 'No connected db.' here because no virtual-key DB is configured; a deployment with a key DB returns 401 for the same unauthenticated call.",
+  "status": 400,
+  "canary_in_response_headers": false,
+  "canary_headers": [],
+  "canary_leak_headers_present": {
+    "location": false,
+    "x-goog-upload-url": false,
+    "x-goog-upload-control-url": false
+  },
+  "headers": {
+    "date": "Tue, 25 Aug 2026 15:57:39 GMT",
+    "server": "uvicorn",
+    "content-length": "92",
+    "content-type": "application/json",
+    "x-frame-options": "DENY",
+    "content-security-policy": "frame-ancestors 'none'",
+    "x-content-type-options": "nosniff",
+    "Connection": "close"
+  },
+  "body": "{\"error\":{\"message\":\"No connected db.\",\"type\":\"no_db_connection\",\"param\":null,\"code\":\"400\"}}"
+}

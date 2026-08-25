@@ -1,0 +1,64 @@
+{
+  "gemini_upload_unauth": {
+    "n": 5,
+    "statuses": {
+      "400": 5
+    },
+    "canary_leak_runs": 0,
+    "canary_headers": {}
+  },
+  "gemini_upload_auth_bearer": {
+    "n": 5,
+    "statuses": {
+      "400": 5
+    },
+    "canary_leak_runs": 0,
+    "canary_headers": {}
+  },
+  "gemini_upload_auth_xgoog_api_key": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "canary_leak_runs": 5,
+    "canary_headers": {
+      "location": 5,
+      "x-goog-upload-url": 5
+    }
+  },
+  "gemini_upload_auth_key_query": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "canary_leak_runs": 5,
+    "canary_headers": {
+      "location": 5,
+      "x-goog-upload-url": 5
+    }
+  },
+  "chat_control_unauth": {
+    "n": 5,
+    "statuses": {
+      "500": 5
+    },
+    "canary_leak_runs": 0,
+    "canary_headers": {}
+  },
+  "chat_control_auth": {
+    "n": 5,
+    "statuses": {
+      "200": 5
+    },
+    "canary_leak_runs": 0,
+    "canary_headers": {}
+  },
+  "closed_port_control_auth_xgoog": {
+    "n": 5,
+    "statuses": {
+      "500": 5
+    },
+    "canary_leak_runs": 0,
+    "canary_headers": {}
+  }
+}

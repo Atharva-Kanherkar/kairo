@@ -1,0 +1,25 @@
+{
+  "litellm_version": "1.98.0",
+  "master_key": "REDACTED_MASTER_KEY (fake local test key, not a real secret)",
+  "auth": "Authorization: Bearer REDACTED_MASTER_KEY",
+  "note": "Caller sends Authorization: Bearer <master_key>. The /gemini/{path} route ignores the Authorization header and authenticates from ?key= / x-goog-api-key only, so this is treated as unauthenticated and rejected; canary NOT returned.",
+  "status": 400,
+  "canary_in_response_headers": false,
+  "canary_headers": [],
+  "canary_leak_headers_present": {
+    "location": false,
+    "x-goog-upload-url": false,
+    "x-goog-upload-control-url": false
+  },
+  "headers": {
+    "date": "Tue, 25 Aug 2026 15:57:39 GMT",
+    "server": "uvicorn",
+    "content-length": "92",
+    "content-type": "application/json",
+    "x-frame-options": "DENY",
+    "content-security-policy": "frame-ancestors 'none'",
+    "x-content-type-options": "nosniff",
+    "Connection": "close"
+  },
+  "body": "{\"error\":{\"message\":\"No connected db.\",\"type\":\"no_db_connection\",\"param\":null,\"code\":\"400\"}}"
+}
