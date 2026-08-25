@@ -20,6 +20,58 @@
 - **Reproduced**: 2026-08-14. Mock canary echo 5/5. Live Gemini key echo
   5/5. Evidence: `transcripts/028/`.
 
+## Retest 2026-08-25, LiteLLM 1.98.0 with a `master_key`
+
+The original capture ran on 1.96.2 with **no** `master_key`, which BerriAI's
+bounty (`security.md`) treats as out of scope. This retest pins the answer for
+1.98.0 **with** `master_key` set, using the existing mock only (no live Google,
+no real keys): `pip install litellm[proxy]==1.98.0`,
+`GEMINI_API_KEY=CANARY_GEMINI_PASSTHROUGH_KEY`,
+`GEMINI_API_BASE=http://127.0.0.1:9996` (`echo_upstream.py`),
+`general_settings.master_key: sk-kairo-master-test` (fake local key). Runner:
+`transcripts/028/hunt_master_key.py`, config
+`transcripts/028/litellm-mock-master-key.yaml`, 5/5 each.
+
+**Answer: on 1.98.0 with `master_key` set, an unauthenticated caller does NOT
+leak the canary.** The `/gemini/{path}` route now calls `user_api_key_auth`
+before proxying, so an unauthenticated request is rejected before the upstream
+`?key=` injection ever happens.
+
+| caller | HTTP | canary in `location` / `x-goog-upload-url`? |
+| --- | --- | --- |
+| unauthenticated (no auth at all) | 400 | no (`transcripts/028/v1.98.0-master-key-unauth.json`) |
+| `Authorization: Bearer <master_key>` | 400 | no (`transcripts/028/v1.98.0-master-key-auth-bearer.json`) |
+| `x-goog-api-key: <master_key>` | 200 | **yes** (`transcripts/028/v1.98.0-master-key-auth.json`) |
+| `?key=<master_key>` | 200 | **yes** |
+
+Notes:
+
+- The unauth 400 body is `No connected db.` because this harness runs without a
+  virtual-key DB. A deployment that has a key DB returns 401 for the same
+  unauthenticated call. Either way the request is rejected and the canary is
+  never returned. A wrong `x-goog-api-key` is rejected the same way (400/401),
+  so the route is genuinely key-gated, not open.
+- `/gemini/{path}` authenticates from `?key=` / `x-goog-api-key` (the LiteLLM
+  Gemini virtual-key slot), **not** from `Authorization`. That is why
+  `Authorization: Bearer <master_key>` still 400s: the route ignores it. The
+  leak only reproduces for a caller who presents a valid key (here the
+  `master_key`) in `?key=` or `x-goog-api-key`.
+- Controls stayed clean 5/5: chat completion returns no canary (unauth 500 /
+  rejected, authed 200 `ok`), and the closed-port pass-through returns
+  `500 Cannot connect to host 127.0.0.1:1` with no canary.
+- Upstream capture `transcripts/028/cap-echo-master.jsonl` shows LiteLLM 1.98.0
+  still injecting `?key=CANARY_GEMINI_PASSTHROUGH_KEY` and copying the echoed
+  URL headers back — the copy behavior is unchanged; only the auth gate changed.
+
+**Bounty scope conclusion: P2, not P1.** P1 (unauthenticated caller gets the
+deployment key) does **not** reproduce on 1.98.0 with `master_key` set — unauth
+is 400/401. The leak is P2: only an already-authenticated key (master or a
+valid virtual key) can read the deployment `GEMINI_API_KEY` out of
+`location` / `x-goog-upload-url`. That still crosses a tenant boundary on a
+shared proxy (any holder of a low-privilege virtual key can lift the shared
+deployment Google key), but it is gated behind authentication, so it is not the
+unauthenticated key-theft that the original no-`master_key` capture showed.
+
 ## What breaks
 
 LiteLLM's Google AI Studio pass-through (`/gemini/{path}`) loads
@@ -144,3 +196,27 @@ curl -sD - http://127.0.0.1:4000/gemini/upload/v1beta/files \
   -H 'content-type: application/json' \
   -d '{"file":{"display_name":"canary"}}'
 ```
+
+### Repro, 1.98.0 with `master_key` (2026-08-25 retest)
+
+```
+pip install 'litellm[proxy]==1.98.0'
+python3 transcripts/028/echo_upstream.py 9996 transcripts/028/cap-echo-master.jsonl
+# GEMINI_API_KEY=CANARY_GEMINI_PASSTHROUGH_KEY
+# GEMINI_API_BASE=http://127.0.0.1:9996
+# litellm --config transcripts/028/litellm-mock-master-key.yaml --port 4000
+# (closed-port control on :4001 with GEMINI_API_BASE=http://127.0.0.1:1)
+python3 transcripts/028/hunt_master_key.py   # 5/5 per case
+
+# unauthenticated -> 400, no canary
+curl -sD - http://127.0.0.1:4000/gemini/upload/v1beta/files \
+  -H 'x-pass-x-goog-upload-protocol: resumable' \
+  -H 'content-type: application/json' -d '{"file":{"display_name":"canary"}}'
+# authenticated (master_key as x-goog-api-key) -> 200, canary in
+# location + x-goog-upload-url
+curl -sD - http://127.0.0.1:4000/gemini/upload/v1beta/files \
+  -H 'x-goog-api-key: sk-kairo-master-test' \
+  -H 'x-pass-x-goog-upload-protocol: resumable' \
+  -H 'content-type: application/json' -d '{"file":{"display_name":"canary"}}'
+```
+

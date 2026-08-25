@@ -1,0 +1,987 @@
+[
+  {
+    "probe": "gemini_upload_unauth",
+    "run": 1,
+    "status": 400,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:39 GMT",
+      "server": "uvicorn",
+      "content-length": "92",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"No connected db.\",\"type\":\"no_db_connection\",\"param\":null,\"code\":\"400\"}}"
+  },
+  {
+    "probe": "gemini_upload_auth_bearer",
+    "run": 1,
+    "status": 400,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:39 GMT",
+      "server": "uvicorn",
+      "content-length": "92",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"No connected db.\",\"type\":\"no_db_connection\",\"param\":null,\"code\":\"400\"}}"
+  },
+  {
+    "probe": "gemini_upload_auth_xgoog_api_key",
+    "run": 1,
+    "status": 200,
+    "canary_in_response_headers": true,
+    "canary_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "canary_leak_headers_present": {
+      "location": true,
+      "x-goog-upload-url": true,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:39 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "50abe547-df2a-49d8-aa73-600dd2a7b12d",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/upload/v1beta/files",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "102",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"ok\": true, \"echo_path\": \"/upload/v1beta/files\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}"
+  },
+  {
+    "probe": "gemini_upload_auth_key_query",
+    "run": 1,
+    "status": 200,
+    "canary_in_response_headers": true,
+    "canary_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "canary_leak_headers_present": {
+      "location": true,
+      "x-goog-upload-url": true,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:39 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "e735b7a3-e7ab-461b-ba2c-221678cf63c9",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/upload/v1beta/files",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "102",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"ok\": true, \"echo_path\": \"/upload/v1beta/files\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}"
+  },
+  {
+    "probe": "chat_control_unauth",
+    "run": 1,
+    "status": 500,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:39 GMT",
+      "server": "uvicorn",
+      "content-length": "76",
+      "content-type": "application/json",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+  },
+  {
+    "probe": "chat_control_auth",
+    "run": 1,
+    "status": 200,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:39 GMT",
+      "server": "uvicorn",
+      "content-length": "280",
+      "content-type": "application/json",
+      "x-litellm-call-id": "6e1b72f2-c7d6-408d-ae97-e76712fbb4e8",
+      "x-litellm-model-id": "6954a0dbc9b1e14fb777ee605bac467064fa01ceb0cb6cd54671a5058b4ae483",
+      "x-litellm-model-name": "openai/mockmodel",
+      "x-litellm-model-api-base": "http://127.0.0.1:9998/v1",
+      "x-litellm-version": "1.98.0",
+      "x-litellm-response-cost-original": "0.0",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0",
+      "x-litellm-response-cost-output": "0.0",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-key-spend": "0.0",
+      "x-litellm-response-duration-ms": "6.073",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "mock",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"id\":\"chatcmpl-53296faf-1b96-4c52-adfc-25c9a249eadc\",\"created\":1787673460,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"usage\":{\"completion_tokens\":20,\"prompt_tokens\":10,\"total_tokens\":30}}"
+  },
+  {
+    "probe": "closed_port_control_auth_xgoog",
+    "run": 1,
+    "status": 500,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "x-litellm-call-id": "c1a52869-cc90-4dd3-a043-63b653a5f264",
+      "x-litellm-model-api-base": "http://127.0.0.1:1/v1beta/models/gemini-2.5-flash:generateContent",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "185",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"Cannot connect to host 127.0.0.1:1 ssl:<ssl.SSLContext object at 0x7fedf569e5d0> [Connect call failed ('127.0.0.1', 1)]\",\"type\":\"None\",\"param\":\"None\",\"code\":\"500\"}}"
+  },
+  {
+    "probe": "gemini_upload_unauth",
+    "run": 2,
+    "status": 400,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-length": "92",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"No connected db.\",\"type\":\"no_db_connection\",\"param\":null,\"code\":\"400\"}}"
+  },
+  {
+    "probe": "gemini_upload_auth_bearer",
+    "run": 2,
+    "status": 400,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-length": "92",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"No connected db.\",\"type\":\"no_db_connection\",\"param\":null,\"code\":\"400\"}}"
+  },
+  {
+    "probe": "gemini_upload_auth_xgoog_api_key",
+    "run": 2,
+    "status": 200,
+    "canary_in_response_headers": true,
+    "canary_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "canary_leak_headers_present": {
+      "location": true,
+      "x-goog-upload-url": true,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "6cbca7f9-55ac-465a-8bc7-f78766a0b578",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/upload/v1beta/files",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "102",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"ok\": true, \"echo_path\": \"/upload/v1beta/files\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}"
+  },
+  {
+    "probe": "gemini_upload_auth_key_query",
+    "run": 2,
+    "status": 200,
+    "canary_in_response_headers": true,
+    "canary_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "canary_leak_headers_present": {
+      "location": true,
+      "x-goog-upload-url": true,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "6dec7a82-6ee5-4682-8680-c82ae5f2685e",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/upload/v1beta/files",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "102",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"ok\": true, \"echo_path\": \"/upload/v1beta/files\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}"
+  },
+  {
+    "probe": "chat_control_unauth",
+    "run": 2,
+    "status": 500,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-length": "76",
+      "content-type": "application/json",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+  },
+  {
+    "probe": "chat_control_auth",
+    "run": 2,
+    "status": 200,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-length": "280",
+      "content-type": "application/json",
+      "x-litellm-call-id": "cde3636c-c5c5-4773-ace8-e511538202b3",
+      "x-litellm-model-id": "6954a0dbc9b1e14fb777ee605bac467064fa01ceb0cb6cd54671a5058b4ae483",
+      "x-litellm-model-name": "openai/mockmodel",
+      "x-litellm-model-api-base": "http://127.0.0.1:9998/v1",
+      "x-litellm-version": "1.98.0",
+      "x-litellm-response-cost-original": "0.0",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0",
+      "x-litellm-response-cost-output": "0.0",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-key-spend": "0.0",
+      "x-litellm-response-duration-ms": "1.0250000000000001",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "mock",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"id\":\"chatcmpl-1e098769-1783-425f-8aa6-641b53174cd9\",\"created\":1787673460,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"usage\":{\"completion_tokens\":20,\"prompt_tokens\":10,\"total_tokens\":30}}"
+  },
+  {
+    "probe": "closed_port_control_auth_xgoog",
+    "run": 2,
+    "status": 500,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "x-litellm-call-id": "24af1b71-4d16-4a3c-85af-9f47785fd96b",
+      "x-litellm-model-api-base": "http://127.0.0.1:1/v1beta/models/gemini-2.5-flash:generateContent",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "185",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"Cannot connect to host 127.0.0.1:1 ssl:<ssl.SSLContext object at 0x7fedf569e5d0> [Connect call failed ('127.0.0.1', 1)]\",\"type\":\"None\",\"param\":\"None\",\"code\":\"500\"}}"
+  },
+  {
+    "probe": "gemini_upload_unauth",
+    "run": 3,
+    "status": 400,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-length": "92",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"No connected db.\",\"type\":\"no_db_connection\",\"param\":null,\"code\":\"400\"}}"
+  },
+  {
+    "probe": "gemini_upload_auth_bearer",
+    "run": 3,
+    "status": 400,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-length": "92",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"No connected db.\",\"type\":\"no_db_connection\",\"param\":null,\"code\":\"400\"}}"
+  },
+  {
+    "probe": "gemini_upload_auth_xgoog_api_key",
+    "run": 3,
+    "status": 200,
+    "canary_in_response_headers": true,
+    "canary_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "canary_leak_headers_present": {
+      "location": true,
+      "x-goog-upload-url": true,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "89cafc6b-e468-4a7c-9296-a936705dd52c",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/upload/v1beta/files",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "102",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"ok\": true, \"echo_path\": \"/upload/v1beta/files\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}"
+  },
+  {
+    "probe": "gemini_upload_auth_key_query",
+    "run": 3,
+    "status": 200,
+    "canary_in_response_headers": true,
+    "canary_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "canary_leak_headers_present": {
+      "location": true,
+      "x-goog-upload-url": true,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "db274731-1dac-47c6-8f9e-9c0f96f437cb",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/upload/v1beta/files",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "102",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"ok\": true, \"echo_path\": \"/upload/v1beta/files\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}"
+  },
+  {
+    "probe": "chat_control_unauth",
+    "run": 3,
+    "status": 500,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-length": "76",
+      "content-type": "application/json",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+  },
+  {
+    "probe": "chat_control_auth",
+    "run": 3,
+    "status": 200,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-length": "280",
+      "content-type": "application/json",
+      "x-litellm-call-id": "60efe466-065c-41f1-bded-dad2c5ebee7c",
+      "x-litellm-model-id": "6954a0dbc9b1e14fb777ee605bac467064fa01ceb0cb6cd54671a5058b4ae483",
+      "x-litellm-model-name": "openai/mockmodel",
+      "x-litellm-model-api-base": "http://127.0.0.1:9998/v1",
+      "x-litellm-version": "1.98.0",
+      "x-litellm-response-cost-original": "0.0",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0",
+      "x-litellm-response-cost-output": "0.0",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-key-spend": "0.0",
+      "x-litellm-response-duration-ms": "0.833",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "mock",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"id\":\"chatcmpl-00d9c0d5-a926-41e4-8600-ea8231716a95\",\"created\":1787673460,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"usage\":{\"completion_tokens\":20,\"prompt_tokens\":10,\"total_tokens\":30}}"
+  },
+  {
+    "probe": "closed_port_control_auth_xgoog",
+    "run": 3,
+    "status": 500,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "x-litellm-call-id": "4cd001ae-eec4-4739-bcdf-3ab8a063f1a3",
+      "x-litellm-model-api-base": "http://127.0.0.1:1/v1beta/models/gemini-2.5-flash:generateContent",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "185",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"Cannot connect to host 127.0.0.1:1 ssl:<ssl.SSLContext object at 0x7fedf569e5d0> [Connect call failed ('127.0.0.1', 1)]\",\"type\":\"None\",\"param\":\"None\",\"code\":\"500\"}}"
+  },
+  {
+    "probe": "gemini_upload_unauth",
+    "run": 4,
+    "status": 400,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-length": "92",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"No connected db.\",\"type\":\"no_db_connection\",\"param\":null,\"code\":\"400\"}}"
+  },
+  {
+    "probe": "gemini_upload_auth_bearer",
+    "run": 4,
+    "status": 400,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-length": "92",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"No connected db.\",\"type\":\"no_db_connection\",\"param\":null,\"code\":\"400\"}}"
+  },
+  {
+    "probe": "gemini_upload_auth_xgoog_api_key",
+    "run": 4,
+    "status": 200,
+    "canary_in_response_headers": true,
+    "canary_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "canary_leak_headers_present": {
+      "location": true,
+      "x-goog-upload-url": true,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "e1670ac9-6cbe-4787-ae1e-e7a6519c4356",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/upload/v1beta/files",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "102",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"ok\": true, \"echo_path\": \"/upload/v1beta/files\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}"
+  },
+  {
+    "probe": "gemini_upload_auth_key_query",
+    "run": 4,
+    "status": 200,
+    "canary_in_response_headers": true,
+    "canary_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "canary_leak_headers_present": {
+      "location": true,
+      "x-goog-upload-url": true,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "1c9dcbca-cd1f-4ce6-a0b7-50370cedd99e",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/upload/v1beta/files",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "102",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"ok\": true, \"echo_path\": \"/upload/v1beta/files\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}"
+  },
+  {
+    "probe": "chat_control_unauth",
+    "run": 4,
+    "status": 500,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-length": "76",
+      "content-type": "application/json",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+  },
+  {
+    "probe": "chat_control_auth",
+    "run": 4,
+    "status": 200,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-length": "280",
+      "content-type": "application/json",
+      "x-litellm-call-id": "fe814ded-d34a-4c8e-9bbc-6040d3f8a124",
+      "x-litellm-model-id": "6954a0dbc9b1e14fb777ee605bac467064fa01ceb0cb6cd54671a5058b4ae483",
+      "x-litellm-model-name": "openai/mockmodel",
+      "x-litellm-model-api-base": "http://127.0.0.1:9998/v1",
+      "x-litellm-version": "1.98.0",
+      "x-litellm-response-cost-original": "0.0",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0",
+      "x-litellm-response-cost-output": "0.0",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-key-spend": "0.0",
+      "x-litellm-response-duration-ms": "0.87",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "mock",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"id\":\"chatcmpl-d2e08ef8-dd0e-43ae-872e-1ed53b099c2d\",\"created\":1787673460,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"usage\":{\"completion_tokens\":20,\"prompt_tokens\":10,\"total_tokens\":30}}"
+  },
+  {
+    "probe": "closed_port_control_auth_xgoog",
+    "run": 4,
+    "status": 500,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "x-litellm-call-id": "c7717b3b-3ad0-42c2-ad3a-add343225932",
+      "x-litellm-model-api-base": "http://127.0.0.1:1/v1beta/models/gemini-2.5-flash:generateContent",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "185",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"Cannot connect to host 127.0.0.1:1 ssl:<ssl.SSLContext object at 0x7fedf569e5d0> [Connect call failed ('127.0.0.1', 1)]\",\"type\":\"None\",\"param\":\"None\",\"code\":\"500\"}}"
+  },
+  {
+    "probe": "gemini_upload_unauth",
+    "run": 5,
+    "status": 400,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-length": "92",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"No connected db.\",\"type\":\"no_db_connection\",\"param\":null,\"code\":\"400\"}}"
+  },
+  {
+    "probe": "gemini_upload_auth_bearer",
+    "run": 5,
+    "status": 400,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-length": "92",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"No connected db.\",\"type\":\"no_db_connection\",\"param\":null,\"code\":\"400\"}}"
+  },
+  {
+    "probe": "gemini_upload_auth_xgoog_api_key",
+    "run": 5,
+    "status": 200,
+    "canary_in_response_headers": true,
+    "canary_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "canary_leak_headers_present": {
+      "location": true,
+      "x-goog-upload-url": true,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "fb44e198-2f9f-414c-ac9d-812b95d68491",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/upload/v1beta/files",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "102",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"ok\": true, \"echo_path\": \"/upload/v1beta/files\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}"
+  },
+  {
+    "probe": "gemini_upload_auth_key_query",
+    "run": 5,
+    "status": 200,
+    "canary_in_response_headers": true,
+    "canary_headers": [
+      "location",
+      "x-goog-upload-url"
+    ],
+    "canary_leak_headers_present": {
+      "location": true,
+      "x-goog-upload-url": true,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-type": "application/json",
+      "location": "http://127.0.0.1:9996/redirected?key=CANARY_GEMINI_PASSTHROUGH_KEY&from=location",
+      "x-goog-upload-url": "http://127.0.0.1:9996/upload?upload_id=canary&key=CANARY_GEMINI_PASSTHROUGH_KEY",
+      "x-goog-upload-status": "active",
+      "x-litellm-call-id": "b1cc985a-28c7-4e6a-bae4-3538863450c1",
+      "x-litellm-model-api-base": "http://127.0.0.1:9996/upload/v1beta/files",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "102",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"ok\": true, \"echo_path\": \"/upload/v1beta/files\", \"echo_key_in_body\": \"CANARY_GEMINI_PASSTHROUGH_KEY\"}"
+  },
+  {
+    "probe": "chat_control_unauth",
+    "run": 5,
+    "status": 500,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-length": "76",
+      "content-type": "application/json",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"Internal server error\",\"type\":\"internal_server_error\"}}"
+  },
+  {
+    "probe": "chat_control_auth",
+    "run": 5,
+    "status": 200,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "content-length": "280",
+      "content-type": "application/json",
+      "x-litellm-call-id": "192b4fab-53df-4ba7-a9d0-fcd78b0384fe",
+      "x-litellm-model-id": "6954a0dbc9b1e14fb777ee605bac467064fa01ceb0cb6cd54671a5058b4ae483",
+      "x-litellm-model-name": "openai/mockmodel",
+      "x-litellm-model-api-base": "http://127.0.0.1:9998/v1",
+      "x-litellm-version": "1.98.0",
+      "x-litellm-response-cost-original": "0.0",
+      "x-litellm-response-cost-discount-amount": "0.0",
+      "x-litellm-response-cost-margin-amount": "0.0",
+      "x-litellm-response-cost-margin-percent": "0.0",
+      "x-litellm-response-cost-input": "0.0",
+      "x-litellm-response-cost-output": "0.0",
+      "x-litellm-response-cost-tool-usage": "0.0",
+      "x-litellm-key-spend": "0.0",
+      "x-litellm-response-duration-ms": "0.95",
+      "x-litellm-callback-duration-ms": "0.0",
+      "x-litellm-model-group": "mock",
+      "x-litellm-attempted-retries": "0",
+      "x-litellm-attempted-fallbacks": "0",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"id\":\"chatcmpl-4802122e-4a6c-4e7a-9da7-5ccfd81ae113\",\"created\":1787673460,\"model\":\"mock\",\"object\":\"chat.completion\",\"choices\":[{\"finish_reason\":\"stop\",\"index\":0,\"message\":{\"content\":\"ok\",\"role\":\"assistant\"}}],\"usage\":{\"completion_tokens\":20,\"prompt_tokens\":10,\"total_tokens\":30}}"
+  },
+  {
+    "probe": "closed_port_control_auth_xgoog",
+    "run": 5,
+    "status": 500,
+    "canary_in_response_headers": false,
+    "canary_headers": [],
+    "canary_leak_headers_present": {
+      "location": false,
+      "x-goog-upload-url": false,
+      "x-goog-upload-control-url": false
+    },
+    "headers": {
+      "date": "Tue, 25 Aug 2026 15:57:40 GMT",
+      "server": "uvicorn",
+      "x-litellm-call-id": "d1f9bab7-652f-438d-a7ae-b1f6208d3da6",
+      "x-litellm-model-api-base": "http://127.0.0.1:1/v1beta/models/gemini-2.5-flash:generateContent",
+      "x-litellm-key-spend": "0.0",
+      "content-length": "185",
+      "content-type": "application/json",
+      "x-frame-options": "DENY",
+      "content-security-policy": "frame-ancestors 'none'",
+      "x-content-type-options": "nosniff",
+      "Connection": "close"
+    },
+    "body": "{\"error\":{\"message\":\"Cannot connect to host 127.0.0.1:1 ssl:<ssl.SSLContext object at 0x7fedf569e5d0> [Connect call failed ('127.0.0.1', 1)]\",\"type\":\"None\",\"param\":\"None\",\"code\":\"500\"}}"
+  }
+]
