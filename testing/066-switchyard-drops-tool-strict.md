@@ -28,7 +28,10 @@
 
 ## Smoke Tests
 
-- `cargo test --test conformance switchyard_tool_strictness` passes.
+- `cargo test --test conformance switchyard_drops_anthropic_tool_strictness`
+  passes.
+- `cargo test --test conformance switchyard_openai_route_keeps_tool_strictness`
+  passes.
 - `cargo test` passes.
 - `python3 tools/update-readme-counts.py --check` reports current counters.
 
