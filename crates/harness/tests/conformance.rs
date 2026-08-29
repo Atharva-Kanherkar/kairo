@@ -877,6 +877,69 @@ fn responses_tool_strictness_direct_control() {
     );
 }
 
+// ---- bug 066: Switchyard /v1/messages drops function-tool strictness ----
+
+#[test]
+fn switchyard_drops_anthropic_tool_strictness() {
+    let records = capture_records(&fixture(
+        "transcripts/066/switchyard-anthropic-strict-upstream.jsonl",
+    ))
+    .expect("066 captures parse");
+    assert_eq!(records.len(), 5, "066 must retain five capture runs");
+    for (line, _) in &records {
+        let capture: serde_json::Value = serde_json::from_str(line).expect("066 capture record");
+        assert_eq!(
+            capture["path"], "/v1/chat/completions",
+            "066 Messages ingress must target OpenAI Chat"
+        );
+        let v = tool_strict_forwarded(line, "strict_probe", FunctionToolFormat::OpenAiChat);
+        assert!(
+            matches!(v, Verdict::Violation(_)),
+            "Switchyard Anthropic ingress must be caught dropping strict: {v:?}"
+        );
+    }
+    let results: serde_json::Value =
+        serde_json::from_str(&fixture("transcripts/066/switchyard-strict-results.json"))
+            .expect("066 client results parse");
+    let rows = results.as_array().expect("066 client results array");
+    assert_eq!(rows.len(), 5, "066 must retain five client results");
+    assert!(
+        rows.iter().all(|row| {
+            row["client_request"]["path"] == "/v1/messages"
+                && row["client_request"]["tool_strict"] == true
+                && row["upstream_tool"]["function_strict"].is_null()
+                && row["client_response"]["http_status"] == 200
+        }),
+        "066 must remain a silent HTTP 200 loss"
+    );
+}
+
+#[test]
+fn switchyard_openai_route_keeps_tool_strictness() {
+    let records = capture_records(&fixture(
+        "transcripts/066/switchyard-openai-strict-control.jsonl",
+    ))
+    .expect("066 control captures parse");
+    assert_eq!(
+        records.len(),
+        5,
+        "066 control must retain five capture runs"
+    );
+    for (line, _) in &records {
+        let capture: serde_json::Value = serde_json::from_str(line).expect("066 control record");
+        assert_eq!(
+            capture["path"], "/v1/chat/completions",
+            "066 OpenAI control must target OpenAI Chat"
+        );
+        let v = tool_strict_forwarded(line, "strict_probe", FunctionToolFormat::OpenAiChat);
+        assert_eq!(
+            v,
+            Verdict::Conformant,
+            "Switchyard OpenAI ingress must keep function strictness: {v:?}"
+        );
+    }
+}
+
 // ---- bug 065: Switchyard demotes Responses instruction messages ----
 
 #[test]
