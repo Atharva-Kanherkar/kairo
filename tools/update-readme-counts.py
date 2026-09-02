@@ -82,14 +82,12 @@ def render(counts: dict) -> str:
     gateways = join_and(counts["gateways"])
     return (
         f"{START}\n"
-        f"{counts['bugs']} reproduced issue folders documented across "
-        f"{gateways} (see [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md)). "
-        f"One is already filed upstream as "
-        f"[NVIDIA-NeMo/Switchyard#380](https://github.com/NVIDIA-NeMo/Switchyard/issues/380).\n"
-        f"The Rust harness is green with {counts['tests']} tests, of which "
-        f"{counts['conformance']} are conformance checks wired to recorded "
-        f"transcripts. This is early and active; contributions of new "
-        f"reproductions are the fastest way to help.\n"
+        f"| Metric | Value |\n"
+        f"|---|---|\n"
+        f"| Reproduced issue folders | {counts['bugs']} |\n"
+        f"| Gateways under test | {gateways} |\n"
+        f"| Harness tests | {counts['tests']} ({counts['conformance']} conformance "
+        f"checks against recorded transcripts, {counts['unit']} unit) |\n"
         f"{END}"
     )
 
