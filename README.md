@@ -26,12 +26,12 @@ offline with no provider keys.
 <!-- kairo-counts:start -->
 | Metric | Value |
 |---|---|
-| Reproduced issue folders | 44 |
+| Reproduced issue folders | 45 |
 | Gateways under test | LiteLLM, NVIDIA Switchyard, Bifrost, GoModel, AxonHub, and any-llm |
-| Harness tests | 119 (106 conformance checks against recorded transcripts, 13 unit) |
+| Harness tests | 122 (108 conformance checks against recorded transcripts, 14 unit) |
 <!-- kairo-counts:end -->
 
-The 44 folders cover 48 distinct defects confirmed on the wire, 47 of them on
+The 45 folders cover 49 distinct defects confirmed on the wire, 48 of them on
 current releases at the time of capture. The full ledger, including the cited
 bugs that did not reproduce, is [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md).
 One finding is filed upstream as
@@ -49,7 +49,7 @@ reproduction commands.
 |---|---|---|---|---|---|---|
 | Terminal reason survives translation (`tool_use`, `content_filter`, `max_tokens`, refusal) | [001](issues/001-anthropic-stream-toolcall-translation), [002](issues/002-litellm-ollama-toolcall-loss) | [010](issues/010-switchyard-content-filter-and-reorder) | [030](issues/030-bifrost-anthropic-stream-stop-reason), [034](issues/034-bifrost-erases-content-filter), [035](issues/035-bifrost-erases-truncation), [036](issues/036-bifrost-drops-refusal-content) | | | |
 | Request constraints survive (`disable_parallel_tool_use`, `stop_sequences`, `tools[].strict`, `output_format`) | [017](issues/017-parallel-tool-flag-dropped), [041](issues/041-litellm-drops-stop-sequences), [064](issues/064-litellm-drops-tool-strict) | [006](issues/006-switchyard-crossformat-losses), [017](issues/017-parallel-tool-flag-dropped), [040](issues/040-switchyard-drops-output-format), [065](issues/065-switchyard-responses-instruction-loss), [066](issues/066-switchyard-drops-tool-strict) | [031](issues/031-bifrost-drops-parallel-tool-flag), [032](issues/032-bifrost-drops-stop-sequences) | [042](issues/042-gomodel-drops-output-format), [043](issues/043-gomodel-drops-parallel-tool-flag) | [051](issues/051-axonhub-drops-output-format) | [058](issues/058-any-llm-drops-parallel-tool-flag), [062](issues/062-any-llm-empty-schema-shell) |
-| Content blocks survive (`is_error`, image and document blocks in tool results and user turns) | [006](issues/006-switchyard-crossformat-losses), [007](issues/007-switchyard-toolresult-multimodal-stringified), [018](issues/018-user-document-dropped) | [006](issues/006-switchyard-crossformat-losses), [007](issues/007-switchyard-toolresult-multimodal-stringified), [018](issues/018-user-document-dropped) | | | | [059](issues/059-any-llm-drops-is-error), [060](issues/060-any-llm-drops-toolresult-image), [061](issues/061-any-llm-drops-toolresult-document) |
+| Content blocks survive (refusal, `is_error`, image and document blocks in tool results and user turns) | [006](issues/006-switchyard-crossformat-losses), [007](issues/007-switchyard-toolresult-multimodal-stringified), [018](issues/018-user-document-dropped), [067](issues/067-litellm-drops-refusal-content) | [006](issues/006-switchyard-crossformat-losses), [007](issues/007-switchyard-toolresult-multimodal-stringified), [018](issues/018-user-document-dropped) | | | | [059](issues/059-any-llm-drops-is-error), [060](issues/060-any-llm-drops-toolresult-image), [061](issues/061-any-llm-drops-toolresult-document) |
 | Assistant history survives replay (`thinking` blocks and signatures) | [016](issues/016-thinking-history-lost) (leaked as visible text) | [016](issues/016-thinking-history-lost) (dropped) | [033](issues/033-bifrost-drops-thinking-history) | | | [057](issues/057-any-llm-drops-thinking-history) |
 | Tool-call ids round-trip | [004](issues/004-gemini-thought-signature) | [005](issues/005-switchyard-toolid-sanitizer) | [037](issues/037-bifrost-toolid-not-restored) | | | |
 | Nothing is invented (empty text blocks, phantom message items, `cache_control`) | [001](issues/001-anthropic-stream-toolcall-translation), [009](issues/009-litellm-responses-phantom-message) | [019](issues/019-switchyard-invents-prompt-cache), [045](issues/045-switchyard-empty-text-before-tooluse) | | | | |
