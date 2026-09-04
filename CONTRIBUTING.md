@@ -46,6 +46,24 @@ sales deck.
    if anything drifted.
 7. Open a PR. One bug per PR.
 
+## Required PR gates
+
+Every pull request must use `.github/PULL_REQUEST_TEMPLATE.md` and independently
+pass three gates before approval:
+
+1. **Correctness.** The exact claim reproduces locally on the named version with
+   raw wire evidence, a successful control, deterministic results, and an isolated
+   trigger.
+2. **Usefulness.** The wire defect is traced to a concrete failure in a real user or
+   agent workflow. A byte difference alone is not enough.
+3. **Upstream status.** Current issues, pull requests, releases, commits, and
+   documentation have been searched and linked. The finding is labeled as novel,
+   duplicate, fixed, regression, or documented behavior.
+
+Use `.github/agents/kairo-reproduction-reviewer.agent.md` for the independent,
+read-only review. It reruns the critical path and tries to disprove the claim. The
+full mandatory rules and decision table are in `AGENTS.md`.
+
 ## What makes a good target
 
 - Tool calls first: streaming argument assembly, ids, finish reasons,
