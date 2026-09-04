@@ -208,6 +208,25 @@ fn collect_strings(v: &Value, out: &mut Vec<String>) {
     }
 }
 
+fn collect_keyed_strings(v: &Value, key: &str, out: &mut Vec<String>) {
+    match v {
+        Value::Array(items) => items
+            .iter()
+            .for_each(|item| collect_keyed_strings(item, key, out)),
+        Value::Object(fields) => {
+            for (name, value) in fields {
+                if name == key {
+                    if let Some(text) = value.as_str() {
+                        out.push(text.to_string());
+                    }
+                }
+                collect_keyed_strings(value, key, out);
+            }
+        }
+        _ => {}
+    }
+}
+
 fn jsonl_contains_string(jsonl: &str, needle: &str) -> bool {
     match capture_body(jsonl) {
         Ok(body) => {
@@ -788,6 +807,37 @@ pub fn response_content_not_empty(response_json: &str) -> Verdict {
     }
 }
 
+/// Invariant (bug 067): every structured refusal string returned upstream MUST
+/// remain representable somewhere in the client response. The target dialect
+/// may keep a `refusal` field or map the text to an ordinary content block, so
+/// the client side is searched by value rather than by one dialect-specific
+/// JSON path.
+pub fn refusal_text_preserved(upstream_response_json: &str, client_response_json: &str) -> Verdict {
+    let Ok(upstream) = serde_json::from_str::<Value>(upstream_response_json) else {
+        return Verdict::Violation("upstream response body is not valid JSON".to_string());
+    };
+    let Ok(client) = serde_json::from_str::<Value>(client_response_json) else {
+        return Verdict::Violation("client response body is not valid JSON".to_string());
+    };
+
+    let mut refusals = Vec::new();
+    collect_keyed_strings(&upstream, "refusal", &mut refusals);
+    if refusals.is_empty() {
+        return Verdict::Violation("upstream response contains no refusal text".to_string());
+    }
+
+    let mut client_strings = Vec::new();
+    collect_strings(&client, &mut client_strings);
+    for refusal in refusals {
+        if !client_strings.iter().any(|value| value == &refusal) {
+            return Verdict::Violation(format!(
+                "upstream refusal text {refusal:?} is absent from the client response"
+            ));
+        }
+    }
+    Verdict::Conformant
+}
+
 /// Invariant (bug 037): when a gateway rewrites an upstream tool-call id to satisfy
 /// a client-side charset contract, it MUST reverse the rewrite before sending the
 /// id back upstream. The upstream never issued the sanitized id; echoing it breaks
@@ -862,6 +912,29 @@ mod tests {
             response_content_not_empty(r#"{"id":"x"}"#),
             Verdict::Violation(_)
         ));
+    }
+
+    #[test]
+    fn refusal_text_checker_accepts_cross_format_representations() {
+        let upstream = r#"{"output":[{"content":[{"type":"refusal","refusal":"cannot help"}]}]}"#;
+        assert!(matches!(
+            refusal_text_preserved(upstream, r#"{"content":[]}"#),
+            Verdict::Violation(_)
+        ));
+        assert_eq!(
+            refusal_text_preserved(
+                upstream,
+                r#"{"choices":[{"message":{"provider_specific_fields":{"refusal":"cannot help"}}}]}"#,
+            ),
+            Verdict::Conformant
+        );
+        assert_eq!(
+            refusal_text_preserved(
+                upstream,
+                r#"{"content":[{"type":"text","text":"cannot help"}]}"#,
+            ),
+            Verdict::Conformant
+        );
     }
 
     #[test]

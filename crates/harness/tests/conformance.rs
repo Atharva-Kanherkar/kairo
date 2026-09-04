@@ -12,9 +12,9 @@ use kairo::checks::{
     no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
     no_phantom_null_output_text, non_text_block_not_json_dumped, openai_stream_finish_reason,
     openai_toolcall_id_charset, parallel_tool_disable_preserved, reasoning_text_order_preserved,
-    response_content_not_empty, response_omits_secret, stop_sequence_forwarded,
-    thinking_not_leaked_as_visible_text, thinking_text_forwarded, tool_strict_forwarded,
-    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    refusal_text_preserved, response_content_not_empty, response_omits_secret,
+    stop_sequence_forwarded, thinking_not_leaked_as_visible_text, thinking_text_forwarded,
+    tool_strict_forwarded, toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
     upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
     JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
@@ -985,6 +985,115 @@ fn switchyard_responses_string_instruction_control() {
         ],
     );
     assert_eq!(v, Verdict::Conformant);
+}
+
+// ---- bug 068: Switchyard erases Chat refusal text on Anthropic output ----
+
+fn issue_068_records(rel: &str) -> Vec<serde_json::Value> {
+    fixture(rel)
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .map(|line| serde_json::from_str(line).unwrap_or_else(|e| panic!("{rel}: {e}")))
+        .collect()
+}
+
+#[test]
+fn switchyard_drops_structured_refusal_on_anthropic_translation() {
+    let rel = "transcripts/068/switchyard-anthropic-refusal-loss.jsonl";
+    let records = issue_068_records(rel);
+    assert_eq!(records.len(), 5, "{rel} must remain the five-run capture");
+
+    for (index, record) in records.iter().enumerate() {
+        assert_eq!(record["request"]["path"], "/v1/chat/completions");
+        assert!(
+            record.pointer("/request/headers").is_none(),
+            "{rel} line {} must not retain credential-bearing headers",
+            index + 1
+        );
+
+        let upstream = record["upstream_response"]["body_raw"]
+            .as_str()
+            .unwrap_or_else(|| panic!("{rel} line {} has no upstream body", index + 1));
+        let upstream_json: serde_json::Value = serde_json::from_str(upstream)
+            .unwrap_or_else(|e| panic!("{rel} line {} upstream body: {e}", index + 1));
+        assert_eq!(
+            upstream_json.pointer("/choices/0/message/refusal"),
+            Some(&serde_json::json!("REFUSALPROBE cannot help")),
+            "{rel} line {} must contain the structured upstream refusal",
+            index + 1
+        );
+
+        let client = &record["client_response"];
+        assert_eq!(
+            client["type"],
+            "message",
+            "{rel} line {} must remain the Anthropic response path",
+            index + 1
+        );
+        assert_eq!(
+            client["content"],
+            serde_json::json!([{"type":"text","text":""}]),
+            "{rel} line {} must contain only the invented empty text block",
+            index + 1
+        );
+        assert_eq!(
+            refusal_text_preserved(upstream, &client.to_string()),
+            Verdict::Violation(
+                "upstream refusal text \"REFUSALPROBE cannot help\" is absent from the client response"
+                    .to_string()
+            ),
+            "{rel} line {} must freeze refusal-text erasure",
+            index + 1
+        );
+    }
+}
+
+#[test]
+fn switchyard_openai_route_keeps_structured_refusal() {
+    let rel = "transcripts/068/switchyard-openai-refusal-control.jsonl";
+    let records = issue_068_records(rel);
+    assert_eq!(records.len(), 5, "{rel} must remain the five-run control");
+
+    for (index, record) in records.iter().enumerate() {
+        assert_eq!(record["request"]["path"], "/v1/chat/completions");
+        assert!(
+            record.pointer("/request/headers").is_none(),
+            "{rel} line {} must not retain credential-bearing headers",
+            index + 1
+        );
+
+        let upstream = record["upstream_response"]["body_raw"]
+            .as_str()
+            .unwrap_or_else(|| panic!("{rel} line {} has no upstream body", index + 1));
+        let upstream_json: serde_json::Value = serde_json::from_str(upstream)
+            .unwrap_or_else(|e| panic!("{rel} line {} upstream body: {e}", index + 1));
+        assert_eq!(
+            upstream_json.pointer("/choices/0/message/refusal"),
+            Some(&serde_json::json!("REFUSALPROBE cannot help")),
+            "{rel} line {} must contain the control refusal",
+            index + 1
+        );
+
+        let client = &record["client_response"];
+        assert_eq!(
+            client["object"],
+            "chat.completion",
+            "{rel} line {} must remain the OpenAI response path",
+            index + 1
+        );
+        assert_eq!(
+            client.pointer("/choices/0/message/refusal"),
+            Some(&serde_json::json!("REFUSALPROBE cannot help")),
+            "{rel} line {} must preserve the refusal for the client",
+            index + 1
+        );
+        assert_eq!(
+            refusal_text_preserved(upstream, &client.to_string()),
+            Verdict::Conformant,
+            "{rel} line {} must remain a passing control",
+            index + 1
+        );
+    }
 }
 
 #[test]
