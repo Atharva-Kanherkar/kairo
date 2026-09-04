@@ -925,11 +925,8 @@ pub fn responses_refusal_semantics_preserved(
         return Verdict::Conformant;
     }
 
-    let client = match serde_json::from_str::<Value>(client_response) {
-        Ok(body) => body,
-        Err(_) => {
-            return Verdict::Violation("client response body is not valid JSON".to_string());
-        }
+    let Ok(client) = serde_json::from_str::<Value>(client_response) else {
+        return Verdict::Violation("client response body is not valid JSON".to_string());
     };
     let typed_refusals = client
         .get("output")
