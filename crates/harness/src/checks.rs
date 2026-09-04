@@ -838,6 +838,119 @@ pub fn refusal_text_preserved(upstream_response_json: &str, client_response_json
     Verdict::Conformant
 }
 
+fn refusal_strings(response: &str) -> Result<Vec<String>, String> {
+    if response.lines().any(|line| line.starts_with("data:")) {
+        let events = sse_data_json(response);
+        if events.is_empty() {
+            return Err("upstream response has no parseable SSE data events".to_string());
+        }
+        let chat_refusal = events
+            .iter()
+            .flat_map(|event| {
+                event
+                    .get("choices")
+                    .and_then(Value::as_array)
+                    .into_iter()
+                    .flatten()
+            })
+            .filter_map(|choice| choice.pointer("/delta/refusal").and_then(Value::as_str))
+            .collect::<String>();
+        if !chat_refusal.is_empty() {
+            return Ok(vec![chat_refusal]);
+        }
+        let mut refusals = Vec::new();
+        for event in &events {
+            collect_keyed_strings(event, "refusal", &mut refusals);
+        }
+        return Ok(refusals);
+    }
+
+    let body = serde_json::from_str::<Value>(response)
+        .map_err(|_| "upstream response body is not valid JSON".to_string())?;
+    let mut refusals = Vec::new();
+    collect_keyed_strings(&body, "refusal", &mut refusals);
+    Ok(refusals)
+}
+
+/// Invariant (bug 069): a structured refusal returned by an upstream dialect
+/// MUST remain machine-identifiable when encoded as an OpenAI Responses result.
+/// Buffered Responses use a `refusal` content part. Streams use refusal delta
+/// and done events. Merely copying the explanation into `output_text` preserves
+/// bytes but destroys the semantic signal used by refusal-aware consumers.
+pub fn responses_refusal_semantics_preserved(
+    upstream_response: &str,
+    client_response: &str,
+) -> Verdict {
+    let upstream_refusals = match refusal_strings(upstream_response) {
+        Ok(refusals) if !refusals.is_empty() => refusals,
+        Ok(_) => {
+            return Verdict::Violation(
+                "upstream response contains no structured refusal signal".to_string(),
+            );
+        }
+        Err(message) => return Verdict::Violation(message),
+    };
+
+    if client_response
+        .lines()
+        .any(|line| line.starts_with("data:"))
+    {
+        let events = sse_data_json(client_response);
+        if events.is_empty() {
+            return Verdict::Violation(
+                "client response has no parseable Responses SSE data events".to_string(),
+            );
+        }
+        let delta_text = events
+            .iter()
+            .filter(|event| {
+                event.get("type").and_then(Value::as_str) == Some("response.refusal.delta")
+            })
+            .filter_map(|event| event.get("delta").and_then(Value::as_str))
+            .collect::<String>();
+        let done_refusals = events
+            .iter()
+            .filter(|event| {
+                event.get("type").and_then(Value::as_str) == Some("response.refusal.done")
+            })
+            .filter_map(|event| event.get("refusal").and_then(Value::as_str))
+            .collect::<Vec<_>>();
+        for refusal in upstream_refusals {
+            if delta_text != refusal || !done_refusals.contains(&refusal.as_str()) {
+                return Verdict::Violation(format!(
+                    "upstream refusal {refusal:?} is not represented by matching response.refusal.delta and response.refusal.done events"
+                ));
+            }
+        }
+        return Verdict::Conformant;
+    }
+
+    let client = match serde_json::from_str::<Value>(client_response) {
+        Ok(body) => body,
+        Err(_) => {
+            return Verdict::Violation("client response body is not valid JSON".to_string());
+        }
+    };
+    let typed_refusals = client
+        .get("output")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(|item| item.get("content").and_then(Value::as_array))
+        .flatten()
+        .filter(|part| part.get("type").and_then(Value::as_str) == Some("refusal"))
+        .filter_map(|part| part.get("refusal").and_then(Value::as_str))
+        .collect::<Vec<_>>();
+    for refusal in upstream_refusals {
+        if !typed_refusals.contains(&refusal.as_str()) {
+            return Verdict::Violation(format!(
+                "upstream refusal {refusal:?} is not a typed Responses refusal content part"
+            ));
+        }
+    }
+    Verdict::Conformant
+}
+
 /// Invariant (bug 037): when a gateway rewrites an upstream tool-call id to satisfy
 /// a client-side charset contract, it MUST reverse the rewrite before sending the
 /// id back upstream. The upstream never issued the sanitized id; echoing it breaks
@@ -935,6 +1048,57 @@ mod tests {
             ),
             Verdict::Conformant
         );
+    }
+
+    #[test]
+    fn responses_refusal_checker_requires_typed_buffered_content() {
+        let upstream = r#"{"choices":[{"message":{"content":null,"refusal":"cannot help"}}]}"#;
+        let conformant = r#"{"output":[{"type":"message","content":[{"type":"refusal","refusal":"cannot help"}]}]}"#;
+        assert_eq!(
+            responses_refusal_semantics_preserved(upstream, conformant),
+            Verdict::Conformant
+        );
+
+        let flattened = r#"{"output":[{"type":"message","content":[{"type":"output_text","text":"cannot help"}]}]}"#;
+        assert!(matches!(
+            responses_refusal_semantics_preserved(upstream, flattened),
+            Verdict::Violation(_)
+        ));
+        assert!(matches!(
+            responses_refusal_semantics_preserved(r#"{"choices":[]}"#, conformant),
+            Verdict::Violation(_)
+        ));
+        assert!(matches!(
+            responses_refusal_semantics_preserved(upstream, "not-json"),
+            Verdict::Violation(_)
+        ));
+    }
+
+    #[test]
+    fn responses_refusal_checker_requires_stream_delta_and_done() {
+        let upstream = "data: {\"choices\":[{\"delta\":{\"refusal\":\"cannot \"}}]}\n\n\
+            data: {\"choices\":[{\"delta\":{\"refusal\":\"help\"}}]}\n\n";
+        let conformant = "event: response.refusal.delta\n\
+            data: {\"type\":\"response.refusal.delta\",\"delta\":\"cannot help\"}\n\n\
+            event: response.refusal.done\n\
+            data: {\"type\":\"response.refusal.done\",\"refusal\":\"cannot help\"}\n\n";
+        assert_eq!(
+            responses_refusal_semantics_preserved(upstream, conformant),
+            Verdict::Conformant
+        );
+
+        let flattened = "event: response.output_text.delta\n\
+            data: {\"type\":\"response.output_text.delta\",\"delta\":\"cannot help\"}\n\n";
+        assert!(matches!(
+            responses_refusal_semantics_preserved(upstream, flattened),
+            Verdict::Violation(_)
+        ));
+        let missing_done = "event: response.refusal.delta\n\
+            data: {\"type\":\"response.refusal.delta\",\"delta\":\"cannot help\"}\n\n";
+        assert!(matches!(
+            responses_refusal_semantics_preserved(upstream, missing_done),
+            Verdict::Violation(_)
+        ));
     }
 
     #[test]

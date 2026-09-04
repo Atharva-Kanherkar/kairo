@@ -1,0 +1,27 @@
+{
+  "target_commit": "7a23989cbe18f1c6c67ee03684ce76bd5901a27d",
+  "label": "main",
+  "model": "captured-model",
+  "results": {
+    "responses-buffered": {
+      "runs": 5,
+      "typed_refusal_detected": 0,
+      "typed_refusal_missed": 5
+    },
+    "responses-stream": {
+      "runs": 5,
+      "typed_refusal_detected": 0,
+      "typed_refusal_missed": 5
+    },
+    "chat-buffered-control": {
+      "runs": 5,
+      "typed_refusal_detected": 5,
+      "typed_refusal_missed": 0
+    },
+    "chat-stream-control": {
+      "runs": 5,
+      "typed_refusal_detected": 5,
+      "typed_refusal_missed": 0
+    }
+  }
+}
