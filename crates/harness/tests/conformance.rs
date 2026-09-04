@@ -1374,6 +1374,108 @@ fn bifrost_plain_turn_keeps_content() {
     );
 }
 
+// ---- bug 067: LiteLLM erases Responses refusal text on Anthropic output ----
+
+fn issue_067_records(rel: &str) -> Vec<serde_json::Value> {
+    fixture(rel)
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .map(|line| serde_json::from_str(line).unwrap_or_else(|e| panic!("{rel}: {e}")))
+        .collect()
+}
+
+#[test]
+fn litellm_drops_structured_refusal_on_anthropic_translation() {
+    let rel = "transcripts/067/litellm-anthropic-refusal-loss.jsonl";
+    let records = issue_067_records(rel);
+    assert_eq!(records.len(), 5, "{rel} must remain the five-run capture");
+
+    for (index, record) in records.iter().enumerate() {
+        assert_eq!(record["request"]["path"], "/v1/responses");
+        assert_eq!(record["request"]["user_agent"], "litellm/1.99.0");
+        assert!(
+            record.pointer("/request/headers").is_none(),
+            "{rel} line {} must not retain credential-bearing headers",
+            index + 1
+        );
+
+        let upstream = record["upstream_response"]["body_raw"]
+            .as_str()
+            .unwrap_or_else(|| panic!("{rel} line {} has no upstream body", index + 1));
+        let upstream_json: serde_json::Value = serde_json::from_str(upstream)
+            .unwrap_or_else(|e| panic!("{rel} line {} upstream body: {e}", index + 1));
+        assert_eq!(
+            upstream_json.pointer("/output/0/content/0/refusal"),
+            Some(&serde_json::json!("REFUSALPROBE cannot help")),
+            "{rel} line {} must contain the structured upstream refusal",
+            index + 1
+        );
+
+        let client = &record["client_response"];
+        assert!(
+            client["content"].as_array().is_some_and(Vec::is_empty),
+            "{rel} line {} must contain the observed empty Anthropic content",
+            index + 1
+        );
+        let client_json = client.to_string();
+        assert!(matches!(
+            response_content_not_empty(&client_json),
+            Verdict::Violation(_)
+        ));
+        assert_eq!(
+            refusal_text_preserved(upstream, &client_json),
+            Verdict::Violation(
+                "upstream refusal text \"REFUSALPROBE cannot help\" is absent from the client response"
+                    .to_string()
+            ),
+            "{rel} line {} must freeze refusal-text erasure",
+            index + 1
+        );
+    }
+}
+
+#[test]
+fn litellm_openai_route_keeps_structured_refusal() {
+    let rel = "transcripts/067/litellm-openai-refusal-control.jsonl";
+    let records = issue_067_records(rel);
+    assert_eq!(records.len(), 5, "{rel} must remain the five-run control");
+
+    for (index, record) in records.iter().enumerate() {
+        assert_eq!(record["request"]["path"], "/v1/chat/completions");
+        assert!(
+            record.pointer("/request/headers").is_none(),
+            "{rel} line {} must not retain credential-bearing headers",
+            index + 1
+        );
+
+        let upstream = record["upstream_response"]["body_raw"]
+            .as_str()
+            .unwrap_or_else(|| panic!("{rel} line {} has no upstream body", index + 1));
+        let upstream_json: serde_json::Value = serde_json::from_str(upstream)
+            .unwrap_or_else(|e| panic!("{rel} line {} upstream body: {e}", index + 1));
+        assert_eq!(
+            upstream_json.pointer("/choices/0/message/refusal"),
+            Some(&serde_json::json!("REFUSALPROBE cannot help")),
+            "{rel} line {} must contain the control refusal",
+            index + 1
+        );
+
+        let client = &record["client_response"];
+        assert_eq!(
+            client.pointer("/choices/0/message/provider_specific_fields/refusal"),
+            Some(&serde_json::json!("REFUSALPROBE cannot help")),
+            "{rel} line {} must preserve the refusal for the client",
+            index + 1
+        );
+        assert_eq!(
+            refusal_text_preserved(upstream, &client.to_string()),
+            Verdict::Conformant,
+            "{rel} line {} must remain a passing control",
+            index + 1
+        );
+    }
+}
+
 #[test]
 fn bifrost_does_not_restore_sanitized_toolcall_id() {
     let v = toolcall_id_restored_upstream(

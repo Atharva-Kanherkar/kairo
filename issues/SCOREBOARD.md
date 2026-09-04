@@ -62,11 +62,12 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 064 | LiteLLM `/v1/messages` drops `tools[].strict` while mapping Anthropic tools to OpenAI Responses; schema and name survive but the strict constraint does not | LiteLLM 1.96.2 (keyless capture rig) | adjacent [litellm#27490](https://github.com/BerriAI/litellm/issues/27490), reverse direction | ✅ capture 5/5, client HTTP 200 5/5. Same-proxy OpenAI ingress and direct Responses controls preserve `strict: true`. |
 | 065 | Switchyard Responses to Chat drops array instructions and demotes inline `system` / `developer` input items to `user` | Switchyard main `053a61e` (keyless capture rig) | no matching upstream issue | ✅ capture 5/5, client HTTP 200 5/5. String-instructions control stays a Chat `system` message. |
 | 066 | Switchyard `/v1/messages` drops Anthropic `tools[].strict` while translating to OpenAI Chat; schema and name survive but the strict constraint does not | Switchyard main `27fc1ce` (keyless capture rig) | 064 family, distinct gateway and target format | ✅ capture 5/5, client HTTP 200 5/5. Same-proxy OpenAI Chat ingress preserves `function.strict: true` 5/5. |
+| 067 | LiteLLM `/v1/messages` erases structured refusal text while translating an OpenAI Responses refusal; client receives `content: []` with `end_turn` | LiteLLM 1.99.0 (keyless capture rig) | no matching upstream issue | ✅ capture 5/5, client HTTP 200 5/5. OpenAI Chat control preserves structured refusal 5/5. |
 | 068 | Switchyard `/v1/messages` erases structured refusal text from an OpenAI Chat response and invents an empty Anthropic text block | Switchyard main `9523023`, 0.2.0 (keyless capture rig) | no matching upstream issue; distinct from 036 and 045 | ✅ capture 5/5, client HTTP 200 5/5. Same-proxy OpenAI response path preserves the same refusal 5/5. |
 
 Numbers 046-050 are reserved for unpublished GoModel round-2 findings (one bug per PR). Issues 052-056 (AxonHub round 2) land on sibling branches, not missing rows here.
 
-**Coverage**: 45 documented issue folders covering 49 distinct defects confirmed on the wire (48 on current releases)
+**Coverage**: 46 documented issue folders covering 50 distinct defects confirmed on the wire (49 on current releases)
 across LiteLLM, Switchyard, Bifrost, GoModel, AxonHub, and any-llm, counting 006 as its 4 independent field losses
 plus the LiteLLM copy of that class. LiteLLM confirmed: 001 (stop_reason, 1.82),
 002a (finish_reason), 002b (route drop), 004a (id smuggle), 004b (Responses
@@ -76,7 +77,7 @@ deleted), 006/007 (is_error + image deleted via Responses), 020 (client
 `api_key` override + sticky router upsert), 024 (`/health` extra_headers
 and `aws_session_token` leak), 026 (JSON `extra_headers`/`headers`/`organization`
 passthrough), 028 (`/gemini` pass-through copies `x-goog-upload-url ?key=`),
-041 (`/v1/messages` drops `stop_sequences`), 064 (`/v1/messages` drops function-tool strictness). Switchyard
+041 (`/v1/messages` drops `stop_sequences`), 064 (`/v1/messages` drops function-tool strictness), 067 (structured refusal text erased on Anthropic translation). Switchyard
 confirmed: 005 (id sanitizer), 006 (4 field losses), 007 (multimodal
 stringified), 016 (thinking dropped), 017 (parallel flag), 018 (document
 dumped), 019 (invented cache breakpoint), 023 (`api-key` and OpenAI
