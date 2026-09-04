@@ -26,12 +26,12 @@ offline with no provider keys.
 <!-- kairo-counts:start -->
 | Metric | Value |
 |---|---|
-| Reproduced issue folders | 45 |
+| Reproduced issue folders | 46 |
 | Gateways under test | LiteLLM, NVIDIA Switchyard, Bifrost, GoModel, AxonHub, and any-llm |
-| Harness tests | 122 (108 conformance checks against recorded transcripts, 14 unit) |
+| Harness tests | 124 (110 conformance checks against recorded transcripts, 14 unit) |
 <!-- kairo-counts:end -->
 
-The 45 folders cover 49 distinct defects confirmed on the wire, 48 of them on
+The 46 folders cover 50 distinct defects confirmed on the wire, 49 of them on
 current releases at the time of capture. The full ledger, including the cited
 bugs that did not reproduce, is [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md).
 One finding is filed upstream as
@@ -49,10 +49,10 @@ reproduction commands.
 |---|---|---|---|---|---|---|
 | Terminal reason survives translation (`tool_use`, `content_filter`, `max_tokens`, refusal) | [001](issues/001-anthropic-stream-toolcall-translation), [002](issues/002-litellm-ollama-toolcall-loss) | [010](issues/010-switchyard-content-filter-and-reorder) | [030](issues/030-bifrost-anthropic-stream-stop-reason), [034](issues/034-bifrost-erases-content-filter), [035](issues/035-bifrost-erases-truncation), [036](issues/036-bifrost-drops-refusal-content) | | | |
 | Request constraints survive (`disable_parallel_tool_use`, `stop_sequences`, `tools[].strict`, `output_format`) | [017](issues/017-parallel-tool-flag-dropped), [041](issues/041-litellm-drops-stop-sequences), [064](issues/064-litellm-drops-tool-strict) | [006](issues/006-switchyard-crossformat-losses), [017](issues/017-parallel-tool-flag-dropped), [040](issues/040-switchyard-drops-output-format), [065](issues/065-switchyard-responses-instruction-loss), [066](issues/066-switchyard-drops-tool-strict) | [031](issues/031-bifrost-drops-parallel-tool-flag), [032](issues/032-bifrost-drops-stop-sequences) | [042](issues/042-gomodel-drops-output-format), [043](issues/043-gomodel-drops-parallel-tool-flag) | [051](issues/051-axonhub-drops-output-format) | [058](issues/058-any-llm-drops-parallel-tool-flag), [062](issues/062-any-llm-empty-schema-shell) |
-| Content blocks survive (refusal, `is_error`, image and document blocks in tool results and user turns) | [006](issues/006-switchyard-crossformat-losses), [007](issues/007-switchyard-toolresult-multimodal-stringified), [018](issues/018-user-document-dropped), [067](issues/067-litellm-drops-refusal-content) | [006](issues/006-switchyard-crossformat-losses), [007](issues/007-switchyard-toolresult-multimodal-stringified), [018](issues/018-user-document-dropped) | | | | [059](issues/059-any-llm-drops-is-error), [060](issues/060-any-llm-drops-toolresult-image), [061](issues/061-any-llm-drops-toolresult-document) |
+| Content blocks survive (refusal, `is_error`, image and document blocks in tool results and user turns) | [006](issues/006-switchyard-crossformat-losses), [007](issues/007-switchyard-toolresult-multimodal-stringified), [018](issues/018-user-document-dropped), [067](issues/067-litellm-drops-refusal-content) | [006](issues/006-switchyard-crossformat-losses), [007](issues/007-switchyard-toolresult-multimodal-stringified), [018](issues/018-user-document-dropped), [068](issues/068-switchyard-drops-refusal-content) | | | | [059](issues/059-any-llm-drops-is-error), [060](issues/060-any-llm-drops-toolresult-image), [061](issues/061-any-llm-drops-toolresult-document) |
 | Assistant history survives replay (`thinking` blocks and signatures) | [016](issues/016-thinking-history-lost) (leaked as visible text) | [016](issues/016-thinking-history-lost) (dropped) | [033](issues/033-bifrost-drops-thinking-history) | | | [057](issues/057-any-llm-drops-thinking-history) |
 | Tool-call ids round-trip | [004](issues/004-gemini-thought-signature) | [005](issues/005-switchyard-toolid-sanitizer) | [037](issues/037-bifrost-toolid-not-restored) | | | |
-| Nothing is invented (empty text blocks, phantom message items, `cache_control`) | [001](issues/001-anthropic-stream-toolcall-translation), [009](issues/009-litellm-responses-phantom-message) | [019](issues/019-switchyard-invents-prompt-cache), [045](issues/045-switchyard-empty-text-before-tooluse) | | | | |
+| Nothing is invented (empty text blocks, phantom message items, `cache_control`) | [001](issues/001-anthropic-stream-toolcall-translation), [009](issues/009-litellm-responses-phantom-message) | [019](issues/019-switchyard-invents-prompt-cache), [045](issues/045-switchyard-empty-text-before-tooluse), [068](issues/068-switchyard-drops-refusal-content) | | | | |
 | Malformed input fails closed | [008](issues/008-litellm-messages-indexerror-crash) | | | | | |
 | Client credentials stay client-side | [020](issues/020-litellm-client-api-key), [024](issues/024-litellm-health-extra-headers), [026](issues/026-litellm-extra-headers-org), [028](issues/028-litellm-gemini-passthrough-upload-url) | [023](issues/023-switchyard-forwards-org-api-key), [025](issues/025-switchyard-transport-query-key), [027](issues/027-switchyard-forwards-x-goog-api-key), [063](issues/063-switchyard-redirect-follows-x-api-key) | | | | |
 
