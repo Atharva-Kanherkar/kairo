@@ -1202,6 +1202,22 @@ mod tests {
             responses_refusal_semantics_preserved(responses_upstream, conformant),
             Verdict::Conformant
         );
+        let two_upstream =
+            "data: {\"type\":\"response.refusal.done\",\"refusal\":\"cannot help\"}\n\n\
+            data: {\"type\":\"response.refusal.done\",\"refusal\":\"second refusal\"}\n\n";
+        let second_lifecycle = conformant
+            .replace("msg_1", "msg_2")
+            .replace("cannot help", "second refusal")
+            .replace("\"output_index\":0", "\"output_index\":1");
+        let two_client = format!("{conformant}{second_lifecycle}");
+        assert_eq!(
+            responses_refusal_semantics_preserved(two_upstream, &two_client),
+            Verdict::Conformant
+        );
+        assert!(matches!(
+            responses_refusal_semantics_preserved(two_upstream, conformant),
+            Verdict::Violation(_)
+        ));
     }
 
     #[test]
