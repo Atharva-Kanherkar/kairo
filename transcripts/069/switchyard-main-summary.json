@@ -1,5 +1,6 @@
 {
   "target_commit": "7a23989cbe18f1c6c67ee03684ce76bd5901a27d",
+  "binary_sha256": "cdf1ff53f411b5bd5a6dadbcd85e4883e986d310f2a94ee26693b4911eff0e8e",
   "label": "main",
   "model": "captured-model",
   "results": {

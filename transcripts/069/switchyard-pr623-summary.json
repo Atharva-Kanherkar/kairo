@@ -1,5 +1,6 @@
 {
   "target_commit": "2765f46972bf89a96beb5b2158b0fc56a3a72288",
+  "binary_sha256": "749029d3e404deb7077ea76e00fdc73cd3e8f0d6756b9609755c1b6176c0a63f",
   "label": "pr623",
   "model": "captured-model",
   "results": {

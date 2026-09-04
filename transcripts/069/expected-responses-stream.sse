@@ -1,5 +1,5 @@
 event: response.content_part.added
-data: {"type":"response.content_part.added","output_index":0,"content_index":0,"part":{"type":"refusal","refusal":""},"sequence_number":2}
+data: {"type":"response.content_part.added","output_index":0,"content_index":0,"item_id":"msg_refusal_069","part":{"type":"refusal","refusal":""},"sequence_number":2}
 
 event: response.refusal.delta
 data: {"type":"response.refusal.delta","output_index":0,"content_index":0,"item_id":"msg_refusal_069","delta":"REFUSALPROBE cannot help","sequence_number":3}
@@ -8,4 +8,4 @@ event: response.refusal.done
 data: {"type":"response.refusal.done","output_index":0,"content_index":0,"item_id":"msg_refusal_069","refusal":"REFUSALPROBE cannot help","sequence_number":4}
 
 event: response.content_part.done
-data: {"type":"response.content_part.done","output_index":0,"content_index":0,"part":{"type":"refusal","refusal":"REFUSALPROBE cannot help"},"sequence_number":5}
+data: {"type":"response.content_part.done","output_index":0,"content_index":0,"item_id":"msg_refusal_069","part":{"type":"refusal","refusal":"REFUSALPROBE cannot help"},"sequence_number":5}

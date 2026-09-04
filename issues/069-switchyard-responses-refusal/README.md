@@ -2,7 +2,7 @@
 
 - **Upstream**: [NVIDIA-NeMo/Switchyard#622](https://github.com/NVIDIA-NeMo/Switchyard/issues/622)
   is open and [pull request #623](https://github.com/NVIDIA-NeMo/Switchyard/pull/623)
-  is a draft as of 2026-09-04. They cover refusal-text loss on Anthropic output,
+  is a draft as of 2026-09-05. They cover refusal-text loss on Anthropic output,
   not the OpenAI Responses type loss recorded here.
 - **Tool under test**: Switchyard `main` commit **`7a23989`** and pull request
   #623 head **`2765f46`**, both reporting `switchyard-server` **0.2.0**.
@@ -114,24 +114,28 @@ Rebuild and rerun the real server path:
 
 ```bash
 git clone --filter=blob:none https://github.com/NVIDIA-NeMo/Switchyard.git /tmp/switchyard-069
+rustup toolchain install 1.96.1
 cd /tmp/switchyard-069
 git checkout --detach 7a23989cbe18f1c6c67ee03684ce76bd5901a27d
-cargo build --release -p switchyard-server
-cp target/release/switchyard-server /tmp/switchyard-069-main
-git checkout --detach 2765f46972bf89a96beb5b2158b0fc56a3a72288
-cargo build --release -p switchyard-server
-cp target/release/switchyard-server /tmp/switchyard-069-pr623
-
 cd /path/to/kairo
 python3 transcripts/069/reproduce.py \
-  --switchyard-server /tmp/switchyard-069-main \
+  --switchyard-source /tmp/switchyard-069 \
   --label main \
-  --commit 7a23989cbe18f1c6c67ee03684ce76bd5901a27d
+  --expected-commit 7a23989cbe18f1c6c67ee03684ce76bd5901a27d
+
+cd /tmp/switchyard-069
+git checkout --detach 2765f46972bf89a96beb5b2158b0fc56a3a72288
+cd /path/to/kairo
 python3 transcripts/069/reproduce.py \
-  --switchyard-server /tmp/switchyard-069-pr623 \
+  --switchyard-source /tmp/switchyard-069 \
   --label pr623 \
-  --commit 2765f46972bf89a96beb5b2158b0fc56a3a72288
+  --expected-commit 2765f46972bf89a96beb5b2158b0fc56a3a72288
 ```
+
+The reproducer requires a clean tracked checkout, resolves the Cargo and Rust
+compiler binaries for toolchain 1.96.1 through `rustup`, builds with `--locked`,
+checks the exact commit and reported version, and records the binary SHA-256 and
+compiler version in every trial.
 
 ## Three-gate review
 
@@ -171,7 +175,7 @@ Result: **PASS**.
 
 ### Gate 3: upstream status
 
-Checked 2026-09-04 against Switchyard `main` `7a23989`, release 0.2.0, and pull
+Checked 2026-09-05 against Switchyard `main` `7a23989`, release 0.2.0, and pull
 request #623 head `2765f46`.
 
 Searches covered open and closed issues and pull requests for

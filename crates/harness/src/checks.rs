@@ -858,6 +858,17 @@ fn refusal_strings(response: &str) -> Result<Vec<String>, String> {
         if !chat_refusal.is_empty() {
             return Ok(vec![chat_refusal]);
         }
+        let response_done_refusals = events
+            .iter()
+            .filter(|event| {
+                event.get("type").and_then(Value::as_str) == Some("response.refusal.done")
+            })
+            .filter_map(|event| event.get("refusal").and_then(Value::as_str))
+            .map(str::to_string)
+            .collect::<Vec<_>>();
+        if !response_done_refusals.is_empty() {
+            return Ok(response_done_refusals);
+        }
         let mut refusals = Vec::new();
         for event in &events {
             collect_keyed_strings(event, "refusal", &mut refusals);
@@ -870,6 +881,31 @@ fn refusal_strings(response: &str) -> Result<Vec<String>, String> {
     let mut refusals = Vec::new();
     collect_keyed_strings(&body, "refusal", &mut refusals);
     Ok(refusals)
+}
+
+fn responses_event_key(event: &Value) -> Option<(&str, u64, u64)> {
+    Some((
+        event.get("item_id")?.as_str()?,
+        event.get("output_index")?.as_u64()?,
+        event.get("content_index")?.as_u64()?,
+    ))
+}
+
+fn refusal_part_event_matches(
+    event: &Value,
+    event_type: &str,
+    key: (&str, u64, u64),
+    expected_refusal: Option<&str>,
+) -> bool {
+    if event.get("type").and_then(Value::as_str) != Some(event_type)
+        || responses_event_key(event) != Some(key)
+        || event.pointer("/part/type").and_then(Value::as_str) != Some("refusal")
+    {
+        return false;
+    }
+    expected_refusal.is_none_or(|expected| {
+        event.pointer("/part/refusal").and_then(Value::as_str) == Some(expected)
+    })
 }
 
 /// Invariant (bug 069): a structured refusal returned by an upstream dialect
@@ -901,24 +937,45 @@ pub fn responses_refusal_semantics_preserved(
                 "client response has no parseable Responses SSE data events".to_string(),
             );
         }
-        let delta_text = events
-            .iter()
-            .filter(|event| {
-                event.get("type").and_then(Value::as_str) == Some("response.refusal.delta")
-            })
-            .filter_map(|event| event.get("delta").and_then(Value::as_str))
-            .collect::<String>();
-        let done_refusals = events
-            .iter()
-            .filter(|event| {
-                event.get("type").and_then(Value::as_str) == Some("response.refusal.done")
-            })
-            .filter_map(|event| event.get("refusal").and_then(Value::as_str))
-            .collect::<Vec<_>>();
         for refusal in upstream_refusals {
-            if delta_text != refusal || !done_refusals.contains(&refusal.as_str()) {
+            let represented = events
+                .iter()
+                .filter(|event| {
+                    event.get("type").and_then(Value::as_str) == Some("response.refusal.done")
+                        && event.get("refusal").and_then(Value::as_str) == Some(refusal.as_str())
+                })
+                .filter_map(responses_event_key)
+                .any(|key| {
+                    let delta_text = events
+                        .iter()
+                        .filter(|event| {
+                            event.get("type").and_then(Value::as_str)
+                                == Some("response.refusal.delta")
+                                && responses_event_key(event) == Some(key)
+                        })
+                        .filter_map(|event| event.get("delta").and_then(Value::as_str))
+                        .collect::<String>();
+                    delta_text == refusal
+                        && events.iter().any(|event| {
+                            refusal_part_event_matches(
+                                event,
+                                "response.content_part.added",
+                                key,
+                                None,
+                            )
+                        })
+                        && events.iter().any(|event| {
+                            refusal_part_event_matches(
+                                event,
+                                "response.content_part.done",
+                                key,
+                                Some(refusal.as_str()),
+                            )
+                        })
+                });
+            if !represented {
                 return Verdict::Violation(format!(
-                    "upstream refusal {refusal:?} is not represented by matching response.refusal.delta and response.refusal.done events"
+                    "upstream refusal {refusal:?} is not represented by one correlated Responses refusal content-part lifecycle"
                 ));
             }
         }
@@ -933,6 +990,8 @@ pub fn responses_refusal_semantics_preserved(
         .and_then(Value::as_array)
         .into_iter()
         .flatten()
+        .filter(|item| item.get("type").and_then(Value::as_str) == Some("message"))
+        .filter(|item| item.get("role").and_then(Value::as_str) == Some("assistant"))
         .filter_map(|item| item.get("content").and_then(Value::as_array))
         .flatten()
         .filter(|part| part.get("type").and_then(Value::as_str) == Some("refusal"))
@@ -1050,7 +1109,7 @@ mod tests {
     #[test]
     fn responses_refusal_checker_requires_typed_buffered_content() {
         let upstream = r#"{"choices":[{"message":{"content":null,"refusal":"cannot help"}}]}"#;
-        let conformant = r#"{"output":[{"type":"message","content":[{"type":"refusal","refusal":"cannot help"}]}]}"#;
+        let conformant = r#"{"output":[{"type":"message","role":"assistant","content":[{"type":"refusal","refusal":"cannot help"}]}]}"#;
         assert_eq!(
             responses_refusal_semantics_preserved(upstream, conformant),
             Verdict::Conformant
@@ -1069,16 +1128,40 @@ mod tests {
             responses_refusal_semantics_preserved(upstream, "not-json"),
             Verdict::Violation(_)
         ));
+        let wrong_output_item = r#"{"output":[{"type":"function_call","role":"assistant","content":[{"type":"refusal","refusal":"cannot help"}]}]}"#;
+        assert!(matches!(
+            responses_refusal_semantics_preserved(upstream, wrong_output_item),
+            Verdict::Violation(_)
+        ));
+        assert!(matches!(
+            responses_refusal_semantics_preserved("not-json", conformant),
+            Verdict::Violation(_)
+        ));
+        let two_upstream =
+            r#"{"choices":[{"message":{"refusal":"first"}},{"message":{"refusal":"second"}}]}"#;
+        let two_client = r#"{"output":[{"type":"message","role":"assistant","content":[{"type":"refusal","refusal":"first"},{"type":"refusal","refusal":"second"}]}]}"#;
+        assert_eq!(
+            responses_refusal_semantics_preserved(two_upstream, two_client),
+            Verdict::Conformant
+        );
+        assert!(matches!(
+            responses_refusal_semantics_preserved(two_upstream, conformant),
+            Verdict::Violation(_)
+        ));
     }
 
     #[test]
     fn responses_refusal_checker_requires_stream_delta_and_done() {
         let upstream = "data: {\"choices\":[{\"delta\":{\"refusal\":\"cannot \"}}]}\n\n\
             data: {\"choices\":[{\"delta\":{\"refusal\":\"help\"}}]}\n\n";
-        let conformant = "event: response.refusal.delta\n\
-            data: {\"type\":\"response.refusal.delta\",\"delta\":\"cannot help\"}\n\n\
+        let conformant = "event: response.content_part.added\n\
+            data: {\"type\":\"response.content_part.added\",\"item_id\":\"msg_1\",\"output_index\":0,\"content_index\":0,\"part\":{\"type\":\"refusal\",\"refusal\":\"\"}}\n\n\
+            event: response.refusal.delta\n\
+            data: {\"type\":\"response.refusal.delta\",\"item_id\":\"msg_1\",\"output_index\":0,\"content_index\":0,\"delta\":\"cannot help\"}\n\n\
             event: response.refusal.done\n\
-            data: {\"type\":\"response.refusal.done\",\"refusal\":\"cannot help\"}\n\n";
+            data: {\"type\":\"response.refusal.done\",\"item_id\":\"msg_1\",\"output_index\":0,\"content_index\":0,\"refusal\":\"cannot help\"}\n\n\
+            event: response.content_part.done\n\
+            data: {\"type\":\"response.content_part.done\",\"item_id\":\"msg_1\",\"output_index\":0,\"content_index\":0,\"part\":{\"type\":\"refusal\",\"refusal\":\"cannot help\"}}\n\n";
         assert_eq!(
             responses_refusal_semantics_preserved(upstream, conformant),
             Verdict::Conformant
@@ -1096,6 +1179,29 @@ mod tests {
             responses_refusal_semantics_preserved(upstream, missing_done),
             Verdict::Violation(_)
         ));
+        let crossed_items = conformant.replace(
+            "\"type\":\"response.refusal.delta\",\"item_id\":\"msg_1\"",
+            "\"type\":\"response.refusal.delta\",\"item_id\":\"msg_2\"",
+        );
+        assert!(matches!(
+            responses_refusal_semantics_preserved(upstream, &crossed_items),
+            Verdict::Violation(_)
+        ));
+        assert!(matches!(
+            responses_refusal_semantics_preserved("data: not-json\n\n", conformant),
+            Verdict::Violation(_)
+        ));
+        assert!(matches!(
+            responses_refusal_semantics_preserved(upstream, "data: not-json\n\n"),
+            Verdict::Violation(_)
+        ));
+        let responses_upstream =
+            "data: {\"type\":\"response.refusal.delta\",\"delta\":\"cannot help\"}\n\n\
+            data: {\"type\":\"response.refusal.done\",\"refusal\":\"cannot help\"}\n\n";
+        assert_eq!(
+            responses_refusal_semantics_preserved(responses_upstream, conformant),
+            Verdict::Conformant
+        );
     }
 
     #[test]

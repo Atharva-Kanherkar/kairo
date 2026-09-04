@@ -10,6 +10,7 @@ is read or required.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import http.client
 import json
 import os
@@ -25,6 +26,9 @@ from typing import Any
 MODEL = "captured-model"
 REFUSAL = "REFUSALPROBE cannot help"
 PROMPT = "REFUSALPROBE trigger"
+MAIN_COMMIT = "7a23989cbe18f1c6c67ee03684ce76bd5901a27d"
+PR623_COMMIT = "2765f46972bf89a96beb5b2158b0fc56a3a72288"
+RUST_TOOLCHAIN = "1.96.1"
 
 
 def json_bytes(value: Any) -> bytes:
@@ -84,6 +88,7 @@ class CaptureServer(ThreadingHTTPServer):
 
     def add_exchange(self, exchange: dict[str, Any]) -> None:
         with self.lock:
+            exchange["exchange_index"] = len(self.exchanges) + 1
             self.exchanges.append(exchange)
 
 
@@ -98,35 +103,45 @@ class CaptureHandler(BaseHTTPRequestHandler):
         request_raw = self.rfile.read(int(self.headers.get("content-length", "0")))
         request = json.loads(request_raw)
         streaming = bool(request.get("stream"))
-        response_raw = chat_stream() if streaming else chat_buffered()
+        valid_path = self.path == "/v1/chat/completions"
+        response_status = 200 if valid_path else 404
+        response_raw = (
+            chat_stream()
+            if valid_path and streaming
+            else chat_buffered()
+            if valid_path
+            else json_bytes({"error": "unexpected upstream path"})
+        )
         server.add_exchange(
             {
                 "method": "POST",
                 "path": self.path,
                 "content_type": self.headers.get("content-type"),
                 "body_raw": request_raw.decode(),
-                "response_status": 200,
+                "response_status": response_status,
                 "response_content_type": (
                     "text/event-stream; charset=utf-8"
-                    if streaming
+                    if valid_path and streaming
                     else "application/json"
                 ),
                 "response_body_raw": response_raw.decode(),
             }
         )
-        self.send_response(200)
+        self.send_response(response_status)
         self.send_header(
             "content-type",
-            "text/event-stream; charset=utf-8" if streaming else "application/json",
+            "text/event-stream; charset=utf-8"
+            if valid_path and streaming
+            else "application/json",
         )
-        if streaming:
+        if valid_path and streaming:
             self.send_header("connection", "close")
         else:
             self.send_header("content-length", str(len(response_raw)))
         self.end_headers()
         self.wfile.write(response_raw)
         self.wfile.flush()
-        if streaming:
+        if valid_path and streaming:
             self.close_connection = True
 
 
@@ -256,18 +271,146 @@ def request_for(path: str, streaming: bool) -> dict[str, Any]:
     return request
 
 
+def command_output(*args: str, cwd: Path | None = None) -> str:
+    return subprocess.check_output(args, cwd=cwd, text=True).strip()
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def build_pinned_server(source: Path, expected_commit: str) -> tuple[Path, dict[str, str]]:
+    source = source.resolve()
+    actual_commit = command_output("git", "rev-parse", "HEAD", cwd=source)
+    if actual_commit != expected_commit:
+        raise SystemExit(
+            f"source commit {actual_commit} does not match --expected-commit {expected_commit}"
+        )
+    dirty = command_output(
+        "git", "status", "--porcelain", "--untracked-files=no", cwd=source
+    )
+    if dirty:
+        raise SystemExit("Switchyard source has tracked modifications; use a clean checkout")
+    cargo = command_output("rustup", "which", "--toolchain", RUST_TOOLCHAIN, "cargo")
+    rustc = command_output("rustup", "which", "--toolchain", RUST_TOOLCHAIN, "rustc")
+    build_environment = os.environ.copy()
+    build_environment.update({"CARGO": cargo, "RUSTC": rustc})
+    subprocess.run(
+        [
+            cargo,
+            "build",
+            "--release",
+            "--locked",
+            "-p",
+            "switchyard-server",
+        ],
+        cwd=source,
+        env=build_environment,
+        check=True,
+    )
+    binary = source / "target/release/switchyard-server"
+    version = command_output(str(binary), "--version")
+    if version != "switchyard-server 0.2.0":
+        raise SystemExit(f"unexpected binary version: {version}")
+    return binary, {
+        "commit": actual_commit,
+        "binary_version": version.removeprefix("switchyard-server "),
+        "binary_sha256": sha256(binary),
+        "rustc_version": command_output(rustc, "--version"),
+    }
+
+
+def assert_upstream_refusal(
+    exchange: dict[str, Any], streaming: bool, client_path: str
+) -> None:
+    if exchange["path"] != "/v1/chat/completions":
+        raise AssertionError(f"unexpected upstream path: {exchange['path']}")
+    if exchange["content_type"] != "application/json":
+        raise AssertionError(f"unexpected upstream content type: {exchange['content_type']}")
+    expected_request: dict[str, Any] = {
+        "model": MODEL,
+        "messages": [{"role": "user", "content": PROMPT}],
+        "max_completion_tokens" if client_path == "/v1/responses" else "max_tokens": 32,
+    }
+    if streaming:
+        expected_request.update(
+            {"stream": True, "stream_options": {"include_usage": True}}
+        )
+    if json.loads(exchange["body_raw"]) != expected_request:
+        raise AssertionError("upstream request is not the exact expected translation")
+    if exchange["response_status"] != 200:
+        raise AssertionError("capture upstream did not return HTTP 200")
+
+    raw = exchange["response_body_raw"]
+    if streaming:
+        if exchange["response_content_type"] != "text/event-stream; charset=utf-8":
+            raise AssertionError("upstream SSE content type changed")
+        if raw != chat_stream().decode():
+            raise AssertionError("upstream SSE is not the exact canned structured refusal")
+        return
+
+    if exchange["response_content_type"] != "application/json":
+        raise AssertionError("upstream JSON content type changed")
+    if raw != chat_buffered().decode():
+        raise AssertionError("upstream JSON is not the exact canned structured refusal")
+
+
+def assert_revision_result(
+    commit: str,
+    path: str,
+    streaming: bool,
+    exchange: dict[str, Any],
+    client_raw: str,
+    consumer: dict[str, Any],
+) -> None:
+    if path == "/v1/chat/completions":
+        if client_raw != exchange["response_body_raw"]:
+            raise AssertionError("Chat control is not byte-equal to the upstream response")
+        if not consumer["classified_as_refusal"]:
+            raise AssertionError("Chat control did not preserve the structured refusal")
+        return
+
+    if consumer["classified_as_refusal"]:
+        raise AssertionError("typed Responses refusal unexpectedly survived")
+    if "response.refusal" in client_raw or '"type":"refusal"' in client_raw:
+        raise AssertionError("Responses result unexpectedly contains a typed refusal")
+    if commit == MAIN_COMMIT:
+        if consumer["ordinary_output_text"]:
+            raise AssertionError("current main unexpectedly preserved refusal text")
+        expected_types = ["response.created", "response.completed"]
+        if streaming and consumer["event_types"] != expected_types:
+            raise AssertionError("current-main stream shape changed")
+        if not streaming and consumer["content_types"] != ["output_text"]:
+            raise AssertionError("current-main buffered shape changed")
+    elif commit == PR623_COMMIT:
+        if consumer["ordinary_output_text"] != REFUSAL:
+            raise AssertionError("PR 623 did not flatten the refusal to output_text")
+        if streaming and "response.output_text.delta" not in consumer["event_types"]:
+            raise AssertionError("PR 623 stream has no output_text delta")
+        if not streaming and consumer["content_types"] != ["output_text"]:
+            raise AssertionError("PR 623 buffered shape changed")
+    else:
+        raise AssertionError(f"no frozen expectation for commit {commit}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--switchyard-server", required=True)
+    parser.add_argument("--switchyard-source", type=Path, required=True)
     parser.add_argument("--label", required=True)
-    parser.add_argument("--commit", required=True)
+    parser.add_argument("--expected-commit", required=True)
     parser.add_argument("--output-dir", type=Path, default=Path(__file__).parent)
     parser.add_argument("--runs", type=int, default=5)
     args = parser.parse_args()
 
-    if not os.access(args.switchyard_server, os.X_OK):
-        raise SystemExit(f"not executable: {args.switchyard_server}")
+    expected_labels = {MAIN_COMMIT: "main", PR623_COMMIT: "pr623"}
+    if expected_labels.get(args.expected_commit) != args.label:
+        raise SystemExit("--label must match the frozen --expected-commit")
     args.output_dir.mkdir(parents=True, exist_ok=True)
+    binary, target = build_pinned_server(args.switchyard_source, args.expected_commit)
 
     upstream = CaptureServer()
     upstream_port = int(upstream.server_address[1])
@@ -292,7 +435,7 @@ def main() -> None:
         )
         process = subprocess.Popen(
             [
-                args.switchyard_server,
+                str(binary),
                 "--config",
                 str(config),
                 "--host",
@@ -323,6 +466,7 @@ def main() -> None:
                     if len(upstream.exchanges) != before + 1:
                         raise AssertionError("expected exactly one upstream exchange")
                     exchange = upstream.exchanges[-1]
+                    assert_upstream_refusal(exchange, streaming, path)
                     consumer = (
                         responses_consumer(client_raw, streaming)
                         if path == "/v1/responses"
@@ -331,8 +475,7 @@ def main() -> None:
                     record = {
                         "target": {
                             "repository": "https://github.com/NVIDIA-NeMo/Switchyard",
-                            "commit": args.commit,
-                            "binary_version": "0.2.0",
+                            **target,
                             "configuration": "openai_chat backend, passthrough route, max_retries=0",
                         },
                         "trial": trial,
@@ -353,18 +496,15 @@ def main() -> None:
                     }
                     if status != 200:
                         raise AssertionError(f"{name} trial {trial}: HTTP {status}")
-                    if REFUSAL not in exchange["response_body_raw"]:
-                        raise AssertionError(f"{name} trial {trial}: upstream refusal absent")
+                    assert_revision_result(
+                        target["commit"], path, streaming, exchange, client_raw, consumer
+                    )
                     records.append(record)
 
                 output.write_text("".join(json.dumps(record) + "\n" for record in records))
                 classified = sum(
                     1 for record in records if record["consumer"]["classified_as_refusal"]
                 )
-                if "control" in name and classified != args.runs:
-                    raise AssertionError(f"{name}: control preserved {classified}/{args.runs}")
-                if "responses" in name and classified != 0:
-                    raise AssertionError(f"{name}: typed refusal unexpectedly preserved")
                 summaries[name] = {
                     "runs": args.runs,
                     "typed_refusal_detected": classified,
@@ -375,7 +515,8 @@ def main() -> None:
             summary_path.write_text(
                 json.dumps(
                     {
-                        "target_commit": args.commit,
+                        "target_commit": target["commit"],
+                        "binary_sha256": target["binary_sha256"],
                         "label": args.label,
                         "model": MODEL,
                         "results": summaries,
