@@ -13,8 +13,9 @@ use kairo::checks::{
     no_phantom_null_output_text, non_text_block_not_json_dumped, openai_stream_finish_reason,
     openai_toolcall_id_charset, parallel_tool_disable_preserved, reasoning_text_order_preserved,
     refusal_text_preserved, response_content_not_empty, response_omits_secret,
-    stop_sequence_forwarded, thinking_not_leaked_as_visible_text, thinking_text_forwarded,
-    tool_strict_forwarded, toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    responses_refusal_semantics_preserved, stop_sequence_forwarded,
+    thinking_not_leaked_as_visible_text, thinking_text_forwarded, tool_strict_forwarded,
+    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
     upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
     JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
@@ -1964,5 +1965,320 @@ fn switchyard_redirect_live_scoreboard_5_of_5() {
         assert!(row["sink_hits"].as_array().is_some_and(Vec::is_empty));
         assert_eq!(row["origin_has_authorization"], true);
         assert_eq!(row["sink_has_authorization"], false);
+    }
+}
+
+// ---- bug 069: Switchyard loses refusal typing on OpenAI Responses output ----
+
+struct Issue069Case {
+    commit: &'static str,
+    scenario: &'static str,
+    client_path: &'static str,
+    streaming: bool,
+    first_exchange: usize,
+}
+
+fn issue_069_case(rel: &str) -> Issue069Case {
+    let commit = if rel.contains("switchyard-main-") {
+        "7a23989cbe18f1c6c67ee03684ce76bd5901a27d"
+    } else if rel.contains("switchyard-pr623-") {
+        "2765f46972bf89a96beb5b2158b0fc56a3a72288"
+    } else {
+        panic!("unexpected issue 069 target: {rel}");
+    };
+    let (scenario, client_path, streaming, first_exchange) =
+        if rel.ends_with("responses-buffered.jsonl") {
+            ("responses-buffered", "/v1/responses", false, 1)
+        } else if rel.ends_with("responses-stream.jsonl") {
+            ("responses-stream", "/v1/responses", true, 6)
+        } else if rel.ends_with("chat-buffered-control.jsonl") {
+            ("chat-buffered-control", "/v1/chat/completions", false, 11)
+        } else if rel.ends_with("chat-stream-control.jsonl") {
+            ("chat-stream-control", "/v1/chat/completions", true, 16)
+        } else {
+            panic!("unexpected issue 069 scenario: {rel}");
+        };
+    Issue069Case {
+        commit,
+        scenario,
+        client_path,
+        streaming,
+        first_exchange,
+    }
+}
+
+fn assert_issue_069_envelope(
+    rel: &str,
+    record: &serde_json::Value,
+    index: usize,
+    case: &Issue069Case,
+    binary_sha: &str,
+) {
+    let line = index + 1;
+    assert_eq!(
+        record["target"]["repository"],
+        "https://github.com/NVIDIA-NeMo/Switchyard"
+    );
+    assert_eq!(record["target"]["commit"], case.commit, "{rel} line {line}");
+    assert_eq!(record["target"]["binary_version"], "0.2.0");
+    assert_eq!(record["target"]["binary_sha256"], binary_sha);
+    assert!(
+        record["target"]["rustc_version"]
+            .as_str()
+            .is_some_and(|version| version.starts_with("rustc 1.96.1 ")),
+        "{rel} line {line} must bind the compiler version"
+    );
+    assert_eq!(
+        record["target"]["configuration"],
+        "openai_chat backend, passthrough route, max_retries=0"
+    );
+    assert_eq!(record["trial"], line);
+    assert_eq!(record["scenario"], case.scenario);
+    assert_eq!(record["client_request"]["method"], "POST");
+    assert_eq!(record["client_request"]["path"], case.client_path);
+    assert_eq!(record["client_request"]["content_type"], "application/json");
+    assert_eq!(
+        record["upstream_exchange"]["exchange_index"],
+        case.first_exchange + index
+    );
+    assert_eq!(record["upstream_exchange"]["method"], "POST");
+    assert_eq!(record["upstream_exchange"]["path"], "/v1/chat/completions");
+    assert_eq!(
+        record["upstream_exchange"]["content_type"],
+        "application/json"
+    );
+    assert_eq!(record["upstream_exchange"]["response_status"], 200);
+    assert_eq!(record["client_response"]["status"], 200);
+}
+
+fn assert_issue_069_requests(rel: &str, record: &serde_json::Value, case: &Issue069Case) {
+    let client_body: serde_json::Value =
+        serde_json::from_str(record["client_request"]["body_raw"].as_str().unwrap()).unwrap();
+    let mut expected_client = if case.client_path == "/v1/responses" {
+        serde_json::json!({
+            "model": "main", "input": "REFUSALPROBE trigger", "max_output_tokens": 32
+        })
+    } else {
+        serde_json::json!({
+            "model": "main",
+            "messages": [{"role": "user", "content": "REFUSALPROBE trigger"}],
+            "max_tokens": 32
+        })
+    };
+    if case.streaming {
+        expected_client["stream"] = serde_json::json!(true);
+    }
+    assert_eq!(client_body, expected_client, "{rel} client request");
+
+    let upstream_body: serde_json::Value =
+        serde_json::from_str(record["upstream_exchange"]["body_raw"].as_str().unwrap()).unwrap();
+    let mut expected_upstream = serde_json::json!({
+        "model": "captured-model",
+        "messages": [{"role": "user", "content": "REFUSALPROBE trigger"}]
+    });
+    let token_field = if case.client_path == "/v1/responses" {
+        "max_completion_tokens"
+    } else {
+        "max_tokens"
+    };
+    expected_upstream[token_field] = serde_json::json!(32);
+    if case.streaming {
+        expected_upstream["stream"] = serde_json::json!(true);
+        expected_upstream["stream_options"] = serde_json::json!({"include_usage": true});
+    }
+    assert_eq!(upstream_body, expected_upstream, "{rel} upstream request");
+}
+
+fn assert_issue_069_upstream_response(rel: &str, record: &serde_json::Value, case: &Issue069Case) {
+    let upstream_raw = record["upstream_exchange"]["response_body_raw"]
+        .as_str()
+        .unwrap();
+    if case.streaming {
+        assert_eq!(
+            record["upstream_exchange"]["response_content_type"],
+            "text/event-stream; charset=utf-8"
+        );
+        assert_eq!(
+            record["client_response"]["content_type"],
+            "text/event-stream"
+        );
+        assert!(upstream_raw.ends_with("data: [DONE]\n\n"));
+        let events = upstream_raw
+            .lines()
+            .filter_map(|line| line.strip_prefix("data: "))
+            .filter(|data| *data != "[DONE]")
+            .map(|data| serde_json::from_str::<serde_json::Value>(data).unwrap())
+            .collect::<Vec<_>>();
+        assert_eq!(events.len(), 3, "{rel} upstream SSE event count");
+        assert!(events.iter().all(|event| {
+            event["object"] == "chat.completion.chunk" && event["model"] == "captured-model"
+        }));
+        let refusal = events
+            .iter()
+            .filter_map(|event| {
+                event
+                    .pointer("/choices/0/delta/refusal")
+                    .and_then(serde_json::Value::as_str)
+            })
+            .collect::<String>();
+        assert_eq!(refusal, "REFUSALPROBE cannot help");
+        assert_eq!(events[2]["choices"][0]["finish_reason"], "stop");
+        return;
+    }
+
+    assert_eq!(
+        record["upstream_exchange"]["response_content_type"],
+        "application/json"
+    );
+    assert_eq!(
+        record["client_response"]["content_type"],
+        "application/json"
+    );
+    let upstream: serde_json::Value = serde_json::from_str(upstream_raw).unwrap();
+    assert_eq!(upstream["object"], "chat.completion");
+    assert_eq!(upstream["model"], "captured-model");
+    assert_eq!(upstream["choices"].as_array().unwrap().len(), 1);
+    assert_eq!(
+        upstream["choices"][0]["message"]["content"],
+        serde_json::Value::Null
+    );
+    assert_eq!(
+        upstream["choices"][0]["message"]["refusal"],
+        "REFUSALPROBE cannot help"
+    );
+    assert_eq!(upstream["choices"][0]["finish_reason"], "stop");
+}
+
+fn issue_069_records(rel: &str) -> Vec<serde_json::Value> {
+    let records = fixture(rel)
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .map(|line| {
+            serde_json::from_str::<serde_json::Value>(line).unwrap_or_else(|e| panic!("{rel}: {e}"))
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(records.len(), 5, "{rel} must remain the five-run capture");
+    let case = issue_069_case(rel);
+    let binary_sha = records[0]["target"]["binary_sha256"]
+        .as_str()
+        .unwrap_or_else(|| panic!("{rel} target binary SHA-256"));
+    assert_eq!(binary_sha.len(), 64, "{rel} binary SHA-256 length");
+    assert!(binary_sha.bytes().all(|byte| byte.is_ascii_hexdigit()));
+    for (index, record) in records.iter().enumerate() {
+        assert_issue_069_envelope(rel, record, index, &case, binary_sha);
+        assert_issue_069_requests(rel, record, &case);
+        assert_issue_069_upstream_response(rel, record, &case);
+    }
+    records
+}
+
+#[test]
+fn switchyard_issue_069_expected_responses_shapes_are_conformant() {
+    let buffered_upstream =
+        r#"{"choices":[{"message":{"content":null,"refusal":"REFUSALPROBE cannot help"}}]}"#;
+    assert_eq!(
+        responses_refusal_semantics_preserved(
+            buffered_upstream,
+            &fixture("transcripts/069/expected-responses-buffered.json")
+        ),
+        Verdict::Conformant
+    );
+
+    let stream_upstream =
+        "data: {\"choices\":[{\"delta\":{\"refusal\":\"REFUSALPROBE cannot help\"}}]}\n\n";
+    assert_eq!(
+        responses_refusal_semantics_preserved(
+            stream_upstream,
+            &fixture("transcripts/069/expected-responses-stream.sse")
+        ),
+        Verdict::Conformant
+    );
+}
+
+#[test]
+fn switchyard_main_drops_responses_refusal_semantics() {
+    for rel in [
+        "transcripts/069/switchyard-main-responses-buffered.jsonl",
+        "transcripts/069/switchyard-main-responses-stream.jsonl",
+    ] {
+        let records = issue_069_records(rel);
+        for (index, record) in records.iter().enumerate() {
+            assert_eq!(record["client_request"]["path"], "/v1/responses");
+            assert_eq!(record["client_response"]["status"], 200);
+            assert_eq!(record["consumer"]["classified_as_refusal"], false);
+            let upstream = record["upstream_exchange"]["response_body_raw"]
+                .as_str()
+                .unwrap_or_else(|| panic!("{rel} line {} upstream raw body", index + 1));
+            let client = record["client_response"]["body_raw"]
+                .as_str()
+                .unwrap_or_else(|| panic!("{rel} line {} client raw body", index + 1));
+            assert!(upstream.contains("REFUSALPROBE cannot help"));
+            assert!(matches!(
+                responses_refusal_semantics_preserved(upstream, client),
+                Verdict::Violation(_)
+            ));
+        }
+    }
+}
+
+#[test]
+fn switchyard_pr623_flattens_responses_refusal_to_output_text() {
+    for rel in [
+        "transcripts/069/switchyard-pr623-responses-buffered.jsonl",
+        "transcripts/069/switchyard-pr623-responses-stream.jsonl",
+    ] {
+        let records = issue_069_records(rel);
+        for (index, record) in records.iter().enumerate() {
+            assert_eq!(record["client_request"]["path"], "/v1/responses");
+            assert_eq!(record["client_response"]["status"], 200);
+            assert_eq!(record["consumer"]["classified_as_refusal"], false);
+            assert_eq!(
+                record["consumer"]["ordinary_output_text"],
+                "REFUSALPROBE cannot help"
+            );
+            let upstream = record["upstream_exchange"]["response_body_raw"]
+                .as_str()
+                .unwrap_or_else(|| panic!("{rel} line {} upstream raw body", index + 1));
+            let client = record["client_response"]["body_raw"]
+                .as_str()
+                .unwrap_or_else(|| panic!("{rel} line {} client raw body", index + 1));
+            assert!(matches!(
+                responses_refusal_semantics_preserved(upstream, client),
+                Verdict::Violation(_)
+            ));
+            assert!(
+                !client.contains("response.refusal") && !client.contains("\"type\":\"refusal\""),
+                "{rel} line {} must remain semantically flattened",
+                index + 1
+            );
+        }
+    }
+}
+
+#[test]
+fn switchyard_chat_route_preserves_the_same_refusal_control() {
+    for rel in [
+        "transcripts/069/switchyard-main-chat-buffered-control.jsonl",
+        "transcripts/069/switchyard-main-chat-stream-control.jsonl",
+        "transcripts/069/switchyard-pr623-chat-buffered-control.jsonl",
+        "transcripts/069/switchyard-pr623-chat-stream-control.jsonl",
+    ] {
+        let records = issue_069_records(rel);
+        for (index, record) in records.iter().enumerate() {
+            assert_eq!(record["client_request"]["path"], "/v1/chat/completions");
+            assert_eq!(record["upstream_exchange"]["path"], "/v1/chat/completions");
+            assert_eq!(record["client_response"]["status"], 200);
+            assert_eq!(record["consumer"]["classified_as_refusal"], true);
+            assert_eq!(
+                record["consumer"]["refusal_text"],
+                "REFUSALPROBE cannot help"
+            );
+            assert_eq!(
+                record["upstream_exchange"]["response_body_raw"],
+                record["client_response"]["body_raw"],
+                "{rel} line {} must preserve the same raw refusal response",
+                index + 1
+            );
+        }
     }
 }

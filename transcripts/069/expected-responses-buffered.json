@@ -1,0 +1,1 @@
+{"id":"resp_refusal_069","object":"response","created_at":1788541200,"model":"captured-model","status":"completed","output":[{"type":"message","id":"msg_refusal_069","status":"completed","role":"assistant","content":[{"type":"refusal","refusal":"REFUSALPROBE cannot help"}]}]}
