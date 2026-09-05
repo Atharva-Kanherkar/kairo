@@ -1030,15 +1030,16 @@ pub fn model_info_omits_api_base_secret(response_json: &str, canary_secret: &str
     let Ok(val) = serde_json::from_str::<Value>(response_json) else {
         return Verdict::Violation("response is not valid JSON".to_string());
     };
-    if let Some(data) = val.get("data").and_then(Value::as_array) {
-        for item in data {
-            if let Some(params) = item.get("litellm_params").and_then(Value::as_object) {
-                if let Some(api_base) = params.get("api_base").and_then(Value::as_str) {
-                    if api_base.contains(canary_secret) {
-                        return Verdict::Violation(format!(
-                            "model/info litellm_params.api_base contains secret marker {canary_secret:?}"
-                        ));
-                    }
+    let Some(data) = val.get("data").and_then(Value::as_array) else {
+        return Verdict::Violation("model/info response is missing data array".to_string());
+    };
+    for item in data {
+        if let Some(params) = item.get("litellm_params").and_then(Value::as_object) {
+            if let Some(api_base) = params.get("api_base").and_then(Value::as_str) {
+                if api_base.contains(canary_secret) {
+                    return Verdict::Violation(format!(
+                        "model/info litellm_params.api_base contains secret marker {canary_secret:?}"
+                    ));
                 }
             }
         }
@@ -1454,5 +1455,9 @@ mod tests {
             model_info_omits_api_base_secret(ok, "CANARY_KEY"),
             Verdict::Conformant
         );
+        assert!(matches!(
+            model_info_omits_api_base_secret(r"{}", "CANARY_KEY"),
+            Verdict::Violation(_)
+        ));
     }
 }

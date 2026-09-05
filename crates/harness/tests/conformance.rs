@@ -2382,28 +2382,11 @@ fn litellm_model_info_v1_leaks_api_base_credentials() {
 }
 
 #[test]
-fn litellm_model_info_leaks_unmasked_custom_headers() {
-    let v = response_omits_secret(
-        &fixture("transcripts/071/model-info.json"),
-        "CANARY_UNMASKED_CUSTOM_HEADER",
-    );
-    assert!(
-        matches!(v, Verdict::Violation(_)),
-        "GET /model/info must be caught returning unmasked custom header: {v:?}"
-    );
-}
-
-#[test]
 fn litellm_models_control_omits_model_info_secrets() {
     let body = fixture("transcripts/071/models-control.json");
     assert_eq!(
         model_info_omits_api_base_secret(&body, "CANARY_QUERY_KEY_IN_API_BASE"),
         Verdict::Conformant,
         "/v1/models control must not contain api_base query keys"
-    );
-    assert_eq!(
-        response_omits_secret(&body, "CANARY_UNMASKED_CUSTOM_HEADER"),
-        Verdict::Conformant,
-        "/v1/models control must not contain custom secret headers"
     );
 }

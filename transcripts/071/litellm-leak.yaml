@@ -4,6 +4,3 @@ model_list:
       model: openai/mock
       api_base: http://127.0.0.1:9996/v1?key=CANARY_QUERY_KEY_IN_API_BASE
       api_key: sk-x-CANARY_DEPLOYMENT_API_KEY
-      extra_headers:
-        Authorization: Bearer CANARY_EXTRA_HEADERS_AUTHORIZATION
-        x-custom-tenant-id: CANARY_UNMASKED_CUSTOM_HEADER

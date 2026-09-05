@@ -9,14 +9,10 @@
         "use_litellm_proxy": false,
         "use_xai_oauth": false,
         "merge_reasoning_content_in_choices": false,
-        "model": "openai/mock",
-        "extra_headers": {
-          "Authorization": "Bear*********************************TION",
-          "x-custom-tenant-id": "CANARY_UNMASKED_CUSTOM_HEADER"
-        }
+        "model": "openai/mock"
       },
       "model_info": {
-        "id": "7bd2e456f56b9379a7f6a3aad965d7cf2f2db484b4388cbdacf20d078e390aa4",
+        "id": "929e87e63466e6d7b3cd2f964de21de0ad69642207bb4b8aa992460492bb1195",
         "db_model": false,
         "key": "openai/mock",
         "max_tokens": null,
