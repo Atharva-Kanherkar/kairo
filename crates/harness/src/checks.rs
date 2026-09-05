@@ -1021,6 +1021,31 @@ pub fn toolcall_id_restored_upstream(forwarded_jsonl: &str, original_id: &str) -
     }
 }
 
+/// Invariant (bug 071): a model-information endpoint (`/model/info`, `/v1/model/info`)
+/// MUST NOT expose deployment credentials embedded in `api_base` (such as query keys
+/// `?key=...`, `?token=...`, or HTTP basic auth credentials) in a client-visible
+/// response body. The endpoint docstring explicitly contracts to omit `api_key`
+/// and `api_base`. `/v1/models` is the control that omits configuration parameters entirely.
+pub fn model_info_omits_api_base_secret(response_json: &str, canary_secret: &str) -> Verdict {
+    let Ok(val) = serde_json::from_str::<Value>(response_json) else {
+        return Verdict::Violation("response is not valid JSON".to_string());
+    };
+    if let Some(data) = val.get("data").and_then(Value::as_array) {
+        for item in data {
+            if let Some(params) = item.get("litellm_params").and_then(Value::as_object) {
+                if let Some(api_base) = params.get("api_base").and_then(Value::as_str) {
+                    if api_base.contains(canary_secret) {
+                        return Verdict::Violation(format!(
+                            "model/info litellm_params.api_base contains secret marker {canary_secret:?}"
+                        ));
+                    }
+                }
+            }
+        }
+    }
+    Verdict::Conformant
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1415,5 +1440,19 @@ mod tests {
             tool_strict_forwarded(chat_wrong_place, "x", FunctionToolFormat::OpenAiChat),
             Verdict::Violation(_)
         ));
+    }
+
+    #[test]
+    fn model_info_omits_api_base_secret_flags_leaked_key() {
+        let bad = r#"{"data":[{"model_name":"x","litellm_params":{"api_base":"http://127.0.0.1:9996/v1?key=CANARY_KEY"}}]}"#;
+        assert!(matches!(
+            model_info_omits_api_base_secret(bad, "CANARY_KEY"),
+            Verdict::Violation(_)
+        ));
+        let ok = r#"{"data":[{"model_name":"x","litellm_params":{"model":"openai/x"}}]}"#;
+        assert_eq!(
+            model_info_omits_api_base_secret(ok, "CANARY_KEY"),
+            Verdict::Conformant
+        );
     }
 }

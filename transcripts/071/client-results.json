@@ -1,0 +1,7 @@
+{
+  "model_info_canary_present": 5,
+  "model_info_v1_canary_present": 5,
+  "models_control_clean": 5,
+  "liveliness_control_clean": 5,
+  "runs": 5
+}

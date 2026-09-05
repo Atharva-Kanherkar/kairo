@@ -9,11 +9,11 @@ use kairo::checks::{
     anthropic_response_toolcall_stop_reason, anthropic_toolcall_stop_reason, capture_records,
     content_filter_preserved, document_body_forwarded, id_conforms, instruction_messages_preserved,
     is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
-    no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
-    no_phantom_null_output_text, non_text_block_not_json_dumped, openai_stream_finish_reason,
-    openai_toolcall_id_charset, parallel_tool_disable_preserved, reasoning_text_order_preserved,
-    refusal_text_preserved, response_content_not_empty, response_omits_secret,
-    responses_refusal_semantics_preserved, stop_sequence_forwarded,
+    model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
+    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
+    openai_stream_finish_reason, openai_toolcall_id_charset, parallel_tool_disable_preserved,
+    reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
+    response_omits_secret, responses_refusal_semantics_preserved, stop_sequence_forwarded,
     thinking_not_leaked_as_visible_text, thinking_text_forwarded, tool_strict_forwarded,
     toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
     upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
@@ -2353,4 +2353,57 @@ fn switchyard_specific_tool_disable_parallel_control() {
             "070 control line must preserve the flag"
         );
     }
+}
+
+// ---- bug 071: LiteLLM GET /model/info returns api_base query-key credentials ----
+
+#[test]
+fn litellm_model_info_leaks_api_base_credentials() {
+    let v = model_info_omits_api_base_secret(
+        &fixture("transcripts/071/model-info.json"),
+        "CANARY_QUERY_KEY_IN_API_BASE",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "GET /model/info must be caught returning api_base query-key: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_model_info_v1_leaks_api_base_credentials() {
+    let v = model_info_omits_api_base_secret(
+        &fixture("transcripts/071/model-info-v1.json"),
+        "CANARY_QUERY_KEY_IN_API_BASE",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "GET /v1/model/info must be caught returning api_base query-key: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_model_info_leaks_unmasked_custom_headers() {
+    let v = response_omits_secret(
+        &fixture("transcripts/071/model-info.json"),
+        "CANARY_UNMASKED_CUSTOM_HEADER",
+    );
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "GET /model/info must be caught returning unmasked custom header: {v:?}"
+    );
+}
+
+#[test]
+fn litellm_models_control_omits_model_info_secrets() {
+    let body = fixture("transcripts/071/models-control.json");
+    assert_eq!(
+        model_info_omits_api_base_secret(&body, "CANARY_QUERY_KEY_IN_API_BASE"),
+        Verdict::Conformant,
+        "/v1/models control must not contain api_base query keys"
+    );
+    assert_eq!(
+        response_omits_secret(&body, "CANARY_UNMASKED_CUSTOM_HEADER"),
+        Verdict::Conformant,
+        "/v1/models control must not contain custom secret headers"
+    );
 }

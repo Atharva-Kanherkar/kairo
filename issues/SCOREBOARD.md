@@ -65,10 +65,12 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 067 | LiteLLM `/v1/messages` erases structured refusal text while translating an OpenAI Responses refusal; client receives `content: []` with `end_turn` | LiteLLM 1.99.0 (keyless capture rig) | no matching upstream issue | ✅ capture 5/5, client HTTP 200 5/5. OpenAI Chat control preserves structured refusal 5/5. |
 | 068 | Switchyard `/v1/messages` erases structured refusal text from an OpenAI Chat response and invents an empty Anthropic text block | Switchyard main `9523023`, 0.2.0 (keyless capture rig) | no matching upstream issue; distinct from 036 and 045 | ✅ capture 5/5, client HTTP 200 5/5. Same-proxy OpenAI response path preserves the same refusal 5/5. |
 | 069 | Switchyard `/v1/responses` loses the machine-readable refusal type from an OpenAI Chat response; current main erases it and PR #623 flattens it to `output_text` | Switchyard main `7a23989` and PR #623 `2765f46`, 0.2.0 (keyless capture rig) | discussed by Switchyard #622/#623 without a dedicated Responses ticket | ✅ buffered and stream violations 5/5 per mode on both revisions. Same-process Chat controls preserve the identical refusal 20/20. |
+| 070 | Switchyard drops `disable_parallel_tool_use` when a specific tool is forced on `/v1/messages`; forwarded `tool_choice` omits `parallel_tool_calls: false` | Switchyard main `9523023`, 0.2.0 (keyless capture rig) | adjacent 017/Switchyard ToolChoice | ✅ capture 5/5, client HTTP 200 5/5. OpenAI Chat control preserves parallel_tool_calls: false 5/5. |
+| 071 | LiteLLM `GET /model/info` returns deployment `api_base` credentials and unmasked headers despite docstrings guaranteeing omission | LiteLLM 1.99.0 (mock deployment with query key in `api_base`) | [litellm#18818](https://github.com/BerriAI/litellm/issues/18818), [litellm#36898](https://github.com/BerriAI/litellm/issues/36898) | ✅ canary echo 5/5 on `/model/info` and `/v1/model/info`. Controls `/v1/models` and `/health/liveliness` omit credentials 5/5. |
 
 Numbers 046-050 are reserved for unpublished GoModel round-2 findings (one bug per PR). Issues 052-056 (AxonHub round 2) land on sibling branches, not missing rows here.
 
-**Coverage**: 47 documented issue folders covering 51 distinct defects confirmed on the wire (50 on current releases)
+**Coverage**: 50 documented issue folders covering 53 distinct defects confirmed on the wire (52 on current releases)
 across LiteLLM, Switchyard, Bifrost, GoModel, AxonHub, and any-llm, counting 006 as its 4 independent field losses
 plus the LiteLLM copy of that class. LiteLLM confirmed: 001 (stop_reason, 1.82),
 002a (finish_reason), 002b (route drop), 004a (id smuggle), 004b (Responses
@@ -78,12 +80,12 @@ deleted), 006/007 (is_error + image deleted via Responses), 020 (client
 `api_key` override + sticky router upsert), 024 (`/health` extra_headers
 and `aws_session_token` leak), 026 (JSON `extra_headers`/`headers`/`organization`
 passthrough), 028 (`/gemini` pass-through copies `x-goog-upload-url ?key=`),
-041 (`/v1/messages` drops `stop_sequences`), 064 (`/v1/messages` drops function-tool strictness), 067 (structured refusal text erased on Anthropic translation). Switchyard
+041 (`/v1/messages` drops `stop_sequences`), 064 (`/v1/messages` drops function-tool strictness), 067 (structured refusal text erased on Anthropic translation), 071 (`/model/info` `api_base` credentials and unmasked headers leak). Switchyard
 confirmed: 005 (id sanitizer), 006 (4 field losses), 007 (multimodal
 stringified), 016 (thinking dropped), 017 (parallel flag), 018 (document
 dumped), 019 (invented cache breakpoint), 023 (`api-key` and OpenAI
 org/project header forward), 025 (transport 502 echoes `?key=`), 027
-(`x-goog-api-key` header forward), 040 (Anthropic `output_format` dropped), 045 (empty text block before non-stream `tool_use`), 063 (307 follow keeps `x-api-key` / `x-goog-api-key`), 066 (Anthropic function-tool `strict` dropped on the OpenAI Chat hop), 068 (structured refusal text erased and an empty Anthropic text block invented), 069 (Responses refusal type lost). Bifrost confirmed: 030 (Anthropic streaming
+(`x-goog-api-key` header forward), 040 (Anthropic `output_format` dropped), 045 (empty text block before non-stream `tool_use`), 063 (307 follow keeps `x-api-key` / `x-goog-api-key`), 066 (Anthropic function-tool `strict` dropped on the OpenAI Chat hop), 068 (structured refusal text erased and an empty Anthropic text block invented), 069 (Responses refusal type lost), 070 (specific-tool `disable_parallel_tool_use` dropped). Bifrost confirmed: 030 (Anthropic streaming
 ends a tool-call turn as `end_turn`, a regression of their own fixed #3638,
 caught by the bug-001 checker unchanged), 031 (parallel flag dropped), 032
 (`stop_sequences` dropped), 033 (thinking history dropped), 034 (`content_filter`
