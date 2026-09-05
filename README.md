@@ -26,7 +26,7 @@ offline with no provider keys.
 <!-- kairo-counts:start -->
 | Metric | Value |
 |---|---|
-| Reproduced issue folders | 47 |
+| Reproduced issue folders | 48 |
 | Gateways under test | LiteLLM, NVIDIA Switchyard, Bifrost, GoModel, AxonHub, and any-llm |
 | Harness tests | 132 (116 conformance checks against recorded transcripts, 16 unit) |
 <!-- kairo-counts:end -->
