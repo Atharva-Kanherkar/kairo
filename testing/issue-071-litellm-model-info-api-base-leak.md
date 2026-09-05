@@ -4,7 +4,7 @@
 
 - Capture raw sanitized HTTP request and response bytes for `GET /model/info`, `GET /v1/model/info`, and their controls.
 - Reproduce the `api_base` query credential exposure 5/5 on LiteLLM 1.99.0.
-- Test an authenticated non-admin virtual key and report only the access boundary actually demonstrated.
+- Report only the unauthenticated default-local access boundary that the reproduction demonstrates; do not claim authenticated non-admin access.
 - Classify `api_base` exposure and custom-header exposure independently against current upstream evidence.
 - Keep issue 071 changes isolated from unrelated issue 070 bookkeeping.
 - Make the reproduction runner write reviewer captures to an ignored or caller-selected directory by default.
@@ -30,7 +30,7 @@
 ## E2E Tests
 
 - Start LiteLLM 1.99.0 through its real CLI with the issue 071 configuration.
-- Run five unauthenticated probes and five authenticated non-admin probes where supported.
+- Run five unauthenticated probes against each model-info route.
 - Run `/v1/models` and `/health/liveliness` controls with the same process and configuration.
 
 ## Manual / cURL Tests
