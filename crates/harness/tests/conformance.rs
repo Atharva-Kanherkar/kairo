@@ -2282,3 +2282,75 @@ fn switchyard_chat_route_preserves_the_same_refusal_control() {
         }
     }
 }
+
+// ---- bug 070: Switchyard drops disable_parallel_tool_use when a specific tool is forced ----
+
+#[test]
+fn switchyard_drops_specific_tool_disable_parallel() {
+    let v = parallel_tool_disable_preserved(&fixture(
+        "transcripts/070/switchyard-specific-tool-disable-upstream.jsonl",
+    ));
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "Switchyard must be caught dropping disable_parallel_tool_use with tool(name): {v:?}"
+    );
+    let records = capture_records(&fixture(
+        "transcripts/070/switchyard-specific-tool-disable-upstream.jsonl",
+    ))
+    .expect("070 captures parse");
+    assert_eq!(records.len(), 5, "070 must retain five capture runs");
+    for (line, body) in &records {
+        assert!(
+            body.get("tools")
+                .and_then(serde_json::Value::as_array)
+                .is_some(),
+            "070 line must still carry tools"
+        );
+        assert!(
+            body.get("tool_choice")
+                .and_then(|c| c.get("function"))
+                .and_then(|f| f.get("name"))
+                .is_some(),
+            "070 line must still carry tool_choice function name"
+        );
+        assert!(
+            body.get("parallel_tool_calls").is_none(),
+            "070 line must still be the dropped form"
+        );
+        assert_eq!(
+            parallel_tool_disable_preserved(line),
+            Verdict::Violation(
+                "disable_parallel_tool_use was dropped; forwarded body has neither parallel_tool_calls=false nor disable_parallel_tool_use=true"
+                    .into()
+            )
+        );
+    }
+}
+
+#[test]
+fn switchyard_specific_tool_disable_parallel_control() {
+    let v = parallel_tool_disable_preserved(&fixture(
+        "transcripts/070/switchyard-specific-tool-disable-control-upstream.jsonl",
+    ));
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "Switchyard OpenAI route must keep parallel_tool_calls:false with tool(name): {v:?}"
+    );
+    let records = capture_records(&fixture(
+        "transcripts/070/switchyard-specific-tool-disable-control-upstream.jsonl",
+    ))
+    .expect("070 control captures parse");
+    assert_eq!(
+        records.len(),
+        5,
+        "070 control must retain five capture runs"
+    );
+    for (line, _) in &records {
+        assert_eq!(
+            parallel_tool_disable_preserved(line),
+            Verdict::Conformant,
+            "070 control line must preserve the flag"
+        );
+    }
+}
