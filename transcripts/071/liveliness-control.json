@@ -1,0 +1,5 @@
+{
+  "request_path": "/health/liveliness",
+  "status": 200,
+  "body": "I'm alive!"
+}

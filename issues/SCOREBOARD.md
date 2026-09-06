@@ -69,9 +69,11 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 
 Numbers 046-050 are reserved for unpublished GoModel round-2 findings (one bug per PR). Issues 052-056 (AxonHub round 2) land on sibling branches, not missing rows here.
 
-**Coverage**: 48 documented issue folders covering 52 distinct defects confirmed on the wire (51 on current releases)
-across LiteLLM, Switchyard, Bifrost, GoModel, AxonHub, and any-llm, counting 006 as its 4 independent field losses
-plus the LiteLLM copy of that class. LiteLLM confirmed: 001 (stop_reason, 1.82),
+**Coverage**: 49 documented issue folders across LiteLLM, Switchyard, Bifrost,
+GoModel, AxonHub, and any-llm. Folder counts are not defect counts: some folders
+contain honest negatives or multiple findings, including 006's four independent
+field losses and the LiteLLM copy of that class. The rows above record each
+finding's tested version and outcome. LiteLLM confirmed: 001 (stop_reason, 1.82),
 002a (finish_reason), 002b (route drop), 004a (id smuggle), 004b (Responses
 call_id), 008 (IndexError crash), 009 (phantom message), 012 (image
 portability), 016 (thinking leaked), 017 (parallel flag), 018 (document

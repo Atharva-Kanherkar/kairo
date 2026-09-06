@@ -1,8 +1,8 @@
 # 071, LiteLLM GET /model/info returns deployment `api_base` query credentials
 
 - **Upstream**: Discussed by [litellm#18818](https://github.com/BerriAI/litellm/issues/18818), which changed `remove_sensitive_info_from_deployment`, but no dedicated `api_base` ticket was found. The docstring on `/model/info` and `/v1/model/info` (`proxy_server.py:13980`) explicitly promises to omit `api_base`: `"Provides more info about each model in /models, including config.yaml descriptions (except api key and api base)"`. In code, `api_key` is popped, but `api_base` is never popped or stripped.
-- **Tool under test**: LiteLLM 1.99.0 (`tools/litellm-env`).
-- **Reproduced**: 2026-09-05. Canary echo 5/5 on mock deployment (`transcripts/071/litellm-leak.yaml`). Evidence: `transcripts/071/`.
+- **Tool under test**: LiteLLM 1.99.0 (`tools/litellm-env`) and current release 1.100.0 (isolated temporary environment).
+- **Reproduced**: 2026-09-05; refreshed 2026-09-06 on both versions. Canary echo 5/5 per affected route and clean controls 5/5 with `transcripts/071/litellm-leak.yaml`. Evidence: `transcripts/071/` and `transcripts/071/current-1.100.0/`.
 
 ## What breaks
 
@@ -29,28 +29,55 @@ flowchart LR
 
 ## Wire evidence
 
+Each JSON fixture is a capture envelope (`{"request_path", "status", "body"}`)
+cross-checked against the actual request line, status, Content-Length, and JSON
+body in its `.http` exchange. Swapped routes, non-200 responses, and mismatched
+bodies fail before the leak assertion.
+
 1. **LiteLLM (mock deployment with query key in `api_base`)**
-   - `GET /model/info` returns `litellm_params.api_base="http://127.0.0.1:9996/v1?key=CANARY_QUERY_KEY_IN_API_BASE"` in full. `api_key` is absent. 5/5. Raw HTTP: `transcripts/071/model-info.http`.
-   - `GET /v1/model/info` returns the identical leak. 5/5. Raw HTTP: `transcripts/071/model-info-v1.http`.
+   - `GET /model/info` returns `litellm_params.api_base="http://127.0.0.1:9996/v1?key=CANARY_QUERY_KEY_IN_API_BASE"` in full. `api_key` is absent. 5/5. Envelope: `transcripts/071/model-info.json`. Raw HTTP: `transcripts/071/model-info.http`.
+   - `GET /v1/model/info` returns the identical leak. 5/5. Envelope: `transcripts/071/model-info-v1.json`. Raw HTTP: `transcripts/071/model-info-v1.http`.
 2. **Control**
-   - `GET /v1/models` returns model list with standard metadata only. No `api_base` and no canary. 5/5. Raw HTTP: `transcripts/071/models-control.http`.
-   - `GET /health/liveliness` returns `"I'm alive!"` with no configuration parameters. 5/5. Raw HTTP: `transcripts/071/liveliness-control.http`.
+   - `GET /v1/models` returns model list with standard metadata only. No `api_base` and no canary anywhere in the body (whole-body control). 5/5. Envelope: `transcripts/071/models-control.json`. Raw HTTP: `transcripts/071/models-control.http`.
+   - `GET /health/liveliness` returns `"I'm alive!"` with no configuration parameters (whole-body control). 5/5. Envelope: `transcripts/071/liveliness-control.json`. Raw HTTP: `transcripts/071/liveliness-control.http`.
 3. **Determinism**
    - 5/5 across all runs. Compact test summary: `transcripts/071/client-results.json`.
 
+**Evidence refresh, 2026-09-06**: all four `.http` exchanges were regenerated
+through a raw socket against the real LiteLLM 1.99.0 CLI. They contain literal
+sent/received bytes with CRLF framing, not reconstructed headers. The runner
+checks the installed version, rejects occupied ports, monitors process exit,
+and runs with an allowlisted environment in a fresh working directory so the
+repository's `.env` and ambient provider keys cannot alter the configuration.
+All status and determinism checks run before any fixture writes, including
+under `python3 -O`. Replacements are atomic per file, not across the whole
+batch on filesystem errors. See `testing/issue-071-litellm-model-info-api-base-leak.md`.
+
 ## Upstream status
 
-Checked 2026-09-06. The runtime reproduction is pinned to LiteLLM 1.99.0. GitHub
-release `v1.99.1` is newer but was not available from the configured Python package
-index, so it was not executed. Inspection of the `v1.99.1` tagged source shows that
-`remove_sensitive_info_from_deployment` still does not remove `api_base`, and the
-model-info docstring still promises its omission.
+Checked 2026-09-06. The original 1.99.0 runtime remains the default pin. The latest
+[release v1.100.0](https://github.com/BerriAI/litellm/releases/tag/v1.100.0), published
+2026-09-06 at 05:33 UTC, was also installed and executed. Both affected routes
+still disclose the canary 5/5; both controls remain clean 5/5. Its tag resolves to
+`e4f25265704e2b2c6cf6e81be2e4c5cffff896f4`. Current-version captures and the exact
+reproduction method are in `transcripts/071/current-1.100.0/README.md`.
 
-Searches covered `api_base`, `/model/info`, `remove_sensitive_info_from_deployment`,
-issues, pull requests, releases, and the `v1.99.0...v1.99.1` diff. Issue
-[litellm#18818](https://github.com/BerriAI/litellm/issues/18818) discusses the same
-sanitizer for `extra_headers`, but no dedicated `api_base` ticket was found.
-Classification: `discussed-no-ticket`.
+Searches covered open and closed issues and PRs using `api_base` + `model/info`,
+with `leak`, `redact`, and `query` variants, plus
+`remove_sensitive_info_from_deployment` and `except api key and api base`.
+The latter sanitizer search returned seven discussions, including
+[#18818](https://github.com/BerriAI/litellm/issues/18818) (closed, `extra_headers`)
+and [#26513](https://github.com/BerriAI/litellm/pull/26513) (merged, plural
+`vertex_ai_credentials` redaction). Neither fixes the query credential in
+`api_base`. The 1.100.0 release notes include
+[#37090](https://github.com/BerriAI/litellm/pull/37090), which fixes the adjacent
+`/health` field leak, not this model-info exposure.
+
+Also inspected the [tagged sanitizer](https://github.com/BerriAI/litellm/blob/e4f25265704e2b2c6cf6e81be2e4c5cffff896f4/litellm/proxy/common_utils/openai_endpoint_utils.py#L15-L49),
+its five latest commits through the tag, and the
+[release changelog](https://github.com/BerriAI/litellm/compare/v1.99.0...v1.100.0).
+The sanitizer still preserves `api_base`. No dedicated query-credential ticket
+was found in these searches. Classification remains `discussed-no-ticket`.
 
 ## Root cause (in LiteLLM source)
 
@@ -102,6 +129,8 @@ tools/litellm-env/bin/litellm --config transcripts/071/litellm-leak.yaml --port 
 # In another terminal:
 curl -s http://127.0.0.1:4010/model/info | jq '.data[0].litellm_params.api_base'
 # Returns "http://127.0.0.1:9996/v1?key=CANARY_QUERY_KEY_IN_API_BASE"
+
+# Stop that manual proxy before running the script below; occupied ports fail fast.
 
 # Reviewer-safe run writes to a new temporary directory:
 python3 transcripts/071/reproduce.py

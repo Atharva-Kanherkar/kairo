@@ -28,12 +28,13 @@ offline with no provider keys.
 |---|---|
 | Reproduced issue folders | 49 |
 | Gateways under test | LiteLLM, NVIDIA Switchyard, Bifrost, GoModel, AxonHub, and any-llm |
-| Harness tests | 136 (119 conformance checks against recorded transcripts, 17 unit) |
+| Harness tests | 143 (123 conformance checks against recorded transcripts, 20 unit) |
 <!-- kairo-counts:end -->
 
-The 47 folders cover 51 distinct defects confirmed on the wire, 50 of them on
-current releases at the time of capture. The full ledger, including the cited
-bugs that did not reproduce, is [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md).
+The 49 folders cover reproduced findings, multi-defect reports, and honest
+negative results. Versions and reproduction outcomes are recorded per finding
+in [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md), including cited bugs that did
+not reproduce.
 One finding is filed upstream as
 [NVIDIA-NeMo/Switchyard#380](https://github.com/NVIDIA-NeMo/Switchyard/issues/380).
 

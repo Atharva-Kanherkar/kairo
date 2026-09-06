@@ -1,15 +1,15 @@
-GET /health/liveliness HTTP/1.1
+GET /v1/models HTTP/1.1
 Host: 127.0.0.1:4010
 Connection: close
 
 HTTP/1.1 200 OK
-date: Sun, 06 Sep 2026 07:47:12 GMT
+date: Sun, 06 Sep 2026 07:47:16 GMT
 server: uvicorn
-content-length: 12
+content-length: 108
 content-type: application/json
 x-frame-options: DENY
 content-security-policy: frame-ancestors 'none'
 x-content-type-options: nosniff
 Connection: close
 
-"I'm alive!"
+{"data":[{"id":"mock-query-key","object":"model","created":1677610602,"owned_by":"openai"}],"object":"list"}

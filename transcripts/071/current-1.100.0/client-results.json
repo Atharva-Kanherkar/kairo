@@ -4,5 +4,5 @@
   "models_control_clean": 5,
   "liveliness_control_clean": 5,
   "runs": 5,
-  "litellm_version": "1.99.0"
+  "litellm_version": "1.100.0"
 }
