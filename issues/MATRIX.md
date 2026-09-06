@@ -80,7 +80,7 @@ Vector is part of the probe. 020 and 026 are JSON *body* bypasses, and both writ
 | `tools[].input_schema` | OK | OK |
 | `tools[].strict` | OK | DROP [064] 5/5 ctl |
 | `tool_choice: auto` | OK | OK |
-| `tool_choice: any -> required` | OK | OK |
+| `tool_choice: any -> required` | MANG [072] live 400 5/5 per route, ctl | OK |
 | `tool_choice: tool(name)` | OK | OK |
 | `tool_choice.disable_parallel_tool_use` | DROP [031] 5/5 ctl | DROP [017] 5/5 ctl |
 | `mcp_servers` | na | na |

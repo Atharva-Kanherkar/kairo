@@ -314,9 +314,8 @@ PROBES = [
     req("req.tool_choice.any", "tool_choice: any -> required",
         base(tools=[TOOL], tool_choice={"type": "any"}),
         lambda fwd, hdr, cli: PRESERVED
-        if value_at(fwd, "tool_choice") in ("required", "any")
-        or value_at(fwd, "tool_choice.type") in ("required", "any") else MANGLED,
-        severity="high"),
+        if value_at(fwd, "tool_choice") == "required" else MANGLED,
+        severity="high", known={"bifrost": "072"}),
     req("req.tool_choice.named", "tool_choice: tool(name)",
         base(tools=[TOOL], tool_choice={"type": "tool", "name": "get_weather"}),
         lambda fwd, hdr, cli: PRESERVED

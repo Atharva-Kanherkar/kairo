@@ -6,17 +6,17 @@
 //! violating the invariant, this test flips and tells us.
 
 use kairo::checks::{
-    anthropic_response_toolcall_stop_reason, anthropic_toolcall_stop_reason, capture_records,
-    content_filter_preserved, document_body_forwarded, id_conforms, instruction_messages_preserved,
-    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
-    model_info_capture_identity, model_info_envelope_body, model_info_omits_api_base_secret,
-    no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
-    no_phantom_null_output_text, non_text_block_not_json_dumped, openai_stream_finish_reason,
-    openai_toolcall_id_charset, parallel_tool_disable_preserved, reasoning_text_order_preserved,
-    refusal_text_preserved, response_content_not_empty, response_omits_secret,
-    responses_refusal_semantics_preserved, stop_sequence_forwarded,
-    thinking_not_leaked_as_visible_text, thinking_text_forwarded, tool_strict_forwarded,
-    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    anthropic_response_toolcall_stop_reason, anthropic_tool_choice_any_mapped_to_required,
+    anthropic_toolcall_stop_reason, capture_records, content_filter_preserved,
+    document_body_forwarded, id_conforms, instruction_messages_preserved, is_error_forwarded,
+    json_schema_forwarded, json_schema_property_forwarded, model_info_capture_identity,
+    model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
+    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
+    non_text_block_not_json_dumped, openai_stream_finish_reason, openai_toolcall_id_charset,
+    parallel_tool_disable_preserved, reasoning_text_order_preserved, refusal_text_preserved,
+    response_content_not_empty, response_omits_secret, responses_refusal_semantics_preserved,
+    stop_sequence_forwarded, thinking_not_leaked_as_visible_text, thinking_text_forwarded,
+    tool_strict_forwarded, toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
     upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
     JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
@@ -2542,6 +2542,152 @@ fn litellm_current_release_model_info_and_controls() {
             );
         } else {
             assert_eq!(response_omits_secret(&body, "CANARY"), Verdict::Conformant);
+        }
+    }
+}
+
+// ---- bug 072: Bifrost Anthropic tool_choice "any" dialect leak on OpenAI wire ----
+
+fn issue_072_exchanges(mode: &str, profile: &str, case: &str) -> Vec<serde_json::Value> {
+    let path = format!("transcripts/072/{mode}/{profile}-{case}.jsonl");
+    let records: Vec<serde_json::Value> = fixture(&path)
+        .lines()
+        .map(|line| serde_json::from_str(line).expect("raw exchange JSON"))
+        .collect();
+    assert_eq!(records.len(), 5, "{path}: require every trial");
+    let upstream_path = if profile == "responses" {
+        "/v1/responses"
+    } else {
+        "/v1/chat/completions"
+    };
+    for (index, record) in records.iter().enumerate() {
+        assert_eq!(record["run"], index + 1, "{path}: run identity");
+        assert_eq!(record["profile"], profile);
+        assert_eq!(record["case"], case);
+        assert_eq!(
+            record["mode"],
+            if mode == "live" {
+                "live-openai"
+            } else {
+                "keyless-capture"
+            }
+        );
+        assert_eq!(record["path"], upstream_path);
+        assert_eq!(record["forwarded_request"]["path"], upstream_path);
+        let raw: serde_json::Value =
+            serde_json::from_str(record["forwarded_request"]["body_raw"].as_str().unwrap())
+                .unwrap();
+        assert_eq!(record["body"], raw, "{path}: raw wire is authoritative");
+        assert_eq!(raw["model"], "gpt-4o");
+        let rejected = mode == "live" && case == "any";
+        let status = if rejected { 400 } else { 200 };
+        for stage in [
+            "client_request",
+            "forwarded_request",
+            "upstream_response",
+            "client_response",
+        ] {
+            let _: serde_json::Value =
+                serde_json::from_str(record[stage]["body_raw"].as_str().unwrap()).unwrap();
+            for key in record[stage]["headers"].as_object().unwrap().keys() {
+                assert!(matches!(
+                    key.as_str(),
+                    "content-type" | "date" | "x-request-id"
+                ));
+            }
+        }
+        assert_eq!(record["client_response"]["status"], status);
+        assert_eq!(record["upstream_response"]["status"], status);
+        if case == "any" || case == "named" {
+            assert_eq!(record["client_request"]["path"], "/anthropic/v1/messages");
+            let input: serde_json::Value =
+                serde_json::from_str(record["client_request"]["body_raw"].as_str().unwrap())
+                    .unwrap();
+            let expected = if case == "any" {
+                serde_json::json!({"type":"any"})
+            } else {
+                serde_json::json!({"type":"tool", "name":"get_weather"})
+            };
+            assert_eq!(input["tool_choice"], expected);
+            assert_eq!(record["consumer"]["tool_dispatches"], i32::from(!rejected));
+        }
+        if rejected {
+            let error: serde_json::Value =
+                serde_json::from_str(record["upstream_response"]["body_raw"].as_str().unwrap())
+                    .unwrap();
+            assert_eq!(error["error"]["param"], "tool_choice");
+            assert_eq!(error["error"]["code"], "invalid_value");
+            assert!(error["error"]["message"]
+                .as_str()
+                .unwrap()
+                .contains("'any'"));
+            assert_eq!(record["consumer"]["outcome"], "BadRequestError");
+        }
+    }
+    records
+}
+
+#[test]
+fn bifrost_leaks_anthropic_tool_choice_any() {
+    for mode in ["local", "live"] {
+        for profile in ["responses", "chat"] {
+            for record in issue_072_exchanges(mode, profile, "any") {
+                assert_eq!(record["body"]["tool_choice"], "any");
+                assert!(matches!(
+                    anthropic_tool_choice_any_mapped_to_required(&record.to_string()),
+                    Verdict::Violation(_)
+                ));
+            }
+        }
+    }
+}
+
+#[test]
+fn bifrost_openai_responses_keeps_tool_choice_required() {
+    for mode in ["local", "live"] {
+        for case in ["required", "direct-required"] {
+            for record in issue_072_exchanges(mode, "responses", case) {
+                assert_eq!(
+                    anthropic_tool_choice_any_mapped_to_required(&record.to_string()),
+                    Verdict::Conformant
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn bifrost_openai_chat_keeps_tool_choice_required() {
+    for mode in ["local", "live"] {
+        for case in ["required", "direct-required"] {
+            for record in issue_072_exchanges(mode, "chat", case) {
+                assert_eq!(
+                    anthropic_tool_choice_any_mapped_to_required(&record.to_string()),
+                    Verdict::Conformant
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn bifrost_named_and_auto_tool_choice_controls() {
+    for mode in ["local", "live"] {
+        for profile in ["responses", "chat"] {
+            for record in issue_072_exchanges(mode, profile, "named") {
+                assert_eq!(record["body"]["tool_choice"]["type"], "function");
+                let field = if profile == "responses" {
+                    "/body/tool_choice/name"
+                } else {
+                    "/body/tool_choice/function/name"
+                };
+                assert_eq!(record.pointer(field).unwrap(), "get_weather");
+            }
+            if mode == "local" {
+                for record in issue_072_exchanges(mode, profile, "auto") {
+                    assert_eq!(record["body"]["tool_choice"], "auto");
+                }
+            }
         }
     }
 }
