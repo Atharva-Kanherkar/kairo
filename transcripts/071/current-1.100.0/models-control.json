@@ -1,0 +1,15 @@
+{
+  "request_path": "/v1/models",
+  "status": 200,
+  "body": {
+    "data": [
+      {
+        "id": "mock-query-key",
+        "object": "model",
+        "created": 1677610602,
+        "owned_by": "openai"
+      }
+    ],
+    "object": "list"
+  }
+}

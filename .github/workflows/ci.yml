@@ -24,6 +24,11 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - name: Reproduction and count-guard regression tests
+        run: |
+          python3 -m unittest discover -s transcripts/071 -p 'test*.py'
+          python3 -O -m unittest discover -s transcripts/071 -p 'test*.py'
+          python3 -m unittest discover -s tools -p 'test*readme*.py'
       - name: README Status matches the issue and test counters
         run: python3 tools/update-readme-counts.py --check
 

@@ -624,10 +624,12 @@ pub fn upstream_omits_header_value(forwarded_jsonl: &str, needle: &str) -> Verdi
     Verdict::Conformant
 }
 
-/// Invariant (bug 024): a proxy MUST NOT return deployment secrets
-/// (`extra_headers`, `aws_session_token`, query keys in `api_base`) in a
-/// client-visible response body. `/v1/models` and `/health/liveliness`
-/// are the controls that already satisfy this.
+/// Invariant (bug 024 / bug 071): a client-visible response body MUST NOT
+/// contain the caller-supplied secret marker `needle`. This checker knows
+/// nothing about which fields carry secrets; it is a whole-body substring
+/// scan, and the caller is responsible for choosing a marker (a canary
+/// planted in `extra_headers`, `aws_session_token`, an `api_base` query key,
+/// or anywhere else) that would only appear if that specific secret leaked.
 pub fn response_omits_secret(body: &str, needle: &str) -> Verdict {
     if body.contains(needle) {
         Verdict::Violation(format!(
@@ -1019,6 +1021,108 @@ pub fn toolcall_id_restored_upstream(forwarded_jsonl: &str, original_id: &str) -
             "upstream id {original_id:?} was not restored; the sanitized form was sent back instead"
         ))
     }
+}
+
+/// Invariant (bug 071): model-info `data[].litellm_params.api_base` must not
+/// contain the caller-supplied secret marker. This is a substring check, not
+/// a general URL credential detector. Empty or malformed deployment lists fail
+/// closed; other response shapes use the whole-body `response_omits_secret` check.
+pub fn model_info_omits_api_base_secret(response_json: &str, canary_secret: &str) -> Verdict {
+    if canary_secret.is_empty() {
+        return Verdict::Violation("secret marker is empty".to_string());
+    }
+    let Ok(val) = serde_json::from_str::<Value>(response_json) else {
+        return Verdict::Violation("response is not valid JSON".to_string());
+    };
+    let Some(data) = val.get("data").and_then(Value::as_array) else {
+        return Verdict::Violation("model/info response is missing data array".to_string());
+    };
+    if data.is_empty() {
+        return Verdict::Violation("model/info response data array is empty".to_string());
+    }
+    for item in data {
+        let Some(params) = item.get("litellm_params").and_then(Value::as_object) else {
+            return Verdict::Violation(
+                "model/info entry is missing litellm_params object".to_string(),
+            );
+        };
+        if let Some(api_base) = params.get("api_base") {
+            let Some(api_base) = api_base.as_str() else {
+                return Verdict::Violation("model/info api_base is not a string".to_string());
+            };
+            if api_base.contains(canary_secret) {
+                return Verdict::Violation(format!(
+                    "model/info litellm_params.api_base contains secret marker {canary_secret:?}"
+                ));
+            }
+        }
+    }
+    Verdict::Conformant
+}
+
+/// Extract a capture envelope's JSON body after checking its wire identity.
+pub fn model_info_envelope_body(envelope_json: &str) -> Result<String, String> {
+    let v: Value =
+        serde_json::from_str(envelope_json).map_err(|e| format!("unparseable envelope: {e}"))?;
+    let body = v
+        .get("body")
+        .ok_or_else(|| "capture envelope is missing a body field".to_string())?;
+    Ok(body.to_string())
+}
+
+/// Cross-check a model-info/control envelope against its recorded HTTP/1.1
+/// GET exchange: route, 200 status, and JSON body. These pinned-runtime captures
+/// use Content-Length, not chunked encoding; unsupported framing fails closed.
+pub fn model_info_capture_identity(
+    envelope_json: &str,
+    raw_http: &str,
+    expected_path: &str,
+) -> Verdict {
+    let v: Value = match serde_json::from_str(envelope_json) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("capture envelope is not valid JSON: {e}")),
+    };
+    let path = v.get("request_path").and_then(Value::as_str);
+    if path != Some(expected_path) {
+        return Verdict::Violation(format!(
+            "capture request_path {path:?} does not match the expected route {expected_path:?}"
+        ));
+    }
+    let status = v.get("status").and_then(Value::as_u64);
+    if status != Some(200) {
+        return Verdict::Violation(format!(
+            "capture status {status:?} is not the expected 200 OK"
+        ));
+    }
+    let Some((request, response)) = raw_http.split_once("\r\n\r\n") else {
+        return Verdict::Violation("capture is missing CRLF request framing".to_string());
+    };
+    if request.split("\r\n").next() != Some(format!("GET {expected_path} HTTP/1.1").as_str()) {
+        return Verdict::Violation(
+            "wire request line does not match the expected route".to_string(),
+        );
+    }
+    let Some((headers, body)) = response.split_once("\r\n\r\n") else {
+        return Verdict::Violation("capture is missing CRLF response framing".to_string());
+    };
+    if headers.split("\r\n").next() != Some("HTTP/1.1 200 OK") {
+        return Verdict::Violation("wire status is not 200 OK".to_string());
+    }
+    let content_length = headers
+        .split("\r\n")
+        .filter_map(|line| line.split_once(':'))
+        .find(|(name, _)| name.eq_ignore_ascii_case("content-length"))
+        .and_then(|(_, length)| length.trim().parse::<usize>().ok());
+    if content_length != Some(body.len()) {
+        return Verdict::Violation("wire Content-Length does not match the body".to_string());
+    }
+    let Ok(wire_body) = serde_json::from_str::<Value>(body) else {
+        return Verdict::Violation("wire response body is not JSON".to_string());
+    };
+    if v.get("body") != Some(&wire_body) {
+        return Verdict::Violation("envelope body differs from the wire response".to_string());
+    }
+    Verdict::Conformant
 }
 
 #[cfg(test)]
@@ -1415,5 +1519,114 @@ mod tests {
             tool_strict_forwarded(chat_wrong_place, "x", FunctionToolFormat::OpenAiChat),
             Verdict::Violation(_)
         ));
+    }
+
+    #[test]
+    fn model_info_omits_api_base_secret_flags_leaked_key() {
+        let bad = r#"{"data":[{"model_name":"x","litellm_params":{"api_base":"http://127.0.0.1:9996/v1?key=CANARY_KEY"}}]}"#;
+        assert!(matches!(
+            model_info_omits_api_base_secret(bad, "CANARY_KEY"),
+            Verdict::Violation(_)
+        ));
+        let ok = r#"{"data":[{"model_name":"x","litellm_params":{"model":"openai/x"}}]}"#;
+        assert_eq!(
+            model_info_omits_api_base_secret(ok, "CANARY_KEY"),
+            Verdict::Conformant
+        );
+        assert!(matches!(
+            model_info_omits_api_base_secret(r"{}", "CANARY_KEY"),
+            Verdict::Violation(_)
+        ));
+        // An empty data array has nothing to check: fail closed, do not pass vacuously.
+        assert!(matches!(
+            model_info_omits_api_base_secret(r#"{"data":[]}"#, "CANARY_KEY"),
+            Verdict::Violation(_)
+        ));
+        for malformed in [
+            "not-json",
+            r#"{"data":[null]}"#,
+            r#"{"data":[{}]}"#,
+            r#"{"data":[{"litellm_params":null}]}"#,
+            r#"{"data":[{"litellm_params":{"api_base":42}}]}"#,
+        ] {
+            assert!(matches!(
+                model_info_omits_api_base_secret(malformed, "CANARY_KEY"),
+                Verdict::Violation(_)
+            ));
+        }
+        assert!(matches!(
+            model_info_omits_api_base_secret(ok, ""),
+            Verdict::Violation(_)
+        ));
+    }
+
+    #[test]
+    fn model_info_capture_identity_flags_swapped_route_and_bad_status() {
+        let good = r#"{"request_path":"/model/info","status":200,"body":{"data":[]}}"#;
+        let wire = "GET /model/info HTTP/1.1\r\nHost: localhost\r\n\r\nHTTP/1.1 200 OK\r\nContent-Length: 11\r\n\r\n{\"data\":[]}";
+        assert_eq!(
+            model_info_capture_identity(good, wire, "/model/info"),
+            Verdict::Conformant
+        );
+        // Swapped route: body captured from a different endpoint than claimed.
+        let swapped = r#"{"request_path":"/v1/model/info","status":200,"body":{"data":[]}}"#;
+        assert!(matches!(
+            model_info_capture_identity(swapped, wire, "/model/info"),
+            Verdict::Violation(_)
+        ));
+        // A 404 (or any non-200) must not pass as a genuine model-info capture.
+        let not_found =
+            r#"{"request_path":"/model/info","status":404,"body":{"detail":"not found"}}"#;
+        assert!(matches!(
+            model_info_capture_identity(not_found, wire, "/model/info"),
+            Verdict::Violation(_)
+        ));
+        assert!(matches!(
+            model_info_capture_identity("not-json", wire, "/model/info"),
+            Verdict::Violation(_)
+        ));
+        assert!(matches!(
+            model_info_capture_identity(r#"{"status":200,"body":{}}"#, wire, "/model/info"),
+            Verdict::Violation(_)
+        ));
+        for bad_wire in [
+            wire.replace("GET /model/info", "GET /v1/model/info"),
+            wire.replace("200 OK", "404 Not Found"),
+            wire.replace("{\"data\":[]}", "{\"data\":{}}"),
+            wire.replace("Content-Length: 11", "Content-Length: 12"),
+            wire.replace("\r\n", "\n"),
+        ] {
+            assert!(matches!(
+                model_info_capture_identity(good, &bad_wire, "/model/info"),
+                Verdict::Violation(_)
+            ));
+        }
+    }
+
+    #[test]
+    fn model_info_envelope_body_extracts_body() {
+        let envelope =
+            r#"{"request_path":"/model/info","status":200,"body":{"data":[{"model_name":"x"}]}}"#;
+        let body = model_info_envelope_body(envelope).expect("envelope has a body");
+        let parsed: Value = serde_json::from_str(&body).expect("body is valid JSON");
+        assert_eq!(
+            parsed.pointer("/data/0/model_name").and_then(Value::as_str),
+            Some("x")
+        );
+        assert!(model_info_envelope_body("not-json").is_err());
+        assert!(model_info_envelope_body(r#"{"status":200}"#).is_err());
+    }
+
+    #[test]
+    fn response_omits_secret_catches_canary_outside_litellm_params() {
+        for leaked_elsewhere in [
+            r#"{"object":"list","data":[{"id":"CANARY_QUERY_KEY_IN_API_BASE-leaked-id"}]}"#,
+            r#"{"data":[],"debug":"CANARY_QUERY_KEY_IN_API_BASE"}"#,
+        ] {
+            assert!(matches!(
+                response_omits_secret(leaked_elsewhere, "CANARY_QUERY_KEY_IN_API_BASE"),
+                Verdict::Violation(_)
+            ));
+        }
     }
 }

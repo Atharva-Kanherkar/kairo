@@ -1,0 +1,15 @@
+GET /health/liveliness HTTP/1.1
+Host: 127.0.0.1:4010
+Connection: close
+
+HTTP/1.1 200 OK
+date: Sun, 06 Sep 2026 08:16:56 GMT
+server: uvicorn
+content-length: 12
+content-type: application/json
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+Connection: close
+
+"I'm alive!"

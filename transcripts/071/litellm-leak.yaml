@@ -1,0 +1,6 @@
+model_list:
+  - model_name: mock-query-key
+    litellm_params:
+      model: openai/mock
+      api_base: http://127.0.0.1:9996/v1?key=CANARY_QUERY_KEY_IN_API_BASE
+      api_key: sk-x-CANARY_DEPLOYMENT_API_KEY

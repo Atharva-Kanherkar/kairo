@@ -9,6 +9,7 @@ use kairo::checks::{
     anthropic_response_toolcall_stop_reason, anthropic_toolcall_stop_reason, capture_records,
     content_filter_preserved, document_body_forwarded, id_conforms, instruction_messages_preserved,
     is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
+    model_info_capture_identity, model_info_envelope_body, model_info_omits_api_base_secret,
     no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
     no_phantom_null_output_text, non_text_block_not_json_dumped, openai_stream_finish_reason,
     openai_toolcall_id_charset, parallel_tool_disable_preserved, reasoning_text_order_preserved,
@@ -19,6 +20,7 @@ use kairo::checks::{
     upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
     JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
+use serde_json::Value;
 use std::fs;
 use std::path::PathBuf;
 
@@ -2352,5 +2354,194 @@ fn switchyard_specific_tool_disable_parallel_control() {
             Verdict::Conformant,
             "070 control line must preserve the flag"
         );
+    }
+}
+
+// ---- bug 071: LiteLLM GET /model/info returns api_base query-key credentials ----
+//
+// Fixtures are capture envelopes: {"request_path": ..., "status": ..., "body": ...}.
+// Route identity and HTTP status are checked FIRST, so a swapped-route capture or a
+// 404 body cannot pass an identical-body test; only then is the body inspected for
+// the leaked credential.
+
+const CANARY: &str = "CANARY_QUERY_KEY_IN_API_BASE";
+
+#[test]
+fn litellm_model_info_leaks_api_base_credentials() {
+    let envelope = fixture("transcripts/071/model-info.json");
+    assert_eq!(
+        model_info_capture_identity(
+            &envelope,
+            &fixture("transcripts/071/model-info.http"),
+            "/model/info"
+        ),
+        Verdict::Conformant,
+        "capture must be identifiably GET /model/info with a 200 status"
+    );
+    let body = model_info_envelope_body(&envelope).expect("envelope has a body");
+    let v = model_info_omits_api_base_secret(&body, CANARY);
+    assert_eq!(
+        v,
+        Verdict::Violation(format!(
+            "model/info litellm_params.api_base contains secret marker {CANARY:?}"
+        )),
+        "GET /model/info must leak the marker, not merely fail JSON validation"
+    );
+}
+
+#[test]
+fn litellm_model_info_v1_leaks_api_base_credentials() {
+    let envelope = fixture("transcripts/071/model-info-v1.json");
+    assert_eq!(
+        model_info_capture_identity(
+            &envelope,
+            &fixture("transcripts/071/model-info-v1.http"),
+            "/v1/model/info"
+        ),
+        Verdict::Conformant,
+        "capture must be identifiably GET /v1/model/info with a 200 status"
+    );
+    let body = model_info_envelope_body(&envelope).expect("envelope has a body");
+    let v = model_info_omits_api_base_secret(&body, CANARY);
+    assert_eq!(
+        v,
+        Verdict::Violation(format!(
+            "model/info litellm_params.api_base contains secret marker {CANARY:?}"
+        )),
+        "GET /v1/model/info must leak the marker, not merely fail JSON validation"
+    );
+}
+
+#[test]
+fn litellm_model_info_route_identity_rejects_swapped_capture() {
+    // Swap the two envelopes' claimed routes: same (real) bodies, wrong identity.
+    // An identical-body test alone would pass this; the identity check must not.
+    let model_info = fixture("transcripts/071/model-info.json");
+    let model_info_v1 = fixture("transcripts/071/model-info-v1.json");
+    let wire = fixture("transcripts/071/model-info.http");
+    let wire_v1 = fixture("transcripts/071/model-info-v1.http");
+    assert!(
+        matches!(
+            model_info_capture_identity(&model_info, &wire_v1, "/model/info"),
+            Verdict::Violation(_)
+        ),
+        "a /model/info capture must not pass as /v1/model/info"
+    );
+    assert!(
+        matches!(
+            model_info_capture_identity(&model_info_v1, &wire, "/v1/model/info"),
+            Verdict::Violation(_)
+        ),
+        "a /v1/model/info capture must not pass as /model/info"
+    );
+    // A 404 body reusing the same shape as a genuine capture must not pass either.
+    let not_found = r#"{"request_path":"/model/info","status":404,"body":{"detail":"Not Found"}}"#;
+    assert!(matches!(
+        model_info_capture_identity(not_found, &wire, "/model/info"),
+        Verdict::Violation(_)
+    ));
+    assert!(matches!(
+        model_info_capture_identity(
+            &model_info,
+            &wire.replace("200 OK", "404 Not Found"),
+            "/model/info"
+        ),
+        Verdict::Violation(_)
+    ));
+}
+
+#[test]
+fn litellm_models_control_whole_body_omits_secrets() {
+    let envelope = fixture("transcripts/071/models-control.json");
+    assert_eq!(
+        model_info_capture_identity(
+            &envelope,
+            &fixture("transcripts/071/models-control.http"),
+            "/v1/models"
+        ),
+        Verdict::Conformant,
+        "control capture must be identifiably GET /v1/models with a 200 status"
+    );
+    let body = model_info_envelope_body(&envelope).expect("envelope has a body");
+    let parsed: Value = serde_json::from_str(&body).expect("control is JSON");
+    assert!(
+        parsed
+            .get("data")
+            .and_then(Value::as_array)
+            .is_some_and(|data| !data.is_empty()),
+        "models control must contain a nonempty model list"
+    );
+    assert_eq!(
+        response_omits_secret(&body, "CANARY"),
+        Verdict::Conformant,
+        "/v1/models whole-body control must not contain the api_base canary anywhere"
+    );
+}
+
+#[test]
+fn litellm_liveliness_control_whole_body_omits_secrets() {
+    let envelope = fixture("transcripts/071/liveliness-control.json");
+    assert_eq!(
+        model_info_capture_identity(
+            &envelope,
+            &fixture("transcripts/071/liveliness-control.http"),
+            "/health/liveliness"
+        ),
+        Verdict::Conformant,
+        "control capture must be identifiably GET /health/liveliness with a 200 status"
+    );
+    let body = model_info_envelope_body(&envelope).expect("envelope has a body");
+    assert_eq!(
+        serde_json::from_str::<Value>(&body).expect("liveliness is JSON"),
+        Value::String("I'm alive!".to_string())
+    );
+    assert_eq!(
+        response_omits_secret(&body, "CANARY"),
+        Verdict::Conformant,
+        "/health/liveliness whole-body control must not contain the api_base canary"
+    );
+}
+
+#[test]
+fn litellm_models_control_catches_canary_outside_api_base_path() {
+    // Negative coverage: a canary placed outside data[].litellm_params.api_base
+    // (where the narrow model_info checker looks) must still be caught by the
+    // whole-body response_omits_secret control used for /v1/models.
+    let leaked_elsewhere =
+        r#"{"object":"list","data":[{"id":"leaked-CANARY_QUERY_KEY_IN_API_BASE"}]}"#;
+    assert!(
+        matches!(
+            response_omits_secret(leaked_elsewhere, CANARY),
+            Verdict::Violation(_)
+        ),
+        "the whole-body control must still catch a canary anywhere in the response"
+    );
+}
+
+#[test]
+fn litellm_current_release_model_info_and_controls() {
+    for (name, path, leaks) in [
+        ("model-info", "/model/info", true),
+        ("model-info-v1", "/v1/model/info", true),
+        ("models-control", "/v1/models", false),
+        ("liveliness-control", "/health/liveliness", false),
+    ] {
+        let prefix = format!("transcripts/071/current-1.100.0/{name}");
+        let envelope = fixture(&format!("{prefix}.json"));
+        assert_eq!(
+            model_info_capture_identity(&envelope, &fixture(&format!("{prefix}.http")), path),
+            Verdict::Conformant,
+        );
+        let body = model_info_envelope_body(&envelope).expect("capture has a body");
+        if leaks {
+            assert_eq!(
+                model_info_omits_api_base_secret(&body, CANARY),
+                Verdict::Violation(format!(
+                    "model/info litellm_params.api_base contains secret marker {CANARY:?}"
+                )),
+            );
+        } else {
+            assert_eq!(response_omits_secret(&body, "CANARY"), Verdict::Conformant);
+        }
     }
 }

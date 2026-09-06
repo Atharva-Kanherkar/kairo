@@ -1,12 +1,12 @@
-#!/usr/bin/env python3
-"""Rewrite the README Status counts from the repo.
+"""Rewrite README and SCOREBOARD folder/test counts from the repo.
 
 Bugs = unique git-tracked issues/NNN-* writeups.
 Tests = #[test] in the harness (conformance + unit).
 
-  python3 tools/update-readme-counts.py          # write README.md
-  python3 tools/update-readme-counts.py --check  # fail if README is stale
+  python3 tools/update-readme-counts.py          # write both documents
+  python3 tools/update-readme-counts.py --check  # fail if either is stale
 """
+
 from __future__ import annotations
 
 import argparse
@@ -17,8 +17,16 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 README = ROOT / "README.md"
+SCOREBOARD = ROOT / "issues" / "SCOREBOARD.md"
 START = "<!-- kairo-counts:start -->"
 END = "<!-- kairo-counts:end -->"
+
+# "The 47 folders cover ..." in the README prose (outside the marker block).
+README_PROSE_RE = re.compile(r"(The )\d+( folders cover)")
+# "**Coverage**: 48 documented issue folders covering ..." in SCOREBOARD.md.
+SCOREBOARD_COVERAGE_RE = re.compile(
+    r"(\*\*Coverage\*\*: )\d+( documented issue folders)"
+)
 
 GATEWAYS = (
     ("litellm", "LiteLLM"),
@@ -29,7 +37,7 @@ GATEWAYS = (
     ("any-llm", "any-llm"),
 )
 
-TEST_RE = re.compile(r"^\s*#\[test\]", re.M)
+TEST_RE = re.compile(r"^\s*#\[test\]", re.MULTILINE)
 ISSUE_RE = re.compile(r"^issues/(\d+)-([^/]+)/README\.md$")
 
 
@@ -93,7 +101,7 @@ def render(counts: dict) -> str:
 
 
 def apply(text: str, block: str) -> str:
-    pattern = re.compile(re.escape(START) + r".*?" + re.escape(END), re.S)
+    pattern = re.compile(re.escape(START) + r".*?" + re.escape(END), re.DOTALL)
     if not pattern.search(text):
         raise SystemExit(
             f"README.md is missing {START} / {END} markers around the Status counts"
@@ -101,47 +109,72 @@ def apply(text: str, block: str) -> str:
     return pattern.sub(block, text, count=1)
 
 
+def apply_readme_prose(text: str, bugs: int) -> str:
+    if not README_PROSE_RE.search(text):
+        raise SystemExit(
+            "README.md is missing the 'The N folders cover' prose sentence"
+        )
+    return README_PROSE_RE.sub(rf"\g<1>{bugs}\g<2>", text, count=1)
+
+
+def apply_scoreboard(text: str, bugs: int) -> str:
+    if not SCOREBOARD_COVERAGE_RE.search(text):
+        raise SystemExit(
+            "issues/SCOREBOARD.md is missing the '**Coverage**: N documented "
+            "issue folders' line"
+        )
+    return SCOREBOARD_COVERAGE_RE.sub(rf"\g<1>{bugs}\g<2>", text, count=1)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--check",
         action="store_true",
-        help="exit 1 if README Status counts do not match the repo",
+        help="exit 1 if README or SCOREBOARD counts do not match the repo",
     )
     args = parser.parse_args()
     counts = collect()
     block = render(counts)
-    current = README.read_text()
-    updated = apply(current, block)
+
+    readme_current = README.read_text()
+    readme_updated = apply_readme_prose(apply(readme_current, block), counts["bugs"])
+    scoreboard_current = SCOREBOARD.read_text()
+    scoreboard_updated = apply_scoreboard(scoreboard_current, counts["bugs"])
+
+    summary = (
+        f"{counts['bugs']} bugs, {counts['tests']} tests "
+        f"({counts['conformance']} conformance, {counts['unit']} unit)"
+    )
+
     if args.check:
-        if updated != current:
+        stale = []
+        if readme_updated != readme_current:
+            stale.append("README.md")
+        if scoreboard_updated != scoreboard_current:
+            stale.append("issues/SCOREBOARD.md")
+        if stale:
             print(
-                "README Status counts are stale. Run "
-                "`python3 tools/update-readme-counts.py` and commit README.md.",
+                f"{', '.join(stale)} count(s) are stale. Run "
+                "`python3 tools/update-readme-counts.py` and commit the changes.",
                 file=sys.stderr,
             )
-            print(
-                f"counter: {counts['bugs']} bugs, {counts['tests']} tests "
-                f"({counts['conformance']} conformance, {counts['unit']} unit)",
-                file=sys.stderr,
-            )
+            print(f"counter: {summary}", file=sys.stderr)
             return 1
-        print(
-            f"README counts match: {counts['bugs']} bugs, {counts['tests']} tests "
-            f"({counts['conformance']} conformance, {counts['unit']} unit)"
-        )
+        print(f"README and SCOREBOARD counts match: {summary}")
         return 0
-    if updated != current:
-        README.write_text(updated)
-        print(
-            f"updated README: {counts['bugs']} bugs, {counts['tests']} tests "
-            f"({counts['conformance']} conformance, {counts['unit']} unit)"
-        )
+
+    changed = []
+    if readme_updated != readme_current:
+        README.write_text(readme_updated)
+        changed.append("README.md")
+    if scoreboard_updated != scoreboard_current:
+        SCOREBOARD.write_text(scoreboard_updated)
+        changed.append("issues/SCOREBOARD.md")
+    if changed:
+        print(f"updated {', '.join(changed)}: {summary}")
     else:
-        print(
-            f"README already current: {counts['bugs']} bugs, {counts['tests']} tests "
-            f"({counts['conformance']} conformance, {counts['unit']} unit)"
-        )
+        print(f"README and SCOREBOARD already current: {summary}")
     return 0
 
 

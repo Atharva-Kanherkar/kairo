@@ -26,14 +26,15 @@ offline with no provider keys.
 <!-- kairo-counts:start -->
 | Metric | Value |
 |---|---|
-| Reproduced issue folders | 48 |
+| Reproduced issue folders | 49 |
 | Gateways under test | LiteLLM, NVIDIA Switchyard, Bifrost, GoModel, AxonHub, and any-llm |
-| Harness tests | 132 (116 conformance checks against recorded transcripts, 16 unit) |
+| Harness tests | 143 (123 conformance checks against recorded transcripts, 20 unit) |
 <!-- kairo-counts:end -->
 
-The 47 folders cover 51 distinct defects confirmed on the wire, 50 of them on
-current releases at the time of capture. The full ledger, including the cited
-bugs that did not reproduce, is [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md).
+The 49 folders cover reproduced findings, multi-defect reports, and honest
+negative results. Versions and reproduction outcomes are recorded per finding
+in [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md), including cited bugs that did
+not reproduce.
 One finding is filed upstream as
 [NVIDIA-NeMo/Switchyard#380](https://github.com/NVIDIA-NeMo/Switchyard/issues/380).
 
@@ -54,7 +55,7 @@ reproduction commands.
 | Tool-call ids round-trip | [004](issues/004-gemini-thought-signature) | [005](issues/005-switchyard-toolid-sanitizer) | [037](issues/037-bifrost-toolid-not-restored) | | | |
 | Nothing is invented (empty text blocks, phantom message items, `cache_control`) | [001](issues/001-anthropic-stream-toolcall-translation), [009](issues/009-litellm-responses-phantom-message) | [019](issues/019-switchyard-invents-prompt-cache), [045](issues/045-switchyard-empty-text-before-tooluse), [068](issues/068-switchyard-drops-refusal-content) | | | | |
 | Malformed input fails closed | [008](issues/008-litellm-messages-indexerror-crash) | | | | | |
-| Client credentials stay client-side | [020](issues/020-litellm-client-api-key), [024](issues/024-litellm-health-extra-headers), [026](issues/026-litellm-extra-headers-org), [028](issues/028-litellm-gemini-passthrough-upload-url) | [023](issues/023-switchyard-forwards-org-api-key), [025](issues/025-switchyard-transport-query-key), [027](issues/027-switchyard-forwards-x-goog-api-key), [063](issues/063-switchyard-redirect-follows-x-api-key) | | | | |
+| Client credentials stay client-side | [020](issues/020-litellm-client-api-key), [024](issues/024-litellm-health-extra-headers), [026](issues/026-litellm-extra-headers-org), [028](issues/028-litellm-gemini-passthrough-upload-url), [071](issues/071-litellm-model-info-api-base-leak) | [023](issues/023-switchyard-forwards-org-api-key), [025](issues/025-switchyard-transport-query-key), [027](issues/027-switchyard-forwards-x-goog-api-key), [063](issues/063-switchyard-redirect-follows-x-api-key) | | | | |
 
 The `disable_parallel_tool_use` flag is dropped by five of the six gateways.
 The Anthropic `{"type": "auto", "disable_parallel_tool_use": true}` object
