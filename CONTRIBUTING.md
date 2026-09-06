@@ -55,7 +55,9 @@ pass three gates before approval:
    raw wire evidence, a successful control, deterministic results, and an isolated
    trigger.
 2. **Usefulness.** The wire defect is traced to a concrete failure in a real user or
-   agent workflow. A byte difference alone is not enough.
+   agent workflow. A byte difference alone is not enough. The finding also passes
+   the bug-or-not checks in `AGENTS.md` and is labeled `bug`, not a docs defect,
+   hardening idea, feature request, or operator misuse.
 3. **Upstream status.** Current issues, pull requests, releases, commits, and
    documentation have been searched and linked. The finding is labeled as novel,
    duplicate, fixed, regression, or documented behavior.

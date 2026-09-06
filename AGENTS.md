@@ -45,6 +45,32 @@ Prove that the defect matters outside the capture harness.
 - If no concrete user-visible consequence can be demonstrated or rigorously traced,
   the usefulness gate fails even when the bytes differ.
 
+#### Bug or not
+
+Before calling anything a bug, answer these in the writeup. Any `no` fails this
+gate.
+
+- Is the expected behavior really the spec? A docstring, comment, or doc line is
+  not the spec when the same project's examples, tests, UI, or clients show the
+  behavior is intended. Check all four before quoting a stale sentence.
+- Have maintainers already ruled on it? If a recent commit, PR description, code
+  comment, or denylist deliberately classifies the field or behavior the other way,
+  the finding is a docs defect or feature request, not a bug.
+- Is the trigger supported usage? The precondition must be a documented setup with
+  default or recommended settings. A secret in a non-secret field, a disabled
+  security control such as no master key, or an unsupported provider layout is
+  operator misuse.
+- Is a real boundary crossed? For any disclosure claim, name the role or key scope
+  the product says must not see the data, then show that caller seeing it. With
+  auth off, everything is visible by design and nothing is crossed.
+- What fix would a maintainer ship? Write it in one sentence. If it is a docstring
+  edit, a doc note, or "do not do that", it is not a bug. If the only real defect is
+  an adjacent inconsistency, reframe the claim around that and re-run the gates.
+
+Record exactly one label: `bug`, `docs-defect`, `hardening`, `feature-request`,
+or `operator-misuse`. Only `bug` can pass usefulness. The other labels may still be
+worth a note upstream, but not an issue in this repository.
+
 ### 3. Upstream status
 
 Check the current upstream state on the day of the work.
@@ -83,7 +109,8 @@ request while reviewing it.
 - `ACCEPT`: all three gates pass and repository checks pass.
 - `NEEDS EVIDENCE`: the claim may be valid, but at least one gate lacks proof.
 - `REJECT`: the exact claim does not reproduce, is attributed to the wrong layer,
-  is already fixed on the tested current version, or has no useful consequence.
+  is already fixed on the tested current version, has no useful consequence, or
+  carries a bug-or-not label other than `bug`.
 
 Any single failed or incomplete gate blocks approval.
 
