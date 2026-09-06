@@ -66,10 +66,11 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 068 | Switchyard `/v1/messages` erases structured refusal text from an OpenAI Chat response and invents an empty Anthropic text block | Switchyard main `9523023`, 0.2.0 (keyless capture rig) | no matching upstream issue; distinct from 036 and 045 | ✅ capture 5/5, client HTTP 200 5/5. Same-proxy OpenAI response path preserves the same refusal 5/5. |
 | 069 | Switchyard `/v1/responses` loses the machine-readable refusal type from an OpenAI Chat response; current main erases it and PR #623 flattens it to `output_text` | Switchyard main `7a23989` and PR #623 `2765f46`, 0.2.0 (keyless capture rig) | discussed by Switchyard #622/#623 without a dedicated Responses ticket | ✅ buffered and stream violations 5/5 per mode on both revisions. Same-process Chat controls preserve the identical refusal 20/20. |
 | 071 | LiteLLM `GET /model/info` returns deployment `api_base` query credentials despite its docstring guaranteeing omission | LiteLLM 1.99.0 (mock deployment with query key in `api_base`) | discussed by [litellm#18818](https://github.com/BerriAI/litellm/issues/18818), no dedicated ticket | ✅ canary echo 5/5 on `/model/info` and `/v1/model/info`. Controls `/v1/models` and `/health/liveliness` omit credentials 5/5. |
+| 072 | Bifrost forwards Anthropic `tool_choice: {"type": "any"}` as bare `"tool_choice": "any"` to OpenAI backends instead of mapping to `"required"` | Bifrost 2.0.0 (and 1.6.11, keyless capture rig) | novel, no matching upstream ticket | ✅ capture 5/5, client HTTP 200 5/5. Same-proxy OpenAI Responses and Chat controls preserve `tool_choice: "required"` 5/5. |
 
 Numbers 046-050 are reserved for unpublished GoModel round-2 findings (one bug per PR). Issues 052-056 (AxonHub round 2) land on sibling branches, not missing rows here.
 
-**Coverage**: 49 documented issue folders across LiteLLM, Switchyard, Bifrost,
+**Coverage**: 50 documented issue folders across LiteLLM, Switchyard, Bifrost,
 GoModel, AxonHub, and any-llm. Folder counts are not defect counts: some folders
 contain honest negatives or multiple findings, including 006's four independent
 field losses and the LiteLLM copy of that class. The rows above record each
@@ -91,7 +92,7 @@ ends a tool-call turn as `end_turn`, a regression of their own fixed #3638,
 caught by the bug-001 checker unchanged), 031 (parallel flag dropped), 032
 (`stop_sequences` dropped), 033 (thinking history dropped), 034 (`content_filter`
 erased), 035 (truncation erased), 036 (refusal content emptied), 037 (tool-id
-sanitizer has no inverse). GoModel confirmed: 042 (Anthropic `output_format`
+sanitizer has no inverse), 072 (Anthropic `tool_choice: {"type": "any"}` leaked as `"any"` instead of `"required"`). GoModel confirmed: 042 (Anthropic `output_format`
 dropped), 043 (parallel flag dropped). AxonHub confirmed: 051 (Anthropic
 `output_format` dropped). any-llm confirmed: 057 (thinking history dropped),
 058 (parallel flag dropped), 059 (`is_error` dropped), 060 (image in tool

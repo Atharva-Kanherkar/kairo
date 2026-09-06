@@ -1,0 +1,131 @@
+{
+  "runs": 5,
+  "violation": [
+    {
+      "run": 1,
+      "path": "/v1/responses",
+      "tool_choice": "any",
+      "is_leak": true
+    },
+    {
+      "run": 2,
+      "path": "/v1/responses",
+      "tool_choice": "any",
+      "is_leak": true
+    },
+    {
+      "run": 3,
+      "path": "/v1/responses",
+      "tool_choice": "any",
+      "is_leak": true
+    },
+    {
+      "run": 4,
+      "path": "/v1/responses",
+      "tool_choice": "any",
+      "is_leak": true
+    },
+    {
+      "run": 5,
+      "path": "/v1/responses",
+      "tool_choice": "any",
+      "is_leak": true
+    }
+  ],
+  "control_responses": [
+    {
+      "run": 1,
+      "path": "/v1/responses",
+      "tool_choice": "required",
+      "conformant": true
+    },
+    {
+      "run": 2,
+      "path": "/v1/responses",
+      "tool_choice": "required",
+      "conformant": true
+    },
+    {
+      "run": 3,
+      "path": "/v1/responses",
+      "tool_choice": "required",
+      "conformant": true
+    },
+    {
+      "run": 4,
+      "path": "/v1/responses",
+      "tool_choice": "required",
+      "conformant": true
+    },
+    {
+      "run": 5,
+      "path": "/v1/responses",
+      "tool_choice": "required",
+      "conformant": true
+    }
+  ],
+  "control_chat": [
+    {
+      "run": 1,
+      "path": "/v1/chat/completions",
+      "tool_choice": "required",
+      "conformant": true
+    },
+    {
+      "run": 2,
+      "path": "/v1/chat/completions",
+      "tool_choice": "required",
+      "conformant": true
+    },
+    {
+      "run": 3,
+      "path": "/v1/chat/completions",
+      "tool_choice": "required",
+      "conformant": true
+    },
+    {
+      "run": 4,
+      "path": "/v1/chat/completions",
+      "tool_choice": "required",
+      "conformant": true
+    },
+    {
+      "run": 5,
+      "path": "/v1/chat/completions",
+      "tool_choice": "required",
+      "conformant": true
+    }
+  ],
+  "control_auto": [
+    {
+      "run": 1,
+      "path": "/v1/responses",
+      "tool_choice": "auto",
+      "conformant": true
+    },
+    {
+      "run": 2,
+      "path": "/v1/responses",
+      "tool_choice": "auto",
+      "conformant": true
+    },
+    {
+      "run": 3,
+      "path": "/v1/responses",
+      "tool_choice": "auto",
+      "conformant": true
+    },
+    {
+      "run": 4,
+      "path": "/v1/responses",
+      "tool_choice": "auto",
+      "conformant": true
+    },
+    {
+      "run": 5,
+      "path": "/v1/responses",
+      "tool_choice": "auto",
+      "conformant": true
+    }
+  ]
+}

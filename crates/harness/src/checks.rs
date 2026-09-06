@@ -316,6 +316,32 @@ pub fn parallel_tool_disable_preserved(forwarded_jsonl: &str) -> Verdict {
     )
 }
 
+/// Invariant (bug 072): Anthropic `tool_choice: {"type": "any"}` forwarded to an
+/// OpenAI-compatible backend MUST be translated to `"required"`. Emitting the bare
+/// string `"any"` leaks the Anthropic dialect onto the OpenAI wire where it is rejected
+/// with HTTP 400.
+pub fn anthropic_tool_choice_any_mapped_to_required(forwarded_jsonl: &str) -> Verdict {
+    let Ok(body) = capture_body(forwarded_jsonl) else {
+        return Verdict::Violation("unparseable capture".into());
+    };
+    let tool_choice = body.get("tool_choice");
+    if tool_choice == Some(&Value::String("required".into()))
+        || body.pointer("/tool_choice/mode").and_then(Value::as_str) == Some("required")
+    {
+        Verdict::Conformant
+    } else if tool_choice == Some(&Value::String("any".into()))
+        || body.pointer("/tool_choice/type").and_then(Value::as_str) == Some("any")
+    {
+        Verdict::Violation(
+            "tool_choice was forwarded as 'any' instead of being mapped to 'required'".into(),
+        )
+    } else {
+        Verdict::Violation(format!(
+            "expected tool_choice to be 'required', got {tool_choice:?}"
+        ))
+    }
+}
+
 /// Invariant (bug 018): a user-supplied document body's bytes MUST appear in
 /// the forwarded request. Silent deletion is a violation.
 pub fn document_body_forwarded(forwarded_jsonl: &str, document_body: &str) -> Verdict {
@@ -1628,5 +1654,32 @@ mod tests {
                 Verdict::Violation(_)
             ));
         }
+    }
+
+    #[test]
+    fn anthropic_tool_choice_any_checker() {
+        let any_fwd = r#"{"path":"/v1/responses","body":{"tool_choice":"any"}}"#;
+        assert!(matches!(
+            anthropic_tool_choice_any_mapped_to_required(any_fwd),
+            Verdict::Violation(_)
+        ));
+
+        let req_fwd = r#"{"path":"/v1/responses","body":{"tool_choice":"required"}}"#;
+        assert_eq!(
+            anthropic_tool_choice_any_mapped_to_required(req_fwd),
+            Verdict::Conformant
+        );
+
+        let req_mode_fwd = r#"{"path":"/v1/responses","body":{"tool_choice":{"mode":"required"}}}"#;
+        assert_eq!(
+            anthropic_tool_choice_any_mapped_to_required(req_mode_fwd),
+            Verdict::Conformant
+        );
+
+        let auto_fwd = r#"{"path":"/v1/responses","body":{"tool_choice":"auto"}}"#;
+        assert!(matches!(
+            anthropic_tool_choice_any_mapped_to_required(auto_fwd),
+            Verdict::Violation(_)
+        ));
     }
 }

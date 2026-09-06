@@ -6,17 +6,17 @@
 //! violating the invariant, this test flips and tells us.
 
 use kairo::checks::{
-    anthropic_response_toolcall_stop_reason, anthropic_toolcall_stop_reason, capture_records,
-    content_filter_preserved, document_body_forwarded, id_conforms, instruction_messages_preserved,
-    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
-    model_info_capture_identity, model_info_envelope_body, model_info_omits_api_base_secret,
-    no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
-    no_phantom_null_output_text, non_text_block_not_json_dumped, openai_stream_finish_reason,
-    openai_toolcall_id_charset, parallel_tool_disable_preserved, reasoning_text_order_preserved,
-    refusal_text_preserved, response_content_not_empty, response_omits_secret,
-    responses_refusal_semantics_preserved, stop_sequence_forwarded,
-    thinking_not_leaked_as_visible_text, thinking_text_forwarded, tool_strict_forwarded,
-    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    anthropic_response_toolcall_stop_reason, anthropic_tool_choice_any_mapped_to_required,
+    anthropic_toolcall_stop_reason, capture_records, content_filter_preserved,
+    document_body_forwarded, id_conforms, instruction_messages_preserved, is_error_forwarded,
+    json_schema_forwarded, json_schema_property_forwarded, model_info_capture_identity,
+    model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
+    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
+    non_text_block_not_json_dumped, openai_stream_finish_reason, openai_toolcall_id_charset,
+    parallel_tool_disable_preserved, reasoning_text_order_preserved, refusal_text_preserved,
+    response_content_not_empty, response_omits_secret, responses_refusal_semantics_preserved,
+    stop_sequence_forwarded, thinking_not_leaked_as_visible_text, thinking_text_forwarded,
+    tool_strict_forwarded, toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
     upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
     JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
@@ -2544,4 +2544,43 @@ fn litellm_current_release_model_info_and_controls() {
             assert_eq!(response_omits_secret(&body, "CANARY"), Verdict::Conformant);
         }
     }
+}
+
+// ---- bug 072: Bifrost Anthropic tool_choice "any" dialect leak on OpenAI wire ----
+
+#[test]
+fn bifrost_leaks_anthropic_tool_choice_any() {
+    let v = anthropic_tool_choice_any_mapped_to_required(&fixture(
+        "transcripts/072/upstream-request.jsonl",
+    ));
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "Bifrost must be caught leaking tool_choice='any' onto OpenAI wire: {v:?}"
+    );
+}
+
+#[test]
+fn bifrost_openai_responses_keeps_tool_choice_required() {
+    // Control 1: OpenAI Responses route forwards "required"
+    let v = anthropic_tool_choice_any_mapped_to_required(&fixture(
+        "transcripts/072/control-responses-upstream.jsonl",
+    ));
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "OpenAI Responses route forwards tool_choice='required': {v:?}"
+    );
+}
+
+#[test]
+fn bifrost_openai_chat_keeps_tool_choice_required() {
+    // Control 2: OpenAI Chat route forwards "required"
+    let v = anthropic_tool_choice_any_mapped_to_required(&fixture(
+        "transcripts/072/control-chat-upstream.jsonl",
+    ));
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "OpenAI Chat route forwards tool_choice='required': {v:?}"
+    );
 }
