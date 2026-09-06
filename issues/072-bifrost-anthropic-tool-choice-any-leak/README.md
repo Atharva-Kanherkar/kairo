@@ -1,134 +1,171 @@
-# 072, Bifrost forwards Anthropic `tool_choice: {"type": "any"}` as bare `"tool_choice": "any"` to OpenAI backends instead of mapping to `"required"`
+# 072, Bifrost forwards Anthropic forced-tool `any` to OpenAI instead of `required`
 
-- **Upstream**: no ticket found in `maximhq/bifrost`. Related issue [#4530](https://github.com/maximhq/bifrost/issues/4530) concerned server-side tools being stripped when `tool_choice: "required"` was used, not translation of the Anthropic `"any"` enum.
-- **Tool under test**: Bifrost gateway **v2.0.0** (binary `bifrost-http-0`) and **v1.6.11** (`npx -y @maximhq/bifrost`).
-- **Reproduced**: 2026-09-06 on macOS arm64. Keyless local OpenAI Responses/Chat capture backend (`transcripts/072/reproduce.py`). Five of five client calls returned HTTP 200, but the forwarded request carried the invalid dialect string `"any"`. Evidence: `transcripts/072/`.
+- **Upstream**: [maximhq/bifrost](https://github.com/maximhq/bifrost), no matching ticket found. Related [#4532](https://github.com/maximhq/bifrost/pull/4532) fixes OpenRouter server-tool stripping, not this enum translation.
+- **Tool under test**: official [transports/v2.0.0](https://github.com/maximhq/bifrost/releases/tag/transports/v2.0.0), commit `e4a30d6041c0446603aea615bc5da340dac001b1`, core v1.8.3. The runner verifies embedded revision, clean build and core dependency before executing.
+- **Reproduced**: 2026-09-06, macOS arm64, `gpt-4o`, Anthropic Python SDK 0.125.0. Both keyless capture and real OpenAI runs are retained. No claim is made about v1.6.11.
+- **Review state**: repair self-reviewed and rerun successfully; separate independent review remains required before approval. Self-review is not independent approval.
 
 ## What breaks
 
-In the Anthropic Messages API (`/anthropic/v1/messages`), an agent forces tool execution by setting:
+An Anthropic SDK user routing to OpenAI through Bifrost can request at least one
+tool call with `tool_choice: {"type": "any"}`. Bifrost serializes that as the
+string `"any"` instead of OpenAI's `"required"`. The real OpenAI provider rejects
+the request before generating a tool call.
+
+The measured workflow is `reproduce.py`'s minimal SDK/tool-dispatch loop. Its
+single tool is `get_weather`. With SDK retries disabled, each invalid request
+raises `anthropic.BadRequestError` and dispatches zero tools. Changing only the
+choice to `{"type":"tool","name":"get_weather"}` forces the same available tool,
+returns HTTP 200 and dispatches it exactly once. The tool is a local deterministic
+function, not a network action or model-generated executable code.
+
+```text
+Anthropic SDK -> real Bifrost -> recording relay -> real OpenAI
+   type:any      string:any       unchanged body      HTTP 400
+       <- BadRequestError, zero tool dispatches <-
+```
+
+The observed provider error on both routes is:
 
 ```json
-"tool_choice": {"type": "any"}
+{"error":{"message":"Invalid value: 'any'. Supported values are: 'none', 'auto', and 'required'.","type":"invalid_request_error","param":"tool_choice","code":"invalid_value"}}
 ```
 
-This specifies that the model must invoke at least one of the provided tools.
-
-In the OpenAI API (both the Responses API `/v1/responses` and Chat Completions `/v1/chat/completions`), the equivalent requirement is specified by the string `"required"`:
-
-```json
-"tool_choice": "required"
-```
-
-OpenAI's schema allows only `"auto"`, `"none"`, `"required"`, or an explicit function object. The string `"any"` is not recognized by OpenAI and causes OpenAI to reject the request with HTTP 400 Bad Request:
-`Invalid value: 'any'. Supported values are: 'auto', 'none', 'required', or an object.`
-
-When Bifrost translates an Anthropic request to an OpenAI-compatible backend, it converts `tool_choice: {"type": "any"}` to `tool_choice: "any"` and transmits that string verbatim on the OpenAI wire. The Anthropic dialect string leaks into the OpenAI request without being mapped to `"required"`.
-
-Who this hurts:
-
-- Any agentic workflow (for example using the Anthropic Python or TypeScript SDK, Claude Code, or LangChain Anthropic integration) pointed at Bifrost and configured to route to an OpenAI model. When the agent enforces tool execution on step 1 using standard Anthropic syntax, the request fails with HTTP 400 from OpenAI rather than invoking the tool.
-
-```mermaid
-flowchart LR
-  client["Anthropic SDK: tool_choice={'type': 'any'}"] --> bifrost["Bifrost Gateway"]
-  bifrost -->|"translates to Responses/Chat"| leak["OpenAI wire: 'tool_choice': 'any'"]
-  leak --> openai["OpenAI API"]
-  openai -->|"HTTP 400: Invalid value 'any'"| fail["Agent crashes"]
-```
+This is not a claim that every agent crashes: a caller can catch the exception.
+The measured consequence is that this tool-requesting step cannot execute its
+tool. Production frequency and streaming behavior were not measured.
 
 ## Wire evidence
 
-1. **Bifrost Anthropic ingress to OpenAI Responses upstream (5/5 violation)**
-   - `transcripts/072/upstream-request.jsonl`
-   - Five `/anthropic/v1/messages` calls with `"tool_choice": {"type": "any"}` resulted in forwarded `/v1/responses` requests containing `"tool_choice": "any"`.
-2. **Control 1: Bifrost OpenAI Responses ingress (5/5 conformant)**
-   - `transcripts/072/control-responses-upstream.jsonl`
-   - Five `/v1/responses` calls with `"tool_choice": "required"` forwarded `"tool_choice": "required"` to the upstream.
-3. **Control 2: Bifrost OpenAI Chat Completions ingress (5/5 conformant)**
-   - `transcripts/072/control-chat-upstream.jsonl`
-   - Five `/v1/chat/completions` calls with `"tool_choice": "required"` forwarded `"tool_choice": "required"` to the upstream.
-4. **Control 3: Bifrost Anthropic auto tool_choice (5/5 conformant)**
-   - `transcripts/072/control-anthropic-auto-upstream.jsonl`
-   - Five `/anthropic/v1/messages` calls with `"tool_choice": {"type": "auto"}` forwarded `"tool_choice": "auto"` to the upstream.
-5. **Determinism summary**
-   - `transcripts/072/client-results.json` records 5/5 runs for each condition.
+Each JSONL line is one complete correlated exchange. `client_request.body_raw`,
+`forwarded_request.body_raw`, `upstream_response.body_raw` and
+`client_response.body_raw` retain the actual UTF-8 bodies, including whitespace,
+as JSON strings. Decoding those strings restores the bytes; they are not
+reconstructed summaries. The parsed top-level `body` is only a checker convenience
+and must equal the parsed forwarded raw body. Status, run number, route, selected
+non-secret headers and SDK/tool-dispatch outcome are also retained.
 
-### Control matrix (5 iterations each)
+All paths below are under `transcripts/072/`. Each file has five exchanges.
 
-| Route | Client sent | Reached upstream | Status |
+| Live evidence | Upstream | Provider/client status | SDK tool dispatch |
 |---|---|---|---|
-| `/anthropic/v1/messages` | `"tool_choice": {"type": "any"}` | `"tool_choice": "any"` 5/5 | ❌ Dialect leak (expected `"required"`) |
-| `/v1/responses` | `"tool_choice": "required"` | `"tool_choice": "required"` 5/5 | ✅ Conformant |
-| `/v1/chat/completions` | `"tool_choice": "required"` | `"tool_choice": "required"` 5/5 | ✅ Conformant |
-| `/anthropic/v1/messages` | `"tool_choice": {"type": "auto"}` | `"tool_choice": "auto"` 5/5 | ✅ Conformant |
+| `live/responses-any.jsonl` | Responses, `any` | 400/400, 5/5 | 0, 5/5 |
+| `live/chat-any.jsonl` | Chat, `any` | 400/400, 5/5 | 0, 5/5 |
+| `live/responses-named.jsonl` | Responses, named function | 200/200, 5/5 | 1, 5/5 |
+| `live/chat-named.jsonl` | Chat, named function | 200/200, 5/5 | 1, 5/5 |
+| `live/responses-required.jsonl` | Responses, `required` | 200/200, 5/5 | HTTP control, function call returned |
+| `live/chat-required.jsonl` | Chat, `required` | 200/200, 5/5 | HTTP control, function call returned |
+| `live/responses-direct-required.jsonl` | Direct OpenAI Responses | 200/200, 5/5 | Function call returned |
+| `live/chat-direct-required.jsonl` | Direct OpenAI Chat | 200/200, 5/5 | Function call returned |
+
+Direct controls replay the captured violating body with only `tool_choice`
+changed to `required`, bypassing Bifrost. Named controls change only the client's
+choice field, preserving the same model, prompt and sole available tool.
+
+The matching `local/` captures isolate forwarding without a provider key; they
+also include `responses-auto.jsonl` and `chat-auto.jsonl`, both preserved 5/5.
+The local responder always returns a synthetic success, including for `any`.
+Those HTTP 200s are explicitly not provider-rejection evidence. There are 50 local
+and 40 live exchanges, not five summaries standing in for the full trial set.
+
+`local/metadata.json` and `live/metadata.json` record the binary SHA-256, embedded
+Go build/dependency metadata, SDK versions, date, model and completion flag.
+`responses-config.json` uses the built-in OpenAI provider. `chat-config.json` uses
+the documented custom OpenAI provider with Responses disabled and Chat enabled,
+which activates Responses-to-Chat fallback. Both target a loopback relay.
+
+### Credential handling
+
+Only `OPENAI_API_KEY` is loaded, from the process environment or the project
+`.env` using a dotenv parser without interpolation or shell evaluation. The real
+key stays in relay memory. Bifrost and the SDK receive a non-secret placeholder.
+Authenticated relay requests have a fixed `https://api.openai.com` destination,
+preserve Bifrost's body bytes, and cannot follow redirects. Authorization,
+account-identifying and cookie headers are excluded; bodies containing the key or
+a likely key string are refused before persistence. Prompts contain only the
+synthetic weather task. The `.env` file is neither edited nor copied.
+
+## Root cause
+
+`convertAnthropicToolChoiceToBifrost` maps Anthropic `any` to
+`ResponsesToolChoiceTypeAny`, the string `"any"`. `ToOpenAIResponsesRequest`
+copies `ResponsesParameters` without normalizing it. The Responses-to-Chat
+conversion also copies the string, and OpenAI Chat serialization leaves it intact.
+The shared schema marshalers emit the string as provided.
+
+The reverse Anthropic conversion already handles both `Any` and `Required` as
+Anthropic `type:any`. The shared schema intentionally includes other providers'
+values; that does not make `any` valid on the OpenAI wire.
+
+Source inspected at current `dev` commit `03ab391865710462302bbcf52dca2f32682b91b5`:
+
+- [Anthropic ingress conversion](https://github.com/maximhq/bifrost/blob/03ab391865710462302bbcf52dca2f32682b91b5/core/providers/anthropic/responses.go#L8209-L8223).
+- [OpenAI Responses parameter copy](https://github.com/maximhq/bifrost/blob/03ab391865710462302bbcf52dca2f32682b91b5/core/providers/openai/responses.go#L308).
+- [Responses-to-Chat choice conversion](https://github.com/maximhq/bifrost/blob/03ab391865710462302bbcf52dca2f32682b91b5/core/schemas/mux.go#L320-L322).
+- [OpenAI Chat parameter copy](https://github.com/maximhq/bifrost/blob/03ab391865710462302bbcf52dca2f32682b91b5/core/providers/openai/chat.go#L43-L45).
 
 ## Bug or not
 
-- **Is the expected behavior really the spec?**
-  Yes. Anthropic specification documents `{"type": "any"}` as the mechanism to force tool use. OpenAI specification defines `"required"` as the mechanism to force tool use, and does not accept `"any"`. Furthermore, Bifrost's own reverse translator (`core/providers/anthropic/responses.go:8253`) already explicitly maps `ResponsesToolChoiceTypeRequired` to `&AnthropicToolChoice{Type: "any"}` when translating from OpenAI to Anthropic.
-- **Have maintainers already ruled on it?**
-  No. No maintainer commit, issue comment, or PR discusses preserving `"any"` on the OpenAI wire.
-- **Is the trigger supported usage?**
-  Yes. `tool_choice: {"type": "any"}` is standard Anthropic API usage across all official SDKs.
-- **Is a real boundary crossed?**
-  Yes. Protocol translation boundary from Anthropic Messages dialect to OpenAI Responses/Chat dialect. Leaking the unmapped string causes upstream provider rejection.
-- **What fix would a maintainer ship?**
-  In `core/providers/openai/responses.go` and `core/providers/openai/chat.go`, map `tool_choice` string `"any"` (or `ResponsesToolChoiceTypeAny`) to `"required"` when serializing requests for OpenAI.
+- **Expected behavior is the spec:** [Anthropic's generated type](https://github.com/anthropics/anthropic-sdk-python/blob/main/src/anthropic/types/tool_choice_any_param.py) accepts `any`; [OpenAI's generated string choices](https://github.com/openai/openai-python/blob/main/src/openai/types/responses/tool_choice_options.py) are `none`, `auto`, `required`. Live validation confirms the distinction.
+- **Examples, tests and UI checked:** Bifrost's [SDK example](https://github.com/maximhq/bifrost/blob/03ab391865710462302bbcf52dca2f32682b91b5/docs/integrations/anthropic-sdk/overview.mdx#L74-L101) routes Anthropic clients to OpenAI; its [integration test](https://github.com/maximhq/bifrost/blob/03ab391865710462302bbcf52dca2f32682b91b5/tests/integrations/python/tests/test_anthropic.py#L625-L638) uses `any` to force tools. The log-detail UI displays the choice but does not declare invalid OpenAI values supported.
+- **Maintainer ruling:** none found accepting `any` on OpenAI egress. [Shared-schema marshalling changes](https://github.com/maximhq/bifrost/commit/0e58cb323fd4e5510085ef6b4feab15c9170bc12) retain provider-generic enums; they do not normalize this OpenAI boundary.
+- **Supported usage:** the built-in OpenAI setup and [Chat-only custom-provider configuration](https://github.com/maximhq/bifrost/blob/03ab391865710462302bbcf52dca2f32682b91b5/docs/providers/custom-providers.mdx#L87-L120) are documented. The keyless local gateway is a capture fixture, not a security precondition.
+- **Boundary:** protocol translation, not disclosure. Valid Anthropic input becomes invalid OpenAI input and prevents a requested tool step.
+- **Maintainer fix:** normalize generic forced-tool `any` to `required` when serializing OpenAI Responses and Chat requests without changing dialects that support `any`.
 
 Classification label: `bug`.
 
 ## Upstream status
 
-Checked on 2026-09-06.
+Checked 2026-09-06. The current stable OSS transport is `transports/v2.0.0`,
+executed here. Current default branch `dev` at `03ab391865710462302bbcf52dca2f32682b91b5`
+was source-inspected, not executed. The [core v1.8.4 release](https://github.com/maximhq/bifrost/releases/tag/core/v1.8.4)
+contains unrelated reasoning/passthrough fixes.
 
-- Searched `maximhq/bifrost` issues, PRs, and commits for `tool_choice "any"` and `tool_choice "required"`.
-- Found [#4530](https://github.com/maximhq/bifrost/issues/4530) and [#4532](https://github.com/maximhq/bifrost/pull/4532) regarding tool stripping with `tool_choice: "required"`, but no issue or PR exists for mapping `"any"` to `"required"`.
-- Inspected `core/providers/openai/responses.go` and `core/providers/openai/chat.go` in Bifrost `dev` branch at commit `e1045c0`: `ToOpenAIResponsesRequest` assigns `req.ResponsesParameters = *params` with no mapping for `tool_choice: "any"`.
-- Classification: `novel`.
+Live GitHub searches included open/closed issues and PRs with `tool_choice any`,
+`"tool_choice" "any" in:title,body`, `"forced tool"`, `"Invalid value" "any"`,
+`ResponsesToolChoiceTypeAny`, and `"tool choice" in:title`. Relevant converter and
+schema commits, release notes, changelogs and documentation were inspected.
 
-## Root cause
-
-In `core/providers/anthropic/responses.go`:
-```go
-func convertAnthropicToolChoiceToBifrost(toolChoice *AnthropicToolChoice) *schemas.ResponsesToolChoice {
-...
-    switch toolChoice.Type {
-    case "auto":
-        bifrostToolChoice.ResponsesToolChoiceStr = schemas.Ptr(string(schemas.ResponsesToolChoiceTypeAuto))
-    case "any":
-        bifrostToolChoice.ResponsesToolChoiceStr = schemas.Ptr(string(schemas.ResponsesToolChoiceTypeAny))
-```
-`ResponsesToolChoiceTypeAny` is defined in `core/schemas/responses.go` as `"any"`.
-
-When `ToOpenAIResponsesRequest` in `core/providers/openai/responses.go` prepares the request for OpenAI:
-```go
-req.ResponsesParameters = *params
-```
-It leaves `ToolChoice` as `"any"`. Because `ResponsesToolChoice.MarshalJSON` outputs `ResponsesToolChoiceStr` directly, `"tool_choice": "any"` is sent to the OpenAI endpoint.
-
-In contrast, `convertResponsesToolChoiceToAnthropic` in `core/providers/anthropic/responses.go:8253` correctly performs the reverse mapping:
-```go
-case schemas.ResponsesToolChoiceTypeAny, schemas.ResponsesToolChoiceTypeRequired:
-    return &AnthropicToolChoice{Type: "any"}
-```
+No matching ticket was found. Related matches are [#4532](https://github.com/maximhq/bifrost/pull/4532)
+(OpenRouter tool stripping), [#2309](https://github.com/maximhq/bifrost/pull/2309)
+(later agent-turn choice reset), [#3315](https://github.com/maximhq/bifrost/pull/3315)
+(Gemini ANY round-trip), and [#1787](https://github.com/maximhq/bifrost/pull/1787)
+(empty object fields). None fixes this translation. Classification: `novel`,
+meaning no match in these searches, not a proof that no discussion exists.
 
 ## Test
 
-Harness invariant: `anthropic_tool_choice_any_mapped_to_required`.
-
-- `bifrost_leaks_anthropic_tool_choice_any` asserts violation on `transcripts/072/upstream-request.jsonl`.
-- `bifrost_openai_responses_keeps_tool_choice_required` asserts conformant on `transcripts/072/control-responses-upstream.jsonl`.
-- `bifrost_openai_chat_keeps_tool_choice_required` asserts conformant on `transcripts/072/control-chat-upstream.jsonl`.
-
-Invariant: *an Anthropic `tool_choice: {"type": "any"}` constraint must be translated to `"tool_choice": "required"` when forwarded to an OpenAI-compatible backend, and must not leak the bare string `"any"`.*
+`anthropic_tool_choice_any_mapped_to_required` accepts only the promised bare
+`"required"` string. It rejects malformed mode/type objects as well as `any`,
+`auto`, null and absent choices. The sweep probe follows the same invariant.
+Conformance tests read all five raw exchanges per file, check route and source
+identity, raw/parsed consistency, status, provider error and SDK dispatch outcome.
+Python tests also mutate a later trial, check exact one-field controls, verify
+provenance rejection and test credential-safe capture behavior.
 
 ## Repro
 
-```bash
-# Run deterministic 5/5 reproduction against local Bifrost:
-python3 transcripts/072/reproduce.py
+Install the SDK dependencies in a virtual environment. The npm launcher version
+is distinct from the transport version; explicitly pin the latter:
 
-# Run unit tests for reproduction:
-python3 -m unittest transcripts/072/test_reproduce.py
+```sh
+python3 -m pip install -r transcripts/072/requirements.txt
+npx -y @maximhq/bifrost@1.6.3 --transport-version v2.0.0 --help
+
+# macOS arm64 cache location; pass --bifrost-bin for another platform/location.
+python3 -B transcripts/072/reproduce.py --output-dir /tmp/kairo-072-local-new
+python3 -B transcripts/072/reproduce.py --live --env-file .env --output-dir /tmp/kairo-072-live-new
+
+python3 -B -m unittest transcripts/072/test_reproduce.py
+python3 -B -O -m unittest transcripts/072/test_reproduce.py
+cargo test --workspace
+cargo fmt --all -- --check
+cargo clippy --workspace --all-targets -- -D warnings
+python3 tools/update-readme-counts.py --check
 ```
+
+Use fresh output directories; existing evidence is not overwritten. A failed run
+keeps sanitized exchanges with `metadata.complete: false`. Live mode makes 40
+bounded generation requests (five per condition), each limited to 100 output
+tokens, and requires the supplied key to have `gpt-4o` access.

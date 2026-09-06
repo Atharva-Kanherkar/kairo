@@ -1,0 +1,35 @@
+{
+  "config_store": {
+    "enabled": false
+  },
+  "client": {
+    "enable_logging": false,
+    "initial_pool_size": 10
+  },
+  "providers": {
+    "chatonly": {
+      "keys": [
+        {
+          "name": "local-placeholder",
+          "value": "local-placeholder",
+          "weight": 1,
+          "models": [
+            "*"
+          ]
+        }
+      ],
+      "network_config": {
+        "base_url": "http://127.0.0.1:19074",
+        "max_retries": 0
+      },
+      "custom_provider_config": {
+        "base_provider_type": "openai",
+        "allowed_requests": {
+          "list_models": true,
+          "chat_completion": true,
+          "chat_completion_stream": true
+        }
+      }
+    }
+  }
+}

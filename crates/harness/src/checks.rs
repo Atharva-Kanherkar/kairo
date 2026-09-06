@@ -325,9 +325,7 @@ pub fn anthropic_tool_choice_any_mapped_to_required(forwarded_jsonl: &str) -> Ve
         return Verdict::Violation("unparseable capture".into());
     };
     let tool_choice = body.get("tool_choice");
-    if tool_choice == Some(&Value::String("required".into()))
-        || body.pointer("/tool_choice/mode").and_then(Value::as_str) == Some("required")
-    {
+    if tool_choice == Some(&Value::String("required".into())) {
         Verdict::Conformant
     } else if tool_choice == Some(&Value::String("any".into()))
         || body.pointer("/tool_choice/type").and_then(Value::as_str) == Some("any")
@@ -1670,16 +1668,20 @@ mod tests {
             Verdict::Conformant
         );
 
-        let req_mode_fwd = r#"{"path":"/v1/responses","body":{"tool_choice":{"mode":"required"}}}"#;
-        assert_eq!(
-            anthropic_tool_choice_any_mapped_to_required(req_mode_fwd),
-            Verdict::Conformant
-        );
-
-        let auto_fwd = r#"{"path":"/v1/responses","body":{"tool_choice":"auto"}}"#;
-        assert!(matches!(
-            anthropic_tool_choice_any_mapped_to_required(auto_fwd),
-            Verdict::Violation(_)
-        ));
+        for body in [
+            serde_json::json!({}),
+            serde_json::json!({"tool_choice": null}),
+            serde_json::json!({"tool_choice": false}),
+            serde_json::json!({"tool_choice": "auto"}),
+            serde_json::json!({"tool_choice": {"mode": "required"}}),
+            serde_json::json!({"tool_choice": {"type": "required"}}),
+            serde_json::json!({"tool_choice": {"type": "any", "mode": "required"}}),
+        ] {
+            let capture = serde_json::json!({"path": "/v1/responses", "body": body});
+            assert!(matches!(
+                anthropic_tool_choice_any_mapped_to_required(&capture.to_string()),
+                Verdict::Violation(_)
+            ));
+        }
     }
 }
