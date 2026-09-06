@@ -75,6 +75,17 @@ values. Pin every external version.
 
 <!-- If there is no concrete consequence, explain why this PR should remain a lead. -->
 
+### Bug or not
+
+<!-- See AGENTS.md, Gate 2, "Bug or not". Any "no" fails this gate. -->
+
+- Expected behavior confirmed as intended spec, not a stale doc line (cite examples, tests, or UI):
+- Maintainer ruling searched (commit, PR, comment, denylist) and result:
+- Trigger is supported usage with default or recommended settings:
+- Boundary crossed (role or key scope that must not see the data, with auth enabled):
+- Fix a maintainer would ship, in one sentence:
+- Label: <!-- bug / docs-defect / hardening / feature-request / operator-misuse -->
+
 ## Gate 3: upstream status
 
 - Date checked:

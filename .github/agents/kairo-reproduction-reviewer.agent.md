@@ -85,6 +85,15 @@ Prefer a minimal agent-loop or consumer demonstration over speculation. A byte
 difference with no concrete user-visible consequence fails usefulness. Separate
 measured consequences from reasonable inference.
 
+Then apply the bug-or-not checks from `AGENTS.md` yourself. Do not accept the
+author's label. Read the quoted spec in context, including examples, tests, and UI
+consumers. Search recent commits and PR descriptions for a deliberate maintainer
+ruling. Confirm the trigger is supported usage under default or recommended
+settings. For disclosure claims, confirm a product-defined role or key scope is
+crossed with auth enabled. State the one-sentence fix a maintainer would ship.
+Assign `bug`, `docs-defect`, `hardening`, `feature-request`, or `operator-misuse`.
+Anything other than `bug` fails usefulness.
+
 ## 5. Verify current upstream status
 
 Search the upstream repository and current documentation on the review date. Use:
@@ -144,6 +153,7 @@ Gate 2, usefulness: PASS | FAIL | INCOMPLETE
 Affected user and workflow:
 Demonstrated consequence:
 Measured versus inferred impact:
+Bug-or-not label and maintainer fix in one sentence:
 
 Gate 3, upstream status: PASS | FAIL | INCOMPLETE
 Date and version checked:
