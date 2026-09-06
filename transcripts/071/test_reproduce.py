@@ -16,6 +16,7 @@ import io
 import json
 import os
 import socket
+import subprocess
 import tempfile
 import threading
 import unittest
@@ -166,6 +167,74 @@ class StartLitellmTests(unittest.TestCase):
             os.unlink(log_path)
             self.assertEqual(popen.call_args.kwargs["cwd"], directory)
             self.assertNotIn("OPENAI_API_KEY", popen.call_args.kwargs["env"])
+            self.assertEqual(
+                popen.call_args.kwargs["env"]["PYTHON_DOTENV_DISABLED"], "1"
+            )
+
+    @unittest.skipUnless(
+        Path(reproduce.LITELLM_BIN).is_file(), "requires the pinned LiteLLM environment"
+    )
+    def test_real_cli_bootstrap_never_opens_dotenv(self):
+        audit_code = """
+import os, runpy, sys
+def audit(event, args):
+    if event == 'open' and isinstance(args[0], (str, bytes)):
+        if os.path.basename(os.fsdecode(args[0])) == '.env':
+            raise RuntimeError('Blocked dotenv before any file could be read')
+sys.addaudithook(audit)
+sys.argv = [sys.argv[1], '--version']
+try:
+    runpy.run_path(sys.argv[0], run_name='__main__')
+except SystemExit as error:
+    if error.code not in (None, 0):
+        raise
+from dotenv import load_dotenv
+load_dotenv(os.path.join(os.getcwd(), '.env'))
+"""
+        with tempfile.TemporaryDirectory() as directory:
+            (Path(directory) / ".env").write_text("KAIRO_TEST_SECRET=CANARY_DOTENV\n")
+            with (
+                patch.object(reproduce, "ensure_port_available"),
+                patch.object(
+                    reproduce.subprocess, "run", return_value=Mock(stdout="1.99.0")
+                ),
+                patch.object(reproduce.subprocess, "Popen") as popen,
+            ):
+                _, log_file, log_path = reproduce.start_litellm(directory)
+                log_file.close()
+                os.unlink(log_path)
+                child_env = popen.call_args.kwargs["env"]
+            command = [
+                str(Path(reproduce.LITELLM_BIN).with_name("python")),
+                "-c",
+                audit_code,
+                reproduce.LITELLM_BIN,
+            ]
+            for disable_dotenv in (True, False):
+                with self.subTest(disable_dotenv=disable_dotenv):
+                    env = dict(child_env)
+                    if not disable_dotenv:
+                        env.pop("PYTHON_DOTENV_DISABLED", None)
+                    result = subprocess.run(
+                        command,
+                        cwd=directory,
+                        env=env,
+                        capture_output=True,
+                        timeout=30,
+                        check=False,
+                    )
+                    if disable_dotenv:
+                        self.assertEqual(
+                            result.returncode, 0, "CLI bootstrap tried to open .env"
+                        )
+                    else:
+                        self.assertNotEqual(
+                            result.returncode, 0, "audit control must block dotenv"
+                        )
+                        self.assertIn(
+                            b"Blocked dotenv before any file could be read",
+                            result.stderr,
+                        )
 
 
 class ValidateResultsTests(unittest.TestCase):

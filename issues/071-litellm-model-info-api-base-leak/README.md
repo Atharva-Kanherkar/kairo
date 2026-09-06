@@ -47,8 +47,11 @@ bodies fail before the leak assertion.
 through a raw socket against the real LiteLLM 1.99.0 CLI. They contain literal
 sent/received bytes with CRLF framing, not reconstructed headers. The runner
 checks the installed version, rejects occupied ports, monitors process exit,
-and runs with an allowlisted environment in a fresh working directory so the
-repository's `.env` and ambient provider keys cannot alter the configuration.
+and runs with an allowlisted environment in a fresh working directory.
+`PYTHON_DOTENV_DISABLED=1` also blocks dotenv discovery from the installed module
+tree; changing cwd alone does not stop LiteLLM from finding the repository's
+`.env`. A real CLI bootstrap audit blocks any attempted `.env` open before the
+file can be read, with a failing control when dotenv is enabled.
 All status and determinism checks run before any fixture writes, including
 under `python3 -O`. Replacements are atomic per file, not across the whole
 batch on filesystem errors. See `testing/issue-071-litellm-model-info-api-base-leak.md`.

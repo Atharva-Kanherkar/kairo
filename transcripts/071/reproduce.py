@@ -100,6 +100,8 @@ def start_litellm(work_dir):
         "HOME": work_dir,
         "LANG": "C.UTF-8",
         "LITELLM_LOCAL_MODEL_COST_MAP": "True",
+        # dotenv can search upward from the installed module, not just cwd.
+        "PYTHON_DOTENV_DISABLED": "1",
     }
     try:
         version = subprocess.run(
