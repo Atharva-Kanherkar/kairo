@@ -67,10 +67,11 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 069 | Switchyard `/v1/responses` loses the machine-readable refusal type from an OpenAI Chat response; current main erases it and PR #623 flattens it to `output_text` | Switchyard main `7a23989` and PR #623 `2765f46`, 0.2.0 (keyless capture rig) | discussed by Switchyard #622/#623 without a dedicated Responses ticket | ✅ buffered and stream violations 5/5 per mode on both revisions. Same-process Chat controls preserve the identical refusal 20/20. |
 | 071 | LiteLLM `GET /model/info` returns deployment `api_base` query credentials despite its docstring guaranteeing omission | LiteLLM 1.99.0 (mock deployment with query key in `api_base`) | discussed by [litellm#18818](https://github.com/BerriAI/litellm/issues/18818), no dedicated ticket | ✅ canary echo 5/5 on `/model/info` and `/v1/model/info`. Controls `/v1/models` and `/health/liveliness` omit credentials 5/5. |
 | 072 | Bifrost forwards Anthropic `tool_choice: {"type": "any"}` as bare `"tool_choice": "any"` to OpenAI backends instead of mapping to `"required"` | Bifrost transports/v2.0.0 `e4a30d6`, core v1.8.3, gpt-4o | novel, no matching upstream ticket | Live OpenAI 400 and SDK BadRequestError 5/5 per Responses/Chat route; named-tool and required controls succeed 5/5 each. Full per-run bytes retained. Independent repair review pending. |
+| 073 | LiteLLM `detect_prompt_injection` rejects Chat Completions but forwards the same injection marker on `/v1/messages` and `/v1/responses` | LiteLLM 1.99.0 (keyless capture and live OpenAI `gpt-4o-mini`, documented callback) | novel; adjacent [litellm#11480](https://github.com/BerriAI/litellm/issues/11480) / merged [PR #16701](https://github.com/BerriAI/litellm/pull/16701); closed [PR #23092](https://github.com/BerriAI/litellm/pull/23092) Chat/async allowlist. Not [litellm#27518](https://github.com/BerriAI/litellm/issues/27518) | Keyless and live Chat 400 with no upstream 5/5. Live Messages and Responses HTTP 200, OpenAI 200, marker forwarded 5/5. Direct OpenAI Chat accepts the marker 5/5. Benign prompts 200 on all three routes 5/5. |
 
 Numbers 046-050 are reserved for unpublished GoModel round-2 findings (one bug per PR). Issues 052-056 (AxonHub round 2) land on sibling branches, not missing rows here.
 
-**Coverage**: 50 documented issue folders across LiteLLM, Switchyard, Bifrost,
+**Coverage**: 51 documented issue folders across LiteLLM, Switchyard, Bifrost,
 GoModel, AxonHub, and any-llm. Folder counts are not defect counts: some folders
 contain honest negatives or multiple findings, including 006's four independent
 field losses and the LiteLLM copy of that class. The rows above record each
@@ -82,7 +83,7 @@ deleted), 006/007 (is_error + image deleted via Responses), 020 (client
 `api_key` override + sticky router upsert), 024 (`/health` extra_headers
 and `aws_session_token` leak), 026 (JSON `extra_headers`/`headers`/`organization`
 passthrough), 028 (`/gemini` pass-through copies `x-goog-upload-url ?key=`),
-041 (`/v1/messages` drops `stop_sequences`), 064 (`/v1/messages` drops function-tool strictness), 067 (structured refusal text erased on Anthropic translation), 071 (`/model/info` `api_base` credential leak). Switchyard
+041 (`/v1/messages` drops `stop_sequences`), 064 (`/v1/messages` drops function-tool strictness), 067 (structured refusal text erased on Anthropic translation), 071 (`/model/info` `api_base` credential leak), 073 (`detect_prompt_injection` skips `/v1/messages` and `/v1/responses`). Switchyard
 confirmed: 005 (id sanitizer), 006 (4 field losses), 007 (multimodal
 stringified), 016 (thinking dropped), 017 (parallel flag), 018 (document
 dumped), 019 (invented cache breakpoint), 023 (`api-key` and OpenAI

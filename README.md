@@ -26,12 +26,12 @@ offline with no provider keys.
 <!-- kairo-counts:start -->
 | Metric | Value |
 |---|---|
-| Reproduced issue folders | 50 |
+| Reproduced issue folders | 51 |
 | Gateways under test | LiteLLM, NVIDIA Switchyard, Bifrost, GoModel, AxonHub, and any-llm |
-| Harness tests | 148 (127 conformance checks against recorded transcripts, 21 unit) |
+| Harness tests | 159 (137 conformance checks against recorded transcripts, 22 unit) |
 <!-- kairo-counts:end -->
 
-The 50 folders cover reproduced findings, multi-defect reports, and honest
+The 51 folders cover reproduced findings, multi-defect reports, and honest
 negative results. Versions and reproduction outcomes are recorded per finding
 in [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md), including cited bugs that did
 not reproduce.
@@ -55,6 +55,7 @@ reproduction commands.
 | Tool-call ids round-trip | [004](issues/004-gemini-thought-signature) | [005](issues/005-switchyard-toolid-sanitizer) | [037](issues/037-bifrost-toolid-not-restored) | | | |
 | Nothing is invented (empty text blocks, phantom message items, `cache_control`) | [001](issues/001-anthropic-stream-toolcall-translation), [009](issues/009-litellm-responses-phantom-message) | [019](issues/019-switchyard-invents-prompt-cache), [045](issues/045-switchyard-empty-text-before-tooluse), [068](issues/068-switchyard-drops-refusal-content) | | | | |
 | Malformed input fails closed | [008](issues/008-litellm-messages-indexerror-crash) | | | | | |
+| Documented safety callbacks cover every public route | [073](issues/073-litellm-prompt-injection-skips-agent-apis) | | | | | |
 | Client credentials stay client-side | [020](issues/020-litellm-client-api-key), [024](issues/024-litellm-health-extra-headers), [026](issues/026-litellm-extra-headers-org), [028](issues/028-litellm-gemini-passthrough-upload-url), [071](issues/071-litellm-model-info-api-base-leak) | [023](issues/023-switchyard-forwards-org-api-key), [025](issues/025-switchyard-transport-query-key), [027](issues/027-switchyard-forwards-x-goog-api-key), [063](issues/063-switchyard-redirect-follows-x-api-key) | | | | |
 
 The `disable_parallel_tool_use` flag is dropped by five of the six gateways.
