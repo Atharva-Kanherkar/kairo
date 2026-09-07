@@ -94,6 +94,93 @@ pub fn openai_stream_finish_reason(sse: &str) -> Verdict {
     }
 }
 
+/// Invariant (bug 074): one client-visible Responses stream represents one
+/// response lifecycle. Internal agent or tool rounds must not introduce a second
+/// `response.created` / `response.completed` pair or reuse an output index for an
+/// unrelated item. Standard SDK accumulators keep one snapshot per stream and
+/// cannot safely merge a fresh response namespace into it.
+pub fn responses_single_lifecycle(sse: &str) -> Verdict {
+    let mut events = Vec::new();
+    for line in sse.lines() {
+        let Some(data) = line.strip_prefix("data: ") else {
+            continue;
+        };
+        if data == "[DONE]" {
+            continue;
+        }
+        let event: Value = match serde_json::from_str(data) {
+            Ok(event) => event,
+            Err(error) => {
+                return Verdict::Violation(format!(
+                    "Responses stream contains an unparseable data frame: {error}"
+                ));
+            }
+        };
+        events.push(event);
+    }
+    if events.is_empty() {
+        return Verdict::Violation("Responses stream contains no JSON events".into());
+    }
+
+    let created = events
+        .iter()
+        .enumerate()
+        .filter(|(_, event)| event.get("type").and_then(Value::as_str) == Some("response.created"))
+        .collect::<Vec<_>>();
+    let completed = events
+        .iter()
+        .enumerate()
+        .filter(|(_, event)| {
+            event.get("type").and_then(Value::as_str) == Some("response.completed")
+        })
+        .collect::<Vec<_>>();
+    if created.len() != 1 || completed.len() != 1 {
+        return Verdict::Violation(format!(
+            "one Responses stream has {} response.created and {} response.completed events, expected one each",
+            created.len(),
+            completed.len()
+        ));
+    }
+    if created[0].0 >= completed[0].0 || completed[0].0 + 1 != events.len() {
+        return Verdict::Violation(
+            "response.completed is not the sole terminal JSON event for its lifecycle".into(),
+        );
+    }
+    let created_id = created[0].1.pointer("/response/id").and_then(Value::as_str);
+    let completed_id = completed[0]
+        .1
+        .pointer("/response/id")
+        .and_then(Value::as_str);
+    if created_id.is_none() || created_id != completed_id {
+        return Verdict::Violation(format!(
+            "response identity changed between created {created_id:?} and completed {completed_id:?}"
+        ));
+    }
+
+    let mut indexes = std::collections::BTreeMap::new();
+    for event in &events {
+        if event.get("type").and_then(Value::as_str) != Some("response.output_item.added") {
+            continue;
+        }
+        let Some(index) = event.get("output_index").and_then(Value::as_u64) else {
+            return Verdict::Violation(
+                "response.output_item.added has no numeric output_index".into(),
+            );
+        };
+        let Some(item_id) = event.pointer("/item/id").and_then(Value::as_str) else {
+            return Verdict::Violation("response.output_item.added has no item id".into());
+        };
+        if let Some(previous) = indexes.insert(index, item_id) {
+            if previous != item_id {
+                return Verdict::Violation(format!(
+                    "output_index {index} identifies unrelated items {previous:?} and {item_id:?}"
+                ));
+            }
+        }
+    }
+    Verdict::Conformant
+}
+
 /// True when `id` satisfies the OpenAI / Anthropic tool-call id contract:
 /// `^[A-Za-z0-9_-]{1,64}$`.
 pub fn id_conforms(id: &str) -> bool {
@@ -1680,6 +1767,54 @@ mod tests {
             let capture = serde_json::json!({"path": "/v1/responses", "body": body});
             assert!(matches!(
                 anthropic_tool_choice_any_mapped_to_required(&capture.to_string()),
+                Verdict::Violation(_)
+            ));
+        }
+    }
+
+    #[test]
+    fn responses_single_lifecycle_checker() {
+        let created = r#"data: {"type":"response.created","response":{"id":"resp_one"}}"#;
+        let added = r#"data: {"type":"response.output_item.added","output_index":0,"item":{"id":"msg_one"}}"#;
+        let completed = r#"data: {"type":"response.completed","response":{"id":"resp_one"}}"#;
+        let valid = format!("{created}\n\n{added}\n\n{completed}\n\ndata: [DONE]\n\n");
+        assert_eq!(responses_single_lifecycle(&valid), Verdict::Conformant);
+
+        let second_created = r#"data: {"type":"response.created","response":{"id":"resp_two"}}"#;
+        let duplicate = format!("{created}\n\n{completed}\n\n{second_created}\n\n{completed}\n\n");
+        assert!(matches!(
+            responses_single_lifecycle(&duplicate),
+            Verdict::Violation(_)
+        ));
+
+        let colliding = format!(
+            "{created}\n\n{added}\n\ndata: {{\"type\":\"response.output_item.added\",\"output_index\":0,\"item\":{{\"id\":\"msg_two\"}}}}\n\n{completed}\n\n"
+        );
+        assert!(matches!(
+            responses_single_lifecycle(&colliding),
+            Verdict::Violation(_)
+        ));
+
+        for invalid in [
+            "",
+            "data: not-json\n\n",
+            created,
+            completed,
+            r#"data: {"type":"response.created","response":{"id":"a"}}
+
+data: {"type":"response.completed","response":{"id":"b"}}
+
+"#,
+            r#"data: {"type":"response.created","response":{"id":"a"}}
+
+data: {"type":"response.completed","response":{"id":"a"}}
+
+data: {"type":"response.output_text.delta","delta":"late"}
+
+"#,
+        ] {
+            assert!(matches!(
+                responses_single_lifecycle(invalid),
                 Verdict::Violation(_)
             ));
         }

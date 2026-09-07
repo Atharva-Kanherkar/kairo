@@ -1,0 +1,16 @@
+{
+  "packages": {
+    "litellm": "1.100.0",
+    "openai": "2.54.0",
+    "mcp": "1.29.1"
+  },
+  "iterator_source": "litellm/responses/mcp/mcp_streaming_iterator.py",
+  "iterator_sha256": "606f6605ef9c534ed386b7259b9a413240d9991f7c50150ae4198ab160665cf9",
+  "python": "Python 3.13.14",
+  "captured_at": "2026-09-07",
+  "runs_per_mode": 5,
+  "public_endpoint": "/v1/responses",
+  "backend": "deterministic local OpenAI Responses capture upstream",
+  "mcp_transport": "stdio",
+  "complete": true
+}

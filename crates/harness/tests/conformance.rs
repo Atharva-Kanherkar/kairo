@@ -15,10 +15,10 @@ use kairo::checks::{
     non_text_block_not_json_dumped, openai_stream_finish_reason, openai_toolcall_id_charset,
     parallel_tool_disable_preserved, reasoning_text_order_preserved, refusal_text_preserved,
     response_content_not_empty, response_omits_secret, responses_refusal_semantics_preserved,
-    stop_sequence_forwarded, thinking_not_leaked_as_visible_text, thinking_text_forwarded,
-    tool_strict_forwarded, toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
-    upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
-    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
+    thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
+    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, FunctionToolFormat,
+    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
 use serde_json::Value;
 use std::fs;
@@ -2690,4 +2690,166 @@ fn bifrost_named_and_auto_tool_choice_controls() {
             }
         }
     }
+}
+
+// ---- bug 074: LiteLLM MCP auto-execution splices response lifecycles ----
+
+fn validate_issue_074_mode(
+    record: &Value,
+    request: &Value,
+    mode: &str,
+    index: usize,
+) -> Result<(), String> {
+    let upstream_count = record
+        .get("upstream_exchanges")
+        .and_then(Value::as_array)
+        .map(Vec::len);
+    let call_count = record
+        .get("mcp_calls")
+        .and_then(Value::as_array)
+        .map(Vec::len);
+    let error_type = record
+        .pointer("/consumer/error/type")
+        .and_then(Value::as_str);
+    match mode {
+        "trigger" => {
+            if upstream_count != Some(2)
+                || call_count != Some(1)
+                || error_type != Some("AssertionError")
+                || record.pointer("/consumer/final_response") != Some(&Value::Null)
+            {
+                return Err(format!("record {index} does not prove trigger impact"));
+            }
+        }
+        "approval" => {
+            if upstream_count != Some(1)
+                || call_count != Some(0)
+                || !record
+                    .pointer("/consumer/error")
+                    .is_some_and(Value::is_null)
+                || request
+                    .pointer("/tools/0/require_approval")
+                    .and_then(Value::as_str)
+                    != Some("always")
+            {
+                return Err(format!("record {index} is not the approval control"));
+            }
+        }
+        "no-tool" => {
+            if upstream_count != Some(1)
+                || call_count != Some(0)
+                || !record
+                    .pointer("/consumer/error")
+                    .is_some_and(Value::is_null)
+                || request.get("tools").is_some()
+            {
+                return Err(format!("record {index} is not the no-tool control"));
+            }
+        }
+        _ => return Err(format!("unknown mode {mode}")),
+    }
+    Ok(())
+}
+
+fn issue_074_records(
+    jsonl: &str,
+    version: &str,
+    mode: &str,
+    should_conform: bool,
+) -> Result<Vec<Value>, String> {
+    let records = jsonl
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .map(|line| serde_json::from_str::<Value>(line).map_err(|error| error.to_string()))
+        .collect::<Result<Vec<_>, _>>()?;
+    if records.len() != 5 {
+        return Err(format!("expected five records, got {}", records.len()));
+    }
+    for (index, record) in records.iter().enumerate() {
+        if record.pointer("/target/project").and_then(Value::as_str) != Some("BerriAI/litellm")
+            || record.pointer("/target/version").and_then(Value::as_str) != Some(version)
+            || record.get("mode").and_then(Value::as_str) != Some(mode)
+            || record.get("trial").and_then(Value::as_u64) != Some((index + 1) as u64)
+        {
+            return Err(format!("record {} has wrong provenance", index + 1));
+        }
+        if record
+            .pointer("/client_request/path")
+            .and_then(Value::as_str)
+            != Some("/v1/responses")
+            || record
+                .pointer("/client_response/status")
+                .and_then(Value::as_u64)
+                != Some(200)
+        {
+            return Err(format!(
+                "record {} is not a successful public route",
+                index + 1
+            ));
+        }
+        let request_raw = record
+            .pointer("/client_request/body_raw")
+            .and_then(Value::as_str)
+            .ok_or_else(|| format!("record {} has no raw request", index + 1))?;
+        let request: Value =
+            serde_json::from_str(request_raw).map_err(|error| error.to_string())?;
+        if request.get("model").and_then(Value::as_str) != Some("mock")
+            || request.get("stream").and_then(Value::as_bool) != Some(true)
+        {
+            return Err(format!("record {} has wrong request shape", index + 1));
+        }
+        let response_raw = record
+            .pointer("/client_response/body_raw")
+            .and_then(Value::as_str)
+            .ok_or_else(|| format!("record {} has no raw response", index + 1))?;
+        let verdict = responses_single_lifecycle(response_raw);
+        let verdict_matches = matches!(verdict, Verdict::Conformant) == should_conform;
+        if !verdict_matches {
+            return Err(format!(
+                "record {} lifecycle verdict is {verdict:?}, expected conformant={should_conform}",
+                index + 1,
+            ));
+        }
+        validate_issue_074_mode(record, &request, mode, index + 1)?;
+    }
+    Ok(records)
+}
+
+#[test]
+fn litellm_mcp_auto_execution_splices_response_lifecycles() {
+    for version in ["1.99.0", "1.100.0"] {
+        let path = format!("transcripts/074/{version}/trigger.jsonl");
+        issue_074_records(&fixture(&path), version, "trigger", false)
+            .unwrap_or_else(|error| panic!("{path}: {error}"));
+    }
+}
+
+#[test]
+fn litellm_mcp_stream_controls_have_one_lifecycle() {
+    for version in ["1.99.0", "1.100.0"] {
+        for mode in ["approval", "no-tool"] {
+            let path = format!("transcripts/074/{version}/{mode}.jsonl");
+            issue_074_records(&fixture(&path), version, mode, true)
+                .unwrap_or_else(|error| panic!("{path}: {error}"));
+        }
+    }
+}
+
+#[test]
+fn issue_074_checks_later_trials_and_rejects_malformed_evidence() {
+    let original = fixture("transcripts/074/1.100.0/approval.jsonl");
+    let mut records = original
+        .lines()
+        .map(|line| serde_json::from_str::<Value>(line).unwrap())
+        .collect::<Vec<_>>();
+    records[4]["client_response"]["body_raw"] = Value::String("data: not-json\n\n".into());
+    let mutated = records
+        .iter()
+        .map(Value::to_string)
+        .collect::<Vec<_>>()
+        .join("\n");
+    assert!(issue_074_records(&mutated, "1.100.0", "approval", true).is_err());
+
+    let malformed = format!("{}\n{{", original.trim_end());
+    assert!(issue_074_records(&malformed, "1.100.0", "approval", true).is_err());
 }
