@@ -8,17 +8,19 @@
 use kairo::checks::{
     anthropic_response_toolcall_stop_reason, anthropic_tool_choice_any_mapped_to_required,
     anthropic_toolcall_stop_reason, capture_records, content_filter_preserved,
-    document_body_forwarded, id_conforms, instruction_messages_preserved, is_error_forwarded,
-    json_schema_forwarded, json_schema_property_forwarded, model_info_capture_identity,
-    model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
-    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
-    non_text_block_not_json_dumped, openai_stream_finish_reason, openai_toolcall_id_charset,
-    parallel_tool_disable_preserved, reasoning_text_order_preserved, refusal_text_preserved,
-    response_content_not_empty, response_omits_secret, responses_refusal_semantics_preserved,
-    responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
-    thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
-    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, FunctionToolFormat,
-    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    document_body_forwarded, gemini_inline_media_preserved_in_chat_response,
+    gemini_inline_media_preserved_in_chat_stream, id_conforms, instruction_messages_preserved,
+    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
+    model_info_capture_identity, model_info_envelope_body, model_info_omits_api_base_secret,
+    no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
+    no_phantom_null_output_text, non_text_block_not_json_dumped, openai_stream_finish_reason,
+    openai_toolcall_id_charset, parallel_tool_disable_preserved, reasoning_text_order_preserved,
+    refusal_text_preserved, response_content_not_empty, response_omits_secret,
+    responses_refusal_semantics_preserved, responses_single_lifecycle, stop_sequence_forwarded,
+    thinking_not_leaked_as_visible_text, thinking_text_forwarded, tool_strict_forwarded,
+    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
+    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
 use serde_json::Value;
 use std::fs;
@@ -2852,4 +2854,145 @@ fn issue_074_checks_later_trials_and_rejects_malformed_evidence() {
 
     let malformed = format!("{}\n{{", original.trim_end());
     assert!(issue_074_records(&malformed, "1.100.0", "approval", true).is_err());
+}
+
+// ---- bug 075: Bifrost Gemini chat-completions drops inlineData image/audio parts ----
+
+fn issue_075_records(path: &str) -> Vec<Value> {
+    let records: Vec<Value> = fixture(path)
+        .lines()
+        .filter(|l| !l.trim().is_empty())
+        .map(|line| serde_json::from_str(line).expect("raw exchange JSON"))
+        .collect();
+    assert!(!records.is_empty(), "{path}: expected at least one run");
+    for (index, record) in records.iter().enumerate() {
+        assert_eq!(record["run"], (index + 1) as u64, "{path}: run identity");
+        // Every stage must carry a well-formed client_request/client_response
+        // pair; body_raw is the wire text, never a reconstructed summary.
+        for stage in ["client_request", "client_response"] {
+            assert!(
+                record[stage]["body_raw"].as_str().is_some(),
+                "{path} record {}: missing {stage}.body_raw",
+                index + 1
+            );
+        }
+    }
+    records
+}
+
+#[test]
+fn bifrost_gemini_chat_completions_drops_inline_image() {
+    for record in issue_075_records("transcripts/075/live/chat-nonstream.jsonl") {
+        assert_eq!(record["path"], "/v1/chat/completions");
+        assert!(
+            record["image_present_in_upstream"]
+                .as_bool()
+                .unwrap_or(false),
+            "control precondition: Gemini must have generated an image this run"
+        );
+        let upstream = record["upstream_response"]
+            .as_str()
+            .expect("upstream_response must be a raw JSON string");
+        let client_body_raw = record["client_response"]["body_raw"]
+            .as_str()
+            .expect("client_response.body_raw must be present");
+        assert!(
+            matches!(
+                gemini_inline_media_preserved_in_chat_response(upstream, client_body_raw),
+                Verdict::Violation(_)
+            ),
+            "expected the recorded exchange to reproduce the inlineData drop"
+        );
+    }
+}
+
+#[test]
+fn bifrost_gemini_chat_completions_stream_drops_inline_image() {
+    for record in issue_075_records("transcripts/075/live/chat-stream.jsonl") {
+        assert!(
+            record["image_present_in_upstream_chunk"]
+                .as_bool()
+                .unwrap_or(false),
+            "control precondition: a streamed chunk must have carried an inlineData part"
+        );
+        let sse = record["client_response"]["body_raw"]
+            .as_str()
+            .expect("client_response.body_raw must be present");
+        assert!(
+            matches!(
+                gemini_inline_media_preserved_in_chat_stream(sse),
+                Verdict::Violation(_)
+            ),
+            "expected the recorded stream to reproduce the inlineData drop"
+        );
+    }
+}
+
+#[test]
+fn bifrost_gemini_responses_control_preserves_inline_image() {
+    // Control: same Bifrost binary, same model, same prompt, different route.
+    // The Responses API dialect converter does handle inlineData, so the
+    // image must be present here even though chat completions drops it.
+    for record in issue_075_records("transcripts/075/live/responses-control.jsonl") {
+        assert_eq!(record["path"], "/v1/responses");
+        assert!(
+            record["image_content_block_present"]
+                .as_bool()
+                .unwrap_or(false),
+            "responses control did not surface an image content block"
+        );
+        let body: Value =
+            serde_json::from_str(record["client_response"]["body_raw"].as_str().unwrap())
+                .expect("client_response.body_raw must be valid JSON");
+        let has_image_block = body
+            .get("output")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(|item| item.get("content"))
+            .filter_map(Value::as_array)
+            .flatten()
+            .any(|block| {
+                matches!(
+                    block.get("type").and_then(Value::as_str),
+                    Some("input_image" | "output_image" | "image")
+                )
+            });
+        assert!(
+            has_image_block,
+            "raw wire body has no image content block despite image_content_block_present=true"
+        );
+    }
+}
+
+#[test]
+fn bifrost_gemini_direct_control_returns_inline_image() {
+    // Control: bypasses Bifrost entirely, proving the image comes from Gemini
+    // itself and is not an artifact of the capture harness.
+    for record in issue_075_records("transcripts/075/live/direct-gemini-control.jsonl") {
+        assert!(
+            record["image_present"].as_bool().unwrap_or(false),
+            "direct Gemini control did not report an image"
+        );
+        let body: Value =
+            serde_json::from_str(record["client_response"]["body_raw"].as_str().unwrap())
+                .expect("client_response.body_raw must be valid JSON");
+        // This is Gemini's own generateContent wire shape, not an OpenAI chat
+        // completions body, so check for the inlineData part directly rather
+        // than reusing the OpenAI-shaped checker above.
+        let has_inline_data = body
+            .pointer("/candidates/0/content/parts")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .any(|part| {
+                part.pointer("/inlineData/data")
+                    .and_then(Value::as_str)
+                    .is_some_and(|d| !d.is_empty())
+            });
+        assert!(
+            has_inline_data,
+            "direct Gemini wire response has no inlineData part"
+        );
+    }
 }
