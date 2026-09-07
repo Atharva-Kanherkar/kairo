@@ -182,17 +182,19 @@ cannot be skipped.
 
 ## Reproduction
 
-Create separate environments so both package versions stay pinned:
+Create separate Python 3.12 environments so both package versions stay pinned.
+The retained captures used Python 3.13.14; the independent reviewer reproduced
+both versions on Python 3.12:
 
 ```sh
-python3 -m venv /tmp/kairo-074-litellm-199
+python3.12 -m venv /tmp/kairo-074-litellm-199
 /tmp/kairo-074-litellm-199/bin/pip install -r transcripts/074/requirements-1.99.txt
 /tmp/kairo-074-litellm-199/bin/python -B transcripts/074/reproduce.py \
   --python /tmp/kairo-074-litellm-199/bin/python \
   --expect-litellm 1.99.0 \
   --output-dir /tmp/kairo-074-output-199
 
-python3 -m venv /tmp/kairo-074-litellm-1100
+python3.12 -m venv /tmp/kairo-074-litellm-1100
 /tmp/kairo-074-litellm-1100/bin/pip install -r transcripts/074/requirements-1.100.txt
 /tmp/kairo-074-litellm-1100/bin/python -B transcripts/074/reproduce.py \
   --python /tmp/kairo-074-litellm-1100/bin/python \
