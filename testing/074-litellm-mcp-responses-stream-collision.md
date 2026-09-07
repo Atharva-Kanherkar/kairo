@@ -49,7 +49,7 @@
 
 - The issue writeup must include exact environment setup and reproduction commands.
 - Inspect a trigger capture and confirm two created/completed lifecycles, distinct
-  response ids, reused output index zero, and mismatched MCP call item ids.
+  response ids, and output index zero reused for unrelated items across rounds.
 - Inspect the approval control and confirm one created/completed lifecycle and a
   successful SDK final response.
 
