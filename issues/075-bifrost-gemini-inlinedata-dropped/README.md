@@ -67,15 +67,20 @@ affect, the 3/3 reproduction rate of the actual defect once an image was
 generated: every trial in which Gemini returned an `inlineData` part had
 that part dropped from the chat completions response.
 
-### Example (one run, `chat-nonstream.jsonl`, image data elided further here)
+### Example (one run, `chat-nonstream.jsonl`, run 1, image data elided further here)
 
-Gemini's raw response (from `extra_fields.raw_response`):
+This is a verbatim excerpt of one real recorded line (base64 truncated to the
+prefix/suffix + sha256/length marker `reproduce.py` already applies before
+commit; the text part and `content` field below are exactly as recorded, not
+cleaned up). Gemini's raw response, as it actually came back, always carries
+a real caption alongside the image, not an empty string:
 
 ```json
 {"candidates":[{"content":{"parts":[
-  {"inlineData":{"data":"iVBORw0KG...(1.3 MB)...","mimeType":"image/png"}}
+  {"text":"Here's that image for you! "},
+  {"inlineData":{"data":"iVBORw0KG...(1.3 MB, truncated)...","mimeType":"image/png"}}
 ],"role":"model"},"finishReason":"STOP","index":0}],
- "usageMetadata":{"candidatesTokenCount":1290,
+ "usageMetadata":{"candidatesTokenCount":1299,
    "candidatesTokensDetails":[{"modality":"IMAGE","tokenCount":1290}], ...}}
 ```
 
@@ -83,10 +88,16 @@ Bifrost's chat completions response to the same call:
 
 ```json
 {"choices":[{"index":0,"finish_reason":"stop",
-  "message":{"role":"assistant","content":""}}],
- "usage":{"completion_tokens":1290,
+  "message":{"role":"assistant","content":"Here's that image for you! "}}],
+ "usage":{"completion_tokens":1299,
    "completion_tokens_details":{"image_tokens":1290}}}
 ```
+
+The caption text is not lost; only the image is. `message.content` is a
+plain string with the real caption in it, never an empty string, in every
+recorded run (the exact caption varies run to run: "Here's that image for
+you! ", "Here's your image: ", "Here you go! "). This is consistent with the
+"What breaks" section above.
 
 `usage.completion_tokens_details.image_tokens` proves the image existed and
 was billed. `message.content` proves it never reached the client.
@@ -132,14 +143,23 @@ streaming path.
 
 ## Bug or not
 
-- **Expected behavior is the spec:** OpenAI's chat completions content
-  schema documents `image_url` and `input_audio` content block types for
-  assistant messages, and Bifrost's own schema (`ChatContentBlockTypeImage`,
-  `ChatContentBlockTypeInputAudio`) already models them. Bifrost's own
-  Responses API converter and dedicated image converter both already
-  populate these fields from the same Gemini `InlineData` value, so this is
-  Bifrost's own established behavior for the same input, not a stale
-  external doc line.
+- **Expected behavior is the spec:** the claim here rests on Bifrost's own
+  established behavior, not on OpenAI's spec for the assistant side.
+  OpenAI's chat completions content schema documents `image_url` as an
+  *input* content block type (user messages); assistant-message output
+  content is documented as text/refusal only, and the pinned commit's own
+  `ChatAssistantMessage` struct
+  (`core/schemas/chatcompletions.go:1406-1413`) has no image field at all.
+  What actually establishes the expected behavior is Bifrost's own code:
+  `ChatContentBlockTypeImage`/`ChatContentBlockTypeInputAudio`
+  (`core/schemas/chatcompletions.go:1133-1134`) already exist in its schema,
+  and Bifrost's own Responses API converter and dedicated image converter
+  already populate a block from this exact Gemini `InlineData` field for the
+  same model and input; chat completions is the one converter that leaves
+  the value on the floor. That is Bifrost's own established, consistent
+  handling of this field elsewhere, not a stale external doc line, and it is
+  sufficient on its own without needing an assistant-side OpenAI spec
+  claim that does not hold.
 - **Maintainer ruling:** no commit, PR, or comment found that classifies
   dropping `InlineData` in chat completions as intentional. PR
   [#1265](https://github.com/maximhq/bifrost/pull/1265) ("missing image url
@@ -212,6 +232,28 @@ Relevant matches:
   a field it already knows how to convert elsewhere. Closely related, but
   not the same file, function, or root cause as this finding, and it is
   filed as a feature request, not a bug.
+- [#4907](https://github.com/maximhq/bifrost/pull/4907) (open, "Closes
+  #2367"): the nearest live upstream work on this symptom class. It adds a
+  new sibling field, `ChatAssistantMessage.Images []ChatAssistantMessageImage`
+  (JSON `"images": [{"type": "image_url", "image_url": {"url": "..."}}]`),
+  wired into `core/providers/openai/utils.go`
+  (`ConvertOpenAIMessagesToBifrostMessages` /
+  `ConvertBifrostMessagesToOpenAIMessages`) and
+  `core/schemas/chatcompletions.go`. As of the date checked it touches only
+  the `openai` provider's own message conversion (verified via
+  `gh api repos/maximhq/bifrost/pulls/4907/files`: `core/providers/openai/*`,
+  `core/schemas/chatcompletions*.go`, `core/providers/vertex/vertex.go`,
+  `transports/bifrost-http/integrations/router*.go`); it does **not** touch
+  `core/providers/gemini/chat.go`, so it does not fix this finding. A
+  maintainer may reasonably triage this finding as "the Gemini half of
+  #4907": the same `images[]` sibling-array shape, wired into
+  `ToBifrostChatResponse/ToBifrostChatCompletionStream` for the native
+  `gemini` provider, would be an equally valid fix to the content-block
+  approach described above. Because of this, the frozen invariant's checker
+  (`crates/harness/src/checks.rs`,
+  `gemini_inline_media_preserved_in_chat_response`/`..._chat_stream`) now
+  accepts either shape: an `image_url`/`input_audio` content block, or a
+  non-empty `images[]` sibling array matching this PR's shape.
 - [#1265](https://github.com/maximhq/bifrost/pull/1265) (merged
   2026-01-07): added image/audio handling to `chat.go`, but only for the
   request-building direction (see Bug or not). Does not touch the response
@@ -250,11 +292,19 @@ checked and ruled out.
   detail: it does not look for a specific Bifrost internal field. It takes
   Gemini's raw response (proof an image/audio blob was generated) and
   Bifrost's client-facing response, and asserts only that when the former
-  has an `inlineData` part, the latter must have a matching `image_url` or
-  `input_audio` content block somewhere in `message.content` (or
-  `delta.content` for streaming). A fix that represents the image any other
-  reasonable way, or a future response that legitimately carries no image,
-  both pass; only silent loss of a real generated image fails.
+  has an `inlineData` part, the latter must have the media preserved
+  somewhere client-visible: either a matching `image_url`/`input_audio`
+  content block in `message.content` (or `delta.content` for streaming), or
+  a non-empty `images[]` sibling array on the message/delta object matching
+  the shape bifrost's own upstream PR
+  [#4907](https://github.com/maximhq/bifrost/pull/4907) is adding (see
+  Upstream status). Streaming additionally scans every chunk of the same
+  stream exchange (grouped by chunk `id`), not only the one chunk whose raw
+  upstream payload happened to carry the `inlineData` part, since a correct
+  fix is free to flush image data in a different chunk than the
+  accompanying text. A fix that represents the image any other reasonable
+  way, or a future response that legitimately carries no image, both pass;
+  only silent loss of a real generated image fails.
 
 ## Validation
 

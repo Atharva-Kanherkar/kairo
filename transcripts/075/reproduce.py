@@ -155,10 +155,18 @@ def verify_binary(binary, expected_revision):
         "go_build_info": text,
         "vcs_modified": modified,
         "vcs_modified_reason": (
-            "an untracked placeholder ui/index.html was added to satisfy the "
-            "//go:embed all:ui directive without building the full Next.js "
-            "admin UI; the embedded frontend is unrelated to the Gemini "
-            "chat-completions converter under test"
+            "go's build tooling added one dependency hash line to the tracked file "
+            "transports/go.sum (github.com/maximhq/bifrost/plugins/mocker "
+            "v1.5.37/go.mod, an already-pinned dependency) during the build, which is "
+            "what git and Go's embedded vcs.modified flag see as a local "
+            "modification; verified with `git status --short` (M transports/go.sum) "
+            "and `git diff transports/go.sum`. The untracked placeholder "
+            "ui/index.html added to satisfy the //go:embed all:ui directive is NOT "
+            "the cause: it lives under transports/bifrost-http/ui/, which is "
+            "gitignored (`git check-ignore -v transports/bifrost-http/ui/index.html` "
+            "matches .gitignore:21 `/transports/bifrost-http/ui/`), so git and go's "
+            "vcs.modified detection never see it. Neither cause touches "
+            "core/providers/gemini/chat.go or any other backend code under test."
             if modified
             else None
         ),
