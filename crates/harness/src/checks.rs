@@ -1236,6 +1236,209 @@ pub fn model_info_capture_identity(
     Verdict::Conformant
 }
 
+/// Look for a Gemini `inlineData` part (a base64 image/audio blob) anywhere in
+/// a parsed `generateContent` response's first candidate. Returns the MIME
+/// type when one is present.
+fn gemini_inline_data_mime(upstream: &Value) -> Option<String> {
+    let parts = upstream
+        .pointer("/candidates/0/content/parts")?
+        .as_array()?;
+    for part in parts {
+        if let Some(data) = part.pointer("/inlineData/data").and_then(Value::as_str) {
+            if !data.is_empty() {
+                return Some(
+                    part.pointer("/inlineData/mimeType")
+                        .and_then(Value::as_str)
+                        .unwrap_or("")
+                        .to_string(),
+                );
+            }
+        }
+    }
+    None
+}
+
+/// Does an OpenAI chat-completions message content value represent the media
+/// content block shape (`image_url` / `input_audio`), as opposed to plain
+/// text or nothing at all?
+fn chat_content_has_media_block(content: &Value) -> bool {
+    content.as_array().is_some_and(|blocks| {
+        blocks.iter().any(|b| {
+            matches!(
+                b.get("type").and_then(Value::as_str),
+                Some("image_url" | "input_audio")
+            )
+        })
+    })
+}
+
+/// Does a single element of an `images[]` sibling array look like a real
+/// image reference, rather than an empty or unrelated object? This is the
+/// shape bifrost's own upstream PR
+/// [#4907](https://github.com/maximhq/bifrost/pull/4907) (open, "Closes
+/// #2367") adds: `ChatAssistantMessage.Images []ChatAssistantMessageImage`,
+/// each element `{"type": "image_url", "image_url": {"url": "data:..."}}`.
+/// Accept that exact shape plus a few reasonably-shaped variants (a direct
+/// `url`/`data`/`b64_json`/mime-type-ish key), but never an empty object or
+/// one that carries none of these keys.
+fn looks_like_image_ref(entry: &Value) -> bool {
+    let Some(obj) = entry.as_object() else {
+        return false;
+    };
+    // #4907 shape: {"type": "image_url", "image_url": {"url": "data:..."}}
+    if obj
+        .get("image_url")
+        .and_then(|v| v.pointer("/url"))
+        .and_then(Value::as_str)
+        .is_some_and(|u| !u.is_empty())
+    {
+        return true;
+    }
+    for key in ["url", "data", "b64_json", "mime_type", "mimeType"] {
+        if obj
+            .get(key)
+            .and_then(Value::as_str)
+            .is_some_and(|s| !s.is_empty())
+        {
+            return true;
+        }
+    }
+    false
+}
+
+/// Does a message or delta object carry a non-empty `images[]` sibling array
+/// (bifrost's own upstream PR #4907 shape) with at least one real image
+/// reference in it? An empty array, or one containing only unrelated
+/// objects, does not count.
+fn message_has_images_sibling(message_or_delta: &Value) -> bool {
+    message_or_delta
+        .get("images")
+        .and_then(Value::as_array)
+        .is_some_and(|images| !images.is_empty() && images.iter().any(looks_like_image_ref))
+}
+
+/// Is media (an image or audio blob) preserved somewhere client-visible in a
+/// chat-completions `message` or streamed `delta` object? Two shapes count:
+/// an OpenAI-style content block (`image_url`/`input_audio` inside
+/// `content[]`), or a non-empty `images[]` sibling array on the message
+/// itself, the shape bifrost's own upstream PR #4907 is adding for the
+/// OpenAI/OpenRouter provider. Only one hardcoded shape would make this
+/// invariant blind to the real fix landing upstream in that shape.
+fn media_preserved_in_message(message_or_delta: &Value) -> bool {
+    let content_ok = message_or_delta
+        .get("content")
+        .is_some_and(chat_content_has_media_block);
+    content_ok || message_has_images_sibling(message_or_delta)
+}
+
+/// Invariant (bug 075): when Gemini's raw `generateContent` response carries an
+/// `inlineData` part (a base64 image or audio blob, as image-generation models
+/// such as `gemini-2.5-flash-image` return), Bifrost's OpenAI-shaped chat
+/// completions conversion MUST surface that media somewhere client-visible in
+/// the response: either an OpenAI-style content block, or an `images[]`
+/// sibling array as bifrost's own upstream PR #4907 is adding. Silently
+/// finishing the turn with text-only (or empty) content and no `images[]` is a
+/// violation: the caller gets HTTP 200 and billed image tokens but no image.
+///
+/// `upstream_response_json` is Gemini's raw response (as embedded by Bifrost's
+/// `send_back_raw_request`/`send_back_raw_response` provider options, or
+/// captured directly). `client_response_json` is Bifrost's chat.completions
+/// JSON body returned to the caller.
+pub fn gemini_inline_media_preserved_in_chat_response(
+    upstream_response_json: &str,
+    client_response_json: &str,
+) -> Verdict {
+    let Ok(upstream) = serde_json::from_str::<Value>(upstream_response_json) else {
+        return Verdict::Violation("upstream response body is not valid JSON".to_string());
+    };
+    let Some(mime) = gemini_inline_data_mime(&upstream) else {
+        return Verdict::Conformant; // nothing to preserve
+    };
+    let Ok(client) = serde_json::from_str::<Value>(client_response_json) else {
+        return Verdict::Violation("client response body is not valid JSON".to_string());
+    };
+    let Some(message) = client.pointer("/choices/0/message") else {
+        return Verdict::Violation(format!(
+            "upstream returned an inlineData part ({mime}) but the client response has no message field at all"
+        ));
+    };
+    if media_preserved_in_message(message) {
+        return Verdict::Conformant;
+    }
+    Verdict::Violation(format!(
+        "upstream returned an inlineData part ({mime}) but chat completions message has no \
+         image_url/input_audio content block and no non-empty images[] sibling array \
+         (message: {message})"
+    ))
+}
+
+/// Streaming counterpart of [`gemini_inline_media_preserved_in_chat_response`].
+/// Walks every `chat.completion.chunk` in the SSE body, grouped by each
+/// chunk's `id` (the correlation field for one exchange). For every group
+/// where at least one chunk embeds a Gemini raw response
+/// (`extra_fields.raw_response`) carrying an `inlineData` part, that same
+/// exchange's chunks MUST reflect the media somewhere: it does not have to be
+/// the same chunk that carried the raw upstream payload, since a correct fix
+/// (including one that follows bifrost's own upstream PR #4907 `images[]`
+/// shape) is free to flush image data in a different chunk than the
+/// accompanying text.
+pub fn gemini_inline_media_preserved_in_chat_stream(sse: &str) -> Verdict {
+    let chunks = sse_data_json(sse);
+    let mut order: Vec<String> = Vec::new();
+    let mut upstream_media_by_id: std::collections::HashMap<String, bool> =
+        std::collections::HashMap::new();
+    let mut delta_media_by_id: std::collections::HashMap<String, bool> =
+        std::collections::HashMap::new();
+    for chunk in &chunks {
+        let id = chunk
+            .get("id")
+            .and_then(Value::as_str)
+            .unwrap_or("")
+            .to_string();
+        if !upstream_media_by_id.contains_key(&id) {
+            order.push(id.clone());
+            upstream_media_by_id.insert(id.clone(), false);
+            delta_media_by_id.insert(id.clone(), false);
+        }
+
+        let raw_response = chunk.pointer("/extra_fields/raw_response");
+        let upstream: Option<Value> = match raw_response {
+            Some(Value::String(s)) => serde_json::from_str(s).ok(),
+            Some(v @ Value::Object(_)) => Some(v.clone()),
+            _ => None,
+        };
+        if let Some(upstream) = upstream {
+            if gemini_inline_data_mime(&upstream).is_some() {
+                upstream_media_by_id.insert(id.clone(), true);
+            }
+        }
+        if let Some(delta) = chunk.pointer("/choices/0/delta") {
+            if media_preserved_in_message(delta) {
+                delta_media_by_id.insert(id.clone(), true);
+            }
+        }
+    }
+
+    let mut saw_any_upstream_media = false;
+    for id in &order {
+        if !upstream_media_by_id.get(id).copied().unwrap_or(false) {
+            continue;
+        }
+        saw_any_upstream_media = true;
+        if !delta_media_by_id.get(id).copied().unwrap_or(false) {
+            return Verdict::Violation(format!(
+                "a chunk in stream exchange {id:?} carried an upstream inlineData part but no \
+                 chunk in that same exchange carried a matching image_url/input_audio content \
+                 block or non-empty images[] sibling array in delta"
+            ));
+        }
+    }
+    if !saw_any_upstream_media {
+        return Verdict::Conformant; // nothing to preserve
+    }
+    Verdict::Conformant
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1818,5 +2021,150 @@ data: {"type":"response.output_text.delta","delta":"late"}
                 Verdict::Violation(_)
             ));
         }
+    }
+
+    #[test]
+    fn gemini_inline_media_checker_needs_the_upstream_to_decide() {
+        let with_image = r#"{"candidates":[{"content":{"parts":[
+            {"text":"here you go"},
+            {"inlineData":{"mimeType":"image/png","data":"Zm9v"}}
+        ]}}]}"#;
+        let text_only = r#"{"candidates":[{"content":{"parts":[{"text":"no image today"}]}}]}"#;
+        let client_text_only =
+            r#"{"choices":[{"message":{"role":"assistant","content":"here you go"}}]}"#;
+        let client_with_block = r#"{"choices":[{"message":{"role":"assistant","content":[
+            {"type":"image_url","image_url":{"url":"data:image/png;base64,Zm9v"}}
+        ]}}]}"#;
+
+        // The defect: upstream generated an image, the client response dropped it.
+        assert!(matches!(
+            gemini_inline_media_preserved_in_chat_response(with_image, client_text_only),
+            Verdict::Violation(_)
+        ));
+        // Fixed behavior: the same upstream, but the client response carries the block.
+        assert_eq!(
+            gemini_inline_media_preserved_in_chat_response(with_image, client_with_block),
+            Verdict::Conformant
+        );
+        // Nothing to preserve: upstream never generated an image this turn.
+        assert_eq!(
+            gemini_inline_media_preserved_in_chat_response(text_only, client_text_only),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn gemini_inline_media_checker_rejects_malformed_input() {
+        assert!(matches!(
+            gemini_inline_media_preserved_in_chat_response("not json", "{}"),
+            Verdict::Violation(_)
+        ));
+        let with_image = r#"{"candidates":[{"content":{"parts":[
+            {"inlineData":{"mimeType":"image/png","data":"Zm9v"}}
+        ]}}]}"#;
+        assert!(matches!(
+            gemini_inline_media_preserved_in_chat_response(with_image, "not json"),
+            Verdict::Violation(_)
+        ));
+        assert!(matches!(
+            gemini_inline_media_preserved_in_chat_response(with_image, "{}"),
+            Verdict::Violation(_)
+        ));
+    }
+
+    #[test]
+    fn gemini_inline_media_stream_checker() {
+        let chunk_with_image_dropped = r#"data: {"choices":[{"delta":{"role":"assistant"}}],"extra_fields":{"raw_response":"{\"candidates\":[{\"content\":{\"parts\":[{\"inlineData\":{\"mimeType\":\"image/png\",\"data\":\"Zm9v\"}}]}}]}"}}
+
+data: [DONE]
+"#;
+        assert!(matches!(
+            gemini_inline_media_preserved_in_chat_stream(chunk_with_image_dropped),
+            Verdict::Violation(_)
+        ));
+
+        let chunk_with_image_preserved = r#"data: {"choices":[{"delta":{"content":[{"type":"image_url","image_url":{"url":"data:image/png;base64,Zm9v"}}]}}],"extra_fields":{"raw_response":"{\"candidates\":[{\"content\":{\"parts\":[{\"inlineData\":{\"mimeType\":\"image/png\",\"data\":\"Zm9v\"}}]}}]}"}}
+
+data: [DONE]
+"#;
+        assert_eq!(
+            gemini_inline_media_preserved_in_chat_stream(chunk_with_image_preserved),
+            Verdict::Conformant
+        );
+
+        let chunk_text_only = r#"data: {"choices":[{"delta":{"content":"hi"}}],"extra_fields":{"raw_response":"{\"candidates\":[{\"content\":{\"parts\":[{\"text\":\"hi\"}]}}]}"}}
+
+data: [DONE]
+"#;
+        assert_eq!(
+            gemini_inline_media_preserved_in_chat_stream(chunk_text_only),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn gemini_inline_media_checker_still_flags_the_observed_caption_only_drop() {
+        // The exact shape currently observed live (transcripts/075/live/chat-nonstream.jsonl):
+        // a real caption comes through in message.content as a plain string, but there is no
+        // content array, no image_url/input_audio block, and no images[] sibling array at all.
+        // This must still score Violation; broadening the checker for #4907 must not paper over
+        // the still-current defect.
+        let with_image = r#"{"candidates":[{"content":{"parts":[
+            {"text":"Here's that image for you! "},
+            {"inlineData":{"mimeType":"image/png","data":"Zm9v"}}
+        ]}}]}"#;
+        let client_caption_only = r#"{"choices":[{"message":{
+            "role":"assistant","content":"Here's that image for you! "
+        }}]}"#;
+        assert!(matches!(
+            gemini_inline_media_preserved_in_chat_response(with_image, client_caption_only),
+            Verdict::Violation(_)
+        ));
+    }
+
+    #[test]
+    fn gemini_inline_media_checker_accepts_upstream_pr_4907_images_sibling_shape() {
+        // Regression test for B1: bifrost's own upstream has an open PR,
+        // https://github.com/maximhq/bifrost/pull/4907 ("Closes #2367"), that adds the
+        // assistant-side image carrier as a SIBLING field `ChatAssistantMessage.Images` ->
+        // JSON `"images": [{"type": "image_url", "image_url": {"url": "data:..."}}]`, not as a
+        // content block. If Gemini's chat.go is ever fixed following that same shape, the
+        // checker must recognize it as Conformant, not Violation, or the frozen invariant could
+        // never detect the real fix landing.
+        let with_image = r#"{"candidates":[{"content":{"parts":[
+            {"text":"here you go"},
+            {"inlineData":{"mimeType":"image/png","data":"Zm9v"}}
+        ]}}]}"#;
+        let client_with_images_sibling = r#"{"choices":[{"message":{
+            "role":"assistant",
+            "content":"here you go",
+            "images":[{"type":"image_url","image_url":{"url":"data:image/png;base64,Zm9v"}}]
+        }}]}"#;
+        assert_eq!(
+            gemini_inline_media_preserved_in_chat_response(with_image, client_with_images_sibling),
+            Verdict::Conformant
+        );
+
+        // An empty images[] array must NOT count: that is not a real fix, just an empty field.
+        let client_empty_images = r#"{"choices":[{"message":{
+            "role":"assistant","content":"here you go","images":[]
+        }}]}"#;
+        assert!(matches!(
+            gemini_inline_media_preserved_in_chat_response(with_image, client_empty_images),
+            Verdict::Violation(_)
+        ));
+
+        // Streaming counterpart: the images[] sibling array on `delta` in a later chunk than the
+        // one carrying the raw upstream inlineData part must still be recognized.
+        let stream_with_images_sibling = r#"data: {"choices":[{"delta":{"role":"assistant","content":"here you go"}}],"extra_fields":{"raw_response":"{\"candidates\":[{\"content\":{\"parts\":[{\"inlineData\":{\"mimeType\":\"image/png\",\"data\":\"Zm9v\"}}]}}]}"},"id":"exch-1"}
+
+data: {"choices":[{"delta":{"images":[{"type":"image_url","image_url":{"url":"data:image/png;base64,Zm9v"}}]}}],"id":"exch-1"}
+
+data: [DONE]
+"#;
+        assert_eq!(
+            gemini_inline_media_preserved_in_chat_stream(stream_with_images_sibling),
+            Verdict::Conformant
+        );
     }
 }
