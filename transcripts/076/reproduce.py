@@ -294,6 +294,11 @@ def find_binary(name, directory=None):
     return str(candidate.resolve())
 
 
+def absolute_without_resolving(path):
+    """Make a path absolute without replacing a virtualenv executable symlink."""
+    return Path(os.path.abspath(os.path.expanduser(path)))
+
+
 def wait_proxy(port, process, timeout=120):
     deadline = time.time() + timeout
     while time.time() < deadline:
@@ -372,7 +377,7 @@ def run(args):
     output = Path(args.output_dir).resolve()
     require(not output.exists(), "output directory already exists")
     source = Path(args.litellm_source).resolve()
-    python = Path(args.python).resolve()
+    python = absolute_without_resolving(args.python)
     query_engine = Path(args.prisma_query_engine).resolve()
     require(source.is_dir(), "--litellm-source is not a directory")
     require(python.is_file(), "--python is not a file")

@@ -1,6 +1,7 @@
 import importlib.util
 import json
 from pathlib import Path
+import tempfile
 import unittest
 
 
@@ -11,6 +12,17 @@ SPEC.loader.exec_module(reproduce)
 
 
 class ReproduceTests(unittest.TestCase):
+    def test_python_executable_symlink_is_not_resolved(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / "python-real"
+            target.touch()
+            link = root / "python-venv"
+            link.symlink_to(target)
+            selected = reproduce.absolute_without_resolving(link)
+            self.assertEqual(selected, link)
+            self.assertTrue(selected.is_symlink())
+
     def test_sanitize_bytes_replaces_every_canary(self):
         canaries = {name: f"secret-{name}" for name in reproduce.MARKERS}
         raw = " ".join(canaries.values()).encode()
