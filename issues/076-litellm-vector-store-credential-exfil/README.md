@@ -308,6 +308,7 @@ The dynamic 3/3 result is limited to the latest stable release `v1.100.0`.
 | Formatting | `cargo fmt --all -- --check` | passed |
 | Lint | `cargo clippy --workspace --all-targets -- -D warnings` | passed |
 | README counts | `python3 tools/update-readme-counts.py --check` | passed, 53 folders and 164 Rust tests |
+| Independent review | `.github/agents/kairo-reproduction-reviewer.agent.md` | ACCEPT; exploit 3/3, server credential control 0/3, all checks passed |
 
 ## Security and scope
 
@@ -333,14 +334,26 @@ sent yet.
 - Correctness: PASS
 - Usefulness: PASS
 - Upstream status: PASS
-- Overall: NEEDS EVIDENCE
+- Overall: ACCEPT
 
-The author gates pass. Overall remains `NEEDS EVIDENCE` until the repository's
-final checks pass and an independent reviewer reruns the critical path and
-tries to falsify the claim.
+All three gates, repository checks, and the independent reproduction review
+pass.
 
 ## Independent review
 
-Run `.github/agents/kairo-reproduction-reviewer.agent.md` against this pull
-request. Approval is blocked until the reviewer independently reruns the
-critical path and all three gates pass.
+On 2026-09-10, an independent reviewer followed
+`.github/agents/kairo-reproduction-reviewer.agent.md`, reran the pinned real
+LiteLLM CLI with PostgreSQL and Prisma, and tried to falsify the claim.
+
+- Correctness: PASS. The server credential reached the caller endpoint 3/3;
+  the matched caller-owned-key control received it 0/3 and received the caller
+  credential 3/3.
+- Usefulness: PASS. The reviewer confirmed that an authenticated
+  `internal_user` crossed the operator credential boundary.
+- Upstream status: PASS. Current primary upstream sources were searched and the
+  persisted managed-vector-store path was classified `novel`.
+- Repository checks: PASS. Python tests, Rust unit and conformance tests,
+  formatting, clippy, README counts, diff checks, and the targeted credential
+  scan all passed.
+- Repository state: clean. The reviewer made no repository changes.
+- Final reviewer verdict: ACCEPT.
