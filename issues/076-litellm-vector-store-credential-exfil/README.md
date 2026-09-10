@@ -326,8 +326,8 @@ invoking shell.
 
 LiteLLM's security policy requires private GitHub reporting and a terminal or
 video recording of the live exploit. This finding must not be filed as a public
-issue. No private advisory, email, video, or public Kairo pull request has been
-sent yet.
+upstream issue. A sanitized terminal recording has been prepared for upstream
+reporting. No private advisory or email has been sent.
 
 ## Author verdict
 
