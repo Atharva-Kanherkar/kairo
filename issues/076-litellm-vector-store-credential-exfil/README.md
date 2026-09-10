@@ -305,9 +305,9 @@ The dynamic 3/3 result is limited to the latest stable release `v1.100.0`.
 | Reproduction | `python3 transcripts/076/reproduce.py ... --output-dir /tmp/kairo-076-review` | server credential 3/3; control 0/3; caller control credential 3/3 |
 | Control | same command, built into runner | HTTP 200 3/3; server credential absent 3/3 |
 | Harness | `cargo test --workspace` | 28 unit and 136 conformance tests passed |
-| Formatting | `cargo fmt --all -- --check` | pending final gate |
-| Lint | `cargo clippy --workspace --all-targets -- -D warnings` | pending final gate |
-| README counts | `python3 tools/update-readme-counts.py --check` | pending count update |
+| Formatting | `cargo fmt --all -- --check` | passed |
+| Lint | `cargo clippy --workspace --all-targets -- -D warnings` | passed |
+| README counts | `python3 tools/update-readme-counts.py --check` | passed, 53 folders and 164 Rust tests |
 
 ## Security and scope
 
