@@ -1,0 +1,21 @@
+{
+  "target": "BerriAI/litellm",
+  "version": "1.100.0",
+  "commit": "e4f25265704e2b2c6cf6e81be2e4c5cffff896f4",
+  "captured_at": "2026-09-10",
+  "platform": "darwin",
+  "python": "Python 3.11.15",
+  "database": "PostgreSQL",
+  "caller_role": "internal_user",
+  "allowed_routes": [
+    "/vector_store/new",
+    "/v1/model/info",
+    "openai_routes"
+  ],
+  "credential_reference_discovered_via": "/v1/model/info",
+  "runs_per_mode": 3,
+  "exploit_server_credential_hits": 3,
+  "control_server_credential_hits": 0,
+  "control_caller_credential_hits": 3,
+  "complete": true
+}

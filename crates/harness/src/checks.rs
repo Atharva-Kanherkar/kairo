@@ -751,6 +751,40 @@ pub fn response_omits_secret(body: &str, needle: &str) -> Verdict {
     }
 }
 
+/// Invariant (bug 076): an outbound HTTP request selected by an authenticated
+/// caller MUST NOT contain a credential outside that caller's scope. The
+/// caller supplies a unique marker for the privileged credential. This scans
+/// the complete request so it remains valid if a provider changes its auth
+/// header name or moves authentication into the request target or body.
+pub fn outbound_request_omits_secret(raw_http_request: &str, needle: &str) -> Verdict {
+    if needle.is_empty() {
+        return Verdict::Violation("secret marker is empty".to_string());
+    }
+    let Some((head, _body)) = raw_http_request.split_once("\r\n\r\n") else {
+        return Verdict::Violation("outbound capture is not a complete HTTP request".to_string());
+    };
+    let Some(request_line) = head.lines().next() else {
+        return Verdict::Violation("outbound capture has no request line".to_string());
+    };
+    let mut parts = request_line.split_whitespace();
+    if parts.next().is_none()
+        || parts.next().is_none()
+        || !parts
+            .next()
+            .is_some_and(|version| version.starts_with("HTTP/"))
+        || parts.next().is_some()
+    {
+        return Verdict::Violation("outbound capture has a malformed request line".to_string());
+    }
+    if raw_http_request.contains(needle) {
+        Verdict::Violation(format!(
+            "outbound request contains privileged credential marker {needle:?}"
+        ))
+    } else {
+        Verdict::Conformant
+    }
+}
+
 /// Invariant (bug 030): the non-streaming sibling of
 /// [`anthropic_toolcall_stop_reason`]. If a non-streamed Anthropic Messages
 /// response carries a `tool_use` content block, its top-level `stop_reason`
@@ -1942,6 +1976,32 @@ mod tests {
                 Verdict::Violation(_)
             ));
         }
+    }
+
+    #[test]
+    fn outbound_request_omits_secret_checks_complete_wire_request() {
+        let leaked = "POST /v1/vector_stores/vs/search HTTP/1.1\r\nAuthorization: Bearer SERVER_CANARY\r\n\r\n{}";
+        assert!(matches!(
+            outbound_request_omits_secret(leaked, "SERVER_CANARY"),
+            Verdict::Violation(_)
+        ));
+
+        let caller_owned = "POST /v1/vector_stores/vs/search HTTP/1.1\r\nAuthorization: Bearer CALLER_CANARY\r\n\r\n{}";
+        assert_eq!(
+            outbound_request_omits_secret(caller_owned, "SERVER_CANARY"),
+            Verdict::Conformant
+        );
+
+        for malformed in ["", "not-http\r\n\r\n", "POST /missing-version\r\n\r\n"] {
+            assert!(matches!(
+                outbound_request_omits_secret(malformed, "SERVER_CANARY"),
+                Verdict::Violation(_)
+            ));
+        }
+        assert!(matches!(
+            outbound_request_omits_secret(caller_owned, ""),
+            Verdict::Violation(_)
+        ));
     }
 
     #[test]
