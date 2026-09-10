@@ -2999,7 +2999,7 @@ fn bifrost_gemini_direct_control_returns_inline_image() {
 
 // ---- bug 076: LiteLLM vector store lets an internal user export a server credential ----
 
-fn issue_076_upstream_requests(path: &str) -> Vec<String> {
+fn issue_076_upstream_requests(path: &str, store_id: &str) -> Vec<String> {
     let records: Vec<Value> = fixture(path)
         .lines()
         .filter(|line| !line.trim().is_empty())
@@ -3019,32 +3019,54 @@ fn issue_076_upstream_requests(path: &str) -> Vec<String> {
                 .get("client_request_raw")
                 .and_then(Value::as_str)
                 .expect("client request must be literal HTTP");
+            let expected_start = format!("POST /v1/vector_stores/{store_id}/search HTTP/1.1\r\n");
             assert!(
-                client_request.starts_with("POST /v1/vector_stores/"),
+                client_request.starts_with(&expected_start),
                 "{path}: wrong public entry point"
             );
-            record
+            assert!(
+                record
+                    .get("client_response_raw")
+                    .and_then(Value::as_str)
+                    .is_some_and(|response| response.starts_with("HTTP/1.1 200 OK\r\n")),
+                "{path}: search did not return HTTP 200"
+            );
+            let upstream_request = record
                 .get("upstream_request_raw")
                 .and_then(Value::as_str)
-                .expect("upstream request must be literal HTTP")
-                .to_string()
+                .expect("upstream request must be literal HTTP");
+            assert!(
+                upstream_request.starts_with(&expected_start),
+                "{path}: wrong upstream request target"
+            );
+            upstream_request.to_string()
         })
         .collect()
 }
 
 #[test]
 fn litellm_vector_store_exposes_server_credential_to_caller_endpoint() {
-    for request in issue_076_upstream_requests("transcripts/076/live/exploit.jsonl") {
+    for request in
+        issue_076_upstream_requests("transcripts/076/live/exploit.jsonl", "kairo-exploit-store")
+    {
         assert!(matches!(
             outbound_request_omits_secret(&request, "[SERVER_PROVIDER_CREDENTIAL]"),
             Verdict::Violation(_)
         ));
+        for absent in ["[CALLER_CONTROL_CREDENTIAL]", "[INTERNAL_USER_KEY]"] {
+            assert_eq!(
+                outbound_request_omits_secret(&request, absent),
+                Verdict::Conformant
+            );
+        }
     }
 }
 
 #[test]
 fn litellm_vector_store_caller_owned_key_control_omits_server_credential() {
-    for request in issue_076_upstream_requests("transcripts/076/live/control.jsonl") {
+    for request in
+        issue_076_upstream_requests("transcripts/076/live/control.jsonl", "kairo-control-store")
+    {
         assert_eq!(
             outbound_request_omits_secret(&request, "[SERVER_PROVIDER_CREDENTIAL]"),
             Verdict::Conformant
@@ -3053,5 +3075,9 @@ fn litellm_vector_store_caller_owned_key_control_omits_server_credential() {
             outbound_request_omits_secret(&request, "[CALLER_CONTROL_CREDENTIAL]"),
             Verdict::Violation(_)
         ));
+        assert_eq!(
+            outbound_request_omits_secret(&request, "[INTERNAL_USER_KEY]"),
+            Verdict::Conformant
+        );
     }
 }
