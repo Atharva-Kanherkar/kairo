@@ -107,6 +107,16 @@ class ReproduceTests(unittest.TestCase):
         self.assertIn(reproduce.MARKERS["server"], message)
         self.assertNotIn(canaries["server"], message)
 
+    def test_sanitized_log_tail_is_bounded_and_redacted(self):
+        canaries = {name: f"secret-{name}" for name in reproduce.MARKERS}
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "proxy.log"
+            path.write_bytes(b"discarded-prefix\n" + (b"x" * 32) + canaries["server"].encode())
+            tail = reproduce.sanitized_log_tail(path, canaries, limit=48)
+        self.assertIn(reproduce.MARKERS["server"], tail)
+        self.assertNotIn(canaries["server"], tail)
+        self.assertNotIn("discarded-prefix", tail)
+
 
 if __name__ == "__main__":
     unittest.main()

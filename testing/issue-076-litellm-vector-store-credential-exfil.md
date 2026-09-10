@@ -66,6 +66,9 @@
 - The runner starts its own loopback capture upstream, performs the authenticated
   setup and six searches, validates all counters before replacing committed
   fixtures, and shuts down child processes.
+- Allow up to 300 seconds for LiteLLM's bounded Prisma preparation and migration
+  step. On startup failure, emit only a bounded log tail after replacing every
+  synthetic credential canary.
 - Re-run against current `v1.101.0-rc.2`, `v1.102.0-dev.1`, or staging when
   practical. Static current-source evidence alone must be described as static,
   not as a dynamic reproduction.

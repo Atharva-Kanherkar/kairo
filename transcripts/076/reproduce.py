@@ -31,6 +31,7 @@ import time
 
 HOST = "127.0.0.1"
 RUNS = 3
+DEFAULT_STARTUP_TIMEOUT = 300
 EXPECTED_COMMIT = "e4f25265704e2b2c6cf6e81be2e4c5cffff896f4"
 EXPECTED_VERSION = "1.100.0"
 SERVER_CREDENTIAL_NAME = "prod-openai"
@@ -299,7 +300,7 @@ def absolute_without_resolving(path):
     return Path(os.path.abspath(os.path.expanduser(path)))
 
 
-def wait_proxy(port, process, timeout=120):
+def wait_proxy(port, process, timeout=DEFAULT_STARTUP_TIMEOUT):
     deadline = time.time() + timeout
     while time.time() < deadline:
         if process.poll() is not None:
@@ -312,6 +313,11 @@ def wait_proxy(port, process, timeout=120):
             pass
         time.sleep(0.2)
     raise ReproductionError("LiteLLM did not become ready before timeout")
+
+
+def sanitized_log_tail(path, canaries, limit=4000):
+    raw = path.read_bytes()[-limit:]
+    return sanitize_bytes(raw, canaries).decode("utf-8", errors="replace")
 
 
 def proxy_is_ready(response):
@@ -457,7 +463,14 @@ def run(args):
                     stdout=log_stream,
                     stderr=subprocess.STDOUT,
                 )
-                wait_proxy(proxy_port, process)
+                try:
+                    wait_proxy(proxy_port, process, timeout=args.startup_timeout)
+                except ReproductionError as exc:
+                    log_stream.flush()
+                    detail = sanitized_log_tail(proxylog, canaries)
+                    if detail:
+                        raise ReproductionError(f"{exc}; sanitized LiteLLM log tail: {detail}") from exc
+                    raise
 
                 user_exchange = post(
                     proxy_port,
@@ -588,11 +601,14 @@ def main():
     parser.add_argument("--prisma-query-engine", required=True)
     parser.add_argument("--postgres-bin", help="directory containing PostgreSQL executables")
     parser.add_argument("--output-dir", required=True)
+    parser.add_argument("--startup-timeout", type=float, default=DEFAULT_STARTUP_TIMEOUT)
     parser.add_argument("--expect-commit", default=EXPECTED_COMMIT)
     parser.add_argument("--expect-version", default=EXPECTED_VERSION)
     parser.add_argument("--captured-at", default="2026-09-10")
     args = parser.parse_args()
     try:
+        if args.startup_timeout <= 0:
+            raise ReproductionError("--startup-timeout must be positive")
         run(args)
     except (OSError, ReproductionError, subprocess.SubprocessError, json.JSONDecodeError, UnicodeError) as exc:
         print(f"reproduction failed: {exc}", file=sys.stderr)

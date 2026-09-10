@@ -69,10 +69,11 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 072 | Bifrost forwards Anthropic `tool_choice: {"type": "any"}` as bare `"tool_choice": "any"` to OpenAI backends instead of mapping to `"required"` | Bifrost transports/v2.0.0 `e4a30d6`, core v1.8.3, gpt-4o | novel, no matching upstream ticket | Live OpenAI 400 and SDK BadRequestError 5/5 per Responses/Chat route; named-tool and required controls succeed 5/5 each. Full per-run bytes retained. Independent repair review pending. |
 | 074 | LiteLLM MCP auto-execution splices two complete Responses lifecycles into one public stream and reuses output index zero; OpenAI SDK stream accumulation aborts before the final answer | LiteLLM 1.99.0 and 1.100.0, OpenAI SDK 2.54.0, deterministic Responses upstream, real stdio MCP | novel; adjacent [litellm#31910](https://github.com/BerriAI/litellm/issues/31910), [#37358](https://github.com/BerriAI/litellm/issues/37358), and fixed [#33024](https://github.com/BerriAI/litellm/issues/33024) | ✅ public route and SDK failure 5/5 per version. Changing only `require_approval` to `always` and the no-tool control both succeed 5/5 per version. Raw public and provider bytes retained. |
 | 075 | Bifrost Gemini chat-completions dialect converter silently drops `inlineData` image/audio parts on both the unary and streaming path; caller gets HTTP 200, billed image tokens, and no image | Bifrost `dev` `e1045c07`, native `gemini` provider, `gemini-2.5-flash-image` | novel; closely related open feature request [#2367](https://github.com/maximhq/bifrost/issues/2367) covers a different provider (OpenRouter) and wire field | ✅ live 3/3 chat unary and stream drop the image once Gemini generates one. `/v1/responses` (same Bifrost) and direct Gemini controls preserve it 3/3 each. |
+| 076 | An authenticated internal user can bind an operator-owned named credential to a user-owned vector store with a caller-controlled `api_base`, then receive that credential at the selected endpoint | LiteLLM 1.100.0, PostgreSQL, real proxy CLI, deterministic raw HTTP capture upstream | novel persisted-path variant; adjacent [GHSA-3cv6-jpf6-8222](https://github.com/BerriAI/litellm/security/advisories/GHSA-3cv6-jpf6-8222) covers the patched direct request-body path | ✅ server credential reached the caller endpoint 3/3. Matched caller-owned-key control received the server credential 0/3 and its own key 3/3. Independent review pending. |
 
 Numbers 046-050 are reserved for unpublished GoModel round-2 findings (one bug per PR). Issues 052-056 (AxonHub round 2) land on sibling branches, not missing rows here.
 
-**Coverage**: 52 documented issue folders across LiteLLM, Switchyard, Bifrost,
+**Coverage**: 53 documented issue folders across LiteLLM, Switchyard, Bifrost,
 GoModel, AxonHub, and any-llm. Folder counts are not defect counts: some folders
 contain honest negatives or multiple findings, including 006's four independent
 field losses and the LiteLLM copy of that class. The rows above record each
@@ -84,7 +85,7 @@ deleted), 006/007 (is_error + image deleted via Responses), 020 (client
 `api_key` override + sticky router upsert), 024 (`/health` extra_headers
 and `aws_session_token` leak), 026 (JSON `extra_headers`/`headers`/`organization`
 passthrough), 028 (`/gemini` pass-through copies `x-goog-upload-url ?key=`),
-041 (`/v1/messages` drops `stop_sequences`), 064 (`/v1/messages` drops function-tool strictness), 067 (structured refusal text erased on Anthropic translation), 071 (`/model/info` `api_base` credential leak), 074 (MCP auto-execution splices Responses lifecycles). Switchyard
+041 (`/v1/messages` drops `stop_sequences`), 064 (`/v1/messages` drops function-tool strictness), 067 (structured refusal text erased on Anthropic translation), 071 (`/model/info` `api_base` credential leak), 074 (MCP auto-execution splices Responses lifecycles), 076 (managed vector-store credential exfiltration). Switchyard
 confirmed: 005 (id sanitizer), 006 (4 field losses), 007 (multimodal
 stringified), 016 (thinking dropped), 017 (parallel flag), 018 (document
 dumped), 019 (invented cache breakpoint), 023 (`api-key` and OpenAI
