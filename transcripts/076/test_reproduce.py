@@ -12,6 +12,19 @@ SPEC.loader.exec_module(reproduce)
 
 
 class ReproduceTests(unittest.TestCase):
+    @staticmethod
+    def response(body, status=200):
+        raw = json.dumps(body).encode()
+        return (
+            f"HTTP/1.1 {status} Test\r\nContent-Length: {len(raw)}\r\n\r\n".encode()
+            + raw
+        )
+
+    def test_proxy_readiness_requires_connected_database(self):
+        self.assertTrue(reproduce.proxy_is_ready(self.response({"status": "healthy", "db": "connected"})))
+        self.assertFalse(reproduce.proxy_is_ready(self.response({"status": "healthy", "db": "Not connected"})))
+        self.assertFalse(reproduce.proxy_is_ready(self.response({"status": "healthy", "db": "disconnected"}, 503)))
+
     def test_python_executable_symlink_is_not_resolved(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

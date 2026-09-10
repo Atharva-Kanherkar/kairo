@@ -305,13 +305,20 @@ def wait_proxy(port, process, timeout=120):
         if process.poll() is not None:
             raise ReproductionError(f"LiteLLM exited during startup with status {process.returncode}")
         try:
-            _, response = raw_exchange(port, "GET", "/health/liveliness", timeout=2)
-            if response_status(response) == 200:
+            _, response = raw_exchange(port, "GET", "/health/readiness", timeout=2)
+            if proxy_is_ready(response):
                 return
         except (OSError, ReproductionError):
             pass
         time.sleep(0.2)
     raise ReproductionError("LiteLLM did not become ready before timeout")
+
+
+def proxy_is_ready(response):
+    if response_status(response) != 200:
+        return False
+    body = response_json(response)
+    return body.get("status") == "healthy" and body.get("db") == "connected"
 
 
 def write_proxy_config(path, upstream_port):
