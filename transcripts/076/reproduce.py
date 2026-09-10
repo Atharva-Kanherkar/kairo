@@ -368,9 +368,17 @@ def get(port, path, bearer):
     return {"request_raw": request, "response_raw": response}
 
 
-def require_status(exchange, expected, name):
+def require_status(exchange, expected, name, canaries=None):
     actual = response_status(exchange["response_raw"])
-    require(actual == expected, f"{name} returned HTTP {actual}, expected {expected}")
+    if actual != expected:
+        parsed = parse_http(exchange["response_raw"], "response")
+        body = parsed["body"]
+        if parsed["headers"].get("transfer-encoding", "").lower() == "chunked":
+            body = decode_chunked(body)
+        if canaries is not None:
+            body = sanitize_bytes(body, canaries)
+        detail = body.decode("utf-8", errors="replace")[:1000]
+        raise ReproductionError(f"{name} returned HTTP {actual}, expected {expected}: {detail}")
 
 
 def run(args):
@@ -445,7 +453,7 @@ def run(args):
                     {"user_id": user_id, "user_email": f"{user_id}@example.invalid", "user_role": "internal_user", "auto_create_key": False},
                     canaries["master"],
                 )
-                require_status(user_exchange, 200, "user creation")
+                require_status(user_exchange, 200, "user creation", canaries)
                 records["setup"].append({"name": "create-internal-user", **user_exchange})
 
                 key_exchange = post(
@@ -454,13 +462,13 @@ def run(args):
                     {"user_id": user_id, "key": canaries["internal"], "allowed_routes": ALLOWED_ROUTES},
                     canaries["master"],
                 )
-                require_status(key_exchange, 200, "key generation")
+                require_status(key_exchange, 200, "key generation", canaries)
                 key_result = response_json(key_exchange["response_raw"])
                 require(key_result.get("allowed_routes") == ALLOWED_ROUTES, "generated key has wrong allowed routes")
                 records["setup"].append({"name": "generate-routed-internal-key", **key_exchange})
 
                 info_exchange = get(proxy_port, "/v1/model/info", canaries["internal"])
-                require_status(info_exchange, 200, "model info")
+                require_status(info_exchange, 200, "model info", canaries)
                 info_result = response_json(info_exchange["response_raw"])
                 info_models = info_result if isinstance(info_result, list) else info_result.get("data", [])
                 credential_names = [item.get("litellm_params", {}).get("litellm_credential_name") for item in info_models]
@@ -479,7 +487,7 @@ def run(args):
                     },
                     canaries["internal"],
                 )
-                require_status(exploit_create, 200, "exploit vector store creation")
+                require_status(exploit_create, 200, "exploit vector store creation", canaries)
                 records["setup"].append({"name": "create-exploit-store", **exploit_create})
 
                 control_create = post(
@@ -495,7 +503,7 @@ def run(args):
                     },
                     canaries["internal"],
                 )
-                require_status(control_create, 200, "control vector store creation")
+                require_status(control_create, 200, "control vector store creation", canaries)
                 records["setup"].append({"name": "create-control-store", **control_create})
 
                 for mode, store_id in (("exploit", "kairo-exploit-store"), ("control", "kairo-control-store")):
@@ -507,7 +515,7 @@ def run(args):
                             SEARCH_BODY,
                             canaries["internal"],
                         )
-                        require_status(exchange, 200, f"{mode} search {trial}")
+                        require_status(exchange, 200, f"{mode} search {trial}", canaries)
                         after = capture.snapshot()
                         require(len(after) == before + 1, f"{mode} search {trial} made an unexpected upstream call count")
                         records[mode].append(

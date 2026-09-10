@@ -79,6 +79,16 @@ class ReproduceTests(unittest.TestCase):
         with self.assertRaisesRegex(reproduce.ReproductionError, "control records"):
             reproduce.validate_search_records(exploit, control, canaries)
 
+    def test_require_status_sanitizes_error_body(self):
+        canaries = {name: f"secret-{name}" for name in reproduce.MARKERS}
+        body = b'{"error":"secret-server"}'
+        response = b"HTTP/1.1 500 Error\r\nContent-Length: " + str(len(body)).encode() + b"\r\n\r\n" + body
+        with self.assertRaises(reproduce.ReproductionError) as raised:
+            reproduce.require_status({"response_raw": response}, 200, "probe", canaries)
+        message = str(raised.exception)
+        self.assertIn(reproduce.MARKERS["server"], message)
+        self.assertNotIn(canaries["server"], message)
+
 
 if __name__ == "__main__":
     unittest.main()
