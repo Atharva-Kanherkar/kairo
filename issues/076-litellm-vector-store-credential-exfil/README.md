@@ -38,7 +38,8 @@ marker.
 git clone https://github.com/BerriAI/litellm.git /path/to/litellm
 cd /path/to/litellm
 git checkout e4f25265704e2b2c6cf6e81be2e4c5cffff896f4
-uv sync --frozen --extra proxy --extra extra_proxy
+uv python install 3.11.15
+uv sync --python 3.11.15 --frozen --extra proxy --extra extra_proxy
 
 # Locate the executable fetched with prisma-python without printing secrets.
 KAIRO_PRISMA_ENGINE=$(.venv/bin/python - <<'PY'
