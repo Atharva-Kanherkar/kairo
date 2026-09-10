@@ -26,12 +26,10 @@
 
 ## Unit Tests
 
-- `outbound_request_omits_secret_flags_provider_credential` reports a violation
-  when a raw forwarded HTTP request contains the server credential marker.
-- `outbound_request_omits_secret_accepts_caller_control` reports conformance for
-  the matched control request.
-- The checker rejects empty or malformed HTTP captures instead of passing
-  vacuously.
+- `outbound_request_omits_secret_checks_complete_wire_request` reports a
+  violation when a raw forwarded HTTP request contains the server credential
+  marker, accepts the matched caller-owned control request, and rejects empty or
+  malformed HTTP captures instead of passing vacuously.
 - Python tests cover exact credential replacement, refusal to persist an
   unsanitized canary, HTTP parsing, and result-count validation.
 
