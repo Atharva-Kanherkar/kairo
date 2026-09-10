@@ -36,6 +36,11 @@ class ReproduceTests(unittest.TestCase):
             self.assertEqual(selected, link)
             self.assertTrue(selected.is_symlink())
 
+    def test_runtime_path_starts_with_selected_python_environment(self):
+        selected = Path("/tmp/kairo-venv/bin/python")
+        path_entries = reproduce.runtime_path(selected).split(reproduce.os.pathsep)
+        self.assertEqual(path_entries[0], str(selected.parent))
+
     def test_sanitize_bytes_replaces_every_canary(self):
         canaries = {name: f"secret-{name}" for name in reproduce.MARKERS}
         raw = " ".join(canaries.values()).encode()

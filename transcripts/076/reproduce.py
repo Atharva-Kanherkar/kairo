@@ -365,6 +365,11 @@ def package_version(python, source):
     return lines[0]
 
 
+def runtime_path(python):
+    inherited = os.environ.get("PATH", "")
+    return str(Path(python).parent) + (os.pathsep + inherited if inherited else "")
+
+
 def post(port, path, body, bearer):
     request, response = raw_exchange(port, "POST", path, body=body, bearer=bearer)
     return {"request_raw": request, "response_raw": response}
@@ -418,7 +423,7 @@ def run(args):
         config = temp / "config.yaml"
         write_proxy_config(config, upstream_port)
         base_env = {
-            "PATH": os.environ.get("PATH", ""),
+            "PATH": runtime_path(python),
             "HOME": str(Path.home()),
             "LANG": "C.UTF-8",
         }
