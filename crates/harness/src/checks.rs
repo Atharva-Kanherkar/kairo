@@ -66,6 +66,30 @@ pub fn anthropic_toolcall_stop_reason(sse: &str) -> Verdict {
     }
 }
 
+/// Invariant (bug 076): a streamed Anthropic turn the upstream safety-filtered
+/// must terminate with the same safety `stop_reason` the scenario demands.
+/// `expected` is the refusal-family reason for the filtered turn (e.g.
+/// "refusal"); any other terminal reason, including a clean `end_turn` or a
+/// missing terminal, means the transport decided the safety verdict instead
+/// of the upstream signal.
+pub fn anthropic_stream_safety_stop_reason(sse: &str, expected: &str) -> Verdict {
+    let events = sse_data_json(sse);
+    let stop_reason = events
+        .iter()
+        .filter(|e| e.get("type").and_then(Value::as_str) == Some("message_delta"))
+        .find_map(|e| {
+            e.pointer("/delta/stop_reason")
+                .and_then(Value::as_str)
+                .map(str::to_owned)
+        });
+    match stop_reason {
+        Some(reason) if reason == expected => Verdict::Conformant,
+        other => Verdict::Violation(format!(
+            "stream terminal stop_reason is {other:?}, expected {expected:?}"
+        )),
+    }
+}
+
 /// Invariant (bug 002a): if an OpenAI chat stream emits any `tool_calls`
 /// delta, the terminal `finish_reason` MUST be `tool_calls`, not `stop`.
 pub fn openai_stream_finish_reason(sse: &str) -> Verdict {

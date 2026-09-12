@@ -1,0 +1,93 @@
+{
+  "gateway": "http://localhost:8080",
+  "version": "\"1.8.6-1d89501\"",
+  "model": "mockoai/mimo-v2.5",
+  "n": 5,
+  "cells": [
+    {
+      "id": "A",
+      "route": "/anthropic/v1/messages",
+      "mode": "non-stream",
+      "scenario": "filter",
+      "expected": "refusal",
+      "observed": [
+        "end_turn",
+        "end_turn",
+        "end_turn",
+        "end_turn",
+        "end_turn"
+      ],
+      "agree": 0,
+      "of": 5,
+      "stable": true
+    },
+    {
+      "id": "B",
+      "route": "/anthropic/v1/messages",
+      "mode": "stream",
+      "scenario": "filter",
+      "expected": "refusal",
+      "observed": [
+        "refusal",
+        "refusal",
+        "refusal",
+        "refusal",
+        "refusal"
+      ],
+      "agree": 5,
+      "of": 5,
+      "stable": true
+    },
+    {
+      "id": "C",
+      "route": "/anthropic/v1/messages",
+      "mode": "non-stream",
+      "scenario": "plain",
+      "expected": "end_turn",
+      "observed": [
+        "end_turn",
+        "end_turn",
+        "end_turn",
+        "end_turn",
+        "end_turn"
+      ],
+      "agree": 5,
+      "of": 5,
+      "stable": true
+    },
+    {
+      "id": "D",
+      "route": "/anthropic/v1/messages",
+      "mode": "stream",
+      "scenario": "plain",
+      "expected": "end_turn",
+      "observed": [
+        "end_turn",
+        "end_turn",
+        "end_turn",
+        "end_turn",
+        "end_turn"
+      ],
+      "agree": 5,
+      "of": 5,
+      "stable": true
+    },
+    {
+      "id": "E",
+      "route": "/v1/chat/completions",
+      "mode": "non-stream",
+      "scenario": "filter",
+      "expected": "content_filter",
+      "observed": [
+        "content_filter",
+        "content_filter",
+        "content_filter",
+        "content_filter",
+        "content_filter"
+      ],
+      "agree": 5,
+      "of": 5,
+      "stable": true
+    }
+  ]
+}
