@@ -2996,3 +2996,126 @@ fn bifrost_gemini_direct_control_returns_inline_image() {
         );
     }
 }
+
+// ---- bug 077: Bifrost returns a custom provider credential to a VK caller ----
+
+const ISSUE_077_SECRET: &str = "CANARY_ADMIN_ONLY_PROVIDER_SECRET_077";
+const ISSUE_077_AUTH_CONTROL: &str = "CANARY_AUTHORIZATION_CONTROL_077";
+const ISSUE_077_SAFE_CONTROL: &str = "CANARY_SAFE_TRACE_077";
+
+fn issue_077_response_body(exchange: &str) -> Value {
+    let (_, body) = exchange
+        .rsplit_once("\r\n\r\n")
+        .expect("077 exchange has response headers and a body");
+    serde_json::from_str(body).expect("077 client response body is JSON")
+}
+
+#[test]
+fn bifrost_provider_response_header_leaks_admin_secret() {
+    let observed = fixture("transcripts/077/observed.http");
+    assert!(
+        observed.starts_with("POST /v1/responses HTTP/1.1\r\n"),
+        "fixture must exercise the public Responses route"
+    );
+    assert!(
+        observed.contains("HTTP/1.1 200 OK\r\n"),
+        "fixture must be a successful response, not an error echo"
+    );
+    assert_eq!(
+        response_omits_secret(&observed, ISSUE_077_SECRET),
+        Verdict::Violation(format!(
+            "response body contains deployment secret marker {ISSUE_077_SECRET:?}"
+        )),
+        "the full client-visible exchange must expose the administrator canary"
+    );
+
+    let body = issue_077_response_body(&observed);
+    assert_eq!(
+        body.pointer("/extra_fields/provider_response_headers/X-Provider-Secret")
+            .and_then(Value::as_str),
+        Some(ISSUE_077_SECRET),
+        "the second client-visible copy must remain frozen in JSON metadata"
+    );
+}
+
+#[test]
+fn bifrost_provider_response_secret_controls_are_discriminating() {
+    let observed = fixture("transcripts/077/observed.http");
+    let upstream = fixture("transcripts/077/upstream.http");
+    assert!(
+        upstream.contains(&format!(
+            "Authorization: Bearer {ISSUE_077_AUTH_CONTROL}\r\n"
+        )),
+        "upstream must actually emit the exact-name credential control"
+    );
+    assert_eq!(
+        response_omits_secret(&observed, ISSUE_077_AUTH_CONTROL),
+        Verdict::Conformant,
+        "Bifrost must strip the Authorization control from the whole client exchange"
+    );
+    assert!(
+        observed.contains(&format!("X-Safe-Trace: {ISSUE_077_SAFE_CONTROL}\r\n")),
+        "benign provider response headers must still pass"
+    );
+    assert_eq!(
+        issue_077_response_body(&observed)
+            .pointer("/extra_fields/provider_response_headers/X-Safe-Trace")
+            .and_then(Value::as_str),
+        Some(ISSUE_077_SAFE_CONTROL),
+        "benign provider metadata must still pass in JSON"
+    );
+}
+
+#[test]
+fn bifrost_provider_response_secret_expected_exchange_is_clean() {
+    let expected = fixture("transcripts/077/expected.http");
+    assert!(expected.contains("HTTP/1.1 200 OK\r\n"));
+    assert_eq!(
+        response_omits_secret(&expected, ISSUE_077_SECRET),
+        Verdict::Conformant,
+        "a fixed successful response must omit the secret everywhere"
+    );
+    assert!(expected.contains(ISSUE_077_SAFE_CONTROL));
+}
+
+#[test]
+fn bifrost_provider_response_secret_unauthenticated_control_is_closed() {
+    let control = fixture("transcripts/077/unauthenticated-control.http");
+    assert!(
+        control.starts_with("POST /v1/responses HTTP/1.1\r\n"),
+        "control must send the same public request"
+    );
+    assert!(
+        control.contains("HTTP/1.1 401 Unauthorized\r\n"),
+        "control must prove inference authentication is enforced"
+    );
+    assert_eq!(
+        response_omits_secret(&control, ISSUE_077_SECRET),
+        Verdict::Conformant,
+        "an unauthenticated caller must not receive the provider secret"
+    );
+}
+
+#[test]
+fn bifrost_provider_response_secret_summary_covers_all_trials() {
+    let summary: Value =
+        serde_json::from_str(&fixture("transcripts/077/results.json")).expect("077 summary JSON");
+    assert_eq!(summary["complete"], true);
+    assert_eq!(summary["runs"], 5);
+    assert_eq!(
+        summary["target"]["commit"],
+        "44a562431ee0463cb1afe0e5833cde07d7921701"
+    );
+    for pointer in [
+        "/authenticated/http_200",
+        "/authenticated/secret_in_http_header",
+        "/authenticated/secret_in_json_metadata",
+        "/authenticated/consumer_extracted_admin_secret",
+        "/same_response_controls/authorization_stripped_from_header_and_json",
+        "/same_response_controls/safe_trace_preserved_in_header_and_json",
+        "/unauthenticated_control/http_401",
+        "/unauthenticated_control/secret_absent",
+    ] {
+        assert_eq!(summary.pointer(pointer).and_then(Value::as_u64), Some(5));
+    }
+}

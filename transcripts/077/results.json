@@ -1,0 +1,33 @@
+{
+  "authenticated": {
+    "consumer_extracted_admin_secret": 5,
+    "http_200": 5,
+    "secret_in_http_header": 5,
+    "secret_in_json_metadata": 5
+  },
+  "complete": true,
+  "date_checked": "2026-09-13",
+  "runs": 5,
+  "same_response_controls": {
+    "authorization_stripped_from_header_and_json": 5,
+    "safe_trace_preserved_in_header_and_json": 5
+  },
+  "secrets": "synthetic canaries only; no provider credential was used",
+  "target": {
+    "backend_dialect": "OpenAI Responses",
+    "binary_vcs_modified": true,
+    "binary_vcs_revision": "44a562431ee0463cb1afe0e5833cde07d7921701",
+    "binary_version": "1.8.6-44a562431e",
+    "client_dialect": "OpenAI Responses",
+    "commit": "44a562431ee0463cb1afe0e5833cde07d7921701",
+    "core_version": "1.8.6",
+    "endpoint": "/v1/responses",
+    "model": "mock-model",
+    "provider": "custom OpenAI-compatible capture upstream",
+    "repository": "https://github.com/maximhq/bifrost"
+  },
+  "unauthenticated_control": {
+    "http_401": 5,
+    "secret_absent": 5
+  }
+}

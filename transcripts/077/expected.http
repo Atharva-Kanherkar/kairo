@@ -1,0 +1,14 @@
+POST /v1/responses HTTP/1.1
+Host: 127.0.0.1:51068
+Content-Type: application/json
+Content-Length: 97
+x-bf-vk: <VIRTUAL_KEY>
+Connection: close
+
+{"model":"mockoai/mock-model","input":"Return the deterministic fixture.","max_output_tokens":16}HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 1000
+X-Safe-Trace: CANARY_SAFE_TRACE_077
+Connection: close
+
+{"id":"resp_077","object":"response","created_at":1789250000,"completed_at":null,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":null,"max_tool_calls":null,"metadata":null,"model":"mock-model","output":[{"id":"msg_077","type":"message","status":"completed","role":"assistant","content":[{"type":"output_text","text":"synthetic-ok","annotations":[],"logprobs":null}]}],"previous_response_id":null,"prompt_cache_key":null,"reasoning":null,"safety_identifier":null,"service_tier":null,"status":"completed","tools":null,"usage":{"input_tokens":1,"input_tokens_details":null,"output_tokens":1,"output_tokens_details":null,"total_tokens":2},"extra_fields":{"request_type":"responses","routing_info":{"provider":"mockoai","model":"mock-model","key":"mock-key"},"provider":"mockoai","original_model_requested":"mock-model","resolved_model_used":"mock-model","latency":0,"upstream_latency":0,"chunk_index":0,"provider_response_headers":{"X-Safe-Trace":"CANARY_SAFE_TRACE_077"}}}
