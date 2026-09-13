@@ -6,15 +6,16 @@
 //! violating the invariant, this test flips and tells us.
 
 use kairo::checks::{
-    anthropic_response_toolcall_stop_reason, anthropic_tool_choice_any_mapped_to_required,
-    anthropic_toolcall_stop_reason, capture_records, content_filter_preserved,
-    document_body_forwarded, gemini_inline_media_preserved_in_chat_response,
-    gemini_inline_media_preserved_in_chat_stream, id_conforms, instruction_messages_preserved,
-    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
-    model_info_capture_identity, model_info_envelope_body, model_info_omits_api_base_secret,
-    no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
-    no_phantom_null_output_text, non_text_block_not_json_dumped, openai_stream_finish_reason,
-    openai_toolcall_id_charset, outbound_request_omits_secret, parallel_tool_disable_preserved,
+    anthropic_response_toolcall_stop_reason, anthropic_stream_safety_stop_reason,
+    anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
+    content_filter_preserved, document_body_forwarded,
+    gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
+    id_conforms, instruction_messages_preserved, is_error_forwarded, json_schema_forwarded,
+    json_schema_property_forwarded, model_info_capture_identity, model_info_envelope_body,
+    model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
+    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
+    openai_stream_finish_reason, openai_toolcall_id_charset, outbound_request_omits_secret,
+    parallel_tool_disable_preserved,
     reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
     response_omits_secret, responses_refusal_semantics_preserved, responses_single_lifecycle,
     stop_sequence_forwarded, thinking_not_leaked_as_visible_text, thinking_text_forwarded,
@@ -3080,4 +3081,114 @@ fn litellm_vector_store_caller_owned_key_control_omits_server_credential() {
             Verdict::Conformant
         );
     }
+}
+
+// ---- bug 078: same filtered turn, opposite safety verdicts by transport ----
+//
+// Bifrost 1.8.6 consults IncompleteDetails on the streaming Anthropic egress
+// (content_filter -> refusal, correct) but ignores it on the non-streaming
+// egress (StopReason nil -> end_turn, safety erased). The OpenAI route on the
+// same gateway reports content_filter on the same turn, so the upstream really
+// did filter. An eval built in one mode invalidates qualification in the other.
+
+#[test]
+fn bifrost_anthropic_nonstream_erases_filter_to_end_turn() {
+    // Frozen violation: the mock upstream returned status incomplete with
+    // incomplete_details content_filter, and the non-streaming client was told
+    // end_turn with the text "blocked" as if it were a normal answer.
+    // Reuses the 010A/034 checker unchanged: the invariant is a property of
+    // the safety signal, not of one gateway version.
+    let body = fixture("transcripts/078/filter-nonstream.json");
+    let stop = serde_json::from_str::<Value>(&body)
+        .expect("filter-nonstream.json must be valid JSON")["stop_reason"]
+        .as_str()
+        .unwrap_or_default()
+        .to_owned();
+    let v = content_filter_preserved("content_filter", &stop);
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "non-streaming must be caught erasing content_filter to end_turn: {v:?}"
+    );
+}
+
+#[test]
+fn bifrost_anthropic_stream_reports_filter_as_refusal() {
+    // Same upstream turn, streaming transport: conformant. This is what makes
+    // 078 a divergence finding rather than a repeat of 034: one transport was
+    // fixed, the other was not, and they now disagree with each other.
+    let sse = fixture("transcripts/078/filter-stream.sse");
+    assert_eq!(
+        anthropic_stream_safety_stop_reason(&sse, "refusal"),
+        Verdict::Conformant,
+        "streaming reports the same filtered turn as refusal"
+    );
+    // Vacuity guard: demand end_turn of the refusal stream and require a
+    // Violation, so a fixture that lost its terminal fails instead of passing.
+    assert!(
+        matches!(
+            anthropic_stream_safety_stop_reason(&sse, "end_turn"),
+            Verdict::Violation(_)
+        ),
+        "control is vacuous: stream fixture carries no refusal terminal to judge"
+    );
+}
+
+#[test]
+fn bifrost_anthropic_plain_turn_agrees_across_transports() {
+    // Controls: an unfiltered turn is end_turn on both transports, so the
+    // checkers above distinguish filtered from finished rather than flagging
+    // every end_turn.
+    let body = fixture("transcripts/078/plain-nonstream.json");
+    let stop = serde_json::from_str::<Value>(&body)
+        .expect("plain-nonstream.json must be valid JSON")["stop_reason"]
+        .as_str()
+        .unwrap_or_default()
+        .to_owned();
+    assert_eq!(
+        stop, "end_turn",
+        "plain non-stream control must stay end_turn"
+    );
+    let sse = fixture("transcripts/078/plain-stream.sse");
+    assert_eq!(
+        anthropic_stream_safety_stop_reason(&sse, "end_turn"),
+        Verdict::Conformant,
+        "plain stream control must stay end_turn"
+    );
+    // Vacuity guard for the plain stream leg: a refusal terminal must NOT
+    // satisfy an end_turn expectation, so a filtered fixture can never pass
+    // this control by accident.
+    let flipped = sse.replace(
+        "\"stop_reason\":\"end_turn\"",
+        "\"stop_reason\":\"refusal\"",
+    );
+    assert_ne!(flipped, sse, "stream fixture carries no end_turn terminal");
+    assert!(
+        matches!(
+            anthropic_stream_safety_stop_reason(&flipped, "end_turn"),
+            Verdict::Violation(_)
+        ),
+        "control is vacuous: checker accepts a refusal terminal as end_turn"
+    );
+}
+
+#[test]
+fn bifrost_openai_route_control_keeps_content_filter() {
+    // The OpenAI route on the same gateway and turn reports content_filter,
+    // proving the upstream really did filter and the loss is isolated to the
+    // non-streaming Anthropic serializer.
+    let body = fixture("transcripts/078/control-openai-filter.json");
+    let finish = serde_json::from_str::<Value>(&body)
+        .expect("control-openai-filter.json must be valid JSON")["choices"][0]["finish_reason"]
+        .as_str()
+        .unwrap_or_default()
+        .to_owned();
+    assert_eq!(
+        finish, "content_filter",
+        "OpenAI route must preserve the filter signal"
+    );
+    assert_eq!(
+        content_filter_preserved(&finish, "refusal"),
+        Verdict::Conformant,
+        "a preserved filter signal must not trip the erasure checker"
+    );
 }
