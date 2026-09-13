@@ -3097,11 +3097,42 @@ fn bifrost_provider_response_secret_unauthenticated_control_is_closed() {
 }
 
 #[test]
+fn bifrost_provider_response_secret_management_boundary_refuses_virtual_key() {
+    // The same virtual key that receives the secret at /v1/responses must be
+    // refused by the management API that would otherwise expose provider config.
+    // Upstream builds APIMiddleware with allowVirtualKeyAuth=false precisely
+    // because "a VK is not an admin/session credential", so this fixture pins the
+    // privilege gap the leak crosses.
+    let boundary = fixture("transcripts/077/management-boundary-control.http");
+    assert!(
+        boundary.starts_with("GET /api/providers HTTP/1.1\r\n"),
+        "control must target the provider configuration route"
+    );
+    assert!(
+        boundary.contains("x-bf-vk: <VIRTUAL_KEY>\r\n"),
+        "control must present the same virtual key that succeeds at inference"
+    );
+    assert!(
+        boundary.contains("HTTP/1.1 401 Unauthorized\r\n"),
+        "the virtual key must not authenticate against the management API"
+    );
+    assert_eq!(
+        response_omits_secret(&boundary, ISSUE_077_SECRET),
+        Verdict::Conformant,
+        "the supported read path must not hand the virtual key the provider secret"
+    );
+}
+
+#[test]
 fn bifrost_provider_response_secret_summary_covers_all_trials() {
     let summary: Value =
         serde_json::from_str(&fixture("transcripts/077/results.json")).expect("077 summary JSON");
     assert_eq!(summary["complete"], true);
     assert_eq!(summary["runs"], 5);
+    assert_eq!(
+        summary["target"]["management_auth_enabled"], true,
+        "the boundary claim requires the management API to be authenticated"
+    );
     assert_eq!(
         summary["target"]["commit"],
         "44a562431ee0463cb1afe0e5833cde07d7921701"
@@ -3115,6 +3146,8 @@ fn bifrost_provider_response_secret_summary_covers_all_trials() {
         "/same_response_controls/safe_trace_preserved_in_header_and_json",
         "/unauthenticated_control/http_401",
         "/unauthenticated_control/secret_absent",
+        "/management_boundary_control/virtual_key_refused_by_config_api",
+        "/management_boundary_control/secret_absent",
     ] {
         assert_eq!(summary.pointer(pointer).and_then(Value::as_u64), Some(5));
     }

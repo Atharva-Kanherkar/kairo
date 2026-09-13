@@ -1,12 +1,12 @@
 POST /v1/responses HTTP/1.1
-Host: 127.0.0.1:51068
+Host: 127.0.0.1:60958
 Content-Type: application/json
 Content-Length: 97
 Connection: close
 
 {"model":"mockoai/mock-model","input":"Return the deterministic fixture.","max_output_tokens":16}HTTP/1.1 401 Unauthorized
 Server: fasthttp
-Date: Sat, 12 Sep 2026 22:34:30 GMT
+Date: Sun, 13 Sep 2026 09:17:13 GMT
 Content-Type: application/json
 Content-Length: 326
 X-Frame-Options: DENY
@@ -19,8 +19,8 @@ Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
 Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID
 Access-Control-Max-Age: 86400
 Vary: Origin
-X-Request-Id: 34bd6c95-55b6-49da-baab-3cd18603650c
-X-Bifrost-Trace-Id: 8a552ef6a1924761939aef47f1a5916f
+X-Request-Id: 03517264-2d48-41e3-b5dd-c3eb84679dea
+X-Bifrost-Trace-Id: 03609b1abe184088a821dc5e85a0baa6
 X-Bifrost-Provider: mockoai
 X-Bifrost-Original-Model: mock-model
 X-Bifrost-Resolved-Model: mock-model

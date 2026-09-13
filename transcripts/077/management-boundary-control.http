@@ -1,0 +1,24 @@
+GET /api/providers HTTP/1.1
+Host: 127.0.0.1:60958
+x-bf-vk: <VIRTUAL_KEY>
+Connection: close
+
+HTTP/1.1 401 Unauthorized
+Server: fasthttp
+Date: Sun, 13 Sep 2026 09:17:13 GMT
+Content-Type: application/json
+Content-Length: 115
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Cache-Control: no-store
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID
+Access-Control-Max-Age: 86400
+Vary: Origin
+Connection: close
+
+{"is_bifrost_error":false,"status_code":401,"error":{"message":"Unauthorized"},"extra_fields":{"routing_info":{}}}

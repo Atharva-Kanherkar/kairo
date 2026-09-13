@@ -38,12 +38,19 @@ READY_TIMEOUT_SECONDS = 60
 
 VIRTUAL_KEY = "sk-bf-vk-dummy-not-a-real-credential-077"
 PROVIDER_KEY = "dummy-provider-key-not-a-real-credential-077"
+ADMIN_USERNAME = "admin-077"
+ADMIN_PASSWORD = "dummy-admin-password-not-a-real-credential-077"
 SECRET = "CANARY_ADMIN_ONLY_PROVIDER_SECRET_077"
 AUTHORIZATION_CONTROL = "CANARY_AUTHORIZATION_CONTROL_077"
 SAFE_TRACE = "CANARY_SAFE_TRACE_077"
 
+# Files that implement the response-header path under test: the three extractors
+# and their shared denylist, the classifier Bifrost already has but does not
+# consult here, the header helpers that call it, the NetworkConfig.ExtraHeaders
+# definition, and the handler that copies the map onto the client response.
 RELEVANT_SOURCE_PATHS = (
     "core/providers/utils/utils.go",
+    "core/schemas/headers.go",
     "core/schemas/provider.go",
     "core/schemas/trace.go",
     "transports/bifrost-http/handlers/inference.go",
@@ -112,11 +119,12 @@ def raw_request(port, path, body, virtual_key=None, timeout=10):
     return request, response, status, headers, response_body
 
 
-def raw_get(port, path, timeout=5):
-    request = (
-        f"GET {path} HTTP/1.1\r\nHost: {HOST}:{port}\r\n"
-        "Connection: close\r\n\r\n"
-    ).encode("ascii")
+def raw_get(port, path, timeout=5, virtual_key=None):
+    lines = [f"GET {path} HTTP/1.1", f"Host: {HOST}:{port}"]
+    if virtual_key is not None:
+        lines.append(f"x-bf-vk: {virtual_key}")
+    lines.append("Connection: close")
+    request = ("\r\n".join(lines) + "\r\n\r\n").encode("ascii")
     with socket.create_connection((HOST, port), timeout=timeout) as sock:
         sock.sendall(request)
         chunks = []
@@ -293,7 +301,11 @@ def make_config(app_dir, upstream_port):
         },
         "logs_store": {"enabled": False},
         "governance": {
-            "auth_config": {"is_enabled": False},
+            "auth_config": {
+                "is_enabled": True,
+                "admin_username": ADMIN_USERNAME,
+                "admin_password": ADMIN_PASSWORD,
+            },
             "virtual_keys": [
                 {
                     "id": "vk-077-low-privilege-caller",
@@ -391,6 +403,25 @@ def validate_unauthenticated(response, status):
     require(SECRET.encode() not in response, "unauthenticated response exposed secret marker")
 
 
+def validate_management_boundary(response, status):
+    """The virtual key must buy inference and nothing else.
+
+    Management auth is enabled in this run, and APIMiddleware is constructed with
+    allowVirtualKeyAuth=false upstream, so the same credential that reaches
+    /v1/responses must be refused by /api/providers. That is the privilege gap the
+    leak crosses: the caller cannot read the administrator's provider config, yet
+    the inference response hands it the configured header value anyway.
+    """
+    require(
+        status in (401, 403),
+        f"virtual key was not refused by the management API, got HTTP {status}",
+    )
+    require(
+        SECRET.encode() not in response,
+        "management API exposed the provider secret to the virtual key",
+    )
+
+
 def expected_exchange(client_request, parsed_body):
     expected_body = json.loads(json.dumps(parsed_body))
     response_headers = expected_body.get("extra_fields", {}).get(
@@ -476,6 +507,7 @@ def run(binary, source, output_dir):
             observed = None
             expected = None
             unauthenticated = None
+            management_boundary = None
             for _ in range(RUNS):
                 client_request, client_response, status, headers, body = raw_request(
                     bifrost_port,
@@ -494,6 +526,15 @@ def run(binary, source, output_dir):
                 validate_unauthenticated(control_response, status)
                 if unauthenticated is None:
                     unauthenticated = control_request + control_response
+
+                boundary_request, boundary_response, status, _, _ = raw_get(
+                    bifrost_port, "/api/providers", virtual_key=VIRTUAL_KEY
+                )
+                validate_management_boundary(boundary_response, status)
+                if management_boundary is None:
+                    management_boundary = (
+                        sanitize_client_request(boundary_request) + boundary_response
+                    )
 
             with capture_server.capture_lock:
                 exchanges = list(capture_server.exchanges)
@@ -535,6 +576,7 @@ def run(binary, source, output_dir):
                     "backend_dialect": "OpenAI Responses",
                     "provider": "custom OpenAI-compatible capture upstream",
                     "model": "mock-model",
+                    "management_auth_enabled": True,
                 },
                 "runs": RUNS,
                 "authenticated": {
@@ -551,12 +593,17 @@ def run(binary, source, output_dir):
                     "http_401": RUNS,
                     "secret_absent": RUNS,
                 },
+                "management_boundary_control": {
+                    "virtual_key_refused_by_config_api": RUNS,
+                    "secret_absent": RUNS,
+                },
                 "secrets": "synthetic canaries only; no provider credential was used",
             }
             artifacts = {
                 "observed.http": observed,
                 "expected.http": expected,
                 "unauthenticated-control.http": unauthenticated,
+                "management-boundary-control.http": management_boundary,
                 "upstream.http": first_upstream,
                 "results.json": results,
             }
