@@ -14,11 +14,11 @@ use kairo::checks::{
     model_info_capture_identity, model_info_envelope_body, model_info_omits_api_base_secret,
     no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
     no_phantom_null_output_text, non_text_block_not_json_dumped, openai_stream_finish_reason,
-    openai_toolcall_id_charset, parallel_tool_disable_preserved, reasoning_text_order_preserved,
-    refusal_text_preserved, response_content_not_empty, response_omits_secret,
-    responses_refusal_semantics_preserved, responses_single_lifecycle, stop_sequence_forwarded,
-    thinking_not_leaked_as_visible_text, thinking_text_forwarded, tool_strict_forwarded,
-    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    openai_toolcall_id_charset, outbound_request_omits_secret, parallel_tool_disable_preserved,
+    reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
+    response_omits_secret, responses_refusal_semantics_preserved, responses_single_lifecycle,
+    stop_sequence_forwarded, thinking_not_leaked_as_visible_text, thinking_text_forwarded,
+    tool_strict_forwarded, toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
     upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
     JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
@@ -2993,6 +2993,91 @@ fn bifrost_gemini_direct_control_returns_inline_image() {
         assert!(
             has_inline_data,
             "direct Gemini wire response has no inlineData part"
+        );
+    }
+}
+
+// ---- bug 076: LiteLLM vector store lets an internal user export a server credential ----
+
+fn issue_076_upstream_requests(path: &str, store_id: &str) -> Vec<String> {
+    let records: Vec<Value> = fixture(path)
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .map(|line| serde_json::from_str(line).expect("raw exchange JSON"))
+        .collect();
+    assert_eq!(records.len(), 3, "{path}: expected three trials");
+    records
+        .iter()
+        .enumerate()
+        .map(|(index, record)| {
+            assert_eq!(
+                record.get("trial").and_then(Value::as_u64),
+                Some((index + 1) as u64),
+                "{path}: trial identity"
+            );
+            let client_request = record
+                .get("client_request_raw")
+                .and_then(Value::as_str)
+                .expect("client request must be literal HTTP");
+            let expected_start = format!("POST /v1/vector_stores/{store_id}/search HTTP/1.1\r\n");
+            assert!(
+                client_request.starts_with(&expected_start),
+                "{path}: wrong public entry point"
+            );
+            assert!(
+                record
+                    .get("client_response_raw")
+                    .and_then(Value::as_str)
+                    .is_some_and(|response| response.starts_with("HTTP/1.1 200 OK\r\n")),
+                "{path}: search did not return HTTP 200"
+            );
+            let upstream_request = record
+                .get("upstream_request_raw")
+                .and_then(Value::as_str)
+                .expect("upstream request must be literal HTTP");
+            assert!(
+                upstream_request.starts_with(&expected_start),
+                "{path}: wrong upstream request target"
+            );
+            upstream_request.to_string()
+        })
+        .collect()
+}
+
+#[test]
+fn litellm_vector_store_exposes_server_credential_to_caller_endpoint() {
+    for request in
+        issue_076_upstream_requests("transcripts/076/live/exploit.jsonl", "kairo-exploit-store")
+    {
+        assert!(matches!(
+            outbound_request_omits_secret(&request, "[SERVER_PROVIDER_CREDENTIAL]"),
+            Verdict::Violation(_)
+        ));
+        for absent in ["[CALLER_CONTROL_CREDENTIAL]", "[INTERNAL_USER_KEY]"] {
+            assert_eq!(
+                outbound_request_omits_secret(&request, absent),
+                Verdict::Conformant
+            );
+        }
+    }
+}
+
+#[test]
+fn litellm_vector_store_caller_owned_key_control_omits_server_credential() {
+    for request in
+        issue_076_upstream_requests("transcripts/076/live/control.jsonl", "kairo-control-store")
+    {
+        assert_eq!(
+            outbound_request_omits_secret(&request, "[SERVER_PROVIDER_CREDENTIAL]"),
+            Verdict::Conformant
+        );
+        assert!(matches!(
+            outbound_request_omits_secret(&request, "[CALLER_CONTROL_CREDENTIAL]"),
+            Verdict::Violation(_)
+        ));
+        assert_eq!(
+            outbound_request_omits_secret(&request, "[INTERNAL_USER_KEY]"),
+            Verdict::Conformant
         );
     }
 }
