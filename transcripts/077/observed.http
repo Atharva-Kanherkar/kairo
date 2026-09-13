@@ -1,0 +1,37 @@
+POST /v1/responses HTTP/1.1
+Host: 127.0.0.1:60958
+Content-Type: application/json
+Content-Length: 97
+x-bf-vk: <VIRTUAL_KEY>
+Connection: close
+
+{"model":"mockoai/mock-model","input":"Return the deterministic fixture.","max_output_tokens":16}HTTP/1.1 200 OK
+Server: fasthttp
+Date: Sun, 13 Sep 2026 09:17:13 GMT
+Content-Type: application/json
+Content-Length: 1061
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID
+Access-Control-Max-Age: 86400
+Vary: Origin
+X-Request-Id: 4ea47e39-82dc-4fbb-804c-0b9ad34dbd2a
+X-Bifrost-Trace-Id: ffaf5585b20442928411fb281033b0a9
+X-Provider-Secret: CANARY_ADMIN_ONLY_PROVIDER_SECRET_077
+X-Safe-Trace: CANARY_SAFE_TRACE_077
+X-Bifrost-Provider: mockoai
+X-Bifrost-Original-Model: mock-model
+X-Bifrost-Resolved-Model: mock-model
+X-Bifrost-Request-Type: responses
+X-Bifrost-Routing-Info-Provider: mockoai
+X-Bifrost-Routing-Info-Model: mock-model
+X-Bifrost-Routing-Info-Key: mock-key
+X-Bifrost-Upstream-Latency-Ms: 0.489
+Connection: close
+
+{"id":"resp_077","object":"response","created_at":1789250000,"completed_at":null,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":null,"max_tool_calls":null,"metadata":null,"model":"mock-model","output":[{"id":"msg_077","type":"message","status":"completed","role":"assistant","content":[{"type":"output_text","text":"synthetic-ok","annotations":[],"logprobs":null}]}],"previous_response_id":null,"prompt_cache_key":null,"reasoning":null,"safety_identifier":null,"service_tier":null,"status":"completed","tools":null,"usage":{"input_tokens":1,"input_tokens_details":null,"output_tokens":1,"output_tokens_details":null,"total_tokens":2},"extra_fields":{"request_type":"responses","routing_info":{"provider":"mockoai","model":"mock-model","key":"mock-key"},"provider":"mockoai","original_model_requested":"mock-model","resolved_model_used":"mock-model","latency":0,"upstream_latency":0,"chunk_index":0,"provider_response_headers":{"X-Provider-Secret":"CANARY_ADMIN_ONLY_PROVIDER_SECRET_077","X-Safe-Trace":"CANARY_SAFE_TRACE_077"}}}

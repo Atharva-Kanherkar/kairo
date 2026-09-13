@@ -15,13 +15,12 @@ use kairo::checks::{
     model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
     no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
     openai_stream_finish_reason, openai_toolcall_id_charset, outbound_request_omits_secret,
-    parallel_tool_disable_preserved,
-    reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
-    response_omits_secret, responses_refusal_semantics_preserved, responses_single_lifecycle,
-    stop_sequence_forwarded, thinking_not_leaked_as_visible_text, thinking_text_forwarded,
-    tool_strict_forwarded, toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
-    upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
-    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    parallel_tool_disable_preserved, reasoning_text_order_preserved, refusal_text_preserved,
+    response_content_not_empty, response_omits_secret, responses_refusal_semantics_preserved,
+    responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
+    thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
+    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, FunctionToolFormat,
+    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
 use serde_json::Value;
 use std::fs;
@@ -3191,4 +3190,160 @@ fn bifrost_openai_route_control_keeps_content_filter() {
         Verdict::Conformant,
         "a preserved filter signal must not trip the erasure checker"
     );
+}
+
+// ---- bug 077: Bifrost returns a custom provider credential to a VK caller ----
+
+const ISSUE_077_SECRET: &str = "CANARY_ADMIN_ONLY_PROVIDER_SECRET_077";
+const ISSUE_077_AUTH_CONTROL: &str = "CANARY_AUTHORIZATION_CONTROL_077";
+const ISSUE_077_SAFE_CONTROL: &str = "CANARY_SAFE_TRACE_077";
+
+fn issue_077_response_body(exchange: &str) -> Value {
+    let (_, body) = exchange
+        .rsplit_once("\r\n\r\n")
+        .expect("077 exchange has response headers and a body");
+    serde_json::from_str(body).expect("077 client response body is JSON")
+}
+
+#[test]
+fn bifrost_provider_response_header_leaks_admin_secret() {
+    let observed = fixture("transcripts/077/observed.http");
+    assert!(
+        observed.starts_with("POST /v1/responses HTTP/1.1\r\n"),
+        "fixture must exercise the public Responses route"
+    );
+    assert!(
+        observed.contains("HTTP/1.1 200 OK\r\n"),
+        "fixture must be a successful response, not an error echo"
+    );
+    assert_eq!(
+        response_omits_secret(&observed, ISSUE_077_SECRET),
+        Verdict::Violation(format!(
+            "response body contains deployment secret marker {ISSUE_077_SECRET:?}"
+        )),
+        "the full client-visible exchange must expose the administrator canary"
+    );
+
+    let body = issue_077_response_body(&observed);
+    assert_eq!(
+        body.pointer("/extra_fields/provider_response_headers/X-Provider-Secret")
+            .and_then(Value::as_str),
+        Some(ISSUE_077_SECRET),
+        "the second client-visible copy must remain frozen in JSON metadata"
+    );
+}
+
+#[test]
+fn bifrost_provider_response_secret_controls_are_discriminating() {
+    let observed = fixture("transcripts/077/observed.http");
+    let upstream = fixture("transcripts/077/upstream.http");
+    assert!(
+        upstream.contains(&format!(
+            "Authorization: Bearer {ISSUE_077_AUTH_CONTROL}\r\n"
+        )),
+        "upstream must actually emit the exact-name credential control"
+    );
+    assert_eq!(
+        response_omits_secret(&observed, ISSUE_077_AUTH_CONTROL),
+        Verdict::Conformant,
+        "Bifrost must strip the Authorization control from the whole client exchange"
+    );
+    assert!(
+        observed.contains(&format!("X-Safe-Trace: {ISSUE_077_SAFE_CONTROL}\r\n")),
+        "benign provider response headers must still pass"
+    );
+    assert_eq!(
+        issue_077_response_body(&observed)
+            .pointer("/extra_fields/provider_response_headers/X-Safe-Trace")
+            .and_then(Value::as_str),
+        Some(ISSUE_077_SAFE_CONTROL),
+        "benign provider metadata must still pass in JSON"
+    );
+}
+
+#[test]
+fn bifrost_provider_response_secret_expected_exchange_is_clean() {
+    let expected = fixture("transcripts/077/expected.http");
+    assert!(expected.contains("HTTP/1.1 200 OK\r\n"));
+    assert_eq!(
+        response_omits_secret(&expected, ISSUE_077_SECRET),
+        Verdict::Conformant,
+        "a fixed successful response must omit the secret everywhere"
+    );
+    assert!(expected.contains(ISSUE_077_SAFE_CONTROL));
+}
+
+#[test]
+fn bifrost_provider_response_secret_unauthenticated_control_is_closed() {
+    let control = fixture("transcripts/077/unauthenticated-control.http");
+    assert!(
+        control.starts_with("POST /v1/responses HTTP/1.1\r\n"),
+        "control must send the same public request"
+    );
+    assert!(
+        control.contains("HTTP/1.1 401 Unauthorized\r\n"),
+        "control must prove inference authentication is enforced"
+    );
+    assert_eq!(
+        response_omits_secret(&control, ISSUE_077_SECRET),
+        Verdict::Conformant,
+        "an unauthenticated caller must not receive the provider secret"
+    );
+}
+
+#[test]
+fn bifrost_provider_response_secret_management_boundary_refuses_virtual_key() {
+    // The same virtual key that receives the secret at /v1/responses must be
+    // refused by the management API that would otherwise expose provider config.
+    // Upstream builds APIMiddleware with allowVirtualKeyAuth=false precisely
+    // because "a VK is not an admin/session credential", so this fixture pins the
+    // privilege gap the leak crosses.
+    let boundary = fixture("transcripts/077/management-boundary-control.http");
+    assert!(
+        boundary.starts_with("GET /api/providers HTTP/1.1\r\n"),
+        "control must target the provider configuration route"
+    );
+    assert!(
+        boundary.contains("x-bf-vk: <VIRTUAL_KEY>\r\n"),
+        "control must present the same virtual key that succeeds at inference"
+    );
+    assert!(
+        boundary.contains("HTTP/1.1 401 Unauthorized\r\n"),
+        "the virtual key must not authenticate against the management API"
+    );
+    assert_eq!(
+        response_omits_secret(&boundary, ISSUE_077_SECRET),
+        Verdict::Conformant,
+        "the supported read path must not hand the virtual key the provider secret"
+    );
+}
+
+#[test]
+fn bifrost_provider_response_secret_summary_covers_all_trials() {
+    let summary: Value =
+        serde_json::from_str(&fixture("transcripts/077/results.json")).expect("077 summary JSON");
+    assert_eq!(summary["complete"], true);
+    assert_eq!(summary["runs"], 5);
+    assert_eq!(
+        summary["target"]["management_auth_enabled"], true,
+        "the boundary claim requires the management API to be authenticated"
+    );
+    assert_eq!(
+        summary["target"]["commit"],
+        "44a562431ee0463cb1afe0e5833cde07d7921701"
+    );
+    for pointer in [
+        "/authenticated/http_200",
+        "/authenticated/secret_in_http_header",
+        "/authenticated/secret_in_json_metadata",
+        "/authenticated/consumer_extracted_admin_secret",
+        "/same_response_controls/authorization_stripped_from_header_and_json",
+        "/same_response_controls/safe_trace_preserved_in_header_and_json",
+        "/unauthenticated_control/http_401",
+        "/unauthenticated_control/secret_absent",
+        "/management_boundary_control/virtual_key_refused_by_config_api",
+        "/management_boundary_control/secret_absent",
+    ] {
+        assert_eq!(summary.pointer(pointer).and_then(Value::as_u64), Some(5));
+    }
 }

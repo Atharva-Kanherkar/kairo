@@ -1,0 +1,18 @@
+POST /v1/responses HTTP/1.1
+User-Agent: fasthttp
+Host: 127.0.0.1:60959
+Content-Type: application/json
+Content-Length: 117
+X-Provider-Secret: CANARY_ADMIN_ONLY_PROVIDER_SECRET_077
+X-Safe-Trace: CANARY_SAFE_TRACE_077
+Authorization: Bearer <BIFROST_PROVIDER_AUTH>
+
+{"model":"mock-model","max_output_tokens":16,"input":[{"role":"user","content":"Return the deterministic fixture."}]}HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 324
+X-Provider-Secret: CANARY_ADMIN_ONLY_PROVIDER_SECRET_077
+X-Safe-Trace: CANARY_SAFE_TRACE_077
+Authorization: Bearer CANARY_AUTHORIZATION_CONTROL_077
+Connection: close
+
+{"id":"resp_077","object":"response","created_at":1789250000,"status":"completed","model":"mock-model","output":[{"id":"msg_077","type":"message","status":"completed","role":"assistant","content":[{"type":"output_text","text":"synthetic-ok","annotations":[]}]}],"usage":{"input_tokens":1,"output_tokens":1,"total_tokens":2}}
