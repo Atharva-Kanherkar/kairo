@@ -1,0 +1,18 @@
+{
+  "date": "2026-09-15",
+  "gateway_version": "v2.1.1",
+  "provider": "OpenAI Realtime",
+  "credential_storage": "temporary environment variable only; value not captured",
+  "runs": [
+    {
+      "absent_status": 401,
+      "forged_status": 101,
+      "forged_first_event_type": "session.created",
+      "forged_error_code": null,
+      "valid_status": 101,
+      "valid_first_event_type": "session.created",
+      "valid_error_code": null
+    }
+  ],
+  "verdict": "forged and valid keys both reached live OpenAI Realtime"
+}

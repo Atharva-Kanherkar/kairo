@@ -1,0 +1,29 @@
+GET /v1/realtime?model=mockoai/mock-model HTTP/1.1
+Host: 127.0.0.1:48307
+Connection: Upgrade
+Upgrade: websocket
+Sec-WebSocket-Version: 13
+Sec-WebSocket-Key: 6YlnCRAtmxihuW0newN+QA==
+Sec-WebSocket-Protocol: realtime
+
+
+--- RESPONSE ---
+HTTP/1.1 401 Unauthorized
+Server: fasthttp
+Date: Tue, 15 Sep 2026 08:09:46 GMT
+Content-Type: application/json
+Content-Length: 381
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin:
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID
+Access-Control-Max-Age: 86400
+Vary: Origin
+X-Request-Id: 01a8b3d7-2e58-4857-9c50-ea9ad02ebb3e
+X-Bifrost-Trace-Id: 3e6933dce36745999518fe01f27ae867
+
+{"type":"invalid_request_error","is_bifrost_error":false,"status_code":401,"error":{"type":"invalid_request_error","code":"invalid_request_error","message":"authentication is required for realtime connections. Provide a virtual key (x-bf-vk or an sk-bf- bearer token), or an ephemeral client secret minted by POST /v1/realtime/client_secrets."},"extra_fields":{"routing_info":{}}}
