@@ -1,0 +1,8 @@
+GET /v1/realtime?model=mock-model HTTP/1.1
+Host: 127.0.0.1:32805
+User-Agent: Go-http-client/1.1
+Authorization: Bearer <BIFROST_PROVIDER_AUTH>
+Connection: Upgrade
+Sec-WebSocket-Key: e7UR7tP40eF5DGpotbTNgw==
+Sec-WebSocket-Version: 13
+Upgrade: websocket
