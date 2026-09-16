@@ -1,0 +1,10 @@
+{
+  "path": "transports/bifrost-http/handlers/realtimeauthgate.go",
+  "release_commit": "c193745d2a713e9f58f021d43e138df5eb7e038a",
+  "dev_commit": "6fbefaf2d71b0386f9ec040ca43001372a22d6fc",
+  "sha256": "7c2726032eeb131ed7df6518dc0813608f96e92a857e4a25ab7d4cfef8e13b6f",
+  "bytes": 3157,
+  "byte_identical": true,
+  "checked": "2026-09-16",
+  "source": "raw.githubusercontent.com/maximhq/bifrost"
+}

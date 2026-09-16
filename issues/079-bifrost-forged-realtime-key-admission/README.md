@@ -40,10 +40,20 @@ docker pull maximhq/bifrost@sha256:9e65eb4d0b292c25aaf46d194c705344f19c833a29e30
 python3 transcripts/079/reproduce.py
 ```
 
-The runner refuses to proceed unless the local image resolves to the pinned
-digest above. It starts the official container with host networking, writes a
-synthetic config into a fresh temporary directory, starts a local capture
-upstream, and makes five requests in each admission cell.
+The runner requires a Linux host and refuses to proceed otherwise: it starts the
+official container with `--network host` and expects it to reach the capture
+upstream on `127.0.0.1`, which Docker Desktop for macOS and Windows do not
+provide by default. It also refuses to proceed unless the local image resolves
+to the pinned digest above. It then writes a synthetic config into a fresh
+temporary directory, starts a local capture upstream, and makes five requests in
+each admission cell.
+
+The runner writes every upstream handshake twice: once sequentially as
+`upstream-handshake-NN.http`, and once under the role-tagged names cited below
+and loaded by the conformance fixtures, so a rerun regenerates the cited
+evidence rather than a set a reader has to map by hand. The index of each named
+capture within the sequence is recorded in `results.json` under
+`named_upstream_captures`.
 
 - Expected behavior: with inference authentication enforced, a nonexistent
   virtual key must be rejected before WebSocket upgrade and before Bifrost
@@ -169,11 +179,19 @@ is visible in
 and
 [`wsrealtime.go:426-467`](https://github.com/maximhq/bifrost/blob/6fbefaf2d71b0386f9ec040ca43001372a22d6fc/transports/bifrost-http/handlers/wsrealtime.go#L426-L467).
 
-The release and current `dev` copies of `realtimeauthgate.go` are byte-identical:
+The release and current `dev` copies of `realtimeauthgate.go` are byte-identical,
+sha256:
 
 ```text
 7c2726032eeb131ed7df6518dc0813608f96e92a857e4a25ab7d4cfef8e13b6f
 ```
+
+That digest is not asserted from prose.
+[`verify_gate_identical.py`](../../transcripts/079/verify_gate_identical.py)
+refetches the file at both commits, recomputes the digest, and fails if the two
+commits differ or if the digest has moved. Its recorded result is
+[`gate-identity.json`](../../transcripts/079/gate-identity.json): 3157 bytes,
+identical at both commits, checked 2026-09-16.
 
 One-sentence fix: resolve and validate the presented virtual key or authenticated
 identity, including provider/model access, before client upgrade and upstream
@@ -265,6 +283,16 @@ instead specifies a valid virtual key for the accepted control and describes
 preventing anonymous operator-key sessions as its objective. The tested release
 and current `dev` use the same admission-gate bytes.
 
+Classification: `novel`. No issue, pull request, discussion, or documented
+exception covers admission of a nonexistent virtual key on `/v1/realtime`.
+Merged [PR #6759](https://github.com/maximhq/bifrost/pull/6759) is the closest
+prior art and is cited here as the incompletely remediated fix, but it is merged
+and closed, so this is not `duplicate-open`. The behavior reproduces on the
+tested release and the admission gate is byte-identical on current `dev`, so it
+is not `fixed`. The documentation promises connect-time refusal, so it is not
+`documented-behavior`, and no upstream discussion of the forged-key case was
+found, so it is not `discussed-no-ticket`.
+
 ## Bug-or-not verdict
 
 - Expected behavior source: Bifrost's authentication setting and its Realtime
@@ -300,7 +328,10 @@ Label: `bug` (authentication bypass with demonstrated availability impact).
 - `bifrost_http_forged_virtual_key_is_rejected_before_upstream`, same-key
   passing control.
 - `bifrost_realtime_auth_checker_has_nonvacuous_controls`, absent and valid
-  polarity controls.
+  polarity controls, plus a vacuity guard. The forged case already fails on its
+  `101` status, so the guard pairs a rejected `401` with a real upstream
+  handshake and requires a violation. A checker that stopped consulting whether
+  the request reached upstream fails there instead of passing as a false green.
 
 Invariant: *an invalid credential is rejected at the gateway boundary before
 the gateway authenticates any connection to an upstream provider.*

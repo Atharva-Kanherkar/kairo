@@ -10,6 +10,7 @@ from pathlib import Path
 import shutil
 import socket
 import subprocess
+import sys
 import tempfile
 import time
 
@@ -140,12 +141,27 @@ def config():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--runs", type=int, default=1)
+    parser.add_argument(
+        "--run-dir",
+        default=None,
+        help="parent directory for the temporary runtime directory. Defaults to "
+             "the system temporary directory, honouring TMPDIR. Point this at a "
+             "Docker-shareable path if the default is not shared with the daemon.",
+    )
     args = parser.parse_args()
+    require(
+        sys.platform.startswith("linux"),
+        "this script requires a Linux host: it runs the gateway with "
+        "docker --network host and reaches it on 127.0.0.1, which Docker Desktop "
+        "for macOS and Windows do not provide by default. Use a Linux host or VM.",
+    )
     require(os.environ.get("OPENAI_API_KEY", "").startswith("sk-"),
             "OPENAI_API_KEY is missing")
 
     port = free_port()
-    run_dir = Path(tempfile.mkdtemp(prefix=".bifrost-live-079-", dir="/home/atharva"))
+    # The runtime directory holds Bifrost's SQLite config state, which can contain
+    # resolved configuration values, so it is created fresh and removed below.
+    run_dir = Path(tempfile.mkdtemp(prefix=".bifrost-live-079-", dir=args.run_dir))
     app_dir = run_dir / "app"
     app_dir.mkdir()
     (app_dir / "config.json").write_text(json.dumps(config(), indent=2))

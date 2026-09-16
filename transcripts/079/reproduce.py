@@ -11,6 +11,7 @@ from pathlib import Path
 import socket
 import socketserver
 import subprocess
+import sys
 import tempfile
 import threading
 import time
@@ -254,6 +255,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
+    require(
+        sys.platform.startswith("linux"),
+        "this script requires a Linux host: it runs the gateway with "
+        "docker --network host and expects the container to reach the capture "
+        "upstream on 127.0.0.1, which Docker Desktop for macOS and Windows do "
+        "not provide by default. Use a Linux host or VM.",
+    )
     upstream_port = free_port()
     bifrost_port = free_port()
     capture = CaptureServer((HOST, upstream_port))
@@ -311,6 +319,7 @@ def main():
             ("forged", FORGED_VK),
             ("valid", VALID_VK),
         ]
+        cell_ranges = {}
         for name, key in cells:
             statuses = []
             before = len(capture.handshakes)
@@ -328,6 +337,7 @@ def main():
                     )
                 time.sleep(0.3)
             after = len(capture.handshakes)
+            cell_ranges[name] = (before, after)
             results["cells"][name] = {
                 "statuses": statuses,
                 "upstream_handshakes": after - before,
@@ -419,7 +429,25 @@ def main():
             (run_dir / f"upstream-handshake-{index:02}.http").write_bytes(
                 sanitized_upstream(handshake["raw"])
             )
+
+        # Also write the role-tagged names the writeup cites and the conformance
+        # fixtures load, so re-running this script regenerates the cited evidence
+        # instead of only a sequential set that a reader has to map by hand.
+        forged_start, _ = cell_ranges["forged"]
+        named = {
+            "upstream-forged-handshake.http": upstream[forged_start],
+            "upstream-impact-forged-1.http": upstream[impact_before],
+            "upstream-impact-forged-2.http": upstream[impact_before + 1],
+        }
+        for filename, handshake in named.items():
+            (run_dir / filename).write_bytes(sanitized_upstream(handshake["raw"]))
+
         results["upstream_handshakes_total"] = len(upstream)
+        results["named_upstream_captures"] = {
+            "upstream-forged-handshake.http": forged_start + 1,
+            "upstream-impact-forged-1.http": impact_before + 1,
+            "upstream-impact-forged-2.http": impact_before + 2,
+        }
         (run_dir / "results.json").write_text(json.dumps(results, indent=2) + "\n")
 
         print(json.dumps(results, indent=2))

@@ -3230,6 +3230,23 @@ fn bifrost_realtime_auth_checker_has_nonvacuous_controls() {
     assert!(valid.contains("x-bf-vk: sk-bf-valid-synthetic-realtime-079"));
     assert!(valid.contains("HTTP/1.1 101 Switching Protocols"));
     assert!(upstream.contains("Authorization: Bearer <BIFROST_PROVIDER_AUTH>"));
+
+    // Conformant alone is vacuous for the upstream half of the invariant. Every
+    // passing control above pairs a rejected status with an empty upstream, so a
+    // checker that ignored `upstream_request` and always assumed no upstream
+    // contact would satisfy all of them and still call the 079 violation a
+    // violation, because the forged case already fails on its 101 status. Keep
+    // the rejected status and attach a real upstream handshake: only the
+    // reached-upstream branch can turn that into a Violation, so a checker that
+    // stops consulting its second argument fails here instead of passing as a
+    // silent false green.
+    assert!(
+        matches!(
+            invalid_credential_rejected_before_upstream(&absent, &upstream),
+            Verdict::Violation(_)
+        ),
+        "control is vacuous: checker ignores whether a rejected request still reached upstream"
+    );
 }
 
 // ---- bug 077: Bifrost returns a custom provider credential to a VK caller ----
