@@ -1,0 +1,27 @@
+GET /v1/models HTTP/1.1
+Host: 127.0.0.1:48307
+x-bf-vk: sk-bf-forged-does-not-exist-realtime-079
+
+
+--- RESPONSE ---
+HTTP/1.1 401 Unauthorized
+Server: fasthttp
+Date: Tue, 15 Sep 2026 08:09:46 GMT
+Content-Type: application/json
+Content-Length: 256
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin:
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID
+Access-Control-Max-Age: 86400
+Vary: Origin
+X-Request-Id: 92635d9b-1058-40a5-8afa-3e9daacacf05
+X-Bifrost-Trace-Id: 3c2caa2f45e1485dbf54fdf3367a02f9
+X-Bifrost-Provider: mockoai
+X-Bifrost-Request-Type: list_models
+
+{"type":"access_not_found","is_bifrost_error":false,"status_code":401,"error":{"message":"access not found. The provided credential does not exist or has been revoked."},"extra_fields":{"routing_info":{},"provider":"mockoai","request_type":"list_models"}}

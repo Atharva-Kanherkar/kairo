@@ -1,0 +1,100 @@
+{
+  "version": "v2.1.1",
+  "image_digest": "sha256:9e65eb4d0b292c25aaf46d194c705344f19c833a29e30155038bbe551eac7245",
+  "cells": {
+    "absent": {
+      "statuses": [
+        {
+          "status": 401,
+          "line": "HTTP/1.1 401 Unauthorized"
+        },
+        {
+          "status": 401,
+          "line": "HTTP/1.1 401 Unauthorized"
+        },
+        {
+          "status": 401,
+          "line": "HTTP/1.1 401 Unauthorized"
+        },
+        {
+          "status": 401,
+          "line": "HTTP/1.1 401 Unauthorized"
+        },
+        {
+          "status": 401,
+          "line": "HTTP/1.1 401 Unauthorized"
+        }
+      ],
+      "upstream_handshakes": 0
+    },
+    "forged": {
+      "statuses": [
+        {
+          "status": 101,
+          "line": "HTTP/1.1 101 Switching Protocols"
+        },
+        {
+          "status": 101,
+          "line": "HTTP/1.1 101 Switching Protocols"
+        },
+        {
+          "status": 101,
+          "line": "HTTP/1.1 101 Switching Protocols"
+        },
+        {
+          "status": 101,
+          "line": "HTTP/1.1 101 Switching Protocols"
+        },
+        {
+          "status": 101,
+          "line": "HTTP/1.1 101 Switching Protocols"
+        }
+      ],
+      "upstream_handshakes": 5
+    },
+    "valid": {
+      "statuses": [
+        {
+          "status": 101,
+          "line": "HTTP/1.1 101 Switching Protocols"
+        },
+        {
+          "status": 101,
+          "line": "HTTP/1.1 101 Switching Protocols"
+        },
+        {
+          "status": 101,
+          "line": "HTTP/1.1 101 Switching Protocols"
+        },
+        {
+          "status": 101,
+          "line": "HTTP/1.1 101 Switching Protocols"
+        },
+        {
+          "status": 101,
+          "line": "HTTP/1.1 101 Switching Protocols"
+        }
+      ],
+      "upstream_handshakes": 5
+    }
+  },
+  "ordinary_http_control": {
+    "status": 401,
+    "upstream_handshakes": 0
+  },
+  "impact": {
+    "configured_connection_limit": 2,
+    "forged_sessions_held": 2,
+    "valid_client_http_status": 101,
+    "valid_client_first_frame": {
+      "type": "error",
+      "error": {
+        "type": "rate_limit_exceeded",
+        "code": "rate_limit_exceeded",
+        "message": "websocket connection limit reached"
+      }
+    },
+    "valid_client_opened_upstream": false
+  },
+  "upstream_handshakes_total": 13
+}

@@ -1,0 +1,31 @@
+GET /v1/realtime?model=mockoai/mock-model HTTP/1.1
+Host: 127.0.0.1:48307
+Connection: Upgrade
+Upgrade: websocket
+Sec-WebSocket-Version: 13
+Sec-WebSocket-Key: Kg75g+LWYp1JojoGUUNGfQ==
+Sec-WebSocket-Protocol: realtime
+x-bf-vk: sk-bf-valid-synthetic-realtime-079
+
+
+--- RESPONSE ---
+HTTP/1.1 101 Switching Protocols
+Server: fasthttp
+Date: Tue, 15 Sep 2026 08:09:52 GMT
+Content-Type: text/plain; charset=utf-8
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin:
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID
+Access-Control-Max-Age: 86400
+Vary: Origin
+X-Request-Id: 6274b5a9-5a33-4b32-abf7-90a72a347a7f
+X-Bifrost-Trace-Id: 39ed6226aefa4a11bd3d45ff4e6ed555
+Upgrade: websocket
+Connection: Upgrade
+Sec-Websocket-Accept: DYSW03gFjgLJQqp6aI8zVHNThyM=
+Sec-Websocket-Protocol: realtime

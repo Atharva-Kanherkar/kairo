@@ -10,17 +10,18 @@ use kairo::checks::{
     anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
     content_filter_preserved, document_body_forwarded,
     gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
-    id_conforms, instruction_messages_preserved, is_error_forwarded, json_schema_forwarded,
-    json_schema_property_forwarded, model_info_capture_identity, model_info_envelope_body,
-    model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
-    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
-    openai_stream_finish_reason, openai_toolcall_id_charset, outbound_request_omits_secret,
-    parallel_tool_disable_preserved, reasoning_text_order_preserved, refusal_text_preserved,
-    response_content_not_empty, response_omits_secret, responses_refusal_semantics_preserved,
-    responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
-    thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
-    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, FunctionToolFormat,
-    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    id_conforms, instruction_messages_preserved, invalid_credential_rejected_before_upstream,
+    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
+    model_info_capture_identity, model_info_envelope_body, model_info_omits_api_base_secret,
+    no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
+    no_phantom_null_output_text, non_text_block_not_json_dumped, openai_stream_finish_reason,
+    openai_toolcall_id_charset, outbound_request_omits_secret, parallel_tool_disable_preserved,
+    reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
+    response_omits_secret, responses_refusal_semantics_preserved, responses_single_lifecycle,
+    stop_sequence_forwarded, thinking_not_leaked_as_visible_text, thinking_text_forwarded,
+    tool_strict_forwarded, toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
+    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
 use serde_json::Value;
 use std::fs;
@@ -3189,6 +3190,62 @@ fn bifrost_openai_route_control_keeps_content_filter() {
         content_filter_preserved(&finish, "refusal"),
         Verdict::Conformant,
         "a preserved filter signal must not trip the erasure checker"
+    );
+}
+
+// ---- bug 079: forged Bifrost virtual key opens an authenticated Realtime session ----
+
+#[test]
+fn bifrost_realtime_forged_virtual_key_reaches_upstream() {
+    let client = fixture("transcripts/079/forged-realtime.http");
+    let upstream = fixture("transcripts/079/upstream-forged-handshake.http");
+    let verdict = invalid_credential_rejected_before_upstream(&client, &upstream);
+    assert!(
+        matches!(verdict, Verdict::Violation(_)),
+        "forged key that upgrades and reaches upstream must be caught: {verdict:?}"
+    );
+}
+
+#[test]
+fn bifrost_http_forged_virtual_key_is_rejected_before_upstream() {
+    let client = fixture("transcripts/079/control-http-forged-key.http");
+    assert_eq!(
+        invalid_credential_rejected_before_upstream(&client, ""),
+        Verdict::Conformant,
+        "ordinary inference control rejects the identical nonexistent key"
+    );
+}
+
+#[test]
+fn bifrost_realtime_auth_checker_has_nonvacuous_controls() {
+    let absent = fixture("transcripts/079/absent-realtime.http");
+    assert_eq!(
+        invalid_credential_rejected_before_upstream(&absent, ""),
+        Verdict::Conformant,
+        "missing-credential Realtime control is rejected without upstream work"
+    );
+
+    let valid = fixture("transcripts/079/valid-realtime.http");
+    let upstream = fixture("transcripts/079/upstream-forged-handshake.http");
+    assert!(valid.contains("x-bf-vk: sk-bf-valid-synthetic-realtime-079"));
+    assert!(valid.contains("HTTP/1.1 101 Switching Protocols"));
+    assert!(upstream.contains("Authorization: Bearer <BIFROST_PROVIDER_AUTH>"));
+
+    // Conformant alone is vacuous for the upstream half of the invariant. Every
+    // passing control above pairs a rejected status with an empty upstream, so a
+    // checker that ignored `upstream_request` and always assumed no upstream
+    // contact would satisfy all of them and still call the 079 violation a
+    // violation, because the forged case already fails on its 101 status. Keep
+    // the rejected status and attach a real upstream handshake: only the
+    // reached-upstream branch can turn that into a Violation, so a checker that
+    // stops consulting its second argument fails here instead of passing as a
+    // silent false green.
+    assert!(
+        matches!(
+            invalid_credential_rejected_before_upstream(&absent, &upstream),
+            Verdict::Violation(_)
+        ),
+        "control is vacuous: checker ignores whether a rejected request still reached upstream"
     );
 }
 

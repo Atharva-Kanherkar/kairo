@@ -775,6 +775,35 @@ pub fn response_omits_secret(body: &str, needle: &str) -> Verdict {
     }
 }
 
+/// Invariant (bug 079): a credential known to be invalid must be rejected at
+/// the public gateway boundary, before any request is authenticated to an
+/// upstream provider. `client_exchange` is a request and response separated
+/// by the transcript marker, and `upstream_request` is empty when no upstream
+/// connection was observed.
+pub fn invalid_credential_rejected_before_upstream(
+    client_exchange: &str,
+    upstream_request: &str,
+) -> Verdict {
+    let Some((_, response)) = client_exchange.split_once("--- RESPONSE ---") else {
+        return Verdict::Violation("client transcript has no response marker".to_owned());
+    };
+    let status = response
+        .lines()
+        .find(|line| line.starts_with("HTTP/"))
+        .and_then(|line| line.split_whitespace().nth(1))
+        .and_then(|code| code.parse::<u16>().ok());
+    let rejected = matches!(status, Some(401 | 403));
+    let reached_upstream = !upstream_request.trim().is_empty();
+
+    if rejected && !reached_upstream {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation(format!(
+            "invalid credential received client status {status:?}; upstream connection observed: {reached_upstream}"
+        ))
+    }
+}
+
 /// Invariant (bug 076): an outbound HTTP request selected by an authenticated
 /// caller MUST NOT contain a credential outside that caller's scope. The
 /// caller supplies a unique marker for the privileged credential. This scans
