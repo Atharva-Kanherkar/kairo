@@ -14,6 +14,10 @@
   black-box reproduction path for an eligible closed-source target.
 - `.github/PULL_REQUEST_TEMPLATE.md` accepts either a pinned local artifact or a
   hosted service fingerprint and records the mandatory closed-source evidence.
+- `CONTRIBUTING.md` routes eligible hosted targets to the closed-source capture
+  method and no longer defines Correctness as local-only.
+- `issues/TEMPLATE.md` accepts a hosted service fingerprint and time window when
+  no source version or commit exists.
 - The policy requires evidence that identifies the observed deployment, exercises
   the real supported public entry point, isolates the target with differential
   controls, and preserves raw sanitized wire bytes.
@@ -39,8 +43,8 @@ manually in the integration review below rather than by runtime unit tests.
 
 - Read the complete diff and verify that the new section does not weaken the
   existing three gates outside the narrowly defined closed-source exception.
-- Search `AGENTS.md`, `.github/agents/`, and
-  `.github/PULL_REQUEST_TEMPLATE.md` for conflicting unconditional local-run,
+- Search `AGENTS.md`, `CONTRIBUTING.md`, `issues/TEMPLATE.md`, `.github/agents/`,
+  and `.github/PULL_REQUEST_TEMPLATE.md` for conflicting unconditional local-run,
   pinned-version, and version-drift language. Verify every occurrence either
   references or implements the closed-source exception.
 - Verify every mandatory claim can be supported by artifacts Kairo can actually
