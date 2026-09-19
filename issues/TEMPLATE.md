@@ -1,8 +1,9 @@
 # NNN, one-line failure statement
 
 - **Upstream**: link(s) to the cited issue(s), state at reproduction date
-- **Tool under test**: name + exact version/commit
-- **Reproduced**: date, environment (model, provider, flags)
+- **Tool under test**: name + exact version/commit, or hosted service fingerprint
+  and UTC window
+- **Reproduced**: date, environment (model, provider, route, stage, region, flags)
 
 ## What breaks
 
@@ -17,7 +18,9 @@ Plain-English description of the observable failure and who it hurts
 
 ## Root cause (if found)
 
-File/line in the tool where the translation goes wrong.
+File/line in the tool where the translation goes wrong. For a closed-source
+target, state the externally isolated layer and leave the internal cause unknown
+unless an official trace or maintainer confirmation establishes it.
 
 ## Test
 

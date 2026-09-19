@@ -14,8 +14,11 @@ Reproduce the exact claim, not a nearby symptom.
 
 - Identify the cited upstream issue, exact target repository, release or commit,
   route, request dialect, response dialect, model, and relevant configuration.
-- Run the target system locally from a pinned checkout, package version, or image.
-  Install its real dependencies and exercise its real public entry point.
+  For an eligible closed-source target, use the hosted deployment identity defined
+  in "Closed-source routers and hosted products" instead of a repository release.
+- Run the target system locally from a pinned checkout, package version, or image,
+  except for an eligible closed-source target covered by the hosted protocol below.
+  Install real dependencies and exercise the real public entry point in either case.
 - Use provider credentials already supplied through the environment when the claim
   depends on live provider behavior. Use a deterministic local capture upstream
   when the claim concerns only what the gateway forwards.
@@ -29,7 +32,9 @@ Reproduce the exact claim, not a nearby symptom.
 - Report N of N results and isolate the smallest trigger. A nondeterministic result
   is a lead, not a verified finding.
 - Rule out version drift, configuration mistakes, model nondeterminism, mock-only
-  behavior, and malformed input before attributing the defect to the gateway.
+  behavior, and malformed input before attributing the defect to the gateway. For
+  an unversioned hosted target, use recorded deployment fingerprints, time windows,
+  and a current rerun to test for service drift.
 
 ### 2. Usefulness
 
@@ -94,10 +99,12 @@ through a vendor-hosted public API, but the implementation cannot be checked out
 and no official self-hosted image or package is available. A difficult build or
 an inconvenient setup does not make an open-source target closed source.
 
-For an eligible target, this section replaces only the Correctness requirement
-to run the target locally from a pinned checkout, package, or image. Every other
-Correctness requirement and the complete Usefulness and Upstream status gates
-still apply. Closed source is a different evidence topology, not a lower bar.
+For an eligible target, the hosted deployment identity and black-box protocol
+below replace the repository release or commit, local artifact execution, and
+source-version drift procedures in Correctness. Every other Correctness
+requirement and the complete Usefulness, Upstream status, artifact, repository
+check, and independent-review gates still apply. Closed source is a different
+evidence topology, not a lower bar.
 
 ### Authorization and scope
 
@@ -134,16 +141,21 @@ applies to an unreproducible historical version or every region.
 
 - Exercise the real public endpoint. A mock of the closed-source product can
   validate the harness, but it cannot reproduce a product defect.
-- Save the exact sanitized client request and response bytes. When the product
-  supports bring-your-own-key, a custom upstream, provider logs, or trace export,
-  also save the forwarded request and upstream response. State plainly when the
-  middle hop is not observable.
-- Build a differential control ladder whenever the product permits it:
+- Save the exact client request and response bytes with only credentials, private
+  prompts, and tenant identifiers redacted. Mark every redaction inline, preserve
+  the containing field or header, and never redact the bytes under dispute. When
+  the product supports bring-your-own-key, a custom upstream, provider logs, or
+  trace export, also save the forwarded request and upstream response. State
+  plainly when the middle hop is not observable.
+- Build this differential control ladder:
   1. Call the incumbent provider directly with the same meaningful input.
   2. Call the product's documented plain, bypass, or non-routing path.
   3. Call the suspected routing or transformation path with the workload stage
      and route decision recorded.
   4. Remove only the suspected trigger and repeat.
+- For each unavailable rung, name it, explain why the documented product surface
+  cannot run it, and state what evidence substitutes for it. Correctness remains
+  incomplete unless the available controls still isolate the hosted product.
 - Change one discriminating condition at a time. Keep the model, prompt, tools,
   streaming mode, account, region, and configuration fixed unless that condition
   is the variable under test.
@@ -194,7 +206,7 @@ In addition to the normal issue template, include:
 4. Route, recipe, policy, request, and trace metadata returned for each call,
    sanitized as necessary.
 5. An N of N matrix covering direct, plain or bypass, routed, and trigger-removed
-   cases that the product supports.
+   cases, with every unavailable rung named and justified.
 6. A consumer-boundary reproduction and a statement separating measured impact
    from inference.
 
@@ -214,16 +226,16 @@ credentials, or vendor correspondence without permission.
 - If neither public evidence nor an authorized vendor response can establish
   current status, the Upstream status gate remains incomplete.
 
-### Closed-source decision rule
+### Applying the repository decision rule
 
-- `ACCEPT`: the public contract is current, the exact violation reproduces N of N,
-  differential controls isolate the hosted product, a real consumer consequence
-  is demonstrated, and upstream status is complete.
-- `NEEDS EVIDENCE`: the behavior is real but deployment identity, routing stage,
-  middle-hop attribution, controls, impact, or upstream status is incomplete.
-- `REJECT`: the difference is documented transformation, provider or SDK behavior,
-  unsupported usage, operator misuse, a transient service incident, or a defect
-  no longer present on the current deployment.
+Use the repository-wide Decision rule below without modification. For a
+closed-source target, Correctness can pass only when the public contract is
+current, the exact violation reproduces N of N, the deployment and route are
+identified, and differential controls isolate the hosted product. Missing
+deployment identity, routing stage, attribution, or controls makes Correctness
+incomplete. Documented transformation, provider or SDK behavior, unsupported
+usage, operator misuse, a transient incident, or a defect absent from the current
+deployment fails the applicable gate. Repository checks remain mandatory.
 
 ## Required artifacts
 

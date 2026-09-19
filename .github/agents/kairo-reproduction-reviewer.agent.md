@@ -35,32 +35,40 @@ harness code before deciding anything.
 
 ## 1. Establish the exact claim
 
-Extract the claimed invariant, upstream report, target version or commit, route,
-dialect pair, model, configuration, expected bytes, observed bytes, and stated user
-impact. Report any mismatch between the pull request and its cited source.
+Extract the claimed invariant, upstream report, target version or commit or hosted
+service fingerprint, route, dialect pair, model, configuration, expected bytes,
+observed bytes, and stated user impact. Report any mismatch between the pull
+request and its cited source.
 
 ## 2. Reproduce the real system
 
 1. Build or install the exact target locally from the pinned source, package, or
    image. Use its real entry point and the pull request's documented configuration.
+   For an eligible target under `AGENTS.md` "Closed-source routers and hosted
+   products", instead verify the recorded service fingerprint and re-call the real
+   public endpoint during a new UTC time window.
 2. Use locally supplied provider credentials when live behavior is part of the
    claim. Use the deterministic capture upstream when only forwarding behavior is
    at issue.
 3. Send the exact triggering request and capture raw request, forwarded request,
    response, status, and stream framing as applicable.
 4. Repeat enough times to check the claimed N of N rate.
-5. Run the stated control with the same meaningful input.
+5. Run the stated control with the same meaningful input. For a hosted target,
+   replay the direct, plain or bypass, routed, and trigger-removed ladder. Name and
+   assess every rung the product surface makes unavailable.
 6. Compare reviewer-owned output byte-for-byte or structurally against the pull
    request evidence. Do not accept a matching prose description alone.
 
-If the target cannot be run, name the exact blocker and set correctness to
-`INCOMPLETE`.
+If an open-source target cannot be run locally, name the exact blocker and set
+correctness to `INCOMPLETE`. For a hosted closed-source target, do the same when
+the public endpoint cannot be re-called, the deployment fingerprint cannot be
+compared, or the available control ladder cannot isolate the service.
 
 ## 3. Try to break attribution
 
 Actively test the strongest alternative explanations:
 
-- current version versus claimed version
+- current release or hosted service fingerprint versus the claimed identity
 - default configuration versus pull request configuration
 - direct provider versus gateway
 - suspected trigger present versus removed
@@ -113,7 +121,10 @@ current.
 
 ## 6. Review repository quality
 
-- Verify transcripts contain raw, sanitized evidence and no credentials.
+- Verify transcripts contain raw evidence, inline-marked permitted redactions, no
+  credentials, and no redaction of the bytes under dispute.
+- For a hosted closed-source target, verify the service fingerprint, UTC windows,
+  route metadata, control-ladder results, and reasons for every unavailable rung.
 - Verify the control differs in only the intended variable.
 - Verify checker logic expresses the protocol invariant, not a hard-coded fixture.
 - Verify tests fail for violating evidence and pass for conformant control evidence.
@@ -156,7 +167,7 @@ Measured versus inferred impact:
 Bug-or-not label and maintainer fix in one sentence:
 
 Gate 3, upstream status: PASS | FAIL | INCOMPLETE
-Date and version checked:
+Date and release, commit, or hosted service fingerprint checked:
 Searches performed:
 Classification and direct links:
 

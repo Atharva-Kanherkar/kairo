@@ -6,7 +6,8 @@
 
 - Upstream project:
 - Cited upstream issue or report:
-- Tested release or commit:
+- Target type: <!-- open-source/local or hosted closed-source -->
+- Tested release or commit, or hosted service fingerprint and UTC window:
 - Client dialect and endpoint:
 - Backend dialect and provider or capture upstream:
 - Model, if relevant:
@@ -17,9 +18,11 @@
 ### Exact reproduction
 
 <!--
-Build and run the real target system locally. Give commands another reviewer can
-run from a clean checkout. List secret environment variable names only, never their
-values. Pin every external version.
+For an open-source target, build and run the real system locally. For an eligible
+closed-source target, follow AGENTS.md "Closed-source routers and hosted products"
+and re-call the real public endpoint. Give commands another reviewer can run from
+a clean checkout. List secret environment variable names only, never their values.
+Pin the local artifact or record the hosted deployment fingerprint and UTC window.
 -->
 
 ```text
@@ -34,6 +37,17 @@ values. Pin every external version.
 - Reproduction rate: <!-- N/N -->
 - Smallest isolated trigger:
 
+### Hosted closed-source evidence
+
+<!-- Required only for an eligible hosted closed-source target. Otherwise N/A. -->
+
+- Public base URL, region, account or plan class, and observed UTC window:
+- Service build, release, request, trace, recipe, and policy identifiers:
+- Requested and observed serving model:
+- Workload, routing stage, route decision, and fallback configuration:
+- Redactions made, with every redaction marked inline:
+- Unobservable middle hops and why:
+
 ### Control
 
 <!-- Use the same meaningful input. Change only the suspected layer or trigger. -->
@@ -45,10 +59,20 @@ values. Pin every external version.
 - Control result:
 - Why this attributes the failure to the claimed layer:
 
+For a hosted target, record every control rung:
+
+| Rung | Result, or reason unavailable | Evidence |
+|---|---|---|
+| Direct incumbent provider | | |
+| Plain, bypass, or non-routing path | | |
+| Routed or transformation path | | |
+| Trigger removed | | |
+
 ### False-positive checks
 
 - [ ] Tested the exact cited behavior, not a similar symptom.
-- [ ] Pinned and reported the target version or commit.
+- [ ] Pinned the target release or commit, or recorded the hosted service
+      fingerprint and UTC window.
 - [ ] Ruled out bad configuration and malformed input.
 - [ ] Ruled out model nondeterminism or reported why it is irrelevant.
 - [ ] Confirmed the failure is not created only by the mock or harness.
@@ -89,7 +113,7 @@ values. Pin every external version.
 ## Gate 3: upstream status
 
 - Date checked:
-- Upstream version checked:
+- Upstream release, commit, or hosted deployment checked:
 - Search terms used:
 - Issues searched:
 - Pull requests searched:
