@@ -10,18 +10,18 @@ use kairo::checks::{
     anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
     content_filter_preserved, document_body_forwarded,
     gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
-    id_conforms, instruction_messages_preserved, invalid_credential_rejected_before_upstream,
-    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
-    model_info_capture_identity, model_info_envelope_body, model_info_omits_api_base_secret,
-    no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
-    no_phantom_null_output_text, non_text_block_not_json_dumped, openai_stream_finish_reason,
-    openai_toolcall_id_charset, outbound_request_omits_secret, parallel_tool_disable_preserved,
-    reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
-    response_omits_secret, responses_refusal_semantics_preserved, responses_single_lifecycle,
-    stop_sequence_forwarded, thinking_not_leaked_as_visible_text, thinking_text_forwarded,
-    tool_strict_forwarded, toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
-    upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
-    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
+    invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
+    json_schema_property_forwarded, model_info_capture_identity, model_info_envelope_body,
+    model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
+    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
+    openai_stream_finish_reason, openai_toolcall_id_charset, outbound_request_omits_secret,
+    parallel_tool_disable_preserved, reasoning_text_order_preserved, refusal_text_preserved,
+    response_content_not_empty, response_omits_secret, responses_refusal_semantics_preserved,
+    responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
+    thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
+    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, FunctionToolFormat,
+    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
 use serde_json::Value;
 use std::fs;
@@ -3403,4 +3403,36 @@ fn bifrost_provider_response_secret_summary_covers_all_trials() {
     ] {
         assert_eq!(summary.pointer(pointer).and_then(Value::as_u64), Some(5));
     }
+}
+
+// ---- bug 080: Dynamo ImageLoader lowercases the whole URL for its cache key ----
+
+#[test]
+fn dynamo_image_cache_case_collision_violation() {
+    // Frozen bug: /Cat.png and /cat.png share one lowered cache key, so the
+    // second request decodes the first image and the origin sees one hit.
+    let v = image_url_cache_key_case_sensitive(&fixture("transcripts/080/capture-bug.jsonl"));
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "the case-colliding cache key must be caught: {v:?}"
+    );
+}
+
+#[test]
+fn dynamo_image_cache_cache_off_control_is_conformant() {
+    // Control: with the cache disabled the same URL pair fetches both
+    // resources; the checker must accept it.
+    let v = image_url_cache_key_case_sensitive(&fixture("transcripts/080/capture-control.jsonl"));
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "cache-off runs must satisfy the invariant"
+    );
+}
+
+#[test]
+fn dynamo_image_cache_distinct_urls_control_is_conformant() {
+    // Control: URLs differing beyond case never collide; checker is silent.
+    let v = image_url_cache_key_case_sensitive(&fixture("transcripts/080/capture-distinct.jsonl"));
+    assert_eq!(v, Verdict::Conformant);
 }
