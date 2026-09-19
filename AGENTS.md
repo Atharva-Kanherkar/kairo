@@ -87,6 +87,144 @@ Check the current upstream state on the day of the work.
 - If access to current upstream evidence is unavailable, report the gate as
   incomplete. Do not guess from cached knowledge.
 
+## Closed-source routers and hosted products
+
+This section applies only when the target's supported behavior is available
+through a vendor-hosted public API, but the implementation cannot be checked out
+and no official self-hosted image or package is available. A difficult build or
+an inconvenient setup does not make an open-source target closed source.
+
+For an eligible target, this section replaces only the Correctness requirement
+to run the target locally from a pinned checkout, package, or image. Every other
+Correctness requirement and the complete Usefulness and Upstream status gates
+still apply. Closed source is a different evidence topology, not a lower bar.
+
+### Authorization and scope
+
+- Test only through documented, supported entry points with an account and
+  workspace the tester is authorized to use.
+- Use dedicated test workloads, synthetic prompts, canary credentials, and
+  accounts owned by or explicitly authorized for the test.
+- Do not bypass access controls, probe another tenant, enumerate private data,
+  evade rate limits, or exceed the vendor's published testing rules.
+- Stop and use the vendor's security-reporting channel if a test could expose
+  another customer's data or materially affect the service. Do not create
+  cross-tenant impact merely to prove exploitability.
+
+### Pin the observed deployment
+
+A hosted service may change without a release. Record enough context to make the
+claim honest and repeatable:
+
+- Date and UTC time window, public base URL, route, request and response dialect,
+  region if exposed, account or plan class, and every relevant feature flag.
+- Requested model, observed serving model when exposed, routing policy and stage,
+  fallback configuration, workload identifier, and route-decision headers.
+- Raw HTTP or exact SDK version, provider configuration, and any build, release,
+  request, trace, recipe, or policy identifier the service returns. Sanitize
+  tenant-specific identifiers before committing them.
+- The official documentation, API reference, examples, UI behavior, changelog,
+  and status information used as the contract, with access dates.
+
+If the service exposes no build or release identity, state that the finding is
+against the deployment observed during the recorded time window. Do not imply it
+applies to an unreproducible historical version or every region.
+
+### Black-box correctness protocol
+
+- Exercise the real public endpoint. A mock of the closed-source product can
+  validate the harness, but it cannot reproduce a product defect.
+- Save the exact sanitized client request and response bytes. When the product
+  supports bring-your-own-key, a custom upstream, provider logs, or trace export,
+  also save the forwarded request and upstream response. State plainly when the
+  middle hop is not observable.
+- Build a differential control ladder whenever the product permits it:
+  1. Call the incumbent provider directly with the same meaningful input.
+  2. Call the product's documented plain, bypass, or non-routing path.
+  3. Call the suspected routing or transformation path with the workload stage
+     and route decision recorded.
+  4. Remove only the suspected trigger and repeat.
+- Change one discriminating condition at a time. Keep the model, prompt, tools,
+  streaming mode, account, region, and configuration fixed unless that condition
+  is the variable under test.
+- Run each case enough times to report N of N. For nondeterministic models, test
+  protocol and structural invariants rather than natural-language equality.
+- For learning or adaptive routers, do not mix Observe, Qualify, Shadow, and Route
+  results. Pin or record the stage for every call and prove which recipe served it.
+- For fallback and retry claims, identify every attempted provider call when logs
+  or trace exports make that possible. Separate a correct fallback from duplicate
+  execution, hidden retry, extra billing, and a second gateway's retry policy.
+- Reproduce through a closest practical consumer such as an SDK or agent loop
+  after the raw-wire comparison. SDK behavior is impact evidence, not a substitute
+  for the bytes.
+
+The target is isolated only when the controls rule out the provider, model,
+client SDK, adjacent gateway, configuration, route stage, and transient outage as
+plausible causes. If any remain viable, the Correctness gate is `NEEDS EVIDENCE`.
+
+### Intentional transformations and bug classification
+
+Some closed-source routers deliberately change models, prompts, tool definitions,
+context, retries, or response selection. A byte difference is not itself a bug.
+
+- Identify the product's documented invariant: for example schema validity,
+  preserved tool-call protocol, a named fallback, a quality floor, or transparent
+  pass-through on an unprefixed route.
+- Check current documentation, examples, official clients, dashboard behavior,
+  and maintainer statements before treating transformation as loss.
+- Demonstrate a violation of that invariant and the consumer-visible consequence.
+  A cheaper model producing different prose is expected behavior unless it breaks
+  a promised constraint or measured quality gate.
+- State internal mechanics only as inference. Without source, an official trace,
+  or a maintainer confirmation, do not claim a private function, code path, or
+  source-level root cause. Root cause may be unknown; exact layer attribution may
+  not be.
+
+The standard `bug`, `docs-defect`, `hardening`, `feature-request`, and
+`operator-misuse` labels still apply. Only `bug` can pass Usefulness.
+
+### Required closed-source evidence
+
+In addition to the normal issue template, include:
+
+1. A sanitized service fingerprint containing the observed deployment context.
+2. Raw client-side request and response bytes for the failing case and controls.
+3. Forwarded bytes or provider traces when available, otherwise an explicit
+   statement that the middle hop is unobservable.
+4. Route, recipe, policy, request, and trace metadata returned for each call,
+   sanitized as necessary.
+5. An N of N matrix covering direct, plain or bypass, routed, and trigger-removed
+   cases that the product supports.
+6. A consumer-boundary reproduction and a statement separating measured impact
+   from inference.
+
+Never publish private dashboard content, customer traffic, proprietary prompts,
+credentials, or vendor correspondence without permission.
+
+### Upstream status for a private product
+
+- Search public documentation, changelogs, status history, release notes, support
+  articles, public issue trackers, and reasonable exact-error synonyms on the day
+  of the work.
+- Report the finding through the vendor's appropriate support or security channel
+  when public tracking is unavailable. Record the date and ticket identifier, but
+  do not copy private correspondence into the repository without permission.
+- Use the normal upstream classifications. If the vendor confirms a fix, rerun
+  the public endpoint before calling it `fixed`.
+- If neither public evidence nor an authorized vendor response can establish
+  current status, the Upstream status gate remains incomplete.
+
+### Closed-source decision rule
+
+- `ACCEPT`: the public contract is current, the exact violation reproduces N of N,
+  differential controls isolate the hosted product, a real consumer consequence
+  is demonstrated, and upstream status is complete.
+- `NEEDS EVIDENCE`: the behavior is real but deployment identity, routing stage,
+  middle-hop attribution, controls, impact, or upstream status is incomplete.
+- `REJECT`: the difference is documented transformation, provider or SDK behavior,
+  unsupported usage, operator misuse, a transient service incident, or a defect
+  no longer present on the current deployment.
+
 ## Required artifacts
 
 Every issue pull request must:
