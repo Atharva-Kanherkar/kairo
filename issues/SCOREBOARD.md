@@ -77,7 +77,7 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 
 Numbers 046-050 are reserved for unpublished GoModel round-2 findings (one bug per PR). Issues 052-056 (AxonHub round 2) land on sibling branches, not missing rows here.
 
-**Coverage**: 56 documented issue folders across LiteLLM, Switchyard, Bifrost,
+**Coverage**: 57 documented issue folders across LiteLLM, Switchyard, Bifrost,
 GoModel, AxonHub, and any-llm. Folder counts are not defect counts: some folders
 contain honest negatives or multiple findings, including 006's four independent
 field losses and the LiteLLM copy of that class. The rows above record each
