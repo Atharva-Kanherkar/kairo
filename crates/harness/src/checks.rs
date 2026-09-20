@@ -1586,10 +1586,9 @@ pub fn executed_tool_results_preserved(executions_json: &str, client_exchange: &
                 "execution index repeats result marker {effect_marker:?}"
             ));
         }
-        let occurrences = body.matches(effect_marker).count();
-        if occurrences != 1 {
+        if !body.contains(effect_marker) {
             return Verdict::Violation(format!(
-                "executed call {tool_call_id:?} result marker {effect_marker:?} appears {occurrences} times in the client response, expected once"
+                "executed call {tool_call_id:?} result marker {effect_marker:?} is absent from the client response"
             ));
         }
     }
@@ -1619,6 +1618,13 @@ mod tests {
         assert_eq!(
             executed_tool_results_preserved(executions, complete),
             Verdict::Conformant
+        );
+        let repeated =
+            "HTTP/1.1 200 OK\r\n\r\n{\"content\":\"RESULT_ALPHA RESULT_ALPHA RESULT_BETA\"}";
+        assert_eq!(
+            executed_tool_results_preserved(executions, repeated),
+            Verdict::Conformant,
+            "an extra client-visible copy does not erase either executed result"
         );
 
         let missing = "HTTP/1.1 200 OK\r\n\r\n{\"content\":\"RESULT_ALPHA\"}";

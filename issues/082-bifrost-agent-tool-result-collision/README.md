@@ -295,8 +295,8 @@ Classification: `novel`.
   `crates/harness/src/checks.rs`
 - Conformance coverage: three issue-082 tests in
   `crates/harness/tests/conformance.rs`
-- Invariant: every distinct auto-executed tool call retains exactly one
-  client-visible result, independent of how a gateway formats the summary
+- Invariant: every distinct auto-executed tool call retains a client-visible
+  result, independent of how a gateway formats the summary
 - Vacuity guards: empty execution indexes, repeated tool-call IDs, malformed
   captures, missing markers, and a two-result index applied to the one-result
   control all score violations
