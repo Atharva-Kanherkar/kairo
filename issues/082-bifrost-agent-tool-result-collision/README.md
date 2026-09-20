@@ -308,10 +308,10 @@ Classification: `novel`.
 | Public reproduction | `BIFROST_SOURCE=... BIFROST_BIN=... python3 transcripts/082/reproduce.py --runs 5` | PASS, violation and both controls 5/5 |
 | Consumer boundary | same runner | PASS, duplicate 5/5 vs 0/5 control |
 | Focused harness | `cargo test -p kairo --test conformance bifrost_agent_mode` | PASS, 3/3 |
-| Workspace | `cargo test --workspace` | pending full validation |
+| Workspace | `cargo test --workspace` | PASS, 181/181 |
 | Formatting | `cargo fmt --all -- --check` | PASS |
-| Lint | `cargo clippy --workspace --all-targets -- -D warnings` | pending full validation |
-| README counts | `python3 tools/update-readme-counts.py --check` | pending index update |
+| Lint | `cargo clippy --workspace --all-targets -- -D warnings` | PASS |
+| README counts | `python3 tools/update-readme-counts.py --check` | PASS, 57 folders and 181 tests |
 
 ## Confidence
 
