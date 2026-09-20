@@ -129,10 +129,10 @@ The prior work covers provider-owned conversation routing and cross-format respo
 |---|---|---|
 | Reproduction | `transcripts/081/run_repro.sh SWITCHYARD_BIN` | PASS, bug 0/5 preserved |
 | Control | same command, response-ID matrix | PASS, 5/5 preserved |
-| Harness | `cargo test --workspace` | Pending final run |
-| Formatting | `cargo fmt --all -- --check` | Pending final run |
-| Lint | `cargo clippy --workspace --all-targets -- -D warnings` | Pending final run |
-| README counts | `python3 tools/update-readme-counts.py --check` | Pending final run |
+| Harness | `cargo test --workspace` | PASS, 180 tests |
+| Formatting | `cargo fmt --all -- --check` | PASS |
+| Lint | `cargo clippy --workspace --all-targets -- -D warnings` | PASS |
+| README counts | `python3 tools/update-readme-counts.py --check` | PASS, 57 folders and 180 tests |
 
 ## Security and scope
 
