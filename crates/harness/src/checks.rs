@@ -1323,6 +1323,68 @@ pub fn model_info_capture_identity(
     Verdict::Conformant
 }
 
+/// Invariant (bug 081): a Responses continuation by `conversation` must carry
+/// the same canonical history as a continuation by `previous_response_id`.
+/// The capture records exact Chat requests forwarded after Switchyard's local
+/// materialization; each recall request must contain its seed canary.
+pub fn response_conversation_preserves_history(
+    forwarded_jsonl: &str,
+    recall_prefix: &str,
+    seed_canary_prefix: &str,
+    expected_trials: usize,
+) -> Verdict {
+    if recall_prefix.is_empty() || seed_canary_prefix.is_empty() || expected_trials == 0 {
+        return Verdict::Violation("conversation checker received an empty invariant".into());
+    }
+    let mut continuations = 0;
+    let mut missing = 0;
+    for line in forwarded_jsonl
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+    {
+        let record: Value = match serde_json::from_str(line) {
+            Ok(record) => record,
+            Err(error) => {
+                return Verdict::Violation(format!(
+                    "forwarded capture is not valid JSONL: {error}"
+                ));
+            }
+        };
+        let Some(raw) = record.get("body_raw").and_then(Value::as_str) else {
+            return Verdict::Violation("forwarded capture is missing body_raw".into());
+        };
+        let body: Value = match serde_json::from_str(raw) {
+            Ok(body) => body,
+            Err(error) => {
+                return Verdict::Violation(format!(
+                    "forwarded body_raw is not valid JSON: {error}"
+                ));
+            }
+        };
+        if body.get("messages").and_then(Value::as_array).is_none() {
+            return Verdict::Violation("forwarded body is missing messages".into());
+        }
+        let dump = body_dump(&body);
+        if dump.contains(recall_prefix) {
+            continuations += 1;
+            if !dump.contains(seed_canary_prefix) {
+                missing += 1;
+            }
+        }
+    }
+    if continuations != expected_trials {
+        return Verdict::Violation(format!(
+            "expected {expected_trials} conversation continuations, found {continuations}"
+        ));
+    }
+    if missing > 0 {
+        return Verdict::Violation(format!(
+            "{missing}/{expected_trials} conversation continuations omit their seed history"
+        ));
+    }
+    Verdict::Conformant
+}
+
 /// Look for a Gemini `inlineData` part (a base64 image/audio blob) anywhere in
 /// a parsed `generateContent` response's first candidate. Returns the MIME
 /// type when one is present.
@@ -2279,5 +2341,20 @@ data: [DONE]
             gemini_inline_media_preserved_in_chat_stream(stream_with_images_sibling),
             Verdict::Conformant
         );
+    }
+
+    #[test]
+    fn response_conversation_checker_requires_complete_valid_evidence() {
+        let clean = r#"{"body_raw":"{\"messages\":[{\"role\":\"user\",\"content\":\"SEED CANARY\"},{\"role\":\"assistant\",\"content\":\"ok\"},{\"role\":\"user\",\"content\":\"RECALL\"}]}"}"#;
+        assert_eq!(
+            response_conversation_preserves_history(clean, "RECALL", "SEED CANARY", 1,),
+            Verdict::Conformant
+        );
+        for evidence in ["", "not-json", r#"{"auth_scope":"attacker"}"#] {
+            assert!(matches!(
+                response_conversation_preserves_history(evidence, "RECALL", "SEED CANARY", 1,),
+                Verdict::Violation(_)
+            ));
+        }
     }
 }

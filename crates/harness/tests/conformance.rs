@@ -17,9 +17,10 @@ use kairo::checks::{
     no_phantom_null_output_text, non_text_block_not_json_dumped, openai_stream_finish_reason,
     openai_toolcall_id_charset, outbound_request_omits_secret, parallel_tool_disable_preserved,
     reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
-    response_omits_secret, responses_refusal_semantics_preserved, responses_single_lifecycle,
-    stop_sequence_forwarded, thinking_not_leaked_as_visible_text, thinking_text_forwarded,
-    tool_strict_forwarded, toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    response_conversation_preserves_history, response_omits_secret,
+    responses_refusal_semantics_preserved, responses_single_lifecycle, stop_sequence_forwarded,
+    thinking_not_leaked_as_visible_text, thinking_text_forwarded, tool_strict_forwarded,
+    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
     upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
     JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
@@ -3403,4 +3404,53 @@ fn bifrost_provider_response_secret_summary_covers_all_trials() {
     ] {
         assert_eq!(summary.pointer(pointer).and_then(Value::as_u64), Some(5));
     }
+}
+
+// ---- bug 081: Switchyard drops cross-format conversation continuations ----
+
+#[test]
+fn switchyard_conversation_continuation_drops_history() {
+    let forwarded = fixture("transcripts/081/forwarded.jsonl");
+    let verdict = response_conversation_preserves_history(
+        &forwarded,
+        "CONVERSATION BUG RECALL_",
+        "CONVERSATION BUG SEED_CANARY_081_",
+        5,
+    );
+    assert!(matches!(verdict, Verdict::Violation(_)), "{verdict:?}");
+
+    let capture = fixture("transcripts/081/capture-bug.jsonl");
+    let captures: Vec<Value> = capture
+        .lines()
+        .map(|line| serde_json::from_str(line).expect("081 bug capture is JSON"))
+        .collect();
+    assert_eq!(captures.len(), 5);
+    assert!(captures.iter().all(|record| {
+        record["seed_canary_in_continuation_response"] == false
+            && record["client_response_body_raw"]
+                .as_str()
+                .is_some_and(|body| !body.contains("SEED_CANARY_081_"))
+    }));
+}
+
+#[test]
+fn switchyard_previous_response_id_control_preserves_history() {
+    assert_eq!(
+        response_conversation_preserves_history(
+            &fixture("transcripts/081/forwarded.jsonl"),
+            "CONVERSATION CONTROL RECALL_",
+            "CONVERSATION CONTROL SEED_CANARY_081_",
+            5,
+        ),
+        Verdict::Conformant
+    );
+    let capture = fixture("transcripts/081/capture-control.jsonl");
+    let captures: Vec<Value> = capture
+        .lines()
+        .map(|line| serde_json::from_str(line).expect("081 control capture is JSON"))
+        .collect();
+    assert_eq!(captures.len(), 5);
+    assert!(captures
+        .iter()
+        .all(|record| record["seed_canary_in_continuation_response"] == true));
 }

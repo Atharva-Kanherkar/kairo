@@ -1,0 +1,20 @@
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION BUG SEED_CANARY_081_1\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION BUG RECALL_1\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION BUG SEED_CANARY_081_2\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION BUG RECALL_2\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION BUG SEED_CANARY_081_3\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION BUG RECALL_3\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION BUG SEED_CANARY_081_4\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION BUG RECALL_4\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION BUG SEED_CANARY_081_5\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION BUG RECALL_5\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION CONTROL SEED_CANARY_081_1\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION CONTROL SEED_CANARY_081_1\"},{\"role\":\"assistant\",\"content\":\"SEEN:CONVERSATION CONTROL SEED_CANARY_081_1\"},{\"role\":\"user\",\"content\":\"CONVERSATION CONTROL RECALL_1\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION CONTROL SEED_CANARY_081_2\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION CONTROL SEED_CANARY_081_2\"},{\"role\":\"assistant\",\"content\":\"SEEN:CONVERSATION CONTROL SEED_CANARY_081_2\"},{\"role\":\"user\",\"content\":\"CONVERSATION CONTROL RECALL_2\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION CONTROL SEED_CANARY_081_3\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION CONTROL SEED_CANARY_081_3\"},{\"role\":\"assistant\",\"content\":\"SEEN:CONVERSATION CONTROL SEED_CANARY_081_3\"},{\"role\":\"user\",\"content\":\"CONVERSATION CONTROL RECALL_3\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION CONTROL SEED_CANARY_081_4\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION CONTROL SEED_CANARY_081_4\"},{\"role\":\"assistant\",\"content\":\"SEEN:CONVERSATION CONTROL SEED_CANARY_081_4\"},{\"role\":\"user\",\"content\":\"CONVERSATION CONTROL RECALL_4\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION CONTROL SEED_CANARY_081_5\"}]}"}
+{"path":"/v1/chat/completions","body_raw":"{\"model\":\"model/chat\",\"messages\":[{\"role\":\"user\",\"content\":\"CONVERSATION CONTROL SEED_CANARY_081_5\"},{\"role\":\"assistant\",\"content\":\"SEEN:CONVERSATION CONTROL SEED_CANARY_081_5\"},{\"role\":\"user\",\"content\":\"CONVERSATION CONTROL RECALL_5\"}]}"}
