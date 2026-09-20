@@ -133,6 +133,7 @@ The prior work covers provider-owned conversation routing and cross-format respo
 | Formatting | `cargo fmt --all -- --check` | PASS |
 | Lint | `cargo clippy --workspace --all-targets -- -D warnings` | PASS |
 | README counts | `python3 tools/update-readme-counts.py --check` | PASS, 57 folders and 180 tests |
+| Independent review | `.github/agents/kairo-reproduction-reviewer.agent.md` | ACCEPT; bug 0/5, control 5/5, binary provenance confirmed by SHA-256 against an independent from-scratch rebuild |
 
 ## Security and scope
 
@@ -150,4 +151,34 @@ The prior work covers provider-owned conversation routing and cross-format respo
 
 ## Independent review
 
-Run `.github/agents/kairo-reproduction-reviewer.agent.md` against this pull request. Approval remains blocked until the reviewer independently reruns the critical path and all three gates pass.
+On 2026-09-20, an independent reviewer followed
+`.github/agents/kairo-reproduction-reviewer.agent.md` against a separately
+cloned and separately built Switchyard checkout pinned at the same commit, and
+tried to falsify the claim.
+
+- Correctness: PASS. Rebuilt `switchyard-server` from scratch and confirmed
+  its SHA-256 matched the supplied binary byte for byte. Reran the
+  reproduction and control three times across both binaries; every run
+  produced `bug 0/5, control 5/5` with forwarded and captured bytes identical
+  to the committed transcripts. Read `run.rs` at the pinned commit directly
+  and confirmed `remember_canonical_response` hardcodes `None` for the
+  conversation id while `remember_response` passes the real value. Ruled out a
+  stale binary, an unsupported configuration, mock-manufactured behavior, and
+  a downstream fix (PR #781 is the last commit to touch `run.rs` before the
+  pin).
+- Usefulness: PASS. Confirmed the wire-level consequence directly: the
+  bug-mode forwarded Chat request carries only the recall turn, and the
+  client receives a well-formed HTTP 200 answer with no trace of the seed
+  turn. Confirmed the `run.rs` module doc comment added by PR #781 promises
+  canonical history for `conversation` and `previous_response_id` alike with
+  no carve-out. Label: `bug`.
+- Upstream status: PASS. Independently searched all 45 currently open issues
+  plus 11 targeted queries; found no duplicate. Confirmed PR #721's own test
+  and PR #781's own validation matrix both exercise only
+  `previous_response_id`, never `conversation`, on follow-up requests.
+  Classification: `novel`.
+- Repository checks: PASS. `cargo test --workspace` (180 tests), formatting,
+  clippy, and README counts all passed independently.
+- Repository state: clean. The reviewer made no changes inside this
+  repository.
+- Final reviewer verdict: ACCEPT.
