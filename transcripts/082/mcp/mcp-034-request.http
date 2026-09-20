@@ -1,0 +1,7 @@
+DELETE /mcp HTTP/1.1
+Host: 127.0.0.1:51687
+User-Agent: Go-http-client/1.1
+Mcp-Protocol-Version: 2025-06-18
+Mcp-Session-Id: kairo-082-session
+Accept-Encoding: gzip
+

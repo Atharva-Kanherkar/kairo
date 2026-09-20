@@ -1,0 +1,5 @@
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 874
+
+{"choices":[{"finish_reason":"tool_calls","index":0,"message":{"content":null,"role":"assistant","tool_calls":[{"function":{"arguments":"{\"cell\":\"control_single\",\"operation\":\"alpha\",\"phase\":\"initial\",\"run\":\"02\",\"source_tool_call_id\":\"call_082_initial_alpha_control_single_02\"}","name":"KairoSideEffect-charge"},"id":"call_082_initial_alpha_control_single_02","type":"function"},{"function":{"arguments":"{\"cell\":\"control_single\",\"operation\":\"review\",\"phase\":\"initial\",\"run\":\"02\",\"source_tool_call_id\":\"call_082_initial_review_control_single_02\"}","name":"KairoSideEffect-review"},"id":"call_082_initial_review_control_single_02","type":"function"}]}}],"created":1789934672,"id":"chatcmpl-082-first-control_single-02","model":"mimo-v2.5","object":"chat.completion","usage":{"completion_tokens":10,"prompt_tokens":20,"total_tokens":30}}
