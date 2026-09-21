@@ -35,6 +35,7 @@ GATEWAYS = (
     ("gomodel", "GoModel"),
     ("axonhub", "AxonHub"),
     ("any-llm", "any-llm"),
+    ("ogx", "OGX"),
 )
 
 TEST_RE = re.compile(r"^\s*#\[test\]", re.MULTILINE)

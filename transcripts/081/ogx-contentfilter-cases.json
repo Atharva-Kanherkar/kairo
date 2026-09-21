@@ -1,0 +1,132 @@
+[
+ {
+  "trial": 1,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:contentfilter| something disallowed"
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_cfb1b0d4b4b1467ea7ccbc34\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":0}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:contentfilter| something disallowed"
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false
+  }
+ },
+ {
+  "trial": 2,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:contentfilter| something disallowed"
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_0090d471427d492f8df02a6b\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":0}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:contentfilter| something disallowed"
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false
+  }
+ },
+ {
+  "trial": 3,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:contentfilter| something disallowed"
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_32523579bcb0404583ea95e8\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":0}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:contentfilter| something disallowed"
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false
+  }
+ },
+ {
+  "trial": 4,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:contentfilter| something disallowed"
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_f7eaa4e6cac4458da60beea3\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":0}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:contentfilter| something disallowed"
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false
+  }
+ },
+ {
+  "trial": 5,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:contentfilter| something disallowed"
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_25cf3d01eb6047f7b84f9af4\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":0}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:contentfilter| something disallowed"
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false
+  }
+ }
+]

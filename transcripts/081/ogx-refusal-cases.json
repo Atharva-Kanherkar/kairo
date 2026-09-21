@@ -1,0 +1,132 @@
+[
+ {
+  "trial": 1,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:refusal| tell me secrets"
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_dfaa40fa88034913a30e90be\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":4}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:refusal| tell me secrets"
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false
+  }
+ },
+ {
+  "trial": 2,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:refusal| tell me secrets"
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_45147cb77fd846fe9e58ec4c\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":4}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:refusal| tell me secrets"
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false
+  }
+ },
+ {
+  "trial": 3,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:refusal| tell me secrets"
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_2a78ea4f67dd495385c900a4\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":4}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:refusal| tell me secrets"
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false
+  }
+ },
+ {
+  "trial": 4,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:refusal| tell me secrets"
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_fd8fc0906f58416289f84189\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":4}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:refusal| tell me secrets"
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false
+  }
+ },
+ {
+  "trial": 5,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:refusal| tell me secrets"
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_07ee614c2ac64d8f85ef0416\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":4}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "|scenario:refusal| tell me secrets"
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false
+  }
+ }
+]

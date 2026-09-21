@@ -1,0 +1,1 @@
+{"id":"chatcmpl-mock","object":"chat.completion","created":1758000000,"model":"mock-gpt","choices":[{"index":0,"message":{"role":"assistant","content":"partial"},"finish_reason":"length"}],"usage":{"prompt_tokens":10,"completion_tokens":3,"total_tokens":13}}

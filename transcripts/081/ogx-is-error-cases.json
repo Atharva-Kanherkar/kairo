@@ -1,0 +1,537 @@
+[
+ {
+  "trial": 1,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "tools": [
+    {
+     "name": "read_file",
+     "description": "Reads a file",
+     "input_schema": {
+      "type": "object",
+      "properties": {
+       "path": {
+        "type": "string"
+       }
+      }
+     }
+    }
+   ],
+   "messages": [
+    {
+     "role": "user",
+     "content": "read /tmp/a"
+    },
+    {
+     "role": "assistant",
+     "content": [
+      {
+       "type": "tool_use",
+       "id": "toolu_01ABC",
+       "name": "read_file",
+       "input": {
+        "path": "/tmp/a"
+       }
+      }
+     ]
+    },
+    {
+     "role": "user",
+     "content": [
+      {
+       "type": "tool_result",
+       "tool_use_id": "toolu_01ABC",
+       "is_error": true,
+       "content": "Error: permission denied"
+      }
+     ]
+    },
+    {
+     "role": "user",
+     "content": "what happened?"
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_a3be7042a2a04a8cb1bf4ad5\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Hello from mock upstream.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":5}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "read /tmp/a"
+    },
+    {
+     "role": "assistant",
+     "tool_calls": [
+      {
+       "id": "toolu_01ABC",
+       "type": "function",
+       "function": {
+        "name": "read_file",
+        "arguments": "{\"path\": \"/tmp/a\"}"
+       }
+      }
+     ]
+    },
+    {
+     "role": "tool",
+     "tool_call_id": "toolu_01ABC",
+     "content": "Error: permission denied"
+    },
+    {
+     "role": "user",
+     "content": "what happened?"
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false,
+   "tools": [
+    {
+     "type": "function",
+     "function": {
+      "name": "read_file",
+      "description": "Reads a file",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "path": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "trial": 2,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "tools": [
+    {
+     "name": "read_file",
+     "description": "Reads a file",
+     "input_schema": {
+      "type": "object",
+      "properties": {
+       "path": {
+        "type": "string"
+       }
+      }
+     }
+    }
+   ],
+   "messages": [
+    {
+     "role": "user",
+     "content": "read /tmp/a"
+    },
+    {
+     "role": "assistant",
+     "content": [
+      {
+       "type": "tool_use",
+       "id": "toolu_01ABC",
+       "name": "read_file",
+       "input": {
+        "path": "/tmp/a"
+       }
+      }
+     ]
+    },
+    {
+     "role": "user",
+     "content": [
+      {
+       "type": "tool_result",
+       "tool_use_id": "toolu_01ABC",
+       "is_error": true,
+       "content": "Error: permission denied"
+      }
+     ]
+    },
+    {
+     "role": "user",
+     "content": "what happened?"
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_0a344eee738f4fee9c1b65cc\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Hello from mock upstream.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":5}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "read /tmp/a"
+    },
+    {
+     "role": "assistant",
+     "tool_calls": [
+      {
+       "id": "toolu_01ABC",
+       "type": "function",
+       "function": {
+        "name": "read_file",
+        "arguments": "{\"path\": \"/tmp/a\"}"
+       }
+      }
+     ]
+    },
+    {
+     "role": "tool",
+     "tool_call_id": "toolu_01ABC",
+     "content": "Error: permission denied"
+    },
+    {
+     "role": "user",
+     "content": "what happened?"
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false,
+   "tools": [
+    {
+     "type": "function",
+     "function": {
+      "name": "read_file",
+      "description": "Reads a file",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "path": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "trial": 3,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "tools": [
+    {
+     "name": "read_file",
+     "description": "Reads a file",
+     "input_schema": {
+      "type": "object",
+      "properties": {
+       "path": {
+        "type": "string"
+       }
+      }
+     }
+    }
+   ],
+   "messages": [
+    {
+     "role": "user",
+     "content": "read /tmp/a"
+    },
+    {
+     "role": "assistant",
+     "content": [
+      {
+       "type": "tool_use",
+       "id": "toolu_01ABC",
+       "name": "read_file",
+       "input": {
+        "path": "/tmp/a"
+       }
+      }
+     ]
+    },
+    {
+     "role": "user",
+     "content": [
+      {
+       "type": "tool_result",
+       "tool_use_id": "toolu_01ABC",
+       "is_error": true,
+       "content": "Error: permission denied"
+      }
+     ]
+    },
+    {
+     "role": "user",
+     "content": "what happened?"
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_1134b2a7ed194f86a89918e6\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Hello from mock upstream.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":5}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "read /tmp/a"
+    },
+    {
+     "role": "assistant",
+     "tool_calls": [
+      {
+       "id": "toolu_01ABC",
+       "type": "function",
+       "function": {
+        "name": "read_file",
+        "arguments": "{\"path\": \"/tmp/a\"}"
+       }
+      }
+     ]
+    },
+    {
+     "role": "tool",
+     "tool_call_id": "toolu_01ABC",
+     "content": "Error: permission denied"
+    },
+    {
+     "role": "user",
+     "content": "what happened?"
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false,
+   "tools": [
+    {
+     "type": "function",
+     "function": {
+      "name": "read_file",
+      "description": "Reads a file",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "path": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "trial": 4,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "tools": [
+    {
+     "name": "read_file",
+     "description": "Reads a file",
+     "input_schema": {
+      "type": "object",
+      "properties": {
+       "path": {
+        "type": "string"
+       }
+      }
+     }
+    }
+   ],
+   "messages": [
+    {
+     "role": "user",
+     "content": "read /tmp/a"
+    },
+    {
+     "role": "assistant",
+     "content": [
+      {
+       "type": "tool_use",
+       "id": "toolu_01ABC",
+       "name": "read_file",
+       "input": {
+        "path": "/tmp/a"
+       }
+      }
+     ]
+    },
+    {
+     "role": "user",
+     "content": [
+      {
+       "type": "tool_result",
+       "tool_use_id": "toolu_01ABC",
+       "is_error": true,
+       "content": "Error: permission denied"
+      }
+     ]
+    },
+    {
+     "role": "user",
+     "content": "what happened?"
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_fc22f7b4b2274bb181a82300\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Hello from mock upstream.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":5}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "read /tmp/a"
+    },
+    {
+     "role": "assistant",
+     "tool_calls": [
+      {
+       "id": "toolu_01ABC",
+       "type": "function",
+       "function": {
+        "name": "read_file",
+        "arguments": "{\"path\": \"/tmp/a\"}"
+       }
+      }
+     ]
+    },
+    {
+     "role": "tool",
+     "tool_call_id": "toolu_01ABC",
+     "content": "Error: permission denied"
+    },
+    {
+     "role": "user",
+     "content": "what happened?"
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false,
+   "tools": [
+    {
+     "type": "function",
+     "function": {
+      "name": "read_file",
+      "description": "Reads a file",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "path": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ },
+ {
+  "trial": 5,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "tools": [
+    {
+     "name": "read_file",
+     "description": "Reads a file",
+     "input_schema": {
+      "type": "object",
+      "properties": {
+       "path": {
+        "type": "string"
+       }
+      }
+     }
+    }
+   ],
+   "messages": [
+    {
+     "role": "user",
+     "content": "read /tmp/a"
+    },
+    {
+     "role": "assistant",
+     "content": [
+      {
+       "type": "tool_use",
+       "id": "toolu_01ABC",
+       "name": "read_file",
+       "input": {
+        "path": "/tmp/a"
+       }
+      }
+     ]
+    },
+    {
+     "role": "user",
+     "content": [
+      {
+       "type": "tool_result",
+       "tool_use_id": "toolu_01ABC",
+       "is_error": true,
+       "content": "Error: permission denied"
+      }
+     ]
+    },
+    {
+     "role": "user",
+     "content": "what happened?"
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_b110e272cfce42c4a10eac4f\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Hello from mock upstream.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":5}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "read /tmp/a"
+    },
+    {
+     "role": "assistant",
+     "tool_calls": [
+      {
+       "id": "toolu_01ABC",
+       "type": "function",
+       "function": {
+        "name": "read_file",
+        "arguments": "{\"path\": \"/tmp/a\"}"
+       }
+      }
+     ]
+    },
+    {
+     "role": "tool",
+     "tool_call_id": "toolu_01ABC",
+     "content": "Error: permission denied"
+    },
+    {
+     "role": "user",
+     "content": "what happened?"
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false,
+   "tools": [
+    {
+     "type": "function",
+     "function": {
+      "name": "read_file",
+      "description": "Reads a file",
+      "parameters": {
+       "type": "object",
+       "properties": {
+        "path": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   ]
+  }
+ }
+]

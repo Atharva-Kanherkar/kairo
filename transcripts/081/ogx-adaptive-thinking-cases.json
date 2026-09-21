@@ -1,0 +1,147 @@
+[
+ {
+  "trial": 1,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "thinking": {
+    "type": "adaptive"
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Solve this puzzle."
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_5518f72a48734d528120a1bb\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Hello from mock upstream.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":5}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "Solve this puzzle."
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false
+  }
+ },
+ {
+  "trial": 2,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "thinking": {
+    "type": "adaptive"
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Solve this puzzle."
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_0ff6df8cd64347289601cca3\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Hello from mock upstream.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":5}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "Solve this puzzle."
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false
+  }
+ },
+ {
+  "trial": 3,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "thinking": {
+    "type": "adaptive"
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Solve this puzzle."
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_26718524a1514e2fa3f28891\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Hello from mock upstream.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":5}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "Solve this puzzle."
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false
+  }
+ },
+ {
+  "trial": 4,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "thinking": {
+    "type": "adaptive"
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Solve this puzzle."
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_1dde60b1bd064d42ba0d7ca9\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Hello from mock upstream.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":5}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "Solve this puzzle."
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false
+  }
+ },
+ {
+  "trial": 5,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 100,
+   "thinking": {
+    "type": "adaptive"
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Solve this puzzle."
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"msg_f9f89dfdad24438bb5e36090\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Hello from mock upstream.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":5}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "Solve this puzzle."
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 100,
+   "stream": false
+  }
+ }
+]

@@ -1,0 +1,1 @@
+{"id":"chatcmpl-mock","object":"chat.completion","created":1758000000,"model":"mock-gpt","choices":[{"index":0,"message":{"role":"assistant","content":null,"tool_calls":[{"id":"call_1","type":"function","function":{"name":"read_file","arguments":"{\"path\": \"/tmp/a\"}"}}]},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":10,"completion_tokens":7,"total_tokens":17}}
