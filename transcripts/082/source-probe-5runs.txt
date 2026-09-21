@@ -1,0 +1,18 @@
+Target: maximhq/bifrost dev 1a17949cd80234de0ceb3018e941854f38b3f7a8
+Core version: 1.9.1
+Probe: source_probe_test.go copied to core/mcp/zz_h1_probe_test.go
+Command, repeated as five separate processes:
+  go test ./mcp -run TestH1Invariant -count=1 -v
+
+Iteration 1: Chat FAIL, one of two distinct same-name results present; Responses FAIL, one of two present
+Iteration 2: Chat FAIL, one of two distinct same-name results present; Responses FAIL, one of two present
+Iteration 3: Chat FAIL, one of two distinct same-name results present; Responses FAIL, one of two present
+Iteration 4: Chat FAIL, one of two distinct same-name results present; Responses FAIL, one of two present
+Iteration 5: Chat FAIL, one of two distinct same-name results present; Responses FAIL, one of two present
+
+Each failure returned this result summary in both dialects:
+  The Output from allowed tools calls is - {"KairoSideEffect-charge":"KAIRO_H1_BETA"}
+
+The probe is expected to fail on the affected source. Its nonzero status is the
+violation signal, not a harness error. The public-entry-point reproduction and
+raw wire captures are in this directory.

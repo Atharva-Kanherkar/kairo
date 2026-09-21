@@ -1,0 +1,10 @@
+{
+  "cell": "control_single",
+  "executions": [
+    {
+      "effect_marker": "KAIRO_082_EFFECT_ALPHA_control_single_01",
+      "tool_call_id": "call_082_initial_alpha_control_single_01"
+    }
+  ],
+  "run": "01"
+}

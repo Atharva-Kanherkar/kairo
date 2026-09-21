@@ -1,0 +1,27 @@
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Sun, 20 Sep 2026 21:26:10 GMT
+Content-Type: application/json
+Content-Length: 1609
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID
+Access-Control-Max-Age: 86400
+Vary: Origin
+X-Request-Id: c171da84-cb3b-4063-b1b5-dab90e909389
+X-Bifrost-Trace-Id: 282f3933fb5141b9b09e33608cbfef85
+X-Bifrost-Provider: mockoai
+X-Bifrost-Original-Model: mimo-v2.5
+X-Bifrost-Resolved-Model: mimo-v2.5
+X-Bifrost-Request-Type: chat_completion
+X-Bifrost-Routing-Info-Provider: mockoai
+X-Bifrost-Routing-Info-Model: mimo-v2.5
+X-Bifrost-Routing-Info-Key: kairo-synthetic
+X-Bifrost-Upstream-Latency-Ms: 1.630
+
+{"id":"chatcmpl-082-first-control_distinct-03","choices":[{"index":0,"finish_reason":"stop","logprobs":null,"message":{"role":"assistant","content":"The Output from allowed tools calls is - {\"KairoSideEffect-charge\":\"{\\\"cell\\\":\\\"control_distinct\\\",\\\"effect_marker\\\":\\\"KAIRO_082_EFFECT_ALPHA_control_distinct_03\\\",\\\"operation\\\":\\\"alpha\\\",\\\"phase\\\":\\\"initial\\\",\\\"run\\\":\\\"03\\\",\\\"tool_call_id\\\":\\\"call_082_initial_alpha_control_distinct_03\\\"}\",\"KairoSideEffect-credit\":\"{\\\"cell\\\":\\\"control_distinct\\\",\\\"effect_marker\\\":\\\"KAIRO_082_EFFECT_BETA_control_distinct_03\\\",\\\"operation\\\":\\\"beta\\\",\\\"phase\\\":\\\"initial\\\",\\\"run\\\":\\\"03\\\",\\\"tool_call_id\\\":\\\"call_082_initial_beta_control_distinct_03\\\"}\"}\n\nNow I shall call these tools next...","refusal":null,"tool_calls":[{"index":0,"type":"function","id":"call_082_initial_review_control_distinct_03","function":{"name":"KairoSideEffect-review","arguments":"{\"cell\":\"control_distinct\",\"operation\":\"review\",\"phase\":\"initial\",\"run\":\"03\",\"source_tool_call_id\":\"call_082_initial_review_control_distinct_03\"}"}}]}}],"created":1789934672,"model":"mimo-v2.5","object":"chat.completion","system_fingerprint":"","usage":{"prompt_tokens":20,"completion_tokens":10,"total_tokens":30},"extra_fields":{"request_type":"chat_completion","routing_info":{"provider":"mockoai","model":"mimo-v2.5","key":"kairo-synthetic"},"provider":"mockoai","original_model_requested":"mimo-v2.5","resolved_model_used":"mimo-v2.5","latency":0,"upstream_latency":0,"chunk_index":0}}

@@ -1,0 +1,8 @@
+POST /v1/chat/completions HTTP/1.1
+User-Agent: fasthttp
+Host: 127.0.0.1:51686
+Content-Type: application/json
+Content-Length: 1266
+Authorization: Bearer <SYNTHETIC_PROVIDER_KEY>
+
+{"model":"mimo-v2.5","temperature":0,"messages":[{"role":"user","content":"KAIRO_082_FIRST cell=violation run=02"}],"tools":[{"type":"function","function":{"name":"KairoSideEffect-charge","description":"Apply one synthetic side effect.","parameters":{"type":"object","properties":{"cell":{"type":"string"},"operation":{"type":"string"},"phase":{"type":"string"},"run":{"type":"string"},"source_tool_call_id":{"type":"string"}},"required":["cell","operation","phase","run","source_tool_call_id"]}}},{"type":"function","function":{"name":"KairoSideEffect-credit","description":"Apply a distinct synthetic side effect.","parameters":{"type":"object","properties":{"cell":{"type":"string"},"operation":{"type":"string"},"phase":{"type":"string"},"run":{"type":"string"},"source_tool_call_id":{"type":"string"}},"required":["cell","operation","phase","run","source_tool_call_id"]}}},{"type":"function","function":{"name":"KairoSideEffect-review","description":"Manual approval boundary. Never auto-executed.","parameters":{"type":"object","properties":{"cell":{"type":"string"},"operation":{"type":"string"},"phase":{"type":"string"},"run":{"type":"string"},"source_tool_call_id":{"type":"string"}},"required":["cell","operation","phase","run","source_tool_call_id"]}}}]}
