@@ -1,0 +1,6 @@
+HTTP/1.1 200 OK
+Content-Length: 308
+Content-Type: application/json
+Mcp-Session-Id: kairo-082-session
+
+{"id":21,"jsonrpc":"2.0","result":{"content":[{"text":"{\"cell\":\"control_distinct\",\"effect_marker\":\"KAIRO_082_EFFECT_BETA_control_distinct_05\",\"operation\":\"beta\",\"phase\":\"initial\",\"run\":\"05\",\"tool_call_id\":\"call_082_initial_beta_control_distinct_05\"}","type":"text"}],"isError":false}}

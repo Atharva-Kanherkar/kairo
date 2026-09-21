@@ -1,0 +1,12 @@
+{
+  "binary_sha256": "d945b1a574030ab80aba7a503959528b8568e73334ebe5aa32c7de30185bc8b3",
+  "commit": "1a17949cd80234de0ceb3018e941854f38b3f7a8",
+  "core_version": "1.9.1",
+  "go_version": "go1.27.1 darwin/arm64",
+  "model": "mockoai/mimo-v2.5",
+  "public_endpoint": "POST /v1/chat/completions",
+  "request_dialect": "OpenAI Chat Completions",
+  "response_dialect": "OpenAI Chat Completions",
+  "source": "https://github.com/maximhq/bifrost",
+  "ui_embed_stub": "transports/bifrost-http/ui/index.html; not on the request path"
+}

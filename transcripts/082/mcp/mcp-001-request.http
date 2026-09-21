@@ -1,0 +1,9 @@
+POST /mcp HTTP/1.1
+Host: 127.0.0.1:51687
+User-Agent: Go-http-client/1.1
+Content-Length: 172
+Accept: application/json, text/event-stream
+Content-Type: application/json
+Accept-Encoding: gzip
+
+{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","clientInfo":{"name":"Bifrost-KairoSideEffect","version":"1.0.0"},"capabilities":{}}}

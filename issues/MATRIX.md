@@ -128,6 +128,7 @@ Vector is part of the probe. 020 and 026 are JSON *body* bypasses, and both writ
 | `upstream refusal content survives` | DROP [036] 5/5 | OK |
 | `upstream tool_call id reaches the client` | MANG [037] 5/5 | OK [004] |
 | `usage counts survive translation` | MANG 5/5 | MANG 5/5 |
+| `each auto-executed call retains its result` | DROP [082] 5/5 ctl | na |
 
 A bracketed number is the kairo issue that documents this loss on **that** gateway. It is per gateway on purpose: 012 is a LiteLLM issue, so Bifrost passing the same probe is a result, not a regression.
 

@@ -8,7 +8,7 @@
 use kairo::checks::{
     anthropic_response_toolcall_stop_reason, anthropic_stream_safety_stop_reason,
     anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
-    content_filter_preserved, document_body_forwarded,
+    content_filter_preserved, document_body_forwarded, executed_tool_results_preserved,
     gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
     id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
     invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
@@ -3663,4 +3663,71 @@ fn ogx_drops_is_error_on_tool_result() {
             i + 1
         );
     }
+}
+
+// ---- bug 082: repeated agent-mode calls overwrite an executed result ----
+
+#[test]
+fn bifrost_agent_mode_same_name_call_loses_one_executed_result() {
+    let executions = fixture("transcripts/082/violation-executions.json");
+    let response = fixture("transcripts/082/violation-client-response.http");
+    let verdict = executed_tool_results_preserved(&executions, &response);
+    assert!(
+        matches!(verdict, Verdict::Violation(_)),
+        "two executed same-name calls must not collapse to one result: {verdict:?}"
+    );
+}
+
+#[test]
+fn bifrost_agent_mode_result_controls_preserve_every_execution() {
+    for cell in ["control_distinct", "control_single"] {
+        let executions = fixture(&format!("transcripts/082/{cell}-executions.json"));
+        let response = fixture(&format!("transcripts/082/{cell}-client-response.http"));
+        assert_eq!(
+            executed_tool_results_preserved(&executions, &response),
+            Verdict::Conformant,
+            "{cell} must preserve every executed result"
+        );
+    }
+
+    // Vacuity guard: a conformant response must fail when the execution index
+    // demands a second distinct result that the response does not contain.
+    let single_response = fixture("transcripts/082/control_single-client-response.http");
+    let two_executions = fixture("transcripts/082/control_distinct-executions.json");
+    assert!(matches!(
+        executed_tool_results_preserved(&two_executions, &single_response),
+        Verdict::Violation(_)
+    ));
+}
+
+#[test]
+fn bifrost_agent_mode_five_run_matrix_reaches_the_consumer_boundary() {
+    let summary: Value =
+        serde_json::from_str(&fixture("transcripts/082/results.json")).expect("082 summary JSON");
+    assert_eq!(summary["complete"], true);
+    assert_eq!(summary["runs"], 5);
+    assert_eq!(
+        summary.pointer("/cells/violation/executions_per_run"),
+        Some(&serde_json::json!([2, 2, 2, 2, 2]))
+    );
+    assert_eq!(
+        summary.pointer("/cells/violation/reported_results_per_run"),
+        Some(&serde_json::json!([1, 1, 1, 1, 1]))
+    );
+    assert_eq!(
+        summary.pointer("/cells/control_distinct/reported_results_per_run"),
+        Some(&serde_json::json!([2, 2, 2, 2, 2]))
+    );
+    assert_eq!(
+        summary.pointer("/cells/control_single/reported_results_per_run"),
+        Some(&serde_json::json!([1, 1, 1, 1, 1]))
+    );
+    assert_eq!(
+        summary.pointer("/consumer/violation/duplicate_executions_per_run"),
+        Some(&serde_json::json!([1, 1, 1, 1, 1]))
+    );
+    assert_eq!(
+        summary.pointer("/consumer/control_distinct/duplicate_executions_per_run"),
+        Some(&serde_json::json!([0, 0, 0, 0, 0]))
+    );
 }

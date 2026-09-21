@@ -1627,6 +1627,75 @@ pub fn image_url_cache_key_case_sensitive(jsonl: &str) -> Verdict {
     Verdict::Conformant
 }
 
+/// Invariant (bug 082): every distinct auto-executed tool call must retain a
+/// separately client-visible result. `executions_json` is an execution index
+/// with `executions[].tool_call_id` and `executions[].effect_marker`; the
+/// markers must come from the recorded tool outputs, not from an expected
+/// response fixture. `client_exchange` is the complete HTTP response.
+///
+/// A tool may legally be called more than once in one turn. Tool names are not
+/// identities, so a summary keyed only by tool name must not collapse results
+/// from calls carrying distinct tool-call IDs.
+pub fn executed_tool_results_preserved(executions_json: &str, client_exchange: &str) -> Verdict {
+    let Ok(execution_index) = serde_json::from_str::<Value>(executions_json) else {
+        return Verdict::Violation("execution index is not valid JSON".to_owned());
+    };
+    let Some(executions) = execution_index.get("executions").and_then(Value::as_array) else {
+        return Verdict::Violation("execution index has no executions array".to_owned());
+    };
+    if executions.is_empty() {
+        return Verdict::Violation("execution index is empty".to_owned());
+    }
+
+    let Some((head, body)) = client_exchange.split_once("\r\n\r\n") else {
+        return Verdict::Violation("client capture is not a complete HTTP response".to_owned());
+    };
+    let status = head
+        .lines()
+        .next()
+        .and_then(|line| line.split_whitespace().nth(1));
+    if status != Some("200") {
+        return Verdict::Violation(format!("client capture status is {status:?}, expected 200"));
+    }
+    if serde_json::from_str::<Value>(body).is_err() {
+        return Verdict::Violation("client response body is not valid JSON".to_owned());
+    }
+
+    let mut ids = std::collections::HashSet::new();
+    let mut markers = std::collections::HashSet::new();
+    for (index, execution) in executions.iter().enumerate() {
+        let Some(tool_call_id) = execution.get("tool_call_id").and_then(Value::as_str) else {
+            return Verdict::Violation(format!("execution {index} has no non-string tool_call_id"));
+        };
+        let Some(effect_marker) = execution.get("effect_marker").and_then(Value::as_str) else {
+            return Verdict::Violation(format!(
+                "execution {index} has no non-string effect_marker"
+            ));
+        };
+        if tool_call_id.is_empty() || effect_marker.is_empty() {
+            return Verdict::Violation(format!(
+                "execution {index} has an empty tool-call ID or result marker"
+            ));
+        }
+        if !ids.insert(tool_call_id) {
+            return Verdict::Violation(format!(
+                "execution index repeats tool-call ID {tool_call_id:?}"
+            ));
+        }
+        if !markers.insert(effect_marker) {
+            return Verdict::Violation(format!(
+                "execution index repeats result marker {effect_marker:?}"
+            ));
+        }
+        if !body.contains(effect_marker) {
+            return Verdict::Violation(format!(
+                "executed call {tool_call_id:?} result marker {effect_marker:?} is absent from the client response"
+            ));
+        }
+    }
+    Verdict::Conformant
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1663,6 +1732,41 @@ mod tests {
             image_url_cache_key_case_sensitive(no_pair),
             Verdict::Conformant
         );
+    }
+
+    #[test]
+    fn executed_tool_result_checker_is_nonvacuous() {
+        let executions = r#"{"executions":[
+            {"tool_call_id":"call_alpha","effect_marker":"RESULT_ALPHA"},
+            {"tool_call_id":"call_beta","effect_marker":"RESULT_BETA"}
+        ]}"#;
+        let complete = "HTTP/1.1 200 OK\r\n\r\n{\"content\":\"RESULT_ALPHA RESULT_BETA\"}";
+        assert_eq!(
+            executed_tool_results_preserved(executions, complete),
+            Verdict::Conformant
+        );
+        let repeated =
+            "HTTP/1.1 200 OK\r\n\r\n{\"content\":\"RESULT_ALPHA RESULT_ALPHA RESULT_BETA\"}";
+        assert_eq!(
+            executed_tool_results_preserved(executions, repeated),
+            Verdict::Conformant,
+            "an extra client-visible copy does not erase either executed result"
+        );
+
+        let missing = "HTTP/1.1 200 OK\r\n\r\n{\"content\":\"RESULT_ALPHA\"}";
+        assert!(matches!(
+            executed_tool_results_preserved(executions, missing),
+            Verdict::Violation(_)
+        ));
+        assert!(matches!(
+            executed_tool_results_preserved(r#"{"executions":[]}"#, complete),
+            Verdict::Violation(_)
+        ));
+        let duplicate_id = executions.replace("call_beta", "call_alpha");
+        assert!(matches!(
+            executed_tool_results_preserved(&duplicate_id, complete),
+            Verdict::Violation(_)
+        ));
     }
 
     #[test]

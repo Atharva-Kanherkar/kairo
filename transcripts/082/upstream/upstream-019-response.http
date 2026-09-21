@@ -1,0 +1,5 @@
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 330
+
+{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"KAIRO_082_CONSUMER_COMPLETE cell=violation run=01","role":"assistant"}}],"created":1789934672,"id":"chatcmpl-082-consumer-complete-violation-01","model":"mimo-v2.5","object":"chat.completion","usage":{"completion_tokens":10,"prompt_tokens":20,"total_tokens":30}}
