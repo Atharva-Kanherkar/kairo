@@ -1526,70 +1526,171 @@ pub fn gemini_inline_media_preserved_in_chat_stream(sse: &str) -> Verdict {
     Verdict::Conformant
 }
 
-/// Invariant (bug 082): every distinct auto-executed tool call must retain a
-/// separately client-visible result. `executions_json` is an execution index
-/// with `executions[].tool_call_id` and `executions[].effect_marker`; the
-/// markers must come from the recorded tool outputs, not from an expected
-/// response fixture. `client_exchange` is the complete HTTP response.
+/// Invariant (bug 080): two media URLs that differ only in letter case are
+/// distinct resources (RFC 3986 paths and queries are case-sensitive). A
+/// cache key that lowercases the whole URL makes the second request silently
+/// receive the first resource. For every loader session that requested a
+/// case-colliding pair, the origin must receive one hit per requested URL and
+/// each decoded image must match the resource the origin serves for that URL.
 ///
-/// A tool may legally be called more than once in one turn. Tool names are not
-/// identities, so a summary keyed only by tool name must not collapse results
-/// from calls carrying distinct tool-call IDs.
-pub fn executed_tool_results_preserved(executions_json: &str, client_exchange: &str) -> Verdict {
-    let Ok(execution_index) = serde_json::from_str::<Value>(executions_json) else {
-        return Verdict::Violation("execution index is not valid JSON".to_owned());
+/// Runs against the capture JSONL written by `transcripts/080/repro_case_collision.py`.
+/// Each record: `requested` (URL paths), `origin_hits` (paths the origin saw),
+/// `decoded` (pixel rows returned per request), `origin_colors` (path -> color).
+pub fn image_url_cache_key_case_sensitive(jsonl: &str) -> Verdict {
+    let records = match capture_records(jsonl) {
+        Ok(r) => r,
+        Err(e) => return Verdict::Violation(format!("unparseable capture: {e}")),
     };
-    let Some(executions) = execution_index.get("executions").and_then(Value::as_array) else {
-        return Verdict::Violation("execution index has no executions array".to_owned());
-    };
-    if executions.is_empty() {
-        return Verdict::Violation("execution index is empty".to_owned());
-    }
+    for (idx, (_, record)) in records.iter().enumerate() {
+        let requested: Vec<String> =
+            match record.get("requested").and_then(Value::as_array).map(|a| {
+                a.iter()
+                    .filter_map(Value::as_str)
+                    .map(str::to_owned)
+                    .collect()
+            }) {
+                Some(r) => r,
+                None => {
+                    return Verdict::Violation(format!(
+                        "record {idx}: missing requested list: {record}"
+                    ))
+                }
 
-    let Some((head, body)) = client_exchange.split_once("\r\n\r\n") else {
-        return Verdict::Violation("client capture is not a complete HTTP response".to_owned());
-    };
-    let status = head
-        .lines()
-        .next()
-        .and_then(|line| line.split_whitespace().nth(1));
-    if status != Some("200") {
-        return Verdict::Violation(format!("client capture status is {status:?}, expected 200"));
-    }
-    if serde_json::from_str::<Value>(body).is_err() {
-        return Verdict::Violation("client response body is not valid JSON".to_owned());
-    }
+                /// Invariant (bug 082): every distinct auto-executed tool call must retain a
+                /// separately client-visible result. `executions_json` is an execution index
+                /// with `executions[].tool_call_id` and `executions[].effect_marker`; the
+                /// markers must come from the recorded tool outputs, not from an expected
+                /// response fixture. `client_exchange` is the complete HTTP response.
+                ///
+                /// A tool may legally be called more than once in one turn. Tool names are not
+                /// identities, so a summary keyed only by tool name must not collapse results
+                /// from calls carrying distinct tool-call IDs.
+                pub fn executed_tool_results_preserved(executions_json: &str, client_exchange: &str) -> Verdict {
+                    let Ok(execution_index) = serde_json::from_str::<Value>(executions_json) else {
+                        return Verdict::Violation("execution index is not valid JSON".to_owned());
+                    };
+                    let Some(executions) = execution_index.get("executions").and_then(Value::as_array) else {
+                        return Verdict::Violation("execution index has no executions array".to_owned());
+                    };
+                    if executions.is_empty() {
+                        return Verdict::Violation("execution index is empty".to_owned());
+                    }
 
-    let mut ids = std::collections::HashSet::new();
-    let mut markers = std::collections::HashSet::new();
-    for (index, execution) in executions.iter().enumerate() {
-        let Some(tool_call_id) = execution.get("tool_call_id").and_then(Value::as_str) else {
-            return Verdict::Violation(format!("execution {index} has no non-string tool_call_id"));
+                    let Some((head, body)) = client_exchange.split_once("\r\n\r\n") else {
+                        return Verdict::Violation("client capture is not a complete HTTP response".to_owned());
+                    };
+                    let status = head
+                        .lines()
+                        .next()
+                        .and_then(|line| line.split_whitespace().nth(1));
+                    if status != Some("200") {
+                        return Verdict::Violation(format!("client capture status is {status:?}, expected 200"));
+                    }
+                    if serde_json::from_str::<Value>(body).is_err() {
+                        return Verdict::Violation("client response body is not valid JSON".to_owned());
+                    }
+
+                    let mut ids = std::collections::HashSet::new();
+                    let mut markers = std::collections::HashSet::new();
+                    for (index, execution) in executions.iter().enumerate() {
+                        let Some(tool_call_id) = execution.get("tool_call_id").and_then(Value::as_str) else {
+                            return Verdict::Violation(format!("execution {index} has no non-string tool_call_id"));
+                        };
+                        let Some(effect_marker) = execution.get("effect_marker").and_then(Value::as_str) else {
+                            return Verdict::Violation(format!(
+                                "execution {index} has no non-string effect_marker"
+                            ));
+                        };
+                        if tool_call_id.is_empty() || effect_marker.is_empty() {
+                            return Verdict::Violation(format!(
+                                "execution {index} has an empty tool-call ID or result marker"
+                            ));
+                        }
+                        if !ids.insert(tool_call_id) {
+                            return Verdict::Violation(format!(
+                                "execution index repeats tool-call ID {tool_call_id:?}"
+                            ));
+                        }
+                        if !markers.insert(effect_marker) {
+                            return Verdict::Violation(format!(
+                                "execution index repeats result marker {effect_marker:?}"
+                            ));
+                        }
+                        if !body.contains(effect_marker) {
+                            return Verdict::Violation(format!(
+                                "executed call {tool_call_id:?} result marker {effect_marker:?} is absent from the client response"
+                            ));
+                        }
+                    }
+                    Verdict::Conformant
+                }
+            };
+        let has_case_collision = requested.iter().enumerate().any(|(i, u)| {
+            requested[i + 1..]
+                .iter()
+                .any(|v| u != v && u.to_lowercase() == v.to_lowercase())
+        });
+        if !has_case_collision {
+            continue; // nothing this record can say about the invariant
+        }
+        let hits: Vec<String> = match record
+            .get("origin_hits")
+            .and_then(Value::as_array)
+            .map(|a| {
+                a.iter()
+                    .filter_map(Value::as_str)
+                    .map(str::to_owned)
+                    .collect()
+            }) {
+            Some(h) => h,
+            None => {
+                return Verdict::Violation(format!(
+                    "record {idx}: missing origin_hits list: {record}"
+                ))
+            }
         };
-        let Some(effect_marker) = execution.get("effect_marker").and_then(Value::as_str) else {
+        let decoded: Vec<Vec<i64>> =
+            match record.get("decoded").and_then(Value::as_array).map(|a| {
+                a.iter()
+                    .filter_map(|p| {
+                        p.as_array()
+                            .map(|rgb| rgb.iter().filter_map(Value::as_i64).collect::<Vec<i64>>())
+                    })
+                    .collect()
+            }) {
+                Some(d) => d,
+                None => {
+                    return Verdict::Violation(format!(
+                        "record {idx}: missing decoded list: {record}"
+                    ))
+                }
+            };
+        let Some(Value::Object(colors)) = record.get("origin_colors") else {
             return Verdict::Violation(format!(
-                "execution {index} has no non-string effect_marker"
+                "record {idx}: missing origin_colors map: {record}"
             ));
         };
-        if tool_call_id.is_empty() || effect_marker.is_empty() {
-            return Verdict::Violation(format!(
-                "execution {index} has an empty tool-call ID or result marker"
-            ));
-        }
-        if !ids.insert(tool_call_id) {
-            return Verdict::Violation(format!(
-                "execution index repeats tool-call ID {tool_call_id:?}"
-            ));
-        }
-        if !markers.insert(effect_marker) {
-            return Verdict::Violation(format!(
-                "execution index repeats result marker {effect_marker:?}"
-            ));
-        }
-        if !body.contains(effect_marker) {
-            return Verdict::Violation(format!(
-                "executed call {tool_call_id:?} result marker {effect_marker:?} is absent from the client response"
-            ));
+        for (i, url) in requested.iter().enumerate() {
+            if !hits.iter().any(|h| h == url) {
+                return Verdict::Violation(format!(
+                    "record {idx}: requested '{url}' never reached the origin \
+                     (hits: {hits:?}); a cache key conflating case-differing URLs \
+                     served another resource"
+                ));
+            }
+            let expected = colors
+                .get(url)
+                .and_then(Value::as_array)
+                .map(|rgb| rgb.iter().filter_map(Value::as_i64).collect::<Vec<i64>>());
+            match (decoded.get(i), expected) {
+                (Some(got), Some(want)) if got != &want => {
+                    return Verdict::Violation(format!(
+                        "record {idx}: '{url}' decoded to {got:?}, origin serves {want:?}; \
+                         the case-differing URL pair collided on one cache key"
+                    ));
+                }
+                _ => {}
+            }
         }
     }
     Verdict::Conformant
@@ -1606,6 +1707,31 @@ mod tests {
         assert!(!id_conforms("functions.list_skills:0")); // dot and colon
         assert!(!id_conforms(&"x".repeat(65))); // too long
         assert!(!id_conforms("")); // empty
+    }
+
+    #[test]
+    fn image_cache_case_collision_is_caught() {
+        let bug = r#"{"body":{"scenario":"bug","cache_size":8,"requested":["/Cat.png","/cat.png"],"origin_hits":["/Cat.png"],"decoded":[[255,0,0],[255,0,0]],"origin_colors":{"/Cat.png":[255,0,0],"/cat.png":[0,0,255]}}}"#;
+        let v = image_url_cache_key_case_sensitive(bug);
+        assert!(matches!(v, Verdict::Violation(_)), "must catch: {v:?}");
+    }
+
+    #[test]
+    fn image_cache_case_distinct_urls_is_conformant() {
+        let control = r#"{"body":{"scenario":"cache-off","cache_size":0,"requested":["/Cat.png","/cat.png"],"origin_hits":["/Cat.png","/cat.png"],"decoded":[[255,0,0],[0,0,255]],"origin_colors":{"/Cat.png":[255,0,0],"/cat.png":[0,0,255]}}}"#;
+        assert_eq!(
+            image_url_cache_key_case_sensitive(control),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn image_cache_no_case_pair_skips() {
+        let no_pair = r#"{"body":{"scenario":"distinct","cache_size":8,"requested":["/Cat.png","/dog.png"],"origin_hits":["/Cat.png","/dog.png"],"decoded":[[255,0,0],[0,255,0]],"origin_colors":{"/Cat.png":[255,0,0],"/cat.png":[0,0,255],"/dog.png":[0,255,0]}}}"#;
+        assert_eq!(
+            image_url_cache_key_case_sensitive(no_pair),
+            Verdict::Conformant
+        );
     }
 
     #[test]

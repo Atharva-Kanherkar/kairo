@@ -1,0 +1,19 @@
+==============================================================================
+DYNAMO ImageLoader lowercase cache-key repro (checkout 5593e8857)
+==============================================================================
+[2026-09-19T09:20:16+00:00] CONTROL direct fetch /cat.png -> [0, 0, 255] (expect (0,0,255) blue)
+[2026-09-19T09:20:16+00:00] CONTROL distinct URLs /Cat.png,/dog.png -> pixels=[[255, 0, 0], [0, 255, 0]] hits=['/Cat.png', '/dog.png']
+[2026-09-19T09:20:16+00:00] CONTROL cache off run 1: pixels=[[255, 0, 0], [0, 0, 255]] hits=['/Cat.png', '/cat.png'] (expect red,blue; 2 hits)
+[2026-09-19T09:20:16+00:00] CONTROL cache off run 2: pixels=[[255, 0, 0], [0, 0, 255]] hits=['/Cat.png', '/cat.png'] (expect red,blue; 2 hits)
+[2026-09-19T09:20:16+00:00] CONTROL cache off run 3: pixels=[[255, 0, 0], [0, 0, 255]] hits=['/Cat.png', '/cat.png'] (expect red,blue; 2 hits)
+[2026-09-19T09:20:16+00:00] CONTROL cache off run 4: pixels=[[255, 0, 0], [0, 0, 255]] hits=['/Cat.png', '/cat.png'] (expect red,blue; 2 hits)
+[2026-09-19T09:20:16+00:00] CONTROL cache off run 5: pixels=[[255, 0, 0], [0, 0, 255]] hits=['/Cat.png', '/cat.png'] (expect red,blue; 2 hits)
+[2026-09-19T09:20:16+00:00] BUG run 1: pixels=[[255, 0, 0], [255, 0, 0]] hits=['/Cat.png'] (correct would be red,blue; 2 hits)
+[2026-09-19T09:20:16+00:00] BUG run 2: pixels=[[255, 0, 0], [255, 0, 0]] hits=['/Cat.png'] (correct would be red,blue; 2 hits)
+[2026-09-19T09:20:16+00:00] BUG run 3: pixels=[[255, 0, 0], [255, 0, 0]] hits=['/Cat.png'] (correct would be red,blue; 2 hits)
+[2026-09-19T09:20:16+00:00] BUG run 4: pixels=[[255, 0, 0], [255, 0, 0]] hits=['/Cat.png'] (correct would be red,blue; 2 hits)
+[2026-09-19T09:20:16+00:00] BUG run 5: pixels=[[255, 0, 0], [255, 0, 0]] hits=['/Cat.png'] (correct would be red,blue; 2 hits)
+[2026-09-19T09:20:16+00:00] ORDERING /cat.png,/Cat.png,/cat.png -> pixels=[[0, 0, 255], [0, 0, 255], [0, 0, 255]] hits=['/cat.png']
+[2026-09-19T09:20:16+00:00] wrote /Users/atharva/kairo/transcripts/080/capture-bug.jsonl (6 records)
+[2026-09-19T09:20:16+00:00] wrote /Users/atharva/kairo/transcripts/080/capture-control.jsonl (5 records)
+[2026-09-19T09:20:16+00:00] wrote /Users/atharva/kairo/transcripts/080/capture-distinct.jsonl (1 records)
