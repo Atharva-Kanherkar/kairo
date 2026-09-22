@@ -1,6 +1,0 @@
-data: {"id": "chatcmpl-mock", "object": "chat.completion.chunk", "created": 1758000000, "model": "mock-gpt", "choices": [{"index": 0, "delta": {"role": "assistant", "content": null, "refusal": "I cannot help with that request."}, "finish_reason": null}]}
-
-data: {"id": "chatcmpl-mock", "object": "chat.completion.chunk", "created": 1758000000, "model": "mock-gpt", "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}]}
-
-data: [DONE]
-

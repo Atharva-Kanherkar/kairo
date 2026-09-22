@@ -1,58 +1,64 @@
-# OGX capture upstream for kairo 081: OpenAI-compatible mock that serves
-# canned /v1/models and per-scenario chat responses, and records every
-# forwarded request body unmutated. Scenario is selected by a marker in the
-# first message text: "|scenario:NAME|". No credentials are recorded.
-import json, os, re, sys, time
+"""Small OpenAI-compatible capture server used by the OGX 1.4.0 repro.
+
+It writes only parsed request bodies, never request headers or credentials.
+"""
+import json
+import os
+import sys
+import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
-PORT, OUT, CANNED_DIR = int(sys.argv[1]), sys.argv[2], sys.argv[3]
 
-class H(BaseHTTPRequestHandler):
-    def log_message(self, *a):
+PORT = int(sys.argv[1])
+OUT = sys.argv[2]
+
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, *_args):
         pass
 
-    def _reply(self, body, ctype):
+    def _send(self, body, content_type="application/json"):
         self.send_response(200)
-        self.send_header("content-type", ctype)
+        self.send_header("content-type", content_type)
         self.send_header("content-length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
 
     def do_GET(self):
-        data = open(os.path.join(CANNED_DIR, "models.json"), "rb").read()
-        self._reply(data, "application/json")
+        if self.path.rstrip("/") != "/v1/models":
+            self.send_error(404)
+            return
+        self._send(json.dumps({
+            "object": "list",
+            "data": [{"id": "mock-gpt", "object": "model", "owned_by": "kairo"}],
+        }).encode())
 
     def do_POST(self):
-        n = int(self.headers.get("content-length", 0))
-        raw = self.rfile.read(n)
-        scenario, stream = "default", False
+        if self.path.rstrip("/") != "/v1/chat/completions":
+            self.send_error(404)
+            return
+        length = int(self.headers.get("content-length", "0"))
+        raw = self.rfile.read(length)
         try:
             body = json.loads(raw)
-            if isinstance(body, dict):
-                first = body.get("messages", [{}])[0]
-                content = first.get("content") if isinstance(first, dict) else None
-                text = content if isinstance(content, str) else json.dumps(content)
-                m = re.search(r"\|scenario:([a-z0-9_-]+)\|", text or "")
-                if m:
-                    scenario = m.group(1)
-                stream = bool(body.get("stream"))
-        except Exception:
-            body = raw
-        with open(OUT, "a") as f:
-            f.write(json.dumps({
-                "ts": time.time(),
-                "path": self.path,
-                "scenario": scenario,
-                "body": body,
-            }) + "\n")
-        f_json = os.path.join(CANNED_DIR, f"{scenario}.json")
-        f_sse = os.path.join(CANNED_DIR, f"{scenario}.sse")
-        if stream and os.path.exists(f_sse):
-            self._reply(open(f_sse, "rb").read(), "text/event-stream")
-        elif not stream and os.path.exists(f_json):
-            self._reply(open(f_json, "rb").read(), "application/json")
-        else:
-            self.send_response(500)
-            self.end_headers()
+        except json.JSONDecodeError:
+            self.send_error(400)
+            return
+        with open(OUT, "a", encoding="utf-8") as stream:
+            stream.write(json.dumps({"ts": time.time(), "path": self.path, "body": body}) + "\n")
+        response = {
+            "id": "chatcmpl-kairo-081",
+            "object": "chat.completion",
+            "created": 0,
+            "model": body.get("model", "mock-gpt"),
+            "choices": [{"index": 0,
+                         "message": {"role": "assistant", "content": "Synthetic control response."},
+                         "finish_reason": "stop"}],
+            "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2},
+        }
+        self._send(json.dumps(response).encode())
 
-HTTPServer(("127.0.0.1", PORT), H).serve_forever()
+
+if __name__ == "__main__":
+    os.makedirs(os.path.dirname(os.path.abspath(OUT)), exist_ok=True)
+    HTTPServer(("127.0.0.1", PORT), Handler).serve_forever()

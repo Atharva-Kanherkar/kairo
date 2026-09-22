@@ -3,28 +3,28 @@
   "trial": 1,
   "request": {
    "model": "openai/mock-gpt",
-   "max_tokens": 100,
+   "max_tokens": 32,
    "thinking": {
     "type": "adaptive"
    },
    "messages": [
     {
      "role": "user",
-     "content": "Solve this puzzle."
+     "content": "Synthetic adaptive-thinking control."
     }
    ]
   },
   "client_status": 200,
-  "client_response": "{\"id\":\"msg_5518f72a48734d528120a1bb\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Hello from mock upstream.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":5}}",
+  "client_response": "{\"id\":\"msg_06e79392bca64b0eb608d4b6\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
   "forwarded": {
    "messages": [
     {
      "role": "user",
-     "content": "Solve this puzzle."
+     "content": "Synthetic adaptive-thinking control."
     }
    ],
    "model": "mock-gpt",
-   "max_completion_tokens": 100,
+   "max_completion_tokens": 32,
    "stream": false
   }
  },
@@ -32,28 +32,28 @@
   "trial": 2,
   "request": {
    "model": "openai/mock-gpt",
-   "max_tokens": 100,
+   "max_tokens": 32,
    "thinking": {
     "type": "adaptive"
    },
    "messages": [
     {
      "role": "user",
-     "content": "Solve this puzzle."
+     "content": "Synthetic adaptive-thinking control."
     }
    ]
   },
   "client_status": 200,
-  "client_response": "{\"id\":\"msg_0ff6df8cd64347289601cca3\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Hello from mock upstream.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":5}}",
+  "client_response": "{\"id\":\"msg_e9299816b4314699868b0db1\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
   "forwarded": {
    "messages": [
     {
      "role": "user",
-     "content": "Solve this puzzle."
+     "content": "Synthetic adaptive-thinking control."
     }
    ],
    "model": "mock-gpt",
-   "max_completion_tokens": 100,
+   "max_completion_tokens": 32,
    "stream": false
   }
  },
@@ -61,28 +61,28 @@
   "trial": 3,
   "request": {
    "model": "openai/mock-gpt",
-   "max_tokens": 100,
+   "max_tokens": 32,
    "thinking": {
     "type": "adaptive"
    },
    "messages": [
     {
      "role": "user",
-     "content": "Solve this puzzle."
+     "content": "Synthetic adaptive-thinking control."
     }
    ]
   },
   "client_status": 200,
-  "client_response": "{\"id\":\"msg_26718524a1514e2fa3f28891\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Hello from mock upstream.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":5}}",
+  "client_response": "{\"id\":\"msg_8bf7ca50c85c4666b650260e\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
   "forwarded": {
    "messages": [
     {
      "role": "user",
-     "content": "Solve this puzzle."
+     "content": "Synthetic adaptive-thinking control."
     }
    ],
    "model": "mock-gpt",
-   "max_completion_tokens": 100,
+   "max_completion_tokens": 32,
    "stream": false
   }
  },
@@ -90,28 +90,28 @@
   "trial": 4,
   "request": {
    "model": "openai/mock-gpt",
-   "max_tokens": 100,
+   "max_tokens": 32,
    "thinking": {
     "type": "adaptive"
    },
    "messages": [
     {
      "role": "user",
-     "content": "Solve this puzzle."
+     "content": "Synthetic adaptive-thinking control."
     }
    ]
   },
   "client_status": 200,
-  "client_response": "{\"id\":\"msg_1dde60b1bd064d42ba0d7ca9\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Hello from mock upstream.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":5}}",
+  "client_response": "{\"id\":\"msg_c3df24acd2e44adba2a0a16e\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
   "forwarded": {
    "messages": [
     {
      "role": "user",
-     "content": "Solve this puzzle."
+     "content": "Synthetic adaptive-thinking control."
     }
    ],
    "model": "mock-gpt",
-   "max_completion_tokens": 100,
+   "max_completion_tokens": 32,
    "stream": false
   }
  },
@@ -119,28 +119,28 @@
   "trial": 5,
   "request": {
    "model": "openai/mock-gpt",
-   "max_tokens": 100,
+   "max_tokens": 32,
    "thinking": {
     "type": "adaptive"
    },
    "messages": [
     {
      "role": "user",
-     "content": "Solve this puzzle."
+     "content": "Synthetic adaptive-thinking control."
     }
    ]
   },
   "client_status": 200,
-  "client_response": "{\"id\":\"msg_f9f89dfdad24438bb5e36090\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Hello from mock upstream.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":10,\"output_tokens\":5}}",
+  "client_response": "{\"id\":\"msg_6b1a3ab3ed264160bc9813f1\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
   "forwarded": {
    "messages": [
     {
      "role": "user",
-     "content": "Solve this puzzle."
+     "content": "Synthetic adaptive-thinking control."
     }
    ],
    "model": "mock-gpt",
-   "max_completion_tokens": 100,
+   "max_completion_tokens": 32,
    "stream": false
   }
  }

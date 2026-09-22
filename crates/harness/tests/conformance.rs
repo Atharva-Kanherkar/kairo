@@ -3443,9 +3443,11 @@ fn ogx_adaptive_thinking_is_silently_ignored() {
             "{rel} trial {} must return 200",
             i + 1
         );
-        let dump = serde_json::to_string(&case["forwarded"]).unwrap();
+        let forwarded = &case["forwarded"];
         assert!(
-            !dump.contains("thinking") && !dump.contains("reasoning"),
+            forwarded.get("thinking").is_none()
+                && forwarded.get("reasoning").is_none()
+                && forwarded.get("reasoning_effort").is_none(),
             "{rel} trial {} must drop adaptive thinking from the forwarded body",
             i + 1
         );
