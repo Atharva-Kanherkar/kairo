@@ -1,0 +1,15 @@
+schema_version = 1
+
+[llm_clients.chat]
+format = "openai_chat"
+base_url = "http://127.0.0.1:19311/v1"
+max_retries = 0
+
+[targets.chat]
+id = "model/chat"
+llm_client = "chat"
+
+[routes.chat]
+id = "switchyard/chat"
+type = "passthrough"
+target = "chat"
