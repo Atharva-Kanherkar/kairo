@@ -1,0 +1,6 @@
+POST /v1/chat/completions HTTP/1.1
+Content-Type: application/json
+Content-Length: 144
+Host: 127.0.0.1:51688
+
+{"messages":[{"content":"KAIRO_082_FIRST cell=control_single run=02","role":"user"}],"model":"mockoai/mimo-v2.5","stream":false,"temperature":0}

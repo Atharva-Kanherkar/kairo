@@ -26,12 +26,17 @@ sales deck.
 1. Pick a target from `issues/TARGETS.md` (or bring your own cited, open issue
    in any translation layer: LiteLLM, Switchyard, Bifrost, vLLM, SGLang,
    Ollama, claude-code-router, open-webui, ...).
-2. Reproduce it. Two rigs cover most cases:
+2. Reproduce it. Two rigs cover locally runnable targets, and a hosted protocol
+   covers eligible closed-source products:
    - **Live capture**: run the gateway locally, send the request, save the
      bytes. See the repro blocks in any `issues/NNN/README.md`.
    - **Offline capture rig**: point the gateway's backend at
      `tools/mock_upstream.py` to record exactly what it forwards upstream.
      Zero keys, fully deterministic. See `issues/006` and `issues/007`.
+   - **Hosted closed-source capture**: call the real supported public endpoint,
+     fingerprint the observed deployment and UTC window, and run the differential
+     control ladder in `AGENTS.md` "Closed-source routers and hosted products".
+     Record every unavailable control and unobservable hop.
 3. Write it up: copy `issues/TEMPLATE.md` into `issues/NNN-short-slug/README.md`.
    State what breaks, the proof (all three legs), and the test invariants the
    bug implies.
@@ -51,9 +56,10 @@ sales deck.
 Every pull request must use `.github/PULL_REQUEST_TEMPLATE.md` and independently
 pass three gates before approval:
 
-1. **Correctness.** The exact claim reproduces locally on the named version with
-   raw wire evidence, a successful control, deterministic results, and an isolated
-   trigger.
+1. **Correctness.** The exact claim reproduces either locally on the named version
+   or, for an eligible closed-source target, against the fingerprinted public
+   deployment. Both paths require raw wire evidence, discriminating controls,
+   deterministic results, and an isolated trigger.
 2. **Usefulness.** The wire defect is traced to a concrete failure in a real user or
    agent workflow. A byte difference alone is not enough. The finding also passes
    the bug-or-not checks in `AGENTS.md` and is labeled `bug`, not a docs defect,

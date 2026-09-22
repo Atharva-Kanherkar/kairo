@@ -1,0 +1,6 @@
+HTTP/1.1 200 OK
+Content-Length: 1047
+Content-Type: application/json
+Mcp-Session-Id: kairo-082-session
+
+{"id":2,"jsonrpc":"2.0","result":{"tools":[{"description":"Apply one synthetic side effect.","inputSchema":{"properties":{"cell":{"type":"string"},"operation":{"type":"string"},"phase":{"type":"string"},"run":{"type":"string"},"source_tool_call_id":{"type":"string"}},"required":["cell","operation","phase","run","source_tool_call_id"],"type":"object"},"name":"charge"},{"description":"Apply a distinct synthetic side effect.","inputSchema":{"properties":{"cell":{"type":"string"},"operation":{"type":"string"},"phase":{"type":"string"},"run":{"type":"string"},"source_tool_call_id":{"type":"string"}},"required":["cell","operation","phase","run","source_tool_call_id"],"type":"object"},"name":"credit"},{"description":"Manual approval boundary. Never auto-executed.","inputSchema":{"properties":{"cell":{"type":"string"},"operation":{"type":"string"},"phase":{"type":"string"},"run":{"type":"string"},"source_tool_call_id":{"type":"string"}},"required":["cell","operation","phase","run","source_tool_call_id"],"type":"object"},"name":"review"}]}}

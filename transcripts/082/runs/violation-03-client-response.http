@@ -1,0 +1,27 @@
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Sun, 20 Sep 2026 21:26:10 GMT
+Content-Type: application/json
+Content-Length: 1262
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID
+Access-Control-Max-Age: 86400
+Vary: Origin
+X-Request-Id: 55b9dcde-239a-4b4e-96ce-26fdb563dd6d
+X-Bifrost-Trace-Id: f945d72a864e4d5d8ab138c6ad22cf00
+X-Bifrost-Provider: mockoai
+X-Bifrost-Original-Model: mimo-v2.5
+X-Bifrost-Resolved-Model: mimo-v2.5
+X-Bifrost-Request-Type: chat_completion
+X-Bifrost-Routing-Info-Provider: mockoai
+X-Bifrost-Routing-Info-Model: mimo-v2.5
+X-Bifrost-Routing-Info-Key: kairo-synthetic
+X-Bifrost-Upstream-Latency-Ms: 1.887
+
+{"id":"chatcmpl-082-first-violation-03","choices":[{"index":0,"finish_reason":"stop","logprobs":null,"message":{"role":"assistant","content":"The Output from allowed tools calls is - {\"KairoSideEffect-charge\":\"{\\\"cell\\\":\\\"violation\\\",\\\"effect_marker\\\":\\\"KAIRO_082_EFFECT_ALPHA_violation_03\\\",\\\"operation\\\":\\\"alpha\\\",\\\"phase\\\":\\\"initial\\\",\\\"run\\\":\\\"03\\\",\\\"tool_call_id\\\":\\\"call_082_initial_alpha_violation_03\\\"}\"}\n\nNow I shall call these tools next...","refusal":null,"tool_calls":[{"index":0,"type":"function","id":"call_082_initial_review_violation_03","function":{"name":"KairoSideEffect-review","arguments":"{\"cell\":\"violation\",\"operation\":\"review\",\"phase\":\"initial\",\"run\":\"03\",\"source_tool_call_id\":\"call_082_initial_review_violation_03\"}"}}]}}],"created":1789934672,"model":"mimo-v2.5","object":"chat.completion","system_fingerprint":"","usage":{"prompt_tokens":20,"completion_tokens":10,"total_tokens":30},"extra_fields":{"request_type":"chat_completion","routing_info":{"provider":"mockoai","model":"mimo-v2.5","key":"kairo-synthetic"},"provider":"mockoai","original_model_requested":"mimo-v2.5","resolved_model_used":"mimo-v2.5","latency":0,"upstream_latency":0,"chunk_index":0}}

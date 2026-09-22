@@ -1,0 +1,27 @@
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Sun, 20 Sep 2026 21:26:10 GMT
+Content-Type: application/json
+Content-Length: 660
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID
+Access-Control-Max-Age: 86400
+Vary: Origin
+X-Request-Id: 9b66af7b-fc3d-4fc6-896b-90ebaf1d1558
+X-Bifrost-Trace-Id: e0ef7f7042e540559522f4f3dadd0dff
+X-Bifrost-Provider: mockoai
+X-Bifrost-Original-Model: mimo-v2.5
+X-Bifrost-Resolved-Model: mimo-v2.5
+X-Bifrost-Request-Type: chat_completion
+X-Bifrost-Routing-Info-Provider: mockoai
+X-Bifrost-Routing-Info-Model: mimo-v2.5
+X-Bifrost-Routing-Info-Key: kairo-synthetic
+X-Bifrost-Upstream-Latency-Ms: 0.365
+
+{"id":"chatcmpl-082-consumer-complete-control_distinct-04","choices":[{"index":0,"finish_reason":"stop","logprobs":null,"message":{"role":"assistant","content":"KAIRO_082_CONSUMER_COMPLETE cell=control_distinct run=04"}}],"created":1789934672,"model":"mimo-v2.5","object":"chat.completion","system_fingerprint":"","usage":{"prompt_tokens":20,"completion_tokens":10,"total_tokens":30},"extra_fields":{"request_type":"chat_completion","routing_info":{"provider":"mockoai","model":"mimo-v2.5","key":"kairo-synthetic"},"provider":"mockoai","original_model_requested":"mimo-v2.5","resolved_model_used":"mimo-v2.5","latency":0,"upstream_latency":0,"chunk_index":0}}
