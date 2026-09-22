@@ -1,0 +1,5 @@
+{
+  "status": "blocked",
+  "credential_present": false,
+  "blocker": "ANTHROPIC_API_KEY is not set"
+}
