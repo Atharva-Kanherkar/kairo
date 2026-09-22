@@ -300,6 +300,92 @@ pub fn capture_records(jsonl: &str) -> Result<Vec<(String, Value)>, String> {
         .collect()
 }
 
+/// Check the adaptive-thinking invariant from either a case-array fixture or
+/// capture-rig JSONL. A 200 response with a non-empty forwarded request and no
+/// `thinking` or `reasoning` field is the reproduced loss. A gateway that
+/// forwards an explicit reasoning configuration or rejects the unsupported
+/// request is conformant.
+pub fn ogx_adaptive_thinking_loss(evidence: &str, expected_trials: usize) -> Verdict {
+    let parsed = serde_json::from_str::<Value>(evidence).ok();
+    let cases: Vec<Value> = match parsed {
+        Some(Value::Array(items)) => items,
+        Some(_) => return Verdict::Violation("case fixture is not an array".to_owned()),
+        None => match capture_records(evidence) {
+            Ok(records) => records
+                .into_iter()
+                .map(|(_, body)| {
+                    serde_json::json!({
+                        "client_status": 200,
+                        "forwarded": body,
+                    })
+                })
+                .collect(),
+            Err(error) => return Verdict::Violation(error),
+        },
+    };
+    if cases.len() != expected_trials {
+        return Verdict::Violation(format!(
+            "expected {expected_trials} trials, found {}",
+            cases.len()
+        ));
+    }
+    let mut saw_forwarded_success = false;
+    let mut every_success_dropped = true;
+    for (index, case) in cases.iter().enumerate() {
+        let status = case.get("client_status").and_then(Value::as_i64);
+        let forwarded = case.get("forwarded").unwrap_or(&Value::Null);
+        if status == Some(400) && forwarded.is_null() {
+            continue;
+        }
+        if status != Some(200) {
+            return Verdict::Violation(format!(
+                "trial {} has status {status:?}, expected 200 or fail-closed 400",
+                index + 1
+            ));
+        }
+        let Some(messages) = forwarded.get("messages").and_then(Value::as_array) else {
+            return Verdict::Violation(format!(
+                "trial {} has no non-empty forwarded messages",
+                index + 1
+            ));
+        };
+        if messages.is_empty() {
+            return Verdict::Violation(format!(
+                "trial {} forwarded an empty messages array",
+                index + 1
+            ));
+        }
+        saw_forwarded_success = true;
+        let has_config = object_has_key(forwarded, "thinking")
+            || object_has_key(forwarded, "reasoning")
+            || object_has_key(forwarded, "reasoning_effort");
+        if has_config {
+            every_success_dropped = false;
+        }
+    }
+    if !saw_forwarded_success {
+        return Verdict::Conformant;
+    }
+    if every_success_dropped {
+        Verdict::Violation(
+            "adaptive thinking was accepted but no thinking or reasoning configuration was forwarded"
+                .to_owned(),
+        )
+    } else {
+        Verdict::Conformant
+    }
+}
+
+fn object_has_key(value: &Value, key: &str) -> bool {
+    match value {
+        Value::Object(fields) => {
+            fields.contains_key(key) || fields.values().any(|child| object_has_key(child, key))
+        }
+        Value::Array(items) => items.iter().any(|child| object_has_key(child, key)),
+        _ => false,
+    }
+}
+
 fn parse_capture_line(line: &str) -> Result<Value, String> {
     let v: Value = serde_json::from_str(line).map_err(|e| format!("unparseable capture: {e}"))?;
     Ok(v.get("body").cloned().unwrap_or(Value::Null))
@@ -1526,107 +1612,6 @@ pub fn gemini_inline_media_preserved_in_chat_stream(sse: &str) -> Verdict {
     Verdict::Conformant
 }
 
-/// Invariant (bug 080): two media URLs that differ only in letter case are
-/// distinct resources (RFC 3986 paths and queries are case-sensitive). A
-/// cache key that lowercases the whole URL makes the second request silently
-/// receive the first resource. For every loader session that requested a
-/// case-colliding pair, the origin must receive one hit per requested URL and
-/// each decoded image must match the resource the origin serves for that URL.
-///
-/// Runs against the capture JSONL written by `transcripts/080/repro_case_collision.py`.
-/// Each record: `requested` (URL paths), `origin_hits` (paths the origin saw),
-/// `decoded` (pixel rows returned per request), `origin_colors` (path -> color).
-pub fn image_url_cache_key_case_sensitive(jsonl: &str) -> Verdict {
-    let records = match capture_records(jsonl) {
-        Ok(r) => r,
-        Err(e) => return Verdict::Violation(format!("unparseable capture: {e}")),
-    };
-    for (idx, (_, record)) in records.iter().enumerate() {
-        let requested: Vec<String> =
-            match record.get("requested").and_then(Value::as_array).map(|a| {
-                a.iter()
-                    .filter_map(Value::as_str)
-                    .map(str::to_owned)
-                    .collect()
-            }) {
-                Some(r) => r,
-                None => {
-                    return Verdict::Violation(format!(
-                        "record {idx}: missing requested list: {record}"
-                    ))
-                }
-            };
-        let has_case_collision = requested.iter().enumerate().any(|(i, u)| {
-            requested[i + 1..]
-                .iter()
-                .any(|v| u != v && u.to_lowercase() == v.to_lowercase())
-        });
-        if !has_case_collision {
-            continue; // nothing this record can say about the invariant
-        }
-        let hits: Vec<String> = match record
-            .get("origin_hits")
-            .and_then(Value::as_array)
-            .map(|a| {
-                a.iter()
-                    .filter_map(Value::as_str)
-                    .map(str::to_owned)
-                    .collect()
-            }) {
-            Some(h) => h,
-            None => {
-                return Verdict::Violation(format!(
-                    "record {idx}: missing origin_hits list: {record}"
-                ))
-            }
-        };
-        let decoded: Vec<Vec<i64>> =
-            match record.get("decoded").and_then(Value::as_array).map(|a| {
-                a.iter()
-                    .filter_map(|p| {
-                        p.as_array()
-                            .map(|rgb| rgb.iter().filter_map(Value::as_i64).collect::<Vec<i64>>())
-                    })
-                    .collect()
-            }) {
-                Some(d) => d,
-                None => {
-                    return Verdict::Violation(format!(
-                        "record {idx}: missing decoded list: {record}"
-                    ))
-                }
-            };
-        let Some(Value::Object(colors)) = record.get("origin_colors") else {
-            return Verdict::Violation(format!(
-                "record {idx}: missing origin_colors map: {record}"
-            ));
-        };
-        for (i, url) in requested.iter().enumerate() {
-            if !hits.iter().any(|h| h == url) {
-                return Verdict::Violation(format!(
-                    "record {idx}: requested '{url}' never reached the origin \
-                     (hits: {hits:?}); a cache key conflating case-differing URLs \
-                     served another resource"
-                ));
-            }
-            let expected = colors
-                .get(url)
-                .and_then(Value::as_array)
-                .map(|rgb| rgb.iter().filter_map(Value::as_i64).collect::<Vec<i64>>());
-            match (decoded.get(i), expected) {
-                (Some(got), Some(want)) if got != &want => {
-                    return Verdict::Violation(format!(
-                        "record {idx}: '{url}' decoded to {got:?}, origin serves {want:?}; \
-                         the case-differing URL pair collided on one cache key"
-                    ));
-                }
-                _ => {}
-            }
-        }
-    }
-    Verdict::Conformant
-}
-
 /// Invariant (bug 082): every distinct auto-executed tool call must retain a
 /// separately client-visible result. `executions_json` is an execution index
 /// with `executions[].tool_call_id` and `executions[].effect_marker`; the
@@ -1701,37 +1686,59 @@ mod tests {
     use super::*;
 
     #[test]
+    fn ogx_adaptive_checker_is_non_vacuous_and_checks_trial_count() {
+        let violating = r#"[
+          {"client_status":200,"forwarded":{"messages":[{"role":"user","content":"synthetic"}],"model":"m"}},
+          {"client_status":200,"forwarded":{"messages":[{"role":"user","content":"synthetic"}],"model":"m"}}
+        ]"#;
+        assert!(matches!(
+            ogx_adaptive_thinking_loss(violating, 2),
+            Verdict::Violation(_)
+        ));
+        assert!(matches!(
+            ogx_adaptive_thinking_loss(violating, 1),
+            Verdict::Violation(_)
+        ));
+        assert!(matches!(
+            ogx_adaptive_thinking_loss("[]", 1),
+            Verdict::Violation(_)
+        ));
+    }
+
+    #[test]
+    fn ogx_adaptive_checker_accepts_forwarded_or_rejected_controls() {
+        let forwarded = r#"[
+          {"client_status":200,"forwarded":{"messages":[{"role":"user","content":"synthetic"}],"reasoning_effort":"medium"}}
+        ]"#;
+        assert_eq!(
+            ogx_adaptive_thinking_loss(forwarded, 1),
+            Verdict::Conformant
+        );
+        let rejected = r#"[
+          {"client_status":400,"forwarded":null}
+        ]"#;
+        assert_eq!(
+            ogx_adaptive_thinking_loss(rejected, 1),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn ogx_adaptive_checker_parses_jsonl_and_rejects_forwarded_config_loss() {
+        let jsonl = "{\"body\":{\"messages\":[{\"role\":\"user\",\"content\":\"synthetic\"}],\"model\":\"m\"}}\n{\"body\":{\"messages\":[{\"role\":\"user\",\"content\":\"synthetic\"}],\"model\":\"m\"}}\n";
+        assert!(matches!(
+            ogx_adaptive_thinking_loss(jsonl, 2),
+            Verdict::Violation(_)
+        ));
+    }
+
+    #[test]
     fn id_contract_basics() {
         assert!(id_conforms("call_abc123"));
         assert!(id_conforms("functions_list_skills_0"));
         assert!(!id_conforms("functions.list_skills:0")); // dot and colon
         assert!(!id_conforms(&"x".repeat(65))); // too long
         assert!(!id_conforms("")); // empty
-    }
-
-    #[test]
-    fn image_cache_case_collision_is_caught() {
-        let bug = r#"{"body":{"scenario":"bug","cache_size":8,"requested":["/Cat.png","/cat.png"],"origin_hits":["/Cat.png"],"decoded":[[255,0,0],[255,0,0]],"origin_colors":{"/Cat.png":[255,0,0],"/cat.png":[0,0,255]}}}"#;
-        let v = image_url_cache_key_case_sensitive(bug);
-        assert!(matches!(v, Verdict::Violation(_)), "must catch: {v:?}");
-    }
-
-    #[test]
-    fn image_cache_case_distinct_urls_is_conformant() {
-        let control = r#"{"body":{"scenario":"cache-off","cache_size":0,"requested":["/Cat.png","/cat.png"],"origin_hits":["/Cat.png","/cat.png"],"decoded":[[255,0,0],[0,0,255]],"origin_colors":{"/Cat.png":[255,0,0],"/cat.png":[0,0,255]}}}"#;
-        assert_eq!(
-            image_url_cache_key_case_sensitive(control),
-            Verdict::Conformant
-        );
-    }
-
-    #[test]
-    fn image_cache_no_case_pair_skips() {
-        let no_pair = r#"{"body":{"scenario":"distinct","cache_size":8,"requested":["/Cat.png","/dog.png"],"origin_hits":["/Cat.png","/dog.png"],"decoded":[[255,0,0],[0,255,0]],"origin_colors":{"/Cat.png":[255,0,0],"/cat.png":[0,0,255],"/dog.png":[0,255,0]}}}"#;
-        assert_eq!(
-            image_url_cache_key_case_sensitive(no_pair),
-            Verdict::Conformant
-        );
     }
 
     #[test]

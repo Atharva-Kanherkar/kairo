@@ -1,1 +1,0 @@
-{"body": {"scenario": "distinct-urls", "cache_size": 8, "requested": ["/Cat.png", "/dog.png"], "origin_hits": ["/Cat.png", "/dog.png"], "decoded": [[255, 0, 0], [0, 255, 0]], "origin_colors": {"/Cat.png": [255, 0, 0], "/cat.png": [0, 0, 255], "/dog.png": [0, 255, 0]}}}

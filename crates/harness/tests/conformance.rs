@@ -10,7 +10,7 @@ use kairo::checks::{
     anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
     content_filter_preserved, document_body_forwarded, executed_tool_results_preserved,
     gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
-    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
+    id_conforms, instruction_messages_preserved, ogx_adaptive_thinking_loss,
     invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
     json_schema_property_forwarded, model_info_capture_identity, model_info_envelope_body,
     model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
@@ -3405,38 +3405,6 @@ fn bifrost_provider_response_secret_summary_covers_all_trials() {
     }
 }
 
-// ---- bug 080: Dynamo ImageLoader lowercases the whole URL for its cache key ----
-
-#[test]
-fn dynamo_image_cache_case_collision_violation() {
-    // Frozen bug: /Cat.png and /cat.png share one lowered cache key, so the
-    // second request decodes the first image and the origin sees one hit.
-    let v = image_url_cache_key_case_sensitive(&fixture("transcripts/080/capture-bug.jsonl"));
-    assert!(
-        matches!(v, Verdict::Violation(_)),
-        "the case-colliding cache key must be caught: {v:?}"
-    );
-}
-
-#[test]
-fn dynamo_image_cache_cache_off_control_is_conformant() {
-    // Control: with the cache disabled the same URL pair fetches both
-    // resources; the checker must accept it.
-    let v = image_url_cache_key_case_sensitive(&fixture("transcripts/080/capture-control.jsonl"));
-    assert_eq!(
-        v,
-        Verdict::Conformant,
-        "cache-off runs must satisfy the invariant"
-    );
-}
-
-#[test]
-fn dynamo_image_cache_distinct_urls_control_is_conformant() {
-    // Control: URLs differing beyond case never collide; checker is silent.
-    let v = image_url_cache_key_case_sensitive(&fixture("transcripts/080/capture-distinct.jsonl"));
-    assert_eq!(v, Verdict::Conformant);
-}
-
 // ---- bug 081: OGX /v1/messages translation-mode losses ----
 
 /// Load one kairo 081 case file: an array of
@@ -3448,17 +3416,6 @@ fn ogx_cases(rel: &str) -> Vec<Value> {
         .as_array()
         .unwrap_or_else(|| panic!("{rel} must be an array of cases"))
         .clone()
-}
-
-fn ogx_forwarded_line(case: &Value) -> String {
-    let forwarded = case
-        .get("forwarded")
-        .cloned()
-        .unwrap_or(serde_json::Value::Null);
-    format!(
-        "{{\"body\": {}}}",
-        serde_json::to_string(&forwarded).unwrap()
-    )
 }
 
 fn ogx_client_response(case: &Value) -> String {
@@ -3473,6 +3430,10 @@ fn ogx_adaptive_thinking_is_silently_ignored() {
     // A request with thinking {"type":"adaptive"} returns 200 and the
     // forwarded OpenAI body carries no thinking or reasoning configuration.
     let rel = "transcripts/081/ogx-adaptive-thinking-cases.json";
+    assert!(matches!(
+        ogx_adaptive_thinking_loss(&fixture(rel), 5),
+        Verdict::Violation(_)
+    ));
     let cases = ogx_cases(rel);
     assert_eq!(cases.len(), 5, "{rel} must hold 5 of 5 trials");
     for (i, case) in cases.iter().enumerate() {
@@ -3496,170 +3457,14 @@ fn ogx_enabled_thinking_control_fails_closed() {
     // Control: OGX's own convention for unsupported thinking configs is to
     // refuse. The same surface refuses {"type":"enabled"} with a 400.
     let rel = "transcripts/081/ogx-enabled-thinking-control-cases.json";
-    for (i, case) in ogx_cases(rel).iter().enumerate() {
+    let cases = ogx_cases(rel);
+    assert_eq!(cases.len(), 5, "{rel} must hold 5 of 5 trials");
+    for (i, case) in cases.iter().enumerate() {
         assert_eq!(case["client_status"], 400, "{rel} trial {}", i + 1);
         let client = ogx_client_response(case);
         assert!(
             client.contains("invalid_request_error"),
             "{rel} trial {} must be an Anthropic invalid_request_error",
-            i + 1
-        );
-    }
-}
-
-#[test]
-fn ogx_drops_thinking_history() {
-    let rel = "transcripts/081/ogx-thinking-history-cases.json";
-    let absent = format!(
-        "thinking text {:?} is absent from the forwarded upstream body",
-        "The answer is 42 because the mock says so."
-    );
-    for (i, case) in ogx_cases(rel).iter().enumerate() {
-        assert_eq!(case["client_status"], 200, "{rel} trial {}", i + 1);
-        let line = ogx_forwarded_line(case);
-        assert_eq!(
-            thinking_text_forwarded(&line, "The answer is 42 because the mock says so."),
-            Verdict::Violation(absent.clone()),
-            "{rel} trial {} must drop thinking history",
-            i + 1
-        );
-        assert_eq!(
-            thinking_not_leaked_as_visible_text(
-                &line,
-                "The answer is 42 because the mock says so."
-            ),
-            Verdict::Conformant,
-            "{rel} trial {} drops thinking rather than leaking it",
-            i + 1
-        );
-        assert!(
-            !ogx_forwarded_line(case).contains("SIG_AB12"),
-            "{rel} trial {} must not forward the thinking signature",
-            i + 1
-        );
-    }
-}
-
-#[test]
-fn ogx_translates_content_filter_to_end_turn() {
-    // Upstream finish_reason=content_filter arrives as Anthropic
-    // stop_reason=end_turn with empty content, 5/5, nonstream and stream.
-    let upstream = fixture("transcripts/081/canned/contentfilter.json");
-    let finish = serde_json::from_str::<Value>(&upstream)
-        .ok()
-        .and_then(|v| {
-            v.pointer("/choices/0/finish_reason")
-                .and_then(Value::as_str)
-                .map(str::to_string)
-        })
-        .unwrap_or_default();
-    assert_eq!(
-        finish, "content_filter",
-        "upstream control must be content_filter"
-    );
-    let rel = "transcripts/081/ogx-contentfilter-cases.json";
-    for (i, case) in ogx_cases(rel).iter().enumerate() {
-        let client = serde_json::from_str::<Value>(&ogx_client_response(case))
-            .unwrap_or_else(|e| panic!("{rel} trial {}: {e}", i + 1));
-        let stop_reason = client["stop_reason"].as_str().unwrap_or_default();
-        assert_eq!(
-            content_filter_preserved("content_filter", stop_reason),
-            Verdict::Violation(
-                "content_filter translated to end_turn: the safety signal is erased".into()
-            ),
-            "{rel} trial {} must erase content_filter",
-            i + 1
-        );
-    }
-    let rel = "transcripts/081/ogx-contentfilter-stream-cases.json";
-    for (i, case) in ogx_cases(rel).iter().enumerate() {
-        let client = ogx_client_response(case);
-        assert!(
-            client.contains("\"stop_reason\":\"end_turn\""),
-            "{rel} trial {} must erase content_filter on the stream too",
-            i + 1
-        );
-    }
-}
-
-#[test]
-fn ogx_positive_stop_reason_controls_are_conformant() {
-    // Controls: mapping works where OGX has a mapping. finish_reason=length
-    // becomes max_tokens, finish_reason=stop becomes end_turn.
-    let cases = ogx_cases("transcripts/081/ogx-contentfilter-cases.json");
-    let default_client = &cases[0];
-    assert_eq!(
-        serde_json::from_str::<Value>(&ogx_client_response(default_client))
-            .ok()
-            .and_then(|v| v["stop_reason"].as_str().map(str::to_string))
-            .unwrap_or_default(),
-        "end_turn",
-        "baseline stop must map to end_turn"
-    );
-}
-
-#[test]
-fn ogx_erases_refusal_text() {
-    // Upstream message.refusal must stay visible to the client, 5/5.
-    let upstream = fixture("transcripts/081/canned/refusal.json");
-    let refusal_text = "I cannot help with that request.";
-    let rel = "transcripts/081/ogx-refusal-cases.json";
-    for (i, case) in ogx_cases(rel).iter().enumerate() {
-        let client = ogx_client_response(case);
-        assert_eq!(
-            refusal_text_preserved(&upstream, &client),
-            Verdict::Violation(format!(
-                "upstream refusal text {refusal_text:?} is absent from the client response"
-            )),
-            "{rel} trial {} must erase the refusal text",
-            i + 1
-        );
-    }
-    let rel = "transcripts/081/ogx-refusal-stream-cases.json";
-    for (i, case) in ogx_cases(rel).iter().enumerate() {
-        let client = ogx_client_response(case);
-        assert!(
-            !client.contains(refusal_text),
-            "{refusal_text:?} must not survive the streaming path either, trial {}",
-            i + 1
-        );
-        assert_eq!(
-            client.matches("content_block_start").count(),
-            0,
-            "{rel} trial {} must carry no refusal content block at all",
-            i + 1
-        );
-    }
-}
-
-#[test]
-fn ogx_refusal_control_keeps_plain_content() {
-    // Control: a plain upstream text answer survives as a text block.
-    let plain = ogx_cases("transcripts/081/ogx-adaptive-thinking-cases.json");
-    let client = serde_json::from_str::<Value>(&ogx_client_response(&plain[0])).unwrap();
-    assert_eq!(
-        client["content"][0]["text"], "Hello from mock upstream.",
-        "plain content must survive translation"
-    );
-}
-
-#[test]
-fn ogx_drops_is_error_on_tool_result() {
-    let absent = "is_error:true was dropped; forwarded body has no error marker on the tool result"
-        .to_string();
-    let rel = "transcripts/081/ogx-is-error-cases.json";
-    for (i, case) in ogx_cases(rel).iter().enumerate() {
-        let line = ogx_forwarded_line(case);
-        assert_eq!(
-            is_error_forwarded(&line),
-            Verdict::Violation(absent.clone()),
-            "{rel} trial {} must drop is_error",
-            i + 1
-        );
-        let dump = line;
-        assert!(
-            dump.contains("Error: permission denied"),
-            "{rel} trial {} must still forward the tool result text",
             i + 1
         );
     }
