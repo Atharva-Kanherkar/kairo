@@ -1717,10 +1717,7 @@ mod tests {
         let rejected = r#"[
           {"client_status":400,"forwarded":null}
         ]"#;
-        assert_eq!(
-            ogx_adaptive_thinking_loss(rejected, 1),
-            Verdict::Conformant
-        );
+        assert_eq!(ogx_adaptive_thinking_loss(rejected, 1), Verdict::Conformant);
     }
 
     #[test]
