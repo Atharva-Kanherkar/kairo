@@ -1,0 +1,5 @@
+{"path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "Synthetic adaptive-thinking control."}], "model": "mock-gpt", "max_completion_tokens": 32, "stream": false}}
+{"path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "Synthetic adaptive-thinking control."}], "model": "mock-gpt", "max_completion_tokens": 32, "stream": false}}
+{"path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "Synthetic adaptive-thinking control."}], "model": "mock-gpt", "max_completion_tokens": 32, "stream": false}}
+{"path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "Synthetic adaptive-thinking control."}], "model": "mock-gpt", "max_completion_tokens": 32, "stream": false}}
+{"path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "Synthetic adaptive-thinking control."}], "model": "mock-gpt", "max_completion_tokens": 32, "stream": false}}

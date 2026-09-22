@@ -1,0 +1,102 @@
+[
+ {
+  "trial": 1,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 32,
+   "messages": [
+    {
+     "role": "user",
+     "content": "Synthetic adaptive-thinking control."
+    }
+   ],
+   "thinking": {
+    "type": "enabled",
+    "budget_tokens": 1024
+   }
+  },
+  "client_status": 400,
+  "client_response": "{\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Failed to process thinking request: extended thinking requires a native Anthropic-compatible provider; translation mode does not support it\"}}",
+  "forwarded": null
+ },
+ {
+  "trial": 2,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 32,
+   "messages": [
+    {
+     "role": "user",
+     "content": "Synthetic adaptive-thinking control."
+    }
+   ],
+   "thinking": {
+    "type": "enabled",
+    "budget_tokens": 1024
+   }
+  },
+  "client_status": 400,
+  "client_response": "{\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Failed to process thinking request: extended thinking requires a native Anthropic-compatible provider; translation mode does not support it\"}}",
+  "forwarded": null
+ },
+ {
+  "trial": 3,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 32,
+   "messages": [
+    {
+     "role": "user",
+     "content": "Synthetic adaptive-thinking control."
+    }
+   ],
+   "thinking": {
+    "type": "enabled",
+    "budget_tokens": 1024
+   }
+  },
+  "client_status": 400,
+  "client_response": "{\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Failed to process thinking request: extended thinking requires a native Anthropic-compatible provider; translation mode does not support it\"}}",
+  "forwarded": null
+ },
+ {
+  "trial": 4,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 32,
+   "messages": [
+    {
+     "role": "user",
+     "content": "Synthetic adaptive-thinking control."
+    }
+   ],
+   "thinking": {
+    "type": "enabled",
+    "budget_tokens": 1024
+   }
+  },
+  "client_status": 400,
+  "client_response": "{\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Failed to process thinking request: extended thinking requires a native Anthropic-compatible provider; translation mode does not support it\"}}",
+  "forwarded": null
+ },
+ {
+  "trial": 5,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 32,
+   "messages": [
+    {
+     "role": "user",
+     "content": "Synthetic adaptive-thinking control."
+    }
+   ],
+   "thinking": {
+    "type": "enabled",
+    "budget_tokens": 1024
+   }
+  },
+  "client_status": 400,
+  "client_response": "{\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"Failed to process thinking request: extended thinking requires a native Anthropic-compatible provider; translation mode does not support it\"}}",
+  "forwarded": null
+ }
+]

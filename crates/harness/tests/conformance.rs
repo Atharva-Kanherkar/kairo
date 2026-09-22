@@ -8,20 +8,21 @@
 use kairo::checks::{
     anthropic_response_toolcall_stop_reason, anthropic_stream_safety_stop_reason,
     anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
-    content_filter_preserved, document_body_forwarded,
+    content_filter_preserved, document_body_forwarded, executed_tool_results_preserved,
     gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
     id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
     invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
     json_schema_property_forwarded, model_info_capture_identity, model_info_envelope_body,
     model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
     no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
-    openai_stream_finish_reason, openai_toolcall_id_charset, outbound_request_omits_secret,
-    parallel_tool_disable_preserved, reasoning_text_order_preserved, refusal_text_preserved,
-    response_content_not_empty, response_omits_secret, responses_refusal_semantics_preserved,
-    responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
-    thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
-    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, FunctionToolFormat,
-    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    ogx_adaptive_thinking_loss, openai_stream_finish_reason, openai_toolcall_id_charset,
+    outbound_request_omits_secret, parallel_tool_disable_preserved, reasoning_text_order_preserved,
+    refusal_text_preserved, response_content_not_empty, response_omits_secret,
+    responses_refusal_semantics_preserved, responses_single_lifecycle, stop_sequence_forwarded,
+    thinking_not_leaked_as_visible_text, thinking_text_forwarded, tool_strict_forwarded,
+    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
+    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
 use serde_json::Value;
 use std::fs;
@@ -3435,6 +3436,73 @@ fn dynamo_image_cache_distinct_urls_control_is_conformant() {
     // Control: URLs differing beyond case never collide; checker is silent.
     let v = image_url_cache_key_case_sensitive(&fixture("transcripts/080/capture-distinct.jsonl"));
     assert_eq!(v, Verdict::Conformant);
+}
+
+// ---- bug 081: OGX /v1/messages translation-mode losses ----
+
+/// Load one kairo 081 case file: an array of
+/// `{trial, request, client_status, client_response, forwarded}` records.
+fn ogx_cases(rel: &str) -> Vec<Value> {
+    let raw = fixture(rel);
+    let parsed: Value = serde_json::from_str(&raw).unwrap_or_else(|e| panic!("{rel}: {e}"));
+    parsed
+        .as_array()
+        .unwrap_or_else(|| panic!("{rel} must be an array of cases"))
+        .clone()
+}
+
+fn ogx_client_response(case: &Value) -> String {
+    case.get("client_response")
+        .and_then(Value::as_str)
+        .unwrap_or_default()
+        .to_string()
+}
+
+#[test]
+fn ogx_adaptive_thinking_is_silently_ignored() {
+    // A request with thinking {"type":"adaptive"} returns 200 and the
+    // forwarded OpenAI body carries no thinking or reasoning configuration.
+    let rel = "transcripts/081/ogx-adaptive-thinking-cases.json";
+    assert!(matches!(
+        ogx_adaptive_thinking_loss(&fixture(rel), 5),
+        Verdict::Violation(_)
+    ));
+    let cases = ogx_cases(rel);
+    assert_eq!(cases.len(), 5, "{rel} must hold 5 of 5 trials");
+    for (i, case) in cases.iter().enumerate() {
+        assert_eq!(
+            case["client_status"],
+            200,
+            "{rel} trial {} must return 200",
+            i + 1
+        );
+        let forwarded = &case["forwarded"];
+        assert!(
+            forwarded.get("thinking").is_none()
+                && forwarded.get("reasoning").is_none()
+                && forwarded.get("reasoning_effort").is_none(),
+            "{rel} trial {} must drop adaptive thinking from the forwarded body",
+            i + 1
+        );
+    }
+}
+
+#[test]
+fn ogx_enabled_thinking_control_fails_closed() {
+    // Control: OGX's own convention for unsupported thinking configs is to
+    // refuse. The same surface refuses {"type":"enabled"} with a 400.
+    let rel = "transcripts/081/ogx-enabled-thinking-control-cases.json";
+    let cases = ogx_cases(rel);
+    assert_eq!(cases.len(), 5, "{rel} must hold 5 of 5 trials");
+    for (i, case) in cases.iter().enumerate() {
+        assert_eq!(case["client_status"], 400, "{rel} trial {}", i + 1);
+        let client = ogx_client_response(case);
+        assert!(
+            client.contains("invalid_request_error"),
+            "{rel} trial {} must be an Anthropic invalid_request_error",
+            i + 1
+        );
+    }
 }
 
 // ---- bug 082: repeated agent-mode calls overwrite an executed result ----

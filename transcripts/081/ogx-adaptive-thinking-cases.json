@@ -1,0 +1,147 @@
+[
+ {
+  "trial": 1,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 32,
+   "thinking": {
+    "type": "adaptive"
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Synthetic adaptive-thinking control."
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"[REDACTED_REQUEST_IDENTIFIER]\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "Synthetic adaptive-thinking control."
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 32,
+   "stream": false
+  }
+ },
+ {
+  "trial": 2,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 32,
+   "thinking": {
+    "type": "adaptive"
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Synthetic adaptive-thinking control."
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"[REDACTED_REQUEST_IDENTIFIER]\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "Synthetic adaptive-thinking control."
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 32,
+   "stream": false
+  }
+ },
+ {
+  "trial": 3,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 32,
+   "thinking": {
+    "type": "adaptive"
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Synthetic adaptive-thinking control."
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"[REDACTED_REQUEST_IDENTIFIER]\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "Synthetic adaptive-thinking control."
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 32,
+   "stream": false
+  }
+ },
+ {
+  "trial": 4,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 32,
+   "thinking": {
+    "type": "adaptive"
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Synthetic adaptive-thinking control."
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"[REDACTED_REQUEST_IDENTIFIER]\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "Synthetic adaptive-thinking control."
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 32,
+   "stream": false
+  }
+ },
+ {
+  "trial": 5,
+  "request": {
+   "model": "openai/mock-gpt",
+   "max_tokens": 32,
+   "thinking": {
+    "type": "adaptive"
+   },
+   "messages": [
+    {
+     "role": "user",
+     "content": "Synthetic adaptive-thinking control."
+    }
+   ]
+  },
+  "client_status": 200,
+  "client_response": "{\"id\":\"[REDACTED_REQUEST_IDENTIFIER]\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
+  "forwarded": {
+   "messages": [
+    {
+     "role": "user",
+     "content": "Synthetic adaptive-thinking control."
+    }
+   ],
+   "model": "mock-gpt",
+   "max_completion_tokens": 32,
+   "stream": false
+  }
+ }
+]

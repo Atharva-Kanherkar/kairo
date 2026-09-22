@@ -300,6 +300,87 @@ pub fn capture_records(jsonl: &str) -> Result<Vec<(String, Value)>, String> {
         .collect()
 }
 
+/// Check the adaptive-thinking invariant from either a case-array fixture or
+/// capture-rig JSONL. A 200 response with a non-empty forwarded request and no
+/// `thinking` or `reasoning` field is the reproduced loss. A gateway that
+/// forwards an explicit reasoning configuration or rejects the unsupported
+/// request is conformant.
+pub fn ogx_adaptive_thinking_loss(evidence: &str, expected_trials: usize) -> Verdict {
+    let parsed = serde_json::from_str::<Value>(evidence).ok();
+    let cases: Vec<Value> = match parsed {
+        Some(Value::Array(items)) => items,
+        Some(_) => return Verdict::Violation("case fixture is not an array".to_owned()),
+        None => match capture_records(evidence) {
+            Ok(records) => records
+                .into_iter()
+                .map(|(_, body)| {
+                    serde_json::json!({
+                        "client_status": 200,
+                        "forwarded": body,
+                    })
+                })
+                .collect(),
+            Err(error) => return Verdict::Violation(error),
+        },
+    };
+    if cases.len() != expected_trials {
+        return Verdict::Violation(format!(
+            "expected {expected_trials} trials, found {}",
+            cases.len()
+        ));
+    }
+    let mut saw_forwarded_success = false;
+    for (index, case) in cases.iter().enumerate() {
+        let status = case.get("client_status").and_then(Value::as_i64);
+        let forwarded = case.get("forwarded").unwrap_or(&Value::Null);
+        if status == Some(400) && forwarded.is_null() {
+            continue;
+        }
+        if status != Some(200) {
+            return Verdict::Violation(format!(
+                "trial {} has status {status:?}, expected 200 or fail-closed 400",
+                index + 1
+            ));
+        }
+        let Some(messages) = forwarded.get("messages").and_then(Value::as_array) else {
+            return Verdict::Violation(format!(
+                "trial {} has no non-empty forwarded messages",
+                index + 1
+            ));
+        };
+        if messages.is_empty() {
+            return Verdict::Violation(format!(
+                "trial {} forwarded an empty messages array",
+                index + 1
+            ));
+        }
+        saw_forwarded_success = true;
+        let has_config = object_has_key(forwarded, "thinking")
+            || object_has_key(forwarded, "reasoning")
+            || object_has_key(forwarded, "reasoning_effort");
+        if !has_config {
+            return Verdict::Violation(format!(
+                "trial {} accepted adaptive thinking without a thinking or reasoning configuration",
+                index + 1
+            ));
+        }
+    }
+    if !saw_forwarded_success {
+        return Verdict::Conformant;
+    }
+    Verdict::Conformant
+}
+
+fn object_has_key(value: &Value, key: &str) -> bool {
+    match value {
+        Value::Object(fields) => {
+            fields.contains_key(key) || fields.values().any(|child| object_has_key(child, key))
+        }
+        Value::Array(items) => items.iter().any(|child| object_has_key(child, key)),
+        _ => false,
+    }
+}
+
 fn parse_capture_line(line: &str) -> Result<Value, String> {
     let v: Value = serde_json::from_str(line).map_err(|e| format!("unparseable capture: {e}"))?;
     Ok(v.get("body").cloned().unwrap_or(Value::Null))
@@ -1555,75 +1636,6 @@ pub fn image_url_cache_key_case_sensitive(jsonl: &str) -> Verdict {
                         "record {idx}: missing requested list: {record}"
                     ))
                 }
-
-                /// Invariant (bug 082): every distinct auto-executed tool call must retain a
-                /// separately client-visible result. `executions_json` is an execution index
-                /// with `executions[].tool_call_id` and `executions[].effect_marker`; the
-                /// markers must come from the recorded tool outputs, not from an expected
-                /// response fixture. `client_exchange` is the complete HTTP response.
-                ///
-                /// A tool may legally be called more than once in one turn. Tool names are not
-                /// identities, so a summary keyed only by tool name must not collapse results
-                /// from calls carrying distinct tool-call IDs.
-                pub fn executed_tool_results_preserved(executions_json: &str, client_exchange: &str) -> Verdict {
-                    let Ok(execution_index) = serde_json::from_str::<Value>(executions_json) else {
-                        return Verdict::Violation("execution index is not valid JSON".to_owned());
-                    };
-                    let Some(executions) = execution_index.get("executions").and_then(Value::as_array) else {
-                        return Verdict::Violation("execution index has no executions array".to_owned());
-                    };
-                    if executions.is_empty() {
-                        return Verdict::Violation("execution index is empty".to_owned());
-                    }
-
-                    let Some((head, body)) = client_exchange.split_once("\r\n\r\n") else {
-                        return Verdict::Violation("client capture is not a complete HTTP response".to_owned());
-                    };
-                    let status = head
-                        .lines()
-                        .next()
-                        .and_then(|line| line.split_whitespace().nth(1));
-                    if status != Some("200") {
-                        return Verdict::Violation(format!("client capture status is {status:?}, expected 200"));
-                    }
-                    if serde_json::from_str::<Value>(body).is_err() {
-                        return Verdict::Violation("client response body is not valid JSON".to_owned());
-                    }
-
-                    let mut ids = std::collections::HashSet::new();
-                    let mut markers = std::collections::HashSet::new();
-                    for (index, execution) in executions.iter().enumerate() {
-                        let Some(tool_call_id) = execution.get("tool_call_id").and_then(Value::as_str) else {
-                            return Verdict::Violation(format!("execution {index} has no non-string tool_call_id"));
-                        };
-                        let Some(effect_marker) = execution.get("effect_marker").and_then(Value::as_str) else {
-                            return Verdict::Violation(format!(
-                                "execution {index} has no non-string effect_marker"
-                            ));
-                        };
-                        if tool_call_id.is_empty() || effect_marker.is_empty() {
-                            return Verdict::Violation(format!(
-                                "execution {index} has an empty tool-call ID or result marker"
-                            ));
-                        }
-                        if !ids.insert(tool_call_id) {
-                            return Verdict::Violation(format!(
-                                "execution index repeats tool-call ID {tool_call_id:?}"
-                            ));
-                        }
-                        if !markers.insert(effect_marker) {
-                            return Verdict::Violation(format!(
-                                "execution index repeats result marker {effect_marker:?}"
-                            ));
-                        }
-                        if !body.contains(effect_marker) {
-                            return Verdict::Violation(format!(
-                                "executed call {tool_call_id:?} result marker {effect_marker:?} is absent from the client response"
-                            ));
-                        }
-                    }
-                    Verdict::Conformant
-                }
             };
         let has_case_collision = requested.iter().enumerate().any(|(i, u)| {
             requested[i + 1..]
@@ -1696,9 +1708,134 @@ pub fn image_url_cache_key_case_sensitive(jsonl: &str) -> Verdict {
     Verdict::Conformant
 }
 
+/// Invariant (bug 082): every distinct auto-executed tool call must retain a
+/// separately client-visible result. `executions_json` is an execution index
+/// with `executions[].tool_call_id` and `executions[].effect_marker`; the
+/// markers must come from the recorded tool outputs, not from an expected
+/// response fixture. `client_exchange` is the complete HTTP response.
+///
+/// A tool may legally be called more than once in one turn. Tool names are not
+/// identities, so a summary keyed only by tool name must not collapse results
+/// from calls carrying distinct tool-call IDs.
+pub fn executed_tool_results_preserved(executions_json: &str, client_exchange: &str) -> Verdict {
+    let Ok(execution_index) = serde_json::from_str::<Value>(executions_json) else {
+        return Verdict::Violation("execution index is not valid JSON".to_owned());
+    };
+    let Some(executions) = execution_index.get("executions").and_then(Value::as_array) else {
+        return Verdict::Violation("execution index has no executions array".to_owned());
+    };
+    if executions.is_empty() {
+        return Verdict::Violation("execution index is empty".to_owned());
+    }
+
+    let Some((head, body)) = client_exchange.split_once("\r\n\r\n") else {
+        return Verdict::Violation("client capture is not a complete HTTP response".to_owned());
+    };
+    let status = head
+        .lines()
+        .next()
+        .and_then(|line| line.split_whitespace().nth(1));
+    if status != Some("200") {
+        return Verdict::Violation(format!("client capture status is {status:?}, expected 200"));
+    }
+    if serde_json::from_str::<Value>(body).is_err() {
+        return Verdict::Violation("client response body is not valid JSON".to_owned());
+    }
+
+    let mut ids = std::collections::HashSet::new();
+    let mut markers = std::collections::HashSet::new();
+    for (index, execution) in executions.iter().enumerate() {
+        let Some(tool_call_id) = execution.get("tool_call_id").and_then(Value::as_str) else {
+            return Verdict::Violation(format!("execution {index} has no non-string tool_call_id"));
+        };
+        let Some(effect_marker) = execution.get("effect_marker").and_then(Value::as_str) else {
+            return Verdict::Violation(format!(
+                "execution {index} has no non-string effect_marker"
+            ));
+        };
+        if tool_call_id.is_empty() || effect_marker.is_empty() {
+            return Verdict::Violation(format!(
+                "execution {index} has an empty tool-call ID or result marker"
+            ));
+        }
+        if !ids.insert(tool_call_id) {
+            return Verdict::Violation(format!(
+                "execution index repeats tool-call ID {tool_call_id:?}"
+            ));
+        }
+        if !markers.insert(effect_marker) {
+            return Verdict::Violation(format!(
+                "execution index repeats result marker {effect_marker:?}"
+            ));
+        }
+        if !body.contains(effect_marker) {
+            return Verdict::Violation(format!(
+                "executed call {tool_call_id:?} result marker {effect_marker:?} is absent from the client response"
+            ));
+        }
+    }
+    Verdict::Conformant
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn ogx_adaptive_checker_is_non_vacuous_and_checks_trial_count() {
+        let violating = r#"[
+          {"client_status":200,"forwarded":{"messages":[{"role":"user","content":"synthetic"}],"model":"m"}},
+          {"client_status":200,"forwarded":{"messages":[{"role":"user","content":"synthetic"}],"model":"m"}}
+        ]"#;
+        assert!(matches!(
+            ogx_adaptive_thinking_loss(violating, 2),
+            Verdict::Violation(_)
+        ));
+        assert!(matches!(
+            ogx_adaptive_thinking_loss(violating, 1),
+            Verdict::Violation(_)
+        ));
+        assert!(matches!(
+            ogx_adaptive_thinking_loss("[]", 1),
+            Verdict::Violation(_)
+        ));
+    }
+
+    #[test]
+    fn ogx_adaptive_checker_accepts_forwarded_or_rejected_controls() {
+        let forwarded = r#"[
+          {"client_status":200,"forwarded":{"messages":[{"role":"user","content":"synthetic"}],"reasoning_effort":"medium"}}
+        ]"#;
+        assert_eq!(
+            ogx_adaptive_thinking_loss(forwarded, 1),
+            Verdict::Conformant
+        );
+        let rejected = r#"[
+          {"client_status":400,"forwarded":null}
+        ]"#;
+        assert_eq!(ogx_adaptive_thinking_loss(rejected, 1), Verdict::Conformant);
+    }
+
+    #[test]
+    fn ogx_adaptive_checker_rejects_mixed_trials() {
+        let mixed = r#"[
+          {"client_status":200,"forwarded":{"messages":[{"role":"user","content":"synthetic"}],"reasoning_effort":"medium"}},
+          {"client_status":200,"forwarded":{"messages":[{"role":"user","content":"synthetic"}]}}
+        ]"#;
+        assert!(matches!(
+            ogx_adaptive_thinking_loss(mixed, 2),
+            Verdict::Violation(_)
+        ));
+    }
+
+    #[test]
+    fn ogx_adaptive_checker_parses_jsonl_and_rejects_forwarded_config_loss() {
+        let jsonl = "{\"body\":{\"messages\":[{\"role\":\"user\",\"content\":\"synthetic\"}],\"model\":\"m\"}}\n{\"body\":{\"messages\":[{\"role\":\"user\",\"content\":\"synthetic\"}],\"model\":\"m\"}}\n";
+        assert!(matches!(
+            ogx_adaptive_thinking_loss(jsonl, 2),
+            Verdict::Violation(_)
+        ));
+    }
 
     #[test]
     fn id_contract_basics() {

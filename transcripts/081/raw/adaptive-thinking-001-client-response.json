@@ -1,0 +1,1 @@
+{"id":"msg_7f8c79bd75fb4550a9a8eb58","type":"message","role":"assistant","content":[{"type":"text","text":"Synthetic control response."}],"model":"mock-gpt","stop_reason":"end_turn","usage":{"input_tokens":1,"output_tokens":1}}

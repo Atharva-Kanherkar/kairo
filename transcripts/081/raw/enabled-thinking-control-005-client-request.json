@@ -1,0 +1,1 @@
+{"model":"openai/mock-gpt","max_tokens":32,"messages":[{"role":"user","content":"Synthetic adaptive-thinking control."}],"thinking":{"type":"enabled","budget_tokens":1024}}

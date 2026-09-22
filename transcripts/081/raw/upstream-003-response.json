@@ -1,0 +1,1 @@
+{"id": "chatcmpl-kairo-081", "object": "chat.completion", "created": 0, "model": "mock-gpt", "choices": [{"index": 0, "message": {"role": "assistant", "content": "Synthetic control response."}, "finish_reason": "stop"}], "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}}
