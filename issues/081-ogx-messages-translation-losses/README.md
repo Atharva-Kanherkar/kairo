@@ -25,12 +25,13 @@ configuration to an OpenAI-compatible upstream.
 ### Exact reproduction
 
 ```sh
-git clone --branch v1.4.0 https://github.com/ogx-ai/ogx \
-  /Users/atharva/kairo-targets/ogx
-cd /Users/atharva/kairo-targets/ogx
-uv sync
-python3 /Users/atharva/kairo/transcripts/081/hunt.py \
-  /Users/atharva/kairo-targets/ogx
+# OGX_SRC is any empty directory. KAIRO is this repository checkout.
+OGX_SRC=/tmp/ogx-v1.4.0
+KAIRO=$(pwd)
+
+git clone --branch v1.4.0 https://github.com/ogx-ai/ogx "$OGX_SRC"
+cd "$OGX_SRC" && uv sync
+python3 "$KAIRO/transcripts/081/hunt.py" "$OGX_SRC"
 ```
 
 The self-contained runner verifies commit `051a8a0`, starts the capture
@@ -213,12 +214,12 @@ adaptive variant remains accepted and silently removed on the current release.
 
 | Check | Command | Result |
 |---|---|---|
-| Reproduction | `python3 transcripts/081/hunt.py /Users/atharva/kairo-targets/ogx` | adaptive 5/5 HTTP 200 with capture; enabled 5/5 HTTP 400 |
+| Reproduction | `python3 transcripts/081/hunt.py "$OGX_SRC"` | adaptive 5/5 HTTP 200 with capture; enabled 5/5 HTTP 400 |
 | Live control | `python3 transcripts/081/live_anthropic_control.py --trials 5` | adaptive advertised; 5/5 HTTP 200 structural messages |
-| Harness | `cargo test --workspace` | 33 unit and 154 conformance tests passed |
+| Harness | `cargo test --workspace` | 36 unit and 157 conformance tests passed |
 | Formatting | `cargo fmt --all -- --check` | passed |
 | Lint | `cargo clippy --workspace --all-targets -- -D warnings` | passed |
-| README counts | `python3 tools/update-readme-counts.py --check` | 58 bugs and 187 tests |
+| README counts | `python3 tools/update-readme-counts.py --check` | 59 bugs and 193 tests |
 
 ## Security and scope
 

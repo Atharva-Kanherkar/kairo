@@ -1607,6 +1607,107 @@ pub fn gemini_inline_media_preserved_in_chat_stream(sse: &str) -> Verdict {
     Verdict::Conformant
 }
 
+/// Invariant (bug 080): two media URLs that differ only in letter case are
+/// distinct resources (RFC 3986 paths and queries are case-sensitive). A
+/// cache key that lowercases the whole URL makes the second request silently
+/// receive the first resource. For every loader session that requested a
+/// case-colliding pair, the origin must receive one hit per requested URL and
+/// each decoded image must match the resource the origin serves for that URL.
+///
+/// Runs against the capture JSONL written by `transcripts/080/repro_case_collision.py`.
+/// Each record: `requested` (URL paths), `origin_hits` (paths the origin saw),
+/// `decoded` (pixel rows returned per request), `origin_colors` (path -> color).
+pub fn image_url_cache_key_case_sensitive(jsonl: &str) -> Verdict {
+    let records = match capture_records(jsonl) {
+        Ok(r) => r,
+        Err(e) => return Verdict::Violation(format!("unparseable capture: {e}")),
+    };
+    for (idx, (_, record)) in records.iter().enumerate() {
+        let requested: Vec<String> =
+            match record.get("requested").and_then(Value::as_array).map(|a| {
+                a.iter()
+                    .filter_map(Value::as_str)
+                    .map(str::to_owned)
+                    .collect()
+            }) {
+                Some(r) => r,
+                None => {
+                    return Verdict::Violation(format!(
+                        "record {idx}: missing requested list: {record}"
+                    ))
+                }
+            };
+        let has_case_collision = requested.iter().enumerate().any(|(i, u)| {
+            requested[i + 1..]
+                .iter()
+                .any(|v| u != v && u.to_lowercase() == v.to_lowercase())
+        });
+        if !has_case_collision {
+            continue; // nothing this record can say about the invariant
+        }
+        let hits: Vec<String> = match record
+            .get("origin_hits")
+            .and_then(Value::as_array)
+            .map(|a| {
+                a.iter()
+                    .filter_map(Value::as_str)
+                    .map(str::to_owned)
+                    .collect()
+            }) {
+            Some(h) => h,
+            None => {
+                return Verdict::Violation(format!(
+                    "record {idx}: missing origin_hits list: {record}"
+                ))
+            }
+        };
+        let decoded: Vec<Vec<i64>> =
+            match record.get("decoded").and_then(Value::as_array).map(|a| {
+                a.iter()
+                    .filter_map(|p| {
+                        p.as_array()
+                            .map(|rgb| rgb.iter().filter_map(Value::as_i64).collect::<Vec<i64>>())
+                    })
+                    .collect()
+            }) {
+                Some(d) => d,
+                None => {
+                    return Verdict::Violation(format!(
+                        "record {idx}: missing decoded list: {record}"
+                    ))
+                }
+            };
+        let Some(Value::Object(colors)) = record.get("origin_colors") else {
+            return Verdict::Violation(format!(
+                "record {idx}: missing origin_colors map: {record}"
+            ));
+        };
+        for (i, url) in requested.iter().enumerate() {
+            if !hits.iter().any(|h| h == url) {
+                return Verdict::Violation(format!(
+                    "record {idx}: requested '{url}' never reached the origin \
+                     (hits: {hits:?}); a cache key conflating case-differing URLs \
+                     served another resource"
+                ));
+            }
+            let expected = colors
+                .get(url)
+                .and_then(Value::as_array)
+                .map(|rgb| rgb.iter().filter_map(Value::as_i64).collect::<Vec<i64>>());
+            match (decoded.get(i), expected) {
+                (Some(got), Some(want)) if got != &want => {
+                    return Verdict::Violation(format!(
+                        "record {idx}: '{url}' decoded to {got:?}, origin serves {want:?}; \
+                         the case-differing URL pair collided on one cache key"
+                    ));
+                }
+                _ => {}
+            }
+        }
+    }
+    Verdict::Conformant
+}
+
 /// Invariant (bug 082): every distinct auto-executed tool call must retain a
 /// separately client-visible result. `executions_json` is an execution index
 /// with `executions[].tool_call_id` and `executions[].effect_marker`; the
@@ -1743,6 +1844,31 @@ mod tests {
         assert!(!id_conforms("functions.list_skills:0")); // dot and colon
         assert!(!id_conforms(&"x".repeat(65))); // too long
         assert!(!id_conforms("")); // empty
+    }
+
+    #[test]
+    fn image_cache_case_collision_is_caught() {
+        let bug = r#"{"body":{"scenario":"bug","cache_size":8,"requested":["/Cat.png","/cat.png"],"origin_hits":["/Cat.png"],"decoded":[[255,0,0],[255,0,0]],"origin_colors":{"/Cat.png":[255,0,0],"/cat.png":[0,0,255]}}}"#;
+        let v = image_url_cache_key_case_sensitive(bug);
+        assert!(matches!(v, Verdict::Violation(_)), "must catch: {v:?}");
+    }
+
+    #[test]
+    fn image_cache_case_distinct_urls_is_conformant() {
+        let control = r#"{"body":{"scenario":"cache-off","cache_size":0,"requested":["/Cat.png","/cat.png"],"origin_hits":["/Cat.png","/cat.png"],"decoded":[[255,0,0],[0,0,255]],"origin_colors":{"/Cat.png":[255,0,0],"/cat.png":[0,0,255]}}}"#;
+        assert_eq!(
+            image_url_cache_key_case_sensitive(control),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn image_cache_no_case_pair_skips() {
+        let no_pair = r#"{"body":{"scenario":"distinct","cache_size":8,"requested":["/Cat.png","/dog.png"],"origin_hits":["/Cat.png","/dog.png"],"decoded":[[255,0,0],[0,255,0]],"origin_colors":{"/Cat.png":[255,0,0],"/cat.png":[0,0,255],"/dog.png":[0,255,0]}}}"#;
+        assert_eq!(
+            image_url_cache_key_case_sensitive(no_pair),
+            Verdict::Conformant
+        );
     }
 
     #[test]

@@ -35,6 +35,7 @@ GATEWAYS = (
     ("gomodel", "GoModel"),
     ("axonhub", "AxonHub"),
     ("any-llm", "any-llm"),
+    ("dynamo", "Dynamo"),
     ("ogx", "OGX"),
 )
 
