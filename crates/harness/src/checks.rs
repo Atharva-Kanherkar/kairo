@@ -330,7 +330,6 @@ pub fn ogx_adaptive_thinking_loss(evidence: &str, expected_trials: usize) -> Ver
         ));
     }
     let mut saw_forwarded_success = false;
-    let mut every_success_dropped = true;
     for (index, case) in cases.iter().enumerate() {
         let status = case.get("client_status").and_then(Value::as_i64);
         let forwarded = case.get("forwarded").unwrap_or(&Value::Null);
@@ -359,21 +358,17 @@ pub fn ogx_adaptive_thinking_loss(evidence: &str, expected_trials: usize) -> Ver
         let has_config = object_has_key(forwarded, "thinking")
             || object_has_key(forwarded, "reasoning")
             || object_has_key(forwarded, "reasoning_effort");
-        if has_config {
-            every_success_dropped = false;
+        if !has_config {
+            return Verdict::Violation(format!(
+                "trial {} accepted adaptive thinking without a thinking or reasoning configuration",
+                index + 1
+            ));
         }
     }
     if !saw_forwarded_success {
         return Verdict::Conformant;
     }
-    if every_success_dropped {
-        Verdict::Violation(
-            "adaptive thinking was accepted but no thinking or reasoning configuration was forwarded"
-                .to_owned(),
-        )
-    } else {
-        Verdict::Conformant
-    }
+    Verdict::Conformant
 }
 
 fn object_has_key(value: &Value, key: &str) -> bool {
@@ -1718,6 +1713,18 @@ mod tests {
           {"client_status":400,"forwarded":null}
         ]"#;
         assert_eq!(ogx_adaptive_thinking_loss(rejected, 1), Verdict::Conformant);
+    }
+
+    #[test]
+    fn ogx_adaptive_checker_rejects_mixed_trials() {
+        let mixed = r#"[
+          {"client_status":200,"forwarded":{"messages":[{"role":"user","content":"synthetic"}],"reasoning_effort":"medium"}},
+          {"client_status":200,"forwarded":{"messages":[{"role":"user","content":"synthetic"}]}}
+        ]"#;
+        assert!(matches!(
+            ogx_adaptive_thinking_loss(mixed, 2),
+            Verdict::Violation(_)
+        ));
     }
 
     #[test]
