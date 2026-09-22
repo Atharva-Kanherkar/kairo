@@ -24,7 +24,11 @@ def sanitize(value):
         result = {}
         for key, item in value.items():
             lowered = key.lower()
-            if lowered in {"id", "request_id", "request-id", "container", "message_id"}:
+            private_id = (
+                lowered in {"request_id", "request-id", "container", "message_id"}
+                or (lowered == "id" and isinstance(item, str) and item.startswith("msg_"))
+            )
+            if private_id:
                 result[key] = "[REDACTED_REQUEST_IDENTIFIER]"
             else:
                 result[key] = sanitize(item)
@@ -44,16 +48,23 @@ def request_bytes(method, path, headers, body):
         elif "request" in key.lower() or key.lower() == "traceparent":
             value = "[REDACTED_REQUEST_IDENTIFIER]"
         lines.append(f"{key}: {value}")
-    return ("\r\n".join(lines) + "\r\n\r\n" + body.decode() + "\r\n").encode()
+    separator = "\n\n" if body else "\n"
+    suffix = "\n" if body else ""
+    return ("\n".join(lines) + separator + body.decode() + suffix).encode()
 
 
 def response_bytes(status, headers, body):
     lines = [f"HTTP/1.1 {status}"]
     for key, value in headers.items():
-        if "request" in key.lower() or key.lower() == "traceparent":
-            value = "[REDACTED_REQUEST_IDENTIFIER]"
+        lowered = key.lower()
+        private_markers = (
+            "request", "trace", "organization", "workspace", "account",
+            "tenant", "ratelimit", "cf-ray",
+        )
+        if any(marker in lowered for marker in private_markers):
+            value = "[REDACTED_PRIVATE_METADATA]"
         lines.append(f"{key}: {value}")
-    return ("\r\n".join(lines) + "\r\n\r\n" + body.decode(errors="replace") + "\r\n").encode()
+    return ("\n".join(lines) + "\n\n" + body.decode(errors="replace") + "\n").encode()
 
 
 def call(path, body, key):
@@ -113,7 +124,23 @@ def main():
     models = [item.get("id") for item in model_json.get("data", []) if isinstance(item, dict) and item.get("id")]
     preferred = next((name for name in models if "sonnet-4" in name or "opus-4" in name), None)
     model = os.environ.get("ANTHROPIC_MODEL") or preferred or (models[0] if models else None)
-    summary = {"status": "blocked", "credential_present": True, "model_discovery_status": model_status, "trials": []}
+    selected = next((item for item in model_json.get("data", []) if item.get("id") == model), {})
+    adaptive_supported = (
+        selected.get("capabilities", {})
+        .get("thinking", {})
+        .get("types", {})
+        .get("adaptive", {})
+        .get("supported")
+        is True
+    )
+    summary = {
+        "status": "blocked",
+        "credential_present": True,
+        "model_discovery_status": model_status,
+        "model": model,
+        "adaptive_thinking_advertised": adaptive_supported,
+        "trials": [],
+    }
     if not model:
         summary["blocker"] = "authenticated models endpoint returned no usable model"
         (output / "live-anthropic-summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
@@ -146,10 +173,12 @@ def main():
                 pass
         summary["trials"].append({"trial": trial, "status": status, "structural_response": structural})
     successful = sum(item["structural_response"] for item in summary["trials"])
-    summary["status"] = "pass" if successful == args.trials else "blocked"
+    summary["status"] = "pass" if adaptive_supported and successful == args.trials else "blocked"
     if summary["status"] != "pass":
-        summary["blocker"] = "direct Anthropic endpoint did not return a structural 200 message for every trial"
-    summary["model"] = model
+        summary["blocker"] = (
+            "the selected model did not advertise adaptive thinking or the direct Anthropic "
+            "endpoint did not return a structural 200 message for every trial"
+        )
     (output / "live-anthropic-summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     print(f"live Anthropic control: {successful}/{args.trials} structural responses (model discovery HTTP {model_status})")
     return 0 if summary["status"] == "pass" else 2

@@ -1,0 +1,5 @@
+GET /v1/models HTTP/1.1
+Host: api.anthropic.com
+x-api-key: [REDACTED_ANTHROPIC_API_KEY]
+anthropic-version: 2023-06-01
+accept: application/json

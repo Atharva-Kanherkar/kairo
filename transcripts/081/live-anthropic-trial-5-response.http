@@ -1,0 +1,30 @@
+HTTP/1.1 200
+Date: Tue, 22 Sep 2026 10:01:36 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: close
+anthropic-ratelimit-input-tokens-limit: [REDACTED_PRIVATE_METADATA]
+anthropic-ratelimit-input-tokens-remaining: [REDACTED_PRIVATE_METADATA]
+anthropic-ratelimit-input-tokens-reset: [REDACTED_PRIVATE_METADATA]
+anthropic-ratelimit-output-tokens-limit: [REDACTED_PRIVATE_METADATA]
+anthropic-ratelimit-output-tokens-remaining: [REDACTED_PRIVATE_METADATA]
+anthropic-ratelimit-output-tokens-reset: [REDACTED_PRIVATE_METADATA]
+anthropic-ratelimit-requests-limit: [REDACTED_PRIVATE_METADATA]
+anthropic-ratelimit-requests-remaining: [REDACTED_PRIVATE_METADATA]
+anthropic-ratelimit-requests-reset: [REDACTED_PRIVATE_METADATA]
+anthropic-ratelimit-tokens-limit: [REDACTED_PRIVATE_METADATA]
+anthropic-ratelimit-tokens-remaining: [REDACTED_PRIVATE_METADATA]
+anthropic-ratelimit-tokens-reset: [REDACTED_PRIVATE_METADATA]
+Server: cloudflare
+request-id: [REDACTED_PRIVATE_METADATA]
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+anthropic-organization-id: [REDACTED_PRIVATE_METADATA]
+anthropic-workspace-id: [REDACTED_PRIVATE_METADATA]
+traceresponse: [REDACTED_PRIVATE_METADATA]
+vary: Accept-Encoding
+Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
+cf-cache-status: DYNAMIC
+X-Robots-Tag: none
+CF-RAY: [REDACTED_PRIVATE_METADATA]
+
+{"model":"claude-opus-4-8","id":"[REDACTED_REQUEST_IDENTIFIER]","type":"message","role":"assistant","content":[{"type":"text","text":"Understood\u2014ready to help with your request."}],"container":"[REDACTED_REQUEST_IDENTIFIER]","stop_reason":"end_turn","stop_sequence":null,"stop_details":null,"usage":{"input_tokens":37,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":14,"output_tokens_details":{"thinking_tokens":0},"service_tier":"standard","inference_geo":"global"}}

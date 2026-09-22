@@ -8,6 +8,7 @@ import argparse
 import json
 import os
 import signal
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -27,17 +28,33 @@ def get(url, timeout=2):
         return response.status, response.read()
 
 
-def post(url, body):
+def post(url, body, request_path, response_path):
+    encoded = json.dumps(body, separators=(",", ":")).encode()
+    request_path.write_bytes(encoded)
     request = urllib.request.Request(
         url,
-        data=json.dumps(body).encode(),
+        data=encoded,
         headers={"content-type": "application/json"},
     )
     try:
         with urllib.request.urlopen(request, timeout=60) as response:
-            return response.status, response.read().decode()
+            raw = response.read()
+            response_path.write_bytes(raw)
+            return response.status, raw.decode()
     except urllib.error.HTTPError as error:
-        return error.code, error.read().decode()
+        raw = error.read()
+        response_path.write_bytes(raw)
+        return error.code, raw.decode()
+
+
+def summary_response(raw):
+    try:
+        parsed = json.loads(raw)
+    except json.JSONDecodeError:
+        return raw
+    if isinstance(parsed, dict) and isinstance(parsed.get("id"), str):
+        parsed["id"] = "[REDACTED_REQUEST_IDENTIFIER]"
+    return json.dumps(parsed, separators=(",", ":"))
 
 
 def wait_ready(url, process, timeout=90):
@@ -93,12 +110,14 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     capture = output / "capture.jsonl"
     capture.write_text("", encoding="utf-8")
+    raw_dir = output / "raw"
+    raw_dir.mkdir(parents=True, exist_ok=True)
     upstream = None
     ogx = None
     try:
         upstream = subprocess.Popen([
             sys.executable, str(HERE / "capture_upstream.py"),
-            str(args.capture_port), str(capture),
+            str(args.capture_port), str(capture), str(raw_dir),
         ])
         wait_ready(f"http://127.0.0.1:{args.capture_port}/v1/models", upstream)
         environment = os.environ.copy()
@@ -127,20 +146,26 @@ def main():
             rows = []
             for trial in range(1, TRIALS + 1):
                 before = len(capture.read_text(encoding="utf-8").splitlines())
-                status, response = post(f"http://127.0.0.1:{args.ogx_port}/v1/messages", body)
-                deadline = time.monotonic() + 10
+                status, response = post(
+                    f"http://127.0.0.1:{args.ogx_port}/v1/messages",
+                    body,
+                    raw_dir / f"{name}-{trial:03d}-client-request.json",
+                    raw_dir / f"{name}-{trial:03d}-client-response.json",
+                )
                 forwarded = None
-                while time.monotonic() < deadline:
-                    records = [line for line in capture.read_text(encoding="utf-8").splitlines() if line.strip()]
-                    if len(records) > before:
-                        forwarded = json.loads(records[-1])["body"]
-                        break
-                    time.sleep(0.05)
+                if status == 200:
+                    deadline = time.monotonic() + 10
+                    while time.monotonic() < deadline:
+                        records = [line for line in capture.read_text(encoding="utf-8").splitlines() if line.strip()]
+                        if len(records) > before:
+                            forwarded = json.loads(records[-1])["body"]
+                            break
+                        time.sleep(0.05)
                 rows.append({
                     "trial": trial,
                     "request": body,
                     "client_status": status,
-                    "client_response": response,
+                    "client_response": summary_response(response),
                     "forwarded": forwarded,
                 })
             cases[name] = rows
@@ -151,6 +176,10 @@ def main():
                     json.dumps(rows, indent=1) + "\n", encoding="utf-8"
                 )
             (HERE / "capture.jsonl").write_text(capture.read_text(encoding="utf-8"), encoding="utf-8")
+            frozen_raw = HERE / "raw"
+            frozen_raw.mkdir(parents=True, exist_ok=True)
+            for source in raw_dir.iterdir():
+                shutil.copyfile(source, frozen_raw / source.name)
         adaptive_ok = sum(row["client_status"] == 200 and row["forwarded"] is not None for row in cases["adaptive-thinking"])
         enabled_ok = sum(row["client_status"] == 400 and row["forwarded"] is None for row in cases["enabled-thinking-control"])
         print(f"OGX {observed}: adaptive {adaptive_ok}/{TRIALS} HTTP 200 with capture; enabled control {enabled_ok}/{TRIALS} HTTP 400")

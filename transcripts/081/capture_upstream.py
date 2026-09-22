@@ -1,16 +1,18 @@
 """Small OpenAI-compatible capture server used by the OGX 1.4.0 repro.
 
-It writes only parsed request bodies, never request headers or credentials.
+It writes parsed request bodies plus the exact request and response bodies.
+Headers and credentials are never captured.
 """
 import json
 import os
 import sys
-import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
 PORT = int(sys.argv[1])
 OUT = sys.argv[2]
+RAW_DIR = sys.argv[3] if len(sys.argv) > 3 else None
+POST_COUNT = 0
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -34,6 +36,7 @@ class Handler(BaseHTTPRequestHandler):
         }).encode())
 
     def do_POST(self):
+        global POST_COUNT
         if self.path.rstrip("/") != "/v1/chat/completions":
             self.send_error(404)
             return
@@ -45,7 +48,7 @@ class Handler(BaseHTTPRequestHandler):
             self.send_error(400)
             return
         with open(OUT, "a", encoding="utf-8") as stream:
-            stream.write(json.dumps({"ts": time.time(), "path": self.path, "body": body}) + "\n")
+            stream.write(json.dumps({"path": self.path, "body": body}) + "\n")
         response = {
             "id": "chatcmpl-kairo-081",
             "object": "chat.completion",
@@ -56,7 +59,16 @@ class Handler(BaseHTTPRequestHandler):
                          "finish_reason": "stop"}],
             "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2},
         }
-        self._send(json.dumps(response).encode())
+        response_raw = json.dumps(response).encode()
+        POST_COUNT += 1
+        if RAW_DIR:
+            raw_dir = os.path.abspath(RAW_DIR)
+            os.makedirs(raw_dir, exist_ok=True)
+            with open(os.path.join(raw_dir, f"forwarded-{POST_COUNT:03d}-request.json"), "wb") as stream:
+                stream.write(raw)
+            with open(os.path.join(raw_dir, f"upstream-{POST_COUNT:03d}-response.json"), "wb") as stream:
+                stream.write(response_raw)
+        self._send(response_raw)
 
 
 if __name__ == "__main__":

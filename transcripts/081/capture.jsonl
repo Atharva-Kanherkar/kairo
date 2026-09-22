@@ -1,5 +1,5 @@
-{"ts": 1790064918.2825348, "path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "Synthetic adaptive-thinking control."}], "model": "mock-gpt", "max_completion_tokens": 32, "stream": false}}
-{"ts": 1790064918.2878919, "path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "Synthetic adaptive-thinking control."}], "model": "mock-gpt", "max_completion_tokens": 32, "stream": false}}
-{"ts": 1790064918.290507, "path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "Synthetic adaptive-thinking control."}], "model": "mock-gpt", "max_completion_tokens": 32, "stream": false}}
-{"ts": 1790064918.293031, "path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "Synthetic adaptive-thinking control."}], "model": "mock-gpt", "max_completion_tokens": 32, "stream": false}}
-{"ts": 1790064918.295887, "path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "Synthetic adaptive-thinking control."}], "model": "mock-gpt", "max_completion_tokens": 32, "stream": false}}
+{"path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "Synthetic adaptive-thinking control."}], "model": "mock-gpt", "max_completion_tokens": 32, "stream": false}}
+{"path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "Synthetic adaptive-thinking control."}], "model": "mock-gpt", "max_completion_tokens": 32, "stream": false}}
+{"path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "Synthetic adaptive-thinking control."}], "model": "mock-gpt", "max_completion_tokens": 32, "stream": false}}
+{"path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "Synthetic adaptive-thinking control."}], "model": "mock-gpt", "max_completion_tokens": 32, "stream": false}}
+{"path": "/v1/chat/completions", "body": {"messages": [{"role": "user", "content": "Synthetic adaptive-thinking control."}], "model": "mock-gpt", "max_completion_tokens": 32, "stream": false}}

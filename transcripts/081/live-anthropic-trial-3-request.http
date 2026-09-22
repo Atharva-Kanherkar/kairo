@@ -1,0 +1,8 @@
+POST /v1/messages HTTP/1.1
+Host: api.anthropic.com
+x-api-key: [REDACTED_ANTHROPIC_API_KEY]
+anthropic-version: 2023-06-01
+content-type: application/json
+accept: application/json
+
+{"model":"claude-opus-4-8","max_tokens":128,"thinking":{"type":"adaptive"},"messages":[{"role":"user","content":"Synthetic kairo 081 adaptive-thinking control. Reply with one short sentence."}]}

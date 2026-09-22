@@ -15,7 +15,7 @@
    ]
   },
   "client_status": 200,
-  "client_response": "{\"id\":\"msg_06e79392bca64b0eb608d4b6\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
+  "client_response": "{\"id\":\"[REDACTED_REQUEST_IDENTIFIER]\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
   "forwarded": {
    "messages": [
     {
@@ -44,7 +44,7 @@
    ]
   },
   "client_status": 200,
-  "client_response": "{\"id\":\"msg_e9299816b4314699868b0db1\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
+  "client_response": "{\"id\":\"[REDACTED_REQUEST_IDENTIFIER]\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
   "forwarded": {
    "messages": [
     {
@@ -73,7 +73,7 @@
    ]
   },
   "client_status": 200,
-  "client_response": "{\"id\":\"msg_8bf7ca50c85c4666b650260e\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
+  "client_response": "{\"id\":\"[REDACTED_REQUEST_IDENTIFIER]\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
   "forwarded": {
    "messages": [
     {
@@ -102,7 +102,7 @@
    ]
   },
   "client_status": 200,
-  "client_response": "{\"id\":\"msg_c3df24acd2e44adba2a0a16e\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
+  "client_response": "{\"id\":\"[REDACTED_REQUEST_IDENTIFIER]\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
   "forwarded": {
    "messages": [
     {
@@ -131,7 +131,7 @@
    ]
   },
   "client_status": 200,
-  "client_response": "{\"id\":\"msg_6b1a3ab3ed264160bc9813f1\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
+  "client_response": "{\"id\":\"[REDACTED_REQUEST_IDENTIFIER]\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"Synthetic control response.\"}],\"model\":\"mock-gpt\",\"stop_reason\":\"end_turn\",\"usage\":{\"input_tokens\":1,\"output_tokens\":1}}",
   "forwarded": {
    "messages": [
     {
