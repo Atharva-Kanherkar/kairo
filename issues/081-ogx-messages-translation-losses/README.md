@@ -226,8 +226,14 @@ adaptive variant remains accepted and silently removed on the current release.
 - [x] No API key, credential, private prompt, or unsanitized response is
       committed.
 - [x] Only environment variable names appear in commands and documentation.
-- [x] The pull request contains only Finding 081.
+- [x] The pull request contains only Finding 081, plus a base-branch build
+      repair. `origin/main` at `cd7b401` does not compile: a previous conflict
+      resolution spliced `executed_tool_results_preserved` into the body of
+      `image_url_cache_key_case_sensitive`. The merge commit moves it back to
+      module level without changing behavior. No checker, test, or scoreboard
+      row from Finding 080 or Finding 082 is added or removed.
 - [x] Unrelated generated files and local state are excluded.
+- [x] No Finding 080 or Finding 082 path appears in the base-to-head diff.
 
 ## Author verdict
 
