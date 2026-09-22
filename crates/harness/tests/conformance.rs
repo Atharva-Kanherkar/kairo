@@ -8,19 +8,19 @@
 use kairo::checks::{
     anthropic_response_toolcall_stop_reason, anthropic_stream_safety_stop_reason,
     anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
-    content_filter_preserved, document_body_forwarded,
+    content_filter_preserved, document_body_forwarded, executed_tool_results_preserved,
     gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
-    id_conforms, instruction_messages_preserved, invalid_credential_rejected_before_upstream,
-    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
-    model_info_capture_identity, model_info_envelope_body, model_info_omits_api_base_secret,
-    no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
-    no_phantom_null_output_text, non_text_block_not_json_dumped, openai_stream_finish_reason,
-    openai_toolcall_id_charset, outbound_request_omits_secret, parallel_tool_disable_preserved,
-    reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
-    response_conversation_preserves_history, response_omits_secret,
-    responses_refusal_semantics_preserved, responses_single_lifecycle, stop_sequence_forwarded,
-    thinking_not_leaked_as_visible_text, thinking_text_forwarded, tool_strict_forwarded,
-    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
+    invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
+    json_schema_property_forwarded, model_info_capture_identity, model_info_envelope_body,
+    model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
+    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
+    ogx_adaptive_thinking_loss, openai_stream_finish_reason, openai_toolcall_id_charset,
+    outbound_request_omits_secret, parallel_tool_disable_preserved, reasoning_text_order_preserved,
+    refusal_text_preserved, response_content_not_empty, response_conversation_preserves_history,
+    response_omits_secret, responses_refusal_semantics_preserved, responses_single_lifecycle,
+    stop_sequence_forwarded, thinking_not_leaked_as_visible_text, thinking_text_forwarded,
+    tool_strict_forwarded, toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
     upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
     JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
@@ -3406,11 +3406,177 @@ fn bifrost_provider_response_secret_summary_covers_all_trials() {
     }
 }
 
-// ---- bug 081: Switchyard drops cross-format conversation continuations ----
+// ---- bug 080: Dynamo ImageLoader lowercases the whole URL for its cache key ----
+
+#[test]
+fn dynamo_image_cache_case_collision_violation() {
+    // Frozen bug: /Cat.png and /cat.png share one lowered cache key, so the
+    // second request decodes the first image and the origin sees one hit.
+    let v = image_url_cache_key_case_sensitive(&fixture("transcripts/080/capture-bug.jsonl"));
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "the case-colliding cache key must be caught: {v:?}"
+    );
+}
+
+#[test]
+fn dynamo_image_cache_cache_off_control_is_conformant() {
+    // Control: with the cache disabled the same URL pair fetches both
+    // resources; the checker must accept it.
+    let v = image_url_cache_key_case_sensitive(&fixture("transcripts/080/capture-control.jsonl"));
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "cache-off runs must satisfy the invariant"
+    );
+}
+
+#[test]
+fn dynamo_image_cache_distinct_urls_control_is_conformant() {
+    // Control: URLs differing beyond case never collide; checker is silent.
+    let v = image_url_cache_key_case_sensitive(&fixture("transcripts/080/capture-distinct.jsonl"));
+    assert_eq!(v, Verdict::Conformant);
+}
+
+// ---- bug 081: OGX /v1/messages translation-mode losses ----
+
+/// Load one kairo 081 case file: an array of
+/// `{trial, request, client_status, client_response, forwarded}` records.
+fn ogx_cases(rel: &str) -> Vec<Value> {
+    let raw = fixture(rel);
+    let parsed: Value = serde_json::from_str(&raw).unwrap_or_else(|e| panic!("{rel}: {e}"));
+    parsed
+        .as_array()
+        .unwrap_or_else(|| panic!("{rel} must be an array of cases"))
+        .clone()
+}
+
+fn ogx_client_response(case: &Value) -> String {
+    case.get("client_response")
+        .and_then(Value::as_str)
+        .unwrap_or_default()
+        .to_string()
+}
+
+#[test]
+fn ogx_adaptive_thinking_is_silently_ignored() {
+    // A request with thinking {"type":"adaptive"} returns 200 and the
+    // forwarded OpenAI body carries no thinking or reasoning configuration.
+    let rel = "transcripts/081/ogx-adaptive-thinking-cases.json";
+    assert!(matches!(
+        ogx_adaptive_thinking_loss(&fixture(rel), 5),
+        Verdict::Violation(_)
+    ));
+    let cases = ogx_cases(rel);
+    assert_eq!(cases.len(), 5, "{rel} must hold 5 of 5 trials");
+    for (i, case) in cases.iter().enumerate() {
+        assert_eq!(
+            case["client_status"],
+            200,
+            "{rel} trial {} must return 200",
+            i + 1
+        );
+        let forwarded = &case["forwarded"];
+        assert!(
+            forwarded.get("thinking").is_none()
+                && forwarded.get("reasoning").is_none()
+                && forwarded.get("reasoning_effort").is_none(),
+            "{rel} trial {} must drop adaptive thinking from the forwarded body",
+            i + 1
+        );
+    }
+}
+
+#[test]
+fn ogx_enabled_thinking_control_fails_closed() {
+    // Control: OGX's own convention for unsupported thinking configs is to
+    // refuse. The same surface refuses {"type":"enabled"} with a 400.
+    let rel = "transcripts/081/ogx-enabled-thinking-control-cases.json";
+    let cases = ogx_cases(rel);
+    assert_eq!(cases.len(), 5, "{rel} must hold 5 of 5 trials");
+    for (i, case) in cases.iter().enumerate() {
+        assert_eq!(case["client_status"], 400, "{rel} trial {}", i + 1);
+        let client = ogx_client_response(case);
+        assert!(
+            client.contains("invalid_request_error"),
+            "{rel} trial {} must be an Anthropic invalid_request_error",
+            i + 1
+        );
+    }
+}
+
+// ---- bug 082: repeated agent-mode calls overwrite an executed result ----
+
+#[test]
+fn bifrost_agent_mode_same_name_call_loses_one_executed_result() {
+    let executions = fixture("transcripts/082/violation-executions.json");
+    let response = fixture("transcripts/082/violation-client-response.http");
+    let verdict = executed_tool_results_preserved(&executions, &response);
+    assert!(
+        matches!(verdict, Verdict::Violation(_)),
+        "two executed same-name calls must not collapse to one result: {verdict:?}"
+    );
+}
+
+#[test]
+fn bifrost_agent_mode_result_controls_preserve_every_execution() {
+    for cell in ["control_distinct", "control_single"] {
+        let executions = fixture(&format!("transcripts/082/{cell}-executions.json"));
+        let response = fixture(&format!("transcripts/082/{cell}-client-response.http"));
+        assert_eq!(
+            executed_tool_results_preserved(&executions, &response),
+            Verdict::Conformant,
+            "{cell} must preserve every executed result"
+        );
+    }
+
+    // Vacuity guard: a conformant response must fail when the execution index
+    // demands a second distinct result that the response does not contain.
+    let single_response = fixture("transcripts/082/control_single-client-response.http");
+    let two_executions = fixture("transcripts/082/control_distinct-executions.json");
+    assert!(matches!(
+        executed_tool_results_preserved(&two_executions, &single_response),
+        Verdict::Violation(_)
+    ));
+}
+
+#[test]
+fn bifrost_agent_mode_five_run_matrix_reaches_the_consumer_boundary() {
+    let summary: Value =
+        serde_json::from_str(&fixture("transcripts/082/results.json")).expect("082 summary JSON");
+    assert_eq!(summary["complete"], true);
+    assert_eq!(summary["runs"], 5);
+    assert_eq!(
+        summary.pointer("/cells/violation/executions_per_run"),
+        Some(&serde_json::json!([2, 2, 2, 2, 2]))
+    );
+    assert_eq!(
+        summary.pointer("/cells/violation/reported_results_per_run"),
+        Some(&serde_json::json!([1, 1, 1, 1, 1]))
+    );
+    assert_eq!(
+        summary.pointer("/cells/control_distinct/reported_results_per_run"),
+        Some(&serde_json::json!([2, 2, 2, 2, 2]))
+    );
+    assert_eq!(
+        summary.pointer("/cells/control_single/reported_results_per_run"),
+        Some(&serde_json::json!([1, 1, 1, 1, 1]))
+    );
+    assert_eq!(
+        summary.pointer("/consumer/violation/duplicate_executions_per_run"),
+        Some(&serde_json::json!([1, 1, 1, 1, 1]))
+    );
+    assert_eq!(
+        summary.pointer("/consumer/control_distinct/duplicate_executions_per_run"),
+        Some(&serde_json::json!([0, 0, 0, 0, 0]))
+    );
+}
+
+// ---- bug 083: Switchyard drops cross-format conversation continuations ----
 
 #[test]
 fn switchyard_conversation_continuation_drops_history() {
-    let forwarded = fixture("transcripts/081/forwarded.jsonl");
+    let forwarded = fixture("transcripts/083/forwarded.jsonl");
     let verdict = response_conversation_preserves_history(
         &forwarded,
         "CONVERSATION BUG RECALL_",
@@ -3419,10 +3585,10 @@ fn switchyard_conversation_continuation_drops_history() {
     );
     assert!(matches!(verdict, Verdict::Violation(_)), "{verdict:?}");
 
-    let capture = fixture("transcripts/081/capture-bug.jsonl");
+    let capture = fixture("transcripts/083/capture-bug.jsonl");
     let captures: Vec<Value> = capture
         .lines()
-        .map(|line| serde_json::from_str(line).expect("081 bug capture is JSON"))
+        .map(|line| serde_json::from_str(line).expect("083 bug capture is JSON"))
         .collect();
     assert_eq!(captures.len(), 5);
     assert!(captures.iter().all(|record| {
@@ -3437,17 +3603,17 @@ fn switchyard_conversation_continuation_drops_history() {
 fn switchyard_previous_response_id_control_preserves_history() {
     assert_eq!(
         response_conversation_preserves_history(
-            &fixture("transcripts/081/forwarded.jsonl"),
+            &fixture("transcripts/083/forwarded.jsonl"),
             "CONVERSATION CONTROL RECALL_",
             "CONVERSATION CONTROL SEED_CANARY_081_",
             5,
         ),
         Verdict::Conformant
     );
-    let capture = fixture("transcripts/081/capture-control.jsonl");
+    let capture = fixture("transcripts/083/capture-control.jsonl");
     let captures: Vec<Value> = capture
         .lines()
-        .map(|line| serde_json::from_str(line).expect("081 control capture is JSON"))
+        .map(|line| serde_json::from_str(line).expect("083 control capture is JSON"))
         .collect();
     assert_eq!(captures.len(), 5);
     assert!(captures

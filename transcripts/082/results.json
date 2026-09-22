@@ -1,0 +1,332 @@
+{
+  "cells": {
+    "control_distinct": {
+      "executions_per_run": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "reported_results_per_run": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "runs": [
+        {
+          "executed_count": 2,
+          "executed_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_distinct_01",
+            "KAIRO_082_EFFECT_BETA_control_distinct_01"
+          ],
+          "pending_manual_count": 1,
+          "reported_count": 2,
+          "reported_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_distinct_01",
+            "KAIRO_082_EFFECT_BETA_control_distinct_01"
+          ],
+          "run": "01"
+        },
+        {
+          "executed_count": 2,
+          "executed_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_distinct_02",
+            "KAIRO_082_EFFECT_BETA_control_distinct_02"
+          ],
+          "pending_manual_count": 1,
+          "reported_count": 2,
+          "reported_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_distinct_02",
+            "KAIRO_082_EFFECT_BETA_control_distinct_02"
+          ],
+          "run": "02"
+        },
+        {
+          "executed_count": 2,
+          "executed_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_distinct_03",
+            "KAIRO_082_EFFECT_BETA_control_distinct_03"
+          ],
+          "pending_manual_count": 1,
+          "reported_count": 2,
+          "reported_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_distinct_03",
+            "KAIRO_082_EFFECT_BETA_control_distinct_03"
+          ],
+          "run": "03"
+        },
+        {
+          "executed_count": 2,
+          "executed_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_distinct_04",
+            "KAIRO_082_EFFECT_BETA_control_distinct_04"
+          ],
+          "pending_manual_count": 1,
+          "reported_count": 2,
+          "reported_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_distinct_04",
+            "KAIRO_082_EFFECT_BETA_control_distinct_04"
+          ],
+          "run": "04"
+        },
+        {
+          "executed_count": 2,
+          "executed_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_distinct_05",
+            "KAIRO_082_EFFECT_BETA_control_distinct_05"
+          ],
+          "pending_manual_count": 1,
+          "reported_count": 2,
+          "reported_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_distinct_05",
+            "KAIRO_082_EFFECT_BETA_control_distinct_05"
+          ],
+          "run": "05"
+        }
+      ]
+    },
+    "control_single": {
+      "executions_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "reported_results_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "runs": [
+        {
+          "executed_count": 1,
+          "executed_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_single_01"
+          ],
+          "pending_manual_count": 1,
+          "reported_count": 1,
+          "reported_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_single_01"
+          ],
+          "run": "01"
+        },
+        {
+          "executed_count": 1,
+          "executed_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_single_02"
+          ],
+          "pending_manual_count": 1,
+          "reported_count": 1,
+          "reported_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_single_02"
+          ],
+          "run": "02"
+        },
+        {
+          "executed_count": 1,
+          "executed_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_single_03"
+          ],
+          "pending_manual_count": 1,
+          "reported_count": 1,
+          "reported_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_single_03"
+          ],
+          "run": "03"
+        },
+        {
+          "executed_count": 1,
+          "executed_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_single_04"
+          ],
+          "pending_manual_count": 1,
+          "reported_count": 1,
+          "reported_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_single_04"
+          ],
+          "run": "04"
+        },
+        {
+          "executed_count": 1,
+          "executed_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_single_05"
+          ],
+          "pending_manual_count": 1,
+          "reported_count": 1,
+          "reported_markers": [
+            "KAIRO_082_EFFECT_ALPHA_control_single_05"
+          ],
+          "run": "05"
+        }
+      ]
+    },
+    "violation": {
+      "executions_per_run": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "reported_results_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "runs": [
+        {
+          "executed_count": 2,
+          "executed_markers": [
+            "KAIRO_082_EFFECT_ALPHA_violation_01",
+            "KAIRO_082_EFFECT_BETA_violation_01"
+          ],
+          "pending_manual_count": 1,
+          "reported_count": 1,
+          "reported_markers": [
+            "KAIRO_082_EFFECT_BETA_violation_01"
+          ],
+          "run": "01"
+        },
+        {
+          "executed_count": 2,
+          "executed_markers": [
+            "KAIRO_082_EFFECT_ALPHA_violation_02",
+            "KAIRO_082_EFFECT_BETA_violation_02"
+          ],
+          "pending_manual_count": 1,
+          "reported_count": 1,
+          "reported_markers": [
+            "KAIRO_082_EFFECT_ALPHA_violation_02"
+          ],
+          "run": "02"
+        },
+        {
+          "executed_count": 2,
+          "executed_markers": [
+            "KAIRO_082_EFFECT_ALPHA_violation_03",
+            "KAIRO_082_EFFECT_BETA_violation_03"
+          ],
+          "pending_manual_count": 1,
+          "reported_count": 1,
+          "reported_markers": [
+            "KAIRO_082_EFFECT_ALPHA_violation_03"
+          ],
+          "run": "03"
+        },
+        {
+          "executed_count": 2,
+          "executed_markers": [
+            "KAIRO_082_EFFECT_ALPHA_violation_04",
+            "KAIRO_082_EFFECT_BETA_violation_04"
+          ],
+          "pending_manual_count": 1,
+          "reported_count": 1,
+          "reported_markers": [
+            "KAIRO_082_EFFECT_BETA_violation_04"
+          ],
+          "run": "04"
+        },
+        {
+          "executed_count": 2,
+          "executed_markers": [
+            "KAIRO_082_EFFECT_ALPHA_violation_05",
+            "KAIRO_082_EFFECT_BETA_violation_05"
+          ],
+          "pending_manual_count": 1,
+          "reported_count": 1,
+          "reported_markers": [
+            "KAIRO_082_EFFECT_BETA_violation_05"
+          ],
+          "run": "05"
+        }
+      ]
+    }
+  },
+  "complete": true,
+  "consumer": {
+    "control_distinct": {
+      "duplicate_executions_per_run": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "runs": [
+        {
+          "duplicate_executions": 0,
+          "run": "01"
+        },
+        {
+          "duplicate_executions": 0,
+          "run": "02"
+        },
+        {
+          "duplicate_executions": 0,
+          "run": "03"
+        },
+        {
+          "duplicate_executions": 0,
+          "run": "04"
+        },
+        {
+          "duplicate_executions": 0,
+          "run": "05"
+        }
+      ]
+    },
+    "violation": {
+      "duplicate_executions_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "runs": [
+        {
+          "duplicate_executions": 1,
+          "run": "01"
+        },
+        {
+          "duplicate_executions": 1,
+          "run": "02"
+        },
+        {
+          "duplicate_executions": 1,
+          "run": "03"
+        },
+        {
+          "duplicate_executions": 1,
+          "run": "04"
+        },
+        {
+          "duplicate_executions": 1,
+          "run": "05"
+        }
+      ]
+    }
+  },
+  "runs": 5,
+  "target": {
+    "binary_sha256": "d945b1a574030ab80aba7a503959528b8568e73334ebe5aa32c7de30185bc8b3",
+    "commit": "1a17949cd80234de0ceb3018e941854f38b3f7a8",
+    "core_version": "1.9.1",
+    "go_version": "go1.27.1 darwin/arm64",
+    "model": "mockoai/mimo-v2.5",
+    "public_endpoint": "POST /v1/chat/completions",
+    "request_dialect": "OpenAI Chat Completions",
+    "response_dialect": "OpenAI Chat Completions",
+    "runtime_version": "1.9.1-1a17949c",
+    "source": "https://github.com/maximhq/bifrost",
+    "ui_embed_stub": "transports/bifrost-http/ui/index.html; not on the request path"
+  }
+}

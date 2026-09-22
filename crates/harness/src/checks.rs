@@ -300,6 +300,87 @@ pub fn capture_records(jsonl: &str) -> Result<Vec<(String, Value)>, String> {
         .collect()
 }
 
+/// Check the adaptive-thinking invariant from either a case-array fixture or
+/// capture-rig JSONL. A 200 response with a non-empty forwarded request and no
+/// `thinking` or `reasoning` field is the reproduced loss. A gateway that
+/// forwards an explicit reasoning configuration or rejects the unsupported
+/// request is conformant.
+pub fn ogx_adaptive_thinking_loss(evidence: &str, expected_trials: usize) -> Verdict {
+    let parsed = serde_json::from_str::<Value>(evidence).ok();
+    let cases: Vec<Value> = match parsed {
+        Some(Value::Array(items)) => items,
+        Some(_) => return Verdict::Violation("case fixture is not an array".to_owned()),
+        None => match capture_records(evidence) {
+            Ok(records) => records
+                .into_iter()
+                .map(|(_, body)| {
+                    serde_json::json!({
+                        "client_status": 200,
+                        "forwarded": body,
+                    })
+                })
+                .collect(),
+            Err(error) => return Verdict::Violation(error),
+        },
+    };
+    if cases.len() != expected_trials {
+        return Verdict::Violation(format!(
+            "expected {expected_trials} trials, found {}",
+            cases.len()
+        ));
+    }
+    let mut saw_forwarded_success = false;
+    for (index, case) in cases.iter().enumerate() {
+        let status = case.get("client_status").and_then(Value::as_i64);
+        let forwarded = case.get("forwarded").unwrap_or(&Value::Null);
+        if status == Some(400) && forwarded.is_null() {
+            continue;
+        }
+        if status != Some(200) {
+            return Verdict::Violation(format!(
+                "trial {} has status {status:?}, expected 200 or fail-closed 400",
+                index + 1
+            ));
+        }
+        let Some(messages) = forwarded.get("messages").and_then(Value::as_array) else {
+            return Verdict::Violation(format!(
+                "trial {} has no non-empty forwarded messages",
+                index + 1
+            ));
+        };
+        if messages.is_empty() {
+            return Verdict::Violation(format!(
+                "trial {} forwarded an empty messages array",
+                index + 1
+            ));
+        }
+        saw_forwarded_success = true;
+        let has_config = object_has_key(forwarded, "thinking")
+            || object_has_key(forwarded, "reasoning")
+            || object_has_key(forwarded, "reasoning_effort");
+        if !has_config {
+            return Verdict::Violation(format!(
+                "trial {} accepted adaptive thinking without a thinking or reasoning configuration",
+                index + 1
+            ));
+        }
+    }
+    if !saw_forwarded_success {
+        return Verdict::Conformant;
+    }
+    Verdict::Conformant
+}
+
+fn object_has_key(value: &Value, key: &str) -> bool {
+    match value {
+        Value::Object(fields) => {
+            fields.contains_key(key) || fields.values().any(|child| object_has_key(child, key))
+        }
+        Value::Array(items) => items.iter().any(|child| object_has_key(child, key)),
+        _ => false,
+    }
+}
+
 fn parse_capture_line(line: &str) -> Result<Value, String> {
     let v: Value = serde_json::from_str(line).map_err(|e| format!("unparseable capture: {e}"))?;
     Ok(v.get("body").cloned().unwrap_or(Value::Null))
@@ -1323,7 +1404,7 @@ pub fn model_info_capture_identity(
     Verdict::Conformant
 }
 
-/// Invariant (bug 081): a Responses continuation by `conversation` must carry
+/// Invariant (bug 083): a Responses continuation by `conversation` must carry
 /// the same canonical history as a continuation by `previous_response_id`.
 /// The capture records exact Chat requests forwarded after Switchyard's local
 /// materialization; each recall request must contain its seed canary.
@@ -1588,9 +1669,235 @@ pub fn gemini_inline_media_preserved_in_chat_stream(sse: &str) -> Verdict {
     Verdict::Conformant
 }
 
+/// Invariant (bug 080): two media URLs that differ only in letter case are
+/// distinct resources (RFC 3986 paths and queries are case-sensitive). A
+/// cache key that lowercases the whole URL makes the second request silently
+/// receive the first resource. For every loader session that requested a
+/// case-colliding pair, the origin must receive one hit per requested URL and
+/// each decoded image must match the resource the origin serves for that URL.
+///
+/// Runs against the capture JSONL written by `transcripts/080/repro_case_collision.py`.
+/// Each record: `requested` (URL paths), `origin_hits` (paths the origin saw),
+/// `decoded` (pixel rows returned per request), `origin_colors` (path -> color).
+pub fn image_url_cache_key_case_sensitive(jsonl: &str) -> Verdict {
+    let records = match capture_records(jsonl) {
+        Ok(r) => r,
+        Err(e) => return Verdict::Violation(format!("unparseable capture: {e}")),
+    };
+    for (idx, (_, record)) in records.iter().enumerate() {
+        let requested: Vec<String> =
+            match record.get("requested").and_then(Value::as_array).map(|a| {
+                a.iter()
+                    .filter_map(Value::as_str)
+                    .map(str::to_owned)
+                    .collect()
+            }) {
+                Some(r) => r,
+                None => {
+                    return Verdict::Violation(format!(
+                        "record {idx}: missing requested list: {record}"
+                    ))
+                }
+            };
+        let has_case_collision = requested.iter().enumerate().any(|(i, u)| {
+            requested[i + 1..]
+                .iter()
+                .any(|v| u != v && u.to_lowercase() == v.to_lowercase())
+        });
+        if !has_case_collision {
+            continue; // nothing this record can say about the invariant
+        }
+        let hits: Vec<String> = match record
+            .get("origin_hits")
+            .and_then(Value::as_array)
+            .map(|a| {
+                a.iter()
+                    .filter_map(Value::as_str)
+                    .map(str::to_owned)
+                    .collect()
+            }) {
+            Some(h) => h,
+            None => {
+                return Verdict::Violation(format!(
+                    "record {idx}: missing origin_hits list: {record}"
+                ))
+            }
+        };
+        let decoded: Vec<Vec<i64>> =
+            match record.get("decoded").and_then(Value::as_array).map(|a| {
+                a.iter()
+                    .filter_map(|p| {
+                        p.as_array()
+                            .map(|rgb| rgb.iter().filter_map(Value::as_i64).collect::<Vec<i64>>())
+                    })
+                    .collect()
+            }) {
+                Some(d) => d,
+                None => {
+                    return Verdict::Violation(format!(
+                        "record {idx}: missing decoded list: {record}"
+                    ))
+                }
+            };
+        let Some(Value::Object(colors)) = record.get("origin_colors") else {
+            return Verdict::Violation(format!(
+                "record {idx}: missing origin_colors map: {record}"
+            ));
+        };
+        for (i, url) in requested.iter().enumerate() {
+            if !hits.iter().any(|h| h == url) {
+                return Verdict::Violation(format!(
+                    "record {idx}: requested '{url}' never reached the origin \
+                     (hits: {hits:?}); a cache key conflating case-differing URLs \
+                     served another resource"
+                ));
+            }
+            let expected = colors
+                .get(url)
+                .and_then(Value::as_array)
+                .map(|rgb| rgb.iter().filter_map(Value::as_i64).collect::<Vec<i64>>());
+            match (decoded.get(i), expected) {
+                (Some(got), Some(want)) if got != &want => {
+                    return Verdict::Violation(format!(
+                        "record {idx}: '{url}' decoded to {got:?}, origin serves {want:?}; \
+                         the case-differing URL pair collided on one cache key"
+                    ));
+                }
+                _ => {}
+            }
+        }
+    }
+    Verdict::Conformant
+}
+
+/// Invariant (bug 082): every distinct auto-executed tool call must retain a
+/// separately client-visible result. `executions_json` is an execution index
+/// with `executions[].tool_call_id` and `executions[].effect_marker`; the
+/// markers must come from the recorded tool outputs, not from an expected
+/// response fixture. `client_exchange` is the complete HTTP response.
+///
+/// A tool may legally be called more than once in one turn. Tool names are not
+/// identities, so a summary keyed only by tool name must not collapse results
+/// from calls carrying distinct tool-call IDs.
+pub fn executed_tool_results_preserved(executions_json: &str, client_exchange: &str) -> Verdict {
+    let Ok(execution_index) = serde_json::from_str::<Value>(executions_json) else {
+        return Verdict::Violation("execution index is not valid JSON".to_owned());
+    };
+    let Some(executions) = execution_index.get("executions").and_then(Value::as_array) else {
+        return Verdict::Violation("execution index has no executions array".to_owned());
+    };
+    if executions.is_empty() {
+        return Verdict::Violation("execution index is empty".to_owned());
+    }
+
+    let Some((head, body)) = client_exchange.split_once("\r\n\r\n") else {
+        return Verdict::Violation("client capture is not a complete HTTP response".to_owned());
+    };
+    let status = head
+        .lines()
+        .next()
+        .and_then(|line| line.split_whitespace().nth(1));
+    if status != Some("200") {
+        return Verdict::Violation(format!("client capture status is {status:?}, expected 200"));
+    }
+    if serde_json::from_str::<Value>(body).is_err() {
+        return Verdict::Violation("client response body is not valid JSON".to_owned());
+    }
+
+    let mut ids = std::collections::HashSet::new();
+    let mut markers = std::collections::HashSet::new();
+    for (index, execution) in executions.iter().enumerate() {
+        let Some(tool_call_id) = execution.get("tool_call_id").and_then(Value::as_str) else {
+            return Verdict::Violation(format!("execution {index} has no non-string tool_call_id"));
+        };
+        let Some(effect_marker) = execution.get("effect_marker").and_then(Value::as_str) else {
+            return Verdict::Violation(format!(
+                "execution {index} has no non-string effect_marker"
+            ));
+        };
+        if tool_call_id.is_empty() || effect_marker.is_empty() {
+            return Verdict::Violation(format!(
+                "execution {index} has an empty tool-call ID or result marker"
+            ));
+        }
+        if !ids.insert(tool_call_id) {
+            return Verdict::Violation(format!(
+                "execution index repeats tool-call ID {tool_call_id:?}"
+            ));
+        }
+        if !markers.insert(effect_marker) {
+            return Verdict::Violation(format!(
+                "execution index repeats result marker {effect_marker:?}"
+            ));
+        }
+        if !body.contains(effect_marker) {
+            return Verdict::Violation(format!(
+                "executed call {tool_call_id:?} result marker {effect_marker:?} is absent from the client response"
+            ));
+        }
+    }
+    Verdict::Conformant
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn ogx_adaptive_checker_is_non_vacuous_and_checks_trial_count() {
+        let violating = r#"[
+          {"client_status":200,"forwarded":{"messages":[{"role":"user","content":"synthetic"}],"model":"m"}},
+          {"client_status":200,"forwarded":{"messages":[{"role":"user","content":"synthetic"}],"model":"m"}}
+        ]"#;
+        assert!(matches!(
+            ogx_adaptive_thinking_loss(violating, 2),
+            Verdict::Violation(_)
+        ));
+        assert!(matches!(
+            ogx_adaptive_thinking_loss(violating, 1),
+            Verdict::Violation(_)
+        ));
+        assert!(matches!(
+            ogx_adaptive_thinking_loss("[]", 1),
+            Verdict::Violation(_)
+        ));
+    }
+
+    #[test]
+    fn ogx_adaptive_checker_accepts_forwarded_or_rejected_controls() {
+        let forwarded = r#"[
+          {"client_status":200,"forwarded":{"messages":[{"role":"user","content":"synthetic"}],"reasoning_effort":"medium"}}
+        ]"#;
+        assert_eq!(
+            ogx_adaptive_thinking_loss(forwarded, 1),
+            Verdict::Conformant
+        );
+        let rejected = r#"[
+          {"client_status":400,"forwarded":null}
+        ]"#;
+        assert_eq!(ogx_adaptive_thinking_loss(rejected, 1), Verdict::Conformant);
+    }
+
+    #[test]
+    fn ogx_adaptive_checker_rejects_mixed_trials() {
+        let mixed = r#"[
+          {"client_status":200,"forwarded":{"messages":[{"role":"user","content":"synthetic"}],"reasoning_effort":"medium"}},
+          {"client_status":200,"forwarded":{"messages":[{"role":"user","content":"synthetic"}]}}
+        ]"#;
+        assert!(matches!(
+            ogx_adaptive_thinking_loss(mixed, 2),
+            Verdict::Violation(_)
+        ));
+    }
+
+    #[test]
+    fn ogx_adaptive_checker_parses_jsonl_and_rejects_forwarded_config_loss() {
+        let jsonl = "{\"body\":{\"messages\":[{\"role\":\"user\",\"content\":\"synthetic\"}],\"model\":\"m\"}}\n{\"body\":{\"messages\":[{\"role\":\"user\",\"content\":\"synthetic\"}],\"model\":\"m\"}}\n";
+        assert!(matches!(
+            ogx_adaptive_thinking_loss(jsonl, 2),
+            Verdict::Violation(_)
+        ));
+    }
 
     #[test]
     fn id_contract_basics() {
@@ -1599,6 +1906,66 @@ mod tests {
         assert!(!id_conforms("functions.list_skills:0")); // dot and colon
         assert!(!id_conforms(&"x".repeat(65))); // too long
         assert!(!id_conforms("")); // empty
+    }
+
+    #[test]
+    fn image_cache_case_collision_is_caught() {
+        let bug = r#"{"body":{"scenario":"bug","cache_size":8,"requested":["/Cat.png","/cat.png"],"origin_hits":["/Cat.png"],"decoded":[[255,0,0],[255,0,0]],"origin_colors":{"/Cat.png":[255,0,0],"/cat.png":[0,0,255]}}}"#;
+        let v = image_url_cache_key_case_sensitive(bug);
+        assert!(matches!(v, Verdict::Violation(_)), "must catch: {v:?}");
+    }
+
+    #[test]
+    fn image_cache_case_distinct_urls_is_conformant() {
+        let control = r#"{"body":{"scenario":"cache-off","cache_size":0,"requested":["/Cat.png","/cat.png"],"origin_hits":["/Cat.png","/cat.png"],"decoded":[[255,0,0],[0,0,255]],"origin_colors":{"/Cat.png":[255,0,0],"/cat.png":[0,0,255]}}}"#;
+        assert_eq!(
+            image_url_cache_key_case_sensitive(control),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn image_cache_no_case_pair_skips() {
+        let no_pair = r#"{"body":{"scenario":"distinct","cache_size":8,"requested":["/Cat.png","/dog.png"],"origin_hits":["/Cat.png","/dog.png"],"decoded":[[255,0,0],[0,255,0]],"origin_colors":{"/Cat.png":[255,0,0],"/cat.png":[0,0,255],"/dog.png":[0,255,0]}}}"#;
+        assert_eq!(
+            image_url_cache_key_case_sensitive(no_pair),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn executed_tool_result_checker_is_nonvacuous() {
+        let executions = r#"{"executions":[
+            {"tool_call_id":"call_alpha","effect_marker":"RESULT_ALPHA"},
+            {"tool_call_id":"call_beta","effect_marker":"RESULT_BETA"}
+        ]}"#;
+        let complete = "HTTP/1.1 200 OK\r\n\r\n{\"content\":\"RESULT_ALPHA RESULT_BETA\"}";
+        assert_eq!(
+            executed_tool_results_preserved(executions, complete),
+            Verdict::Conformant
+        );
+        let repeated =
+            "HTTP/1.1 200 OK\r\n\r\n{\"content\":\"RESULT_ALPHA RESULT_ALPHA RESULT_BETA\"}";
+        assert_eq!(
+            executed_tool_results_preserved(executions, repeated),
+            Verdict::Conformant,
+            "an extra client-visible copy does not erase either executed result"
+        );
+
+        let missing = "HTTP/1.1 200 OK\r\n\r\n{\"content\":\"RESULT_ALPHA\"}";
+        assert!(matches!(
+            executed_tool_results_preserved(executions, missing),
+            Verdict::Violation(_)
+        ));
+        assert!(matches!(
+            executed_tool_results_preserved(r#"{"executions":[]}"#, complete),
+            Verdict::Violation(_)
+        ));
+        let duplicate_id = executions.replace("call_beta", "call_alpha");
+        assert!(matches!(
+            executed_tool_results_preserved(&duplicate_id, complete),
+            Verdict::Violation(_)
+        ));
     }
 
     #[test]

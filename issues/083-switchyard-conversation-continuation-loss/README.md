@@ -23,13 +23,14 @@ cd Switchyard
 git checkout bfcd023cb6791efd8ac59d32afb5095c74fef1ff
 rustup run 1.96.1 cargo build --release -p switchyard-server
 cd /path/to/kairo
-transcripts/081/run_repro.sh /path/to/Switchyard/target/release/switchyard-server
+transcripts/083/run_repro.sh /path/to/Switchyard/target/release/switchyard-server
 ```
 
 - Expected behavior: the second request using the same `conversation` ID reaches the Chat backend with the seed user turn and seed assistant answer, like the response-ID control.
 - Observed behavior: the conversation follow-up reaches the Chat backend with only `RECALL`; Switchyard returns HTTP 200 and a plausible answer with no seed context.
-- Raw request and response evidence: [`capture-bug.jsonl`](../../transcripts/081/capture-bug.jsonl)
-- Forwarded-request evidence: [`forwarded.jsonl`](../../transcripts/081/forwarded.jsonl), exact UTF-8 bodies read by the capture upstream
+- Raw request and response evidence: [`capture-bug.jsonl`](../../transcripts/083/capture-bug.jsonl)
+- Forwarded-request evidence: [`forwarded.jsonl`](../../transcripts/083/forwarded.jsonl), exact UTF-8 bodies read by the capture upstream
+- Numbering note: this finding was renumbered from 081 to 083 after 081 and 082 landed on `main`. The recorded canaries (`SEED_CANARY_081_*`, `conv_081_*`) keep their original marker so the raw bytes stay unmodified.
 - Reproduction rate: conversation history missing 5/5; `previous_response_id` control preserved it 5/5
 - Smallest isolated trigger: replace the working follow-up's `previous_response_id` with the supported `conversation` ID.
 
@@ -127,7 +128,7 @@ The prior work covers provider-owned conversation routing and cross-format respo
 
 | Check | Command | Result |
 |---|---|---|
-| Reproduction | `transcripts/081/run_repro.sh SWITCHYARD_BIN` | PASS, bug 0/5 preserved |
+| Reproduction | `transcripts/083/run_repro.sh SWITCHYARD_BIN` | PASS, bug 0/5 preserved |
 | Control | same command, response-ID matrix | PASS, 5/5 preserved |
 | Harness | `cargo test --workspace` | PASS, 180 tests |
 | Formatting | `cargo fmt --all -- --check` | PASS |

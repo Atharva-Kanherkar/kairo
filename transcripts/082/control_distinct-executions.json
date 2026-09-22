@@ -1,0 +1,14 @@
+{
+  "cell": "control_distinct",
+  "executions": [
+    {
+      "effect_marker": "KAIRO_082_EFFECT_ALPHA_control_distinct_01",
+      "tool_call_id": "call_082_initial_alpha_control_distinct_01"
+    },
+    {
+      "effect_marker": "KAIRO_082_EFFECT_BETA_control_distinct_01",
+      "tool_call_id": "call_082_initial_beta_control_distinct_01"
+    }
+  ],
+  "run": "01"
+}

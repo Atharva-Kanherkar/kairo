@@ -1,4 +1,4 @@
-# Issue 081 Switchyard Conversation Continuation - Test Contract
+# Issue 083 Switchyard Conversation Continuation - Test Contract
 
 ## Functional Behavior
 
@@ -18,7 +18,7 @@
 
 - Reproduce the collision 5 of 5 times with the real release server and deterministic capture upstream.
 - Run the `previous_response_id` control 5 of 5 times with the same server, route, and requests.
-- Save sanitized client requests, client responses, and forwarded upstream requests under `transcripts/081/`.
+- Save sanitized client requests, client responses, and forwarded upstream requests under `transcripts/083/`.
 
 ## Smoke Tests
 
