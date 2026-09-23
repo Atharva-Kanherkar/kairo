@@ -1,8 +1,22 @@
+"""Replay the issue 084 client request directly and through LiteLLM.
+
+    python3 transcripts/084/replay.py --output-dir /tmp/kairo-084-rerun          # reviewer run
+    python3 transcripts/084/replay.py --output-dir transcripts/084/raw/replay    # maintainer fixture refresh
+"""
+
 from pathlib import Path
+import argparse
 import json
 import socket
 
-OUT = Path(__file__).resolve().parent / "raw" / "replay"
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--output-dir",
+    type=Path,
+    required=True,
+    help="capture directory; pass the same one to capture_upstream.py",
+)
+OUT = parser.parse_args().output_dir.resolve()
 OUT.mkdir(parents=True, exist_ok=True)
 payload = {
     "id": "codex-manual-search-test",
@@ -40,3 +54,4 @@ for case, (port, path) in cases.items():
         results[case].append(status)
         print(f"{case} {i}/5 status={status}")
 (OUT / "results.json").write_text(json.dumps(results, indent=2) + "\n")
+print(f"captures written to {OUT}")

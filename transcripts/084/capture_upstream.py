@@ -1,10 +1,28 @@
+"""Deterministic standalone-search upstream for issue 084.
+
+Answers HTTP 200 when the JSON body carries a top-level `id` and the
+provider-style missing-parameter 400 otherwise, recording every exchange.
+
+    python3 transcripts/084/capture_upstream.py --output-dir /tmp/kairo-084-rerun          # reviewer run
+    python3 transcripts/084/capture_upstream.py --output-dir transcripts/084/raw/replay    # maintainer fixture refresh
+"""
+
 from pathlib import Path
+import argparse
 import json
 import socketserver
 import threading
 
-OUT = Path(__file__).resolve().parent / "raw" / "replay"
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    "--output-dir",
+    type=Path,
+    required=True,
+    help="capture directory; pass the same one to replay.py",
+)
+OUT = parser.parse_args().output_dir.resolve()
 OUT.mkdir(parents=True, exist_ok=True)
+print(f"capturing to {OUT}", flush=True)
 count = 0
 lock = threading.Lock()
 

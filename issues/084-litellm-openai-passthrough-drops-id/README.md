@@ -19,14 +19,18 @@ Installed the pinned public package with the proxy extra in a clean Python 3.12.
 ```sh
 uv venv /tmp/litellm-1.102.1 --python 3.12
 uv pip install --python /tmp/litellm-1.102.1/bin/python 'litellm[proxy]==1.102.1'
-python3 transcripts/084/capture_upstream.py
+rm -rf /tmp/kairo-084-rerun  # reviewer captures stay outside the repository
+python3 transcripts/084/capture_upstream.py --output-dir /tmp/kairo-084-rerun
 # In another terminal, set OPENAI_API_KEY to a synthetic value.
 OPENAI_API_BASE=http://127.0.0.1:9996 /tmp/litellm-1.102.1/bin/litellm --host 127.0.0.1 --port 4010
 # In a third terminal:
-/tmp/litellm-1.102.1/bin/python transcripts/084/replay.py
+/tmp/litellm-1.102.1/bin/python transcripts/084/replay.py --output-dir /tmp/kairo-084-rerun
+git status --porcelain  # prints nothing: the committed snapshot is unchanged
 ```
 
 The replay makes five direct calls with the exact client JSON and five calls through LiteLLM. The deterministic upstream returns HTTP 200 when `id` is present and the provider-style missing-ID HTTP 400 otherwise.
+
+The files under `transcripts/084/raw/replay/` are the frozen 2026-09-23 capture. Both scripts require `--output-dir`, so a rerun never writes there unless a maintainer passes that directory to both scripts to refresh the snapshot. Compare a rerun with `diff -r transcripts/084/raw/replay /tmp/kairo-084-rerun`. Proxied responses carry a new `date` and `x-litellm-call-id` on every run, and the redacted forwarded credential header can differ in name case between environments (`Authorization` in the snapshot, `authorization` in the 2026-09-23 review rerun). Every forwarded body still differs from the client body only by the missing `id`.
 
 - **Expected behavior**: `/openai_passthrough` forwards this less-common OpenAI endpoint request with its provider-required fields intact. LiteLLM documents this route for endpoints needing guaranteed pass-through and for newer endpoints it does not fully support.
 - **Observed behavior**: the client JSON has `id`; all five captured requests forwarded by LiteLLM omit only that key. All five proxied calls receive `400 missing_required_parameter`. The five direct controls include `id` at the capture and receive HTTP 200.
@@ -94,6 +98,7 @@ The replay and raw captures are under `transcripts/084/`. The conformance suite 
 | Pinned package and real CLI route | See setup commands above | Passed, LiteLLM 1.102.1 |
 | Direct capture control | `transcripts/084/replay.py` | Passed 5/5 |
 | Proxied capture reproduction | `transcripts/084/replay.py` | Failed as claimed 5/5 |
+| Rerun leaves committed evidence intact | Documented commands, then `git status --porcelain` | Passed, no tracked file changed; both scripts exit 2 without `--output-dir` |
 | Harness | `cargo test --workspace` | Passed, 199 tests |
 | Formatting | `cargo fmt --all -- --check` | Passed |
 | Lint | `cargo clippy --workspace --all-targets -- -D warnings` | Passed |
