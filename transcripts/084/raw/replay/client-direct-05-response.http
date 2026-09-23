@@ -1,0 +1,6 @@
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 107
+Connection: close
+
+{"id": "codex-manual-search-test", "object": "search.results", "results": [{"title": "synthetic control"}]}

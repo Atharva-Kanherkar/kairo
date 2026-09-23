@@ -1,0 +1,32 @@
+{
+  "date_utc": "2026-09-23",
+  "target": "LiteLLM Proxy 1.102.1",
+  "target_tag_commit": "d09bbae1c6df463e425558f60d460437193635da",
+  "runtime": "Python 3.12.13",
+  "route": "POST /openai_passthrough/v1/alpha/search",
+  "upstream": "deterministic local HTTP capture at 127.0.0.1:9996",
+  "model": "gpt-5.6-luna (synthetic request field; no model call)",
+  "config": [
+    "OPENAI_API_BASE=http://127.0.0.1:9996",
+    "OPENAI_API_KEY set to a synthetic value; value not recorded"
+  ],
+  "trials": {
+    "direct_with_id": {
+      "success": 5,
+      "total": 5,
+      "status": 200
+    },
+    "through_litellm": {
+      "failure": 5,
+      "total": 5,
+      "status": 400,
+      "error_code": "missing_required_parameter"
+    }
+  },
+  "assertion": "The client request includes top-level id; the real LiteLLM proxy removes it before forwarding. The capture upstream returns 400 only when id is absent.",
+  "limitations": [
+    "No OpenAI credential was available in the environment, so the provider was not called directly. The actual OpenAI 400 is reported in upstream issue #42656.",
+    "No Codex binary/session reproduction was run; the proxied API caller received the captured 400 response."
+  ],
+  "evidence_dir": "transcripts/084/raw/observed"
+}

@@ -300,6 +300,34 @@ pub fn capture_records(jsonl: &str) -> Result<Vec<(String, Value)>, String> {
         .collect()
 }
 
+/// A provider-owned top-level request `id` MUST survive a pass-through hop.
+/// The field is compared as JSON, so string, number, and null IDs are checked
+/// without coercion. If the client did not send an ID, there is nothing to
+/// preserve.
+pub fn provider_request_id_preserved(client_json: &str, forwarded_json: &str) -> Verdict {
+    let client: Value = match serde_json::from_str(client_json) {
+        Ok(value) => value,
+        Err(error) => return Verdict::Violation(format!("unparseable client JSON: {error}")),
+    };
+    let forwarded: Value = match serde_json::from_str(forwarded_json) {
+        Ok(value) => value,
+        Err(error) => return Verdict::Violation(format!("unparseable forwarded JSON: {error}")),
+    };
+    let Some(client_object) = client.as_object() else {
+        return Verdict::Violation("client JSON is not an object".into());
+    };
+    let Some(expected_id) = client_object.get("id") else {
+        return Verdict::Conformant;
+    };
+    match forwarded.get("id") {
+        Some(actual_id) if actual_id == expected_id => Verdict::Conformant,
+        Some(actual_id) => Verdict::Violation(format!(
+            "provider-owned top-level id changed from {expected_id} to {actual_id}"
+        )),
+        None => Verdict::Violation("provider-owned top-level id was dropped".into()),
+    }
+}
+
 /// Check the adaptive-thinking invariant from either a case-array fixture or
 /// capture-rig JSONL. A 200 response with a non-empty forwarded request and no
 /// `thinking` or `reasoning` field is the reproduced loss. A gateway that
