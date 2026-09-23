@@ -33,3 +33,6 @@
 
 - Reviewer can recreate the pinned LiteLLM 1.102.1 environment and run the documented capture server, proxy CLI, and replay commands from `issues/084-litellm-openai-passthrough-drops-id/README.md`.
 - Verify the raw client request contains `id`, the direct upstream request retains it, and each forwarded proxy request omits it.
+- `capture_upstream.py` and `replay.py` refuse to run without `--output-dir`, so no capture location is implied.
+- The documented reviewer run writes every capture to a temporary directory outside the repository, and `git status --porcelain` is empty afterwards.
+- The committed snapshot under `transcripts/084/raw/replay/` changes only when a maintainer passes that directory explicitly to both scripts.
