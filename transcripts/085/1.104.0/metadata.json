@@ -10,6 +10,11 @@
   "runs_per_mode": 5,
   "public_endpoint": "/v1/responses",
   "backend": "deterministic local OpenAI Responses capture upstream",
-  "note": "1.104.0 is unreleased; installed from a local checkout of BerriAI/litellm@1c8a0ff6023b3eba6b01e955c49edcfa97bf0d22 (main, fetched 2026-09-24), not from PyPI",
+  "sdk_replays": [
+    "3.13.0",
+    "3.14.0",
+    "3.19.2"
+  ],
+  "note": "1.104.0 is unreleased; editable install of BerriAI/litellm main at 8bbe7edb711ee894deb5ad7e3cc10391a9837de9 (fetched 2026-09-24). router.py and responses/streaming_iterator.py are unchanged from 1c8a0ff6.",
   "complete": true
 }

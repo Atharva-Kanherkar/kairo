@@ -2,78 +2,67 @@
 
 ## Functional Behavior
 
-- LiteLLM's Responses-API router fallback wrapper (`Router._aresponses_streaming_iterator`)
-  decides whether to replay the original input based only on accumulated text
-  (`generated_content`), never on a completed `function_call` item.
-- When the primary deployment completes a tool call and then fails with a
-  retriable error, the fallback deployment re-runs the same tool and its own
-  events are forwarded verbatim, reusing `output_index` from zero.
-- A control where the primary fails before any output item is announced
-  (`is_pre_first_chunk`) is the correct, conformant fallback path.
-- A control where no fallback is triggered at all is conformant.
-- The issue writeup names the finding as novel and links the maintainer ruling
-  (#40121) that establishes the "one lifecycle" invariant for an adjacent code
-  path.
+- LiteLLM's Responses-API fallback wrapper (`Router._aresponses_streaming_iterator`) decides whether to replay the original input from accumulated text alone (`generated_content`). A completed `function_call` or `reasoning` item is never counted.
+- When the primary completes a tool call and then sends a retriable in-band failure (`error`, or `response.failed` with `server_error`), the fallback runs the same request again. Its events are forwarded as a second lifecycle, reusing `output_index` from zero.
+- A failure before any output item (`control-fault-before-output`) and a completed primary (`control-no-fault`) are conformant.
+- Two boundaries mark the edges of the claim:
+  - An announced but never completed item reuses the index without any consumer-visible failure.
+  - A transport drop does not reach the fallback.
+- The writeup cites #34627 as the governing maintainer ruling (the chat path re-raises once any content streamed), and classifies the finding as `novel` and `bug`.
 
 ## Unit Tests
 
-- `responses_fallback_preserves_delivered_indexes` reports a violation when an
-  `output_index` assigned by one lifecycle is reassigned to an unrelated item
-  by a later lifecycle in the same stream, regardless of item type.
-- The same checker reports conformant when: only one lifecycle exists; a later
-  lifecycle reuses an index nothing was ever assigned to; or a later lifecycle
-  reuses an index for the *same* item id.
-- The checker fails closed on empty, malformed, and missing-field streams.
-- `transcripts/085/test_reproduce.py` unit-tests the deterministic upstream's
-  six scenarios and the reproduction rig's per-mode validation logic without
-  starting any real process.
+- `responses_no_restart_after_output`:
+  - Rejects a `response.created` that follows any announced output item, whether or not the fallback's index is renumbered.
+  - Accepts a second `response.created` before any output item.
+  - Fails closed on empty or non-JSON streams.
+- `responses_fallback_not_spliced_after_delivery`:
+  - Rejects any item from a later upstream attempt in the client stream after a failed attempt's item was delivered. This covers the "one clean lifecycle with renumbered indexes" variant.
+  - Accepts no failure, a failure before any delivered item, and a failed attempt whose items never reached the client.
+- `responses_fallback_preserves_delivered_indexes`: unchanged from the first revision. It rejects one `output_index` reassigned to a different item.
+- `transcripts/085/test_reproduce.py` covers:
+  - every deterministic upstream scenario, including the transport drop and the reasoning-first fallback
+  - the per-mode, per-SDK-version validation
+  - the token-boundary credential check
+- `transcripts/085/codex/test_run_codex_matrix.py` covers:
+  - byte-exact externalization and restore, including tamper detection and only-top-level keys
+  - sanitization
+  - the Codex upstream scenarios
+  - the credential check
 
 ## Integration / Functional Tests
 
-- `litellm_responses_fallback_replays_delivered_tool_call` reads the captured
-  `trigger-duplicate-tool` evidence for both tested versions and requires 2
-  completed tool calls and a checker violation in every trial.
-- `litellm_responses_fallback_crashes_official_sdk` reads both SDK-crash
-  triggers (`item-type`, `partial-text`) for both versions and requires the
-  real `openai` SDK to have raised `AssertionError` with no final response in
-  every trial, plus a checker violation.
-- `litellm_responses_fallback_controls_preserve_one_output_namespace` reads
-  both controls for both versions and requires a checker-conformant verdict
-  with the expected upstream-call and tool-call counts in every trial.
-- `issue_085_checks_later_trials_and_rejects_malformed_evidence` mutates the
-  fifth trial and appends a malformed JSONL line to prove the suite cannot
-  pass by only checking the first record.
-- Reproduction rate is 5/5 for all three triggers and both controls, on both
-  LiteLLM 1.102.1 and current main.
+- `litellm_responses_fallback_replays_delivered_tool_call`: both duplicate modes, on both versions. Requires, in every trial:
+  - two upstream calls
+  - two completed calls under every SDK version
+  - all three checkers reporting a violation
+- `litellm_responses_fallback_crashes_openai_python_before_3_14`: both crash modes. Requires `AssertionError` with no final response under openai 2.54.0 and 3.13.0, and a clean final response under 3.14.0 and 3.19.2.
+- `litellm_responses_fallback_controls_and_boundaries`:
+  - The controls are conformant under all three checkers.
+  - The announced-only boundary violates the checkers but every SDK completes one call.
+  - The transport drop makes one upstream call, is conformant, and surfaces an error.
+- `issue_085_checks_later_trials_and_rejects_malformed_evidence`: a mutated fifth trial, a fifth trial with its SDK replays removed, and an appended malformed line each fail.
+- `issue_085_splice_invariant_survives_renumbering`: a real trigger capture, rewritten to one lifecycle with shifted indexes, passes the index and restart checkers and still fails the splice checker.
+- `codex_runs_the_side_effect_twice_after_a_litellm_fallback`: every Codex run, on 1.102.1, on main, and with the live fallback. For each run it checks:
+  - the side-effect count, from the ledger and from Codex's own events
+  - Codex's returned tool results
+  - the checker verdicts on the first turn
+  - that each shared reference file exists
 
 ## Smoke Tests
 
-- `cargo test --workspace` passes.
-- `cargo fmt --all -- --check` passes.
-- `cargo clippy --workspace --all-targets -- -D warnings` passes.
-- `python3 tools/update-readme-counts.py --check` passes.
+- `cargo test --workspace`, `cargo fmt --all -- --check`, `cargo clippy --workspace --all-targets -- -D warnings`, and `python3 tools/update-readme-counts.py --check` pass.
+- `python3 transcripts/085/codex/verify_refs.py ...` rebuilds all 160 committed Codex request bodies byte for byte.
 
 ## E2E Tests
 
-- The reproduction runs the real LiteLLM proxy CLI as a subprocess bound to a
-  loopback port, with a real `router_settings.fallbacks` configuration, driven
-  by the real `openai` Python SDK's `client.responses.stream()` accumulator in
-  a subprocess. A loopback relay captures the exact bytes the SDK sends and
-  receives; a deterministic capture server plays the role of the two provider
-  deployments and captures the exact bytes LiteLLM forwards and receives.
-- The SDK consumer's own reported outcome (event types, response ids,
-  completed tool-call ids, final response, exception type and source line) is
-  captured per trial and asserted against in the conformance suite, not just
-  the raw wire bytes.
+- `transcripts/085/reproduce.py` runs:
+  - the real LiteLLM proxy CLI with a real `router_settings.fallbacks` configuration
+  - driven by the real `openai` SDK's `client.responses.stream()`
+  - with each captured public body replayed to openai 3.13.0, 3.14.0, and 3.19.2
+- `transcripts/085/codex/run_codex_matrix.py` runs the real Codex CLI 0.156.1 through the same proxy. It uses hermetic `HOME` and `CODEX_HOME`, disables Codex's own retries, and measures the side effect as lines in `ledger.txt`.
 
 ## Manual / cURL Tests
 
-- A reviewer can recreate the pinned LiteLLM 1.102.1 environment (or a fresh
-  checkout of current main) and run `transcripts/085/reproduce.py` exactly as
-  documented in `issues/085-litellm-responses-fallback-replays-tool-call/README.md`.
-- `reproduce.py` refuses to run against an existing output directory, so no
-  capture location is implied and a rerun never overwrites committed evidence.
-- Verify the raw client-visible SSE body for `trigger-duplicate-tool` contains
-  two `response.created` events and two completed `function_call` items with
-  different `call_id`s at `output_index` 0; verify `control-pre-first-chunk`'s
-  body contains two `response.created` events but only one completed item.
+- A reviewer can recreate the pinned environments and rerun both runners exactly as documented in the issue writeup and `transcripts/085/codex/README.md`.
+- Both runners refuse an existing output directory, so a rerun never overwrites committed evidence.

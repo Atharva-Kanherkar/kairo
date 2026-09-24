@@ -1,0 +1,20 @@
+{
+  "packages": {
+    "litellm": "1.102.1",
+    "openai": "2.54.0"
+  },
+  "router_sha256": "c914de7cf3a4523707d7bc01204a7a9683f6212db2579725ab897c05cb00565e",
+  "codex": "codex-cli 0.156.1",
+  "python": "Python 3.12.13",
+  "captured_at": "2026-09-24",
+  "runs_per_case": 5,
+  "cases": [
+    "codex-trigger-duplicate-tool",
+    "codex-control-no-fault",
+    "codex-control-fault-before-output"
+  ],
+  "note": "PyPI litellm[proxy]==1.102.1",
+  "live_fallback_model": null,
+  "live_fallback_hop": null,
+  "complete": true
+}

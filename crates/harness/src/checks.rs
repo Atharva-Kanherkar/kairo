@@ -250,6 +250,97 @@ pub fn responses_fallback_preserves_delivered_indexes(sse: &str) -> Verdict {
     Verdict::Conformant
 }
 
+/// Invariant (bug 085): once a public Responses stream has announced an
+/// output item, it must not start another response lifecycle. LiteLLM's own
+/// chat-completions fallback re-raises instead of retrying once any content
+/// has streamed (BerriAI/litellm#34627), because a retry "would otherwise send
+/// a second, unrelated response after content the client already received".
+/// A second `response.created` before any output item, from a fallback for a
+/// primary that failed before producing output, is conformant.
+pub fn responses_no_restart_after_output(sse: &str) -> Verdict {
+    let events = sse_data_json(sse);
+    if events.is_empty() {
+        return Verdict::Violation("Responses stream contains no JSON events".into());
+    }
+    let mut first_item: Option<&str> = None;
+    for event in &events {
+        match event.get("type").and_then(Value::as_str) {
+            Some("response.output_item.added") if first_item.is_none() => {
+                first_item = Some(
+                    event
+                        .pointer("/item/id")
+                        .and_then(Value::as_str)
+                        .unwrap_or("<no id>"),
+                );
+            }
+            Some("response.created") => {
+                if let Some(item) = first_item {
+                    return Verdict::Violation(format!(
+                        "a new response lifecycle started after output item {item:?} was already delivered"
+                    ));
+                }
+            }
+            _ => {}
+        }
+    }
+    Verdict::Conformant
+}
+
+fn output_item_ids(events: &[Value]) -> Vec<String> {
+    events
+        .iter()
+        .filter(|e| e.get("type").and_then(Value::as_str) == Some("response.output_item.added"))
+        .filter_map(|e| e.pointer("/item/id").and_then(Value::as_str))
+        .map(str::to_owned)
+        .collect()
+}
+
+/// Invariant (bug 085), across hops: when an upstream attempt ends without
+/// completing after the client already received one of its output items, no
+/// output item from a later upstream attempt may appear in the same public
+/// stream. This holds however the gateway renumbers indexes or merges
+/// lifecycles, so it rejects a fallback that is spliced in after delivered
+/// output even when the client-side stream looks like one clean response.
+/// `upstream_sses` are the raw provider streams in attempt order.
+pub fn responses_fallback_not_spliced_after_delivery(
+    client_sse: &str,
+    upstream_sses: &[&str],
+) -> Verdict {
+    let client = sse_data_json(client_sse);
+    if client.is_empty() {
+        return Verdict::Violation("client stream contains no JSON events".into());
+    }
+    let delivered = output_item_ids(&client);
+    let attempts: Vec<Vec<Value>> = upstream_sses.iter().map(|s| sse_data_json(s)).collect();
+    for (index, attempt) in attempts.iter().enumerate() {
+        let completed = attempt.iter().any(|e| {
+            matches!(
+                e.get("type").and_then(Value::as_str),
+                Some("response.completed" | "response.incomplete")
+            )
+        });
+        let forwarded: Vec<String> = output_item_ids(attempt)
+            .into_iter()
+            .filter(|id| delivered.contains(id))
+            .collect();
+        if completed || forwarded.is_empty() {
+            continue;
+        }
+        for later in &attempts[index + 1..] {
+            if let Some(spliced) = output_item_ids(later)
+                .into_iter()
+                .find(|id| delivered.contains(id))
+            {
+                return Verdict::Violation(format!(
+                    "upstream attempt {index} failed after the client received {forwarded:?}; \
+                     item {spliced:?} from a later attempt was spliced into the same stream"
+                ));
+            }
+        }
+    }
+    Verdict::Conformant
+}
+
 /// True when `id` satisfies the OpenAI / Anthropic tool-call id contract:
 /// `^[A-Za-z0-9_-]{1,64}$`.
 pub fn id_conforms(id: &str) -> bool {
@@ -2705,6 +2796,112 @@ data: {"type":"response.output_text.delta","delta":"late"}
                 Verdict::Violation(_)
             ));
         }
+    }
+
+    #[test]
+    fn responses_no_restart_after_output_checker() {
+        let created_a = r#"data: {"type":"response.created","response":{"id":"resp_a"}}"#;
+        let created_b = r#"data: {"type":"response.created","response":{"id":"resp_b"}}"#;
+        let added = |id: &str, index: u64| {
+            format!(
+                r#"data: {{"type":"response.output_item.added","output_index":{index},"item":{{"id":"{id}"}}}}"#
+            )
+        };
+        // Bug 085: the fallback's lifecycle starts after the primary's call
+        // was delivered. Renumbering the fallback's item does not help.
+        for index in [0, 1] {
+            let restarted = format!(
+                "{created_a}\n\n{}\n\n{created_b}\n\n{}\n\n",
+                added("fc_primary", 0),
+                added("fc_fallback", index)
+            );
+            assert!(matches!(
+                responses_no_restart_after_output(&restarted),
+                Verdict::Violation(_)
+            ));
+        }
+        // Control: the primary failed before any output item.
+        let before_output = format!(
+            "{created_a}\n\n{created_b}\n\n{}\n\n",
+            added("fc_fallback", 0)
+        );
+        assert_eq!(
+            responses_no_restart_after_output(&before_output),
+            Verdict::Conformant
+        );
+        let single = format!("{created_a}\n\n{}\n\n", added("fc_primary", 0));
+        assert_eq!(
+            responses_no_restart_after_output(&single),
+            Verdict::Conformant
+        );
+        for invalid in ["", "data: not-json\n\n"] {
+            assert!(matches!(
+                responses_no_restart_after_output(invalid),
+                Verdict::Violation(_)
+            ));
+        }
+    }
+
+    #[test]
+    fn responses_fallback_not_spliced_after_delivery_checker() {
+        let added = |id: &str, index: u64| {
+            format!(
+                r#"data: {{"type":"response.output_item.added","output_index":{index},"item":{{"id":"{id}"}}}}"#
+            )
+        };
+        let created = r#"data: {"type":"response.created","response":{"id":"resp"}}"#;
+        let error = r#"data: {"type":"error","error":{"code":"server_error"}}"#;
+        let completed = r#"data: {"type":"response.completed","response":{"id":"resp"}}"#;
+        let primary_failed = format!("{created}\n\n{}\n\n{error}\n\n", added("fc_primary", 0));
+        let primary_ok = format!("{created}\n\n{}\n\n{completed}\n\n", added("fc_primary", 0));
+        let prefail = format!("{created}\n\n{error}\n\n");
+        let fallback = format!(
+            "{created}\n\n{}\n\n{completed}\n\n",
+            added("fc_fallback", 0)
+        );
+
+        // Bug 085 as LiteLLM emits it, and the same splice hidden behind one
+        // clean lifecycle with renumbered indexes: both are violations.
+        let two_lifecycles = format!(
+            "{created}\n\n{}\n\n{created}\n\n{}\n\n",
+            added("fc_primary", 0),
+            added("fc_fallback", 0)
+        );
+        let composed = format!(
+            "{created}\n\n{}\n\n{}\n\n{completed}\n\n",
+            added("fc_primary", 0),
+            added("fc_fallback", 1)
+        );
+        for client in [&two_lifecycles, &composed] {
+            assert!(matches!(
+                responses_fallback_not_spliced_after_delivery(
+                    client,
+                    &[&primary_failed, &fallback]
+                ),
+                Verdict::Violation(_)
+            ));
+        }
+        // Controls: nothing delivered before the failure, no failure at all,
+        // and a failed attempt whose items never reached the client.
+        let fallback_only = format!("{created}\n\n{created}\n\n{}\n\n", added("fc_fallback", 0));
+        assert_eq!(
+            responses_fallback_not_spliced_after_delivery(&fallback_only, &[&prefail, &fallback]),
+            Verdict::Conformant
+        );
+        let single = format!("{created}\n\n{}\n\n", added("fc_primary", 0));
+        assert_eq!(
+            responses_fallback_not_spliced_after_delivery(&single, &[&primary_ok]),
+            Verdict::Conformant
+        );
+        let unseen = format!("{created}\n\n{}\n\n", added("fc_fallback", 0));
+        assert_eq!(
+            responses_fallback_not_spliced_after_delivery(&unseen, &[&primary_failed, &fallback]),
+            Verdict::Conformant
+        );
+        assert!(matches!(
+            responses_fallback_not_spliced_after_delivery("", &[&primary_failed]),
+            Verdict::Violation(_)
+        ));
     }
 
     #[test]

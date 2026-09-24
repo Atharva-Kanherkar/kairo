@@ -10,5 +10,11 @@
   "runs_per_mode": 5,
   "public_endpoint": "/v1/responses",
   "backend": "deterministic local OpenAI Responses capture upstream",
+  "sdk_replays": [
+    "3.13.0",
+    "3.14.0",
+    "3.19.2"
+  ],
+  "note": "PyPI litellm[proxy]==1.102.1 (tag v1.102.1)",
   "complete": true
 }

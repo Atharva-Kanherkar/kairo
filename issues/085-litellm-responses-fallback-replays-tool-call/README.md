@@ -1,307 +1,191 @@
-# 085, LiteLLM Responses mid-stream fallback replays a delivered tool call and corrupts the public stream's output-index namespace
+# 085, LiteLLM Responses mid-stream fallback replays a delivered tool call, and Codex runs it twice
 
-- **Upstream**: [BerriAI/litellm](https://github.com/BerriAI/litellm). No exact
-  upstream ticket found on 2026-09-24. Related reports are listed below.
-- **Tool under test**: LiteLLM 1.102.1 (current latest release,
-  [tag v1.102.1](https://github.com/BerriAI/litellm/releases/tag/v1.102.1)) and
-  current main commit
-  [`1c8a0ff6`](https://github.com/BerriAI/litellm/commit/1c8a0ff6023b3eba6b01e955c49edcfa97bf0d22)
-  (reports as `1.104.0`, unreleased), OpenAI Python SDK 2.54.0.
-- **Reproduced**: 2026-09-24 through the real LiteLLM proxy CLI's
-  `POST /v1/responses` route, a real `fallbacks` router configuration, and a
-  deterministic OpenAI Responses capture upstream. No provider credential is
-  needed.
+- **Upstream**: [BerriAI/litellm](https://github.com/BerriAI/litellm). No matching issue or pull request on 2026-09-24. The governing maintainer ruling is merged [#34627](https://github.com/BerriAI/litellm/pull/34627), which makes the chat-completions path re-raise instead of retrying once any content has streamed. Related work is listed under "Upstream status".
+- **Tool under test**:
+  - LiteLLM 1.102.1, the current latest release ([tag v1.102.1](https://github.com/BerriAI/litellm/releases/tag/v1.102.1)).
+  - Unreleased main at [`8bbe7edb`](https://github.com/BerriAI/litellm/commit/8bbe7edb711ee894deb5ad7e3cc10391a9837de9), which reports `1.104.0`. Its `router.py` is byte-identical to `1c8a0ff6`, which the first version of this report used.
+  - Consumers: the Codex CLI 0.156.1, and the OpenAI Python SDK 2.54.0, 3.13.0, 3.14.0, and 3.19.2.
+- **Reproduced**: 2026-09-24.
+  - The real LiteLLM proxy CLI serves `POST /v1/responses` with a real `router_settings.fallbacks` configuration, in front of a deterministic OpenAI Responses upstream.
+  - One Codex case uses the live OpenAI API (`gpt-5.4-nano`) as the fallback deployment.
 
 ## What breaks
 
-A developer configures LiteLLM's documented `router_settings.fallbacks` for the
-Responses API, exactly as
-[PR #28215](https://github.com/BerriAI/litellm/pull/28215) added. A model
-completes a tool call, then the underlying provider connection fails
-(a retriable 5xx). LiteLLM's fallback wrapper decides whether anything was
-already delivered by checking only accumulated **text**
-(`router.py:3274`, `e.generated_content`). A completed tool call is not text, so
-the wrapper treats the turn as if nothing happened and replays the original
-input against the fallback deployment. The fallback deployment runs the tool
-again and streams its own result into the same public SSE body, restarting
-`output_index` at zero.
+An agent sends Responses API traffic through LiteLLM with a fallback configured. The primary streams a completed tool call, then fails with a retriable in-band event: an `error` event, or `response.failed` with `server_error`.
 
-The official OpenAI Python SDK's `client.responses.stream()` accumulator keeps
-one response snapshot per stream and dispatches on `output_index` without ever
-noticing the second `response.created`. So a caller of the documented SDK either
-
-- receives a genuinely duplicated tool call (the agent runs a side-effecting
-  action twice), or
-- crashes at
-  [`_responses.py:254` or `:294`](https://github.com/openai/openai-python/blob/v2.54.0/src/openai/lib/streaming/responses/_responses.py#L247-L297)
-  with `AssertionError`, if the fallback's item at the reused index has a
-  different type than the primary's.
-
-This is not limited to tool calls. The **same** collision crashes the SDK even
-when the primary only streamed partial **text** before failing and the fallback
-correctly follows LiteLLM's own designed continuation-prompt path
-(`router.py:3277`, `_build_responses_continuation_input`). The intended,
-non-buggy retry strategy still reuses the wire-level `output_index` namespace
-and still corrupts the client's stream.
+LiteLLM decides whether anything was already delivered by checking only accumulated **text** (`router.py:3274`). A completed `function_call` is not text, so the wrapper treats the turn as if nothing reached the client:
+- It replays the original request against the fallback deployment.
+- It appends the fallback's whole second lifecycle to the same public SSE body, restarting `output_index` at 0.
 
 ```text
-Client -> LiteLLM /v1/responses (fallbacks: [primary, backup])
-       -> primary: function_call "append_ledger" delivered, then a 5xx error
-       -> generated_content is text-only, sees "" -> replays original input
-       -> backup: runs append_ledger again, own output_index starts at 0
-Client <- one SSE body: two response.created, two completed function_call
-          items at output_index 0, OR an AssertionError before any final
-          response is available
+Client -> LiteLLM /v1/responses (fallbacks: primary -> backup)
+       -> primary: function_call "echo run >> ledger.txt" delivered, then an in-band 5xx
+       -> generated_content is text-only, sees "" -> replays the original input
+       -> backup: the same call again, its own lifecycle, output_index from 0
+Client <- one SSE body: two response.created, two completed calls, no error
 ```
 
-Measured impact is 5/5 for each of three distinct triggers, on both the pinned
-release and current main, over a real LiteLLM proxy process and the real
-`openai` SDK. Two clean controls confirm the discriminating variable: whether
-the primary delivered any output item before it failed.
+The measured consequences:
+
+- **Codex runs the side effect twice.** The real Codex CLI 0.156.1 runs a side-effecting shell command twice, with exit 0 and no error shown to the user. This happens in 5/5 runs on both LiteLLM versions, and in 5/5 runs with a live `gpt-5.4-nano` fallback. Codex's own retries are disabled, and both controls run the command once. Codex dispatches a tool on every completed call item and treats a second `response.created` as an id update ([`codex-rs/core/src/session/turn.rs`](https://github.com/openai/codex/blob/c098f97e5305394c7f30a876c1393cf34a3eedca/codex-rs/core/src/session/turn.rs#L2597-L2704)). Any consumer that runs tools on `response.output_item.done` is exposed the same way.
+- **Final-response consumers are not affected.** The final response that the OpenAI SDK assembles contains only the fallback's call, in every trigger record, so a consumer that runs tools only from `get_final_response()` runs the call once.
+- **openai-python below 3.14.0 crashes.** `client.responses.stream()` raises `AssertionError` before any final response when the item type at the reused index changes. That happens with a reasoning-model fallback, which leads with a `reasoning` item, or after a partial text answer. openai-python 3.14.0 (2026-09-14, [#3126](https://github.com/openai/openai-python/issues/3126)) keys its accumulator by `output_index` and tolerates the reuse. All 2.x releases and 3.0.0 through 3.13.0 crash, 5/5; 3.14.0 and 3.19.2 do not, 5/5. LiteLLM itself pins `openai<3`, so any Python environment that also installs LiteLLM gets a crashing SDK.
+
+What triggers it, as measured:
+- **Triggers:** only a retriable in-band failure event after at least one output item was forwarded.
+- **Transport drop:** the upstream closes the connection early and LiteLLM does not fall back. It forwards the delivered call and then an error, as `boundary-transport-drop` shows.
+- **Failure before any output item:** takes the conformant path, as `control-fault-before-output` shows.
+
+How often production streams hit an in-band retriable failure after a tool call was not measured.
 
 ## Wire evidence
 
-Each JSONL line is one complete public exchange over real HTTP: a real
-`openai` Python SDK client, driven as a subprocess, calling a real LiteLLM
-proxy process, which calls a deterministic local upstream. `client_request` and
-`client_response` retain the exact bytes the SDK sent and received.
-`upstream_exchanges` retains the exact bytes LiteLLM sent to and received from
-the deterministic upstream for every provider round in that trial. `consumer`
-records the SDK's own parsed event types, response ids, completed tool-call
-ids, final response, and any exception the SDK itself raised.
+All files are under `transcripts/085/`, with five independent trials each:
+- `1.102.1/` and `1.104.0/`: the real `openai` SDK, driven as a subprocess, calls the real proxy through a loopback relay. Each record keeps:
+  - `client_request` and `client_response`: the exact public bytes.
+  - `upstream_exchanges`: the exact bytes LiteLLM sent to and received from the deterministic upstream.
+  - `consumer`: the SDK's own outcome, under 2.54.0.
+  - `sdk_replays`: the same public body replayed byte for byte under openai 3.13.0, 3.14.0, and 3.19.2.
+- `codex/`: the Codex runs. See [`codex/README.md`](../../transcripts/085/codex/README.md).
 
-All paths below are under `transcripts/085/`. Every JSONL file contains five
-independent trials.
+- **Upstream sent** (`upstream_exchanges`):
+  - The primary: `response.created`, then a completed `function_call` (`call_primary`), then `error` with `server_error`.
+  - The fallback: its own complete stream (`call_fallback`).
+- **LiteLLM emitted** (`client_response.body_raw`): both lifecycles in one body.
+  - `response.created` for the primary, and `call_primary` completed at `output_index` 0.
+  - `response.created` for the fallback, and `call_fallback` completed at `output_index` 0.
+  - `response.completed` for the fallback. The primary's error is never shown to the client.
+- **Expected** after delivered output: the failure is surfaced and no second lifecycle starts, which is what the chat path has done since #34627. The client receives `call_primary` and then a terminal `response.failed` or `error`. LiteLLM main already emits exactly that shape for a transport drop (`1.104.0/boundary-transport-drop.jsonl`): `call_primary`, then `response.failed` with `server_error`, then `[DONE]`, with no fallback call.
 
-| Version | Evidence | Upstream calls | SDK result |
-|---|---|---:|---|
-| 1.102.1 | `1.102.1/trigger-duplicate-tool.jsonl` | 2 each | 2 completed tool calls, 5/5 |
-| 1.102.1 | `1.102.1/trigger-sdk-crash-item-type.jsonl` | 2 each | `AssertionError`, 5/5 |
-| 1.102.1 | `1.102.1/trigger-sdk-crash-partial-text.jsonl` | 2 each | `AssertionError`, 5/5 |
-| 1.102.1 | `1.102.1/control-no-fault.jsonl` | 1 each | 1 completed tool call, 5/5 |
-| 1.102.1 | `1.102.1/control-pre-first-chunk.jsonl` | 2 each | 1 completed tool call, 5/5 |
-| 1.104.0 (main) | `1.104.0/trigger-duplicate-tool.jsonl` | 2 each | 2 completed tool calls, 5/5 |
-| 1.104.0 (main) | `1.104.0/trigger-sdk-crash-item-type.jsonl` | 2 each | `AssertionError`, 5/5 |
-| 1.104.0 (main) | `1.104.0/trigger-sdk-crash-partial-text.jsonl` | 2 each | `AssertionError`, 5/5 |
-| 1.104.0 (main) | `1.104.0/control-no-fault.jsonl` | 1 each | 1 completed tool call, 5/5 |
-| 1.104.0 (main) | `1.104.0/control-pre-first-chunk.jsonl` | 2 each | 1 completed tool call, 5/5 |
+| Mode | Primary behavior | Upstream calls | Public stream | SDK 2.54.0 / 3.13.0 | SDK 3.14.0 / 3.19.2 |
+|---|---|---:|---|---|---|
+| `trigger-duplicate-tool` | completed call, then `error` | 2 | two lifecycles, index 0 reused | two completed calls | two completed calls |
+| `trigger-duplicate-tool-response-failed` | completed call, then `response.failed` | 2 | same | two completed calls | two completed calls |
+| `trigger-sdk-crash-item-type` | completed call, then `error`; fallback leads with `reasoning` | 2 | same, item type changes at index 0 | `AssertionError` | two completed calls |
+| `trigger-sdk-crash-partial-text` | partial text, then `error` (`tool_choice: "auto"`) | 2 | continuation, index 0 reused | `AssertionError` | one completed call |
+| `control-no-fault` | completes | 1 | one lifecycle | one call | one call |
+| `control-fault-before-output` | `error` before any output item | 2 | two `response.created`, no item before the second | one call | one call |
+| `boundary-announced-only` | announces a call, then `error` | 2 | index 0 reused | one call | one call |
+| `boundary-transport-drop` | completed call, then the connection closes | 1 | no fallback, error surfaced | error | error |
 
-`trigger-duplicate-tool`'s response has two `response.created` events, and its
-first `response.output_item.added` assigns `output_index` 0 to a completed
-`function_call` with `call_id: call_primary`; its second assigns the same
-index 0 to an unrelated completed `function_call` with `call_id: call_fallback`.
-`trigger-sdk-crash-item-type` is identical except the second item is an
-assistant text message, not a function call. `trigger-sdk-crash-partial-text`
-reuses index 0 for a partial (never completed) text item followed by a
-completed tool call, proving the collision is about the index namespace, not
-about which item type or completion state started it.
+Every row is 5/5 on both LiteLLM versions. The two boundary rows mark the edges of the claim:
+- **Announced only:** one announced but never completed item is enough to reuse the index, but no tested consumer sees a failure.
+- **Transport drop:** does not reach the fallback at all.
 
-The evidence is sanitized. Only `content-type` and `x-litellm-version` headers
-are retained. `reproduce.py` rejects fixed local key strings and
-credential-shaped body strings before writing a capture, and refuses to run
-against a reused output directory.
+The evidence is sanitized:
+- Only `content-type` and `x-litellm-version` headers are kept.
+- Both rigs reject fixed local keys and any token-shaped `sk-` string before writing.
+- The Codex rig also rejects the value of `OPENAI_API_KEY` if it appears in any capture.
 
 ## Control
 
-Two controls change only whether the primary delivered any output item before
-failing, holding the route, model names, tool definition, client SDK, and
-fallback configuration fixed.
+- `control-no-fault`: the primary completes. It makes one upstream call, the stream has one lifecycle, and Codex runs the command once.
+- `control-fault-before-output`: the primary fails after `response.created` and before any output item. This is the same code branch as the trigger. LiteLLM had already forwarded `response.created`, so `is_pre_first_chunk` is false, and the replay happens because `generated_content` is empty. The only difference from the trigger is the delivered call. LiteLLM replays, the fallback's call is the only call, and Codex runs the command once.
 
-- **`control-no-fault`**: the primary completes its tool call successfully with
-  no error, so no fallback is attempted. One upstream call, one lifecycle, the
-  SDK's accumulator never sees a second `response.created`.
-- **`control-pre-first-chunk`**: the primary fails immediately, before emitting
-  any `response.output_item.added` event. LiteLLM correctly replays the
-  original input (this is the intended `is_pre_first_chunk` path,
-  `router.py:3274`). The fallback's own `output_item.added` at index 0 has
-  nothing to collide with, because the SDK's snapshot list was still empty.
-  The SDK completes cleanly with exactly one tool call.
+The route, tools, `tool_choice`, fallback configuration, client, and SDK are the same across trigger and controls. `num_retries: 0` keeps the upstream call counts deterministic. With LiteLLM's default retry setting the trigger replays the same way, which was checked during review but is not committed.
 
-Both controls pass 5/5 on both versions. Together they isolate the trigger:
-LiteLLM's fallback replay is safe exactly when the primary delivered nothing,
-and unsafe the moment it delivered anything, regardless of type or completion
-state.
-
-`reproduce.py`'s config sets `num_retries: 0` only to keep evidence
-deterministic (so a same-deployment retry never interleaves with the fallback
-call count). It is not load-bearing for the defect: removing it and using
-LiteLLM's default retry count reproduces `trigger-duplicate-tool` identically
-(2 upstream calls, both tool calls completed).
+The bytes are the same on the pinned release and on main. They also stay the same whether the primary sends an `error` event or `response.failed`, and whether the fallback is deterministic or live.
 
 ## Root cause
 
-`Router._aresponses_streaming_iterator` (`litellm/router.py:3101`) wraps the
-Responses-API streaming path added in
-[PR #28215](https://github.com/BerriAI/litellm/pull/28215). On
-`MidStreamFallbackError`, it checks only
-`e.is_pre_first_chunk or not e.generated_content` (`router.py:3274`) to decide
-whether the primary delivered anything. `generated_content` is accumulated
-exclusively from `response.output_text.delta` events
-(`litellm/responses/streaming_iterator.py:347`); a completed
-`function_call` item is never added to it. So a stream that finished a tool
-call but produced no text is treated identically to a stream that produced
-nothing at all.
+Line numbers are for 1.102.1, with main in parentheses.
 
-Once the fallback chain runs, the wrapper forwards the fallback iterator's
-events verbatim (`router.py:3308`, `async for fallback_item in
-fallback_response: ... yield fallback_item`). The fallback's own
-`ResponsesAPIStreamingIterator` numbers its `output_index` and
-`response.created`/`response.completed` identity independently, starting from
-zero, exactly like the primary did. Nothing in the wrapper renumbers indexes,
-merges the two lifecycles, or signals the client that a new namespace started.
-The public stream is the literal concatenation of two independent,
-zero-indexed provider streams.
-
-The sibling chat-completions fallback wrapper (`_acompletion_streaming_iterator`,
-`router.py:2762`) already gets this right for its own dialect. Its equivalent
-check is `e.generated_content or _stream_chunks_have_generated_content(
-model_response.chunks)` (`router.py:2826`), and
-`_stream_chunks_have_generated_content` (`router.py:402`) explicitly tests
-`delta.get("tool_calls")` alongside `content`. Calling it directly against the
-pinned 1.102.1 source confirms this: a delta carrying a `tool_calls` entry
-returns `True` (content was generated), where the Responses path's
-`generated_content` would see nothing. The chat-completions path was fixed to
-count tool calls as delivered content; the Responses path, added later by
-PR #28215, was not given the same check.
-
-The official `openai` SDK's `ResponseStreamState.accumulate_event`
-(`_responses.py:325`) only resets its snapshot on the very first event
-(`_create_initial_response` fires only when `self.__current_snapshot is
-None`). Every later `response.created` is silently ignored by the accumulator.
-Its per-event handlers then index into the stale snapshot by `output_index`
-(`_responses.py:254`, `:294`) with a type assertion, which is exactly where a
-reused index with a different item type raises `AssertionError`.
+- **The Responses wrapper:** `Router._aresponses_streaming_iterator` (`litellm/router.py:3101`, main `:3186`) wraps the Responses streaming path. It was added in [#28215](https://github.com/BerriAI/litellm/pull/28215) on 2026-05-20, whose description promises "full parity with the chat-completions path".
+- **The replay decision:**
+  - On `MidStreamFallbackError`, the wrapper replays the original input when `e.is_pre_first_chunk or not e.generated_content` (`router.py:3274`, main `:3354`).
+  - `generated_content` grows only from `response.output_text.delta` events (`litellm/responses/streaming_iterator.py:344-347`, main `:383-386`). A completed `function_call` or `reasoning` item never counts.
+  - After partial text, the wrapper instead sends a continuation prompt through `_build_responses_continuation_input` (`router.py:3041`).
+- **The splice:** either way, it forwards the fallback's events unchanged (`router.py:3308`, main `:3395`), so the public stream carries a second lifecycle.
+- **The chat-completions path now does the opposite.** [#34627](https://github.com/BerriAI/litellm/pull/34627), merged 2026-08-04, made `_acompletion_streaming_iterator` re-raise the original error instead of falling back "once any content (text or non-text) already streamed". It detects content, including tool-call deltas, with `_stream_chunks_have_generated_content` (`router.py:402` and `:2825-2830`). Its description gives the reason: "retrying in that case would otherwise send a second, unrelated response after content the client already received".
+- **The gap:** #34627 did not touch the Responses wrapper, which still falls back after a delivered tool call. So the gap is a missing port of that rule, not a deliberate difference.
 
 ## Bug or not
 
-- **Expected behavior is the intended contract**: LiteLLM's own PR #28215
-  explicitly restates the chat-completions mid-stream fallback contract for the
-  Responses API ("full parity with the chat-completions path") and documents
-  injecting a continuation prompt "so the fallback model continues rather than
-  restarts" when content was already generated. Preserving already-delivered
-  content, not replaying it, is LiteLLM's own stated design.
-- **Maintainer ruling checked**: merged PR
-  [#40121](https://github.com/BerriAI/litellm/pull/40121) (2026-09-21, "stream
-  one lifecycle across MCP auto-execute rounds") establishes that a single
-  public Responses stream must expose one lifecycle to the client, for the
-  adjacent MCP auto-execution path. It touches only
-  `litellm/responses/mcp/mcp_streaming_iterator.py` and does not touch
-  `router.py`'s fallback wrapper. The one-lifecycle invariant is the
-  maintainers' own established fix pattern in this codebase; it has not been
-  applied to mid-stream fallback.
-- **Examples and tests checked**: the existing mock-only tests for this wrapper
-  (`tests/router_unit_tests/test_router_aresponses_streaming_fallback.py`,
-  added by #28215) cover only text-delta continuation. None constructs a
-  primary stream that completes a `function_call` before failing, and none
-  feeds the wrapper's output through the official SDK's accumulator. The gap is
-  untested, not intentionally accepted.
-- **Supported usage**: `router_settings.fallbacks` with the Responses API is a
-  documented, first-party feature; the trigger is a plain retriable 5xx from
-  the primary deployment, the single most common fallback trigger.
-  `tool_choice: "required"` and a `strict` function tool are standard usage.
-- **Boundary**: protocol compatibility, not disclosure. Valid client input and
-  two independently valid provider streams become a public stream that either
-  runs a side-effecting tool call twice or crashes the official SDK before
-  a final response is available.
-- **Maintainer fix**: track whether a completed output item (of any type,
-  including `function_call`) was announced before falling back, and reuse the
-  MCP-path pattern of composing internal rounds into one client-visible
-  lifecycle with non-colliding indexes, so a delivered item is neither
-  replayed nor its `output_index` reused.
+- **The expected behavior is the maintainers' current contract, not a stale doc line.**
+  - #34627's re-raise rule is merged code with tests, and covers text and non-text content alike.
+  - On 2026-09-19 maintainer mateo-berri closed [#31067](https://github.com/BerriAI/litellm/issues/31067) and [#27967](https://github.com/BerriAI/litellm/issues/27967), citing it. The closing comment on #27967 reads: "PR #34627 (v1.97.0+) removed the prefix continuation, so a mid-stream failure now re-raises the original error."
+  - The "full parity" sentence in #28215 is older than that ruling.
+- **Maintainer ruling checked.** No commit, PR, or comment accepts a replayed call or a second lifecycle. Merged [#40121](https://github.com/BerriAI/litellm/pull/40121), for [#40118](https://github.com/BerriAI/litellm/issues/40118), fixed the same two-lifecycles-in-one-stream shape on the MCP auto-execution path.
+- **Supported usage.**
+  - `router_settings.fallbacks` with the Responses API is first-party functionality.
+  - Codex with a custom `responses` provider is a normal client.
+  - The trigger is a retriable `server_error` from the provider, and the client input is valid.
+- **Boundary.** This is not a disclosure claim. Valid input and two valid provider streams become a public stream on which a real agent repeats a side effect.
+- **Maintainer fix, in one sentence**: once `_aresponses_streaming_iterator` has forwarded any output item, re-raise the original error instead of falling back, as `_acompletion_streaming_iterator` has done since #34627.
 
 Classification label: `bug`.
 
 ## Upstream status
 
-Checked 2026-09-24 against release 1.102.1 and current main commit
-[`1c8a0ff6`](https://github.com/BerriAI/litellm/commit/1c8a0ff6023b3eba6b01e955c49edcfa97bf0d22).
+Checked on 2026-09-24 against release 1.102.1 and main `8bbe7edb`.
 
-GitHub issue and pull request searches included open and closed results for
-`MidStreamFallbackError`, `responses fallback duplicate tool`,
-`responses fallback function_call twice`, `output_index collision`,
-`responses.stream AssertionError fallback`, `aresponses_streaming_iterator`,
-`second response.created fallback`, and `generated_content function_call
-fallback`. Commit history on `litellm/router.py` and
-`litellm/responses/streaming_iterator.py` since 2026-09-23 was also checked.
+Searches covered issues and pull requests, open and closed. Terms:
+- `MidStreamFallbackError`, `generated_content`, `aresponses_streaming_iterator`, `_build_responses_continuation_input`
+- `mid-stream fallback`, `responses fallback tool call`, `responses fallback duplicate`, `fallback tool twice`, `fallback replay responses`
+- `output_item fallback`, `two response.created`, `responses stream AssertionError`
+- Recent `fallback` results created since 2026-09-22.
 
-No exact report was found. The closest results are:
+No report covers a Responses fallback after a delivered output item. The closest results:
 
-- [#29808](https://github.com/BerriAI/litellm/issues/29808), open, a
-  non-streaming Vertex AI request's retry count is not honored before falling
-  back. Unrelated: no streaming, no output-item duplication.
-- [#41528](https://github.com/BerriAI/litellm/pull/41528), open, preserves
-  provider headers across `MidStreamFallbackError`. Does not touch generated
-  content tracking or output indexes.
-- [#39703](https://github.com/BerriAI/litellm/issues/39703), open, the
-  `/v1/messages` Responses bridge swallows a mid-stream failure instead of
-  surfacing it. A different bridge, a different symptom (a hidden failure, not
-  a replayed item).
-- [#40121](https://github.com/BerriAI/litellm/pull/40121), merged 2026-09-21,
-  the maintainer ruling this report relies on (see "Bug or not" above), fixing
-  the same defect shape for the unrelated MCP auto-execution path.
+- [#28215](https://github.com/BerriAI/litellm/pull/28215) (merged): added the Responses wrapper.
+- [#34627](https://github.com/BerriAI/litellm/pull/34627) (merged): the chat-path re-raise rule. It is the ruling this report relies on, and it did not touch the Responses wrapper.
+- [#31067](https://github.com/BerriAI/litellm/issues/31067) and [#27967](https://github.com/BerriAI/litellm/issues/27967) (closed as not planned): chat-path continuation problems, closed by citing #34627.
+- [#40118](https://github.com/BerriAI/litellm/issues/40118) / [#40121](https://github.com/BerriAI/litellm/pull/40121) (fixed): the same lifecycle splice on the MCP path only.
+- [#42283](https://github.com/BerriAI/litellm/pull/42283) (merged 2026-09-21): walks every fallback entry after a mid-stream failure. It does not change what counts as delivered.
+- [#31089](https://github.com/BerriAI/litellm/pull/31089), [#41127](https://github.com/BerriAI/litellm/pull/41127), and [#42736](https://github.com/BerriAI/litellm/pull/42736) (open): chat-path continuation and fallback shape. None touches the Responses wrapper.
 
-Release notes for 1.102.1, the Responses-API and fallback documentation,
-current source, the fallback wrapper's own tests, and commits touching the
-iterator were checked. None reports or fixes a mid-stream fallback replaying an
-already-delivered tool call or corrupting the SDK's output-index namespace.
-
-Classification: `novel`, meaning no match in these searches. #40121 shows the
-maintainers already accept and fix this exact defect shape for one code path;
-this report extends the same standard to another code path they did not touch.
+Classification: `novel`.
 
 ## Test
 
-`responses_fallback_preserves_delivered_indexes` accepts a stream when no
-`output_index` assigned by one internal lifecycle is reassigned to an unrelated
-item by a later lifecycle. It is deliberately weaker than the existing
-`responses_single_lifecycle` (bug 074): a `response.created` fallback replay
-that reuses an index nothing was ever assigned to (the `is_pre_first_chunk`
-control) is conformant here, because LiteLLM's own fallback feature legitimately
-produces more than one `response.created` in a correct retry. What is never
-conformant is an index collision between unrelated items, because the official
-SDK's per-event accumulator dispatches on `output_index` without knowing a new
-lifecycle started.
+Three checkers in `crates/harness/src/checks.rs` state the invariant from three angles:
 
-The conformance suite reads all five records for every mode and version,
-checks the public route, target identity, and request shape, verifies upstream
-call counts, tool-call counts, and SDK outcomes, and applies the invariant. A
-mutated final trial and a malformed final JSONL record prove later evidence
-cannot be skipped.
+- `responses_no_restart_after_output`: once a public stream has announced an output item, no later `response.created` may start another lifecycle. A second `response.created` before any output item is conformant, which covers the fault-before-output control.
+- `responses_fallback_not_spliced_after_delivery`: a cross-hop check. If an upstream attempt ends without completing after the client received one of its items, no item from a later attempt may appear in the public stream. It holds however the gateway renumbers indexes or merges lifecycles. `issue_085_splice_invariant_survives_renumbering` proves this on a real capture that was rewritten to hide the second lifecycle.
+- `responses_fallback_preserves_delivered_indexes`: an `output_index` assigned to one item is never reassigned to a different item. This is the collision that crashes openai-python below 3.14.
+
+The conformance suite checks every one of the five records in every mode, version, and Codex case. It covers:
+- provenance, the public route, and the request shape
+- upstream call counts
+- all three checker verdicts
+- every SDK version's outcome
+- for Codex, the measured side-effect count, Codex's returned tool results, and that each shared reference file exists
+
+Mutating the fifth trial or appending a malformed line fails the suite.
 
 ## Reproduction
 
-Create a Python 3.12 environment with the pinned package. The retained
-captures used Python 3.12.13; a reviewer can use any Python 3.12.x.
+Python 3.12 is required. The captures used 3.12.13.
 
 ```sh
-python3.12 -m venv /tmp/kairo-085-litellm-1102
-/tmp/kairo-085-litellm-1102/bin/pip install -r transcripts/085/requirements-1.102.1.txt
+uv venv /tmp/kairo-085-litellm-1102 --python 3.12
+uv pip install --python /tmp/kairo-085-litellm-1102/bin/python -r transcripts/085/requirements-1.102.1.txt
+for v in 3.13.0 3.14.0 3.19.2; do
+  uv venv /tmp/kairo-085-openai-$v --python 3.12
+  uv pip install --python /tmp/kairo-085-openai-$v/bin/python openai==$v
+done
 /tmp/kairo-085-litellm-1102/bin/python -B transcripts/085/reproduce.py \
-  --python /tmp/kairo-085-litellm-1102/bin/python \
-  --expect-litellm 1.102.1 \
-  --captured-at 2026-09-24 \
-  --output-dir /tmp/kairo-085-output-1102
+  --python /tmp/kairo-085-litellm-1102/bin/python --expect-litellm 1.102.1 \
+  --captured-at 2026-09-24 --output-dir /tmp/kairo-085-output-1102 \
+  --sdk-python /tmp/kairo-085-openai-3.13.0/bin/python \
+  --sdk-python /tmp/kairo-085-openai-3.14.0/bin/python \
+  --sdk-python /tmp/kairo-085-openai-3.19.2/bin/python
 
-# current main (unreleased, install from a local checkout; no pinned package exists)
+# current main (unreleased; install from a checkout)
 git clone https://github.com/BerriAI/litellm.git /tmp/litellm-085-main
-python3.12 -m venv /tmp/kairo-085-litellm-main
-/tmp/kairo-085-litellm-main/bin/pip install -e "/tmp/litellm-085-main[proxy]"
-/tmp/kairo-085-litellm-main/bin/python -B transcripts/085/reproduce.py \
-  --python /tmp/kairo-085-litellm-main/bin/python \
-  --expect-litellm "$(/tmp/kairo-085-litellm-main/bin/python -c 'import importlib.metadata as m; print(m.version("litellm"))')" \
-  --captured-at 2026-09-24 \
-  --output-dir /tmp/kairo-085-output-main
+uv venv /tmp/kairo-085-litellm-main --python 3.12
+uv pip install --python /tmp/kairo-085-litellm-main/bin/python -e "/tmp/litellm-085-main[proxy]" openai==2.54.0
+# rerun reproduce.py with --python /tmp/kairo-085-litellm-main/bin/python --expect-litellm 1.104.0
 
-python3 -B -m unittest transcripts/085/test_reproduce.py
-python3 -B -O -m unittest transcripts/085/test_reproduce.py
+# Codex consumer boundary: see transcripts/085/codex/README.md
+
+python3 -B -m unittest transcripts/085/test_reproduce.py transcripts/085/codex/test_run_codex_matrix.py
+python3 transcripts/085/codex/verify_refs.py transcripts/085/codex/1.102.1 transcripts/085/codex/1.104.0 \
+  transcripts/085/codex/1.102.1-live --shared transcripts/085/codex/shared
 cargo test --workspace
 cargo fmt --all -- --check
 cargo clippy --workspace --all-targets -- -D warnings
 python3 tools/update-readme-counts.py --check
 ```
 
-Use fresh output directories. Existing evidence under `transcripts/085/` is
-never overwritten; `reproduce.py` refuses to run against a directory that
-already exists. The runner uses loopback ports only, installs no software
-beyond the pinned package, reads no environment credentials, and makes no
-external network calls.
+Use fresh output directories. Both runners refuse an existing output directory, so a rerun never overwrites committed evidence. The wire rig uses loopback ports only and reads no credentials.

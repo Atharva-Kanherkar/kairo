@@ -1,0 +1,20 @@
+{
+  "packages": {
+    "litellm": "1.104.0",
+    "openai": "2.54.0"
+  },
+  "router_sha256": "4d40f55f0128bbc0de4255d9931a25f33d9a70ddfa15006215445b88d0958ed8",
+  "codex": "codex-cli 0.156.1",
+  "python": "Python 3.12.13",
+  "captured_at": "2026-09-24",
+  "runs_per_case": 5,
+  "cases": [
+    "codex-trigger-duplicate-tool",
+    "codex-control-no-fault",
+    "codex-control-fault-before-output"
+  ],
+  "note": "unreleased main at 8bbe7edb711ee894deb5ad7e3cc10391a9837de9",
+  "live_fallback_model": null,
+  "live_fallback_hop": null,
+  "complete": true
+}
