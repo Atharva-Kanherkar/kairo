@@ -1,0 +1,20 @@
+{
+  "packages": {
+    "litellm": "1.104.0",
+    "openai": "2.54.0"
+  },
+  "iterator_source": "litellm/router.py (_aresponses_streaming_iterator)",
+  "iterator_sha256": "4d40f55f0128bbc0de4255d9931a25f33d9a70ddfa15006215445b88d0958ed8",
+  "python": "Python 3.12.13",
+  "captured_at": "2026-09-24",
+  "runs_per_mode": 5,
+  "public_endpoint": "/v1/responses",
+  "backend": "deterministic local OpenAI Responses capture upstream",
+  "sdk_replays": [
+    "3.13.0",
+    "3.14.0",
+    "3.19.2"
+  ],
+  "note": "1.104.0 is unreleased; editable install of BerriAI/litellm main at 8bbe7edb711ee894deb5ad7e3cc10391a9837de9 (fetched 2026-09-24). router.py and responses/streaming_iterator.py are unchanged from 1c8a0ff6.",
+  "complete": true
+}

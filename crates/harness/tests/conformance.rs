@@ -19,11 +19,12 @@ use kairo::checks::{
     outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
     reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
     response_conversation_preserves_history, response_omits_secret,
-    responses_refusal_semantics_preserved, responses_single_lifecycle, stop_sequence_forwarded,
-    thinking_not_leaked_as_visible_text, thinking_text_forwarded, tool_strict_forwarded,
-    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
-    upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
-    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
+    responses_no_restart_after_output, responses_refusal_semantics_preserved,
+    responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
+    thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
+    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, FunctionToolFormat,
+    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
 use serde_json::Value;
 use std::fs;
@@ -3717,4 +3718,511 @@ fn codex_consumer_search_calls_lose_provider_request_id() {
         violations, 24,
         "every captured Codex search call through the pass-through route loses its id"
     );
+}
+
+// ---- bug 085: LiteLLM Responses mid-stream fallback replays a delivered tool
+// call and splices a second lifecycle into the public stream ----
+
+const ISSUE_085_VERSIONS: [&str; 2] = ["1.102.1", "1.104.0"];
+const ISSUE_085_SDKS: [&str; 4] = ["2.54.0", "3.13.0", "3.14.0", "3.19.2"];
+
+/// openai-python 3.14.0 re-keys its Responses stream accumulator by
+/// `output_index` (openai/openai-python#3126).
+fn issue_085_sdk_tolerates_reuse(openai: &str) -> bool {
+    let parts: Vec<u64> = openai.split('.').filter_map(|p| p.parse().ok()).collect();
+    parts.as_slice() >= [3u64, 14, 0].as_slice()
+}
+
+fn issue_085_consumer(mode: &str, openai: &str, consumer: &Value) -> Result<(), String> {
+    let calls: Vec<&str> = consumer
+        .get("completed_tool_call_ids")
+        .and_then(Value::as_array)
+        .map(|ids| ids.iter().filter_map(Value::as_str).collect())
+        .unwrap_or_default();
+    let has_error = !matches!(consumer.get("error"), None | Some(Value::Null));
+    let error_type = consumer.pointer("/error/type").and_then(Value::as_str);
+    let no_final = matches!(consumer.get("final_response"), None | Some(Value::Null));
+    let lifecycles = consumer
+        .get("created_ids")
+        .and_then(Value::as_array)
+        .map(Vec::len);
+    let ok = match mode {
+        "trigger-duplicate-tool" | "trigger-duplicate-tool-response-failed" => {
+            !has_error && calls == ["call_primary", "call_fallback"] && lifecycles == Some(2)
+        }
+        "trigger-sdk-crash-item-type" | "trigger-sdk-crash-partial-text" => {
+            if issue_085_sdk_tolerates_reuse(openai) {
+                let expected: &[&str] = if mode == "trigger-sdk-crash-item-type" {
+                    &["call_primary", "call_fallback"]
+                } else {
+                    &["call_fallback"]
+                };
+                !has_error && !no_final && calls == expected
+            } else {
+                error_type == Some("AssertionError") && no_final
+            }
+        }
+        "control-no-fault" => !has_error && calls == ["call_primary"] && lifecycles == Some(1),
+        "control-fault-before-output" | "boundary-announced-only" => {
+            !has_error && calls == ["call_fallback"]
+        }
+        "boundary-transport-drop" => has_error && no_final && !calls.contains(&"call_fallback"),
+        _ => return Err(format!("unknown mode {mode}")),
+    };
+    if ok {
+        Ok(())
+    } else {
+        Err(format!(
+            "{mode} under openai {openai}: unexpected SDK outcome {consumer}"
+        ))
+    }
+}
+
+fn issue_085_expect(
+    verdict: &Verdict,
+    violation: bool,
+    what: &str,
+    index: usize,
+) -> Result<(), String> {
+    match (violation, verdict) {
+        (true, Verdict::Violation(_)) | (false, Verdict::Conformant) => Ok(()),
+        _ => Err(format!(
+            "record {index}: {what} verdict {verdict:?} does not match the evidence"
+        )),
+    }
+}
+
+fn validate_issue_085_mode(record: &Value, mode: &str, index: usize) -> Result<(), String> {
+    let response_raw = record
+        .pointer("/client_response/body_raw")
+        .and_then(Value::as_str)
+        .ok_or_else(|| format!("record {index} has no raw response"))?;
+    let upstream: Vec<&str> = record
+        .get("upstream_exchanges")
+        .and_then(Value::as_array)
+        .ok_or_else(|| format!("record {index} has no upstream exchanges"))?
+        .iter()
+        .filter_map(|exchange| exchange.get("response_body_raw").and_then(Value::as_str))
+        .collect();
+    let (expected_calls, spliced) = match mode {
+        "trigger-duplicate-tool"
+        | "trigger-duplicate-tool-response-failed"
+        | "trigger-sdk-crash-item-type"
+        | "trigger-sdk-crash-partial-text"
+        | "boundary-announced-only" => (2, true),
+        "control-fault-before-output" => (2, false),
+        "control-no-fault" | "boundary-transport-drop" => (1, false),
+        _ => return Err(format!("unknown mode {mode}")),
+    };
+    if upstream.len() != expected_calls {
+        return Err(format!(
+            "record {index} made {} upstream calls, expected {expected_calls}",
+            upstream.len()
+        ));
+    }
+    if mode != "boundary-transport-drop"
+        && record
+            .pointer("/client_response/status")
+            .and_then(Value::as_u64)
+            != Some(200)
+    {
+        return Err(format!("record {index} is not a successful public route"));
+    }
+    issue_085_expect(
+        &responses_fallback_preserves_delivered_indexes(response_raw),
+        spliced,
+        "output-index",
+        index,
+    )?;
+    issue_085_expect(
+        &responses_no_restart_after_output(response_raw),
+        spliced,
+        "lifecycle-restart",
+        index,
+    )?;
+    issue_085_expect(
+        &responses_fallback_not_spliced_after_delivery(response_raw, &upstream),
+        spliced,
+        "fallback-splice",
+        index,
+    )?;
+    let live_sdk = record
+        .get("consumer_openai")
+        .and_then(Value::as_str)
+        .ok_or_else(|| format!("record {index} has no consumer SDK version"))?;
+    let mut versions = vec![live_sdk];
+    issue_085_consumer(
+        mode,
+        live_sdk,
+        record
+            .get("consumer")
+            .ok_or_else(|| format!("record {index} has no consumer outcome"))?,
+    )?;
+    for replay in record
+        .get("sdk_replays")
+        .and_then(Value::as_array)
+        .ok_or_else(|| format!("record {index} has no SDK replays"))?
+    {
+        let openai = replay
+            .get("openai")
+            .and_then(Value::as_str)
+            .ok_or_else(|| format!("record {index} has an unlabeled SDK replay"))?;
+        issue_085_consumer(
+            mode,
+            openai,
+            replay
+                .get("consumer")
+                .ok_or_else(|| format!("record {index} replay has no outcome"))?,
+        )?;
+        versions.push(openai);
+    }
+    if versions != ISSUE_085_SDKS {
+        return Err(format!(
+            "record {index} covers openai {versions:?}, expected {ISSUE_085_SDKS:?}"
+        ));
+    }
+    Ok(())
+}
+
+fn issue_085_records(jsonl: &str, version: &str, mode: &str) -> Result<Vec<Value>, String> {
+    let records = jsonl
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .map(|line| serde_json::from_str::<Value>(line).map_err(|error| error.to_string()))
+        .collect::<Result<Vec<_>, _>>()?;
+    if records.len() != 5 {
+        return Err(format!("expected five records, got {}", records.len()));
+    }
+    let tool_choice = if mode == "trigger-sdk-crash-partial-text" {
+        "auto"
+    } else {
+        "required"
+    };
+    for (index, record) in records.iter().enumerate() {
+        if record.pointer("/target/project").and_then(Value::as_str) != Some("BerriAI/litellm")
+            || record.pointer("/target/version").and_then(Value::as_str) != Some(version)
+            || record.get("mode").and_then(Value::as_str) != Some(mode)
+            || record.get("trial").and_then(Value::as_u64) != Some((index + 1) as u64)
+        {
+            return Err(format!("record {} has wrong provenance", index + 1));
+        }
+        if record
+            .pointer("/client_request/path")
+            .and_then(Value::as_str)
+            != Some("/v1/responses")
+        {
+            return Err(format!("record {} is not the public route", index + 1));
+        }
+        let request_raw = record
+            .pointer("/client_request/body_raw")
+            .and_then(Value::as_str)
+            .ok_or_else(|| format!("record {} has no raw request", index + 1))?;
+        let request: Value =
+            serde_json::from_str(request_raw).map_err(|error| error.to_string())?;
+        if request.get("model").and_then(Value::as_str) != Some(mode)
+            || request.get("stream").and_then(Value::as_bool) != Some(true)
+            || request.get("tool_choice").and_then(Value::as_str) != Some(tool_choice)
+        {
+            return Err(format!("record {} has wrong request shape", index + 1));
+        }
+        validate_issue_085_mode(record, mode, index + 1)?;
+    }
+    Ok(records)
+}
+
+fn issue_085_check(modes: &[&str]) {
+    for version in ISSUE_085_VERSIONS {
+        for mode in modes {
+            let path = format!("transcripts/085/{version}/{mode}.jsonl");
+            issue_085_records(&fixture(&path), version, mode)
+                .unwrap_or_else(|error| panic!("{path}: {error}"));
+        }
+    }
+}
+
+#[test]
+fn litellm_responses_fallback_replays_delivered_tool_call() {
+    issue_085_check(&[
+        "trigger-duplicate-tool",
+        "trigger-duplicate-tool-response-failed",
+    ]);
+}
+
+#[test]
+fn litellm_responses_fallback_crashes_openai_python_before_3_14() {
+    issue_085_check(&[
+        "trigger-sdk-crash-item-type",
+        "trigger-sdk-crash-partial-text",
+    ]);
+}
+
+#[test]
+fn litellm_responses_fallback_controls_and_boundaries() {
+    issue_085_check(&[
+        "control-no-fault",
+        "control-fault-before-output",
+        "boundary-announced-only",
+        "boundary-transport-drop",
+    ]);
+}
+
+#[test]
+fn issue_085_checks_later_trials_and_rejects_malformed_evidence() {
+    let original = fixture("transcripts/085/1.102.1/control-no-fault.jsonl");
+    let mut records = original
+        .lines()
+        .map(|line| serde_json::from_str::<Value>(line).unwrap())
+        .collect::<Vec<_>>();
+    records[4]["client_response"]["body_raw"] = Value::String("data: not-json\n\n".into());
+    let mutated = records
+        .iter()
+        .map(Value::to_string)
+        .collect::<Vec<_>>()
+        .join("\n");
+    assert!(issue_085_records(&mutated, "1.102.1", "control-no-fault").is_err());
+
+    let mut replays = original
+        .lines()
+        .map(|line| serde_json::from_str::<Value>(line).unwrap())
+        .collect::<Vec<_>>();
+    replays[4]["sdk_replays"] = Value::Array(Vec::new());
+    let dropped = replays
+        .iter()
+        .map(Value::to_string)
+        .collect::<Vec<_>>()
+        .join("\n");
+    assert!(issue_085_records(&dropped, "1.102.1", "control-no-fault").is_err());
+
+    let malformed = format!("{}\n{{", original.trim_end());
+    assert!(issue_085_records(&malformed, "1.102.1", "control-no-fault").is_err());
+}
+
+#[test]
+fn issue_085_splice_invariant_survives_renumbering() {
+    // A gateway change that hid the second lifecycle and shifted the
+    // fallback's indexes, but still replayed the call, would pass the index
+    // and restart checks. The cross-hop splice check must still reject it.
+    let line = fixture("transcripts/085/1.102.1/trigger-duplicate-tool.jsonl");
+    let record: Value = serde_json::from_str(line.lines().next().unwrap()).unwrap();
+    let raw = record
+        .pointer("/client_response/body_raw")
+        .and_then(Value::as_str)
+        .unwrap();
+    let mut created_seen = false;
+    let mut fallback_started = false;
+    let composed = raw
+        .split("\n\n")
+        .filter_map(|block| {
+            let data = block.strip_prefix("data: ")?;
+            let Ok(mut event) = serde_json::from_str::<Value>(data) else {
+                return Some(block.to_owned());
+            };
+            if event["type"] == "response.created" {
+                if created_seen {
+                    fallback_started = true;
+                    return None;
+                }
+                created_seen = true;
+            }
+            if fallback_started {
+                if let Some(index) = event.get("output_index").and_then(Value::as_u64) {
+                    event["output_index"] = (index + 1).into();
+                }
+            }
+            Some(format!("data: {event}"))
+        })
+        .collect::<Vec<_>>()
+        .join("\n\n");
+    let upstream: Vec<&str> = record["upstream_exchanges"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter_map(|exchange| exchange["response_body_raw"].as_str())
+        .collect();
+    assert_eq!(
+        responses_fallback_preserves_delivered_indexes(&composed),
+        Verdict::Conformant
+    );
+    assert_eq!(
+        responses_no_restart_after_output(&composed),
+        Verdict::Conformant
+    );
+    assert!(matches!(
+        responses_fallback_not_spliced_after_delivery(&composed, &upstream),
+        Verdict::Violation(_)
+    ));
+}
+
+const ISSUE_085_CODEX_CASES: [(&str, &str, u64); 7] = [
+    ("1.102.1", "codex-trigger-duplicate-tool", 2),
+    ("1.102.1", "codex-control-no-fault", 1),
+    ("1.102.1", "codex-control-fault-before-output", 1),
+    ("1.104.0", "codex-trigger-duplicate-tool", 2),
+    ("1.104.0", "codex-control-no-fault", 1),
+    ("1.104.0", "codex-control-fault-before-output", 1),
+    ("1.102.1-live", "codex-trigger-live-fallback", 2),
+];
+
+fn issue_085_request(exchange: &Value) -> Result<Value, String> {
+    let raw = exchange
+        .get("request_body_raw")
+        .and_then(Value::as_str)
+        .ok_or("exchange has no request body")?;
+    for marker in raw.split("[kairo-ref sha256:").skip(1) {
+        let file = marker
+            .split_once(" file:")
+            .and_then(|(_, rest)| rest.split_once(']'))
+            .map(|(file, _)| file)
+            .ok_or("malformed shared reference")?;
+        let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../transcripts/085/codex")
+            .join(file);
+        if !path.is_file() {
+            return Err(format!("shared reference {file} is missing"));
+        }
+    }
+    serde_json::from_str(raw).map_err(|error| error.to_string())
+}
+
+fn issue_085_tool_outputs(request: &Value) -> Vec<String> {
+    request
+        .get("input")
+        .and_then(Value::as_array)
+        .map(|items| {
+            items
+                .iter()
+                .filter(|item| {
+                    item.get("type").and_then(Value::as_str) == Some("function_call_output")
+                })
+                .filter_map(|item| item.get("call_id").and_then(Value::as_str))
+                .map(str::to_owned)
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+fn validate_issue_085_codex(
+    record: &Value,
+    dir: &str,
+    case: &str,
+    executions: u64,
+    trial: usize,
+) -> Result<(), String> {
+    let version = dir.trim_end_matches("-live");
+    if record.pointer("/target/version").and_then(Value::as_str) != Some(version)
+        || record.pointer("/consumer/name").and_then(Value::as_str) != Some("codex-cli")
+        || record.pointer("/consumer/version").and_then(Value::as_str) != Some("0.156.1")
+        || record.get("case").and_then(Value::as_str) != Some(case)
+        || record.get("trial").and_then(Value::as_u64) != Some(trial as u64)
+        || record.get("codex_exit").and_then(Value::as_i64) != Some(0)
+    {
+        return Err(format!(
+            "record {trial} has wrong provenance or Codex failed"
+        ));
+    }
+    let executed = record
+        .get("codex_events")
+        .and_then(Value::as_array)
+        .ok_or("no Codex events")?
+        .iter()
+        .filter(|event| {
+            event.get("type").and_then(Value::as_str) == Some("item.completed")
+                && event.pointer("/item/type").and_then(Value::as_str) == Some("command_execution")
+        })
+        .count() as u64;
+    if executed != executions
+        || record.get("ledger_lines").and_then(Value::as_u64) != Some(executions)
+        || record.get("command_executions").and_then(Value::as_u64) != Some(executions)
+    {
+        return Err(format!(
+            "record {trial}: Codex ran the side effect {executed} times, expected {executions}"
+        ));
+    }
+    let client = record
+        .get("client_exchanges")
+        .and_then(Value::as_array)
+        .ok_or("no client exchanges")?;
+    if client.len() != 2
+        || client.iter().any(|exchange| {
+            exchange.get("path").and_then(Value::as_str) != Some("/v1/responses")
+                || exchange.get("status").and_then(Value::as_u64) != Some(200)
+        })
+    {
+        return Err(format!(
+            "record {trial}: expected exactly two successful Codex requests"
+        ));
+    }
+    let mut first_turn = None;
+    let mut tool_outputs = Vec::new();
+    for exchange in client {
+        let outputs = issue_085_tool_outputs(&issue_085_request(exchange)?);
+        if outputs.is_empty() {
+            first_turn = exchange.get("response_body_raw").and_then(Value::as_str);
+        } else {
+            tool_outputs = outputs;
+        }
+    }
+    let first_turn = first_turn.ok_or("no first turn")?;
+    if tool_outputs.len() as u64 != executions {
+        return Err(format!(
+            "record {trial}: Codex returned {} tool results, expected {executions}",
+            tool_outputs.len()
+        ));
+    }
+    let spliced = executions == 2;
+    issue_085_expect(
+        &responses_fallback_preserves_delivered_indexes(first_turn),
+        spliced,
+        "output-index",
+        trial,
+    )?;
+    issue_085_expect(
+        &responses_no_restart_after_output(first_turn),
+        spliced,
+        "lifecycle-restart",
+        trial,
+    )?;
+    let mut first_turn_upstream = Vec::new();
+    for exchange in record
+        .get("upstream_exchanges")
+        .and_then(Value::as_array)
+        .ok_or("no upstream exchanges")?
+    {
+        if issue_085_tool_outputs(&issue_085_request(exchange)?).is_empty() {
+            first_turn_upstream.push(
+                exchange
+                    .get("response_body_raw")
+                    .and_then(Value::as_str)
+                    .ok_or("upstream exchange has no response")?,
+            );
+        }
+    }
+    // The live fallback hop goes straight to the provider and is not
+    // captured, so the cross-hop check applies to the deterministic runs.
+    if !dir.ends_with("-live") {
+        issue_085_expect(
+            &responses_fallback_not_spliced_after_delivery(first_turn, &first_turn_upstream),
+            spliced,
+            "fallback-splice",
+            trial,
+        )?;
+    }
+    Ok(())
+}
+
+#[test]
+fn codex_runs_the_side_effect_twice_after_a_litellm_fallback() {
+    for (dir, case, executions) in ISSUE_085_CODEX_CASES {
+        let path = format!("transcripts/085/codex/{dir}/{case}.jsonl");
+        let records = fixture(&path)
+            .lines()
+            .filter(|line| !line.trim().is_empty())
+            .map(|line| serde_json::from_str::<Value>(line).unwrap())
+            .collect::<Vec<_>>();
+        assert_eq!(records.len(), 5, "{path}: expected five Codex runs");
+        for (index, record) in records.iter().enumerate() {
+            validate_issue_085_codex(record, dir, case, executions, index + 1)
+                .unwrap_or_else(|error| panic!("{path}: {error}"));
+        }
+    }
 }

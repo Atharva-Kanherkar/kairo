@@ -78,10 +78,11 @@ bytes on the stated version. Each folder has a writeup + transcripts.
 | 082 | Bifrost MCP agent mode executes two distinct calls to one auto tool but returns only one result when a manual tool is pending; the summary is keyed by tool name instead of tool-call ID | Bifrost `dev` `1a17949c`, core 1.9.1, built HTTP gateway, deterministic OpenAI-compatible upstream and streamable HTTP MCP | novel, no matching upstream issue or pull request | ✅ public Chat Completions route loses one of two results 5/5. Distinct-name and single-call controls preserve every result 5/5. The identical continuation policy repeats the side effect 5/5 versus 0/5 in the distinct-name control. |
 | 083 | Switchyard cross-format Responses continuations by `conversation` silently omit all prior turns; `previous_response_id` preserves the same history | Switchyard main `bfcd023c` (real server, keyless capture rig) | novel gap in merged PRs [#721](https://github.com/NVIDIA-NeMo/Switchyard/pull/721) and [#781](https://github.com/NVIDIA-NeMo/Switchyard/pull/781) | ✅ conversation seed absent 5/5; response-ID control preserves it 5/5. Client and forwarded bytes retained. |
 | 084 | OpenAI pass-through removes provider-owned `id` from `/v1/alpha/search`, so the caller receives `400 missing_required_parameter` | LiteLLM Proxy 1.102.1, Python 3.12.13, deterministic raw HTTP capture upstream | duplicate-open [litellm#42656](https://github.com/BerriAI/litellm/issues/42656); fix PR [#42661](https://github.com/BerriAI/litellm/pull/42661) open | ✅ forwarded body omits `id` and fails 5/5; same direct request preserves `id` and succeeds 5/5. Raw client and upstream HTTP retained. |
+| 085 | Responses mid-stream fallback replays a delivered tool call as a second lifecycle; the real Codex CLI runs the side effect twice, and openai-python below 3.14 raises `AssertionError` | LiteLLM 1.102.1 and main `8bbe7edb`, Codex CLI 0.156.1, OpenAI SDK 2.54.0 / 3.13.0 / 3.14.0 / 3.19.2, real proxy over real HTTP, deterministic upstream plus one live `gpt-5.4-nano` fallback case | novel; governing ruling merged [litellm#34627](https://github.com/BerriAI/litellm/pull/34627) (chat path re-raises once content streamed) | ✅ Codex runs the command twice 5/5 on both versions and 5/5 with the live fallback; controls once 5/5. Duplicate call 5/5 under every SDK; `AssertionError` 5/5 on openai < 3.14, 0/5 on 3.14+. The failure-before-output control and the transport-drop boundary do not duplicate. Raw client, upstream, and Codex bytes retained. |
 
 Numbers 046-050 are reserved for unpublished GoModel round-2 findings (one bug per PR). Issues 052-056 (AxonHub round 2) land on sibling branches, not missing rows here.
 
-**Coverage**: 61 documented issue folders across LiteLLM, Switchyard, Bifrost,
+**Coverage**: 62 documented issue folders across LiteLLM, Switchyard, Bifrost,
 GoModel, AxonHub, any-llm, Dynamo, and OGX. Folder counts are not defect counts: some folders
 contain honest negatives or multiple findings, including 006's four independent
 field losses and the LiteLLM copy of that class. The rows above record each
@@ -93,7 +94,7 @@ deleted), 006/007 (is_error + image deleted via Responses), 020 (client
 `api_key` override + sticky router upsert), 024 (`/health` extra_headers
 and `aws_session_token` leak), 026 (JSON `extra_headers`/`headers`/`organization`
 passthrough), 028 (`/gemini` pass-through copies `x-goog-upload-url ?key=`),
-041 (`/v1/messages` drops `stop_sequences`), 064 (`/v1/messages` drops function-tool strictness), 067 (structured refusal text erased on Anthropic translation), 071 (`/model/info` `api_base` credential leak), 074 (MCP auto-execution splices Responses lifecycles), 076 (managed vector-store credential exfiltration). Switchyard
+041 (`/v1/messages` drops `stop_sequences`), 064 (`/v1/messages` drops function-tool strictness), 067 (structured refusal text erased on Anthropic translation), 071 (`/model/info` `api_base` credential leak), 074 (MCP auto-execution splices Responses lifecycles), 076 (managed vector-store credential exfiltration), 085 (Responses mid-stream fallback replays a delivered tool call). Switchyard
 confirmed: 005 (id sanitizer), 006 (4 field losses), 007 (multimodal
 stringified), 016 (thinking dropped), 017 (parallel flag), 018 (document
 dumped), 019 (invented cache breakpoint), 023 (`api-key` and OpenAI
