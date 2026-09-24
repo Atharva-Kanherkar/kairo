@@ -14,7 +14,7 @@ ENV PREFIX=/opt/kairo-agents \
     UV_PYTHON_INSTALL_DIR=/opt/kairo-agents/python \
     UV_TOOL_DIR=/opt/kairo-agents/uv-tools \
     UV_TOOL_BIN_DIR=/opt/kairo-agents/bin \
-    UV_NO_CACHE=1 \
+    UV_NO_CACHE=1 UV_HTTP_TIMEOUT=120 UV_HTTP_RETRIES=5 \
     PATH=/opt/kairo-agents/bin:$PATH
 
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl \

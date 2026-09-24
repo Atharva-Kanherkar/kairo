@@ -41,7 +41,7 @@ egress = ["generativelanguage.googleapis.com", ".googleapis.com", "play.googleap
 description = "OpenCode CLI (opencode run --auto); MODEL is provider/model, e.g. anthropic/claude-sonnet-5"
 model = "anthropic/claude-sonnet-5"
 keys = ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "OPENROUTER_API_KEY"]
-egress = ["api.anthropic.com", "api.openai.com", "generativelanguage.googleapis.com", "openrouter.ai", ".openrouter.ai", "models.dev"]
+egress = ["api.anthropic.com", "api.openai.com", "generativelanguage.googleapis.com", "openrouter.ai", ".openrouter.ai", "models.dev", "models.opencode.ai"]
 
 [agents.mini-swe-agent]
 description = "mini-SWE-agent: bash-only reference agent over LiteLLM; MODEL is a LiteLLM model name"

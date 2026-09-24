@@ -208,3 +208,8 @@ directory also keeps `egress.jsonl`, every allow or deny decision the proxy made
   the same Dockerfiles but were not validated in this PR.
 - The egress allowlist relies on each CLI honoring `HTTPS_PROXY`. A CLI that
   ignores it cannot reach anything, because the agent network has no route out.
+- Disk: besides about 45 GB of images, each concurrent Go or Rust job needs a
+  few GB of scratch while it runs, because rebuilding copies part of the warm
+  build cache into the container's writable layer. It is released when the
+  container is removed. Lower `--jobs` on a small disk; `doctor` warns below
+  40 GB free.

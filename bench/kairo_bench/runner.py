@@ -175,7 +175,7 @@ def run_job(cfg: RunConfig, agent: AgentSpec, task: Task, trial: int, image: str
     container = docker.start(image, name, network=network, mounts=mounts, env=egress.proxy_env if egress else {},
                              cpus=cfg.cpus, memory=cfg.memory,
                              labels={"kairo-bench.run": cfg.run_id, "kairo-bench.role": "agent"})
-    t0 = time.monotonic()
+    t0 = time.monotonic()  # reset right before the agent command; setup is not agent time
     patch_bytes = b""
     try:
         # Issue-only mode withholds the reproduction kit entirely, not just its mention.
@@ -185,13 +185,17 @@ def run_job(cfg: RunConfig, agent: AgentSpec, task: Task, trial: int, image: str
             container.write_file("/tmp/kairo/gold.patch",
                                  task.gold_patch.read_text() if task.gold_patch.is_file() else "")
             container.write_file("/tmp/kairo/expected-verdict.json", expected_verdict(task))
-        container.output("mkdir -p /tmp/kairo-out /home/kairo && chown -R kairo /tmp/kairo /tmp/kairo-out /home/kairo",
-                         user="root")
+        # Only chown what the harness created. /home/kairo already belongs to kairo, and in
+        # Go and Rust images it holds GB of build caches: a recursive chown would copy all
+        # of them into the container's writable layer.
+        container.output("mkdir -p /tmp/kairo-out /home/kairo && chown kairo /home/kairo "
+                         "&& chown -R kairo /tmp/kairo /tmp/kairo-out", user="root")
 
         # Keep the environment's PATH (venvs, toolchains) and put the agent CLIs first.
         _, image_path = container.output("printenv PATH")
         inv.env["PATH"] = f"/opt/kairo-agents/bin:{image_path.strip()}"
         timeout = cfg.agent_timeout or task.agent_timeout
+        t0 = time.monotonic()
         with (out / "agent.stdout.jsonl").open("wb") as so, (out / "agent.stderr.log").open("wb") as se:
             code, timed_out = container.exec(inv.command, env=inv.env, env_names=inv.key_names,
                                              secrets=cfg.secrets, workdir="/work/repo", timeout=timeout,

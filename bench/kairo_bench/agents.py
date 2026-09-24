@@ -120,7 +120,8 @@ def invocation(spec: AgentSpec, secrets: dict[str, str]) -> Invocation:
                 f"mkdir -p ~/.gemini && printf '%s' {shlex.quote(settings)} > ~/.gemini/settings.json; "
                 f"gemini --yolo --output-format stream-json {_model_flag('-m', spec.model)} -p {prompt}"
             ),
-            env=common,
+            # Headless runs refuse untrusted folders; the container is the trust boundary.
+            env={**common, "GEMINI_CLI_TRUST_WORKSPACE": "true"},
             key_names=keys,
             home_dirs=[".gemini/tmp"],
         )
