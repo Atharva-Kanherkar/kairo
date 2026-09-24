@@ -1,0 +1,254 @@
+[
+  {
+    "side": "client",
+    "n": 1,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 2,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "client",
+    "n": 3,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 4,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "client",
+    "n": 5,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 6,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "client",
+    "n": 7,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 8,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "client",
+    "n": 9,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 10,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 11,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 12,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 13,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 14,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "client",
+    "n": 15,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 16,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "client",
+    "n": 17,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 18,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 1,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 2,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "upstream",
+    "n": 3,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 4,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "upstream",
+    "n": 5,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 6,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "upstream",
+    "n": 7,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 8,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "upstream",
+    "n": 9,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 10,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 11,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 12,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 13,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 14,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "upstream",
+    "n": 15,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 16,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "upstream",
+    "n": 17,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 18,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  }
+]

@@ -1,0 +1,3 @@
+The most recent release tag is **`v1.104.0-dev.1`**.
+
+URL: [GitHub release](https://github.com/BerriAI/litellm/releases/tag/v1.104.0-dev.1)

@@ -1,0 +1,15 @@
+{
+  "method": "POST",
+  "path": "/v1/alpha/search",
+  "headers": {
+    "host": "127.0.0.1:9997",
+    "accept": "*/*",
+    "accept-encoding": "gzip, deflate",
+    "connection": "keep-alive",
+    "user-agent": "litellm/1.102.1",
+    "authorization": "[REDACTED]",
+    "api-key": "[REDACTED]",
+    "content-length": "666",
+    "content-type": "application/json"
+  }
+}

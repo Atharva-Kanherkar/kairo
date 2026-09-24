@@ -1,0 +1,25 @@
+{
+  "status": 400,
+  "headers": {
+    "date": "Thu, 24 Sep 2026 07:44:50 GMT",
+    "content-type": "application/json",
+    "openai-version": "2020-10-01",
+    "openai-organization": "[REDACTED]",
+    "openai-project": "[REDACTED]",
+    "x-request-id": "req_f0153894a3a94c7a8274c8e59be0da20",
+    "openai-processing-ms": "20",
+    "access-control-expose-headers": "X-Request-ID, CF-Ray",
+    "cf-cache-status": "DYNAMIC",
+    "x-content-type-options": "nosniff",
+    "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+    "cf-ray": "a4002a946e3d483b-BOM",
+    "alt-svc": "h3=\":443\"; ma=86400",
+    "x-litellm-call-id": "3742ca9b-4b9c-43ec-adc4-60b71a9cdb0a",
+    "x-litellm-model-api-base": "http://127.0.0.1:9997/v1/alpha/search",
+    "x-litellm-key-spend": "0.0",
+    "content-length": "169",
+    "vary": "Origin",
+    "x-frame-options": "DENY",
+    "content-security-policy": "frame-ancestors 'none'"
+  }
+}

@@ -1,0 +1,8 @@
+POST /v1/alpha/search HTTP/1.1
+Host: 127.0.0.1:9996
+Content-Type: application/json
+Accept: application/json
+Content-Length: 207
+Connection: close
+
+{"id":"codex-manual-search-test","model":"gpt-5.6-luna","commands":{"search_query":[{"q":"OpenAI Responses API"}]},"settings":{"search_context_size":"low","external_web_access":true},"max_output_tokens":200}

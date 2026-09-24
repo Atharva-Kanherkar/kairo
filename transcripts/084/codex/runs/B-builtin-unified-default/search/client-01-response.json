@@ -1,0 +1,12 @@
+{
+  "status": 404,
+  "headers": {
+    "date": "Thu, 24 Sep 2026 07:44:12 GMT",
+    "content-length": "22",
+    "content-type": "application/json",
+    "vary": "Origin",
+    "x-frame-options": "DENY",
+    "content-security-policy": "frame-ancestors 'none'",
+    "x-content-type-options": "nosniff"
+  }
+}

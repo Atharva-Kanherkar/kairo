@@ -1,0 +1,14 @@
+HTTP/1.1 400 Bad Request
+date: Wed, 23 Sep 2026 13:07:49 GMT
+content-type: application/json
+x-litellm-call-id: d5c291b8-fcf6-49d9-8965-3c5527379432
+x-litellm-model-api-base: http://127.0.0.1:9996/v1/alpha/search
+x-litellm-key-spend: 0.0
+content-length: 134
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+Connection: close
+
+{"error":{"message":"Missing required parameter: id","type":"invalid_request_error","param":"id","code":"missing_required_parameter"}}

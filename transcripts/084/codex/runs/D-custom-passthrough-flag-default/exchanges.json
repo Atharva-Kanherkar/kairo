@@ -1,0 +1,282 @@
+[
+  {
+    "side": "client",
+    "n": 38,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 39,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "client",
+    "n": 40,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 41,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "client",
+    "n": 42,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 43,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "client",
+    "n": 44,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 45,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "client",
+    "n": 46,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 47,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "client",
+    "n": 48,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 49,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "client",
+    "n": 50,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 51,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 52,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 53,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "client",
+    "n": 54,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 55,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "client",
+    "n": 56,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 57,
+    "method": "POST",
+    "path": "/openai_passthrough/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 34,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 35,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "upstream",
+    "n": 36,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 37,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "upstream",
+    "n": 38,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 39,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "upstream",
+    "n": 40,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 41,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "upstream",
+    "n": 42,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 43,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "upstream",
+    "n": 44,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 45,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "upstream",
+    "n": 46,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 47,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 48,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 49,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "upstream",
+    "n": 50,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 51,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 400
+  },
+  {
+    "side": "upstream",
+    "n": 52,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 53,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  }
+]

@@ -1,0 +1,154 @@
+{
+  "A-builtin-passthrough-default": {
+    "codex_exit": "0",
+    "web_run_tool_offered": true,
+    "search_calls": {
+      "client": {
+        "count": 6,
+        "with_id": 6,
+        "statuses": [
+          400
+        ]
+      },
+      "upstream": {
+        "count": 6,
+        "with_id": 0,
+        "statuses": [
+          400
+        ]
+      }
+    },
+    "final_answer": "https://github.com/BerriAI/litellm/releases/latest"
+  },
+  "A-builtin-passthrough-live": {
+    "codex_exit": "0",
+    "web_run_tool_offered": true,
+    "search_calls": {
+      "client": {
+        "count": 5,
+        "with_id": 5,
+        "statuses": [
+          400
+        ]
+      },
+      "upstream": {
+        "count": 5,
+        "with_id": 0,
+        "statuses": [
+          400
+        ]
+      }
+    },
+    "final_answer": "I couldn\u2019t retrieve the release data: the web-search tool returned an internal error, and direct network access was unavailable. I won\u2019t guess the tag."
+  },
+  "B-builtin-unified-default": {
+    "codex_exit": "0",
+    "web_run_tool_offered": true,
+    "search_calls": {
+      "client": {
+        "count": 4,
+        "with_id": 4,
+        "statuses": [
+          404
+        ]
+      }
+    },
+    "final_answer": "I couldn\u2019t verify this because the web search service is currently unavailable, and I won\u2019t guess the release tag."
+  },
+  "B-builtin-unified-live": {
+    "codex_exit": "0",
+    "web_run_tool_offered": true,
+    "search_calls": {
+      "client": {
+        "count": 4,
+        "with_id": 4,
+        "statuses": [
+          404
+        ]
+      }
+    },
+    "final_answer": "I couldn\u2019t verify the latest release: web search returned an internal 404, and direct GitHub access was unavailable. I don\u2019t want to guess the tag."
+  },
+  "C-custom-passthrough-noflag-default": {
+    "codex_exit": "0",
+    "web_run_tool_offered": false,
+    "search_calls": {},
+    "final_answer": "I couldn\u2019t complete the required web search because network access is unavailable in this environment."
+  },
+  "C-custom-passthrough-noflag-live": {
+    "codex_exit": "0",
+    "web_run_tool_offered": false,
+    "search_calls": {},
+    "final_answer": "I couldn\u2019t complete the web search because network/DNS access is blocked in this environment. I won\u2019t guess the release tag."
+  },
+  "D-custom-passthrough-flag-default": {
+    "codex_exit": "0",
+    "web_run_tool_offered": true,
+    "search_calls": {
+      "client": {
+        "count": 8,
+        "with_id": 8,
+        "statuses": [
+          400
+        ]
+      },
+      "upstream": {
+        "count": 8,
+        "with_id": 0,
+        "statuses": [
+          400
+        ]
+      }
+    },
+    "final_answer": "I couldn\u2019t verify this because the web-search tool is currently failing with an internal error, and network access is unavailable. I don\u2019t want to guess the release tag."
+  },
+  "D-custom-passthrough-flag-live": {
+    "codex_exit": "0",
+    "web_run_tool_offered": true,
+    "search_calls": {
+      "client": {
+        "count": 5,
+        "with_id": 5,
+        "statuses": [
+          400
+        ]
+      },
+      "upstream": {
+        "count": 5,
+        "with_id": 0,
+        "statuses": [
+          400
+        ]
+      }
+    },
+    "final_answer": "I couldn\u2019t verify the latest tag because the web-search service returned an internal error, and network access was unavailable. I don\u2019t want to guess."
+  },
+  "E-direct-default": {
+    "codex_exit": "0",
+    "web_run_tool_offered": true,
+    "search_calls": {
+      "direct": {
+        "count": 1,
+        "with_id": 1,
+        "statuses": [
+          200
+        ]
+      }
+    },
+    "final_answer": "URL: [GitHub release](https://github.com/BerriAI/litellm/releases/tag/v1.104.0-dev.1)"
+  },
+  "E-direct-live": {
+    "codex_exit": "0",
+    "web_run_tool_offered": true,
+    "search_calls": {
+      "direct": {
+        "count": 1,
+        "with_id": 1,
+        "statuses": [
+          200
+        ]
+      }
+    },
+    "final_answer": "URL: [GitHub Releases](https://github.com/BerriAI/litellm/releases)"
+  }
+}

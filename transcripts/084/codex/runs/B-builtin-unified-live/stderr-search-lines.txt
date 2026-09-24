@@ -1,0 +1,12 @@
+OpenAI Codex v0.156.1
+model: gpt-5.6-luna
+provider: openai
+warning: Falling back from WebSockets to HTTPS transport. unexpected status 403 Forbidden: Unknown error, url: ws://127.0.0.1:9998/v1/responses
+web search: 
+2026-09-24T07:46:14.432559Z ERROR codex_core::tools::router: error=Fatal error: http 404 Not Found: Some("{\"detail\":\"Not Found\"}")
+web search: 
+2026-09-24T07:46:16.034480Z ERROR codex_core::tools::router: error=Fatal error: http 404 Not Found: Some("{\"detail\":\"Not Found\"}")
+web search: 
+2026-09-24T07:46:18.512830Z ERROR codex_core::tools::router: error=Fatal error: http 404 Not Found: Some("{\"detail\":\"Not Found\"}")
+web search: 
+2026-09-24T07:46:23.683487Z ERROR codex_core::tools::router: error=Fatal error: http 404 Not Found: Some("{\"detail\":\"Not Found\"}")

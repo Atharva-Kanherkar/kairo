@@ -1,0 +1,12 @@
+POST /v1/alpha/search HTTP/1.1
+host: 127.0.0.1:9996
+accept: */*
+accept-encoding: gzip, deflate
+connection: keep-alive
+user-agent: litellm/1.102.1
+Authorization: [REDACTED]
+api-key: [REDACTED]
+content-length: 175
+content-type: application/json
+
+{"model":"gpt-5.6-luna","commands":{"search_query":[{"q":"OpenAI Responses API"}]},"settings":{"search_context_size":"low","external_web_access":true},"max_output_tokens":200}

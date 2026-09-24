@@ -1,0 +1,1 @@
+exec --skip-git-repo-check -s read-only -m gpt-5.6-luna -C /tmp/k084c/runs/E-direct-live/work -c web_search=\"live\" -c openai_base_url=\"http://127.0.0.1:9999/v1\" 

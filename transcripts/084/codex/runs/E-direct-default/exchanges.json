@@ -1,0 +1,23 @@
+[
+  {
+    "side": "direct",
+    "n": 4,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "direct",
+    "n": 5,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 200
+  },
+  {
+    "side": "direct",
+    "n": 6,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  }
+]
