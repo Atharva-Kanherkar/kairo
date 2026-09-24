@@ -1,0 +1,88 @@
+{
+  "base_as_expected": "3/3",
+  "base_commit": "98af761c0adab5dee4c91c7c5121034a73c10488",
+  "env": "bifrost-98af761",
+  "gold_as_expected": "3/3",
+  "gold_source": "upstream-merged",
+  "image_id": "sha256:d9bea9da32fddbf37c61a5679277e59f0637b2c3cbe68c826056a27214a27ec5",
+  "kind": "bug",
+  "ok": true,
+  "problems": [],
+  "repeats": 3,
+  "task": "bifrost-075-gemini-inline-image-dropped",
+  "tests": {
+    "chat_stream_keeps_caption": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "chat_stream_keeps_generated_image": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "chat_unary_keeps_caption": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "chat_unary_keeps_generated_image": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "responses_route_keeps_generated_image": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "text_only_turn_unchanged": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  },
+  "validated_at": "2026-09-24T16:07:45+00:00"
+}

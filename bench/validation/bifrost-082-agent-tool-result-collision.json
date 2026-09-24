@@ -1,0 +1,88 @@
+{
+  "base_as_expected": "3/3",
+  "base_commit": "98af761c0adab5dee4c91c7c5121034a73c10488",
+  "env": "bifrost-98af761",
+  "gold_as_expected": "3/3",
+  "gold_source": "upstream-open-pr",
+  "image_id": "sha256:d9bea9da32fddbf37c61a5679277e59f0637b2c3cbe68c826056a27214a27ec5",
+  "kind": "bug",
+  "ok": true,
+  "problems": [],
+  "repeats": 3,
+  "task": "bifrost-082-agent-tool-result-collision",
+  "tests": {
+    "distinct_tool_results_all_reported": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "each_auto_call_executed_once": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "go_unit_tests_mcp": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "pending_manual_call_returned": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "repeated_tool_results_all_reported": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "single_tool_result_reported": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  },
+  "validated_at": "2026-09-24T16:09:51+00:00"
+}

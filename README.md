@@ -38,6 +38,23 @@ not reproduce.
 One finding is filed upstream as
 [NVIDIA-NeMo/Switchyard#380](https://github.com/NVIDIA-NeMo/Switchyard/issues/380).
 
+## Kairo-30 benchmark
+
+[`bench/`](bench/) turns 30 of these findings into software-engineering tasks for
+coding agents: the real upstream repository at the commit where the bug
+existed, a bug report, a reproduction kit, and a hidden offline verifier that
+drives the real public entry point. Ten more tasks are honest negatives, where
+the right answer is that there is no bug. Every verifier is proven before any
+agent runs: the base commit fails, the gold patch (18 merged upstream fixes, 4
+open upstream PRs, 8 reference fixes) passes, three times each.
+
+```bash
+cd bench && cp .env.example .env    # add the agents' API keys
+./kairo-bench run                  # Claude Code, Codex, Gemini CLI, OpenCode, mini-SWE-agent
+```
+
+See [`bench/README.md`](bench/README.md) and [`bench/TASKS.md`](bench/TASKS.md).
+
 ## Findings
 
 Independent gateways violate the same small set of invariants, and a checker

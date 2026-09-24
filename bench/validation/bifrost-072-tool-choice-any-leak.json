@@ -1,0 +1,100 @@
+{
+  "base_as_expected": "3/3",
+  "base_commit": "98af761c0adab5dee4c91c7c5121034a73c10488",
+  "env": "bifrost-98af761",
+  "gold_as_expected": "3/3",
+  "gold_source": "upstream-merged",
+  "image_id": "sha256:d9bea9da32fddbf37c61a5679277e59f0637b2c3cbe68c826056a27214a27ec5",
+  "kind": "bug",
+  "ok": true,
+  "problems": [],
+  "repeats": 3,
+  "task": "bifrost-072-tool-choice-any-leak",
+  "tests": {
+    "go_unit_tests_anthropic_provider": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "go_unit_tests_openai_provider": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "tool_call_reply_translated": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "tool_choice_any_mapped_on_chat_route": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "tool_choice_any_mapped_on_responses_route": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "tool_choice_auto_preserved": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "tool_choice_named_tool_preserved": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  },
+  "validated_at": "2026-09-24T16:08:08+00:00"
+}
