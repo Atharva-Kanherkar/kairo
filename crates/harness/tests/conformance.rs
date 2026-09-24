@@ -19,11 +19,11 @@ use kairo::checks::{
     outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
     reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
     response_conversation_preserves_history, response_omits_secret,
-    responses_refusal_semantics_preserved, responses_single_lifecycle, stop_sequence_forwarded,
-    thinking_not_leaked_as_visible_text, thinking_text_forwarded, tool_strict_forwarded,
-    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
-    upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
-    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    responses_fallback_preserves_delivered_indexes, responses_refusal_semantics_preserved,
+    responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
+    thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
+    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, FunctionToolFormat,
+    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
 use serde_json::Value;
 use std::fs;
@@ -3717,4 +3717,187 @@ fn codex_consumer_search_calls_lose_provider_request_id() {
         violations, 24,
         "every captured Codex search call through the pass-through route loses its id"
     );
+}
+
+// ---- bug 085: LiteLLM Responses mid-stream fallback replays a delivered tool
+// call and corrupts the public stream's output-index namespace ----
+
+fn validate_issue_085_mode(record: &Value, mode: &str, index: usize) -> Result<(), String> {
+    let response_raw = record
+        .pointer("/client_response/body_raw")
+        .and_then(Value::as_str)
+        .ok_or_else(|| format!("record {index} has no raw response"))?;
+    let upstream_count = record
+        .get("upstream_exchanges")
+        .and_then(Value::as_array)
+        .map(Vec::len);
+    let consumer_error = record.pointer("/consumer/error");
+    let tool_calls = record
+        .pointer("/consumer/completed_tool_call_ids")
+        .and_then(Value::as_array)
+        .map(Vec::len);
+    let verdict = responses_fallback_preserves_delivered_indexes(response_raw);
+    match mode {
+        "trigger-duplicate-tool" => {
+            if upstream_count != Some(2)
+                || !consumer_error.is_some_and(Value::is_null)
+                || tool_calls != Some(2)
+            {
+                return Err(format!(
+                    "record {index} does not prove the duplicate-tool-call impact"
+                ));
+            }
+            if !matches!(verdict, Verdict::Violation(_)) {
+                return Err(format!(
+                    "record {index} lifecycle verdict must be a violation"
+                ));
+            }
+        }
+        "trigger-sdk-crash-item-type" | "trigger-sdk-crash-partial-text" => {
+            if upstream_count != Some(2)
+                || record
+                    .pointer("/consumer/error/type")
+                    .and_then(Value::as_str)
+                    != Some("AssertionError")
+                || record.pointer("/consumer/final_response") != Some(&Value::Null)
+            {
+                return Err(format!(
+                    "record {index} does not prove the official SDK crashed"
+                ));
+            }
+            if !matches!(verdict, Verdict::Violation(_)) {
+                return Err(format!(
+                    "record {index} lifecycle verdict must be a violation"
+                ));
+            }
+        }
+        "control-no-fault" => {
+            if upstream_count != Some(1)
+                || !consumer_error.is_some_and(Value::is_null)
+                || tool_calls != Some(1)
+            {
+                return Err(format!("record {index} is not the no-fault control"));
+            }
+            if verdict != Verdict::Conformant {
+                return Err(format!(
+                    "record {index} lifecycle verdict must be conformant"
+                ));
+            }
+        }
+        "control-pre-first-chunk" => {
+            if upstream_count != Some(2)
+                || !consumer_error.is_some_and(Value::is_null)
+                || tool_calls != Some(1)
+            {
+                return Err(format!("record {index} is not the pre-first-chunk control"));
+            }
+            if verdict != Verdict::Conformant {
+                return Err(format!(
+                    "record {index} lifecycle verdict must be conformant"
+                ));
+            }
+        }
+        _ => return Err(format!("unknown mode {mode}")),
+    }
+    Ok(())
+}
+
+fn issue_085_records(jsonl: &str, version: &str, mode: &str) -> Result<Vec<Value>, String> {
+    let records = jsonl
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .map(|line| serde_json::from_str::<Value>(line).map_err(|error| error.to_string()))
+        .collect::<Result<Vec<_>, _>>()?;
+    if records.len() != 5 {
+        return Err(format!("expected five records, got {}", records.len()));
+    }
+    for (index, record) in records.iter().enumerate() {
+        if record.pointer("/target/project").and_then(Value::as_str) != Some("BerriAI/litellm")
+            || record.pointer("/target/version").and_then(Value::as_str) != Some(version)
+            || record.get("mode").and_then(Value::as_str) != Some(mode)
+            || record.get("trial").and_then(Value::as_u64) != Some((index + 1) as u64)
+        {
+            return Err(format!("record {} has wrong provenance", index + 1));
+        }
+        if record
+            .pointer("/client_request/path")
+            .and_then(Value::as_str)
+            != Some("/v1/responses")
+            || record
+                .pointer("/client_response/status")
+                .and_then(Value::as_u64)
+                != Some(200)
+        {
+            return Err(format!(
+                "record {} is not a successful public route",
+                index + 1
+            ));
+        }
+        let request_raw = record
+            .pointer("/client_request/body_raw")
+            .and_then(Value::as_str)
+            .ok_or_else(|| format!("record {} has no raw request", index + 1))?;
+        let request: Value =
+            serde_json::from_str(request_raw).map_err(|error| error.to_string())?;
+        if request.get("model").and_then(Value::as_str) != Some(mode)
+            || request.get("stream").and_then(Value::as_bool) != Some(true)
+        {
+            return Err(format!("record {} has wrong request shape", index + 1));
+        }
+        validate_issue_085_mode(record, mode, index + 1)?;
+    }
+    Ok(records)
+}
+
+#[test]
+fn litellm_responses_fallback_replays_delivered_tool_call() {
+    for version in ["1.102.1", "1.104.0"] {
+        let path = format!("transcripts/085/{version}/trigger-duplicate-tool.jsonl");
+        issue_085_records(&fixture(&path), version, "trigger-duplicate-tool")
+            .unwrap_or_else(|error| panic!("{path}: {error}"));
+    }
+}
+
+#[test]
+fn litellm_responses_fallback_crashes_official_sdk() {
+    for version in ["1.102.1", "1.104.0"] {
+        for mode in [
+            "trigger-sdk-crash-item-type",
+            "trigger-sdk-crash-partial-text",
+        ] {
+            let path = format!("transcripts/085/{version}/{mode}.jsonl");
+            issue_085_records(&fixture(&path), version, mode)
+                .unwrap_or_else(|error| panic!("{path}: {error}"));
+        }
+    }
+}
+
+#[test]
+fn litellm_responses_fallback_controls_preserve_one_output_namespace() {
+    for version in ["1.102.1", "1.104.0"] {
+        for mode in ["control-no-fault", "control-pre-first-chunk"] {
+            let path = format!("transcripts/085/{version}/{mode}.jsonl");
+            issue_085_records(&fixture(&path), version, mode)
+                .unwrap_or_else(|error| panic!("{path}: {error}"));
+        }
+    }
+}
+
+#[test]
+fn issue_085_checks_later_trials_and_rejects_malformed_evidence() {
+    let original = fixture("transcripts/085/1.102.1/control-no-fault.jsonl");
+    let mut records = original
+        .lines()
+        .map(|line| serde_json::from_str::<Value>(line).unwrap())
+        .collect::<Vec<_>>();
+    records[4]["client_response"]["body_raw"] = Value::String("data: not-json\n\n".into());
+    let mutated = records
+        .iter()
+        .map(Value::to_string)
+        .collect::<Vec<_>>()
+        .join("\n");
+    assert!(issue_085_records(&mutated, "1.102.1", "control-no-fault").is_err());
+
+    let malformed = format!("{}\n{{", original.trim_end());
+    assert!(issue_085_records(&malformed, "1.102.1", "control-no-fault").is_err());
 }
