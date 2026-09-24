@@ -1,6 +1,6 @@
 # kairo
 
-**A conformance suite and open dataset for LLM tool-call translation.**
+**Kairo is a dataset of real, reproducible bugs in production AI infrastructure, with executable environments, controls, exact failure traces, and verified fixes.**
 
 Every LLM gateway, proxy, and OpenAI-compatible server translates between wire
 dialects: OpenAI Chat Completions, Anthropic Messages, and the OpenAI Responses
