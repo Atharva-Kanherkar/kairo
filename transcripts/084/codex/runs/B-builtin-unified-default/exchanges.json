@@ -1,0 +1,128 @@
+[
+  {
+    "side": "client",
+    "n": 19,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 20,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 404
+  },
+  {
+    "side": "client",
+    "n": 21,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 22,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 404
+  },
+  {
+    "side": "client",
+    "n": 23,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 24,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 404
+  },
+  {
+    "side": "client",
+    "n": 25,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 26,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 27,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 28,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 404
+  },
+  {
+    "side": "client",
+    "n": 29,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 19,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 20,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 21,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 22,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 23,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 24,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 25,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  }
+]

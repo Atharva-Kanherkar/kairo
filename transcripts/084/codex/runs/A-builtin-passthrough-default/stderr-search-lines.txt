@@ -1,0 +1,16 @@
+OpenAI Codex v0.156.1
+model: gpt-5.6-luna
+provider: openai
+warning: Falling back from WebSockets to HTTPS transport. unexpected status 403 Forbidden: Unknown error, url: ws://127.0.0.1:9998/openai_passthrough/v1/responses
+web search: 
+2026-09-24T07:43:25.155739Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:43:28.264911Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:43:30.846828Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:43:33.851184Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:43:46.002608Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:43:50.092854Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")

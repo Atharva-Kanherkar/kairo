@@ -1,0 +1,1 @@
+exec --skip-git-repo-check -s read-only -m gpt-5.6-luna -C /tmp/k084c/runs/C-custom-passthrough-noflag-default/work -c model_provider=\"litellm\" -c model_providers.litellm.name=\"litellm\" -c model_providers.litellm.base_url=\"http://127.0.0.1:9998/openai_passthrough/v1\" -c model_providers.litellm.env_key=\"LITELLM_KEY\" -c model_providers.litellm.wire_api=\"responses\" 

@@ -3673,3 +3673,48 @@ fn provider_request_id_checker_has_conformant_and_vacuous_controls() {
         Verdict::Violation(_)
     ));
 }
+
+#[test]
+fn codex_consumer_search_calls_lose_provider_request_id() {
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../transcripts/084/codex/runs");
+    let mut violations = 0;
+    for case in [
+        "A-builtin-passthrough-default",
+        "A-builtin-passthrough-live",
+        "D-custom-passthrough-flag-default",
+        "D-custom-passthrough-flag-live",
+    ] {
+        let search = root.join(case).join("search");
+        let mut clients: Vec<_> = fs::read_dir(&search)
+            .unwrap_or_else(|e| panic!("read {}: {e}", search.display()))
+            .filter_map(|entry| {
+                entry
+                    .ok()
+                    .map(|entry| entry.file_name().into_string().unwrap())
+            })
+            .filter(|name| name.starts_with("client-") && name.ends_with("-request-body.json"))
+            .collect();
+        clients.sort();
+        assert!(
+            !clients.is_empty(),
+            "{case} must contain Codex search calls"
+        );
+        for client in clients {
+            let upstream = client.replacen("client-", "upstream-", 1);
+            let client_body = fs::read_to_string(search.join(&client)).unwrap();
+            let upstream_body = fs::read_to_string(search.join(&upstream)).unwrap();
+            assert!(
+                matches!(
+                    provider_request_id_preserved(&client_body, &upstream_body),
+                    Verdict::Violation(_)
+                ),
+                "{case} {client}: Codex sent an id that LiteLLM must have dropped"
+            );
+            violations += 1;
+        }
+    }
+    assert_eq!(
+        violations, 24,
+        "every captured Codex search call through the pass-through route loses its id"
+    );
+}

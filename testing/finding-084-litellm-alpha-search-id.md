@@ -27,7 +27,9 @@
 
 ## E2E Tests
 
-- Not applicable. LiteLLM's real proxy CLI and the captured consumer boundary are exercised by the preserved transcript replay; no separate Kairo service exists.
+- The real Codex CLI 0.156.1 runs through LiteLLM 1.102.1 to the live OpenAI API in five setups, each with default config and with `web_search="live"`. See `transcripts/084/codex/README.md`.
+- `codex_consumer_search_calls_lose_provider_request_id` reads all 24 captured Codex search calls through `/openai_passthrough` and requires every pair to violate the invariant.
+- The no-gateway control keeps `id`, gets HTTP 200, and Codex answers the question.
 
 ## Manual / cURL Tests
 

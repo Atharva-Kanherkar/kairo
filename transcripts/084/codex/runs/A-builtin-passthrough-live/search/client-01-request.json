@@ -1,0 +1,15 @@
+{
+  "method": "POST",
+  "path": "/openai_passthrough/v1/alpha/search",
+  "headers": {
+    "version": "0.156.1",
+    "x-codex-turn-metadata": "[REDACTED]",
+    "authorization": "[REDACTED]",
+    "content-type": "application/json",
+    "accept": "*/*",
+    "originator": "codex_exec",
+    "user-agent": "codex_exec/0.156.1 (Mac OS 26.2.0; arm64) Apple_Terminal/466 (codex_exec; 0.156.1)",
+    "host": "127.0.0.1:9998",
+    "content-length": "731"
+  }
+}

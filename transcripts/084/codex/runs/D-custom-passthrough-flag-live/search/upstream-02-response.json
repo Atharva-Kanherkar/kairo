@@ -1,0 +1,21 @@
+{
+  "status": 400,
+  "headers": {
+    "date": "Thu, 24 Sep 2026 07:47:12 GMT",
+    "content-type": "application/json",
+    "content-length": "169",
+    "connection": "keep-alive",
+    "openai-version": "2020-10-01",
+    "openai-organization": "[REDACTED]",
+    "openai-project": "[REDACTED]",
+    "x-request-id": "req_c8fd5b6379164e5cbdfd4aaf5c3e87d1",
+    "openai-processing-ms": "20",
+    "server": "cloudflare",
+    "access-control-expose-headers": "X-Request-ID, CF-Ray",
+    "cf-cache-status": "DYNAMIC",
+    "x-content-type-options": "nosniff",
+    "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+    "cf-ray": "a4002e003ac347e7-BOM",
+    "alt-svc": "h3=\":443\"; ma=86400"
+  }
+}

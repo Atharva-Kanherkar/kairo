@@ -1,0 +1,13 @@
+OpenAI Codex v0.156.1
+model: gpt-5.6-luna
+provider: litellm
+web search: 
+2026-09-24T07:47:09.726910Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:47:12.403642Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:47:17.109064Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:47:22.852318Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:47:44.080555Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")

@@ -1,0 +1,19 @@
+OpenAI Codex v0.156.1
+model: gpt-5.6-luna
+provider: litellm
+web search: 
+2026-09-24T07:44:52.281932Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:44:55.921886Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:44:59.069618Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:45:01.698524Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:45:03.870086Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:45:07.364513Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:45:14.222677Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:45:18.254305Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")

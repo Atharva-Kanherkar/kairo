@@ -42,7 +42,7 @@ The files under `transcripts/084/raw/replay/` are the frozen 2026-09-23 capture.
 - **Reproduction rate**: 5/5 direct controls succeed; 5/5 proxied requests lose `id` and fail.
 - **Smallest trigger**: sending the same JSON through the OpenAI pass-through route causes LiteLLM to remove top-level `id`; direct forwarding of that same JSON preserves it. The affected workflow requires an OpenAI standalone search call with an `id` sent through this route. Its production frequency was not measured.
 
-The provider was not called directly because no OpenAI credential was available in the environment. This claim is about LiteLLM's forwarded bytes, so a local deterministic capture is the appropriate attribution control. The upstream reporter records the actual OpenAI 400 and the Codex search workflow in issue #42656. The mock does not cause the gateway's byte loss; captured bytes from the real pinned LiteLLM process show the ID missing before the mock evaluates the request.
+The deterministic capture isolates LiteLLM's forwarded bytes. On 2026-09-24 the live provider was also called with the `OPENAI_API_KEY` from the gitignored repository `.env`. Direct calls to OpenAI `/v1/alpha/search` returned HTTP 200 in 3/3 calls with `id` and HTTP 400 `missing_required_parameter` in 3/3 calls without it. The same request through LiteLLM 1.102.1 to OpenAI returned that 400 in 5/5 calls, while `/openai_passthrough/v1/models` on the same proxy and key returned HTTP 200. The real Codex CLI run below repeats this at the consumer boundary.
 
 ### Root cause
 
@@ -59,9 +59,19 @@ A Codex user who enables live standalone web search while routing its OpenAI API
 - **User action**: Codex performs a live web search through the LiteLLM OpenAI pass-through route.
 - **Wire defect**: LiteLLM removes the request's `id` before forwarding it.
 - **Consumer failure**: OpenAI returns `400 missing_required_parameter`; the search operation fails instead of returning results.
-- **Consumer-boundary demonstration**: the real proxy returns HTTP 400 to the caller in 5/5 local capture trials; the direct control with the same body receives HTTP 200 from the deterministic endpoint in 5/5. The upstream reporter records the actual provider 400, LiteLLM access log, and Codex workflow in issue #42656. The provider call was not independently repeated here.
-- **Measured impact**: failure is deterministic for the tested request shape, 5/5. Production frequency was not measured.
-- **Inferred impact**: Codex tasks requiring web results cannot use this route until the request ID is preserved.
+- **Consumer-boundary demonstration**: the real Codex CLI 0.156.1 was run through LiteLLM 1.102.1 to the live OpenAI API on 2026-09-24. Each setup ran once with default Codex config and once with `web_search="live"`. Evidence and scripts are in `transcripts/084/codex/`.
+
+| Codex setup | Standalone search | Search calls | Forwarded with `id` | Result |
+|---|---|---|---|---|
+| Control: built-in provider, no gateway | on by default | 2 | 2 | HTTP 200; Codex answers with the release tag, 2/2 runs |
+| A: built-in provider, `openai_base_url` = LiteLLM `/openai_passthrough/v1` | on by default | 11 | 0 | HTTP 400 missing `id`; Codex reports search failed, 2/2 runs |
+| D: custom provider, `supports_standalone_web_search = true` (reporter's setup) | opted in | 13 | 0 | HTTP 400 missing `id`; Codex reports search failed, 2/2 runs |
+| C: custom provider, flag unset | off by default | 0 | n/a | Codex offers no web search tool, so this defect is not reached |
+| B: built-in provider, `openai_base_url` = LiteLLM `/v1` | on by default | 8 | n/a | LiteLLM returns HTTP 404 for `/v1/alpha/search`; a separate behavior not claimed here |
+
+- **Why setup A matters**: Codex enables standalone search by default for its built-in `openai` provider (`supports_standalone_web_search: true` in `codex-rs/model-provider-info/src/lib.rs`). A custom provider defaults to `false`. So pointing the built-in provider at LiteLLM's pass-through route breaks web search with no opt-in.
+- **Measured impact**: every one of the 24 Codex search calls through `/openai_passthrough` lost `id` and failed, and every affected Codex run ended without search results. The no-gateway control succeeded in 2/2 runs. Production frequency and the share of Codex users on setup A were not measured.
+- **Inferred impact**: Codex users who route the built-in provider through LiteLLM's OpenAI pass-through lose web search entirely until the request ID is preserved. The failure is loud, not silent: Codex tells the user search failed and refuses to guess.
 
 ### Bug or not
 
@@ -89,7 +99,7 @@ A Codex user who enables live standalone web search while routing its OpenAI API
 
 ## Test
 
-The replay and raw captures are under `transcripts/084/`. The conformance suite uses the same captured client and forwarded bodies for each trial. The checker tests the invariant itself, so it also detects a changed ID and permits requests that did not include one.
+The replay and raw captures are under `transcripts/084/`. The Codex consumer-boundary captures are under `transcripts/084/codex/runs/`, with `codex_consumer_search_calls_lose_provider_request_id` covering every captured Codex search pair. The conformance suite uses the same captured client and forwarded bodies for each trial. The checker tests the invariant itself, so it also detects a changed ID and permits requests that did not include one.
 
 ## Validation
 
@@ -99,16 +109,18 @@ The replay and raw captures are under `transcripts/084/`. The conformance suite 
 | Direct capture control | `transcripts/084/replay.py` | Passed 5/5 |
 | Proxied capture reproduction | `transcripts/084/replay.py` | Failed as claimed 5/5 |
 | Rerun leaves committed evidence intact | Documented commands, then `git status --porcelain` | Passed, no tracked file changed; both scripts exit 2 without `--output-dir` |
-| Harness | `cargo test --workspace` | Passed, 199 tests |
+| Harness | `cargo test --workspace` | Passed, 200 tests |
 | Formatting | `cargo fmt --all -- --check` | Passed |
 | Lint | `cargo clippy --workspace --all-targets -- -D warnings` | Passed |
-| README counts | `python3 tools/update-readme-counts.py --check` | Passed, 61 findings and 199 tests |
+| README counts | `python3 tools/update-readme-counts.py --check` | Passed, 61 findings and 200 tests |
+| Codex consumer boundary | `transcripts/084/codex/run_matrix.sh` against live OpenAI | 24/24 search calls through pass-through lost `id`; control 2/2 succeeded |
+| Codex capture invariant | `codex_consumer_search_calls_lose_provider_request_id` | Passed, 24 violations detected |
 | Independent reproduction review | `.github/agents/kairo-reproduction-reviewer.agent.md` | Passed; reviewer independently reran 5/5 proxy failures and 5/5 direct controls, then returned ACCEPT |
 
 ## Author verdict
 
-- **Correctness**: PASS for LiteLLM's body mutation. The provider's real response is reported in upstream issue #42656; the provider was not independently called in this reproduction.
-- **Usefulness**: PASS; the call returns an error instead of a usable search result.
+- **Correctness**: PASS for LiteLLM's body mutation, confirmed against both the deterministic capture and the live OpenAI API.
+- **Usefulness**: PASS; the real Codex CLI loses web search with default settings when its built-in provider points at LiteLLM's pass-through route.
 - **Upstream status**: PASS, duplicate-open with a current open fix PR.
 - **Overall**: ACCEPT. All three gates and repository checks passed, including independent reproduction review.
 

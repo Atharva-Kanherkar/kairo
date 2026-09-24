@@ -1,0 +1,14 @@
+OpenAI Codex v0.156.1
+model: gpt-5.6-luna
+provider: openai
+warning: Falling back from WebSockets to HTTPS transport. unexpected status 403 Forbidden: Unknown error, url: ws://127.0.0.1:9998/openai_passthrough/v1/responses
+web search: 
+2026-09-24T07:45:41.121460Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:45:44.280724Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:45:46.951039Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:45:49.411579Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")
+web search: 
+2026-09-24T07:45:57.558018Z ERROR codex_core::tools::router: error=Fatal error: http 400 Bad Request: Some("{\n  \"error\": {\n    \"message\": \"Missing required parameter: 'id'.\",\n    \"type\": \"invalid_request_error\",\n    \"param\": \"id\",\n    \"code\": \"missing_required_parameter\"\n  }\n}")

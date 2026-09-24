@@ -1,0 +1,114 @@
+[
+  {
+    "side": "client",
+    "n": 71,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 72,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 404
+  },
+  {
+    "side": "client",
+    "n": 73,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 74,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 404
+  },
+  {
+    "side": "client",
+    "n": 75,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 76,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 404
+  },
+  {
+    "side": "client",
+    "n": 77,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 78,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "client",
+    "n": 79,
+    "method": "POST",
+    "path": "/v1/alpha/search",
+    "status": 404
+  },
+  {
+    "side": "client",
+    "n": 80,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 67,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 68,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 69,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 70,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 71,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  },
+  {
+    "side": "upstream",
+    "n": 72,
+    "method": "POST",
+    "path": "/v1/responses",
+    "status": 200
+  }
+]
