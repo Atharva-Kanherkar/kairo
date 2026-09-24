@@ -122,6 +122,12 @@ LiteLLM's fallback replay is safe exactly when the primary delivered nothing,
 and unsafe the moment it delivered anything, regardless of type or completion
 state.
 
+`reproduce.py`'s config sets `num_retries: 0` only to keep evidence
+deterministic (so a same-deployment retry never interleaves with the fallback
+call count). It is not load-bearing for the defect: removing it and using
+LiteLLM's default retry count reproduces `trigger-duplicate-tool` identically
+(2 upstream calls, both tool calls completed).
+
 ## Root cause
 
 `Router._aresponses_streaming_iterator` (`litellm/router.py:3101`) wraps the
@@ -145,6 +151,18 @@ zero, exactly like the primary did. Nothing in the wrapper renumbers indexes,
 merges the two lifecycles, or signals the client that a new namespace started.
 The public stream is the literal concatenation of two independent,
 zero-indexed provider streams.
+
+The sibling chat-completions fallback wrapper (`_acompletion_streaming_iterator`,
+`router.py:2762`) already gets this right for its own dialect. Its equivalent
+check is `e.generated_content or _stream_chunks_have_generated_content(
+model_response.chunks)` (`router.py:2826`), and
+`_stream_chunks_have_generated_content` (`router.py:402`) explicitly tests
+`delta.get("tool_calls")` alongside `content`. Calling it directly against the
+pinned 1.102.1 source confirms this: a delta carrying a `tool_calls` entry
+returns `True` (content was generated), where the Responses path's
+`generated_content` would see nothing. The chat-completions path was fixed to
+count tool calls as delivered content; the Responses path, added later by
+PR #28215, was not given the same check.
 
 The official `openai` SDK's `ResponseStreamState.accumulate_event`
 (`_responses.py:325`) only resets its snapshot on the very first event
