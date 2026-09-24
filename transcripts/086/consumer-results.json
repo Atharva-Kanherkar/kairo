@@ -1,0 +1,514 @@
+{
+  "cells": {
+    "consumer_agents_after_chat": {
+      "final_healthy": 0,
+      "runs": [
+        {
+          "final_healthy": false,
+          "final_step": "second_agent",
+          "run": "01",
+          "steps": {
+            "first_chat": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_CHAT seq=061 cell=consumer_agents_after_chat run=01"
+            },
+            "second_agent": {
+              "error": "AttributeError",
+              "message": "'NoneType' object has no attribute 'usage'",
+              "ok": false
+            }
+          }
+        },
+        {
+          "final_healthy": false,
+          "final_step": "second_agent",
+          "run": "02",
+          "steps": {
+            "first_chat": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_CHAT seq=062 cell=consumer_agents_after_chat run=02"
+            },
+            "second_agent": {
+              "error": "AttributeError",
+              "message": "'NoneType' object has no attribute 'usage'",
+              "ok": false
+            }
+          }
+        },
+        {
+          "final_healthy": false,
+          "final_step": "second_agent",
+          "run": "03",
+          "steps": {
+            "first_chat": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_CHAT seq=063 cell=consumer_agents_after_chat run=03"
+            },
+            "second_agent": {
+              "error": "AttributeError",
+              "message": "'NoneType' object has no attribute 'usage'",
+              "ok": false
+            }
+          }
+        },
+        {
+          "final_healthy": false,
+          "final_step": "second_agent",
+          "run": "04",
+          "steps": {
+            "first_chat": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_CHAT seq=064 cell=consumer_agents_after_chat run=04"
+            },
+            "second_agent": {
+              "error": "AttributeError",
+              "message": "'NoneType' object has no attribute 'usage'",
+              "ok": false
+            }
+          }
+        },
+        {
+          "final_healthy": false,
+          "final_step": "second_agent",
+          "run": "05",
+          "steps": {
+            "first_chat": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_CHAT seq=065 cell=consumer_agents_after_chat run=05"
+            },
+            "second_agent": {
+              "error": "AttributeError",
+              "message": "'NoneType' object has no attribute 'usage'",
+              "ok": false
+            }
+          }
+        }
+      ]
+    },
+    "consumer_chat_after_agents": {
+      "final_healthy": 0,
+      "runs": [
+        {
+          "final_healthy": false,
+          "final_step": "second_chat",
+          "run": "01",
+          "steps": {
+            "first_agent": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=066 cell=consumer_chat_after_agents run=01"
+            },
+            "second_chat": {
+              "error": "AttributeError",
+              "message": "'NoneType' object has no attribute 'choices'",
+              "ok": false
+            }
+          }
+        },
+        {
+          "final_healthy": false,
+          "final_step": "second_chat",
+          "run": "02",
+          "steps": {
+            "first_agent": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=067 cell=consumer_chat_after_agents run=02"
+            },
+            "second_chat": {
+              "error": "AttributeError",
+              "message": "'NoneType' object has no attribute 'choices'",
+              "ok": false
+            }
+          }
+        },
+        {
+          "final_healthy": false,
+          "final_step": "second_chat",
+          "run": "03",
+          "steps": {
+            "first_agent": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=068 cell=consumer_chat_after_agents run=03"
+            },
+            "second_chat": {
+              "error": "AttributeError",
+              "message": "'NoneType' object has no attribute 'choices'",
+              "ok": false
+            }
+          }
+        },
+        {
+          "final_healthy": false,
+          "final_step": "second_chat",
+          "run": "04",
+          "steps": {
+            "first_agent": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=069 cell=consumer_chat_after_agents run=04"
+            },
+            "second_chat": {
+              "error": "AttributeError",
+              "message": "'NoneType' object has no attribute 'choices'",
+              "ok": false
+            }
+          }
+        },
+        {
+          "final_healthy": false,
+          "final_step": "second_chat",
+          "run": "05",
+          "steps": {
+            "first_agent": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=070 cell=consumer_chat_after_agents run=05"
+            },
+            "second_chat": {
+              "error": "AttributeError",
+              "message": "'NoneType' object has no attribute 'choices'",
+              "ok": false
+            }
+          }
+        }
+      ]
+    },
+    "consumer_chat_stream_after_responses_stream": {
+      "final_healthy": 0,
+      "runs": [
+        {
+          "final_healthy": false,
+          "final_step": "second_chat_stream",
+          "run": "01",
+          "steps": {
+            "first_responses_stream": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=076 cell=consumer_chat_stream_after_responses_stream run=01"
+            },
+            "second_chat_stream": {
+              "ok": true,
+              "value": {
+                "chunks": 9,
+                "text": ""
+              }
+            }
+          }
+        },
+        {
+          "final_healthy": false,
+          "final_step": "second_chat_stream",
+          "run": "02",
+          "steps": {
+            "first_responses_stream": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=077 cell=consumer_chat_stream_after_responses_stream run=02"
+            },
+            "second_chat_stream": {
+              "ok": true,
+              "value": {
+                "chunks": 9,
+                "text": ""
+              }
+            }
+          }
+        },
+        {
+          "final_healthy": false,
+          "final_step": "second_chat_stream",
+          "run": "03",
+          "steps": {
+            "first_responses_stream": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=078 cell=consumer_chat_stream_after_responses_stream run=03"
+            },
+            "second_chat_stream": {
+              "ok": true,
+              "value": {
+                "chunks": 9,
+                "text": ""
+              }
+            }
+          }
+        },
+        {
+          "final_healthy": false,
+          "final_step": "second_chat_stream",
+          "run": "04",
+          "steps": {
+            "first_responses_stream": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=079 cell=consumer_chat_stream_after_responses_stream run=04"
+            },
+            "second_chat_stream": {
+              "ok": true,
+              "value": {
+                "chunks": 9,
+                "text": ""
+              }
+            }
+          }
+        },
+        {
+          "final_healthy": false,
+          "final_step": "second_chat_stream",
+          "run": "05",
+          "steps": {
+            "first_responses_stream": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=080 cell=consumer_chat_stream_after_responses_stream run=05"
+            },
+            "second_chat_stream": {
+              "ok": true,
+              "value": {
+                "chunks": 9,
+                "text": ""
+              }
+            }
+          }
+        }
+      ]
+    },
+    "consumer_control_agents_after_chat_no_cache_key": {
+      "final_healthy": 5,
+      "runs": [
+        {
+          "final_healthy": true,
+          "final_step": "second_agent",
+          "run": "01",
+          "steps": {
+            "first_chat": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_CHAT seq=086 cell=consumer_control_agents_after_chat_no_cache_key run=01"
+            },
+            "second_agent": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=087 cell=consumer_control_agents_after_chat_no_cache_key run=01"
+            }
+          }
+        },
+        {
+          "final_healthy": true,
+          "final_step": "second_agent",
+          "run": "02",
+          "steps": {
+            "first_chat": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_CHAT seq=088 cell=consumer_control_agents_after_chat_no_cache_key run=02"
+            },
+            "second_agent": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=089 cell=consumer_control_agents_after_chat_no_cache_key run=02"
+            }
+          }
+        },
+        {
+          "final_healthy": true,
+          "final_step": "second_agent",
+          "run": "03",
+          "steps": {
+            "first_chat": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_CHAT seq=090 cell=consumer_control_agents_after_chat_no_cache_key run=03"
+            },
+            "second_agent": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=091 cell=consumer_control_agents_after_chat_no_cache_key run=03"
+            }
+          }
+        },
+        {
+          "final_healthy": true,
+          "final_step": "second_agent",
+          "run": "04",
+          "steps": {
+            "first_chat": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_CHAT seq=092 cell=consumer_control_agents_after_chat_no_cache_key run=04"
+            },
+            "second_agent": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=093 cell=consumer_control_agents_after_chat_no_cache_key run=04"
+            }
+          }
+        },
+        {
+          "final_healthy": true,
+          "final_step": "second_agent",
+          "run": "05",
+          "steps": {
+            "first_chat": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_CHAT seq=094 cell=consumer_control_agents_after_chat_no_cache_key run=05"
+            },
+            "second_agent": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=095 cell=consumer_control_agents_after_chat_no_cache_key run=05"
+            }
+          }
+        }
+      ]
+    },
+    "consumer_control_agents_alone": {
+      "final_healthy": 5,
+      "runs": [
+        {
+          "final_healthy": true,
+          "final_step": "first_agent",
+          "run": "01",
+          "steps": {
+            "first_agent": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=081 cell=consumer_control_agents_alone run=01"
+            }
+          }
+        },
+        {
+          "final_healthy": true,
+          "final_step": "first_agent",
+          "run": "02",
+          "steps": {
+            "first_agent": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=082 cell=consumer_control_agents_alone run=02"
+            }
+          }
+        },
+        {
+          "final_healthy": true,
+          "final_step": "first_agent",
+          "run": "03",
+          "steps": {
+            "first_agent": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=083 cell=consumer_control_agents_alone run=03"
+            }
+          }
+        },
+        {
+          "final_healthy": true,
+          "final_step": "first_agent",
+          "run": "04",
+          "steps": {
+            "first_agent": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=084 cell=consumer_control_agents_alone run=04"
+            }
+          }
+        },
+        {
+          "final_healthy": true,
+          "final_step": "first_agent",
+          "run": "05",
+          "steps": {
+            "first_agent": {
+              "ok": true,
+              "value": "KAIRO_086_UPSTREAM_RESPONSES seq=085 cell=consumer_control_agents_alone run=05"
+            }
+          }
+        }
+      ]
+    },
+    "consumer_responses_stream_after_chat_stream": {
+      "final_healthy": 0,
+      "runs": [
+        {
+          "final_healthy": false,
+          "final_step": "second_responses_stream",
+          "run": "01",
+          "steps": {
+            "first_chat_stream": {
+              "ok": true,
+              "value": {
+                "chunks": 3,
+                "text": "KAIRO_086_UPSTREAM_CHAT seq=071 cell=consumer_responses_stream_after_chat_stream run=01"
+              }
+            },
+            "second_responses_stream": {
+              "error": "RuntimeError",
+              "message": "Expected to have received `response.created` before `None`",
+              "ok": false
+            }
+          }
+        },
+        {
+          "final_healthy": false,
+          "final_step": "second_responses_stream",
+          "run": "02",
+          "steps": {
+            "first_chat_stream": {
+              "ok": true,
+              "value": {
+                "chunks": 3,
+                "text": "KAIRO_086_UPSTREAM_CHAT seq=072 cell=consumer_responses_stream_after_chat_stream run=02"
+              }
+            },
+            "second_responses_stream": {
+              "error": "RuntimeError",
+              "message": "Expected to have received `response.created` before `None`",
+              "ok": false
+            }
+          }
+        },
+        {
+          "final_healthy": false,
+          "final_step": "second_responses_stream",
+          "run": "03",
+          "steps": {
+            "first_chat_stream": {
+              "ok": true,
+              "value": {
+                "chunks": 3,
+                "text": "KAIRO_086_UPSTREAM_CHAT seq=073 cell=consumer_responses_stream_after_chat_stream run=03"
+              }
+            },
+            "second_responses_stream": {
+              "error": "RuntimeError",
+              "message": "Expected to have received `response.created` before `None`",
+              "ok": false
+            }
+          }
+        },
+        {
+          "final_healthy": false,
+          "final_step": "second_responses_stream",
+          "run": "04",
+          "steps": {
+            "first_chat_stream": {
+              "ok": true,
+              "value": {
+                "chunks": 3,
+                "text": "KAIRO_086_UPSTREAM_CHAT seq=074 cell=consumer_responses_stream_after_chat_stream run=04"
+              }
+            },
+            "second_responses_stream": {
+              "error": "RuntimeError",
+              "message": "Expected to have received `response.created` before `None`",
+              "ok": false
+            }
+          }
+        },
+        {
+          "final_healthy": false,
+          "final_step": "second_responses_stream",
+          "run": "05",
+          "steps": {
+            "first_chat_stream": {
+              "ok": true,
+              "value": {
+                "chunks": 3,
+                "text": "KAIRO_086_UPSTREAM_CHAT seq=075 cell=consumer_responses_stream_after_chat_stream run=05"
+              }
+            },
+            "second_responses_stream": {
+              "error": "RuntimeError",
+              "message": "Expected to have received `response.created` before `None`",
+              "ok": false
+            }
+          }
+        }
+      ]
+    }
+  },
+  "sdk": {
+    "openai": "3.19.2",
+    "openai-agents": "0.22.3",
+    "python": "3.12.13"
+  }
+}

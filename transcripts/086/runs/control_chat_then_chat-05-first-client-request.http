@@ -1,0 +1,7 @@
+POST /v1/chat/completions HTTP/1.1
+Host: 127.0.0.1:57028
+Content-Type: application/json
+Content-Length: 150
+x-bf-cache-key: kairo-086-control_chat_then_chat-05
+
+{"messages":[{"content":"KAIRO_086 cell=control_chat_then_chat run=05 Reply with the capital of France.","role":"user"}],"model":"openai/gpt-4o-mini"}

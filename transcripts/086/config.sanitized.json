@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.getbifrost.ai/schema",
+  "client": {
+    "disable_content_logging": true,
+    "enable_logging": false,
+    "initial_pool_size": 10
+  },
+  "config_store": {
+    "config": {
+      "path": "<RUNTIME_DIR>/config.db"
+    },
+    "enabled": true,
+    "type": "sqlite"
+  },
+  "logs_store": {
+    "enabled": false
+  },
+  "vector_store": {
+    "config": {
+      "host": "127.0.0.1",
+      "port": "<QDRANT_GRPC_PORT>"
+    },
+    "enabled": true,
+    "type": "qdrant"
+  },
+  "plugins": [
+    {
+      "config": {
+        "cache_by_model": true,
+        "cache_by_provider": true,
+        "dimension": 1,
+        "ttl": "5m"
+      },
+      "enabled": true,
+      "name": "semantic_cache"
+    }
+  ],
+  "providers": {
+    "openai": {
+      "keys": [
+        {
+          "models": [
+            "*"
+          ],
+          "name": "kairo-synthetic",
+          "value": "<SYNTHETIC_PROVIDER_KEY>",
+          "weight": 1
+        }
+      ],
+      "network_config": {
+        "base_url": "http://127.0.0.1:<UPSTREAM_PORT>"
+      }
+    }
+  }
+}

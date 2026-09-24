@@ -2003,6 +2003,138 @@ pub fn executed_tool_results_preserved(executions_json: &str, client_exchange: &
     Verdict::Conformant
 }
 
+/// Invariant (bug 086): a successful response from an OpenAI-compatible
+/// endpoint carries that endpoint's own response family, whichever layer
+/// produced it (upstream, cache, or plugin). `/v1/chat/completions` returns a
+/// `chat.completion` object or a stream of `chat.completion.chunk` objects
+/// with a finish reason; `/v1/responses` returns a `response` object or a
+/// stream of `response.*` events that starts with `response.created` and
+/// ends in a terminal event. `client_exchange` is the complete raw HTTP
+/// response the client received.
+///
+/// The check reads only the public OpenAI discriminators (`object`, `type`),
+/// so it does not depend on how a gateway stores or replays entries. A
+/// non-2xx or unparseable capture is a violation, not a vacuous pass.
+pub fn endpoint_response_family_preserved(endpoint: &str, client_exchange: &str) -> Verdict {
+    let Some((head, body)) = client_exchange.split_once("\r\n\r\n") else {
+        return Verdict::Violation("capture has no HTTP header terminator".to_owned());
+    };
+    let status = head
+        .lines()
+        .next()
+        .and_then(|line| line.split_whitespace().nth(1))
+        .and_then(|code| code.parse::<u16>().ok());
+    match status {
+        Some(code) if (200..300).contains(&code) => {}
+        other => {
+            return Verdict::Violation(format!(
+                "not a successful response (status {other:?}); the family invariant needs a 2xx"
+            ))
+        }
+    }
+    let streamed = head.lines().any(|line| {
+        let lower = line.to_ascii_lowercase();
+        lower.starts_with("content-type:") && lower.contains("text/event-stream")
+    });
+    match (endpoint, streamed) {
+        ("/v1/chat/completions", false) => json_body_family(body, "chat.completion", "choices"),
+        ("/v1/responses", false) => json_body_family(body, "response", "output"),
+        ("/v1/chat/completions", true) => chat_stream_family(body),
+        ("/v1/responses", true) => responses_stream_family(body),
+        _ => Verdict::Violation(format!("no family rule for endpoint {endpoint:?}")),
+    }
+}
+
+/// A non-streamed body must be a JSON object whose `object` names the
+/// endpoint's family and that carries the family's result array.
+fn json_body_family(body: &str, object: &str, array_field: &str) -> Verdict {
+    match serde_json::from_str::<Value>(body.trim()) {
+        Ok(value)
+            if value.get("object").and_then(Value::as_str) == Some(object)
+                && value.get(array_field).is_some_and(Value::is_array) =>
+        {
+            Verdict::Conformant
+        }
+        Ok(value) => Verdict::Violation(format!(
+            "expected a {object} body, got: {}",
+            truncate_for_reason(&value.to_string())
+        )),
+        Err(error) => Verdict::Violation(format!("{object} body is not JSON: {error}")),
+    }
+}
+
+fn chat_stream_family(body: &str) -> Verdict {
+    let payloads = sse_data_json(body);
+    if payloads.is_empty() {
+        return Verdict::Violation("chat completions stream carried no JSON data".to_owned());
+    }
+    if let Some(foreign) = payloads.iter().find(|payload| {
+        payload.get("object").and_then(Value::as_str) != Some("chat.completion.chunk")
+    }) {
+        return Verdict::Violation(format!(
+            "chat completions stream carried a non chat.completion.chunk payload: {}",
+            truncate_for_reason(&foreign.to_string())
+        ));
+    }
+    let finished = payloads.iter().any(|payload| {
+        payload
+            .get("choices")
+            .and_then(Value::as_array)
+            .is_some_and(|choices| {
+                choices.iter().any(|choice| {
+                    choice
+                        .get("finish_reason")
+                        .and_then(Value::as_str)
+                        .is_some()
+                })
+            })
+    });
+    if finished {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation("chat completions stream never reported a finish_reason".to_owned())
+    }
+}
+
+fn responses_stream_family(body: &str) -> Verdict {
+    let payloads = sse_data_json(body);
+    let types: Vec<&str> = payloads
+        .iter()
+        .map(|payload| payload.get("type").and_then(Value::as_str).unwrap_or(""))
+        .collect();
+    if types.is_empty() {
+        return Verdict::Violation("responses stream carried no JSON data".to_owned());
+    }
+    if let Some(foreign) = types.iter().find(|kind| !kind.starts_with("response.")) {
+        return Verdict::Violation(format!(
+            "responses stream carried a non response.* payload (type {foreign:?})"
+        ));
+    }
+    if types.first() != Some(&"response.created") {
+        return Verdict::Violation(format!(
+            "responses stream did not start with response.created (first {:?})",
+            types.first()
+        ));
+    }
+    let terminal = [
+        "response.completed",
+        "response.failed",
+        "response.incomplete",
+    ];
+    if types.last().is_some_and(|kind| terminal.contains(kind)) {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation(format!(
+            "responses stream ended without a terminal event (last {:?})",
+            types.last()
+        ))
+    }
+}
+
+fn truncate_for_reason(text: &str) -> String {
+    text.chars().take(160).collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -3061,6 +3193,58 @@ data: [DONE]
                 response_conversation_preserves_history(evidence, "RECALL", "SEED CANARY", 1,),
                 Verdict::Violation(_)
             ));
+        }
+    }
+
+    #[test]
+    fn endpoint_family_checker_rejects_vacuous_or_foreign_evidence() {
+        let json = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n";
+        let sse = "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\n\r\n";
+        let chat = r#"{"object":"chat.completion","choices":[{"index":0,"message":{"role":"assistant","content":"x"},"finish_reason":"stop"}]}"#;
+        let response = r#"{"object":"response","output":[]}"#;
+        assert_eq!(
+            endpoint_response_family_preserved("/v1/chat/completions", &format!("{json}{chat}")),
+            Verdict::Conformant
+        );
+        assert_eq!(
+            endpoint_response_family_preserved("/v1/responses", &format!("{json}{response}")),
+            Verdict::Conformant
+        );
+        let responses_stream =
+            "data: {\"type\":\"response.created\"}\n\ndata: {\"type\":\"response.completed\"}\n\n";
+        assert_eq!(
+            endpoint_response_family_preserved(
+                "/v1/responses",
+                &format!("{sse}{responses_stream}")
+            ),
+            Verdict::Conformant
+        );
+        let cases = [
+            ("/v1/responses", format!("{json}{chat}")),
+            ("/v1/chat/completions", format!("{json}{response}")),
+            ("/v1/responses", format!("{json}null")),
+            ("/v1/chat/completions", format!("{json}not-json")),
+            (
+                "/v1/chat/completions",
+                format!("HTTP/1.1 500 Internal Server Error\r\n\r\n{chat}"),
+            ),
+            ("/v1/chat/completions", chat.to_owned()),
+            ("/v1/embeddings", format!("{json}{chat}")),
+            (
+                "/v1/responses",
+                format!("{sse}data: {{\"type\":\"response.created\"}}\n\n"),
+            ),
+            ("/v1/chat/completions", format!("{sse}{responses_stream}")),
+            ("/v1/chat/completions", format!("{sse}data: [DONE]\n\n")),
+        ];
+        for (endpoint, capture) in cases {
+            assert!(
+                matches!(
+                    endpoint_response_family_preserved(endpoint, &capture),
+                    Verdict::Violation(_)
+                ),
+                "{endpoint} must reject {capture:?}"
+            );
         }
     }
 }

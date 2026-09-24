@@ -1,0 +1,27 @@
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Thu, 24 Sep 2026 21:24:50 GMT
+Content-Type: application/json
+Content-Length: 812
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID
+Access-Control-Max-Age: 86400
+Vary: Origin
+X-Request-Id: da22b903-ecbb-45a9-a2e4-ad1b6c9d2cbf
+X-Bifrost-Trace-Id: 8107300c1acc49a79fc61f0384015f1c
+X-Bifrost-Provider: openai
+X-Bifrost-Original-Model: gpt-4o-mini
+X-Bifrost-Resolved-Model: gpt-4o-mini
+X-Bifrost-Request-Type: chat_completion
+X-Bifrost-Routing-Info-Provider: openai
+X-Bifrost-Routing-Info-Model: gpt-4o-mini
+X-Bifrost-Routing-Info-Key: kairo-synthetic
+X-Bifrost-Upstream-Latency-Ms: 0.000
+
+{"id":"chatcmpl-086-005","choices":[{"index":0,"finish_reason":"stop","logprobs":null,"message":{"role":"assistant","content":"KAIRO_086_UPSTREAM_CHAT seq=005 cell=warmup run=02"}}],"created":1790000000,"model":"gpt-4o-mini","object":"chat.completion","system_fingerprint":"","usage":{"prompt_tokens":12,"completion_tokens":8,"total_tokens":20},"extra_fields":{"request_type":"chat_completion","routing_info":{"provider":"openai","model":"gpt-4o-mini","key":"kairo-synthetic"},"provider":"openai","original_model_requested":"gpt-4o-mini","resolved_model_used":"gpt-4o-mini","latency":0,"upstream_latency":0,"chunk_index":0,"cache_debug":{"cache_hit":true,"cache_id":"f0219d69-49fa-5f7a-ab71-50cfe0642e9f","hit_type":"direct","requested_provider":"openai","requested_model":"gpt-4o-mini","cache_hit_latency":5}}}
