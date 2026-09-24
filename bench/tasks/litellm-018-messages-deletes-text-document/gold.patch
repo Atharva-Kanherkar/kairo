@@ -1,0 +1,40 @@
+diff --git a/litellm/llms/anthropic/experimental_pass_through/responses_adapters/transformation.py b/litellm/llms/anthropic/experimental_pass_through/responses_adapters/transformation.py
+index 1fdb0318ba..f0bca92086 100644
+--- a/litellm/llms/anthropic/experimental_pass_through/responses_adapters/transformation.py
++++ b/litellm/llms/anthropic/experimental_pass_through/responses_adapters/transformation.py
+@@ -99,12 +99,34 @@ class LiteLLMAnthropicToResponsesAPIAdapter:
+     def _translate_anthropic_document_block_to_file_part(
+         block: Mapping[str, object],
+     ) -> dict[str, str] | None:  # mutable-ok: API message payload
+-        """Convert an Anthropic document block to a Responses input_file part."""
++        """Convert an Anthropic document block to a Responses content part.
++
++        ``base64`` and ``url`` sources become ``input_file``. ``text`` and ``content``
++        sources already hold plain text, which ``input_file`` cannot carry, so they
++        become ``input_text`` instead of being dropped.
++        """
+         raw_source: Final = block.get("source")
+         if not isinstance(raw_source, Mapping):
+             return None
+         source: Final = cast(Mapping[str, object], raw_source)  # cast-ok: untrusted client payload
+         source_type: Final = source.get("type")
++        if source_type == "text":
++            text: Final = source.get("data")
++            if not isinstance(text, str) or not text:
++                return None
++            return {"type": "input_text", "text": text}  # mutable-ok: API message payload
++        if source_type == "content":
++            inner: Final = source.get("content")
++            joined: Final = (
++                inner
++                if isinstance(inner, str)
++                else "".join(
++                    str(part.get("text", ""))
++                    for part in (inner if isinstance(inner, list) else [])
++                    if isinstance(part, Mapping) and part.get("type") == "text"
++                )
++            )
++            return {"type": "input_text", "text": joined} if joined else None  # mutable-ok: API message payload
+         if source_type == "base64":
+             data: Final = source.get("data")
+             if not isinstance(data, str) or not data:

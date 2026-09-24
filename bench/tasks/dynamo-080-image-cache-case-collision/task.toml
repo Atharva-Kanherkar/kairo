@@ -1,0 +1,39 @@
+id = "dynamo-080-image-cache-case-collision"
+title = "ImageLoader cache key lowercases the URL path, so /Cat.png returns /cat.png's image"
+kind = "bug"
+env = "dynamo-5593e88"
+category = "state-and-history"
+difficulty = "easy"
+finding = "080"
+languages = ["python"]
+splits = ["kairo-30"]
+
+[repo]
+name = "ai-dynamo/dynamo"
+url = "https://github.com/ai-dynamo/dynamo"
+base_commit = "5593e8857c508bebce7259e107a85c57cd142fd8"
+base_ref = "main on 2026-09-19"
+
+[upstream]
+issues = ["https://github.com/ai-dynamo/dynamo/issues/15100", "https://github.com/ai-dynamo/dynamo/pull/3634#discussion_r2464485829"]
+fix = "https://github.com/ai-dynamo/dynamo/pull/15101"
+status = "duplicate-open"
+
+[gold]
+source = "upstream-open-pr"
+url = "https://github.com/ai-dynamo/dynamo/pull/15101"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 600
+reset_paths = ["components/src/dynamo/common/tests"]
+fail_to_pass = [
+  "case_differing_paths_decode_distinct_images",
+  "case_differing_queries_decode_distinct_images",
+]
+pass_to_pass = [
+  "repeated_url_served_from_cache",
+  "distinct_urls_decode_distinct_images",
+  "cache_disabled_fetches_every_request",
+  "upstream_unit_tests_image_loader",
+]

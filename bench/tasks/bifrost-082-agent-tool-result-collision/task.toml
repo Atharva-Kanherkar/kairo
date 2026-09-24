@@ -1,0 +1,39 @@
+id = "bifrost-082-agent-tool-result-collision"
+title = "MCP agent mode returns one result when the same auto-executed tool runs twice"
+kind = "bug"
+env = "bifrost-98af761"
+category = "tool-call-identity"
+difficulty = "medium"
+finding = "082"
+languages = ["go"]
+splits = ["kairo-30"]
+
+[repo]
+name = "maximhq/bifrost"
+url = "https://github.com/maximhq/bifrost"
+base_commit = "98af761c0adab5dee4c91c7c5121034a73c10488"
+base_ref = "dev on 2026-09-07"
+
+[upstream]
+issues = ["https://github.com/maximhq/bifrost/issues/7383"]
+fix = "https://github.com/maximhq/bifrost/pull/7385"
+status = "duplicate-open"
+
+[gold]
+source = "upstream-open-pr"
+url = "https://github.com/maximhq/bifrost/pull/7385"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 1800
+reset_paths = ["core/mcp/agent_test.go"]
+fail_to_pass = [
+  "repeated_tool_results_all_reported",
+]
+pass_to_pass = [
+  "each_auto_call_executed_once",
+  "distinct_tool_results_all_reported",
+  "single_tool_result_reported",
+  "pending_manual_call_returned",
+  "go_unit_tests_mcp",
+]

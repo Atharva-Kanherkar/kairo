@@ -1,0 +1,41 @@
+id = "litellm-085-responses-fallback-replays-tool-call"
+title = "Responses mid-stream fallback replays an already-delivered tool call"
+kind = "bug"
+env = "litellm-e7bff27"
+category = "stream-lifecycle"
+difficulty = "hard"
+finding = "085"
+languages = ["python"]
+splits = ["kairo-30"]
+
+[repo]
+name = "BerriAI/litellm"
+url = "https://github.com/BerriAI/litellm"
+base_commit = "e7bff277a6f93ec4a26850d05ce2f6c2842c1512"
+base_ref = "main on 2026-09-21"
+
+[upstream]
+issues = ["https://github.com/BerriAI/litellm/pull/34627", "https://github.com/BerriAI/litellm/pull/28215"]
+status = "novel"
+
+[gold]
+# No upstream fix exists. The reference patch applies the rule maintainers set for
+# the chat path in #34627: once output has streamed, surface the failure.
+source = "kairo-reference"
+url = "https://github.com/BerriAI/litellm/pull/34627"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 1200
+reset_paths = ["tests"]
+fail_to_pass = [
+  "delivered_tool_call_not_replayed_after_error_event",
+  "delivered_tool_call_not_replayed_after_response_failed",
+  "delivered_tool_call_not_replayed_before_reasoning_fallback",
+]
+pass_to_pass = [
+  "failure_before_output_still_falls_back",
+  "no_fault_stream_unchanged",
+  "transport_drop_surfaces_failure",
+  "upstream_unit_tests_responses_streaming_fallback",
+]

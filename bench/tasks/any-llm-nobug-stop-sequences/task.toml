@@ -1,0 +1,33 @@
+id = "any-llm-nobug-stop-sequences"
+title = "Report: Messages bridge ignores stop_sequences (it does not)"
+kind = "no-bug"
+env = "any-llm-3ee84f6"
+category = "request-field-drop"
+difficulty = "easy"
+finding = "057 honest negative (2026-08-18 sweep)"
+languages = ["python"]
+splits = ["negatives"]
+
+[repo]
+name = "mozilla-ai/any-llm"
+url = "https://github.com/mozilla-ai/any-llm"
+base_commit = "3ee84f6a3482f86d4c02c25643613809944709d1"
+base_ref = "main before PR #1312"
+
+[upstream]
+status = "documented-behavior"
+
+[gold]
+source = "none"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 600
+reset_paths = ["tests"]
+pass_to_pass = [
+  "stop_sequences_forwarded_as_stop",
+  "single_stop_sequence_forwarded",
+  "no_stop_invented",
+  "plain_conversation_unchanged",
+  "upstream_unit_tests_messages_compat",
+]

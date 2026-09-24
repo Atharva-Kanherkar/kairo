@@ -1,0 +1,41 @@
+diff --git a/core/providers/anthropic/responses.go b/core/providers/anthropic/responses.go
+index f0e242734..04debc843 100644
+--- a/core/providers/anthropic/responses.go
++++ b/core/providers/anthropic/responses.go
+@@ -3813,10 +3813,16 @@ func toAnthropicResponsesStreamEvents(ctx *schemas.BifrostContext, bifrostResp *
+ 		if alreadyEmitted, ok := ctx.Value(schemas.BifrostContextKeyHasEmittedMessageDelta).(bool); ok && alreadyEmitted {
+ 			return []*AnthropicStreamEvent{streamResp}
+ 		}
++		// With no explicit stop reason, a turn that produced a tool call ends in tool_use,
++		// mirroring the inference the non-streaming converter makes from its content blocks.
++		defaultStopReason := AnthropicStopReasonEndTurn
++		if bifrostResp.Response != nil && responsesOutputHasToolCall(bifrostResp.Response.Output) {
++			defaultStopReason = AnthropicStopReasonToolUse
++		}
+ 		anthropicContentDeltaEvent := &AnthropicStreamEvent{
+ 			Type: AnthropicStreamEventTypeMessageDelta,
+ 			Delta: &AnthropicStreamDelta{
+-				StopReason:   schemas.Ptr(AnthropicStopReasonEndTurn),
++				StopReason:   schemas.Ptr(defaultStopReason),
+ 				StopSequence: schemas.Ptr(""),
+ 			},
+ 		}
+@@ -9520,3 +9526,18 @@ func rawCaptureExtraFields(extra schemas.BifrostResponseExtraFields) *schemas.Bi
+ 	echo := extra
+ 	return &echo
+ }
++
++// responsesOutputHasToolCall reports whether a Responses output carries a client tool call
++// (function or computer call), which Anthropic clients must see as stop_reason tool_use.
++func responsesOutputHasToolCall(output []schemas.ResponsesMessage) bool {
++	for _, item := range output {
++		if item.Type == nil {
++			continue
++		}
++		switch *item.Type {
++		case schemas.ResponsesMessageTypeFunctionCall, schemas.ResponsesMessageTypeComputerCall:
++			return true
++		}
++	}
++	return false
++}

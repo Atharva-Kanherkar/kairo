@@ -1,0 +1,40 @@
+id = "litellm-074-mcp-stream-lifecycle-splice"
+title = "MCP auto-execution splices two Responses lifecycles into one stream"
+kind = "bug"
+env = "litellm-e7bff27"
+category = "stream-lifecycle"
+difficulty = "hard"
+finding = "074"
+languages = ["python"]
+splits = ["kairo-30"]
+
+[repo]
+name = "BerriAI/litellm"
+url = "https://github.com/BerriAI/litellm"
+base_commit = "e7bff277a6f93ec4a26850d05ce2f6c2842c1512"
+base_ref = "main on 2026-09-21"
+
+[upstream]
+issues = ["https://github.com/BerriAI/litellm/issues/40118"]
+fix = "https://github.com/BerriAI/litellm/pull/40121"
+status = "fixed"
+
+[gold]
+source = "upstream-merged"
+url = "https://github.com/BerriAI/litellm/pull/40121"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 1200
+reset_paths = ["tests"]
+fail_to_pass = [
+  "mcp_auto_execute_stream_is_one_lifecycle",
+  "openai_sdk_stream_returns_final_answer",
+]
+pass_to_pass = [
+  "mcp_tool_executed_exactly_once",
+  "mcp_final_answer_reaches_client",
+  "approval_required_stream_unchanged",
+  "no_tool_stream_unchanged",
+  "upstream_unit_tests_mcp_streaming_iterator",
+]
