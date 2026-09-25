@@ -1,0 +1,271 @@
+{
+  "target": {
+    "litellm_version": "1.104.0",
+    "openai_version": "2.54.0",
+    "mcp_version": "2.2.0",
+    "python": "3.12.13",
+    "litellm_init_sha256": "aaf77cd80f58ae71dbdc7ca89ceefa1358ab29e925a4e4df05e734895501894e",
+    "project": "BerriAI/litellm",
+    "source_ref": "2701e2008baee4ed2c16cba7a56ea7f96d6d0981",
+    "captured_at": "2026-09-25",
+    "endpoint": "POST /v1/chat/completions",
+    "tool": "MCP gateway auto-execution, require_approval=never, tool_choice=required"
+  },
+  "runs": 5,
+  "cells": {
+    "violation_default_retries": {
+      "spec": {
+        "fault": "on",
+        "router_retries": null,
+        "sdk_retries": 0
+      },
+      "runs": [
+        {
+          "run": "01",
+          "client_ok": false,
+          "client_error": "InternalServerError",
+          "client_status": 500,
+          "tool_executions": 3,
+          "upstream_calls": 6
+        },
+        {
+          "run": "02",
+          "client_ok": false,
+          "client_error": "InternalServerError",
+          "client_status": 500,
+          "tool_executions": 3,
+          "upstream_calls": 6
+        },
+        {
+          "run": "03",
+          "client_ok": false,
+          "client_error": "InternalServerError",
+          "client_status": 500,
+          "tool_executions": 3,
+          "upstream_calls": 6
+        },
+        {
+          "run": "04",
+          "client_ok": false,
+          "client_error": "InternalServerError",
+          "client_status": 500,
+          "tool_executions": 3,
+          "upstream_calls": 6
+        },
+        {
+          "run": "05",
+          "client_ok": false,
+          "client_error": "InternalServerError",
+          "client_status": 500,
+          "tool_executions": 3,
+          "upstream_calls": 6
+        }
+      ],
+      "tool_executions_per_run": [
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "upstream_calls_per_run": [
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "violation_num_retries_2": {
+      "spec": {
+        "fault": "on",
+        "router_retries": 2,
+        "sdk_retries": 0
+      },
+      "runs": [
+        {
+          "run": "01",
+          "client_ok": false,
+          "client_error": "InternalServerError",
+          "client_status": 500,
+          "tool_executions": 3,
+          "upstream_calls": 6
+        },
+        {
+          "run": "02",
+          "client_ok": false,
+          "client_error": "InternalServerError",
+          "client_status": 500,
+          "tool_executions": 3,
+          "upstream_calls": 6
+        },
+        {
+          "run": "03",
+          "client_ok": false,
+          "client_error": "InternalServerError",
+          "client_status": 500,
+          "tool_executions": 3,
+          "upstream_calls": 6
+        },
+        {
+          "run": "04",
+          "client_ok": false,
+          "client_error": "InternalServerError",
+          "client_status": 500,
+          "tool_executions": 3,
+          "upstream_calls": 6
+        },
+        {
+          "run": "05",
+          "client_ok": false,
+          "client_error": "InternalServerError",
+          "client_status": 500,
+          "tool_executions": 3,
+          "upstream_calls": 6
+        }
+      ],
+      "tool_executions_per_run": [
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "upstream_calls_per_run": [
+        6,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "control_fault_off": {
+      "spec": {
+        "fault": "off",
+        "router_retries": 2,
+        "sdk_retries": 0
+      },
+      "runs": [
+        {
+          "run": "01",
+          "client_ok": true,
+          "client_error": null,
+          "client_status": 200,
+          "tool_executions": 1,
+          "upstream_calls": 2
+        },
+        {
+          "run": "02",
+          "client_ok": true,
+          "client_error": null,
+          "client_status": 200,
+          "tool_executions": 1,
+          "upstream_calls": 2
+        },
+        {
+          "run": "03",
+          "client_ok": true,
+          "client_error": null,
+          "client_status": 200,
+          "tool_executions": 1,
+          "upstream_calls": 2
+        },
+        {
+          "run": "04",
+          "client_ok": true,
+          "client_error": null,
+          "client_status": 200,
+          "tool_executions": 1,
+          "upstream_calls": 2
+        },
+        {
+          "run": "05",
+          "client_ok": true,
+          "client_error": null,
+          "client_status": 200,
+          "tool_executions": 1,
+          "upstream_calls": 2
+        }
+      ],
+      "tool_executions_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "upstream_calls_per_run": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "control_num_retries_0": {
+      "spec": {
+        "fault": "on",
+        "router_retries": 0,
+        "sdk_retries": 0
+      },
+      "runs": [
+        {
+          "run": "01",
+          "client_ok": false,
+          "client_error": "InternalServerError",
+          "client_status": 500,
+          "tool_executions": 1,
+          "upstream_calls": 2
+        },
+        {
+          "run": "02",
+          "client_ok": false,
+          "client_error": "InternalServerError",
+          "client_status": 500,
+          "tool_executions": 1,
+          "upstream_calls": 2
+        },
+        {
+          "run": "03",
+          "client_ok": false,
+          "client_error": "InternalServerError",
+          "client_status": 500,
+          "tool_executions": 1,
+          "upstream_calls": 2
+        },
+        {
+          "run": "04",
+          "client_ok": false,
+          "client_error": "InternalServerError",
+          "client_status": 500,
+          "tool_executions": 1,
+          "upstream_calls": 2
+        },
+        {
+          "run": "05",
+          "client_ok": false,
+          "client_error": "InternalServerError",
+          "client_status": 500,
+          "tool_executions": 1,
+          "upstream_calls": 2
+        }
+      ],
+      "tool_executions_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "upstream_calls_per_run": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    }
+  },
+  "complete": true,
+  "failures": []
+}

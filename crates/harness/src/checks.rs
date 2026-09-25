@@ -2135,6 +2135,51 @@ fn truncate_for_reason(text: &str) -> String {
     text.chars().take(160).collect()
 }
 
+/// Invariant (bug 087): one client turn may execute a side-effecting MCP tool
+/// at most once. The ledger is JSON Lines written at the consumer boundary,
+/// with a positive, consecutive `seq` and a non-empty `entry` per execution.
+/// Empty or malformed evidence fails closed instead of passing vacuously.
+pub fn mcp_tool_executes_once(ledger_jsonl: &str) -> Verdict {
+    let mut count = 0_u64;
+    let mut previous = None;
+    for (index, line) in ledger_jsonl.lines().enumerate() {
+        if line.trim().is_empty() {
+            continue;
+        }
+        let Ok(record) = serde_json::from_str::<Value>(line) else {
+            return Verdict::Violation(format!("ledger line {} is not valid JSON", index + 1));
+        };
+        let Some(sequence) = record.get("seq").and_then(Value::as_u64) else {
+            return Verdict::Violation(format!(
+                "ledger line {} has no positive integer seq",
+                index + 1
+            ));
+        };
+        if sequence == 0 || previous.is_some_and(|value| sequence != value + 1) {
+            return Verdict::Violation(format!(
+                "ledger line {} has non-consecutive seq {sequence}",
+                index + 1
+            ));
+        }
+        if record
+            .get("entry")
+            .and_then(Value::as_str)
+            .is_none_or(str::is_empty)
+        {
+            return Verdict::Violation(format!("ledger line {} has no non-empty entry", index + 1));
+        }
+        previous = Some(sequence);
+        count += 1;
+    }
+    match count {
+        1 => Verdict::Conformant,
+        0 => Verdict::Violation("tool ledger is empty".to_owned()),
+        other => Verdict::Violation(format!(
+            "one client turn executed the MCP tool {other} times, expected once"
+        )),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

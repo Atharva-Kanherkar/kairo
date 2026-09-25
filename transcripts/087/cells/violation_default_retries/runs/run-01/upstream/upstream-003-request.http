@@ -1,0 +1,21 @@
+POST /v1/chat/completions HTTP/1.1
+host: 127.0.0.1:60675
+accept-encoding: gzip, deflate
+connection: keep-alive
+authorization: Bearer <SYNTHETIC_UPSTREAM_KEY>
+accept: application/json
+content-type: application/json
+user-agent: AsyncOpenAI/Python 2.54.0
+x-stainless-lang: python
+x-stainless-package-version: 2.54.0
+x-stainless-os: MacOS
+x-stainless-arch: arm64
+x-stainless-runtime: CPython
+x-stainless-runtime-version: 3.12.13
+x-stainless-async: async:asyncio
+x-stainless-raw-response: true
+x-stainless-retry-count: 0
+x-stainless-read-timeout: 6000.0
+content-length: 474
+
+{"messages":[{"role":"user","content":"write alpha run 01"}],"model":"kairo-087-model","tool_choice":"required","tools":[{"type":"function","function":{"name":"kairoledger-commit_write","description":"Append one entry to the ledger and return a marker. Side-effecting, not idempotent.","parameters":{"properties":{"entry":{"title":"Entry","type":"string"}},"required":["entry"],"title":"commit_writeArguments","type":"object","additionalProperties":false},"strict":false}}]}

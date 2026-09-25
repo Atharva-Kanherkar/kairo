@@ -1,0 +1,33 @@
+HTTP/1.1 200 OK
+date: Fri, 25 Sep 2026 07:38:35 GMT
+content-length: 990
+content-type: application/json
+x-litellm-call-id: 37ea7d57-7ce3-4e08-ab39-ad4bc32805b8
+x-litellm-model-id: 50da8540a7b45e2328cd0313927ffbb72529b377faa5670042c10349eb7f4df2
+x-litellm-model-name: openai/kairo-087-model
+x-litellm-model-api-base: http://127.0.0.1:60393/v1
+x-litellm-version: 1.104.0
+x-litellm-response-cost-original: 0.0
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-response-cost-input: 0.0
+x-litellm-response-cost-output: 0.0
+x-litellm-response-cost-tool-usage: 0.0
+x-litellm-key-spend: 0.0
+x-litellm-response-duration-ms: 32.0429801940918
+x-litellm-overhead-duration-ms: 28.79
+x-litellm-callback-duration-ms: 0.1259
+llm_provider-server: BaseHTTP/0.6 Python/3.12.13
+llm_provider-date: Fri, 25 Sep 2026 07:38:36 GMT
+llm_provider-content-type: application/json
+llm_provider-content-length: 280
+x-litellm-model-group: kairo-model
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+
+{"id":"chatcmpl-087-final","created":1790000000,"model":"kairo-model","object":"chat.completion","choices":[{"finish_reason":"stop","index":0,"message":{"content":"KAIRO087_FINAL done","role":"assistant","provider_specific_fields":{"refusal":null,"mcp_list_tools":[{"type":"function","function":{"name":"kairoledger-commit_write","description":"Append one entry to the ledger and return a marker. Side-effecting, not idempotent.","parameters":{"properties":{"entry":{"title":"Entry","type":"string"}},"required":["entry"],"type":"object","title":"commit_writeArguments","additionalProperties":false},"strict":false}}],"mcp_tool_calls":[{"function":{"arguments":"{\"entry\":\"alpha\"}","name":"kairoledger-commit_write"},"id":"call_087_a","type":"function"}],"mcp_call_results":[{"tool_call_id":"call_087_a","result":"KAIRO087_WROTE seq=2 entry=alpha","name":"kairoledger-commit_write"}]}},"provider_specific_fields":{}}],"usage":{"completion_tokens":4,"prompt_tokens":12,"total_tokens":16}}
