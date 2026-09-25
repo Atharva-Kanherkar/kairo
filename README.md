@@ -26,12 +26,12 @@ offline with no provider keys.
 <!-- kairo-counts:start -->
 | Metric | Value |
 |---|---|
-| Reproduced issue folders | 62 |
+| Reproduced issue folders | 63 |
 | Gateways under test | LiteLLM, NVIDIA Switchyard, Bifrost, GoModel, AxonHub, any-llm, Dynamo, and OGX |
-| Harness tests | 209 (169 conformance checks against recorded transcripts, 40 unit) |
+| Harness tests | 214 (173 conformance checks against recorded transcripts, 41 unit) |
 <!-- kairo-counts:end -->
 
-The 62 folders cover reproduced findings, multi-defect reports, and honest
+The 63 folders cover reproduced findings, multi-defect reports, and honest
 negative results. Versions and reproduction outcomes are recorded per finding
 in [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md), including cited bugs that did
 not reproduce.
@@ -50,6 +50,7 @@ reproduction commands.
 |---|---|---|---|---|---|---|---|
 | Terminal reason survives translation (`tool_use`, `content_filter`, `max_tokens`, refusal) | [001](issues/001-anthropic-stream-toolcall-translation), [002](issues/002-litellm-ollama-toolcall-loss) | [010](issues/010-switchyard-content-filter-and-reorder) | [030](issues/030-bifrost-anthropic-stream-stop-reason), [034](issues/034-bifrost-erases-content-filter), [035](issues/035-bifrost-erases-truncation), [036](issues/036-bifrost-drops-refusal-content), [078](issues/078-bifrost-filter-stream-divergence) | | | | |
 | One public stream has one response lifecycle and output namespace | [074](issues/074-litellm-mcp-responses-stream-collision) | | | | | | |
+| A cached replay carries the requesting endpoint's API family | | | [086](issues/086-bifrost-semantic-cache-cross-endpoint-hit) | | | | |
 | Request constraints survive (`disable_parallel_tool_use`, `stop_sequences`, `tools[].strict`, `output_format`) | [017](issues/017-parallel-tool-flag-dropped), [041](issues/041-litellm-drops-stop-sequences), [064](issues/064-litellm-drops-tool-strict) | [006](issues/006-switchyard-crossformat-losses), [017](issues/017-parallel-tool-flag-dropped), [040](issues/040-switchyard-drops-output-format), [065](issues/065-switchyard-responses-instruction-loss), [066](issues/066-switchyard-drops-tool-strict) | [031](issues/031-bifrost-drops-parallel-tool-flag), [032](issues/032-bifrost-drops-stop-sequences), [072](issues/072-bifrost-anthropic-tool-choice-any-leak) | [042](issues/042-gomodel-drops-output-format), [043](issues/043-gomodel-drops-parallel-tool-flag) | [051](issues/051-axonhub-drops-output-format) | [058](issues/058-any-llm-drops-parallel-tool-flag), [062](issues/062-any-llm-empty-schema-shell) | [081](issues/081-ogx-messages-translation-losses) |
 | Provider-owned request fields survive pass-through | [084](issues/084-litellm-openai-passthrough-drops-id) | | | | | | |
 | Content blocks survive (refusal, `is_error`, image and document blocks in tool results and user turns) | [006](issues/006-switchyard-crossformat-losses), [007](issues/007-switchyard-toolresult-multimodal-stringified), [018](issues/018-user-document-dropped), [067](issues/067-litellm-drops-refusal-content) | [006](issues/006-switchyard-crossformat-losses), [007](issues/007-switchyard-toolresult-multimodal-stringified), [018](issues/018-user-document-dropped), [068](issues/068-switchyard-drops-refusal-content), [069](issues/069-switchyard-responses-refusal) | | | | [059](issues/059-any-llm-drops-is-error), [060](issues/060-any-llm-drops-toolresult-image), [061](issues/061-any-llm-drops-toolresult-document) | |
