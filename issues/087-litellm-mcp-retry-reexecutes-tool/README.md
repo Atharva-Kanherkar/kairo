@@ -186,7 +186,7 @@ What is new here is a deterministic reproduction of LiteLLM's own MCP gateway ex
 | Harness | `cargo test --workspace` | pass: 40 unit and 171 conformance tests |
 | Formatting | `cargo fmt --all -- --check` | pass |
 | Lint | `cargo clippy --workspace --all-targets --all-features -- -D warnings` | pass |
-| README counts | `python3 tools/update-readme-counts.py --check` | pass: 62 findings and 211 tests |
+| README counts | `python3 tools/update-readme-counts.py --check` | pass: 63 findings and 211 tests |
 
 ## Security and scope
 
