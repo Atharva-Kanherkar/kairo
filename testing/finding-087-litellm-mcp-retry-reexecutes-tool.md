@@ -34,7 +34,7 @@
 - `python3 tools/update-readme-counts.py --check` passes.
 - Focused finding 087 checks pass.
 - Staged artifacts contain no credentials, private prompts, absolute local paths, em dashes, or en dashes.
-- The unrelated `/Users/atharva/kairo` worktree remains unchanged.
+- The unrelated primary worktree remains unchanged.
 
 ## E2E Tests
 

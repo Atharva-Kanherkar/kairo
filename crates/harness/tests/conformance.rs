@@ -4237,6 +4237,86 @@ fn issue_087_path(root: &str, relative: &str) -> PathBuf {
     path
 }
 
+fn validate_issue_087_trial(
+    root: &str,
+    cell_name: &str,
+    run: &Value,
+    index: usize,
+    tools: u64,
+    upstream: u64,
+    violation: bool,
+) -> Result<(), String> {
+    let trial = format!("{:02}", index + 1);
+    if run.get("run").and_then(Value::as_str) != Some(&trial)
+        || run.get("tool_executions").and_then(Value::as_u64) != Some(tools)
+        || run.get("upstream_calls").and_then(Value::as_u64) != Some(upstream)
+    {
+        return Err(format!(
+            "{cell_name} trial {trial}: summary counts are inconsistent"
+        ));
+    }
+    let run_rel = format!("cells/{cell_name}/runs/run-{trial}");
+    let ledger = fs::read_to_string(issue_087_path(
+        root,
+        &format!("{run_rel}/tool-ledger.jsonl"),
+    ))
+    .map_err(|error| format!("{cell_name} trial {trial}: cannot read ledger: {error}"))?;
+    let verdict = mcp_tool_executes_once(&ledger);
+    if violation != matches!(verdict, Verdict::Violation(_)) {
+        return Err(format!(
+            "{cell_name} trial {trial}: exactly-once verdict is {verdict:?}"
+        ));
+    }
+    if ledger
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .count() as u64
+        != tools
+    {
+        return Err(format!("{cell_name} trial {trial}: raw ledger disagrees"));
+    }
+
+    let upstream_dir = issue_087_path(root, &format!("{run_rel}/upstream"));
+    let raw_upstream = fs::read_dir(&upstream_dir)
+        .map_err(|error| format!("cannot read {}: {error}", upstream_dir.display()))?
+        .filter_map(Result::ok)
+        .filter(|entry| entry.path().extension().and_then(|value| value.to_str()) == Some("json"))
+        .count() as u64;
+    if raw_upstream != upstream {
+        return Err(format!(
+            "{cell_name} trial {trial}: raw upstream count disagrees"
+        ));
+    }
+
+    let request = fs::read_to_string(issue_087_path(
+        root,
+        &format!("{run_rel}/client-request.http"),
+    ))
+    .map_err(|error| format!("{cell_name} trial {trial}: no client request: {error}"))?;
+    if !request.starts_with("POST /v1/chat/completions HTTP/1.1")
+        || !request.contains("\"type\":\"mcp\"")
+        || !request.contains("\"require_approval\":\"never\"")
+    {
+        return Err(format!("{cell_name} trial {trial}: public request changed"));
+    }
+    let response = fs::read_to_string(issue_087_path(
+        root,
+        &format!("{run_rel}/client-response.http"),
+    ))
+    .map_err(|error| format!("{cell_name} trial {trial}: no client response: {error}"))?;
+    let status = if cell_name == "control_fault_off" {
+        200
+    } else {
+        500
+    };
+    if !response.starts_with(&format!("HTTP/1.1 {status} "))
+        || run.get("client_status").and_then(Value::as_u64) != Some(status)
+    {
+        return Err(format!("{cell_name} trial {trial}: client status changed"));
+    }
+    Ok(())
+}
+
 fn validate_issue_087_matrix(
     summary: &Value,
     root: &str,
@@ -4299,76 +4379,7 @@ fn validate_issue_087_matrix(
             ));
         }
         for (index, run) in runs.iter().enumerate() {
-            let trial = format!("{:02}", index + 1);
-            if run.get("run").and_then(Value::as_str) != Some(&trial)
-                || run.get("tool_executions").and_then(Value::as_u64) != Some(tools)
-                || run.get("upstream_calls").and_then(Value::as_u64) != Some(upstream)
-            {
-                return Err(format!(
-                    "{cell_name} trial {trial}: summary counts are inconsistent"
-                ));
-            }
-            let run_rel = format!("cells/{cell_name}/runs/run-{trial}");
-            let ledger = fs::read_to_string(issue_087_path(
-                root,
-                &format!("{run_rel}/tool-ledger.jsonl"),
-            ))
-            .map_err(|error| format!("{cell_name} trial {trial}: cannot read ledger: {error}"))?;
-            let verdict = mcp_tool_executes_once(&ledger);
-            if violation != matches!(verdict, Verdict::Violation(_)) {
-                return Err(format!(
-                    "{cell_name} trial {trial}: exactly-once verdict is {verdict:?}"
-                ));
-            }
-            if ledger
-                .lines()
-                .filter(|line| !line.trim().is_empty())
-                .count() as u64
-                != tools
-            {
-                return Err(format!("{cell_name} trial {trial}: raw ledger disagrees"));
-            }
-
-            let upstream_dir = issue_087_path(root, &format!("{run_rel}/upstream"));
-            let raw_upstream = fs::read_dir(&upstream_dir)
-                .map_err(|error| format!("cannot read {}: {error}", upstream_dir.display()))?
-                .filter_map(Result::ok)
-                .filter(|entry| {
-                    entry.path().extension().and_then(|value| value.to_str()) == Some("json")
-                })
-                .count() as u64;
-            if raw_upstream != upstream {
-                return Err(format!(
-                    "{cell_name} trial {trial}: raw upstream count disagrees"
-                ));
-            }
-
-            let request = fs::read_to_string(issue_087_path(
-                root,
-                &format!("{run_rel}/client-request.http"),
-            ))
-            .map_err(|error| format!("{cell_name} trial {trial}: no client request: {error}"))?;
-            if !request.starts_with("POST /v1/chat/completions HTTP/1.1")
-                || !request.contains("\"type\":\"mcp\"")
-                || !request.contains("\"require_approval\":\"never\"")
-            {
-                return Err(format!("{cell_name} trial {trial}: public request changed"));
-            }
-            let response = fs::read_to_string(issue_087_path(
-                root,
-                &format!("{run_rel}/client-response.http"),
-            ))
-            .map_err(|error| format!("{cell_name} trial {trial}: no client response: {error}"))?;
-            let status = if cell_name == "control_fault_off" {
-                200
-            } else {
-                500
-            };
-            if !response.starts_with(&format!("HTTP/1.1 {status} "))
-                || run.get("client_status").and_then(Value::as_u64) != Some(status)
-            {
-                return Err(format!("{cell_name} trial {trial}: client status changed"));
-            }
+            validate_issue_087_trial(root, cell_name, run, index, tools, upstream, violation)?;
         }
         let tool_counts = cell
             .get("tool_executions_per_run")
