@@ -12,13 +12,13 @@ use kairo::checks::{
     gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
     id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
     invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
-    json_schema_property_forwarded, model_info_capture_identity, model_info_envelope_body,
-    model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
-    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
-    ogx_adaptive_thinking_loss, openai_stream_finish_reason, openai_toolcall_id_charset,
-    outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
-    reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
-    response_conversation_preserves_history, response_omits_secret,
+    json_schema_property_forwarded, mcp_tool_executes_once, model_info_capture_identity,
+    model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
+    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
+    non_text_block_not_json_dumped, ogx_adaptive_thinking_loss, openai_stream_finish_reason,
+    openai_toolcall_id_charset, outbound_request_omits_secret, parallel_tool_disable_preserved,
+    provider_request_id_preserved, reasoning_text_order_preserved, refusal_text_preserved,
+    response_content_not_empty, response_conversation_preserves_history, response_omits_secret,
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
     responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
@@ -4225,4 +4225,226 @@ fn codex_runs_the_side_effect_twice_after_a_litellm_fallback() {
                 .unwrap_or_else(|error| panic!("{path}: {error}"));
         }
     }
+}
+
+// ---- bug 087: LiteLLM router retry re-executes an MCP tool ----
+
+fn issue_087_path(root: &str, relative: &str) -> PathBuf {
+    let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    path.push("../../");
+    path.push(root);
+    path.push(relative);
+    path
+}
+
+fn validate_issue_087_matrix(
+    summary: &Value,
+    root: &str,
+    version: &str,
+    source_ref: &str,
+) -> Result<(), String> {
+    if summary.get("complete").and_then(Value::as_bool) != Some(true)
+        || summary
+            .get("failures")
+            .and_then(Value::as_array)
+            .is_none_or(|v| !v.is_empty())
+        || summary.get("runs").and_then(Value::as_u64) != Some(5)
+        || summary.pointer("/target/project").and_then(Value::as_str) != Some("BerriAI/litellm")
+        || summary
+            .pointer("/target/litellm_version")
+            .and_then(Value::as_str)
+            != Some(version)
+        || summary
+            .pointer("/target/source_ref")
+            .and_then(Value::as_str)
+            != Some(source_ref)
+        || summary.pointer("/target/endpoint").and_then(Value::as_str)
+            != Some("POST /v1/chat/completions")
+    {
+        return Err("matrix provenance or completion state is invalid".to_owned());
+    }
+
+    let cells = summary
+        .get("cells")
+        .and_then(Value::as_object)
+        .ok_or("matrix has no cells object")?;
+    if cells.len() != 4 {
+        return Err(format!("matrix has {} cells, expected four", cells.len()));
+    }
+
+    let expected = [
+        ("violation_default_retries", "on", None, 3_u64, 6_u64, true),
+        ("violation_num_retries_2", "on", Some(2_u64), 3, 6, true),
+        ("control_fault_off", "off", Some(2_u64), 1, 2, false),
+        ("control_num_retries_0", "on", Some(0_u64), 1, 2, false),
+    ];
+    for (cell_name, fault, retries, tools, upstream, violation) in expected {
+        let cell = cells
+            .get(cell_name)
+            .ok_or_else(|| format!("missing cell {cell_name}"))?;
+        if cell.pointer("/spec/fault").and_then(Value::as_str) != Some(fault)
+            || cell.pointer("/spec/router_retries").and_then(Value::as_u64) != retries
+            || cell.pointer("/spec/sdk_retries").and_then(Value::as_u64) != Some(0)
+        {
+            return Err(format!("{cell_name}: cell specification changed"));
+        }
+        let runs = cell
+            .get("runs")
+            .and_then(Value::as_array)
+            .ok_or_else(|| format!("{cell_name}: no runs array"))?;
+        if runs.len() != 5 {
+            return Err(format!(
+                "{cell_name}: expected five trials, got {}",
+                runs.len()
+            ));
+        }
+        for (index, run) in runs.iter().enumerate() {
+            let trial = format!("{:02}", index + 1);
+            if run.get("run").and_then(Value::as_str) != Some(&trial)
+                || run.get("tool_executions").and_then(Value::as_u64) != Some(tools)
+                || run.get("upstream_calls").and_then(Value::as_u64) != Some(upstream)
+            {
+                return Err(format!(
+                    "{cell_name} trial {trial}: summary counts are inconsistent"
+                ));
+            }
+            let run_rel = format!("cells/{cell_name}/runs/run-{trial}");
+            let ledger = fs::read_to_string(issue_087_path(
+                root,
+                &format!("{run_rel}/tool-ledger.jsonl"),
+            ))
+            .map_err(|error| format!("{cell_name} trial {trial}: cannot read ledger: {error}"))?;
+            let verdict = mcp_tool_executes_once(&ledger);
+            if violation != matches!(verdict, Verdict::Violation(_)) {
+                return Err(format!(
+                    "{cell_name} trial {trial}: exactly-once verdict is {verdict:?}"
+                ));
+            }
+            if ledger
+                .lines()
+                .filter(|line| !line.trim().is_empty())
+                .count() as u64
+                != tools
+            {
+                return Err(format!("{cell_name} trial {trial}: raw ledger disagrees"));
+            }
+
+            let upstream_dir = issue_087_path(root, &format!("{run_rel}/upstream"));
+            let raw_upstream = fs::read_dir(&upstream_dir)
+                .map_err(|error| format!("cannot read {}: {error}", upstream_dir.display()))?
+                .filter_map(Result::ok)
+                .filter(|entry| {
+                    entry.path().extension().and_then(|value| value.to_str()) == Some("json")
+                })
+                .count() as u64;
+            if raw_upstream != upstream {
+                return Err(format!(
+                    "{cell_name} trial {trial}: raw upstream count disagrees"
+                ));
+            }
+
+            let request = fs::read_to_string(issue_087_path(
+                root,
+                &format!("{run_rel}/client-request.http"),
+            ))
+            .map_err(|error| format!("{cell_name} trial {trial}: no client request: {error}"))?;
+            if !request.starts_with("POST /v1/chat/completions HTTP/1.1")
+                || !request.contains("\"type\":\"mcp\"")
+                || !request.contains("\"require_approval\":\"never\"")
+            {
+                return Err(format!("{cell_name} trial {trial}: public request changed"));
+            }
+            let response = fs::read_to_string(issue_087_path(
+                root,
+                &format!("{run_rel}/client-response.http"),
+            ))
+            .map_err(|error| format!("{cell_name} trial {trial}: no client response: {error}"))?;
+            let status = if cell_name == "control_fault_off" {
+                200
+            } else {
+                500
+            };
+            if !response.starts_with(&format!("HTTP/1.1 {status} "))
+                || run.get("client_status").and_then(Value::as_u64) != Some(status)
+            {
+                return Err(format!("{cell_name} trial {trial}: client status changed"));
+            }
+        }
+        let tool_counts = cell
+            .get("tool_executions_per_run")
+            .and_then(Value::as_array)
+            .ok_or_else(|| format!("{cell_name}: no tool count vector"))?;
+        let upstream_counts = cell
+            .get("upstream_calls_per_run")
+            .and_then(Value::as_array)
+            .ok_or_else(|| format!("{cell_name}: no upstream count vector"))?;
+        if tool_counts
+            .iter()
+            .any(|value| value.as_u64() != Some(tools))
+            || upstream_counts
+                .iter()
+                .any(|value| value.as_u64() != Some(upstream))
+            || tool_counts.len() != 5
+            || upstream_counts.len() != 5
+        {
+            return Err(format!("{cell_name}: aggregate vectors are inconsistent"));
+        }
+    }
+    Ok(())
+}
+
+#[test]
+fn litellm_mcp_router_retries_reexecute_the_tool() {
+    for (root, version, source_ref) in [
+        ("transcripts/087", "1.102.1", "v1.102.1"),
+        (
+            "transcripts/087/matrix/main-2701e200",
+            "1.104.0",
+            "2701e2008baee4ed2c16cba7a56ea7f96d6d0981",
+        ),
+    ] {
+        let summary: Value = serde_json::from_str(
+            &fs::read_to_string(issue_087_path(root, "results.json"))
+                .unwrap_or_else(|error| panic!("{root}: cannot read results: {error}")),
+        )
+        .unwrap_or_else(|error| panic!("{root}: malformed results JSON: {error}"));
+        validate_issue_087_matrix(&summary, root, version, source_ref)
+            .unwrap_or_else(|error| panic!("{root}: {error}"));
+    }
+}
+
+#[test]
+fn issue_087_checker_rejects_vacuous_malformed_and_inconsistent_evidence() {
+    for ledger in ["", "not-json\n", "{\"seq\":1,\"entry\":\"\"}\n"] {
+        assert!(matches!(
+            mcp_tool_executes_once(ledger),
+            Verdict::Violation(_)
+        ));
+    }
+    assert_eq!(
+        mcp_tool_executes_once("{\"seq\":7,\"entry\":\"alpha\"}\n"),
+        Verdict::Conformant
+    );
+    assert!(matches!(
+        mcp_tool_executes_once(
+            "{\"seq\":7,\"entry\":\"alpha\"}\n{\"seq\":8,\"entry\":\"alpha\"}\n"
+        ),
+        Verdict::Violation(_)
+    ));
+
+    let root = "transcripts/087";
+    let mut summary: Value = serde_json::from_str(
+        &fs::read_to_string(issue_087_path(root, "results.json")).expect("087 results"),
+    )
+    .expect("087 summary JSON");
+    summary["cells"]["violation_num_retries_2"]["runs"][4]["tool_executions"] =
+        serde_json::json!(1);
+    assert!(validate_issue_087_matrix(&summary, root, "1.102.1", "v1.102.1").is_err());
+
+    let mut vacuous: Value = serde_json::from_str(
+        &fs::read_to_string(issue_087_path(root, "results.json")).expect("087 results"),
+    )
+    .expect("087 summary JSON");
+    vacuous["cells"]["control_fault_off"]["runs"] = serde_json::json!([]);
+    assert!(validate_issue_087_matrix(&vacuous, root, "1.102.1", "v1.102.1").is_err());
 }

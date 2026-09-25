@@ -1,0 +1,8 @@
+{
+  "run": "04",
+  "client_ok": false,
+  "client_error": "InternalServerError",
+  "client_status": 500,
+  "tool_executions": 1,
+  "upstream_calls": 2
+}

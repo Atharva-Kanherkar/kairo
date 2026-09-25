@@ -307,14 +307,19 @@ def ledger_records(path):
     if not path.exists():
         return []
     records = []
+    previous_sequence = None
     for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         try:
             record = json.loads(line)
         except json.JSONDecodeError as error:
             raise ReproductionError("malformed ledger line %d" % number) from error
-        require(record.get("seq") == number, "ledger sequence is inconsistent")
+        sequence = record.get("seq")
+        require(isinstance(sequence, int) and sequence > 0, "ledger sequence is invalid")
+        if previous_sequence is not None:
+            require(sequence == previous_sequence + 1, "ledger sequence is inconsistent")
         require(record.get("entry") == "alpha", "ledger entry changed")
         records.append(record)
+        previous_sequence = sequence
     return records
 
 
