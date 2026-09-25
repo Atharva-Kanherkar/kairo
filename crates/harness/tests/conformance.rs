@@ -8,17 +8,18 @@
 use kairo::checks::{
     anthropic_response_toolcall_stop_reason, anthropic_stream_safety_stop_reason,
     anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
-    content_filter_preserved, document_body_forwarded, executed_tool_results_preserved,
-    gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
-    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
-    invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
-    json_schema_property_forwarded, mcp_tool_executes_once, model_info_capture_identity,
-    model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
-    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
-    non_text_block_not_json_dumped, ogx_adaptive_thinking_loss, openai_stream_finish_reason,
-    openai_toolcall_id_charset, outbound_request_omits_secret, parallel_tool_disable_preserved,
-    provider_request_id_preserved, reasoning_text_order_preserved, refusal_text_preserved,
-    response_content_not_empty, response_conversation_preserves_history, response_omits_secret,
+    content_filter_preserved, document_body_forwarded, endpoint_response_family_preserved,
+    executed_tool_results_preserved, gemini_inline_media_preserved_in_chat_response,
+    gemini_inline_media_preserved_in_chat_stream, id_conforms, image_url_cache_key_case_sensitive,
+    instruction_messages_preserved, invalid_credential_rejected_before_upstream,
+    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
+    mcp_tool_executes_once, model_info_capture_identity, model_info_envelope_body,
+    model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
+    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
+    ogx_adaptive_thinking_loss, openai_stream_finish_reason, openai_toolcall_id_charset,
+    outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
+    reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
+    response_conversation_preserves_history, response_omits_secret,
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
     responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
@@ -4223,6 +4224,191 @@ fn codex_runs_the_side_effect_twice_after_a_litellm_fallback() {
         for (index, record) in records.iter().enumerate() {
             validate_issue_085_codex(record, dir, case, executions, index + 1)
                 .unwrap_or_else(|error| panic!("{path}: {error}"));
+        }
+    }
+}
+
+// ---- bug 086: Bifrost direct cache serves one API family's entry to the other ----
+
+const ISSUE_086_CROSS_FAMILY: [(&str, &str); 4] = [
+    ("chat_then_responses", "/v1/responses"),
+    ("responses_then_chat", "/v1/chat/completions"),
+    ("chat_stream_then_responses_stream", "/v1/responses"),
+    ("responses_stream_then_chat_stream", "/v1/chat/completions"),
+];
+
+const ISSUE_086_CONTROLS: [(&str, &str); 4] = [
+    ("control_chat_then_chat", "/v1/chat/completions"),
+    ("control_responses_then_responses", "/v1/responses"),
+    ("control_no_cache_key", "/v1/responses"),
+    ("control_typed_responses_item", "/v1/responses"),
+];
+
+fn issue_086_first_endpoint(cell: &str) -> &'static str {
+    if cell.starts_with("responses") || cell == "control_responses_then_responses" {
+        "/v1/responses"
+    } else {
+        "/v1/chat/completions"
+    }
+}
+
+#[test]
+fn bifrost_direct_cache_serves_the_other_api_family() {
+    for (cell, endpoint) in ISSUE_086_CROSS_FAMILY {
+        let second = fixture(&format!(
+            "transcripts/086/{cell}-second-client-response.http"
+        ));
+        let verdict = endpoint_response_family_preserved(endpoint, &second);
+        assert!(
+            matches!(verdict, Verdict::Violation(_)),
+            "{cell}: a cached entry from the other API family must be flagged: {verdict:?}"
+        );
+        // The first call went upstream and is well formed for its own endpoint,
+        // so the checker is not rejecting the gateway's normal output.
+        let first = fixture(&format!(
+            "transcripts/086/{cell}-first-client-response.http"
+        ));
+        assert_eq!(
+            endpoint_response_family_preserved(issue_086_first_endpoint(cell), &first),
+            Verdict::Conformant,
+            "{cell}: the uncached first response must conform"
+        );
+    }
+}
+
+#[test]
+fn bifrost_direct_cache_controls_keep_the_endpoint_family() {
+    for (cell, endpoint) in ISSUE_086_CONTROLS {
+        for phase in ["first", "second"] {
+            let capture = fixture(&format!(
+                "transcripts/086/{cell}-{phase}-client-response.http"
+            ));
+            let phase_endpoint = if phase == "first" {
+                issue_086_first_endpoint(cell)
+            } else {
+                endpoint
+            };
+            assert_eq!(
+                endpoint_response_family_preserved(phase_endpoint, &capture),
+                Verdict::Conformant,
+                "{cell} {phase} must keep its endpoint family"
+            );
+        }
+    }
+    // Vacuity guard: the same-family hit is conformant only for its own endpoint.
+    let hit = fixture("transcripts/086/control_chat_then_chat-second-client-response.http");
+    assert!(matches!(
+        endpoint_response_family_preserved("/v1/responses", &hit),
+        Verdict::Violation(_)
+    ));
+}
+
+#[test]
+fn bifrost_direct_cache_five_run_matrix_and_consumers() {
+    let summary: Value =
+        serde_json::from_str(&fixture("transcripts/086/results.json")).expect("086 summary JSON");
+    assert_eq!(summary["complete"], true);
+    assert_eq!(summary["runs"], 5);
+    assert_eq!(summary["target"]["runtime_version"], "v2.2.3");
+    assert_eq!(summary["target"]["vector_store"], "qdrant");
+    let one_call = serde_json::json!([1, 1, 1, 1, 1]);
+    let two_calls = serde_json::json!([2, 2, 2, 2, 2]);
+    for (cell, _) in ISSUE_086_CROSS_FAMILY {
+        assert_eq!(summary["cells"][cell]["second_wrong_family"], 5, "{cell}");
+        assert_eq!(
+            summary["cells"][cell]["upstream_calls_per_run"], one_call,
+            "{cell}"
+        );
+    }
+    for (cell, calls) in [
+        ("control_chat_then_chat", &one_call),
+        ("control_responses_then_responses", &one_call),
+        ("control_no_cache_key", &two_calls),
+        ("control_typed_responses_item", &two_calls),
+    ] {
+        assert_eq!(summary["cells"][cell]["second_wrong_family"], 0, "{cell}");
+        assert_eq!(
+            &summary["cells"][cell]["upstream_calls_per_run"], calls,
+            "{cell}"
+        );
+    }
+
+    let consumer = &summary["consumer"]["cells"];
+    for (cell, failure) in [
+        ("consumer_agents_after_chat", "AttributeError"),
+        ("consumer_chat_after_agents", "AttributeError"),
+        (
+            "consumer_responses_stream_after_chat_stream",
+            "RuntimeError",
+        ),
+        ("consumer_chat_stream_after_responses_stream", "ok"),
+    ] {
+        assert_eq!(consumer[cell]["final_healthy"], 0, "{cell}");
+        assert_eq!(consumer[cell]["upstream_calls_per_run"], one_call, "{cell}");
+        assert!(
+            consumer[cell]["final_outcomes"].as_array().is_some_and(
+                |outcomes| outcomes.len() == 5 && outcomes.iter().all(|o| o == failure)
+            ),
+            "{cell}: every run must end in {failure}"
+        );
+    }
+    assert_eq!(
+        consumer["consumer_control_agents_alone"]["final_healthy"],
+        5
+    );
+    assert_eq!(
+        consumer["consumer_control_agents_after_chat_no_cache_key"]["final_healthy"],
+        5
+    );
+    assert_eq!(
+        consumer["consumer_control_agents_after_chat_no_cache_key"]["upstream_calls_per_run"],
+        two_calls
+    );
+
+    // The same matrix holds on the in-process store and on current dev.
+    for (file, runtime, store) in [
+        ("v2.2.3-chromem-results.json", "v2.2.3", "chromem"),
+        ("dev-cefde78b-qdrant-results.json", "dev-cefde78b", "qdrant"),
+    ] {
+        let matrix: Value =
+            serde_json::from_str(&fixture(&format!("transcripts/086/matrix/{file}")))
+                .expect("086 matrix JSON");
+        assert_eq!(matrix["complete"], true, "{file}");
+        assert_eq!(matrix["target"]["runtime_version"], runtime, "{file}");
+        assert_eq!(matrix["target"]["vector_store"], store, "{file}");
+        for (cell, _) in ISSUE_086_CROSS_FAMILY {
+            assert_eq!(
+                matrix["cells"][cell]["second_wrong_family"], 5,
+                "{file} {cell}"
+            );
+        }
+        assert_eq!(matrix["persistence"]["runs_all_repeats_wrong"], 5, "{file}");
+    }
+}
+
+#[test]
+fn bifrost_direct_cache_entry_stays_poisoned_for_repeat_callers() {
+    let summary: Value =
+        serde_json::from_str(&fixture("transcripts/086/results.json")).expect("086 summary JSON");
+    let persistence = &summary["persistence"];
+    assert_eq!(persistence["repeats"], 3);
+    assert_eq!(persistence["runs_all_repeats_wrong"], 5);
+    assert_eq!(
+        persistence["upstream_calls_per_run"],
+        serde_json::json!([1, 1, 1, 1, 1])
+    );
+    for run in 1..=5 {
+        for repeat in 1..=3 {
+            let capture = fixture(&format!(
+                "transcripts/086/runs/persistence_chat_then_responses-{run:02}-repeat{repeat}-client-response.http"
+            ));
+            assert!(
+                matches!(
+                    endpoint_response_family_preserved("/v1/responses", &capture),
+                    Verdict::Violation(_)
+                ),
+                "run {run} repeat {repeat} must still be the poisoned entry"
+            );
         }
     }
 }

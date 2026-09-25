@@ -1,0 +1,19 @@
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Thu, 24 Sep 2026 21:25:40 GMT
+Content-Type: application/json
+Content-Length: 5
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID
+Access-Control-Max-Age: 86400
+Vary: Origin
+X-Request-Id: 8275fd58-5db6-495f-87cc-9dc1d5b6b101
+X-Bifrost-Trace-Id: 58a187c5238e43fca7da5f5fdb310d47
+
+null

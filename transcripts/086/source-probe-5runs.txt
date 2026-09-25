@@ -1,0 +1,93 @@
+# Bifrost transports/v2.2.3 411d62b2, plugins/semanticcache 1.6.6, go go1.27.0
+## run 1
+    zz_kairo086_probe_test.go:71: chat          hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:72: responses     hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:73: typed control hash=ddc4e3d541599f36 input={"input":[{"type":"message","role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:79: defect: chat and Responses requests share direct-cache hash c6df20b6e8f5d200
+--- FAIL: TestKairo086DirectHashIgnoresRequestFamily (0.00s)
+FAIL
+FAIL	github.com/maximhq/bifrost/plugins/semanticcache	<t>s
+FAIL
+## run 2
+    zz_kairo086_probe_test.go:71: chat          hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:72: responses     hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:73: typed control hash=ddc4e3d541599f36 input={"input":[{"type":"message","role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:79: defect: chat and Responses requests share direct-cache hash c6df20b6e8f5d200
+--- FAIL: TestKairo086DirectHashIgnoresRequestFamily (0.00s)
+FAIL
+FAIL	github.com/maximhq/bifrost/plugins/semanticcache	<t>s
+FAIL
+## run 3
+    zz_kairo086_probe_test.go:71: chat          hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:72: responses     hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:73: typed control hash=ddc4e3d541599f36 input={"input":[{"type":"message","role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:79: defect: chat and Responses requests share direct-cache hash c6df20b6e8f5d200
+--- FAIL: TestKairo086DirectHashIgnoresRequestFamily (0.00s)
+FAIL
+FAIL	github.com/maximhq/bifrost/plugins/semanticcache	<t>s
+FAIL
+## run 4
+    zz_kairo086_probe_test.go:71: chat          hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:72: responses     hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:73: typed control hash=ddc4e3d541599f36 input={"input":[{"type":"message","role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:79: defect: chat and Responses requests share direct-cache hash c6df20b6e8f5d200
+--- FAIL: TestKairo086DirectHashIgnoresRequestFamily (0.00s)
+FAIL
+FAIL	github.com/maximhq/bifrost/plugins/semanticcache	<t>s
+FAIL
+## run 5
+    zz_kairo086_probe_test.go:71: chat          hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:72: responses     hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:73: typed control hash=ddc4e3d541599f36 input={"input":[{"type":"message","role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:79: defect: chat and Responses requests share direct-cache hash c6df20b6e8f5d200
+--- FAIL: TestKairo086DirectHashIgnoresRequestFamily (0.00s)
+FAIL
+FAIL	github.com/maximhq/bifrost/plugins/semanticcache	<t>s
+FAIL
+
+# Bifrost dev cefde78b, plugins/semanticcache 1.6.6, go workspace
+## run 1
+    zz_kairo086_probe_test.go:71: chat          hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:72: responses     hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:73: typed control hash=ddc4e3d541599f36 input={"input":[{"type":"message","role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:79: defect: chat and Responses requests share direct-cache hash c6df20b6e8f5d200
+--- FAIL: TestKairo086DirectHashIgnoresRequestFamily (0.00s)
+FAIL
+FAIL	github.com/maximhq/bifrost/plugins/semanticcache	<t>s
+FAIL
+## run 2
+    zz_kairo086_probe_test.go:71: chat          hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:72: responses     hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:73: typed control hash=ddc4e3d541599f36 input={"input":[{"type":"message","role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:79: defect: chat and Responses requests share direct-cache hash c6df20b6e8f5d200
+--- FAIL: TestKairo086DirectHashIgnoresRequestFamily (0.00s)
+FAIL
+FAIL	github.com/maximhq/bifrost/plugins/semanticcache	<t>s
+FAIL
+## run 3
+    zz_kairo086_probe_test.go:71: chat          hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:72: responses     hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:73: typed control hash=ddc4e3d541599f36 input={"input":[{"type":"message","role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:79: defect: chat and Responses requests share direct-cache hash c6df20b6e8f5d200
+--- FAIL: TestKairo086DirectHashIgnoresRequestFamily (0.00s)
+FAIL
+FAIL	github.com/maximhq/bifrost/plugins/semanticcache	<t>s
+FAIL
+## run 4
+    zz_kairo086_probe_test.go:71: chat          hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:72: responses     hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:73: typed control hash=ddc4e3d541599f36 input={"input":[{"type":"message","role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:79: defect: chat and Responses requests share direct-cache hash c6df20b6e8f5d200
+--- FAIL: TestKairo086DirectHashIgnoresRequestFamily (0.00s)
+FAIL
+FAIL	github.com/maximhq/bifrost/plugins/semanticcache	<t>s
+FAIL
+## run 5
+    zz_kairo086_probe_test.go:71: chat          hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:72: responses     hash=c6df20b6e8f5d200 input={"input":[{"role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:73: typed control hash=ddc4e3d541599f36 input={"input":[{"type":"message","role":"user","content":"hello"}],"params":{"stream":false}}
+    zz_kairo086_probe_test.go:79: defect: chat and Responses requests share direct-cache hash c6df20b6e8f5d200
+--- FAIL: TestKairo086DirectHashIgnoresRequestFamily (0.00s)
+FAIL
+FAIL	github.com/maximhq/bifrost/plugins/semanticcache	<t>s
+FAIL

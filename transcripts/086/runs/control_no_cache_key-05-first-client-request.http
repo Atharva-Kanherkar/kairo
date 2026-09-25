@@ -1,0 +1,6 @@
+POST /v1/chat/completions HTTP/1.1
+Host: 127.0.0.1:57028
+Content-Type: application/json
+Content-Length: 148
+
+{"messages":[{"content":"KAIRO_086 cell=control_no_cache_key run=05 Reply with the capital of France.","role":"user"}],"model":"openai/gpt-4o-mini"}

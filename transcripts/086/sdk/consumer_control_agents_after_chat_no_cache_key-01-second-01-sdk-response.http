@@ -1,0 +1,27 @@
+HTTP/1.1 200 OK
+server: fasthttp
+date: Thu, 24 Sep 2026 21:26:05 GMT
+content-type: application/json
+content-length: 1035
+x-frame-options: DENY
+x-content-type-options: nosniff
+referrer-policy: strict-origin-when-cross-origin
+content-security-policy: frame-ancestors 'none'
+permissions-policy: camera=(), microphone=(), geolocation=()
+access-control-allow-origin: 
+access-control-allow-methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+access-control-allow-headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID
+access-control-max-age: 86400
+vary: Origin
+x-request-id: bfe59c8a-58b1-44c8-ac18-91b0ee7256d8
+x-bifrost-trace-id: 3b01cabad2c54656946b16b4047c8113
+x-bifrost-provider: openai
+x-bifrost-original-model: gpt-4o-mini
+x-bifrost-resolved-model: gpt-4o-mini
+x-bifrost-request-type: responses
+x-bifrost-routing-info-provider: openai
+x-bifrost-routing-info-model: gpt-4o-mini
+x-bifrost-routing-info-key: kairo-synthetic
+x-bifrost-upstream-latency-ms: 1.135
+
+{"id":"resp_086_087","object":"response","created_at":1790000000,"completed_at":null,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":null,"max_tool_calls":null,"metadata":null,"model":"gpt-4o-mini","output":[{"id":"msg_086_087","type":"message","status":"completed","role":"assistant","content":[{"type":"output_text","text":"KAIRO_086_UPSTREAM_RESPONSES seq=087 cell=consumer_control_agents_after_chat_no_cache_key run=01","annotations":[],"logprobs":null}]}],"previous_response_id":null,"prompt_cache_key":null,"reasoning":null,"safety_identifier":null,"service_tier":null,"status":"completed","tools":null,"usage":{"input_tokens":12,"input_tokens_details":null,"output_tokens":8,"output_tokens_details":null,"total_tokens":20},"extra_fields":{"request_type":"responses","routing_info":{"provider":"openai","model":"gpt-4o-mini","key":"kairo-synthetic"},"provider":"openai","original_model_requested":"gpt-4o-mini","resolved_model_used":"gpt-4o-mini","latency":1,"upstream_latency":1,"chunk_index":0}}

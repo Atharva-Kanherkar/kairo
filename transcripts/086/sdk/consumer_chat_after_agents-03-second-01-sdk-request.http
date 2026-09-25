@@ -1,0 +1,21 @@
+POST /v1/chat/completions HTTP/1.1
+host: 127.0.0.1:57028
+accept-encoding: gzip, deflate
+connection: keep-alive
+authorization: Bearer <UNUSED_CLIENT_KEY>
+accept: application/json
+content-type: application/json
+user-agent: OpenAI/Python 3.19.2
+x-stainless-lang: python
+x-stainless-package-version: 3.19.2
+x-stainless-os: MacOS
+x-stainless-arch: arm64
+x-stainless-runtime: CPython
+x-stainless-runtime-version: 3.12.13
+x-bf-cache-key: kairo-086-consumer_chat_after_agents-03
+x-stainless-async: false
+x-stainless-retry-count: 0
+x-stainless-read-timeout: 600
+content-length: 154
+
+{"messages":[{"role":"user","content":"KAIRO_086 cell=consumer_chat_after_agents run=03 Reply with the capital of France."}],"model":"openai/gpt-4o-mini"}

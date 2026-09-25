@@ -1,0 +1,14 @@
+HTTP/1.1 200 OK
+Content-Type: text/event-stream
+Content-Length: 832
+
+data: {"choices":[{"delta":{"content":"","role":"assistant"},"finish_reason":null,"index":0}],"created":1790000000,"id":"chatcmpl-086-074","model":"gpt-4o-mini","object":"chat.completion.chunk"}
+
+data: {"choices":[{"delta":{"content":"KAIRO_086_UPSTREAM_CHAT seq=074 cell=consumer_responses_stream_after_chat_stream run=04"},"finish_reason":null,"index":0}],"created":1790000000,"id":"chatcmpl-086-074","model":"gpt-4o-mini","object":"chat.completion.chunk"}
+
+data: {"choices":[{"delta":{},"finish_reason":"stop","index":0}],"created":1790000000,"id":"chatcmpl-086-074","model":"gpt-4o-mini","object":"chat.completion.chunk"}
+
+data: {"choices":[],"created":1790000000,"id":"chatcmpl-086-074","model":"gpt-4o-mini","object":"chat.completion.chunk","usage":{"completion_tokens":8,"prompt_tokens":12,"total_tokens":20}}
+
+data: [DONE]
+

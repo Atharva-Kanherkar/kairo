@@ -1,0 +1,16 @@
+{
+  "binary_sha256": "45fe61b78b0dd9db097188f54ab233f6b7fff2244494849909efd19bb64897ce",
+  "commit": "411d62b28b03b03bd3b4025b2cfab50af45f05f4",
+  "core_version_file": "1.10.2",
+  "label": "transports/v2.2.3",
+  "model": "openai/gpt-4o-mini",
+  "public_endpoints": [
+    "POST /v1/chat/completions",
+    "POST /v1/responses"
+  ],
+  "qdrant_version": "qdrant 1.19.1",
+  "runtime_version": "v2.2.3",
+  "semanticcache_version_file": "1.6.6",
+  "source": "https://github.com/maximhq/bifrost",
+  "vector_store": "qdrant"
+}

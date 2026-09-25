@@ -1,0 +1,8 @@
+POST /v1/chat/completions HTTP/1.1
+User-Agent: fasthttp
+Host: 127.0.0.1:57027
+Content-Type: application/json
+Content-Length: 152
+Authorization: Bearer <SYNTHETIC_PROVIDER_KEY>
+
+{"model":"gpt-4o-mini","messages":[{"role":"user","content":"KAIRO_086 cell=persistence_chat_then_responses run=03 Reply with the capital of France."}]}
