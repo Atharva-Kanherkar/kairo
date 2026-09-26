@@ -1,0 +1,23 @@
+id = "switchyard-nobug-body-api-key"
+title = "Report: a client JSON api_key overrides Switchyard's backend credential (it does not)"
+kind = "no-bug"
+env = "switchyard-e9767d6"
+category = "credential-boundary"
+difficulty = "easy"
+finding = "023 honest negative"
+languages = ["rust"]
+splits = ["negatives"]
+
+[repo]
+name = "NVIDIA-NeMo/Switchyard"
+url = "https://github.com/NVIDIA-NeMo/Switchyard"
+base_commit = "e9767d642461af63e7f11dc74a85f1e9f56c1e78"
+base_ref = "main on 2026-08-13"
+
+[upstream]
+status = "documented-behavior"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 2400
+pass_to_pass = ["body_api_key_does_not_replace_backend_credential", "body_credentials_not_turned_into_headers", "request_still_served", "cargo_tests_llm_client"]

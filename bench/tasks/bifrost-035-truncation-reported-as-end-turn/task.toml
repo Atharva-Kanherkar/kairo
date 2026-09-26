@@ -1,0 +1,36 @@
+id = "bifrost-035-truncation-reported-as-end-turn"
+title = "Non-streaming Anthropic responses report a truncated or filtered turn as end_turn"
+kind = "bug"
+env = "bifrost-98af761"
+category = "stop-reason-mapping"
+difficulty = "easy"
+finding = "035 (and the non-stream half of 078)"
+languages = ["go"]
+splits = ["kairo-30"]
+
+[repo]
+name = "maximhq/bifrost"
+url = "https://github.com/maximhq/bifrost"
+base_commit = "98af761c0adab5dee4c91c7c5121034a73c10488"
+base_ref = "dev on 2026-09-07"
+
+[upstream]
+issues = ["https://github.com/maximhq/bifrost/issues/6081"]
+status = "novel"
+
+[gold]
+source = "kairo-reference"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 1800
+fail_to_pass = [
+  "nonstream_truncation_reports_max_tokens",
+  "nonstream_content_filter_matches_stream",
+]
+pass_to_pass = [
+  "stream_truncation_reports_max_tokens",
+  "nonstream_completed_turn_reports_end_turn",
+  "nonstream_tool_turn_reports_tool_use",
+  "go_unit_tests_anthropic_provider",
+]

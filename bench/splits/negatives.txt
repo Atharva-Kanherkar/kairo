@@ -1,0 +1,10 @@
+any-llm-nobug-stop-sequences
+litellm-nobug-messages-tool-strict
+litellm-nobug-messages-tool-result-image
+bifrost-nobug-client-credential-headers
+bifrost-nobug-tool-result-is-error
+bifrost-nobug-long-tool-name
+gomodel-nobug-parallel-tool-flag
+litellm-nobug-messages-empty-candidates-crash
+switchyard-nobug-stream-split-tool-arguments
+switchyard-nobug-body-api-key

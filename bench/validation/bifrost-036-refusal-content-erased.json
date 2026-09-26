@@ -1,0 +1,88 @@
+{
+  "base_as_expected": "3/3",
+  "base_commit": "98af761c0adab5dee4c91c7c5121034a73c10488",
+  "env": "bifrost-98af761",
+  "gold_as_expected": "3/3",
+  "gold_source": "kairo-reference",
+  "image_id": "sha256:d9bea9da32fddbf37c61a5679277e59f0637b2c3cbe68c826056a27214a27ec5",
+  "kind": "bug",
+  "ok": true,
+  "problems": [],
+  "repeats": 3,
+  "task": "bifrost-036-refusal-content-erased",
+  "tests": {
+    "go_unit_tests_anthropic_provider": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "openai_route_keeps_refusal": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "plain_text_turn_unchanged": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "refusal_reported_as_refusal": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "refusal_text_reaches_client": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "tool_turn_unchanged": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  },
+  "validated_at": "2026-09-24T16:06:17+00:00"
+}

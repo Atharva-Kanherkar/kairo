@@ -1,0 +1,44 @@
+{
+  "base_as_expected": "3/3",
+  "base_commit": "abde73ca50384317d28e333954f605fa05e9e6ab",
+  "env": "gomodel-abde73c",
+  "gold_as_expected": "n/a",
+  "gold_source": "none",
+  "image_id": "sha256:9b19ec77a035f73da5efdfa0f84023deff8b20a0102cf61b46714fc37fcdfda7",
+  "kind": "no-bug",
+  "ok": true,
+  "problems": [],
+  "repeats": 3,
+  "task": "gomodel-nobug-parallel-tool-flag",
+  "tests": {
+    "disable_parallel_maps_to_parallel_false": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "flag_absent_not_invented": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "go_unit_tests_anthropicapi": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "tool_choice_mapping_intact": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  },
+  "validated_at": "2026-09-24T16:10:53+00:00"
+}

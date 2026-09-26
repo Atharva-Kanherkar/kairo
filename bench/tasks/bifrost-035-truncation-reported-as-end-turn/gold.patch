@@ -1,0 +1,19 @@
+diff --git a/core/providers/anthropic/responses.go b/core/providers/anthropic/responses.go
+index f0e242734..6fc0aba49 100644
+--- a/core/providers/anthropic/responses.go
++++ b/core/providers/anthropic/responses.go
+@@ -4958,9 +4958,13 @@ func ToAnthropicResponsesResponse(ctx *schemas.BifrostContext, bifrostResp *sche
+ 		break
+ 	}
+ 
+-	// Map stop reason from Bifrost response if available, otherwise infer from content
++	// Map stop reason from Bifrost response if available, otherwise infer from content.
++	// A turn the upstream reported as incomplete (output-token cap or content filter)
++	// must not read as a normal end_turn; the streaming converter maps it the same way.
+ 	if bifrostResp.StopReason != nil {
+ 		anthropicResp.StopReason = ConvertBifrostFinishReasonToAnthropic(*bifrostResp.StopReason)
++	} else if reason := anthropicStopReasonFromIncompleteDetails(bifrostResp.IncompleteDetails); reason != "" {
++		anthropicResp.StopReason = reason
+ 	} else {
+ 		anthropicResp.StopReason = AnthropicStopReasonEndTurn
+ 		for _, block := range contentBlocks {

@@ -1,0 +1,44 @@
+{
+  "base_as_expected": "3/3",
+  "base_commit": "e9767d642461af63e7f11dc74a85f1e9f56c1e78",
+  "env": "switchyard-e9767d6",
+  "gold_as_expected": "n/a",
+  "gold_source": "none",
+  "image_id": "sha256:fd6e003e94b679c2c783d037e997b0ddd534af96f1ef2932750162b1f2e3af8c",
+  "kind": "no-bug",
+  "ok": true,
+  "problems": [],
+  "repeats": 3,
+  "task": "switchyard-nobug-body-api-key",
+  "tests": {
+    "body_api_key_does_not_replace_backend_credential": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "body_credentials_not_turned_into_headers": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "cargo_tests_llm_client": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "request_still_served": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  },
+  "validated_at": "2026-09-24T16:13:46+00:00"
+}

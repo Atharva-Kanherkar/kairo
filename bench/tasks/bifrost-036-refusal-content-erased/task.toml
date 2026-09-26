@@ -1,0 +1,35 @@
+id = "bifrost-036-refusal-content-erased"
+title = "Upstream refusal reaches Anthropic clients as empty content with end_turn"
+kind = "bug"
+env = "bifrost-98af761"
+category = "content-loss"
+difficulty = "medium"
+finding = "036"
+languages = ["go"]
+splits = ["kairo-30"]
+
+[repo]
+name = "maximhq/bifrost"
+url = "https://github.com/maximhq/bifrost"
+base_commit = "98af761c0adab5dee4c91c7c5121034a73c10488"
+base_ref = "dev on 2026-09-07"
+
+[upstream]
+status = "novel"
+
+[gold]
+source = "kairo-reference"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 1800
+fail_to_pass = [
+  "refusal_text_reaches_client",
+  "refusal_reported_as_refusal",
+]
+pass_to_pass = [
+  "plain_text_turn_unchanged",
+  "tool_turn_unchanged",
+  "openai_route_keeps_refusal",
+  "go_unit_tests_anthropic_provider",
+]
