@@ -387,29 +387,85 @@ checker cannot report a violation for the absence of the construct.
 
 ## Reproduce
 
+One command brings the whole rig up from nothing, walks the differential ladder, and exits
+non-zero if any rung fails. It is the reviewer gate.
+
 ```bash
-# 1. upstream capture, a faithful Anthropic tool-use stream
-#    (transcripts/088/upstream.sse)
-python3 transcripts/088/consumer/capture_upstream.py 9990 /tmp/upstream.jsonl \
-  transcripts/088/upstream.sse &
+# the agentgateway v1.5.0 release binary
+curl -sL -o /tmp/agentgateway \
+  https://github.com/agentgateway/agentgateway/releases/download/v1.5.0/agentgateway-darwin-arm64
+shasum -a 256 /tmp/agentgateway   # expect da432d35bd696da0564f7b2b6bbc783542b6b9c616d6c0c4d4c3daef9dfa11a1
+chmod +x /tmp/agentgateway
 
-# 2. agentgateway v1.5.0, standalone, one port per egress provider
-#    (transcripts/088/consumer/agentgateway-config.yaml)
-agentgateway -f transcripts/088/consumer/agentgateway-config.yaml &
+python3 -m pip install -r transcripts/088/consumer/requirements.txt   # openai==2.48.0
+transcripts/088/consumer/reproduce.sh /tmp/agentgateway
+```
 
-# 3. the real consumer. Route 4003 converts Anthropic->OpenAI and raises;
-#    route 4002 is the same-dialect passthrough control and completes.
-python3 -m pip install -r transcripts/088/consumer/requirements.txt
-python3 transcripts/088/consumer/consumer.py conv   # AssertionError at _completions.py:407
-python3 transcripts/088/consumer/consumer.py ctrl   # completes, tool call intact
+Expected output, abbreviated. The run recorded on 2026-09-27 was 20 assertions across 8
+rungs, all passing, exit 0:
 
-# 4. the byte in isolation, no gateway in the loop
+```text
+=== Rung 0, capture upstream serves the Anthropic tool-use stream ===
+  PASS  upstream returned 200 text/event-stream
+  PASS  upstream carries input_tokens in message_start (Anthropic documented shape)
+  PASS  upstream emits no null union tag
+=== Rung 1, CONTROL, same-dialect passthrough :4002 (no conversion) ===
+  PASS  openai-python accumulated the tool call and returned a completion
+  PASS  control reports the correct prompt_tokens
+=== Rung 2, FAILING PATH, Anthropic -> OpenAI conversion :4003 ===
+  PASS  openai-python raised AssertionError at _completions.py:407
+  PASS  the naive chunk iterator still reassembles, so the blast radius is the accumulating API
+=== Rung 2b, determinism, 8 runs of the failing path ===
+  PASS  8 of 8 raised
+=== Rung 3, CONTROL, same conversion with stream:false ===
+  PASS  the buffered conversion returns a complete, correct tool call
+=== Rung 4, isolate the byte with agentgateway not in the loop ===
+  PASS  type_omitted does not raise, so the null tag is the trigger
+  PASS  type_repeated does not raise, so the null tag is the trigger
+  PASS  type_null_only does not raise, so the null tag is the trigger
+  PASS  agentgateway's verbatim bytes do raise
+=== Rung 5, frozen invariant via the harness ===
+  PASS  4 of 4 harness assertions pass against the frozen bytes
+=== Verdict ===
+  REPRODUCED. Every rung held; the claim stands.
+```
+
+Rung 0 exists to stop the harness from being the suspect. It asserts that the capture
+upstream itself serves a well-formed Anthropic stream and, specifically, that it does
+**not** emit a null union tag. If a future fixture ever did, the script fails there rather
+than blaming the gateway for its own mock.
+
+The script pins nothing implicitly. It creates its own working directory under `$TMPDIR`,
+stages each upstream reply through `canned.pointer`, and tears down every process it
+started. It needs no provider credential of any kind, and every upstream byte is served
+locally, so a rerun is deterministic and needs no network.
+
+Individual pieces, if a reviewer wants to drive them by hand:
+
+```bash
+# the capture upstream alone, to confirm what the provider sent
+transcripts/088/consumer/capture_upstream.py 9990 /tmp/up.jsonl transcripts/088/upstream.sse
+
+# the gateway alone
+/tmp/agentgateway -f transcripts/088/consumer/agentgateway-config.yaml
+
+# one consumer leg, given a running rig. WITH_TOOLS=1 is required: without a
+# tools array there is no tool_calls delta and therefore nothing to break.
+stage() { echo "$1" > "$TMPDIR/canned.pointer"; }
+cd "$TMPDIR"
+stage /Users/you/kairo/transcripts/088/upstream.sse
+WITH_TOOLS=1 BASE_CONV=4003 python3 /Users/you/kairo/transcripts/088/consumer/consumer.py conv
+stage /Users/you/kairo/transcripts/088/control-passthrough.sse
+WITH_TOOLS=1 BASE_CTRL=4002 python3 /Users/you/kairo/transcripts/088/consumer/consumer.py ctrl
+
+# the byte in isolation, no gateway in the loop
 python3 transcripts/088/consumer/isolate.py 9997 agw_verbatim &
 python3 transcripts/088/consumer/variants.py 9997
 ```
 
-Requires no provider credential. Every upstream byte is served by the local capture
-upstream, so the reproduction is deterministic and rerunnable offline.
+Note `capture_upstream.py` resolves `canned.pointer` relative to its own working directory,
+so the mock and the `stage` calls must share a `cd`. `reproduce.sh` handles this; a manual
+rerun has to do it explicitly.
 
 ## Limitations
 
