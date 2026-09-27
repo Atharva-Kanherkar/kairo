@@ -118,6 +118,44 @@ pub fn openai_stream_finish_reason(sse: &str) -> Verdict {
     }
 }
 
+/// Invariant (bug 088): in an OpenAI Chat Completions SSE stream, a
+/// `tool_calls[]` entry never carries an explicit JSON `null` for `type`.
+///
+/// `type` is a discriminated-union tag, not an ordinary optional string.
+/// Streaming accumulators treat it as last-write-wins rather than
+/// merge-if-present, so a `null` in a continuation delta *erases* the
+/// `"function"` announced by the opening delta instead of being ignored. The
+/// openai-python accumulator asserts on the result and the agent loop never
+/// receives a completion.
+///
+/// The delta must either omit the key or repeat `"function"`. An absent key is
+/// not the same wire value as an explicit null, which is the whole defect.
+pub fn openai_stream_toolcall_type_never_null(sse: &str) -> Verdict {
+    let mut offenders = Vec::new();
+    for (i, chunk) in sse_data_json(sse).iter().enumerate() {
+        let Some(calls) = chunk
+            .pointer("/choices/0/delta/tool_calls")
+            .and_then(Value::as_array)
+        else {
+            continue;
+        };
+        for (j, call) in calls.iter().enumerate() {
+            if call.get("type").is_some_and(Value::is_null) {
+                offenders.push(format!("chunk {i} tool_calls[{j}]"));
+            }
+        }
+    }
+    if offenders.is_empty() {
+        return Verdict::Conformant;
+    }
+    Verdict::Violation(format!(
+        "tool_calls[].type is an explicit null at {} position(s): {}; \
+         a union tag must be absent or \"function\", never null",
+        offenders.len(),
+        offenders.join(", ")
+    ))
+}
+
 /// Invariant (bug 074): one client-visible Responses stream represents one
 /// response lifecycle. Internal agent or tool rounds must not introduce a second
 /// `response.created` / `response.completed` pair or reuse an output index for an
