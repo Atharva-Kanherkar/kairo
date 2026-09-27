@@ -16,7 +16,8 @@ use kairo::checks::{
     mcp_tool_executes_once, model_info_capture_identity, model_info_envelope_body,
     model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
     no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
-    ogx_adaptive_thinking_loss, openai_stream_finish_reason, openai_toolcall_id_charset,
+    ogx_adaptive_thinking_loss, openai_stream_finish_reason,
+    openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
     outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
     reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
     response_conversation_preserves_history, response_omits_secret,
@@ -4644,4 +4645,56 @@ fn issue_087_checker_rejects_vacuous_malformed_and_inconsistent_evidence() {
     .expect("087 summary JSON");
     vacuous["cells"]["control_fault_off"]["runs"] = serde_json::json!([]);
     assert!(validate_issue_087_matrix(&vacuous, root, "1.102.1", "v1.102.1").is_err());
+}
+
+// ---- bug 088: agentgateway Anthropic->OpenAI streaming, tool_calls[].type is null ----
+//
+// The opening tool-call delta announces "type":"function". Every argument
+// continuation delta then re-sends "type":null, because the encoder leaves the
+// field None and the upstream async-openai struct has no skip_serializing_if on
+// it. openai-python treats `type` as a union tag and overwrites unconditionally,
+// so the accumulated tag becomes null and its accumulator asserts.
+
+#[test]
+fn agentgateway_openai_stream_toolcall_type_null_violates() {
+    let v = openai_stream_toolcall_type_never_null(&fixture("transcripts/088/observed.sse"));
+    assert!(
+        matches!(&v, Verdict::Violation(reason) if reason.contains("explicit null")),
+        "expected an explicit-null violation, got {v:?}"
+    );
+}
+
+#[test]
+fn openai_stream_toolcall_type_absent_is_conformant() {
+    // Same stream with the key omitted instead of nulled. An absent key is a
+    // different wire value, which is the entire difference between the two.
+    assert_eq!(
+        openai_stream_toolcall_type_never_null(&fixture("transcripts/088/expected.sse")),
+        Verdict::Conformant
+    );
+}
+
+#[test]
+fn openai_passthrough_stream_toolcall_type_is_conformant() {
+    // Real OpenAI bytes through the gateway's passthrough route: no conversion,
+    // no violation. This is the control that isolates conversion as the trigger.
+    assert_eq!(
+        openai_stream_toolcall_type_never_null(&fixture("transcripts/088/control-passthrough.sse")),
+        Verdict::Conformant
+    );
+}
+
+#[test]
+fn checker_ignores_streams_without_tool_call_deltas() {
+    // A plain text stream has no tool_calls to check, so the checker must not
+    // report a violation for the absence of the construct.
+    let text_stream = concat!(
+        "data: {\"choices\":[{\"index\":0,\"delta\":{\"content\":\"hi\"}}]}\n\n",
+        "data: {\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\n",
+        "data: [DONE]\n\n"
+    );
+    assert_eq!(
+        openai_stream_toolcall_type_never_null(text_stream),
+        Verdict::Conformant
+    );
 }

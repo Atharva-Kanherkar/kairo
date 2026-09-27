@@ -1,0 +1,85 @@
+# agentgateway rig. One port per egress provider so a route is never ambiguous
+# (two listeners sharing a port resolve to whichever is declared first, which
+# silently sends every request to the same upstream).
+#
+#   4000  to-oai    Anthropic ingress  -> OpenAI Chat Completions  (conversion)
+#   4001  to-anth   Anthropic ingress  -> Anthropic Messages      (passthrough control)
+#   4002  to-oai2   OpenAI ingress     -> OpenAI Chat Completions (passthrough control)
+#   4003  to-anth2  OpenAI ingress     -> Anthropic Messages      (reverse conversion)
+#
+# Every upstream is the local capture mock, so the only variable is whether
+# agentgateway re-encodes the body or forwards it.
+config:
+  readinessAddr: 127.0.0.1:19101
+  statsAddr: 127.0.0.1:19102
+
+binds:
+- port: 4000
+  listeners:
+  - name: to-oai
+    routes:
+    - backends:
+      - ai:
+          name: oai
+          provider:
+            openAI:
+              model: captured-model
+          hostOverride: 127.0.0.1:9990
+          pathPrefix: /v1
+      policies:
+        ai:
+          routes:
+            /v1/messages: messages
+            '*': completions
+
+- port: 4001
+  listeners:
+  - name: to-anth
+    routes:
+    - backends:
+      - ai:
+          name: anth
+          provider:
+            anthropic:
+              model: captured-model
+          hostOverride: 127.0.0.1:9990
+          pathPrefix: /v1
+      policies:
+        ai:
+          routes:
+            /v1/messages: messages
+            '*': completions
+
+- port: 4002
+  listeners:
+  - name: to-oai2
+    routes:
+    - backends:
+      - ai:
+          name: oai
+          provider:
+            openAI:
+              model: captured-model
+          hostOverride: 127.0.0.1:9990
+          pathPrefix: /v1
+      policies:
+        ai:
+          routes:
+            '*': completions
+
+- port: 4003
+  listeners:
+  - name: to-anth2
+    routes:
+    - backends:
+      - ai:
+          name: anth
+          provider:
+            anthropic:
+              model: captured-model
+          hostOverride: 127.0.0.1:9990
+          pathPrefix: /v1
+      policies:
+        ai:
+          routes:
+            '*': completions

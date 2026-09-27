@@ -1,0 +1,16 @@
+openai-python 2.48.0
+Calling the SDK's own accumulator on the two byte sequences, no HTTP.
+
+agentgateway observed.sse (continuation deltas carry "type": null)
+  accumulated tool_calls[0]['type'] = None
+  accumulated arguments            = '{"city":"sf"}'
+  new_tool.type == 'function'      -> False   (the assert at _completions.py:407)
+
+expected.sse (continuation deltas omit type, as OpenAI emits)
+  accumulated tool_calls[0]['type'] = 'function'
+  accumulated arguments            = '{"city":"sf"}'
+  new_tool.type == 'function'      -> True   (the assert at _completions.py:407)
+
+Source of the overwrite, openai/lib/streaming/_deltas.py:23-25
+    if key == "index" or key == "type":
+        acc[key] = delta_value

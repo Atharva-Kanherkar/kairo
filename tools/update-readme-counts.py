@@ -37,6 +37,7 @@ GATEWAYS = (
     ("any-llm", "any-llm"),
     ("dynamo", "Dynamo"),
     ("ogx", "OGX"),
+    ("agentgateway", "agentgateway"),
 )
 
 TEST_RE = re.compile(r"^\s*#\[test\]", re.MULTILINE)

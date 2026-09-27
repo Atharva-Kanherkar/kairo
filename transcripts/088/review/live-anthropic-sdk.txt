@@ -1,0 +1,6 @@
+openai 2.48.0 run 1: RAISED AssertionError at openai/lib/streaming/chat/_completions.py:407
+openai 2.48.0 run 2: RAISED AssertionError at openai/lib/streaming/chat/_completions.py:407
+openai 2.48.0 run 3: RAISED AssertionError at openai/lib/streaming/chat/_completions.py:407
+openai 3.19.2 run 1: RAISED AssertionError at openai/lib/streaming/chat/_completions.py:407
+openai 3.19.2 run 2: RAISED AssertionError at openai/lib/streaming/chat/_completions.py:407
+openai 3.19.2 run 3: RAISED AssertionError at openai/lib/streaming/chat/_completions.py:407
