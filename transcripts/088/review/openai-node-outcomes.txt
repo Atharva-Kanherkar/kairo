@@ -1,0 +1,3 @@
+openai-node 7.23.0
+agw_verbatim   OK type=function args={"city":"sf"}
+type_omitted   OK type=function args={"city":"sf"}

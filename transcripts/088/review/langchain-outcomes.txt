@@ -1,0 +1,6 @@
+langchain-openai 1.6.6 openai 3.19.2
+port 4003 response_format=True: RAISED AssertionError at openai/lib/streaming/chat/_completions.py:407
+port 4003 response_format=True: RAISED AssertionError at openai/lib/streaming/chat/_completions.py:407
+port 4003 response_format=True: RAISED AssertionError at openai/lib/streaming/chat/_completions.py:407
+port 4003 response_format=False: OK tool_calls=[{'name': 'get_weather', 'args': {'city': 'sf'}, 'id': 'toolu_01', 'type': 'tool_call'}]
+port 4002 response_format=True: OK tool_calls=[{'name': 'get_weather', 'args': {'city': 'sf'}, 'id': 'toolu_01', 'type': 'tool_call'}]

@@ -1,0 +1,15 @@
+# Same layout as agentgateway's own examples/llm-basic/config.yaml: an OpenAI
+# Chat Completions ingress, `anthropic/*` models routed to Anthropic. The key is
+# read from the environment by agentgateway; its value is never in this file.
+config:
+  readinessAddr: 127.0.0.1:19201
+  statsAddr: 127.0.0.1:19202
+llm:
+  port: 4100
+  models:
+  - name: anthropic/*
+    provider: anthropic
+    params:
+      apiKey: $ANTHROPIC_API_KEY
+    transformation:
+      model: llmRequest.model.stripPrefix("anthropic/")
