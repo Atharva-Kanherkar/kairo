@@ -10,11 +10,19 @@
   `agentgateway-darwin-arm64`, `git_revision fe6732474a96a0363dfb9822859af4e9bab360fa`,
   `rust_version 1.98.0`, sha256 `da432d35…9dfa11a1` verified against the published
   checksum. Standalone mode, one bind per egress provider.
-  Upstream dependency pinned by that release:
-  `async-openai` from `github.com/howardjohn/async-openai` rev `a1a4ce7dde6c3f8d5747e27c70d72c48df95fdd3`.
-- **Consumer under test**: `openai-python` **2.48.0**, the official SDK, on CPython 3.9.6.
-- **Reproduced**: 2026-09-27, macOS arm64. **8 of 8.**
+  Upstream dependency pinned by that release (`Cargo.lock` at `v1.5.0`):
+  `async-openai` from `github.com/howardjohn/async-openai` rev `681e3c6e382fa8bf8abf511d45ada73c25c659b6`.
+  `main` at `7e47ceb5` pins rev `a1a4ce7dde6c3f8d5747e27c70d72c48df95fdd3`. The struct at
+  fault is identical at both revisions.
+- **Consumer under test**: `openai-python` **2.48.0**, the official SDK, on CPython 3.9.6,
+  and **3.19.2**, the current release, on CPython 3.12.
+- **Reproduced**: 2026-09-27, macOS arm64. **8 of 8** on each SDK version. Independently
+  reproduced the same day on `v1.5.0` and `v1.6.0-alpha.2`, and live against Anthropic,
+  in `transcripts/088/review/`.
 - **Label**: `bug`.
+
+Source line numbers below are given for `v1.5.0`, the tested release, with the `main`
+line in parentheses where it differs.
 
 ## What breaks
 
@@ -128,8 +136,10 @@ data: {"id":"msg_1","choices":[{"index":0,"delta":{"content":null,"tool_calls":[
 data: {"id":"msg_1","choices":[{"index":0,"delta":{"content":null,"tool_calls":[{"index":0,"function":{"arguments":"ty\":\"sf\"}"}}]}}],...}
 ```
 
-`transcripts/088/control-passthrough.sse`, the same tool call in real OpenAI shape,
-delivered through agentgateway's same-dialect passthrough route. No violation, and the SDK
+`transcripts/088/control-passthrough.sse`, the same tool call as a hand-built stream in
+OpenAI's shape (the delta key sets match a live direct OpenAI call, recorded in
+`transcripts/088/review/live-openai-direct.txt`), served through agentgateway's
+same-dialect passthrough route. No violation, and the SDK
 completes normally. This is the control that isolates **conversion** as the trigger rather
 than the gateway, the SDK, the model, or the network.
 
@@ -168,10 +178,13 @@ ctrl :4002  body keys: ['max_tokens', 'messages', 'model', 'tools']
 
 Two things to read off this. The naive `for chunk in stream:` loop **succeeds** on the
 failing route, reassembling the tool call correctly, because the SDK's plain chunk iterator
-does not merge. It is the accumulating API, `client.chat.completions.stream()`, the one
-that both the official quickstart and every cost- and tool-parsing layer above it uses,
-that dies. A gateway can therefore pass a smoke test and still break production. And the
-control route, one variable away, completes with the right tool call and the right usage.
+does not merge. It is the accumulating helper, `client.chat.completions.stream()`, that
+dies. That helper is openai-python's streaming path for parsed tool arguments and
+structured output, and LangChain's `ChatOpenAI` switches to it whenever `response_format`
+is set (measured below). Code that iterates raw chunks, LangChain without
+`response_format`, and openai-node 7.23.0 are not affected. A gateway can therefore pass
+a smoke test and still break a production consumer. And the control route, one variable
+away, completes with the right tool call and the right usage.
 
 Buffered control on the same conversion, same upstream, `stream: false`:
 
@@ -221,13 +234,32 @@ expected.sse (continuation deltas omit type, as OpenAI emits)
   new_tool.type == 'function'      -> True   (the assert at _completions.py:407)
 ```
 
+### Live provider, current SDK, and a framework consumer
+
+Added by the independent review, raw files in `transcripts/088/review/`:
+
+- **Live Anthropic.** `claude-haiku-4-5-20251001` through agentgateway `v1.5.0`, configured
+  like the project's own `examples/llm-basic/config.yaml` (OpenAI ingress, `anthropic/*`
+  routed to Anthropic). Every continuation delta carries `"type":null`, 5 of 5 streams.
+  `client.chat.completions.stream()` raises `AssertionError` at `_completions.py:407`,
+  3 of 3 on openai 2.48.0 and 3 of 3 on 3.19.2.
+- **Direct provider control.** OpenAI `gpt-4.1-mini` called directly with the same tool and
+  prompt: continuation deltas carry only `index` and `function`, never `type`, 3 of 3.
+- **Current SDK and newest build.** `reproduce.sh` exits 0 on openai 3.19.2, and on the
+  `v1.6.0-alpha.2` binary.
+- **LangChain.** `ChatOpenAI` with tools, streaming, and `response_format` raises the same
+  `AssertionError` 3 of 3 on the conversion route. The same call on the passthrough route
+  completes, and the conversion route completes when `response_format` is removed.
+- **openai-node 7.23.0** accumulates the verbatim bytes without error, so the failure is
+  specific to openai-python's accumulating helper and the code built on it.
+
 ## Root cause
 
 Two sites, one of them the incomplete half of a previous fix.
 
 **1. The encoder leaves the tag unset.**
-`crates/llm/src/conversion/messages.rs:836-844`, the `input_json_delta` arm of the
-Anthropic to Chat Completions stream converter:
+`crates/llm/src/conversion/messages.rs:776-785` (`main`: `836-845`), the `input_json_delta`
+arm of the Anthropic to Chat Completions stream converter:
 
 ```rust
 dr.tool_calls = Some(vec![completions::ChatCompletionMessageToolCallChunk {
@@ -243,7 +275,8 @@ dr.tool_calls = Some(vec![completions::ChatCompletionMessageToolCallChunk {
 
 **2. The wire type serializes `None` as an explicit `null`.**
 `ChatCompletionMessageToolCallChunk` is not defined in agentgateway. It comes from the
-pinned `async-openai` fork, `src/types/chat/chat_.rs:1120-1128`:
+pinned `async-openai` fork, `async-openai/src/types/chat/chat_.rs:1142-1150` at `681e3c6e`
+(`1146-1154` at `a1a4ce7d`), shown here without its doc comments:
 
 ```rust
 #[derive(Debug, Deserialize, Serialize, Clone, PartialEq)]
@@ -272,22 +305,30 @@ chunk.
 So this is a known defect class with a known fix, shipped for one struct and not the
 adjacent one.
 
-**The same defect is present on a second path, by code inspection only.**
-`crates/llm/src/conversion/bedrock.rs:1350` sets `r#type: None` on Bedrock tool-call
-continuation deltas, so the Bedrock to Chat Completions streaming conversion should produce
-the same `"type": null`. This was **not** measured, because standing up a Bedrock upstream
-needs request signing, which this rig does not do. It is recorded as a strong prediction,
-not a finding.
+The same converter has a second `r#type: None` at `messages.rs:883` (`main`: `948`), the
+`"{}"` arguments chunk it emits for a tool call that received no argument deltas.
+
+**The same defect is present on a second path.**
+`crates/llm/src/conversion/bedrock.rs:1259` (`main`: `1350`) sets `r#type: None` on Bedrock
+tool-call continuation deltas. This rig did not measure it, because standing up a Bedrock
+upstream needs request signing. The project's own golden snapshot shows the output
+anyway: `crates/llm/src/tests/response/bedrock/tool.bedrock-completions-streaming.snap`
+carries `"type":null` on all three continuation deltas, on both `v1.5.0` and `main`, and
+`crates/llm/src/tests/response/anthropic/stream_tool.messages-completions-streaming.snap`
+does the same for the Anthropic path. Those snapshots are generated output. The Bedrock
+one has carried the null since the LLM crate split (#2469) and the Anthropic one since it
+was added (#2793). Later snapshot updates (#2843, #2971, #3005) changed other fields and
+left it in place, and no commit, PR description, or comment marks it as intended.
 
 **A one-line fix a maintainer would ship.** Either set the tag rather than clearing it, in
-`messages.rs:839`:
+`messages.rs:779` (`main`: `839`):
 
 ```rust
 r#type: Some(completions::FunctionType::Function),
 ```
 
-or add the module-conventional attribute in the fork, which also covers `bedrock.rs:1350`
-and any future path:
+or add the module-conventional attribute in the fork, which also covers `messages.rs:883`,
+`bedrock.rs:1259`, and any future path:
 
 ```rust
 #[serde(skip_serializing_if = "Option::is_none")]
@@ -303,16 +344,25 @@ field should get the same treatment for consistency, though it is not load-beari
   chat completion stream sends `type` on the opening tool-call delta and omits it on
   continuations. The openai-python merge helper documents `type` as a union tag that is
   overwritten rather than merged. agentgateway's own #1988 concluded that a `null` where a
-  field should be absent is a bug and fixed it for the neighbouring struct. Every source
-  here agrees, and none of them is a docstring.
+  field should be absent is a bug and fixed it for the neighbouring struct. OpenAI's
+  published OpenAPI schema defines `ChatCompletionMessageToolCallChunk.type` as an optional
+  `string` with the single enum value `function` and no `nullable`, so an explicit `null`
+  is outside the schema, not an alternative encoding. A live direct OpenAI call omits the
+  key on every continuation delta (`transcripts/088/review/live-openai-direct.txt`). Every
+  source here agrees, and none of them is a docstring.
 - **Have maintainers already ruled on it?** Yes, in the project's favour and against the
   bug: #1988 is the same class, is closed as fixed, and its resolution path is the fix this
-  report recommends. The residual is an incomplete application of that fix.
+  report recommends. The residual is an incomplete application of that fix. The fork's
+  owner applied the same remedy again for another explicit-null field in #3619 (merged
+  2026-09-22, fixing #3597). The golden snapshots that show `"type":null` are generated
+  output, not a ruling; see Root cause.
 - **Is the trigger supported usage?** Yes. `/v1/chat/completions` with `stream: true` and a
   `tools` array is the documented default path for an OpenAI-compatible gateway, and
   routing it to an Anthropic backend is a first-class advertised capability. No secret in
-  a public field, no disabled control, no exotic configuration. The four ports in the rig
-  differ only in which provider the route points at.
+  a public field, no disabled control, no exotic configuration. The project's own
+  `examples/llm-basic/config.yaml` routes `anthropic/*` from the same OpenAI ingress, and
+  the live review run used that layout. In the rig, the failing port 4003 and the control
+  port 4002 differ only in which provider the route points at.
 - **Is a real boundary crossed?** The gateway is trusted to carry a client's protocol
   faithfully. It corrupts a field in that protocol and the failure surfaces as an
   application-process exception rather than an HTTP error, so the operator sees a stack
@@ -336,10 +386,22 @@ call type`, `streaming tool call delta`, `new_tool.type`, `prompt_tokens usage s
 - **#3041**, open, buffered conversions undercounting cached input tokens in the gateway's
   own telemetry. Different layer, and see the second defect below.
 
+The independent review repeated the search the same day with `tool_calls type null`,
+`ChatCompletionMessageToolCallChunk`, `skip_serializing_if`, `tool call delta null`,
+`null tool call stream`, `tool_calls null`, `stream tool`, `openai-python`, `accumulator`,
+and `chat.completions.stream`, across issues and pull requests, open, closed, and merged.
+Closest additional matches: #2965 and #2971 (Bedrock streamed `tool_calls[].index`, fixed,
+a different field), #3597 and #3619 (null `cache_write_tokens` on Responses, fixed, a
+different field), and #2147 (Anthropic tool blocks closing early, fixed). None covers
+`type`.
+
 Classification: **novel**, with one adjacent closed relative whose fix left this residue.
 
-Not verified: `main` at `7e47ceb5` and `v1.6.0-alpha.2` were not built, so this may already
-be fixed on a newer revision. Only the `v1.5.0` release binary was executed.
+Newer revisions: the `v1.6.0-alpha.2` release binary reproduces (`reproduce.sh` exit 0,
+`transcripts/088/review/reproduce-v1.6.0-alpha.2-openai-3.19.2.txt`). `main` at `7e47ceb5`
+was not built. By source inspection it still sets `r#type: None` at the same sites and pins
+a fork revision without the attribute, no commit after `v1.6.0-alpha.2` touches those
+lines, and its golden snapshots still show `"type":null`.
 
 ## Second defect on the same code path
 
@@ -348,11 +410,11 @@ shares the reproduction. On the same streaming route the emitted usage chunk is 
 the `message_delta` event's own field only:
 
 ```rust
-// crates/llm/src/conversion/messages.rs:909
+// crates/llm/src/conversion/messages.rs:846 (main: 910)
 prompt_tokens: usage.input_tokens.unwrap_or_default() as u32,
 ```
 
-while the internal accumulator at `messages.rs:750` correctly captured `input_tokens` from
+while the internal accumulator at `messages.rs:696` (`main`: `750`) correctly captured `input_tokens` from
 `message_start`. Anthropic's documented stream shapes put `input_tokens` in `message_start`
 and send only `output_tokens` in `message_delta`, so the client receives `prompt_tokens: 0`
 and a `total_tokens` that omits input entirely, visible in the `raw chunk[4].usage` line
@@ -363,15 +425,15 @@ a billing bypass and must not be reported as one; the error is only on the clien
 where SDKs and downstream routers read cost.
 
 The same site also skips the codebase's own normalization helper,
-`CacheTokenConvention::include_cache_tokens` at `crates/llm/src/lib.rs:288`, which exists to
+`CacheTokenConvention::include_cache_tokens` at `crates/llm/src/lib.rs:284` (`main`: `288`), which exists to
 convert a provider input count into one that includes cached tokens. The project has
 committed a golden snapshot that enshrines the un-normalized value:
 `crates/llm/src/tests/response/anthropic/stream_message_delta_usage.messages-completions-streaming.snap`
 emits `prompt_tokens: 3883` alongside `cached_tokens: 30464`, which is impossible under
 OpenAI semantics, where `cached_tokens` is a subset of `prompt_tokens`. That test is green
 only because its input fixture happens to place `input_tokens` in `message_delta`, the one
-shape the buggy expression handles. Filed separately; the fixture-provenance lesson is
-recorded in the architecture chapter rather than here.
+shape the buggy expression handles. Not filed yet; it is left for a separate finding and
+is not part of this PR's claim.
 
 ## Test
 
@@ -469,14 +531,14 @@ rerun has to do it explicitly.
 
 ## Limitations
 
-- One SDK version, `openai-python` 2.48.0. kairo finding 085 records that the equivalent
-  Responses-API accumulator changed behaviour across 3.13.0 to 3.19.2, so the affected
-  version range for this Chat Completions path is not established and may be narrower or
-  wider than 2.48.0 alone suggests.
-- Only CPython. The TypeScript SDK was not tested; its accumulator is a separate
-  implementation and may or may not share the failure.
-- The Bedrock path (`conversion/bedrock.rs:1350`) is a code-inspection prediction only.
-- `main` and `v1.6.0-alpha.2` were not built.
+- Two openai-python versions, 2.48.0 and the current 3.19.2, both fail. Versions between
+  them were not tested, so the exact lower bound of the affected range is not established.
+- openai-node 7.23.0 is not affected. Other SDKs and frameworks were not tested beyond
+  LangChain's `ChatOpenAI`.
+- The Bedrock path (`conversion/bedrock.rs:1259`, `main`: `1350`) was not run. The evidence
+  for it is the project's own golden snapshot, not a kairo capture.
+- `main` was not built; its status rests on source inspection and snapshots.
+  `v1.6.0-alpha.2` was run as a release binary.
+- The live Anthropic runs used one model, `claude-haiku-4-5-20251001`, and one prompt.
 - The MCP, A2A, guardrail, and retry surfaces of this target were not probed.
-- Only the pinned `v1.5.0` darwin-arm64 release binary was executed. Nothing was built
-  from source.
+- Only darwin-arm64 release binaries were executed. Nothing was built from source.
