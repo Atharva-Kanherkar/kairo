@@ -9,17 +9,16 @@
 - Sibling control: the same update shape with `websocket_credential_rewrite` in place of the flag must be rejected by the inheritance guard with an error asking to also declare `/usr/local/bin/tool-b`.
 - Each of the three cases must pass 5 of 5 independent trials on OpenShell v0.1.2 (`6648bd0c290efbc41ba131ee9831ee45cd431f94`) and on a recorded current `main` commit (`a6eefcf` or newer).
 - The claim stays narrow: `endpoint_attributes_cover` omits `allow_uninspected_credentials` from its coverage set while `merge_endpoint` widens the flag, so the guard never forces the update onto its own rule. Source lines are cited at both tested commits.
-- Runtime consequence, 3 of 3 through the real `openshell-supervisor-network` L7 WebSocket relay: with the flag off a credential-bearing binary frame is closed with code 1008; with the flag on the same frame is forwarded unchanged.
-- The unavailable rung is named: a live B process inside a booted sandbox could not run on macOS because `supervisor:dev` `/etc/passwd` extraction returned 404. No evidence from that rung is claimed.
+- Runtime consequence, 3 of 3 from a live B process inside a Ready Docker-backed sandbox through the real `openshell-supervisor-network` L7 WebSocket relay: with the flag off a credential-bearing binary frame is closed with code 1008 and no binary frame reaches upstream; with the inherited flag on the same frame is forwarded unchanged.
 - Evidence includes sanitized raw CLI output, gateway logs, seed and update policies, effective policies, relay captures, configurations, version metadata, commands, and an N-of-N result matrix per version.
-- The issue answers all three gates, all five bug-or-not questions, records exactly one label, gives a one-sentence maintainer fix, a final verdict, and an upstream search dated 2026-09-29 with links and terms.
+- The issue answers all three gates, all five bug-or-not questions, records exactly one label, gives a one-sentence maintainer fix, a final verdict, and an upstream search dated 2026-09-30 with links and terms.
 
 ## Unit Tests
 
 - The finding 090 invariant checker accepts the committed v0.1.2 and current-main evidence only when every declared invariant is supported by raw artifacts.
 - It rejects a failing trial where B does not end with the flag on, or where the update declared B.
 - It rejects a trigger-removed trial that changes B, and a sibling trial that is not rejected by the inheritance guard.
-- It rejects a relay result unless flag-off closes with 1008 and flag-on forwards bytes identical to the input frame.
+- It rejects a live-sandbox relay result unless flag-off closes with 1008 without forwarding a binary frame and flag-on forwards bytes identical to the input frame from binary B.
 - It rejects missing trials, fewer than 5 trials per case, fewer than 3 relay runs, missing versions, commit mismatches, summaries that contradict raw artifacts, vacuous evidence, and unsanitized credentials or absolute local paths.
 
 ## Integration / Functional Tests
@@ -41,9 +40,8 @@
 ## E2E Tests
 
 - Start the pinned gateway with the supported local Docker configuration, apply the seed policy with the CLI, apply each update, and read the effective policy back through the CLI for every trial.
-- Run the relay flag-off and flag-on cases through the real L7 relay code with the same credential-bearing binary frame.
+- Run binary B inside a Ready Docker-backed sandbox and send the same credentialed binary WebSocket action through the real L7 relay with the flag off and on.
 - Repeat the full matrix on v0.1.2 and current main.
-- N/A: live in-sandbox process run, blocked on macOS as stated above.
 
 ## Manual / cURL Tests
 
