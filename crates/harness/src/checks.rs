@@ -15,6 +15,112 @@ pub enum Verdict {
     Violation(String),
 }
 
+/// Check OpenShell's evidence matrices for credential permission inheritance
+/// by a binary omitted from the policy update.
+///
+/// The policy matrix establishes that enabling the flag on binary A widens a
+/// shared endpoint while binary B remains undeclared. The relay matrix checks
+/// the consumer-visible boundary: B is denied with the flag off and forwards
+/// the same credentialed frame after the update.
+pub fn openshell_credential_permission_stays_in_declared_scope(
+    policy: &Value,
+    relay: &Value,
+) -> Verdict {
+    fn records<'a>(value: &'a Value, key: &str) -> Option<Vec<&'a Value>> {
+        value
+            .get(key)?
+            .as_array()
+            .map(|items| items.iter().collect())
+    }
+    fn fail(message: &str) -> Verdict {
+        Verdict::Violation(message.to_owned())
+    }
+
+    let Some(trials) = records(policy, "trials") else {
+        return fail("policy evidence has no trials array");
+    };
+    for (case, count) in [("failing", 5), ("trigger-removed", 5), ("sibling", 5)] {
+        let selected: Vec<_> = trials
+            .iter()
+            .filter(|trial| trial.get("case").and_then(Value::as_str) == Some(case))
+            .collect();
+        if selected.len() != count || selected.iter().any(|t| t["passed"] != true) {
+            return fail(&format!("policy {case} case is incomplete or failed"));
+        }
+        for trial in selected {
+            let before = trial["before_flag"].as_bool();
+            let after = trial["after_flag"].as_bool();
+            let b_declared = trial["binary_b_declared_by_update"].as_bool();
+            let b_present = trial["binary_b_present_after"].as_bool();
+            let exit = trial["update_exit_code"].as_i64();
+            let valid = match case {
+                "failing" => {
+                    before == Some(false)
+                        && after == Some(true)
+                        && b_declared == Some(false)
+                        && b_present == Some(true)
+                        && exit == Some(0)
+                }
+                "trigger-removed" => {
+                    before == Some(false)
+                        && after == Some(false)
+                        && b_declared == Some(false)
+                        && b_present == Some(true)
+                        && exit == Some(0)
+                }
+                _ => {
+                    before == Some(false)
+                        && after == Some(false)
+                        && b_declared == Some(false)
+                        && b_present == Some(true)
+                        && exit.is_some_and(|code| code != 0)
+                }
+            };
+            if !valid {
+                return fail(&format!(
+                    "policy {case} evidence does not isolate the scope change"
+                ));
+            }
+        }
+    }
+
+    let Some(relay_results) = records(relay, "results") else {
+        return fail("relay evidence has no results array");
+    };
+    for (mode, expected_outcome, expected_client, count) in [
+        ("flag-off", "no-upstream-frame", "closed", 3),
+        ("flag-on", "binary-forwarded", "forwarded", 3),
+    ] {
+        let selected: Vec<_> = relay_results
+            .iter()
+            .filter(|trial| trial.get("mode").and_then(Value::as_str) == Some(mode))
+            .collect();
+        if selected.len() != count || selected.iter().any(|t| t["passed"] != true) {
+            return fail(&format!("relay {mode} case is incomplete or failed"));
+        }
+        for trial in selected {
+            let valid = trial["binary_declared_by_update"] == false
+                && trial["upstream"]["authorization_present"] == true
+                && trial["upstream"]["authorization_redacted"] == true
+                && trial["upstream"]["outcome"] == expected_outcome
+                && trial["client"]["outcome"] == expected_client
+                && if mode == "flag-off" {
+                    trial["client"]["close_code"] == 1008
+                } else {
+                    trial["client"]["byte_equal"] == true
+                        && trial["client"]["sent_hex"] == trial["client"]["received_hex"]
+                        && trial["upstream"]["payload_hex"] == trial["client"]["sent_hex"]
+                };
+            if !valid {
+                return fail(&format!(
+                    "relay {mode} evidence does not prove the boundary result"
+                ));
+            }
+        }
+    }
+    Verdict::Conformant
+}
+
 #[derive(Clone, Copy)]
 pub enum FunctionToolFormat {
     OpenAiResponses,
