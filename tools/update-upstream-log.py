@@ -55,13 +55,6 @@ PROJECTS = (
     ("64bit/async-openai", "async-openai", {590: ("088",)}),
 )
 
-ICON = {
-    "open": "🟢",
-    "merged": "🟣",
-    "completed": "🟣",
-    "closed": "🔴",
-    "not planned": "⚪",
-}
 TAG_RE = re.compile(r"^\s*(\[[a-z ]+\]|\([a-z ]+\))\s*:?\s*", re.IGNORECASE)
 
 
@@ -125,7 +118,7 @@ def folder_links(numbers: tuple[str, ...], folders: dict[str, str]) -> str:
 def row(item: dict, findings: tuple[str, ...], folders: dict[str, str]) -> str:
     state = item["state"]
     return (
-        f"| {ICON[state]} {state} "
+        f"| {state} "
         f"| [#{item['number']}]({item['url']}) "
         f"| {clean_title(item['title'])} "
         f"| {folder_links(findings, folders) if findings else ''} "
@@ -168,8 +161,7 @@ def render(data: dict[str, dict], folders: dict[str, str], today: str) -> str:
     lines.append("| **Total** | " + " | ".join(f"**{t}**" for t in totals) + " |")
     lines += [
         "",
-        f"🟢 open · 🟣 merged or completed · 🔴 PR closed unmerged · "
-        f"⚪ issue closed as not planned. State checked {today}. "
+        f"State checked {today}. "
         "Refresh with `python3 tools/update-upstream-log.py`.",
         "",
     ]
