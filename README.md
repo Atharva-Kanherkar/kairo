@@ -35,8 +35,8 @@ The 65 folders cover reproduced findings, multi-defect reports, and honest
 negative results. Versions and reproduction outcomes are recorded per finding
 in [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md), including cited bugs that did
 not reproduce.
-One finding is filed upstream as
-[NVIDIA-NeMo/Switchyard#380](https://github.com/NVIDIA-NeMo/Switchyard/issues/380).
+Filed issues and fix pull requests are tracked in
+[Upstream activity](#upstream-activity).
 
 ## Findings
 
@@ -93,6 +93,184 @@ correctly. Several cited upstream tickets are patched on current releases and
 are recorded as non-reproductions. Issue 030 is a regression of a Bifrost bug
 fixed in v1.5.4, which is the argument for a permanent suite rather than a
 one-time audit.
+
+## Upstream activity
+
+Findings that hold up are filed with the maintainers, and most come with a fix
+pull request. This is every issue and pull request filed in the projects kairo
+tests, with its current state on GitHub and the finding it came from.
+
+<!-- kairo-upstream:start -->
+| Project | Issues open | Issues closed | PRs merged | PRs open | PRs closed |
+|---|--:|--:|--:|--:|--:|
+| [LiteLLM](https://github.com/BerriAI/litellm) | 4 | 3 | 2 | 2 | 0 |
+| [NVIDIA Switchyard](https://github.com/NVIDIA-NeMo/Switchyard) | 2 | 9 | 3 | 2 | 1 |
+| [Bifrost](https://github.com/maximhq/bifrost) | 2 | 3 | 3 | 2 | 0 |
+| [Dynamo](https://github.com/ai-dynamo/dynamo) | 1 | 0 | 0 | 1 | 0 |
+| [OGX](https://github.com/ogx-ai/ogx) | 0 | 1 | 1 | 0 | 0 |
+| [agentgateway](https://github.com/agentgateway/agentgateway) | 1 | 0 | 0 | 0 | 0 |
+| [any-llm](https://github.com/mozilla-ai/any-llm) | 0 | 1 | 1 | 0 | 0 |
+| [async-openai](https://github.com/64bit/async-openai) | 0 | 0 | 1 | 0 | 0 |
+| **Total** | **10** | **17** | **11** | **7** | **1** |
+
+🟢 open · 🟣 merged or completed · 🔴 PR closed unmerged · ⚪ issue closed as not planned. State checked 2026-09-29. Refresh with `python3 tools/update-upstream-log.py`.
+
+<details open>
+<summary><b>LiteLLM</b> (7 issues, 4 pull requests)</summary>
+
+**Pull requests**
+
+| State | # | Title | Finding | Opened |
+|---|---|---|---|---|
+| 🟢 open | [#43159](https://github.com/BerriAI/litellm/pull/43159) | fix(router): stop retries and fallbacks from re-running executed MCP tools | [087](issues/087-litellm-mcp-retry-reexecutes-tool) | 2026-09-25 |
+| 🟢 open | [#42958](https://github.com/BerriAI/litellm/pull/42958) | fix(router): stop Responses fallback after delivered output | [085](issues/085-litellm-responses-fallback-replays-tool-call) | 2026-09-24 |
+| 🟣 merged | [#40121](https://github.com/BerriAI/litellm/pull/40121) | fix(responses): stream one lifecycle across MCP auto-execute rounds | [074](issues/074-litellm-mcp-responses-stream-collision) | 2026-09-07 |
+| 🟣 merged | [#39723](https://github.com/BerriAI/litellm/pull/39723) | fix(anthropic_responses): preserve Responses refusal blocks in Anthropic messages translation | [067](issues/067-litellm-drops-refusal-content) | 2026-09-04 |
+
+**Issues**
+
+| State | # | Title | Finding | Opened |
+|---|---|---|---|---|
+| 🟢 open | [#43153](https://github.com/BerriAI/litellm/issues/43153) | Router retries re-execute auto-approved MCP tools after a failed follow-up model call | [087](issues/087-litellm-mcp-retry-reexecutes-tool) | 2026-09-25 |
+| 🟢 open | [#42955](https://github.com/BerriAI/litellm/issues/42955) | Responses streaming fallback replays a delivered tool call | [085](issues/085-litellm-responses-fallback-replays-tool-call) | 2026-09-24 |
+| 🟣 completed | [#40118](https://github.com/BerriAI/litellm/issues/40118) | Streaming /v1/responses with an auto-executed MCP tool emits two response lifecycles in one stream, OpenAI SDK responses.stream() raises AssertionError | [074](issues/074-litellm-mcp-responses-stream-collision) | 2026-09-07 |
+| 🟣 completed | [#39721](https://github.com/BerriAI/litellm/issues/39721) | Anthropic /v1/messages erases OpenAI Responses refusal blocks into empty content array | [067](issues/067-litellm-drops-refusal-content) | 2026-09-04 |
+| 🟢 open | [#37118](https://github.com/BerriAI/litellm/issues/37118) | /v1/messages drops stop_sequences | [041](issues/041-litellm-drops-stop-sequences) | 2026-08-16 |
+| 🟣 completed | [#36898](https://github.com/BerriAI/litellm/issues/36898) | GET /health returns extra_headers and aws_session_token in plaintext | [024](issues/024-litellm-health-extra-headers) | 2026-08-14 |
+| 🟢 open | [#36794](https://github.com/BerriAI/litellm/issues/36794) | proxy uses request-body api_key without allow_client_side_credentials | [020](issues/020-litellm-client-api-key) | 2026-08-13 |
+
+</details>
+
+<details open>
+<summary><b>NVIDIA Switchyard</b> (11 issues, 6 pull requests)</summary>
+
+**Pull requests**
+
+| State | # | Title | Finding | Opened |
+|---|---|---|---|---|
+| 🟢 open | [#803](https://github.com/NVIDIA-NeMo/Switchyard/pull/803) | fix(llm-client): store canonical history under the conversation id | [083](issues/083-switchyard-conversation-continuation-loss) | 2026-09-20 |
+| 🟢 open | [#623](https://github.com/NVIDIA-NeMo/Switchyard/pull/623) | fix(translation): preserve OpenAI Chat refusal text | [068](issues/068-switchyard-drops-refusal-content) | 2026-09-04 |
+| 🔴 closed | [#544](https://github.com/NVIDIA-NeMo/Switchyard/pull/544) | fix(llm-client): follow only same-origin redirects to keep credentials on origin | [063](issues/063-switchyard-redirect-follows-x-api-key) | 2026-08-25 |
+| 🟣 merged | [#523](https://github.com/NVIDIA-NeMo/Switchyard/pull/523) | fix(translation): keep Responses inline system and developer roles | [065](issues/065-switchyard-responses-instruction-loss) | 2026-08-22 |
+| 🟣 merged | [#420](https://github.com/NVIDIA-NeMo/Switchyard/pull/420) | fix(client): strip api-key and OpenAI org/project headers before forwarding | [023](issues/023-switchyard-forwards-org-api-key) | 2026-08-14 |
+| 🟣 merged | [#370](https://github.com/NVIDIA-NeMo/Switchyard/pull/370) | fix(translation): report content filter stops as Anthropic refusal | [010](issues/010-switchyard-content-filter-and-reorder) | 2026-08-11 |
+
+**Issues**
+
+| State | # | Title | Finding | Opened |
+|---|---|---|---|---|
+| 🟢 open | [#802](https://github.com/NVIDIA-NeMo/Switchyard/issues/802) | Responses conversation continuation drops materialized cross-format history | [083](issues/083-switchyard-conversation-continuation-loss) | 2026-09-20 |
+| 🟢 open | [#622](https://github.com/NVIDIA-NeMo/Switchyard/issues/622) | OpenAI-to-Anthropic translation erases structured refusal text and emits empty text block | [068](issues/068-switchyard-drops-refusal-content) | 2026-09-04 |
+| 🟣 completed | [#577](https://github.com/NVIDIA-NeMo/Switchyard/issues/577) | switchyard drops anthropic tools[].strict when translating to openai chat | [066](issues/066-switchyard-drops-tool-strict) | 2026-08-29 |
+| 🟣 completed | [#543](https://github.com/NVIDIA-NeMo/Switchyard/issues/543) | default upstream client follows cross-origin redirects while holding the deployment x-api-key | [063](issues/063-switchyard-redirect-follows-x-api-key) | 2026-08-25 |
+| 🟣 completed | [#521](https://github.com/NVIDIA-NeMo/Switchyard/issues/521) | /v1/responses demotes system/developer input roles to user on the chat wire | [065](issues/065-switchyard-responses-instruction-loss) | 2026-08-22 |
+| 🟣 completed | [#452](https://github.com/NVIDIA-NeMo/Switchyard/issues/452) | /v1/messages drops output_format / json_schema | [040](issues/040-switchyard-drops-output-format) | 2026-08-16 |
+| 🟣 completed | [#423](https://github.com/NVIDIA-NeMo/Switchyard/issues/423) | transport 502 echoes base_url including ?key= | [025](issues/025-switchyard-transport-query-key) | 2026-08-14 |
+| 🟣 completed | [#419](https://github.com/NVIDIA-NeMo/Switchyard/issues/419) | Client api-key and OpenAI org/project headers are forwarded upstream | [023](issues/023-switchyard-forwards-org-api-key) | 2026-08-14 |
+| 🟣 completed | [#410](https://github.com/NVIDIA-NeMo/Switchyard/issues/410) | proxy forwards client x-* headers including x-goog-api-key to the upstream | [027](issues/027-switchyard-forwards-x-goog-api-key) | 2026-08-13 |
+| 🟣 completed | [#380](https://github.com/NVIDIA-NeMo/Switchyard/issues/380) | image and document blocks in tool_result are serialized into a text string when translating to OpenAI Chat | [007](issues/007-switchyard-toolresult-multimodal-stringified) | 2026-08-12 |
+| 🟣 completed | [#369](https://github.com/NVIDIA-NeMo/Switchyard/issues/369) | OpenAI content_filter is silently translated to Anthropic end_turn | [010](issues/010-switchyard-content-filter-and-reorder) | 2026-08-11 |
+
+</details>
+
+<details open>
+<summary><b>Bifrost</b> (5 issues, 5 pull requests)</summary>
+
+**Pull requests**
+
+| State | # | Title | Finding | Opened |
+|---|---|---|---|---|
+| 🟢 open | [#7561](https://github.com/maximhq/bifrost/pull/7561) | fix(semanticcache): isolate cache entries by request family | [086](issues/086-bifrost-semantic-cache-cross-endpoint-hit) | 2026-09-25 |
+| 🟢 open | [#7385](https://github.com/maximhq/bifrost/pull/7385) | preserve repeated MCP agent tool results | [082](issues/082-bifrost-agent-tool-result-collision) | 2026-09-21 |
+| 🟣 merged | [#7121](https://github.com/maximhq/bifrost/pull/7121) | fix: filter credential-bearing provider response headers by classifier | [077](issues/077-bifrost-custom-response-header-secret-leak) | 2026-09-13 |
+| 🟣 merged | [#7033](https://github.com/maximhq/bifrost/pull/7033) | Gemini provider - preserve inline image and audio data in chat completions | [075](issues/075-bifrost-gemini-inlinedata-dropped) | 2026-09-09 |
+| 🟣 merged | [#6888](https://github.com/maximhq/bifrost/pull/6888) | fix: map Anthropic forced tool choice any to required on OpenAI egress | [072](issues/072-bifrost-anthropic-tool-choice-any-leak) | 2026-09-06 |
+
+**Issues**
+
+| State | # | Title | Finding | Opened |
+|---|---|---|---|---|
+| 🟢 open | [#7560](https://github.com/maximhq/bifrost/issues/7560) | semantic_cache serves a chat.completion entry to a /v1/responses caller because the direct cache key omits the request family | [086](issues/086-bifrost-semantic-cache-cross-endpoint-hit) | 2026-09-25 |
+| 🟢 open | [#7383](https://github.com/maximhq/bifrost/issues/7383) | agent mode drops one result when the same auto-executable tool runs twice in one turn | [082](issues/082-bifrost-agent-tool-result-collision) | 2026-09-21 |
+| 🟣 completed | [#7120](https://github.com/maximhq/bifrost/issues/7120) | Provider response-header filter ignores IsSensitiveHeader, forwarding credential-named headers to inference callers | [077](issues/077-bifrost-custom-response-header-secret-leak) | 2026-09-13 |
+| 🟣 completed | [#7032](https://github.com/maximhq/bifrost/issues/7032) | Gemini image-generation output (inlineData) silently dropped on /v1/chat/completions, both unary and streaming | [075](issues/075-bifrost-gemini-inlinedata-dropped) | 2026-09-09 |
+| 🟣 completed | [#6887](https://github.com/maximhq/bifrost/issues/6887) | Anthropic tool_choice {type: any} forwarded to OpenAI as "any" instead of "required" | [072](issues/072-bifrost-anthropic-tool-choice-any-leak) | 2026-09-06 |
+
+</details>
+
+<details open>
+<summary><b>Dynamo</b> (1 issues, 1 pull requests)</summary>
+
+**Pull requests**
+
+| State | # | Title | Finding | Opened |
+|---|---|---|---|---|
+| 🟢 open | [#15101](https://github.com/ai-dynamo/dynamo/pull/15101) | fix(multimodal): preserve URL path case in ImageLoader cache key | [080](issues/080-dynamo-imageloader-lowercase-cache-key) | 2026-09-19 |
+
+**Issues**
+
+| State | # | Title | Finding | Opened |
+|---|---|---|---|---|
+| 🟢 open | [#15100](https://github.com/ai-dynamo/dynamo/issues/15100) | ImageLoader cache key lowercases the whole URL, returning the wrong image for case-differing paths | [080](issues/080-dynamo-imageloader-lowercase-cache-key) | 2026-09-19 |
+
+</details>
+
+<details open>
+<summary><b>OGX</b> (1 issues, 1 pull requests)</summary>
+
+**Pull requests**
+
+| State | # | Title | Finding | Opened |
+|---|---|---|---|---|
+| 🟣 merged | [#6615](https://github.com/ogx-ai/ogx/pull/6615) | fix(anthropic): reject adaptive thinking in translation mode | [081](issues/081-ogx-messages-translation-losses) | 2026-09-22 |
+
+**Issues**
+
+| State | # | Title | Finding | Opened |
+|---|---|---|---|---|
+| 🟣 completed | [#6614](https://github.com/ogx-ai/ogx/issues/6614) | Anthropic to OpenAI translation silently drops thinking.type=adaptive and returns 200 | [081](issues/081-ogx-messages-translation-losses) | 2026-09-22 |
+
+</details>
+
+<details open>
+<summary><b>agentgateway</b> (1 issues, 0 pull requests)</summary>
+
+**Issues**
+
+| State | # | Title | Finding | Opened |
+|---|---|---|---|---|
+| 🟢 open | [#3681](https://github.com/agentgateway/agentgateway/issues/3681) | it emits null tool_calls[].type on OpenAI streams, and openai-python's accumulator raises before the agent completes | [088](issues/088-agentgateway-toolid-type-null-breaks-openai-stream) | 2026-09-27 |
+
+</details>
+
+<details open>
+<summary><b>any-llm</b> (1 issues, 1 pull requests)</summary>
+
+**Pull requests**
+
+| State | # | Title | Finding | Opened |
+|---|---|---|---|---|
+| 🟣 merged | [#1312](https://github.com/mozilla-ai/any-llm/pull/1312) | fix: preserve fields the anthropic messages bridge dropped on encode | [057](issues/057-any-llm-drops-thinking-history)-[062](issues/062-any-llm-empty-schema-shell) | 2026-08-18 |
+
+**Issues**
+
+| State | # | Title | Finding | Opened |
+|---|---|---|---|---|
+| 🟣 completed | [#1311](https://github.com/mozilla-ai/any-llm/issues/1311) | messages_compat drops thinking history, parallel flag, is_error, and multimodal tool results | [057](issues/057-any-llm-drops-thinking-history)-[062](issues/062-any-llm-empty-schema-shell) | 2026-08-18 |
+
+</details>
+
+<details open>
+<summary><b>async-openai</b> (0 issues, 1 pull requests)</summary>
+
+**Pull requests**
+
+| State | # | Title | Finding | Opened |
+|---|---|---|---|---|
+| 🟣 merged | [#590](https://github.com/64bit/async-openai/pull/590) | fix(chat): skip_serializing_if on ChatCompletionMessageToolCallChunk optional fields | [088](issues/088-agentgateway-toolid-type-null-breaks-openai-stream) | 2026-09-27 |
+
+</details>
+<!-- kairo-upstream:end -->
 
 ## Method
 
@@ -182,6 +360,7 @@ tools/mock_upstream.py              offline capture backend
 tools/capture_server*.py            request recorders for specific dialects
 tools/sweep/                        rectangular gateway x probe sweep
 tools/update-readme-counts.py       regenerates the Status block; CI fails if stale
+tools/update-upstream-log.py       regenerates the Upstream activity block from gh
 ```
 
 ## Coverage
