@@ -1,0 +1,35 @@
+version: 1
+filesystem_policy:
+  include_workdir: true
+  read_only:
+    - /bin
+    - /usr
+    - /lib
+    - /proc
+    - /dev/urandom
+    - /app
+    - /etc
+    - /var/log
+  read_write:
+    - /sandbox
+    - /tmp
+    - /dev/null
+landlock:
+  compatibility: best_effort
+network_policies:
+  realtime:
+    name: realtime
+    endpoints:
+      - host: 192.168.65.254
+        port: 19100
+        protocol: websocket
+        enforcement: enforce
+        access: full
+        allowed_ips:
+          - 192.168.65.254
+        credential_binding:
+          provider: kairo-ws-provider
+        allow_uninspected_credentials: false
+    binaries:
+      - path: /usr/local/bin/tool-a
+      - path: /usr/local/bin/tool-b
