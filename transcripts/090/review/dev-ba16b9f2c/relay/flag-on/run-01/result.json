@@ -1,0 +1,21 @@
+{
+  "binary": "/usr/local/bin/tool-b",
+  "binary_declared_by_update": false,
+  "client": {
+    "byte_equal": true,
+    "outcome": "forwarded",
+    "received_hex": "4b4149524f2d3039302d42494e4152592d414354494f4e",
+    "sent_hex": "4b4149524f2d3039302d42494e4152592d414354494f4e"
+  },
+  "mode": "flag-on",
+  "passed": true,
+  "trial": 1,
+  "upstream": {
+    "authorization_present": true,
+    "authorization_redacted": true,
+    "opcode": 2,
+    "outcome": "binary-forwarded",
+    "payload_hex": "4b4149524f2d3039302d42494e4152592d414354494f4e",
+    "raw_frame_hex": "8297cd9b3d9786da74c582b60daefdb67fde83da6fcee0da7ec384d473"
+  }
+}

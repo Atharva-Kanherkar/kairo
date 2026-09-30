@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "$OPENSHELL_BIN",
+    "--color",
+    "never",
+    "--gateway",
+    "kairo-090-review-v012",
+    "sandbox",
+    "exec",
+    "--name",
+    "kairo090-rev",
+    "--no-tty",
+    "--no-login-shell",
+    "--",
+    "/usr/local/bin/tool-b",
+    "/sandbox/ws_client.py"
+  ],
+  "exit_code": 0
+}

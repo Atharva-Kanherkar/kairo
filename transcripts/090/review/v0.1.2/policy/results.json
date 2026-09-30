@@ -1,0 +1,401 @@
+{
+  "cases": {
+    "failing": {
+      "passed": 5,
+      "total": 5
+    },
+    "sibling": {
+      "passed": 5,
+      "total": 5
+    },
+    "trigger-removed": {
+      "passed": 5,
+      "total": 5
+    }
+  },
+  "schema_version": 1,
+  "target": {
+    "cli_version_output": "openshell 0.1.2",
+    "commit": "6648bd0c290efbc41ba131ee9831ee45cd431f94",
+    "name": "NVIDIA/OpenShell",
+    "version": "v0.1.2"
+  },
+  "trials": [
+    {
+      "after_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "after_flag": true,
+      "artifacts": {
+        "after": "failing/run-01/after.stdout.txt",
+        "before": "failing/run-01/before.stdout.txt",
+        "update_command": "failing/run-01/update.command.json",
+        "update_stderr": "failing/run-01/update.stderr.txt",
+        "update_stdout": "failing/run-01/update.stdout.txt"
+      },
+      "before_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "before_flag": false,
+      "binary_b_declared_by_update": false,
+      "binary_b_present_after": true,
+      "case": "failing",
+      "passed": true,
+      "trial": 1,
+      "update_exit_code": 0
+    },
+    {
+      "after_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "after_flag": true,
+      "artifacts": {
+        "after": "failing/run-02/after.stdout.txt",
+        "before": "failing/run-02/before.stdout.txt",
+        "update_command": "failing/run-02/update.command.json",
+        "update_stderr": "failing/run-02/update.stderr.txt",
+        "update_stdout": "failing/run-02/update.stdout.txt"
+      },
+      "before_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "before_flag": false,
+      "binary_b_declared_by_update": false,
+      "binary_b_present_after": true,
+      "case": "failing",
+      "passed": true,
+      "trial": 2,
+      "update_exit_code": 0
+    },
+    {
+      "after_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "after_flag": true,
+      "artifacts": {
+        "after": "failing/run-03/after.stdout.txt",
+        "before": "failing/run-03/before.stdout.txt",
+        "update_command": "failing/run-03/update.command.json",
+        "update_stderr": "failing/run-03/update.stderr.txt",
+        "update_stdout": "failing/run-03/update.stdout.txt"
+      },
+      "before_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "before_flag": false,
+      "binary_b_declared_by_update": false,
+      "binary_b_present_after": true,
+      "case": "failing",
+      "passed": true,
+      "trial": 3,
+      "update_exit_code": 0
+    },
+    {
+      "after_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "after_flag": true,
+      "artifacts": {
+        "after": "failing/run-04/after.stdout.txt",
+        "before": "failing/run-04/before.stdout.txt",
+        "update_command": "failing/run-04/update.command.json",
+        "update_stderr": "failing/run-04/update.stderr.txt",
+        "update_stdout": "failing/run-04/update.stdout.txt"
+      },
+      "before_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "before_flag": false,
+      "binary_b_declared_by_update": false,
+      "binary_b_present_after": true,
+      "case": "failing",
+      "passed": true,
+      "trial": 4,
+      "update_exit_code": 0
+    },
+    {
+      "after_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "after_flag": true,
+      "artifacts": {
+        "after": "failing/run-05/after.stdout.txt",
+        "before": "failing/run-05/before.stdout.txt",
+        "update_command": "failing/run-05/update.command.json",
+        "update_stderr": "failing/run-05/update.stderr.txt",
+        "update_stdout": "failing/run-05/update.stdout.txt"
+      },
+      "before_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "before_flag": false,
+      "binary_b_declared_by_update": false,
+      "binary_b_present_after": true,
+      "case": "failing",
+      "passed": true,
+      "trial": 5,
+      "update_exit_code": 0
+    },
+    {
+      "after_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "after_flag": false,
+      "artifacts": {
+        "after": "trigger-removed/run-01/after.stdout.txt",
+        "before": "trigger-removed/run-01/before.stdout.txt",
+        "update_command": "trigger-removed/run-01/update.command.json",
+        "update_stderr": "trigger-removed/run-01/update.stderr.txt",
+        "update_stdout": "trigger-removed/run-01/update.stdout.txt"
+      },
+      "before_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "before_flag": false,
+      "binary_b_declared_by_update": false,
+      "binary_b_present_after": true,
+      "case": "trigger-removed",
+      "passed": true,
+      "trial": 1,
+      "update_exit_code": 0
+    },
+    {
+      "after_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "after_flag": false,
+      "artifacts": {
+        "after": "trigger-removed/run-02/after.stdout.txt",
+        "before": "trigger-removed/run-02/before.stdout.txt",
+        "update_command": "trigger-removed/run-02/update.command.json",
+        "update_stderr": "trigger-removed/run-02/update.stderr.txt",
+        "update_stdout": "trigger-removed/run-02/update.stdout.txt"
+      },
+      "before_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "before_flag": false,
+      "binary_b_declared_by_update": false,
+      "binary_b_present_after": true,
+      "case": "trigger-removed",
+      "passed": true,
+      "trial": 2,
+      "update_exit_code": 0
+    },
+    {
+      "after_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "after_flag": false,
+      "artifacts": {
+        "after": "trigger-removed/run-03/after.stdout.txt",
+        "before": "trigger-removed/run-03/before.stdout.txt",
+        "update_command": "trigger-removed/run-03/update.command.json",
+        "update_stderr": "trigger-removed/run-03/update.stderr.txt",
+        "update_stdout": "trigger-removed/run-03/update.stdout.txt"
+      },
+      "before_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "before_flag": false,
+      "binary_b_declared_by_update": false,
+      "binary_b_present_after": true,
+      "case": "trigger-removed",
+      "passed": true,
+      "trial": 3,
+      "update_exit_code": 0
+    },
+    {
+      "after_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "after_flag": false,
+      "artifacts": {
+        "after": "trigger-removed/run-04/after.stdout.txt",
+        "before": "trigger-removed/run-04/before.stdout.txt",
+        "update_command": "trigger-removed/run-04/update.command.json",
+        "update_stderr": "trigger-removed/run-04/update.stderr.txt",
+        "update_stdout": "trigger-removed/run-04/update.stdout.txt"
+      },
+      "before_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "before_flag": false,
+      "binary_b_declared_by_update": false,
+      "binary_b_present_after": true,
+      "case": "trigger-removed",
+      "passed": true,
+      "trial": 4,
+      "update_exit_code": 0
+    },
+    {
+      "after_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "after_flag": false,
+      "artifacts": {
+        "after": "trigger-removed/run-05/after.stdout.txt",
+        "before": "trigger-removed/run-05/before.stdout.txt",
+        "update_command": "trigger-removed/run-05/update.command.json",
+        "update_stderr": "trigger-removed/run-05/update.stderr.txt",
+        "update_stdout": "trigger-removed/run-05/update.stdout.txt"
+      },
+      "before_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "before_flag": false,
+      "binary_b_declared_by_update": false,
+      "binary_b_present_after": true,
+      "case": "trigger-removed",
+      "passed": true,
+      "trial": 5,
+      "update_exit_code": 0
+    },
+    {
+      "after_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "after_flag": false,
+      "artifacts": {
+        "after": "sibling/run-01/after.stdout.txt",
+        "before": "sibling/run-01/before.stdout.txt",
+        "update_command": "sibling/run-01/update.command.json",
+        "update_stderr": "sibling/run-01/update.stderr.txt",
+        "update_stdout": "sibling/run-01/update.stdout.txt"
+      },
+      "before_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "before_flag": false,
+      "binary_b_declared_by_update": false,
+      "binary_b_present_after": true,
+      "case": "sibling",
+      "passed": true,
+      "trial": 1,
+      "update_exit_code": 1
+    },
+    {
+      "after_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "after_flag": false,
+      "artifacts": {
+        "after": "sibling/run-02/after.stdout.txt",
+        "before": "sibling/run-02/before.stdout.txt",
+        "update_command": "sibling/run-02/update.command.json",
+        "update_stderr": "sibling/run-02/update.stderr.txt",
+        "update_stdout": "sibling/run-02/update.stdout.txt"
+      },
+      "before_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "before_flag": false,
+      "binary_b_declared_by_update": false,
+      "binary_b_present_after": true,
+      "case": "sibling",
+      "passed": true,
+      "trial": 2,
+      "update_exit_code": 1
+    },
+    {
+      "after_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "after_flag": false,
+      "artifacts": {
+        "after": "sibling/run-03/after.stdout.txt",
+        "before": "sibling/run-03/before.stdout.txt",
+        "update_command": "sibling/run-03/update.command.json",
+        "update_stderr": "sibling/run-03/update.stderr.txt",
+        "update_stdout": "sibling/run-03/update.stdout.txt"
+      },
+      "before_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "before_flag": false,
+      "binary_b_declared_by_update": false,
+      "binary_b_present_after": true,
+      "case": "sibling",
+      "passed": true,
+      "trial": 3,
+      "update_exit_code": 1
+    },
+    {
+      "after_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "after_flag": false,
+      "artifacts": {
+        "after": "sibling/run-04/after.stdout.txt",
+        "before": "sibling/run-04/before.stdout.txt",
+        "update_command": "sibling/run-04/update.command.json",
+        "update_stderr": "sibling/run-04/update.stderr.txt",
+        "update_stdout": "sibling/run-04/update.stdout.txt"
+      },
+      "before_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "before_flag": false,
+      "binary_b_declared_by_update": false,
+      "binary_b_present_after": true,
+      "case": "sibling",
+      "passed": true,
+      "trial": 4,
+      "update_exit_code": 1
+    },
+    {
+      "after_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "after_flag": false,
+      "artifacts": {
+        "after": "sibling/run-05/after.stdout.txt",
+        "before": "sibling/run-05/before.stdout.txt",
+        "update_command": "sibling/run-05/update.command.json",
+        "update_stderr": "sibling/run-05/update.stderr.txt",
+        "update_stdout": "sibling/run-05/update.stdout.txt"
+      },
+      "before_binaries": [
+        "/usr/local/bin/tool-a",
+        "/usr/local/bin/tool-b"
+      ],
+      "before_flag": false,
+      "binary_b_declared_by_update": false,
+      "binary_b_present_after": true,
+      "case": "sibling",
+      "passed": true,
+      "trial": 5,
+      "update_exit_code": 1
+    }
+  ],
+  "trials_per_case": 5
+}

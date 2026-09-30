@@ -1,0 +1,63 @@
+{
+  "active_version": 10,
+  "config_revision": 1713691882419826249,
+  "hash": "6e7461a35d1d420a21757caf2915b6e89dba436118f892c278dacaf641635663",
+  "policy": {
+    "filesystem_policy": {
+      "include_workdir": true,
+      "read_only": [
+        "/bin",
+        "/usr",
+        "/lib",
+        "/proc",
+        "/dev/urandom",
+        "/app",
+        "/etc",
+        "/var/log"
+      ],
+      "read_write": [
+        "/sandbox",
+        "/tmp",
+        "/dev/null"
+      ]
+    },
+    "landlock": {
+      "compatibility": "best_effort"
+    },
+    "network_policies": {
+      "realtime": {
+        "binaries": [
+          {
+            "path": "/usr/local/bin/tool-a"
+          },
+          {
+            "path": "/usr/local/bin/tool-b"
+          }
+        ],
+        "endpoints": [
+          {
+            "access": "full",
+            "allow_uninspected_credentials": true,
+            "allowed_ips": [
+              "192.168.65.254"
+            ],
+            "credential_binding": {
+              "provider": "kairo-ws-provider"
+            },
+            "enforcement": "enforce",
+            "host": "192.168.65.254",
+            "port": 19100,
+            "protocol": "websocket"
+          }
+        ],
+        "name": "realtime"
+      }
+    },
+    "version": 1
+  },
+  "policy_source": "sandbox",
+  "sandbox": "kairo090-rev",
+  "scope": "sandbox",
+  "status": "effective",
+  "version": 10
+}

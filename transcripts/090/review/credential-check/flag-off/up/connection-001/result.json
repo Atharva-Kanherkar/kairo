@@ -1,0 +1,7 @@
+{
+  "auth_equals_provider_secret": true,
+  "auth_is_placeholder": false,
+  "authorization_present": true,
+  "authorization_redacted": true,
+  "outcome": "no-upstream-frame"
+}

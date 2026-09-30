@@ -1,0 +1,9 @@
+GET /ws HTTP/1.1
+Host: 192.168.65.254:19100
+Sec-WebSocket-Key: 0vAN3R0XlGSbjxaKCVK8cg==
+Sec-WebSocket-Version: 13
+Authorization: Bearer [REDACTED]
+User-Agent: Python/3.13 websockets/15.0.1
+Connection: Upgrade
+Upgrade: websocket
+

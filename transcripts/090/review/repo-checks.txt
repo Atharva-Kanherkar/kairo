@@ -1,0 +1,14 @@
+# Reviewer-run repository checks on PR head c1161ad (2026-09-30)
+## python3 tools/update-readme-counts.py --check
+README and SCOREBOARD counts match: 66 bugs, 221 tests (180 conformance, 41 unit)
+counts exit 0
+## cargo fmt --all -- --check
+fmt exit 0
+## cargo test --workspace (result lines)
+test result: ok. 41 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 180 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test exit 0
+## cargo clippy --workspace --all-targets -- -D warnings
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.39s
+clippy exit 0
