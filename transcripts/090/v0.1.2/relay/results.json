@@ -1,0 +1,136 @@
+{
+  "modes": {
+    "flag-off": {
+      "passed": 3,
+      "total": 3
+    },
+    "flag-on": {
+      "passed": 3,
+      "total": 3
+    }
+  },
+  "results": [
+    {
+      "binary": "/usr/local/bin/tool-b",
+      "binary_declared_by_update": false,
+      "client": {
+        "close_code": 1008,
+        "close_reason": "",
+        "outcome": "closed"
+      },
+      "mode": "flag-off",
+      "passed": true,
+      "trial": 1,
+      "upstream": {
+        "authorization_present": true,
+        "authorization_redacted": true,
+        "outcome": "no-upstream-frame"
+      }
+    },
+    {
+      "binary": "/usr/local/bin/tool-b",
+      "binary_declared_by_update": false,
+      "client": {
+        "close_code": 1008,
+        "close_reason": "",
+        "outcome": "closed"
+      },
+      "mode": "flag-off",
+      "passed": true,
+      "trial": 2,
+      "upstream": {
+        "authorization_present": true,
+        "authorization_redacted": true,
+        "outcome": "no-upstream-frame"
+      }
+    },
+    {
+      "binary": "/usr/local/bin/tool-b",
+      "binary_declared_by_update": false,
+      "client": {
+        "close_code": 1008,
+        "close_reason": "",
+        "outcome": "closed"
+      },
+      "mode": "flag-off",
+      "passed": true,
+      "trial": 3,
+      "upstream": {
+        "authorization_present": true,
+        "authorization_redacted": true,
+        "outcome": "no-upstream-frame"
+      }
+    },
+    {
+      "binary": "/usr/local/bin/tool-b",
+      "binary_declared_by_update": false,
+      "client": {
+        "byte_equal": true,
+        "outcome": "forwarded",
+        "received_hex": "4b4149524f2d3039302d42494e4152592d414354494f4e",
+        "sent_hex": "4b4149524f2d3039302d42494e4152592d414354494f4e"
+      },
+      "mode": "flag-on",
+      "passed": true,
+      "trial": 1,
+      "upstream": {
+        "authorization_present": true,
+        "authorization_redacted": true,
+        "opcode": 2,
+        "outcome": "binary-forwarded",
+        "payload_hex": "4b4149524f2d3039302d42494e4152592d414354494f4e",
+        "raw_frame_hex": "8297ce4fb442850efd108162847bfe62f60b800ee61be30ef7168700fa"
+      }
+    },
+    {
+      "binary": "/usr/local/bin/tool-b",
+      "binary_declared_by_update": false,
+      "client": {
+        "byte_equal": true,
+        "outcome": "forwarded",
+        "received_hex": "4b4149524f2d3039302d42494e4152592d414354494f4e",
+        "sent_hex": "4b4149524f2d3039302d42494e4152592d414354494f4e"
+      },
+      "mode": "flag-on",
+      "passed": true,
+      "trial": 2,
+      "upstream": {
+        "authorization_present": true,
+        "authorization_redacted": true,
+        "opcode": 2,
+        "outcome": "binary-forwarded",
+        "payload_hex": "4b4149524f2d3039302d42494e4152592d414354494f4e",
+        "raw_frame_hex": "8297186f95c2532edc905742a5fb2842d78b562ec79b352ed6965120db"
+      }
+    },
+    {
+      "binary": "/usr/local/bin/tool-b",
+      "binary_declared_by_update": false,
+      "client": {
+        "byte_equal": true,
+        "outcome": "forwarded",
+        "received_hex": "4b4149524f2d3039302d42494e4152592d414354494f4e",
+        "sent_hex": "4b4149524f2d3039302d42494e4152592d414354494f4e"
+      },
+      "mode": "flag-on",
+      "passed": true,
+      "trial": 3,
+      "upstream": {
+        "authorization_present": true,
+        "authorization_redacted": true,
+        "opcode": 2,
+        "outcome": "binary-forwarded",
+        "payload_hex": "4b4149524f2d3039302d42494e4152592d414354494f4e",
+        "raw_frame_hex": "8297dcec732297ad3a7093c1431becc1316b92ad217bf1ad307695a33d"
+      }
+    }
+  ],
+  "sandbox": "kairo090-e2e",
+  "schema_version": 1,
+  "target": {
+    "commit": "6648bd0c290efbc41ba131ee9831ee45cd431f94",
+    "name": "NVIDIA/OpenShell",
+    "version": "v0.1.2"
+  },
+  "trials_per_mode": 3
+}

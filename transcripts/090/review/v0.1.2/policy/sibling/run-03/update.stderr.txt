@@ -1,0 +1,4 @@
+Error:   × merge operation 0 add-rule 'realtime' would grant existing binaries new or
+  │ changed authorization for 192.168.65.254 on ports [19100]; also declare /
+  │ usr/local/bin/tool-b
+

@@ -1,0 +1,10 @@
+{
+  "auth_equals_provider_secret": true,
+  "auth_is_placeholder": false,
+  "authorization_present": true,
+  "authorization_redacted": true,
+  "opcode": 2,
+  "outcome": "binary-forwarded",
+  "payload_hex": "4b4149524f2d3039302d42494e4152592d414354494f4e",
+  "raw_frame_hex": "8297a1b5046ceaf44d3eee98345591984625eff456358cf44738e8fa4a"
+}

@@ -1,0 +1,14 @@
+id: kairo-ws
+display_name: Kairo WebSocket Test
+description: Local endpointless profile used only by finding 090
+category: other
+credentials:
+  - name: api_token
+    description: Synthetic authorization token
+    env_vars:
+      - KAIRO_WS_TOKEN
+    required: true
+    auth_style: bearer
+    header_name: authorization
+endpoints: []
+binaries: []

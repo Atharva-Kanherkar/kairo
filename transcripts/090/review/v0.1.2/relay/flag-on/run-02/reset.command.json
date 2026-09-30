@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "$OPENSHELL_BIN",
+    "--color",
+    "never",
+    "--gateway",
+    "kairo-090-review-v012",
+    "policy",
+    "set",
+    "kairo090-rev",
+    "--policy",
+    "$SEED_POLICY",
+    "--wait",
+    "--timeout",
+    "30"
+  ],
+  "exit_code": 0
+}

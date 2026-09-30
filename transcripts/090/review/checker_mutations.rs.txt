@@ -1,0 +1,94 @@
+// Reviewer scratch test, run in a copy of the repository as
+// crates/harness/tests/review_mutations.rs. Kept as text on purpose.
+// Command: cargo test -p kairo --test review_mutations -- --nocapture
+use kairo::checks::{openshell_credential_permission_stays_in_declared_scope as check, Verdict};
+use serde_json::{json, Value};
+use std::fs;
+
+fn load(rel: &str) -> Value {
+    let p = format!("{}/../../{}", env!("CARGO_MANIFEST_DIR"), rel);
+    serde_json::from_str(&fs::read_to_string(p).unwrap()).unwrap()
+}
+fn violated(p: &Value, r: &Value) -> bool { matches!(check(p, r), Verdict::Violation(_)) }
+
+#[test]
+fn mutations() {
+    let policy = load("transcripts/090/v0.1.2/policy/results.json");
+    let relay = load("transcripts/090/v0.1.2/relay/results.json");
+    assert_eq!(check(&policy, &relay), Verdict::Conformant);
+
+    // drop one failing trial
+    let mut p = policy.clone();
+    let idx = p["trials"].as_array().unwrap().iter().position(|t| t["case"] == "failing").unwrap();
+    p["trials"].as_array_mut().unwrap().remove(idx);
+    println!("drop failing trial -> violated={}", violated(&p, &relay));
+    assert!(violated(&p, &relay));
+
+    // B declared by the update in a failing trial
+    let mut p = policy.clone();
+    let t = p["trials"].as_array_mut().unwrap().iter_mut().find(|t| t["case"] == "failing").unwrap();
+    t["binary_b_declared_by_update"] = json!(true);
+    println!("B declared -> violated={}", violated(&p, &relay));
+    assert!(violated(&p, &relay));
+
+    // failing trial where the update failed (exit 1)
+    let mut p = policy.clone();
+    let t = p["trials"].as_array_mut().unwrap().iter_mut().find(|t| t["case"] == "failing").unwrap();
+    t["update_exit_code"] = json!(1);
+    assert!(violated(&p, &relay));
+
+    // trigger-removed trial where the flag flipped on
+    let mut p = policy.clone();
+    let t = p["trials"].as_array_mut().unwrap().iter_mut().find(|t| t["case"] == "trigger-removed").unwrap();
+    t["after_flag"] = json!(true);
+    assert!(violated(&p, &relay));
+
+    // sibling accepted (exit 0)
+    let mut p = policy.clone();
+    let t = p["trials"].as_array_mut().unwrap().iter_mut().find(|t| t["case"] == "sibling").unwrap();
+    t["update_exit_code"] = json!(0);
+    assert!(violated(&p, &relay));
+
+    // sibling rejected for an unrelated reason: the summary has no error text, so the checker cannot tell
+    let mut p = policy.clone();
+    let t = p["trials"].as_array_mut().unwrap().iter_mut().find(|t| t["case"] == "sibling").unwrap();
+    t["update_exit_code"] = json!(2);
+    println!("sibling exit=2 (any non-zero) -> violated={}", violated(&p, &relay));
+
+    // relay: payload mismatch between client and upstream
+    let mut r = relay.clone();
+    let t = r["results"].as_array_mut().unwrap().iter_mut().find(|t| t["mode"] == "flag-on").unwrap();
+    t["upstream"]["payload_hex"] = json!("00");
+    assert!(violated(&policy, &r));
+    // relay: flag-off closed with a different code
+    let mut r = relay.clone();
+    let t = r["results"].as_array_mut().unwrap().iter_mut().find(|t| t["mode"] == "flag-off").unwrap();
+    t["client"]["close_code"] = json!(1000);
+    assert!(violated(&policy, &r));
+    // relay: authorization absent
+    let mut r = relay.clone();
+    let t = r["results"].as_array_mut().unwrap().iter_mut().find(|t| t["mode"] == "flag-on").unwrap();
+    t["upstream"]["authorization_present"] = json!(false);
+    assert!(violated(&policy, &r));
+    // relay: binary declared by the update
+    let mut r = relay.clone();
+    let t = r["results"].as_array_mut().unwrap().iter_mut().find(|t| t["mode"] == "flag-on").unwrap();
+    t["binary_declared_by_update"] = json!(true);
+    assert!(violated(&policy, &r));
+    // relay: flag-on outcome is a control frame, not a forwarded binary frame
+    let mut r = relay.clone();
+    let t = r["results"].as_array_mut().unwrap().iter_mut().find(|t| t["mode"] == "flag-on").unwrap();
+    t["upstream"]["outcome"] = json!("control-frame");
+    assert!(violated(&policy, &r));
+    // relay evidence with flag-off only (vacuous consumer evidence)
+    let mut r = relay.clone();
+    r["results"].as_array_mut().unwrap().retain(|t| t["mode"] == "flag-off");
+    assert!(violated(&policy, &r));
+    // an unsanitized extra field is not inspected at all
+    let mut r = relay.clone();
+    r["results"][0]["upstream"]["authorization_value"] = json!("Bearer real-looking-secret");
+    println!("unsanitized extra field -> violated={}", violated(&policy, &r));
+    // empty inputs
+    assert!(violated(&json!({}), &relay));
+    assert!(violated(&policy, &json!({})));
+}

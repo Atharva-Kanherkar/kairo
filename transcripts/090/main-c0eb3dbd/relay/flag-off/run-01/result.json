@@ -1,0 +1,17 @@
+{
+  "binary": "/usr/local/bin/tool-b",
+  "binary_declared_by_update": false,
+  "client": {
+    "close_code": 1008,
+    "close_reason": "",
+    "outcome": "closed"
+  },
+  "mode": "flag-off",
+  "passed": true,
+  "trial": 1,
+  "upstream": {
+    "authorization_present": true,
+    "authorization_redacted": true,
+    "outcome": "no-upstream-frame"
+  }
+}

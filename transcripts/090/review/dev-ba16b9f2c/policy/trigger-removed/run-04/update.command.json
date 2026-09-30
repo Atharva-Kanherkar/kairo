@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "$OPENSHELL_BIN",
+    "--color",
+    "never",
+    "--gateway",
+    "kairo-090-review-dev",
+    "policy",
+    "update",
+    "kairo090-dev",
+    "--rule-name",
+    "realtime",
+    "--binary",
+    "/usr/local/bin/tool-a",
+    "--add-endpoint",
+    "192.168.65.254:19100:full:websocket:enforce:allowed-ip=192.168.65.254"
+  ],
+  "exit_code": 0
+}

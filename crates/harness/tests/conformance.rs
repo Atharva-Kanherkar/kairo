@@ -18,15 +18,16 @@ use kairo::checks::{
     no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
     ogx_adaptive_thinking_loss, openai_stream_finish_reason,
     openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
-    outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
-    reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
-    response_conversation_preserves_history, response_omits_secret,
-    responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
-    responses_no_restart_after_output, responses_refusal_semantics_preserved,
-    responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
-    thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
-    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, FunctionToolFormat,
-    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    openshell_credential_permission_stays_in_declared_scope, outbound_request_omits_secret,
+    parallel_tool_disable_preserved, provider_request_id_preserved, reasoning_text_order_preserved,
+    refusal_text_preserved, response_content_not_empty, response_conversation_preserves_history,
+    response_omits_secret, responses_fallback_not_spliced_after_delivery,
+    responses_fallback_preserves_delivered_indexes, responses_no_restart_after_output,
+    responses_refusal_semantics_preserved, responses_single_lifecycle, stop_sequence_forwarded,
+    thinking_not_leaked_as_visible_text, thinking_text_forwarded, tool_strict_forwarded,
+    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
+    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
 use serde_json::Value;
 use std::fs;
@@ -4697,4 +4698,59 @@ fn checker_ignores_streams_without_tool_call_deltas() {
         openai_stream_toolcall_type_never_null(text_stream),
         Verdict::Conformant
     );
+}
+
+// ---- bug 090: OpenShell widens a credential exception to an undeclared binary ----
+
+#[test]
+fn openshell_credential_permission_scope_violation_reproduces_on_release_and_main() {
+    for (root, version, commit) in [
+        (
+            "transcripts/090/v0.1.2",
+            "v0.1.2",
+            "6648bd0c290efbc41ba131ee9831ee45cd431f94",
+        ),
+        (
+            "transcripts/090/main-c0eb3dbd",
+            "0.1.3-dev.22+gc0eb3dbd3",
+            "c0eb3dbd30b50e7e24666af857b8320e9d83a6cc",
+        ),
+    ] {
+        let policy: Value = serde_json::from_str(&fixture(&format!("{root}/policy/results.json")))
+            .expect("policy matrix JSON");
+        let relay: Value = serde_json::from_str(&fixture(&format!("{root}/relay/results.json")))
+            .expect("relay matrix JSON");
+        let metadata: Value =
+            serde_json::from_str(&fixture(&format!("{root}/policy/metadata.json")))
+                .expect("target metadata JSON");
+        assert_eq!(metadata["target"]["version"], version);
+        assert_eq!(metadata["target"]["commit"], commit);
+        assert_eq!(policy["target"]["commit"], commit);
+        assert_eq!(relay["target"]["commit"], commit);
+        assert_eq!(
+            openshell_credential_permission_stays_in_declared_scope(&policy, &relay),
+            Verdict::Conformant,
+            "{root} must contain complete, non-vacuous reproduction and consumer evidence"
+        );
+
+        let mut no_inheritance = policy.clone();
+        no_inheritance["trials"][0]["after_flag"] = serde_json::json!(false);
+        assert!(matches!(
+            openshell_credential_permission_stays_in_declared_scope(&no_inheritance, &relay),
+            Verdict::Violation(_)
+        ));
+
+        let mut no_consumer_effect = relay.clone();
+        let forwarded = no_consumer_effect["results"]
+            .as_array_mut()
+            .unwrap()
+            .iter_mut()
+            .find(|trial| trial["mode"] == "flag-on")
+            .unwrap();
+        forwarded["client"]["byte_equal"] = serde_json::json!(false);
+        assert!(matches!(
+            openshell_credential_permission_stays_in_declared_scope(&policy, &no_consumer_effect),
+            Verdict::Violation(_)
+        ));
+    }
 }

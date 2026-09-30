@@ -1,0 +1,16 @@
+{
+  "argv": [
+    "$OPENSHELL_BIN",
+    "--color",
+    "never",
+    "--gateway",
+    "kairo-090-v012",
+    "policy",
+    "get",
+    "kairo090-e2e",
+    "--base",
+    "--output",
+    "json"
+  ],
+  "exit_code": 0
+}

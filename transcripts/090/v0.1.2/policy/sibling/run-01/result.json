@@ -1,0 +1,25 @@
+{
+  "after_binaries": [
+    "/usr/local/bin/tool-a",
+    "/usr/local/bin/tool-b"
+  ],
+  "after_flag": false,
+  "artifacts": {
+    "after": "sibling/run-01/after.stdout.txt",
+    "before": "sibling/run-01/before.stdout.txt",
+    "update_command": "sibling/run-01/update.command.json",
+    "update_stderr": "sibling/run-01/update.stderr.txt",
+    "update_stdout": "sibling/run-01/update.stdout.txt"
+  },
+  "before_binaries": [
+    "/usr/local/bin/tool-a",
+    "/usr/local/bin/tool-b"
+  ],
+  "before_flag": false,
+  "binary_b_declared_by_update": false,
+  "binary_b_present_after": true,
+  "case": "sibling",
+  "passed": true,
+  "trial": 1,
+  "update_exit_code": 1
+}

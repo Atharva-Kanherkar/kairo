@@ -1,0 +1,2 @@
+✓ Policy version 39 submitted (hash: bdacf5e3b28c)
+✓ Policy version 39 loaded (active version: 39)

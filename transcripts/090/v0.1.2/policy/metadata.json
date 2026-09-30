@@ -1,0 +1,16 @@
+{
+  "environment_names": [
+    "XDG_CONFIG_HOME",
+    "XDG_STATE_HOME"
+  ],
+  "gateway": "kairo-090-v012",
+  "sandbox": "kairo090-e2e",
+  "schema_version": 1,
+  "target": {
+    "cli_version_output": "openshell 0.1.2",
+    "commit": "6648bd0c290efbc41ba131ee9831ee45cd431f94",
+    "name": "NVIDIA/OpenShell",
+    "version": "v0.1.2"
+  },
+  "trials_per_case": 5
+}

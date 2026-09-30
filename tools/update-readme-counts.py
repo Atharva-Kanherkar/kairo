@@ -38,6 +38,7 @@ GATEWAYS = (
     ("dynamo", "Dynamo"),
     ("ogx", "OGX"),
     ("agentgateway", "agentgateway"),
+    ("openshell", "OpenShell"),
 )
 
 TEST_RE = re.compile(r"^\s*#\[test\]", re.MULTILINE)

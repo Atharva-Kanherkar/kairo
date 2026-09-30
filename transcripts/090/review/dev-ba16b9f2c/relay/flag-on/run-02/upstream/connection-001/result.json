@@ -1,0 +1,8 @@
+{
+  "authorization_present": true,
+  "authorization_redacted": true,
+  "opcode": 2,
+  "outcome": "binary-forwarded",
+  "payload_hex": "4b4149524f2d3039302d42494e4152592d414354494f4e",
+  "raw_frame_hex": "8297f3bb4137b8fa0865bc96710ec396037ebdfa136edefa0263baf40f"
+}
