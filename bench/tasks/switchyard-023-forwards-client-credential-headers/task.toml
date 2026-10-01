@@ -1,0 +1,39 @@
+id = "switchyard-023-forwards-client-credential-headers"
+title = "Client api-key and OpenAI-Organization / OpenAI-Project headers are forwarded upstream"
+kind = "bug"
+env = "switchyard-e9767d6"
+category = "credential-boundary"
+difficulty = "easy"
+finding = "023"
+languages = ["rust"]
+splits = ["kairo-30"]
+
+[repo]
+name = "NVIDIA-NeMo/Switchyard"
+url = "https://github.com/NVIDIA-NeMo/Switchyard"
+base_commit = "e9767d642461af63e7f11dc74a85f1e9f56c1e78"
+base_ref = "main on 2026-08-13"
+
+[upstream]
+fix = "https://github.com/NVIDIA-NeMo/Switchyard/pull/420"
+status = "fixed"
+
+[gold]
+# PR #420 backported to this base (the reserved-header list gained one unrelated
+# entry upstream in between, so the hunk context differs).
+source = "upstream-merged"
+url = "https://github.com/NVIDIA-NeMo/Switchyard/pull/420"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 2400
+fail_to_pass = [
+  "client_api_key_header_not_forwarded",
+  "client_openai_org_and_project_not_forwarded",
+]
+pass_to_pass = [
+  "client_authorization_and_x_api_key_still_stripped",
+  "configured_credentials_still_sent",
+  "benign_metadata_header_still_forwarded",
+  "cargo_tests_llm_client",
+]

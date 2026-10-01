@@ -1,0 +1,76 @@
+{
+  "base_as_expected": "3/3",
+  "base_commit": "e9767d642461af63e7f11dc74a85f1e9f56c1e78",
+  "env": "switchyard-e9767d6",
+  "gold_as_expected": "3/3",
+  "gold_source": "upstream-merged",
+  "image_id": "sha256:fd6e003e94b679c2c783d037e997b0ddd534af96f1ef2932750162b1f2e3af8c",
+  "kind": "bug",
+  "ok": true,
+  "problems": [],
+  "repeats": 3,
+  "task": "switchyard-040-output-format-dropped",
+  "tests": {
+    "cargo_tests_translation": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "messages_forwarded": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "no_response_format_invented": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "openai_route_keeps_response_format": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "output_format_schema_forwarded": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  },
+  "validated_at": "2026-09-24T16:13:24+00:00"
+}

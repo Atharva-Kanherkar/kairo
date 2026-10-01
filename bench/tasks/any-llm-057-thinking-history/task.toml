@@ -1,0 +1,39 @@
+id = "any-llm-057-thinking-history"
+title = "Messages bridge drops replayed assistant thinking blocks"
+kind = "bug"
+env = "any-llm-3ee84f6"
+category = "content-loss"
+difficulty = "easy"
+finding = "057"
+languages = ["python"]
+splits = ["kairo-30"]
+
+[repo]
+name = "mozilla-ai/any-llm"
+url = "https://github.com/mozilla-ai/any-llm"
+base_commit = "3ee84f6a3482f86d4c02c25643613809944709d1"
+base_ref = "main before PR #1312"
+
+[upstream]
+issues = ["https://github.com/mozilla-ai/any-llm/issues/1311"]
+fix = "https://github.com/mozilla-ai/any-llm/pull/1312"
+status = "fixed"
+
+[gold]
+source = "upstream-merged"
+url = "https://github.com/mozilla-ai/any-llm/pull/1312"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 600
+reset_paths = ["tests"]
+fail_to_pass = [
+  "thinking_block_forwarded",
+  "thinking_forwarded_with_tool_use_turn",
+]
+pass_to_pass = [
+  "visible_assistant_text_preserved",
+  "thinking_not_leaked_into_visible_content",
+  "plain_conversation_unchanged",
+  "upstream_unit_tests_messages_compat",
+]

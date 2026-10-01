@@ -1,0 +1,15 @@
+diff --git a/litellm/llms/anthropic/experimental_pass_through/responses_adapters/transformation.py b/litellm/llms/anthropic/experimental_pass_through/responses_adapters/transformation.py
+index 1fdb0318ba..e175d7e0ed 100644
+--- a/litellm/llms/anthropic/experimental_pass_through/responses_adapters/transformation.py
++++ b/litellm/llms/anthropic/experimental_pass_through/responses_adapters/transformation.py
+@@ -579,6 +579,10 @@ class LiteLLMAnthropicToResponsesAPIAdapter:
+             responses_kwargs["tool_choice"] = self.translate_tool_choice_to_responses_api(
+                 cast(AnthropicMessagesToolChoice, tool_choice)
+             )
++            # Anthropic carries the sequential-tool-use switch inside tool_choice; the
++            # Responses API carries it as a sibling. It is valid on every tool_choice type.
++            if isinstance(tool_choice, Mapping) and tool_choice.get("disable_parallel_tool_use") is True:
++                responses_kwargs["parallel_tool_calls"] = False
+ 
+         # thinking -> reasoning
+         thinking: Final = anthropic_request.get("thinking")

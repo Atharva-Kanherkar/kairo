@@ -1,0 +1,40 @@
+id = "litellm-067-messages-refusal-erased"
+title = "/v1/messages turns an OpenAI Responses refusal into an empty end_turn message"
+kind = "bug"
+env = "litellm-b9f5cd6"
+category = "content-loss"
+difficulty = "medium"
+finding = "067"
+languages = ["python"]
+splits = ["kairo-30"]
+
+[repo]
+name = "BerriAI/litellm"
+url = "https://github.com/BerriAI/litellm"
+base_commit = "b9f5cd60364aae12b654c3e01aa43173e4003e71"
+base_ref = "litellm_internal_staging on 2026-09-06"
+
+[upstream]
+issues = ["https://github.com/BerriAI/litellm/issues/39721"]
+fix = "https://github.com/BerriAI/litellm/pull/39723"
+status = "fixed"
+
+[gold]
+source = "upstream-merged"
+url = "https://github.com/BerriAI/litellm/pull/39723"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 1200
+reset_paths = ["tests"]
+fail_to_pass = [
+  "refusal_text_reaches_client",
+  "refusal_reported_as_refusal",
+  "streamed_refusal_text_reaches_client",
+]
+pass_to_pass = [
+  "plain_text_turn_unchanged",
+  "plain_text_stream_unchanged",
+  "tool_call_turn_unchanged",
+  "upstream_unit_tests_responses_adapters",
+]

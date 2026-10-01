@@ -1,0 +1,39 @@
+id = "switchyard-010-reasoning-after-text-in-chunk"
+title = "A stream chunk with reasoning and text emits the text before the thinking"
+kind = "bug"
+env = "switchyard-e9767d6"
+category = "stream-lifecycle"
+difficulty = "easy"
+finding = "010B"
+languages = ["rust"]
+splits = ["kairo-30"]
+
+[repo]
+name = "NVIDIA-NeMo/Switchyard"
+url = "https://github.com/NVIDIA-NeMo/Switchyard"
+base_commit = "e9767d642461af63e7f11dc74a85f1e9f56c1e78"
+base_ref = "main on 2026-08-13"
+
+[upstream]
+issues = ["https://github.com/NVIDIA-NeMo/Switchyard/issues/242"]
+fix = "https://github.com/NVIDIA-NeMo/Switchyard/pull/387"
+status = "fixed"
+
+[gold]
+# PR #387 backported to this base: the same change, re-applied by hand around one
+# block that did not exist yet here.
+source = "upstream-merged"
+url = "https://github.com/NVIDIA-NeMo/Switchyard/pull/387"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 2400
+fail_to_pass = [
+  "mixed_chunk_thinking_before_text",
+]
+pass_to_pass = [
+  "mixed_chunk_keeps_both_texts",
+  "plain_stream_unchanged",
+  "buffered_reasoning_before_text",
+  "cargo_tests_translation",
+]

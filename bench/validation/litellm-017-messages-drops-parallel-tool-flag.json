@@ -1,0 +1,100 @@
+{
+  "base_as_expected": "3/3",
+  "base_commit": "e7bff277a6f93ec4a26850d05ce2f6c2842c1512",
+  "env": "litellm-e7bff27",
+  "gold_as_expected": "3/3",
+  "gold_source": "kairo-reference",
+  "image_id": "sha256:59c696192a0df98616f53add9faf4881408a6b68c4e1a5b8d8c11c55a366df0a",
+  "kind": "bug",
+  "ok": true,
+  "problems": [],
+  "repeats": 3,
+  "task": "litellm-017-messages-drops-parallel-tool-flag",
+  "tests": {
+    "chat_route_keeps_parallel_false": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "disable_parallel_any_forwarded": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "disable_parallel_auto_forwarded": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "disable_parallel_named_tool_forwarded": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "parallel_flag_not_invented": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "tool_choice_mapping_preserved": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "upstream_unit_tests_responses_adapters": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  },
+  "validated_at": "2026-09-24T16:15:38+00:00"
+}

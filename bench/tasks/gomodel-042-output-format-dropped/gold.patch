@@ -1,0 +1,67 @@
+diff --git a/internal/anthropicapi/request.go b/internal/anthropicapi/request.go
+index 6c5be82..9bd3aa3 100644
+--- a/internal/anthropicapi/request.go
++++ b/internal/anthropicapi/request.go
+@@ -550,9 +550,47 @@ func buildExtraFields(req *MessagesRequest) core.UnknownJSONFields {
+ 	if raw := bytes.TrimSpace(req.CacheControl); len(raw) > 0 && !core.IsJSONNull(raw) {
+ 		fields["cache_control"] = core.CloneRawJSON(raw)
+ 	}
++	if raw, ok := structuredOutputResponseFormat(req); ok {
++		fields["response_format"] = raw
++	}
+ 	return core.UnknownJSONFieldsFromMap(fields)
+ }
+ 
++// structuredOutputResponseFormat maps Anthropic structured output (output_config.format,
++// or the top-level output_format spelling) onto an OpenAI json_schema response_format.
++func structuredOutputResponseFormat(req *MessagesRequest) (json.RawMessage, bool) {
++	var format struct {
++		Type   string          `json:"type"`
++		Schema json.RawMessage `json:"schema"`
++	}
++	var config struct {
++		Format json.RawMessage `json:"format"`
++	}
++	raw := bytes.TrimSpace(req.OutputFormat)
++	if cfg := bytes.TrimSpace(req.OutputConfig); len(cfg) > 0 && !core.IsJSONNull(cfg) {
++		if err := json.Unmarshal(cfg, &config); err == nil && len(bytes.TrimSpace(config.Format)) > 0 {
++			raw = bytes.TrimSpace(config.Format)
++		}
++	}
++	if len(raw) == 0 || core.IsJSONNull(raw) {
++		return nil, false
++	}
++	if err := json.Unmarshal(raw, &format); err != nil || format.Type != "json_schema" || len(format.Schema) == 0 {
++		return nil, false
++	}
++	out, err := json.Marshal(map[string]any{
++		"type": "json_schema",
++		"json_schema": map[string]any{
++			"name":   "output",
++			"schema": format.Schema,
++		},
++	})
++	if err != nil {
++		return nil, false
++	}
++	return out, true
++}
++
+ // EstimateInputTokens returns a provider-agnostic heuristic estimate of the
+ // input token count for a Messages request (roughly characters / 4). It is an
+ // approximation, not a tokenizer-exact count.
+diff --git a/internal/anthropicapi/types.go b/internal/anthropicapi/types.go
+index 6e79762..1179c16 100644
+--- a/internal/anthropicapi/types.go
++++ b/internal/anthropicapi/types.go
+@@ -24,6 +24,10 @@ type MessagesRequest struct {
+ 	ToolChoice    *ToolChoice     `json:"tool_choice,omitempty"`
+ 	Thinking      *Thinking       `json:"thinking,omitempty"`
+ 	CacheControl  json.RawMessage `json:"cache_control,omitempty" swaggertype:"object"`
++	// OutputConfig carries structured-output settings ({"format": {"type": "json_schema", ...}}).
++	// OutputFormat is the older top-level spelling of the same format object.
++	OutputConfig json.RawMessage `json:"output_config,omitempty" swaggertype:"object"`
++	OutputFormat json.RawMessage `json:"output_format,omitempty" swaggertype:"object"`
+ }
+ 
+ // Metadata carries the optional Anthropic request metadata object.

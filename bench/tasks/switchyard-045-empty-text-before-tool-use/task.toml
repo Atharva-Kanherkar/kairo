@@ -1,0 +1,36 @@
+id = "switchyard-045-empty-text-before-tool-use"
+title = "Non-streaming /v1/messages invents an empty text block before tool_use"
+kind = "bug"
+env = "switchyard-e9767d6"
+category = "content-loss"
+difficulty = "easy"
+finding = "045"
+languages = ["rust"]
+splits = ["kairo-30"]
+
+[repo]
+name = "NVIDIA-NeMo/Switchyard"
+url = "https://github.com/NVIDIA-NeMo/Switchyard"
+base_commit = "e9767d642461af63e7f11dc74a85f1e9f56c1e78"
+base_ref = "main on 2026-08-13"
+
+[upstream]
+fix = "https://github.com/NVIDIA-NeMo/Switchyard/pull/776"
+status = "fixed"
+
+[gold]
+source = "upstream-merged"
+url = "https://github.com/NVIDIA-NeMo/Switchyard/pull/776"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 2400
+fail_to_pass = [
+  "tool_only_turn_has_no_empty_text_block",
+]
+pass_to_pass = [
+  "tool_only_turn_reports_tool_use",
+  "text_turn_keeps_text",
+  "stream_tool_turn_clean",
+  "cargo_tests_translation",
+]

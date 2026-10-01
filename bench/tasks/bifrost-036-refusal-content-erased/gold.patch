@@ -1,0 +1,48 @@
+diff --git a/core/providers/anthropic/responses.go b/core/providers/anthropic/responses.go
+index f0e242734..23c57bdb5 100644
+--- a/core/providers/anthropic/responses.go
++++ b/core/providers/anthropic/responses.go
+@@ -4961,6 +4961,8 @@ func ToAnthropicResponsesResponse(ctx *schemas.BifrostContext, bifrostResp *sche
+ 	// Map stop reason from Bifrost response if available, otherwise infer from content
+ 	if bifrostResp.StopReason != nil {
+ 		anthropicResp.StopReason = ConvertBifrostFinishReasonToAnthropic(*bifrostResp.StopReason)
++	} else if responsesOutputHasRefusal(bifrostResp.Output) {
++		anthropicResp.StopReason = AnthropicStopReasonRefusal
+ 	} else {
+ 		anthropicResp.StopReason = AnthropicStopReasonEndTurn
+ 		for _, block := range contentBlocks {
+@@ -8688,6 +8690,15 @@ func convertResponsesToolChoiceToAnthropic(toolChoice *schemas.ResponsesToolChoi
+ // Helper function to convert ContentBlock to AnthropicContentBlock
+ func convertContentBlockToAnthropic(block schemas.ResponsesMessageContentBlock) *AnthropicContentBlock {
+ 	switch block.Type {
++	case schemas.ResponsesOutputMessageContentTypeRefusal:
++		// Anthropic has no refusal content type; the refusal is ordinary assistant text,
++		// and ToAnthropicResponsesResponse reports stop_reason "refusal" for it.
++		if block.ResponsesOutputMessageContentRefusal != nil && block.ResponsesOutputMessageContentRefusal.Refusal != "" {
++			return &AnthropicContentBlock{
++				Type: AnthropicContentBlockTypeText,
++				Text: schemas.Ptr(block.ResponsesOutputMessageContentRefusal.Refusal),
++			}
++		}
+ 	case schemas.ResponsesInputMessageContentBlockTypeText, schemas.ResponsesOutputMessageContentTypeText:
+ 		anthropicBlock := AnthropicContentBlock{}
+ 		if block.Text != nil {
+@@ -9520,3 +9531,18 @@ func rawCaptureExtraFields(extra schemas.BifrostResponseExtraFields) *schemas.Bi
+ 	echo := extra
+ 	return &echo
+ }
++
++// responsesOutputHasRefusal reports whether any output message carries a refusal part.
++func responsesOutputHasRefusal(output []schemas.ResponsesMessage) bool {
++	for _, item := range output {
++		if item.Content == nil {
++			continue
++		}
++		for _, block := range item.Content.ContentBlocks {
++			if block.Type == schemas.ResponsesOutputMessageContentTypeRefusal {
++				return true
++			}
++		}
++	}
++	return false
++}

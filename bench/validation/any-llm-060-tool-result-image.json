@@ -1,0 +1,88 @@
+{
+  "base_as_expected": "3/3",
+  "base_commit": "3ee84f6a3482f86d4c02c25643613809944709d1",
+  "env": "any-llm-3ee84f6",
+  "gold_as_expected": "3/3",
+  "gold_source": "upstream-merged",
+  "image_id": "sha256:0e7d4898d71661e541d4f6939f26c1cef940e0be3ddefd151c7a85929b86e5bf",
+  "kind": "bug",
+  "ok": true,
+  "problems": [],
+  "repeats": 3,
+  "task": "any-llm-060-tool-result-image",
+  "tests": {
+    "image_forwarded_from_parallel_tool_results": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "tool_messages_follow_openai_rules": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "tool_result_image_forwarded": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "tool_result_text_preserved": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "upstream_unit_tests_messages_compat": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "user_image_still_forwarded": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  },
+  "validated_at": "2026-09-24T17:28:06+00:00"
+}

@@ -1,0 +1,40 @@
+id = "any-llm-058-parallel-tool-flag"
+title = "Messages bridge drops disable_parallel_tool_use"
+kind = "bug"
+env = "any-llm-3ee84f6"
+category = "request-field-drop"
+difficulty = "easy"
+finding = "058"
+languages = ["python"]
+splits = ["kairo-30"]
+
+[repo]
+name = "mozilla-ai/any-llm"
+url = "https://github.com/mozilla-ai/any-llm"
+base_commit = "3ee84f6a3482f86d4c02c25643613809944709d1"
+base_ref = "main before PR #1312"
+
+[upstream]
+issues = ["https://github.com/mozilla-ai/any-llm/issues/1311", "https://github.com/mozilla-ai/any-llm/issues/646"]
+fix = "https://github.com/mozilla-ai/any-llm/pull/1312"
+status = "fixed"
+
+[gold]
+source = "upstream-merged"
+url = "https://github.com/mozilla-ai/any-llm/pull/1312"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 600
+reset_paths = ["tests"]
+fail_to_pass = [
+  "disable_parallel_auto_forwarded",
+  "disable_parallel_any_forwarded",
+  "disable_parallel_named_tool_forwarded",
+]
+pass_to_pass = [
+  "parallel_flag_absent_when_not_requested",
+  "tool_choice_mapping_preserved",
+  "tools_forwarded",
+  "upstream_unit_tests_messages_compat",
+]

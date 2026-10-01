@@ -1,0 +1,44 @@
+{
+  "base_as_expected": "3/3",
+  "base_commit": "e7bff277a6f93ec4a26850d05ce2f6c2842c1512",
+  "env": "litellm-e7bff27",
+  "gold_as_expected": "n/a",
+  "gold_source": "none",
+  "image_id": "sha256:59c696192a0df98616f53add9faf4881408a6b68c4e1a5b8d8c11c55a366df0a",
+  "kind": "no-bug",
+  "ok": true,
+  "problems": [],
+  "repeats": 3,
+  "task": "litellm-nobug-messages-tool-strict",
+  "tests": {
+    "strict_absent_not_invented": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "strict_true_forwarded": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "tool_schema_forwarded": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "upstream_unit_tests_responses_adapters": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  },
+  "validated_at": "2026-09-24T16:18:02+00:00"
+}

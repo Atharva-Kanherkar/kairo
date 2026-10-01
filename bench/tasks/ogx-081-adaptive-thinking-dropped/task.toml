@@ -1,0 +1,39 @@
+id = "ogx-081-adaptive-thinking-dropped"
+title = "Messages translation accepts adaptive thinking with HTTP 200 and silently drops it"
+kind = "bug"
+env = "ogx-051a8a0"
+category = "request-field-drop"
+difficulty = "easy"
+finding = "081"
+languages = ["python"]
+splits = ["kairo-30"]
+
+[repo]
+name = "ogx-ai/ogx"
+url = "https://github.com/ogx-ai/ogx"
+base_commit = "051a8a0dff57d8f7a40aced27cfcf8b629212b36"
+base_ref = "v1.4.0"
+
+[upstream]
+issues = ["https://github.com/ogx-ai/ogx/issues/6614", "https://github.com/ogx-ai/ogx/pull/5938"]
+fix = "https://github.com/ogx-ai/ogx/pull/6615"
+status = "duplicate-open"
+
+[gold]
+source = "upstream-open-pr"
+url = "https://github.com/ogx-ai/ogx/pull/6615"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 900
+reset_paths = ["tests"]
+fail_to_pass = [
+  "adaptive_thinking_not_silently_dropped",
+  "adaptive_thinking_with_effort_not_silently_dropped",
+]
+pass_to_pass = [
+  "enabled_thinking_still_rejected",
+  "disabled_thinking_forwards_request",
+  "plain_request_forwards_request",
+  "upstream_unit_tests_anthropic_translation",
+]

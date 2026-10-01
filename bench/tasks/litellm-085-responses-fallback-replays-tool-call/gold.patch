@@ -1,0 +1,36 @@
+diff --git a/litellm/router.py b/litellm/router.py
+index 98c7c319ea..9fd6c50750 100644
+--- a/litellm/router.py
++++ b/litellm/router.py
+@@ -3288,12 +3288,31 @@ class Router:
+                 # async generators always expose aclose — no defensive check needed.
+                 await self._async_generator.aclose()
+ 
++        def forwards_non_message_item(chunk: object) -> bool:
++            """True for a ``response.output_item.added`` announcing a tool call or other non-message item."""
++            if getattr(chunk, "type", None) != "response.output_item.added":
++                return False
++            item: Final = getattr(chunk, "item", None)
++            item_type: Final = item.get("type") if isinstance(item, dict) else getattr(item, "type", None)
++            return item_type is not None and item_type != "message"
++
+         async def stream_with_fallbacks():
+             fallback_response = None
++            delivered_non_message_item = False
+             try:
+                 async for item in source_iterator:
++                    if not delivered_non_message_item and forwards_non_message_item(item):
++                        delivered_non_message_item = True  # rebind-ok: one-shot latch
+                     yield item
+             except MidStreamFallbackError as e:
++                if delivered_non_message_item:
++                    # A tool call (or another non-message item) already reached the client.
++                    # A fallback would open a second lifecycle in the same stream and replay it,
++                    # so the client would execute the call twice. Surface the failure instead, as
++                    # _acompletion_streaming_iterator does once content has streamed (#34627).
++                    if e.original_exception is not None:
++                        raise e.original_exception from e
++                    raise
+                 partial_usage: Final = Router._extract_partial_responses_usage(source_iterator)
+                 try:
+                     model_group: Final = cast(str, initial_kwargs.get("model"))

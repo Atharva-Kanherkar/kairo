@@ -1,0 +1,38 @@
+id = "switchyard-010-content-filter-end-turn"
+title = "Upstream content_filter finish is reported to Anthropic clients as end_turn"
+kind = "bug"
+env = "switchyard-e9767d6"
+category = "stop-reason-mapping"
+difficulty = "easy"
+finding = "010A"
+languages = ["rust"]
+splits = ["kairo-30"]
+
+[repo]
+name = "NVIDIA-NeMo/Switchyard"
+url = "https://github.com/NVIDIA-NeMo/Switchyard"
+base_commit = "e9767d642461af63e7f11dc74a85f1e9f56c1e78"
+base_ref = "main on 2026-08-13"
+
+[upstream]
+issues = ["https://github.com/NVIDIA-NeMo/Switchyard/issues/369"]
+fix = "https://github.com/NVIDIA-NeMo/Switchyard/pull/370"
+status = "fixed"
+
+[gold]
+source = "upstream-merged"
+url = "https://github.com/NVIDIA-NeMo/Switchyard/pull/370"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 2400
+fail_to_pass = [
+  "content_filter_not_end_turn_buffered",
+  "content_filter_not_end_turn_stream",
+]
+pass_to_pass = [
+  "normal_stop_is_end_turn",
+  "tool_call_is_tool_use",
+  "partial_text_still_delivered",
+  "openai_route_keeps_content_filter",
+]

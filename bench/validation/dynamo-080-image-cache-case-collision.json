@@ -1,0 +1,88 @@
+{
+  "base_as_expected": "3/3",
+  "base_commit": "5593e8857c508bebce7259e107a85c57cd142fd8",
+  "env": "dynamo-5593e88",
+  "gold_as_expected": "3/3",
+  "gold_source": "upstream-open-pr",
+  "image_id": "sha256:5ba7795edff1bd84161bfaa9fde39aa948cc3b9e3cb4766f8ced70e3443a5898",
+  "kind": "bug",
+  "ok": true,
+  "problems": [],
+  "repeats": 3,
+  "task": "dynamo-080-image-cache-case-collision",
+  "tests": {
+    "cache_disabled_fetches_every_request": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "case_differing_paths_decode_distinct_images": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "case_differing_queries_decode_distinct_images": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "distinct_urls_decode_distinct_images": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "repeated_url_served_from_cache": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "upstream_unit_tests_image_loader": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  },
+  "validated_at": "2026-09-24T17:28:45+00:00"
+}

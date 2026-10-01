@@ -1,0 +1,38 @@
+id = "bifrost-075-gemini-inline-image-dropped"
+title = "Gemini inlineData images and audio vanish on the Chat Completions route"
+kind = "bug"
+env = "bifrost-98af761"
+category = "content-loss"
+difficulty = "hard"
+finding = "075"
+languages = ["go"]
+splits = ["kairo-30"]
+
+[repo]
+name = "maximhq/bifrost"
+url = "https://github.com/maximhq/bifrost"
+base_commit = "98af761c0adab5dee4c91c7c5121034a73c10488"
+base_ref = "dev on 2026-09-07"
+
+[upstream]
+issues = ["https://github.com/maximhq/bifrost/issues/7032"]
+fix = "https://github.com/maximhq/bifrost/pull/7033"
+status = "fixed"
+
+[gold]
+source = "upstream-merged"
+url = "https://github.com/maximhq/bifrost/pull/7033"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 1800
+fail_to_pass = [
+  "chat_unary_keeps_generated_image",
+  "chat_stream_keeps_generated_image",
+]
+pass_to_pass = [
+  "chat_unary_keeps_caption",
+  "chat_stream_keeps_caption",
+  "responses_route_keeps_generated_image",
+  "text_only_turn_unchanged",
+]

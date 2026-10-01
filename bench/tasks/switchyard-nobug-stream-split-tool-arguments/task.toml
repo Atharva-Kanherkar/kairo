@@ -1,0 +1,23 @@
+id = "switchyard-nobug-stream-split-tool-arguments"
+title = "Report: streamed tool arguments split across deltas get corrupted (they do not)"
+kind = "no-bug"
+env = "switchyard-e9767d6"
+category = "stream-lifecycle"
+difficulty = "easy"
+finding = "007 streaming control (honest negative)"
+languages = ["rust"]
+splits = ["negatives"]
+
+[repo]
+name = "NVIDIA-NeMo/Switchyard"
+url = "https://github.com/NVIDIA-NeMo/Switchyard"
+base_commit = "e9767d642461af63e7f11dc74a85f1e9f56c1e78"
+base_ref = "main on 2026-08-13"
+
+[upstream]
+status = "documented-behavior"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 2400
+pass_to_pass = ["split_arguments_reassembled_exactly", "tool_use_identity_intact", "stream_ends_with_tool_use", "cargo_tests_translation"]

@@ -1,0 +1,36 @@
+id = "switchyard-040-output-format-dropped"
+title = "Anthropic output_format json_schema is dropped on /v1/messages"
+kind = "bug"
+env = "switchyard-e9767d6"
+category = "request-field-drop"
+difficulty = "easy"
+finding = "040"
+languages = ["rust"]
+splits = ["kairo-30"]
+
+[repo]
+name = "NVIDIA-NeMo/Switchyard"
+url = "https://github.com/NVIDIA-NeMo/Switchyard"
+base_commit = "e9767d642461af63e7f11dc74a85f1e9f56c1e78"
+base_ref = "main on 2026-08-13"
+
+[upstream]
+fix = "https://github.com/NVIDIA-NeMo/Switchyard/pull/462"
+status = "fixed"
+
+[gold]
+source = "upstream-merged"
+url = "https://github.com/NVIDIA-NeMo/Switchyard/pull/462"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 2400
+fail_to_pass = [
+  "output_format_schema_forwarded",
+]
+pass_to_pass = [
+  "no_response_format_invented",
+  "openai_route_keeps_response_format",
+  "messages_forwarded",
+  "cargo_tests_translation",
+]

@@ -1,0 +1,37 @@
+id = "switchyard-066-tool-strict-dropped"
+title = "Anthropic tools[].strict is dropped on the OpenAI Chat hop"
+kind = "bug"
+env = "switchyard-e9767d6"
+category = "request-field-drop"
+difficulty = "easy"
+finding = "066"
+languages = ["rust"]
+splits = ["kairo-30"]
+
+[repo]
+name = "NVIDIA-NeMo/Switchyard"
+url = "https://github.com/NVIDIA-NeMo/Switchyard"
+base_commit = "e9767d642461af63e7f11dc74a85f1e9f56c1e78"
+base_ref = "main on 2026-08-13"
+
+[upstream]
+issues = ["https://github.com/NVIDIA-NeMo/Switchyard/issues/577"]
+fix = "https://github.com/NVIDIA-NeMo/Switchyard/pull/585"
+status = "fixed"
+
+[gold]
+source = "upstream-merged"
+url = "https://github.com/NVIDIA-NeMo/Switchyard/pull/585"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 2400
+fail_to_pass = [
+  "strict_true_forwarded",
+]
+pass_to_pass = [
+  "strict_absent_not_invented",
+  "tool_schema_forwarded",
+  "openai_route_keeps_strict",
+  "cargo_tests_translation",
+]

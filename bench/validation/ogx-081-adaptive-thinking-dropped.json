@@ -1,0 +1,88 @@
+{
+  "base_as_expected": "3/3",
+  "base_commit": "051a8a0dff57d8f7a40aced27cfcf8b629212b36",
+  "env": "ogx-051a8a0",
+  "gold_as_expected": "3/3",
+  "gold_source": "upstream-open-pr",
+  "image_id": "sha256:25142f34363473bbd194dc410085b87b37f9b1f8f979f4363bc912448e04832f",
+  "kind": "bug",
+  "ok": true,
+  "problems": [],
+  "repeats": 3,
+  "task": "ogx-081-adaptive-thinking-dropped",
+  "tests": {
+    "adaptive_thinking_not_silently_dropped": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "adaptive_thinking_with_effort_not_silently_dropped": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "disabled_thinking_forwards_request": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "enabled_thinking_still_rejected": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "plain_request_forwards_request": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "upstream_unit_tests_anthropic_translation": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  },
+  "validated_at": "2026-09-24T17:29:27+00:00"
+}
