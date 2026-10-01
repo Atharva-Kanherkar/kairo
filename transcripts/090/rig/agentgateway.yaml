@@ -1,0 +1,70 @@
+# agentgateway rig for the tool_result image-loss investigation.
+#
+# Custom providers pin the egress format explicitly, so the only variable
+# between binds is which OpenAI shape agentgateway is told the upstream speaks.
+# The ingress is Anthropic Messages on every bind.
+#
+#   4100  chat    egress pinned to OpenAI Chat Completions   (suspect)
+#   4101  resp    egress pinned to OpenAI Responses          (control)
+#   4102  anth    egress pinned to Anthropic Messages        (passthrough control)
+#
+# Every upstream is the local capture mock, so the only variable is whether
+# agentgateway re-encodes the body or forwards it.
+config:
+  readinessAddr: 127.0.0.1:19201
+  statsAddr: 127.0.0.1:19202
+
+binds:
+- port: 4100
+  listeners:
+  - name: to-chat
+    routes:
+    - backends:
+      - ai:
+          name: chatprov
+          provider:
+            custom:
+              formats:
+              - type: completions
+                path: /v1/chat/completions
+          hostOverride: 127.0.0.1:9990
+      policies:
+        ai:
+          routes:
+            /v1/messages: messages
+
+- port: 4101
+  listeners:
+  - name: to-resp
+    routes:
+    - backends:
+      - ai:
+          name: respprov
+          provider:
+            custom:
+              formats:
+              - type: responses
+                path: /v1/responses
+          hostOverride: 127.0.0.1:9990
+      policies:
+        ai:
+          routes:
+            /v1/messages: messages
+
+- port: 4102
+  listeners:
+  - name: to-anth
+    routes:
+    - backends:
+      - ai:
+          name: anthprov
+          provider:
+            custom:
+              formats:
+              - type: messages
+                path: /v1/messages
+          hostOverride: 127.0.0.1:9990
+      policies:
+        ai:
+          routes:
+            /v1/messages: messages

@@ -156,6 +156,113 @@ pub fn openai_stream_toolcall_type_never_null(sse: &str) -> Verdict {
     ))
 }
 
+/// Invariant (bug 090): a translator that receives a non-text part inside a
+/// tool result must either carry it, map it, or refuse the request. It must not
+/// return HTTP 200 having silently deleted it.
+///
+/// This is the "loud or lossless, never silently lossy" rule applied to request
+/// bodies rather than responses. A tool result carrying an image is how every
+/// vision tool reports what it saw, so deleting the media turns a screenshot tool
+/// into a text-only tool while the caller is told the call succeeded.
+///
+/// The forwarder is given as the client's original request body plus the body
+/// the gateway actually emitted, because the loss is only observable by
+/// comparing the two. `carried` is checked per non-text part so a genuine
+/// dialect gap (no equivalent part type exists) is reported separately from a
+/// silent deletion: a translator that cannot represent the part should return an
+/// error rather than an HTTP 200 with the part missing.
+pub fn tool_result_media_not_silently_dropped(client_body: &str, forwarded_body: &str) -> Verdict {
+    /// Anthropic `tool_result` part types whose payload is not plain text. A
+    /// text part needs no equivalent in any target dialect, so it is excluded.
+    const MEDIA_PARTS: [&str; 3] = ["image", "document", "search_result"];
+
+    let Ok(client) = serde_json::from_str::<Value>(client_body) else {
+        return Verdict::Violation("client request body is not valid JSON".into());
+    };
+    let Ok(forwarded) = serde_json::from_str::<Value>(forwarded_body) else {
+        return Verdict::Violation("forwarded request body is not valid JSON".into());
+    };
+
+    // Count non-text tool_result parts the client sent.
+    let sent: Vec<String> = client
+        .get("messages")
+        .and_then(Value::as_array)
+        .map(|messages| {
+            messages
+                .iter()
+                .flat_map(|message| {
+                    message
+                        .get("content")
+                        .and_then(Value::as_array)
+                        .into_iter()
+                        .flatten()
+                        .filter(|block| {
+                            block.get("type").and_then(Value::as_str) == Some("tool_result")
+                        })
+                        .filter_map(|block| block.get("content"))
+                        .filter_map(Value::as_array)
+                        .flatten()
+                        .filter_map(|part| part.get("type").and_then(Value::as_str))
+                        .filter(|kind| MEDIA_PARTS.contains(kind))
+                        .map(str::to_owned)
+                        .collect::<Vec<String>>()
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+
+    if sent.is_empty() {
+        return Verdict::Conformant;
+    }
+
+    // Did any forwarded message carry a non-text part at all? The translator is
+    // free to choose the target representation: Chat Completions would use an
+    // `image_url` part on a `tool` message, Anthropic keeps the `image` part
+    // inside `tool_result`, Responses emits `input_image` inside
+    // `function_call_output`. All three are non-text parts, so the check is on
+    // the shape of the payload rather than on one dialect's spelling.
+    let carried_non_text = forwarded
+        .get("messages")
+        .and_then(Value::as_array)
+        .is_some_and(|messages| {
+            messages
+                .iter()
+                .flat_map(|message| {
+                    message
+                        .get("content")
+                        .and_then(Value::as_array)
+                        .into_iter()
+                        .flatten()
+                        .flat_map(|part| {
+                            // Anthropic nests the parts of a tool_result one
+                            // level deeper, so recurse through block content.
+                            part.get("content")
+                                .and_then(Value::as_array)
+                                .into_iter()
+                                .flatten()
+                                .chain(std::iter::once(part))
+                        })
+                })
+                .any(|part| {
+                    part.get("type")
+                        .and_then(Value::as_str)
+                        .is_some_and(|kind| kind != "text")
+                })
+        });
+
+    if carried_non_text {
+        return Verdict::Conformant;
+    }
+
+    Verdict::Violation(format!(
+        "client sent {} non-text tool_result part(s) ({}) and the forwarded body carries \
+         none of them on any tool message; a translator with no equivalent part type must \
+         refuse the request instead of returning success with the media deleted",
+        sent.len(),
+        sent.join(", ")
+    ))
+}
+
 /// Invariant (bug 074): one client-visible Responses stream represents one
 /// response lifecycle. Internal agent or tool rounds must not introduce a second
 /// `response.created` / `response.completed` pair or reuse an output index for an

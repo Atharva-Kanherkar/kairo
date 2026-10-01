@@ -24,9 +24,10 @@ use kairo::checks::{
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
     responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
-    thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
-    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, FunctionToolFormat,
-    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    thinking_text_forwarded, tool_result_media_not_silently_dropped, tool_strict_forwarded,
+    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
+    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
 use serde_json::Value;
 use std::fs;
@@ -4695,6 +4696,62 @@ fn checker_ignores_streams_without_tool_call_deltas() {
     );
     assert_eq!(
         openai_stream_toolcall_type_never_null(text_stream),
+        Verdict::Conformant
+    );
+}
+
+/// Bug 090: agentgateway's Anthropic ingress to OpenAI Chat Completions egress
+/// deletes a non-text part inside a `tool_result` and returns HTTP 200.
+///
+/// Both bodies below are the recorded wire bytes from
+/// `transcripts/090/rig/`, captured from a single agentgateway v1.5.0 process
+/// with the egress format pinned by config. The client request is identical in
+/// both runs; only the pinned egress format differs.
+#[test]
+fn agentgateway_chat_egress_silently_drops_tool_result_image() {
+    let client = fixture("transcripts/090/rig/req-toolresult-image.json");
+    let forwarded = fixture("transcripts/090/rig/forwarded-chat-body.json");
+    let v = tool_result_media_not_silently_dropped(&client, &forwarded);
+    assert!(
+        matches!(&v, Verdict::Violation(reason) if reason.contains("image")),
+        "the Chat Completions egress deleted the image and returned success, expected a violation, got {v:?}"
+    );
+}
+
+/// Control: the same request on the same process, egress pinned to Anthropic
+/// Messages, carries the image. This isolates the translation hop as the cause
+/// and rules out the gateway's Anthropic request parser.
+#[test]
+fn agentgateway_anthropic_egress_carries_tool_result_image() {
+    let client = fixture("transcripts/090/rig/req-toolresult-image.json");
+    let forwarded = fixture("transcripts/090/rig/forwarded-anth-body.json");
+    assert_eq!(
+        tool_result_media_not_silently_dropped(&client, &forwarded),
+        Verdict::Conformant
+    );
+}
+
+/// Control: the identical image in a user turn survives the same Chat
+/// Completions route, so the trigger is the `tool_result` position rather than
+/// the image, the route, or the gateway's handling of base64 media.
+#[test]
+fn agentgateway_user_turn_image_survives_same_route() {
+    let client = fixture("transcripts/090/rig/req-user-image.json");
+    let forwarded = fixture("transcripts/090/rig/forwarded-user-image-body.json");
+    assert_eq!(
+        tool_result_media_not_silently_dropped(&client, &forwarded),
+        Verdict::Conformant
+    );
+}
+
+/// Control: a text-only `tool_result` carries no non-text part, so the checker
+/// must not report a violation for a request that had nothing to lose.
+#[test]
+fn checker_ignores_text_only_tool_results() {
+    let client = fixture("transcripts/090/rig/req-toolresult-text-only.json");
+    let forwarded = fixture("transcripts/090/rig/forwarded-chat-body.json");
+    assert_eq!(
+        tool_result_media_not_silently_dropped(&client, &forwarded),
         Verdict::Conformant
     );
 }
