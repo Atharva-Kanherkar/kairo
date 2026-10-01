@@ -24,9 +24,10 @@ use kairo::checks::{
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
     responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
-    thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
-    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, FunctionToolFormat,
-    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    thinking_text_forwarded, tool_failure_signal_preserved, tool_strict_forwarded,
+    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
+    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
 use serde_json::Value;
 use std::fs;
@@ -4728,5 +4729,392 @@ fn agentgateway_empty_text_delta_between_arguments_is_conformant() {
     assert_eq!(
         anthropic_stream_block_lifecycle(&fixture("transcripts/091/rig/control-empty-delta.sse")),
         Verdict::Conformant
+    );
+}
+
+// ---- bug 093: a relay reports a failed tool call as a success ----
+
+/// Read one recorded artifact relative to the repo root.
+fn bug_093(relative: &str) -> String {
+    fixture(&format!("transcripts/093/{relative}"))
+}
+
+/// The `result` object of a recorded tools/call response, taken out of the raw
+/// HTTP bytes. Reading it here rather than trusting a saved summary means the
+/// conformance test is made against the same bytes the gateway emitted.
+fn bug_093_client_result(cell: &str, trial: &str) -> String {
+    let raw = bug_093(&format!(
+        "cells/{cell}/runs/run-{trial}/client-response.http"
+    ));
+    let body = raw
+        .split_once("\r\n\r\n")
+        .map_or(raw.as_str(), |(_, body)| body);
+    let value: Value = serde_json::from_str(body.trim())
+        .unwrap_or_else(|error| panic!("{cell} run-{trial}: client body is not JSON: {error}"));
+    value["result"].to_string()
+}
+
+/// The `result` object the upstream MCP server put on the stdio pipe for the same
+/// call, taken out of the recorded relay bytes.
+fn bug_093_tool_result(cell: &str, trial: &str) -> String {
+    let raw = bug_093(&format!(
+        "cells/{cell}/runs/run-{trial}/upstream-stdio-raw-probe.log"
+    ));
+    let frame = raw
+        .lines()
+        .rev()
+        .find(|line| line.starts_with("<<<server-to-client>>>"))
+        .unwrap_or_else(|| panic!("{cell} run-{trial}: no upstream response frame"));
+    let value: Value =
+        serde_json::from_str(frame.trim_start_matches("<<<server-to-client>>>").trim())
+            .unwrap_or_else(|error| {
+                panic!("{cell} run-{trial}: upstream frame is not JSON: {error}")
+            });
+    value["result"].to_string()
+}
+
+/// The reproduced defect, frozen against the recorded bytes.
+///
+/// The upstream tool reported failure on the stdio pipe. The relay handed the
+/// caller the same content with the failure signal gone, so a consumer branching
+/// on that signal classified the call as a success. This is the KNOWN-BAD case:
+/// the assertion below is that the checker returns `Violation`, so the day the
+/// relay stops dropping the signal this test fails and says so.
+#[test]
+fn relay_drops_the_failure_signal_of_a_failed_tool_call() {
+    for trial in ["01", "02", "03", "04", "05"] {
+        let verdict = tool_failure_signal_preserved(
+            &bug_093_client_result("violation_gateway_iserror", trial),
+            &bug_093_tool_result("violation_gateway_iserror", trial),
+        );
+        assert!(
+            matches!(&verdict, Verdict::Violation(reason)
+                if reason.contains("reported failure") && reason.contains("caller was given success")),
+            "violation_gateway_iserror run-{trial}: expected the dropped-signal verdict, got {verdict:?}"
+        );
+    }
+}
+
+/// The same relay, the same route, the same tool, with the relay removed from the
+/// path. The failure signal survives, which is what isolates the relay as the
+/// layer that loses it.
+#[test]
+fn failure_signal_survives_when_no_relay_is_in_the_path() {
+    for trial in ["01", "02", "03", "04", "05"] {
+        let verdict = tool_failure_signal_preserved(
+            &bug_093_client_result("control_direct_stdio", trial),
+            &bug_093_tool_result("control_direct_stdio", trial),
+        );
+        assert_eq!(
+            verdict,
+            Verdict::Conformant,
+            "control_direct_stdio run-{trial}: the signal must survive with no relay in the path"
+        );
+    }
+}
+
+/// A succeeding tool through the same relay is conformant. Without this, a
+/// checker that simply flagged every relay response would satisfy the previous
+/// test while describing nothing.
+#[test]
+fn relay_preserves_the_success_signal_of_a_succeeding_tool_call() {
+    for trial in ["01", "02", "03", "04", "05"] {
+        let verdict = tool_failure_signal_preserved(
+            &bug_093_client_result("control_gateway_success", trial),
+            &bug_093_tool_result("control_gateway_success", trial),
+        );
+        assert_eq!(
+            verdict,
+            Verdict::Conformant,
+            "control_gateway_success run-{trial}: a successful call must stay successful"
+        );
+    }
+}
+
+/// The differential cell: the same relay build carrying the upstream fix keeps the
+/// signal. Same failure, same tool, same client, different relay build, opposite
+/// outcome, which is what makes the relay the discriminating variable.
+#[test]
+fn relay_keeps_the_failure_signal_once_the_flip_is_applied() {
+    for trial in ["01", "02", "03", "04", "05"] {
+        let verdict = tool_failure_signal_preserved(
+            &bug_093_client_result("differential_pr7640", trial),
+            &bug_093_tool_result("differential_pr7640", trial),
+        );
+        assert_eq!(
+            verdict,
+            Verdict::Conformant,
+            "differential_pr7640 run-{trial}: the corrected relay must keep the signal"
+        );
+    }
+}
+
+/// The recorded matrix, cross-checked against the raw bytes on disk.
+///
+/// This is what stops the summary from drifting away from the evidence: each
+/// cell's expectations, counts, and target identities are asserted, and each
+/// run's ledger and upstream frame are re-derived rather than read back.
+/// Every cell's recorded identity and rate, plus a per-trial re-derivation of
+/// the two facts that matter from the bytes rather than from the summary.
+fn bug_093_check_matrix(cells: &serde_json::Map<String, Value>) {
+    // cell -> (target commit, isError key present in every client result,
+    //          isError:true present upstream in every trial, consumer verdict)
+    let expected = [
+        (
+            "violation_gateway_iserror",
+            "ed8371a9779bfbc8aa689d4d77964cf8ce9308bf",
+            false,
+            true,
+            "SUCCESS",
+        ),
+        (
+            "control_direct_stdio",
+            "ed8371a9779bfbc8aa689d4d77964cf8ce9308bf",
+            true,
+            true,
+            "FAILURE",
+        ),
+        (
+            "control_gateway_success",
+            "ed8371a9779bfbc8aa689d4d77964cf8ce9308bf",
+            false,
+            false,
+            "SUCCESS",
+        ),
+        (
+            "differential_pr7640",
+            "862b3bea5cd8a940d52fefdfb57a0741efc48c84",
+            true,
+            true,
+            "FAILURE",
+        ),
+    ];
+    for (cell, commit, key_present, upstream_failed, classification) in expected {
+        let recorded = &cells[cell];
+        assert_eq!(
+            recorded["target"]["commit"].as_str(),
+            Some(commit),
+            "{cell}: recorded target commit changed"
+        );
+        assert_eq!(
+            recorded["expectation_met_n_of_n"].as_str(),
+            Some("5 of 5"),
+            "{cell}: recorded rate is not N of N"
+        );
+        for (field, expected_value) in [
+            ("is_error_key_present_per_run", key_present),
+            ("upstream_emitted_is_error_true_per_run", upstream_failed),
+        ] {
+            let values = recorded[field]
+                .as_array()
+                .unwrap_or_else(|| panic!("{cell}: {field} has no recorded vector"));
+            assert_eq!(values.len(), 5, "{cell}: {field} must have five entries");
+            assert!(
+                values
+                    .iter()
+                    .all(|value| value.as_bool() == Some(expected_value)),
+                "{cell}: {field} disagrees with the recorded expectation"
+            );
+        }
+        let classifications = recorded["client_classification_per_run"]
+            .as_array()
+            .unwrap_or_else(|| panic!("{cell}: no recorded classification vector"));
+        assert_eq!(classifications.len(), 5);
+        assert!(
+            classifications
+                .iter()
+                .all(|value| value.as_str() == Some(classification)),
+            "{cell}: the consumer classification is not {classification} in every trial"
+        );
+
+        for trial in ["01", "02", "03", "04", "05"] {
+            let caller: Value =
+                serde_json::from_str(&bug_093_client_result(cell, trial)).expect("caller result");
+            let tool: Value =
+                serde_json::from_str(&bug_093_tool_result(cell, trial)).expect("tool result");
+            assert_eq!(
+                caller.get("isError").is_some(),
+                key_present,
+                "{cell} run-{trial}: client bytes disagree with the recorded expectation"
+            );
+            // An upstream success omits the key rather than stating false, so the
+            // expectation is about whether the key is there, not about a value.
+            assert_eq!(
+                tool.get("isError").is_some(),
+                upstream_failed,
+                "{cell} run-{trial}: upstream bytes disagree with the recorded expectation"
+            );
+            if upstream_failed {
+                assert_eq!(
+                    tool["isError"].as_bool(),
+                    Some(true),
+                    "{cell} run-{trial}: the upstream failure flag must read true"
+                );
+            }
+            bug_093_check_one_execution(cell, trial, upstream_failed);
+        }
+    }
+}
+
+/// One tool execution per call, counted at the server rather than inferred.
+fn bug_093_check_one_execution(cell: &str, trial: &str, upstream_failed: bool) {
+    let ledger = bug_093(&format!(
+        "cells/{cell}/runs/run-{trial}/tool-ledger-raw-probe.jsonl"
+    ));
+    let lines: Vec<&str> = ledger
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .collect();
+    assert_eq!(
+        lines.len(),
+        1,
+        "{cell} run-{trial}: expected one tool execution, got {}",
+        lines.len()
+    );
+    let entry: Value = serde_json::from_str(lines[0]).expect("ledger line is JSON");
+    assert_eq!(
+        entry["returned_flag"].as_bool(),
+        Some(upstream_failed),
+        "{cell} run-{trial}: ledger flag disagrees with the recorded expectation"
+    );
+}
+
+/// The recorded matrix, cross-checked against the raw bytes on disk.
+///
+/// This is what stops the summary from drifting away from the evidence.
+#[test]
+fn bug_093_matrix_agrees_with_the_recorded_bytes() {
+    let summary: Value =
+        serde_json::from_str(&bug_093("results.json")).expect("093 results.json is readable");
+    assert_eq!(
+        summary["complete"].as_bool(),
+        Some(true),
+        "the recorded matrix must be complete"
+    );
+    assert_eq!(
+        summary["failures"].as_array().map(Vec::len),
+        Some(0),
+        "the recorded matrix must carry no failures"
+    );
+    assert_eq!(summary["runs_per_cell"].as_u64(), Some(5));
+    let cells = summary["cells"]
+        .as_object()
+        .expect("matrix has a cells object")
+        .clone();
+    assert_eq!(cells.len(), 4, "matrix must carry the four recorded cells");
+    bug_093_check_matrix(&cells);
+}
+
+#[test]
+fn bug_093_consumer_classified_the_failed_call_as_success() {
+    for (cell, verdict) in [
+        ("violation_gateway_iserror", "SUCCESS"),
+        ("control_direct_stdio", "FAILURE"),
+        ("control_gateway_success", "SUCCESS"),
+        ("differential_pr7640", "FAILURE"),
+    ] {
+        for trial in ["01", "02", "03", "04", "05"] {
+            let recorded = bug_093(&format!("cells/{cell}/runs/run-{trial}/result.json"));
+            let run: Value =
+                serde_json::from_str(&recorded).unwrap_or_else(|error| panic!("{cell}: {error}"));
+            assert_eq!(run["run"].as_str(), Some(trial));
+            assert_eq!(
+                run["client_classification"].as_str(),
+                Some(verdict),
+                "{cell} run-{trial}: the client's own classification changed"
+            );
+            // Key presence is re-derived from the recorded bytes and compared
+            // with what the client reported, so the client's classification is
+            // tied to the wire rather than to the summary.
+            let caller: Value =
+                serde_json::from_str(&bug_093_client_result(cell, trial)).expect("caller result");
+            let present = caller.get("isError").is_some();
+            assert_eq!(
+                run["is_error_key_present_in_client_response"].as_bool(),
+                Some(present),
+                "{cell} run-{trial}: recorded key presence disagrees with the bytes"
+            );
+            assert_eq!(
+                present,
+                verdict == "FAILURE",
+                "{cell} run-{trial}: the client's verdict and the bytes disagree"
+            );
+        }
+    }
+}
+
+/// The SDK attribution, read from the recorded probe.
+///
+/// The pinned SDK emits the failure key when a caller gives it one and omits it
+/// otherwise, and it decodes both recorded response shapes to the verdict a
+/// consumer would reach. No relay process is involved in any of these lines, so a
+/// drop in a gateway response cannot be attributed to the SDK reading it.
+#[test]
+fn bug_093_sdk_emits_the_failure_key_when_given_one() {
+    let probe = bug_093("sdk-probe.txt");
+    let error_constructor = probe
+        .lines()
+        .find(|line| line.contains("SDK NewToolResultError "))
+        .expect("the probe must record the SDK error constructor");
+    assert!(
+        error_constructor.contains("key_present=true")
+            && error_constructor.contains("decoded_is_error=true"),
+        "the SDK must carry a failure flag through to the wire, got: {error_constructor}"
+    );
+    let text_constructor = probe
+        .lines()
+        .find(|line| line.contains("SDK NewToolResultText "))
+        .expect("the probe must record the SDK text constructor");
+    assert!(
+        text_constructor.contains("key_present=false"),
+        "the SDK must omit the key for a success, got: {text_constructor}"
+    );
+    assert!(
+        probe.contains("consumer_would_say=SUCCESS")
+            && probe.contains("consumer_would_say=FAILURE"),
+        "the probe must show both consumer verdicts"
+    );
+}
+
+/// The checker is not vacuous on the recorded evidence.
+///
+/// Deleting the signal from a conformant control result must flip it to a
+/// violation, and so must inventing one on a success, which is what a checker
+/// that only ever compared content would miss.
+#[test]
+fn bug_093_checker_detects_an_injected_signal_on_recorded_bytes() {
+    let caller = bug_093_client_result("control_gateway_success", "01");
+    let tool = bug_093_tool_result("control_gateway_success", "01");
+    assert_eq!(
+        tool_failure_signal_preserved(&caller, &tool),
+        Verdict::Conformant
+    );
+
+    let mut forged: Value = serde_json::from_str(&caller).expect("control result JSON");
+    forged["isError"] = Value::Bool(true);
+    assert!(
+        matches!(
+            tool_failure_signal_preserved(&forged.to_string(), &tool),
+            Verdict::Violation(_)
+        ),
+        "an invented failure on a successful call must be flagged"
+    );
+
+    let failed_tool = bug_093_tool_result("violation_gateway_iserror", "01");
+    let mut stripped: Value =
+        serde_json::from_str(&bug_093_client_result("violation_gateway_iserror", "01"))
+            .expect("violation result JSON");
+    assert!(
+        matches!(
+            tool_failure_signal_preserved(&stripped.to_string(), &failed_tool),
+            Verdict::Violation(_)
+        ),
+        "the recorded dropped-signal pair must be flagged"
+    );
+    stripped["isError"] = Value::Bool(true);
+    assert_eq!(
+        tool_failure_signal_preserved(&stripped.to_string(), &failed_tool),
+        Verdict::Conformant,
+        "restoring the recorded signal must make the same pair conformant"
     );
 }

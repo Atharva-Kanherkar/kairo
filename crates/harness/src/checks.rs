@@ -2347,6 +2347,120 @@ pub fn mcp_tool_executes_once(ledger_jsonl: &str) -> Verdict {
     }
 }
 
+/// How a tool result records whether the execution failed.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ToolFailureSignal {
+    /// The execution failed and the result says so on the wire.
+    Failure,
+    /// The execution succeeded and the result says nothing about failure.
+    Success,
+}
+
+impl std::fmt::Display for ToolFailureSignal {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(match self {
+            Self::Failure => "failure",
+            Self::Success => "success",
+        })
+    }
+}
+
+/// Invariant: for every recorded tool call, the result the caller was given
+/// carries the same failure signal as the result the tool actually produced.
+///
+/// A relay sits between a caller and a tool on both legs of this comparison, so
+/// the interesting question is not whether the relay can pass a failure through,
+/// but whether it passes the SAME failure through every time. A relay that
+/// forwards a success correctly but silently rewrites a failure into a success
+/// satisfies every other check available here: the call succeeded, the status was
+/// fine, the content arrived, and the response is well formed. Only pairing the
+/// caller's view against the tool's own view exposes it.
+///
+/// `caller_result` and `tool_result` are the two `result` objects of the same
+/// call, verbatim. Key presence is what is compared, not the value: a protocol
+/// that encodes "did not fail" by omitting the key has made absent and false
+/// the same fact, so an absent key on a side whose tool failed is a loss even
+/// though the field reads false.
+///
+/// Evidence that cannot be read is a violation rather than a pass, so an empty
+/// or malformed pair fails closed instead of satisfying the invariant by
+/// default.
+pub fn tool_failure_signal_preserved(caller_result: &str, tool_result: &str) -> Verdict {
+    let Some(caller) = read_tool_result(caller_result) else {
+        return Verdict::Violation(format!(
+            "caller result is not a readable tool result: {}",
+            truncate_for_reason(caller_result)
+        ));
+    };
+    let Some(tool) = read_tool_result(tool_result) else {
+        return Verdict::Violation(format!(
+            "tool result is not a readable tool result: {}",
+            truncate_for_reason(tool_result)
+        ));
+    };
+    if caller.content.is_empty() {
+        return Verdict::Violation(
+            "caller result has no content blocks; nothing was delivered to compare".to_owned(),
+        );
+    }
+    if tool.content.is_empty() {
+        return Verdict::Violation(
+            "tool result has no content blocks; the executed result is unknown".to_owned(),
+        );
+    }
+    // An absent key already reads as success on both sides, so there is no
+    // separate absent case here: failure_signal collapses "absent" into
+    // Success, and a failure reported on the tool side therefore has no way to
+    // match an absent key on the caller side.
+    match (tool.signal, caller.signal) {
+        (ToolFailureSignal::Failure, ToolFailureSignal::Failure)
+        | (ToolFailureSignal::Success, ToolFailureSignal::Success) => Verdict::Conformant,
+        (from, to) => Verdict::Violation(format!(
+            "tool execution reported {from} but the caller was given {to}"
+        )),
+    }
+}
+
+/// Read one recorded `result` object and report both its content and whether it
+/// carries an explicit failure signal. A JSON-RPC envelope is unwrapped, so the
+/// same function accepts a bare result or a whole response.
+fn read_tool_result(recorded: &str) -> Option<ParsedToolResult> {
+    let value: Value = serde_json::from_str(recorded.trim()).ok()?;
+    let result = match value.get("result") {
+        Some(envelope) if envelope.is_object() => envelope.clone(),
+        _ => value,
+    };
+    let content = result.get("content")?.as_array()?.clone();
+    let signal = failure_signal(&result)?;
+    Some(ParsedToolResult { content, signal })
+}
+
+struct ParsedToolResult {
+    content: Vec<Value>,
+    signal: ToolFailureSignal,
+}
+
+/// Read a failure signal off a `result` object. The key is looked up across the
+/// spellings a tool-result dialect uses for it, because the invariant is about
+/// the signal rather than about one wire spelling.
+fn failure_signal(result: &Value) -> Option<ToolFailureSignal> {
+    let object = result.as_object()?;
+    let flag = object
+        .iter()
+        .find(|(key, _)| {
+            key.eq_ignore_ascii_case("isError") || key.eq_ignore_ascii_case("is_error")
+        })
+        .map(|(_, value)| value);
+    match flag {
+        // An absent key and an explicit false are the same statement: this did
+        // not fail.
+        None | Some(Value::Bool(false)) => Some(ToolFailureSignal::Success),
+        Some(Value::Bool(true)) => Some(ToolFailureSignal::Failure),
+        // Anything that is not a boolean is not a statement about failure.
+        Some(_) => None,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -3458,5 +3572,117 @@ data: [DONE]
                 "{endpoint} must reject {capture:?}"
             );
         }
+    }
+
+    #[test]
+    fn tool_failure_signal_checker_accepts_every_matching_pair() {
+        // The tool failed and the caller was told so, with the key spelled the
+        // way the dialect spells it.
+        assert_eq!(
+            tool_failure_signal_preserved(
+                r#"{"content":[{"type":"text","text":"no"}],"isError":true}"#,
+                r#"{"content":[{"type":"text","text":"no"}],"isError":true}"#
+            ),
+            Verdict::Conformant
+        );
+        // A snake_case spelling is the same signal.
+        assert_eq!(
+            tool_failure_signal_preserved(
+                r#"{"content":[{"type":"text","text":"no"}],"is_error":true}"#,
+                r#"{"content":[{"type":"text","text":"no"}],"is_error":true}"#
+            ),
+            Verdict::Conformant
+        );
+        // The tool succeeded and the caller was given success, with the key
+        // omitted on both sides. An absent key is success, not a loss.
+        assert_eq!(
+            tool_failure_signal_preserved(
+                r#"{"content":[{"type":"text","text":"42"}]}"#,
+                r#"{"content":[{"type":"text","text":"42"}]}"#
+            ),
+            Verdict::Conformant
+        );
+        // Success stated explicitly on the tool side and omitted on the caller
+        // side is the same fact spelled two ways.
+        assert_eq!(
+            tool_failure_signal_preserved(
+                r#"{"content":[{"type":"text","text":"42"}]}"#,
+                r#"{"content":[{"type":"text","text":"42"}],"isError":false}"#
+            ),
+            Verdict::Conformant
+        );
+        // A whole JSON-RPC response works as well as a bare result object.
+        assert_eq!(
+            tool_failure_signal_preserved(
+                r#"{"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"no"}],"isError":true}}"#,
+                r#"{"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"no"}],"isError":true}}"#
+            ),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn tool_failure_signal_checker_catches_a_dropped_failure() {
+        // The exact shape of the defect: the tool reported failure and the
+        // caller was handed the same content with the signal gone. A checker
+        // that compared content, or compared a value rather than presence, would
+        // pass this pair.
+        assert!(matches!(
+            tool_failure_signal_preserved(
+                r#"{"content":[{"type":"text","text":"no"}]}"#,
+                r#"{"content":[{"type":"text","text":"no"}],"isError":true}"#
+            ),
+            Verdict::Violation(_)
+        ));
+        // The inverse rewrite, a success dressed as a failure, is also a loss.
+        assert!(matches!(
+            tool_failure_signal_preserved(
+                r#"{"content":[{"type":"text","text":"42"}],"isError":true}"#,
+                r#"{"content":[{"type":"text","text":"42"}]}"#
+            ),
+            Verdict::Violation(_)
+        ));
+        // Present-but-false where the tool failed is the same defect wearing a
+        // different encoding, and must not pass.
+        assert!(matches!(
+            tool_failure_signal_preserved(
+                r#"{"content":[{"type":"text","text":"no"}],"isError":false}"#,
+                r#"{"content":[{"type":"text","text":"no"}],"isError":true}"#
+            ),
+            Verdict::Violation(_)
+        ));
+    }
+
+    #[test]
+    fn tool_failure_signal_checker_fails_closed_on_unreadable_evidence() {
+        for caller in ["", "not-json", "{}", r#"{"content":[]}"#] {
+            let tool = r#"{"content":[{"type":"text","text":"no"}],"isError":true}"#;
+            assert!(
+                matches!(
+                    tool_failure_signal_preserved(caller, tool),
+                    Verdict::Violation(_)
+                ),
+                "caller evidence {caller:?} must not satisfy the invariant"
+            );
+        }
+        for tool in ["", "not-json", "{}", r#"{"content":[]}"#] {
+            let caller = r#"{"content":[{"type":"text","text":"no"}],"isError":true}"#;
+            assert!(
+                matches!(
+                    tool_failure_signal_preserved(caller, tool),
+                    Verdict::Violation(_)
+                ),
+                "tool evidence {tool:?} must not satisfy the invariant"
+            );
+        }
+        // A signal that is neither boolean nor absent is not a signal, so it is
+        // refused rather than coerced.
+        assert!(matches!(
+            tool_failure_signal_preserved(
+                r#"{"content":[{"type":"text","text":"no"}],"isError":"true"}"#,
+                r#"{"content":[{"type":"text","text":"no"}],"isError":true}"#
+            ),
+            Verdict::Violation(_)
+        ));
     }
 }

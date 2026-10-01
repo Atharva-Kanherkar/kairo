@@ -1,0 +1,27 @@
+<<<client-to-gateway>>>POST /mcp HTTP/1.1
+Host: 127.0.0.1:63171
+Content-Type: application/json
+Accept: application/json, text/event-stream
+Content-Length: 114
+Connection: close
+
+{"id":2,"jsonrpc":"2.0","method":"tools/call","params":{"arguments":{},"name":"KairoFail-kairofail-always_fails"}}<<<gateway-to-client>>>HTTP/1.1 200 OK
+Server: fasthttp
+Date: Thu, 01 Oct 2026 15:19:05 GMT
+Content-Type: application/json
+Content-Length: 159
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID
+Access-Control-Max-Age: 86400
+Vary: Origin
+X-Request-Id: 52b3a45f-5e66-41de-929f-dd5060a70e53
+X-Bifrost-Trace-Id: d5b4e6f75f3542ceac87471b16d4abc8
+Connection: close
+
+{"jsonrpc":"2.0","id":2,"result":{"content":[{"type":"text","text":"{\"code\":\"KAIRO_FAIL\",\"detail\":\"deterministic upstream failure\"}"}],"isError":true}}

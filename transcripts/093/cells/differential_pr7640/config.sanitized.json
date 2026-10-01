@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.getbifrost.ai/schema",
+  "client": {
+    "disable_content_logging": true,
+    "enable_logging": false,
+    "enforce_auth_on_inference": false,
+    "initial_pool_size": 10
+  },
+  "config_store": {
+    "config": {
+      "path": "<RUNTIME_DIR>/config.db"
+    },
+    "enabled": true,
+    "type": "sqlite"
+  },
+  "logs_store": {
+    "enabled": false
+  },
+  "mcp": {
+    "client_configs": [
+      {
+        "auth_type": "none",
+        "connection_type": "stdio",
+        "name": "KairoFail",
+        "stdio_config": {
+          "args": [
+            "<BIN_DIR>/kairoserver"
+          ],
+          "command": "<BIN_DIR>/kairotee",
+          "envs": [
+            "KAIRO_LEDGER=<RUNTIME_DIR>",
+            "KAIRO_TEE_LOG=<RUNTIME_DIR>"
+          ]
+        },
+        "tools_to_execute": [
+          "*"
+        ]
+      }
+    ],
+    "tool_manager_config": {
+      "max_agent_depth": 5,
+      "tool_execution_timeout": "5s"
+    }
+  }
+}

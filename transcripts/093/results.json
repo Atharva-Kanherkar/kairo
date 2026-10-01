@@ -1,0 +1,290 @@
+{
+  "complete": true,
+  "runs_per_cell": 5,
+  "target": {
+    "project": "maximhq/bifrost",
+    "source": "https://github.com/maximhq/bifrost",
+    "release_label": "transports/v2.2.4",
+    "release_commit": "ed8371a9779bfbc8aa689d4d77964cf8ce9308bf",
+    "release_core_version": "1.11.0",
+    "pr_7640_head": "862b3bea5cd8a940d52fefdfb57a0741efc48c84",
+    "pr_7640_base": "f8fccb93c9817668670323b5a7ef57458050602d",
+    "pr_7640_core_version": "1.10.4",
+    "public_endpoint": "POST /mcp",
+    "request_dialect": "MCP JSON-RPC over HTTP",
+    "response_dialect": "MCP JSON-RPC over HTTP",
+    "upstream_transport": "stdio MCP",
+    "upstream_sdk": "github.com/mark3labs/mcp-go v0.43.2",
+    "client_sdk": "github.com/mark3labs/mcp-go v0.43.2",
+    "go_version": "go1.26.1 darwin/arm64",
+    "runtime_prerequisites": {
+      "docker": "unavailable in this environment; the pinned tag is built from source instead",
+      "ui_embed_stub": "transports/bifrost-http/ui/index.html placeholder; the embedded UI is not on the /mcp request path",
+      "pr_head_governance_pin": "PR #7640 head pins plugins/governance v1.8.3, whose published module lacks StartResetWorkers and does not compile; the pin was raised to the v1.8.4 the tag already pins. No Bifrost Go source under test was modified."
+    },
+    "credentials": "none; no provider key, no Authorization header"
+  },
+  "cells": {
+    "violation_gateway_iserror": {
+      "runs": 5,
+      "is_error_key_present_per_run": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "expectation_met_per_run": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "expectation_met_n_of_n": "5 of 5",
+      "client_classification_per_run": [
+        "SUCCESS",
+        "SUCCESS",
+        "SUCCESS",
+        "SUCCESS",
+        "SUCCESS"
+      ],
+      "upstream_emitted_is_error_true_per_run": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "raw_probe_ledger_executions_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "consumer_ledger_executions_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "consumer_upstream_emitted_is_error_true_per_run": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "cell": "violation_gateway_iserror",
+      "target": {
+        "commit": "ed8371a9779bfbc8aa689d4d77964cf8ce9308bf",
+        "core_version": "1.11.0",
+        "binary_sha256": "359f13b4b267a1313252a6f2ea675b692ea575877379abd91137e2ffb98e0efb"
+      },
+      "spec": {
+        "through_gateway": true,
+        "upstream_tool": "kairofail-always_fails",
+        "gateway_tool": "KairoFail-kairofail-always_fails",
+        "expect_is_error_key_present": false
+      }
+    },
+    "control_direct_stdio": {
+      "runs": 5,
+      "is_error_key_present_per_run": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "expectation_met_per_run": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "expectation_met_n_of_n": "5 of 5",
+      "client_classification_per_run": [
+        "FAILURE",
+        "FAILURE",
+        "FAILURE",
+        "FAILURE",
+        "FAILURE"
+      ],
+      "upstream_emitted_is_error_true_per_run": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "raw_probe_ledger_executions_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "consumer_ledger_executions_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "consumer_upstream_emitted_is_error_true_per_run": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "cell": "control_direct_stdio",
+      "target": {
+        "commit": "ed8371a9779bfbc8aa689d4d77964cf8ce9308bf",
+        "core_version": "1.11.0",
+        "binary_sha256": "359f13b4b267a1313252a6f2ea675b692ea575877379abd91137e2ffb98e0efb"
+      },
+      "spec": {
+        "through_gateway": false,
+        "upstream_tool": "kairofail-always_fails",
+        "gateway_tool": null,
+        "expect_is_error_key_present": true
+      }
+    },
+    "control_gateway_success": {
+      "runs": 5,
+      "is_error_key_present_per_run": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "expectation_met_per_run": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "expectation_met_n_of_n": "5 of 5",
+      "client_classification_per_run": [
+        "SUCCESS",
+        "SUCCESS",
+        "SUCCESS",
+        "SUCCESS",
+        "SUCCESS"
+      ],
+      "upstream_emitted_is_error_true_per_run": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "raw_probe_ledger_executions_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "consumer_ledger_executions_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "consumer_upstream_emitted_is_error_true_per_run": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "cell": "control_gateway_success",
+      "target": {
+        "commit": "ed8371a9779bfbc8aa689d4d77964cf8ce9308bf",
+        "core_version": "1.11.0",
+        "binary_sha256": "359f13b4b267a1313252a6f2ea675b692ea575877379abd91137e2ffb98e0efb"
+      },
+      "spec": {
+        "through_gateway": true,
+        "upstream_tool": "kairofail-always_ok",
+        "gateway_tool": "KairoFail-kairofail-always_ok",
+        "expect_is_error_key_present": false
+      }
+    },
+    "differential_pr7640": {
+      "runs": 5,
+      "is_error_key_present_per_run": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "expectation_met_per_run": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "expectation_met_n_of_n": "5 of 5",
+      "client_classification_per_run": [
+        "FAILURE",
+        "FAILURE",
+        "FAILURE",
+        "FAILURE",
+        "FAILURE"
+      ],
+      "upstream_emitted_is_error_true_per_run": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "raw_probe_ledger_executions_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "consumer_ledger_executions_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "consumer_upstream_emitted_is_error_true_per_run": [
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "cell": "differential_pr7640",
+      "target": {
+        "commit": "862b3bea5cd8a940d52fefdfb57a0741efc48c84",
+        "core_version": "1.10.4",
+        "binary_sha256": "8e55bb4156030560702fbfef16c70a52a54427b92d05f828e78d790089f5fa52"
+      },
+      "spec": {
+        "through_gateway": true,
+        "upstream_tool": "kairofail-always_fails",
+        "gateway_tool": "KairoFail-kairofail-always_fails",
+        "expect_is_error_key_present": true
+      }
+    }
+  },
+  "failures": []
+}

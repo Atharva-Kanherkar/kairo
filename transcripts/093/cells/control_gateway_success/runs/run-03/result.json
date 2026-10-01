@@ -1,0 +1,58 @@
+{
+  "run": "03",
+  "client_status": 200,
+  "raw_probe": {
+    "upstream_stdout_verbatim": "<<<client-to-server>>>{\"jsonrpc\":\"2.0\",\"id\":7,\"method\":\"tools/call\",\"params\":{\"name\":\"kairofail-always_ok\",\"arguments\":{}}}\n<<<server-to-client>>>{\"jsonrpc\":\"2.0\",\"id\":7,\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"{\\\"code\\\":\\\"KAIRO_OK\\\",\\\"detail\\\":\\\"deterministic upstream success\\\"}\"}]}}\n",
+    "upstream_emitted_is_error_true": false,
+    "ledger_executions": 1,
+    "ledger": [
+      {
+        "returned_flag": false,
+        "tool": "kairofail-always_ok"
+      }
+    ],
+    "ledger_marks_tool_failed": false
+  },
+  "consumer": {
+    "base_url": "http://127.0.0.1:63000/mcp",
+    "consumer_classifies": "SUCCESS",
+    "content_texts": [
+      "{\"code\":\"KAIRO_OK\",\"detail\":\"deterministic upstream success\"}"
+    ],
+    "decoded_is_error": false,
+    "tool": "KairoFail-kairofail-always_ok",
+    "tools_listed": [
+      "KairoFail-kairofail-always_fails",
+      "KairoFail-kairofail-always_ok"
+    ],
+    "wire_has_is_error": false,
+    "wire_result_verbatim": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\\"code\\\":\\\"KAIRO_OK\\\",\\\"detail\\\":\\\"deterministic upstream success\\\"}\"}]}"
+  },
+  "consumer_call": {
+    "upstream_stdout_verbatim": "<<<client-to-server>>>{\"jsonrpc\":\"2.0\",\"id\":8,\"method\":\"tools/call\",\"params\":{\"name\":\"kairofail-always_ok\",\"arguments\":{}}}\n<<<server-to-client>>>{\"jsonrpc\":\"2.0\",\"id\":8,\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"{\\\"code\\\":\\\"KAIRO_OK\\\",\\\"detail\\\":\\\"deterministic upstream success\\\"}\"}]}}\n",
+    "upstream_emitted_is_error_true": false,
+    "ledger_executions": 1,
+    "ledger": [
+      {
+        "returned_flag": false,
+        "tool": "kairofail-always_ok"
+      }
+    ],
+    "ledger_marks_tool_failed": false
+  },
+  "is_error_key_present_in_client_response": false,
+  "client_classification": "SUCCESS",
+  "client_content_texts": [
+    "{\"code\":\"KAIRO_OK\",\"detail\":\"deterministic upstream success\"}"
+  ],
+  "client_result_object": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"code\":\"KAIRO_OK\",\"detail\":\"deterministic upstream success\"}"
+      }
+    ]
+  },
+  "client_result_verbatim": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\\"code\\\":\\\"KAIRO_OK\\\",\\\"detail\\\":\\\"deterministic upstream success\\\"}\"}]}",
+  "expectation_met": true
+}
