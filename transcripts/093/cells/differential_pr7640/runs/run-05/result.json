@@ -1,0 +1,59 @@
+{
+  "run": "05",
+  "client_status": 200,
+  "raw_probe": {
+    "upstream_stdout_verbatim": "<<<client-to-server>>>{\"jsonrpc\":\"2.0\",\"id\":11,\"method\":\"tools/call\",\"params\":{\"name\":\"kairofail-always_fails\",\"arguments\":{}}}\n<<<server-to-client>>>{\"jsonrpc\":\"2.0\",\"id\":11,\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"{\\\"code\\\":\\\"KAIRO_FAIL\\\",\\\"detail\\\":\\\"deterministic upstream failure\\\"}\"}],\"isError\":true}}\n",
+    "upstream_emitted_is_error_true": true,
+    "ledger_executions": 1,
+    "ledger": [
+      {
+        "returned_flag": true,
+        "tool": "kairofail-always_fails"
+      }
+    ],
+    "ledger_marks_tool_failed": true
+  },
+  "consumer": {
+    "base_url": "http://127.0.0.1:63171/mcp",
+    "consumer_classifies": "FAILURE",
+    "content_texts": [
+      "{\"code\":\"KAIRO_FAIL\",\"detail\":\"deterministic upstream failure\"}"
+    ],
+    "decoded_is_error": true,
+    "tool": "KairoFail-kairofail-always_fails",
+    "tools_listed": [
+      "KairoFail-kairofail-always_fails",
+      "KairoFail-kairofail-always_ok"
+    ],
+    "wire_has_is_error": true,
+    "wire_result_verbatim": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\\"code\\\":\\\"KAIRO_FAIL\\\",\\\"detail\\\":\\\"deterministic upstream failure\\\"}\"}],\"isError\":true}"
+  },
+  "consumer_call": {
+    "upstream_stdout_verbatim": "<<<client-to-server>>>{\"jsonrpc\":\"2.0\",\"id\":12,\"method\":\"tools/call\",\"params\":{\"name\":\"kairofail-always_fails\",\"arguments\":{}}}\n<<<server-to-client>>>{\"jsonrpc\":\"2.0\",\"id\":12,\"result\":{\"content\":[{\"type\":\"text\",\"text\":\"{\\\"code\\\":\\\"KAIRO_FAIL\\\",\\\"detail\\\":\\\"deterministic upstream failure\\\"}\"}],\"isError\":true}}\n",
+    "upstream_emitted_is_error_true": true,
+    "ledger_executions": 1,
+    "ledger": [
+      {
+        "returned_flag": true,
+        "tool": "kairofail-always_fails"
+      }
+    ],
+    "ledger_marks_tool_failed": true
+  },
+  "is_error_key_present_in_client_response": true,
+  "client_classification": "FAILURE",
+  "client_content_texts": [
+    "{\"code\":\"KAIRO_FAIL\",\"detail\":\"deterministic upstream failure\"}"
+  ],
+  "client_result_object": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"code\":\"KAIRO_FAIL\",\"detail\":\"deterministic upstream failure\"}"
+      }
+    ],
+    "isError": true
+  },
+  "client_result_verbatim": "{\"content\":[{\"type\":\"text\",\"text\":\"{\\\"code\\\":\\\"KAIRO_FAIL\\\",\\\"detail\\\":\\\"deterministic upstream failure\\\"}\"}],\"isError\":true}",
+  "expectation_met": true
+}

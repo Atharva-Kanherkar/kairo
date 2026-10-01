@@ -1,0 +1,20 @@
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Thu, 01 Oct 2026 15:18:53 GMT
+Content-Type: application/json
+Content-Length: 144
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID
+Access-Control-Max-Age: 86400
+Vary: Origin
+X-Request-Id: 51a599f3-cb0c-4deb-ba7d-21cee7294927
+X-Bifrost-Trace-Id: 097b14543f0547aea054ceb109f185fe
+Connection: close
+
+{"jsonrpc":"2.0","id":3,"result":{"content":[{"type":"text","text":"{\"code\":\"KAIRO_FAIL\",\"detail\":\"deterministic upstream failure\"}"}]}}
