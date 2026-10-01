@@ -115,15 +115,15 @@ tests, with its current state on GitHub and the finding it came from.
 |---|--:|--:|--:|--:|--:|
 | [LiteLLM](https://github.com/BerriAI/litellm) | 4 | 3 | 2 | 2 | 0 |
 | [NVIDIA Switchyard](https://github.com/NVIDIA-NeMo/Switchyard) | 2 | 9 | 3 | 2 | 1 |
-| [Bifrost](https://github.com/maximhq/bifrost) | 2 | 3 | 3 | 2 | 0 |
-| [Dynamo](https://github.com/ai-dynamo/dynamo) | 1 | 0 | 0 | 1 | 0 |
+| [Bifrost](https://github.com/maximhq/bifrost) | 1 | 4 | 4 | 1 | 0 |
+| [Dynamo](https://github.com/ai-dynamo/dynamo) | 0 | 1 | 1 | 0 | 0 |
 | [OGX](https://github.com/ogx-ai/ogx) | 0 | 1 | 1 | 0 | 0 |
 | [agentgateway](https://github.com/agentgateway/agentgateway) | 1 | 0 | 0 | 0 | 0 |
 | [any-llm](https://github.com/mozilla-ai/any-llm) | 0 | 1 | 1 | 0 | 0 |
 | [async-openai](https://github.com/64bit/async-openai) | 0 | 0 | 1 | 0 | 0 |
-| **Total** | **10** | **17** | **11** | **7** | **1** |
+| **Total** | **8** | **19** | **13** | **5** | **1** |
 
-State checked 2026-09-29. Refresh with `python3 tools/update-upstream-log.py`.
+State checked 2026-09-30. Refresh with `python3 tools/update-upstream-log.py`.
 
 <details open>
 <summary><b>LiteLLM</b> (7 issues, 4 pull requests)</summary>
@@ -190,7 +190,7 @@ State checked 2026-09-29. Refresh with `python3 tools/update-upstream-log.py`.
 
 | State | # | Title | Finding | Opened |
 |---|---|---|---|---|
-| open | [#7561](https://github.com/maximhq/bifrost/pull/7561) | fix(semanticcache): isolate cache entries by request family | [086](issues/086-bifrost-semantic-cache-cross-endpoint-hit) | 2026-09-25 |
+| merged | [#7561](https://github.com/maximhq/bifrost/pull/7561) | fix(semanticcache): isolate cache entries by request family | [086](issues/086-bifrost-semantic-cache-cross-endpoint-hit) | 2026-09-25 |
 | open | [#7385](https://github.com/maximhq/bifrost/pull/7385) | preserve repeated MCP agent tool results | [082](issues/082-bifrost-agent-tool-result-collision) | 2026-09-21 |
 | merged | [#7121](https://github.com/maximhq/bifrost/pull/7121) | fix: filter credential-bearing provider response headers by classifier | [077](issues/077-bifrost-custom-response-header-secret-leak) | 2026-09-13 |
 | merged | [#7033](https://github.com/maximhq/bifrost/pull/7033) | Gemini provider - preserve inline image and audio data in chat completions | [075](issues/075-bifrost-gemini-inlinedata-dropped) | 2026-09-09 |
@@ -200,7 +200,7 @@ State checked 2026-09-29. Refresh with `python3 tools/update-upstream-log.py`.
 
 | State | # | Title | Finding | Opened |
 |---|---|---|---|---|
-| open | [#7560](https://github.com/maximhq/bifrost/issues/7560) | semantic_cache serves a chat.completion entry to a /v1/responses caller because the direct cache key omits the request family | [086](issues/086-bifrost-semantic-cache-cross-endpoint-hit) | 2026-09-25 |
+| completed | [#7560](https://github.com/maximhq/bifrost/issues/7560) | semantic_cache serves a chat.completion entry to a /v1/responses caller because the direct cache key omits the request family | [086](issues/086-bifrost-semantic-cache-cross-endpoint-hit) | 2026-09-25 |
 | open | [#7383](https://github.com/maximhq/bifrost/issues/7383) | agent mode drops one result when the same auto-executable tool runs twice in one turn | [082](issues/082-bifrost-agent-tool-result-collision) | 2026-09-21 |
 | completed | [#7120](https://github.com/maximhq/bifrost/issues/7120) | Provider response-header filter ignores IsSensitiveHeader, forwarding credential-named headers to inference callers | [077](issues/077-bifrost-custom-response-header-secret-leak) | 2026-09-13 |
 | completed | [#7032](https://github.com/maximhq/bifrost/issues/7032) | Gemini image-generation output (inlineData) silently dropped on /v1/chat/completions, both unary and streaming | [075](issues/075-bifrost-gemini-inlinedata-dropped) | 2026-09-09 |
@@ -215,13 +215,13 @@ State checked 2026-09-29. Refresh with `python3 tools/update-upstream-log.py`.
 
 | State | # | Title | Finding | Opened |
 |---|---|---|---|---|
-| open | [#15101](https://github.com/ai-dynamo/dynamo/pull/15101) | fix(multimodal): preserve URL path case in ImageLoader cache key | [080](issues/080-dynamo-imageloader-lowercase-cache-key) | 2026-09-19 |
+| merged | [#15101](https://github.com/ai-dynamo/dynamo/pull/15101) | fix(multimodal): preserve URL path case in ImageLoader cache key | [080](issues/080-dynamo-imageloader-lowercase-cache-key) | 2026-09-19 |
 
 **Issues**
 
 | State | # | Title | Finding | Opened |
 |---|---|---|---|---|
-| open | [#15100](https://github.com/ai-dynamo/dynamo/issues/15100) | ImageLoader cache key lowercases the whole URL, returning the wrong image for case-differing paths | [080](issues/080-dynamo-imageloader-lowercase-cache-key) | 2026-09-19 |
+| completed | [#15100](https://github.com/ai-dynamo/dynamo/issues/15100) | ImageLoader cache key lowercases the whole URL, returning the wrong image for case-differing paths | [080](issues/080-dynamo-imageloader-lowercase-cache-key) | 2026-09-19 |
 
 </details>
 
