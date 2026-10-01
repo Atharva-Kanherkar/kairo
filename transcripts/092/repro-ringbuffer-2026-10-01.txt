@@ -1,0 +1,85 @@
+source file      : /Users/atharva/Documents/ChatGPT/NVIDIA_DYNAMO/components/src/dynamo/common/multimodal/embedding_transfer.py
+file sha256      : 3114c81e35ef96a95da7a381c0dfa362a912ec524c212e49bcebf3d1a36a5a56
+extracted classes: [('MonolithicCounter', 'L248-L259'), ('RingBuffer', 'L262-L359')]
+extracted sha256 : 055099954431271c935dbad0046fd1c491e8f5aa5373d8dbdf80992103e26c3d
+RingBuffer.get_buffer defined at line: 48
+==============================================================================
+Dynamo RingBuffer: does get_buffer ever return two live buffers that alias?
+==============================================================================
+
+[case1 minimal, tiny buffer] buffer_size=24
+  get_buffer(18) -> id=0 [0,18)  ptr=35055744192
+  get_buffer(1) -> id=1 [18,19)  ptr=35055744210
+  release_buffer(0)
+  get_buffer(17) -> id=2 [0,17)  ptr=35055744192
+  get_buffer(16) -> id=3 [0,16)  ptr=35055744192
+  state after: free_start=16 allocated_start=18 wrapped=True freed_list={19: 24, 17: 24}
+  live ranges: {1: (18, 19), 2: (0, 17), 3: (0, 16)}
+  *** OVERLAP: id=3 (0, 16) collides with live id=2 (0, 17) (size=16)
+
+[case2 same shape, production 8 GiB default] buffer_size=8589934592
+  get_buffer(5368709120) -> id=0 [0,5368709120)  ptr=47949283328
+  get_buffer(360710144) -> id=1 [5368709120,5729419264)  ptr=53317992448
+  release_buffer(0)
+  get_buffer(4294967296) -> id=2 [0,4294967296)  ptr=47949283328
+  get_buffer(4831838208) -> id=3 [0,4831838208)  ptr=47949283328
+  state after: free_start=4831838208 allocated_start=5368709120 wrapped=True freed_list={5729419264: 8589934592, 4294967296: 8589934592}
+  live ranges: {1: (5368709120, 5729419264), 2: (0, 4294967296), 3: (0, 4831838208)}
+  *** OVERLAP: id=3 (0, 4831838208) collides with live id=2 (0, 4294967296) (size=4831838208)
+
+==============================================================================
+case3: the two overlapping tensors alias one buffer, so bytes cross over
+==============================================================================
+  id_c=2 range=(0, 17)
+  id_d=3 range=(0, 16)
+  live buffers: [1, 2, 3]
+  tensor_c.data_ptr()=35055744192 tensor_d.data_ptr()=35055744192
+  C reads 61 after its own WRITE, then 62 after D's WRITE
+  D's WRITE silently rewrote C's live bytes: True
+
+==============================================================================
+case4 CONTROL: same op shapes on a buffer with no second wrap
+==============================================================================
+  get_buffer(3000) -> id=0 [0,3000)
+  get_buffer(100) -> id=1 [3000,3100)
+  release_buffer(0)
+  get_buffer(900) -> id=2 [3100,4000)
+  get_buffer(500) -> id=3 [0,500)
+  overlaps: none
+
+==============================================================================
+case5: N of N - minimal trigger repeated, fresh RingBuffer each run
+==============================================================================
+  reproduced 200 of 200 runs
+
+==============================================================================
+case6: randomized soak, 4096 B buffer (same wrap geometry as case2)
+==============================================================================
+  trials: 4000, allocations checked: 15742
+  overlapping allocations found: 13
+  trials containing at least one overlap: 6
+  first overlap: trial 637
+    new id=6 [0,1708) size=1708
+    collided with live id=3 [0,1379)
+    live bytes at that moment: 3719 (91% of the buffer)
+
+==============================================================================
+case7 CONTROL: same soak, request sizes too small to wrap twice
+==============================================================================
+  allocations checked: 19088
+  overlapping allocations found: 0
+
+==============================================================================
+SUMMARY
+==============================================================================
+  source file                : embedding_transfer.py @ 5593e8857
+  file sha256                : 3114c81e35ef96a95da7a381c0dfa362a912ec524c212e49bcebf3d1a36a5a56
+  RingBuffer.get_buffer      : L262-L359 of the file
+  case1 minimal overlap      : 1
+  case2 production 8 GiB     : 1
+  case3 aliasing proven      : True
+  case4 control (no 2nd wrap): 0
+  case5 N of N               : 200/200
+  case6 soak overlaps        : 13 in 6/4000 trials
+  case7 control (small sizes): 0
+  generated at               : 2026-10-01T11:50:17.191273+00:00
