@@ -8,6 +8,7 @@
 //! Same checkers, both directions.
 
 use serde_json::Value;
+use std::collections::{BTreeMap, BTreeSet};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Verdict {
@@ -154,6 +155,134 @@ pub fn openai_stream_toolcall_type_never_null(sse: &str) -> Verdict {
         offenders.len(),
         offenders.join(", ")
     ))
+}
+
+/// Invariant (bug 091): in an Anthropic Messages SSE stream, a content block
+/// index is opened exactly once, and one upstream tool call yields exactly one
+/// `tool_use` block.
+///
+/// Two rules, both required by the Messages streaming contract:
+///
+/// 1. `content_block_start` at a given `index` appears at most once. Clients
+///    key partial state by index, so a second start at a used index either
+///    overwrites the accumulated tool input or re-opens a closed block.
+/// 2. A tool call is not split across two blocks. If `tool_use` blocks `A` and
+///    `B` share an id, the arguments were streamed as two separate
+///    `input_json_delta` runs that a client concatenates into two objects
+///    instead of one, and the tool is invoked twice with a truncated argument
+///    each time.
+///
+/// Rule 2 is checked by tool-call id, not by position, so an unrelated tool
+/// call elsewhere in the stream cannot mask a split, and a stream that carries
+/// several distinct calls still conforms.
+pub fn anthropic_stream_block_lifecycle(sse: &str) -> Verdict {
+    let mut opened: BTreeMap<u64, String> = BTreeMap::new();
+    let mut closed: BTreeSet<u64> = BTreeSet::new();
+    // Tool-call id -> how many distinct `tool_use` blocks carried it.
+    let mut tool_blocks: BTreeMap<String, usize> = BTreeMap::new();
+    // Tool-call id -> concatenated partial_json, to report a split precisely.
+    let mut partials: BTreeMap<String, Vec<String>> = BTreeMap::new();
+    let mut offenders: Vec<String> = Vec::new();
+
+    for line in sse.lines() {
+        let Some(data) = line.strip_prefix("data: ") else {
+            continue;
+        };
+        if data == "[DONE]" {
+            continue;
+        }
+        let Ok(event) = serde_json::from_str::<Value>(data) else {
+            continue;
+        };
+        let kind = event
+            .get("type")
+            .and_then(Value::as_str)
+            .unwrap_or_default();
+        let Some(raw_index) = event.get("index").and_then(Value::as_u64) else {
+            continue;
+        };
+        match kind {
+            "content_block_start" => {
+                match opened.entry(raw_index) {
+                    std::collections::btree_map::Entry::Occupied(prior) => {
+                        offenders.push(format!(
+                            "index {raw_index} opened twice (first as {:?}, again as {:?})",
+                            prior.get(),
+                            block_label(&event)
+                        ));
+                    }
+                    std::collections::btree_map::Entry::Vacant(slot) => {
+                        if closed.contains(&raw_index) {
+                            offenders.push(format!(
+                                "index {raw_index} reopened after content_block_stop"
+                            ));
+                        } else {
+                            slot.insert(block_label(&event));
+                        }
+                    }
+                }
+                // Record every `tool_use` block, including a duplicate at a reused
+                // index, so the split rule below can also fire. Skipping it here
+                // would let one defect mask the other.
+                let block = event.get("content_block");
+                if block.and_then(|b| b.get("type")).and_then(Value::as_str) == Some("tool_use") {
+                    let id = block
+                        .and_then(|b| b.get("id"))
+                        .and_then(Value::as_str)
+                        .unwrap_or_default()
+                        .to_owned();
+                    *tool_blocks.entry(id.clone()).or_default() += 1;
+                    partials.entry(id).or_default();
+                }
+            }
+            "content_block_delta" => {
+                let id = opened.get(&raw_index).cloned().unwrap_or_default();
+                if let Some(delta) = event.get("delta") {
+                    if delta.get("type").and_then(Value::as_str) == Some("input_json_delta") {
+                        if let Some(partial) = delta.get("partial_json").and_then(Value::as_str) {
+                            if let Some(bucket) = partials.get_mut(&id) {
+                                bucket.push(partial.to_owned());
+                            }
+                        }
+                    }
+                }
+            }
+            "content_block_stop" => {
+                closed.insert(raw_index);
+            }
+            _ => {}
+        }
+    }
+
+    for (id, count) in &tool_blocks {
+        if *count > 1 {
+            let fragments = partials.get(id).map(|v| v.join("")).unwrap_or_default();
+            let runs = partials.get(id).map_or(0, Vec::len);
+            offenders.push(format!(
+                "tool call {id:?} was split across {count} tool_use blocks ({runs} separate \
+				 input_json_delta runs, concatenated length {}); one call must be one block",
+                fragments.len()
+            ));
+        }
+    }
+
+    if offenders.is_empty() {
+        return Verdict::Conformant;
+    }
+    Verdict::Violation(format!(
+        "{}: a block index is opened once and a tool call is one block",
+        offenders.join("; ")
+    ))
+}
+
+/// The `type` of a `content_block_start` payload, for a violation message.
+fn block_label(event: &Value) -> String {
+    event
+        .get("content_block")
+        .and_then(|b| b.get("type"))
+        .and_then(Value::as_str)
+        .unwrap_or("unknown")
+        .to_owned()
 }
 
 /// Invariant (bug 074): one client-visible Responses stream represents one

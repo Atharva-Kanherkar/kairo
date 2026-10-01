@@ -1,0 +1,56 @@
+config:
+  readinessAddr: 127.0.0.1:19301
+  statsAddr: 127.0.0.1:19302
+
+binds:
+- port: 4200
+  listeners:
+  - name: to-chat
+    routes:
+    - backends:
+      - ai:
+          name: chatprov
+          provider:
+            custom:
+              formats:
+              - type: completions
+                path: /v1/chat/completions
+          hostOverride: 127.0.0.1:9990
+      policies:
+        ai:
+          routes:
+            /v1/messages: messages
+- port: 4201
+  listeners:
+  - name: to-resp
+    routes:
+    - backends:
+      - ai:
+          name: respprov
+          provider:
+            custom:
+              formats:
+              - type: responses
+                path: /v1/responses
+          hostOverride: 127.0.0.1:9990
+      policies:
+        ai:
+          routes:
+            /v1/messages: messages
+- port: 4202
+  listeners:
+  - name: to-anth
+    routes:
+    - backends:
+      - ai:
+          name: anthprov
+          provider:
+            custom:
+              formats:
+              - type: messages
+                path: /v1/messages
+          hostOverride: 127.0.0.1:9990
+      policies:
+        ai:
+          routes:
+            /v1/messages: messages

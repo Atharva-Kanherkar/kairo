@@ -1,0 +1,12 @@
+data: {"id": "chatcmpl-x", "object": "chat.completion.chunk", "created": 0, "model": "captured", "choices": [{"index": 0, "delta": {"role": "assistant", "content": ""}, "finish_reason": null}]}
+
+data: {"id": "chatcmpl-x", "object": "chat.completion.chunk", "created": 0, "model": "captured", "choices": [{"index": 0, "delta": {"tool_calls": [{"index": 0, "function": {"arguments": "{\"city\":", "name": "get_weather"}, "id": "call_a", "type": "function"}]}, "finish_reason": null}]}
+
+data: {"id": "chatcmpl-x", "object": "chat.completion.chunk", "created": 0, "model": "captured", "choices": [{"index": 0, "delta": {"content": " and also "}, "finish_reason": null}]}
+
+data: {"id": "chatcmpl-x", "object": "chat.completion.chunk", "created": 0, "model": "captured", "choices": [{"index": 0, "delta": {"tool_calls": [{"index": 0, "function": {"arguments": "\"sf\"}"}}]}, "finish_reason": null}]}
+
+data: {"id": "chatcmpl-x", "object": "chat.completion.chunk", "created": 0, "model": "captured", "choices": [{"index": 0, "delta": {}, "finish_reason": "tool_calls"}], "usage": {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}}
+
+data: [DONE]
+

@@ -1,0 +1,4 @@
+{"model":"claude-opus-4-6","max_tokens":1024,"stream":true,
+ "messages":[{"role":"user","content":"weather?"}],
+ "tools":[{"name":"get_weather","description":"d","input_schema":{"type":"object","properties":{"city":{"type":"string"}}}},
+          {"name":"get_time","description":"d","input_schema":{"type":"object","properties":{"zone":{"type":"string"}}}}]}
