@@ -26,12 +26,12 @@ offline with no provider keys.
 <!-- kairo-counts:start -->
 | Metric | Value |
 |---|---|
-| Reproduced issue folders | 65 |
+| Reproduced issue folders | 66 |
 | Gateways under test | LiteLLM, NVIDIA Switchyard, Bifrost, GoModel, AxonHub, any-llm, Dynamo, OGX, and agentgateway |
-| Harness tests | 220 (179 conformance checks against recorded transcripts, 41 unit) |
+| Harness tests | 222 (181 conformance checks against recorded transcripts, 41 unit) |
 <!-- kairo-counts:end -->
 
-The 65 folders cover reproduced findings, multi-defect reports, and honest
+The 66 folders cover reproduced findings, multi-defect reports, and honest
 negative results. Versions and reproduction outcomes are recorded per finding
 in [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md), including cited bugs that did
 not reproduce.
@@ -85,6 +85,16 @@ forwards them as visible `output_text`, which puts private reasoning into the
 model's visible context. An image inside a `tool_result` is JSON-dumped into a
 text string by Switchyard, so the model receives literal base64, and is deleted
 outright by LiteLLM.
+
+A streaming translator has a second way to break the same loop. agentgateway's
+OpenAI-to-Anthropic stream translation closes an open `tool_use` block when a text
+delta arrives, then re-opens it at the same block index when arguments resume, so
+one upstream tool call reaches the client as three content blocks with the call's id
+split across two of them ([091](issues/091-agentgateway-duplicate-tooluse-block-stream)).
+The Anthropic SDK reports the duplication without raising, and the buffered path
+handles the identical turn correctly, so the fault is isolated to the stream state
+machine. Its own comment states the invariant it then breaks, and the case its
+predecessor fixed, an empty text delta, is conformant on the same binary.
 
 Honest negatives are kept as data. Bifrost's multimodal handling and its
 handling of client credentials are correct where both incumbents fail.

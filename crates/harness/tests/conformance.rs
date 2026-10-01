@@ -6,17 +6,17 @@
 //! violating the invariant, this test flips and tells us.
 
 use kairo::checks::{
-    anthropic_response_toolcall_stop_reason, anthropic_stream_safety_stop_reason,
-    anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
-    content_filter_preserved, document_body_forwarded, endpoint_response_family_preserved,
-    executed_tool_results_preserved, gemini_inline_media_preserved_in_chat_response,
-    gemini_inline_media_preserved_in_chat_stream, id_conforms, image_url_cache_key_case_sensitive,
-    instruction_messages_preserved, invalid_credential_rejected_before_upstream,
-    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
-    mcp_tool_executes_once, model_info_capture_identity, model_info_envelope_body,
-    model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
-    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
-    ogx_adaptive_thinking_loss, openai_stream_finish_reason,
+    anthropic_response_toolcall_stop_reason, anthropic_stream_block_lifecycle,
+    anthropic_stream_safety_stop_reason, anthropic_tool_choice_any_mapped_to_required,
+    anthropic_toolcall_stop_reason, capture_records, content_filter_preserved,
+    document_body_forwarded, endpoint_response_family_preserved, executed_tool_results_preserved,
+    gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
+    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
+    invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
+    json_schema_property_forwarded, mcp_tool_executes_once, model_info_capture_identity,
+    model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
+    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
+    non_text_block_not_json_dumped, ogx_adaptive_thinking_loss, openai_stream_finish_reason,
     openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
     outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
     reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
@@ -4695,6 +4695,38 @@ fn checker_ignores_streams_without_tool_call_deltas() {
     );
     assert_eq!(
         openai_stream_toolcall_type_never_null(text_stream),
+        Verdict::Conformant
+    );
+}
+
+/// Bug 091: agentgateway's OpenAI Chat Completions to Anthropic Messages stream
+/// translation re-opens a `tool_use` block that it already closed, when the
+/// upstream interleaves non-empty text with a tool call's argument deltas.
+///
+/// `observed.sse` is the recorded client stream from agentgateway v1.5.0. It
+/// opens index 0 as `tool_use`, closes it, opens index 1 as text, closes it,
+/// then opens index 0 as `tool_use` again. One upstream tool call becomes two
+/// client tool calls with a reused index and split arguments.
+#[test]
+fn agentgateway_reopens_tool_use_block_after_text_interleaves() {
+    let v = anthropic_stream_block_lifecycle(&fixture("transcripts/091/rig/observed.sse"));
+    assert!(
+        matches!(&v, Verdict::Violation(reason) if reason.contains("opened twice")),
+        "expected a reused-index violation against the recorded bytes, got {v:?}"
+    );
+    assert!(
+        matches!(&v, Verdict::Violation(reason) if reason.contains("split across 2 tool_use blocks")),
+        "the same stream also splits one tool call across two blocks, got {v:?}"
+    );
+}
+
+/// Control: the empty-content-delta shape fixed upstream in #2147/#2148 is
+/// conformant on the same binary and the same route. This is the discrimination
+/// between the fixed case and this defect.
+#[test]
+fn agentgateway_empty_text_delta_between_arguments_is_conformant() {
+    assert_eq!(
+        anthropic_stream_block_lifecycle(&fixture("transcripts/091/rig/control-empty-delta.sse")),
         Verdict::Conformant
     );
 }
