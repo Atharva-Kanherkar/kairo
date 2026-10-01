@@ -23,10 +23,11 @@ use kairo::checks::{
     response_conversation_preserves_history, response_omits_secret,
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
-    responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
-    thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
-    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, FunctionToolFormat,
-    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    responses_single_lifecycle, ring_buffer_allocations_are_disjoint, stop_sequence_forwarded,
+    thinking_not_leaked_as_visible_text, thinking_text_forwarded, tool_strict_forwarded,
+    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
+    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
 };
 use serde_json::Value;
 use std::fs;
@@ -3440,6 +3441,48 @@ fn dynamo_image_cache_distinct_urls_control_is_conformant() {
     // Control: URLs differing beyond case never collide; checker is silent.
     let v = image_url_cache_key_case_sensitive(&fixture("transcripts/080/capture-distinct.jsonl"));
     assert_eq!(v, Verdict::Conformant);
+}
+
+// ---- bug 092: Dynamo RingBuffer hands two live buffers the same bytes ----
+
+#[test]
+fn dynamo_ring_buffer_aliased_live_allocations_violation() {
+    // Frozen bug: a second post-wrap allocation is admitted at [0, 14) while
+    // [0, 12) is still live, so two in-flight requests share bytes and the
+    // request that sent image 3.0 ends up holding image 4.0.
+    let v = ring_buffer_allocations_are_disjoint(&fixture(
+        "transcripts/092/capture-embedding-crossover.jsonl",
+    ));
+    assert!(
+        matches!(v, Verdict::Violation(_)),
+        "aliased live ring buffer allocations must be caught: {v:?}"
+    );
+}
+
+#[test]
+fn dynamo_ring_buffer_non_wrapping_control_is_conformant() {
+    // The same capture also records a control run: identical requests and
+    // payloads on a buffer large enough that nothing wraps twice. Read only the
+    // control record and require conformance, so the checker is proven to accept
+    // a correct allocator on the very same request sequence.
+    let raw = fixture("transcripts/092/capture-embedding-crossover.jsonl");
+    let mut control = String::new();
+    for line in raw.lines().filter(|l| !l.trim().is_empty()) {
+        if line.contains("\"control\"") {
+            control.push_str(line);
+            control.push('\n');
+        }
+    }
+    assert!(
+        !control.is_empty(),
+        "the capture must contain a control record"
+    );
+    let v = ring_buffer_allocations_are_disjoint(&control);
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "the non-wrapping control must satisfy the invariant, got: {v:?}"
+    );
 }
 
 // ---- bug 081: OGX /v1/messages translation-mode losses ----

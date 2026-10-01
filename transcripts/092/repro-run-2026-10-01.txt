@@ -1,0 +1,106 @@
+==============================================================================
+Dynamo multimodal embedding transfer: aliased ring buffer ranges
+==============================================================================
+source file      : /Users/atharva/Documents/ChatGPT/NVIDIA_DYNAMO/components/src/dynamo/common/multimodal/embedding_transfer.py
+file sha256      : 3114c81e35ef96a95da7a381c0dfa362a912ec524c212e49bcebf3d1a36a5a56
+extracted classes: [('torch_dtype_from_string', 'L51-L64'), ('torch_dtype_to_string', 'L67-L68'), ('TransferRequest', 'L73-L80'), ('AbstractEmbeddingReceiver', 'L83-L111'), ('AbstractEmbeddingSender', 'L114-L133'), ('MonolithicCounter', 'L248-L259'), ('RingBuffer', 'L262-L359'), ('NixlTransferRequest', 'L362-L373'), ('NixlWriteEmbeddingSender', 'L376-L632'), ('NixlWriteEmbeddingReceiver', 'L635-L792')]
+extracted sha256 : ff92f4b8d792297db1b5284254730389d7d1161584befe688bac676a335bdfdb
+
+  request 0 (image 1, 20 MiB): IN FLIGHT; live buffers [0]
+  request 1 (image 2, 3 MiB): IN FLIGHT; live buffers [0, 1]
+  request 2: an earlier in-flight request completed and released; live buffers [1]
+  request 3 (image 3, 12 MiB): IN FLIGHT; live buffers [1, 2]
+  request 4 (image 4, 14 MiB): IN FLIGHT; live buffers [1, 2, 3]
+
+[BUG: two in-flight requests both wrap] buffer=24 MiB
+  id=1 [20971520,24117248)  3145728 bytes  ptr=19088277504
+  id=2 [0,12582912)  12582912 bytes  ptr=19067305984
+  id=3 [0,14680064)  14680064 bytes  ptr=19067305984
+  pairs of live buffers that alias: [(2, 3)]
+
+  request sent image 2 and holds embedding value 2
+  request sent image 3 and holds embedding value 4
+  request sent image 4 and holds embedding value 4
+  at least one request received another request's image: True
+
+  request 0 (image 1, 20 MiB): IN FLIGHT; live buffers [0]
+  request 1 (image 2, 3 MiB): IN FLIGHT; live buffers [0, 1]
+  request 2: an earlier in-flight request completed and released; live buffers [1]
+  request 3 (image 3, 12 MiB): IN FLIGHT; live buffers [1, 2]
+  request 4 (image 4, 14 MiB): IN FLIGHT; live buffers [1, 2, 3]
+
+[CONTROL: requests do not both wrap] buffer=64 MiB
+  id=1 [20971520,24117248)  3145728 bytes  ptr=19155386368
+  id=2 [24117248,36700160)  12582912 bytes  ptr=19158532096
+  id=3 [36700160,51380224)  14680064 bytes  ptr=19171115008
+  pairs of live buffers that alias: []
+
+  request sent image 2 and holds embedding value 2
+  request sent image 3 and holds embedding value 3
+  request sent image 4 and holds embedding value 4
+  at least one request received another request's image: False
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+N of N: bug case contaminated 25 of 25 runs
+N of N: control case contaminated 0 of 25 runs
+
+==============================================================================
+SUMMARY
+==============================================================================
+  BUG aliased live buffer pairs      : 1 [(2, 3)]
+  BUG per-request (sent, received)   : [(2, 2), (3, 4), (4, 4)]
+  CONTROL aliased pairs              : 0 []
+  CONTROL per-request (sent, received): [(2, 2), (3, 3), (4, 4)]
+  N of N bug runs contaminated        : 25/25
+  N of N control runs contaminated    : 0/25
+  generated at                       : 2026-10-01T11:53:01.613283+00:00
+wrote /Users/atharva/kairo/transcripts/092/capture-embedding-crossover.jsonl

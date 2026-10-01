@@ -1892,6 +1892,120 @@ fn media_preserved_in_message(message_or_delta: &Value) -> bool {
     content_ok || message_has_images_sibling(message_or_delta)
 }
 
+/// Invariant (bug 092): two buffers that a ring allocator has handed out and not
+/// yet released MUST cover disjoint byte ranges. An allocator that returns
+/// overlapping ranges to two live owners has crossed a request boundary: the
+/// bytes one request publishes for its peer to write are the bytes another
+/// in-flight request is still reading.
+///
+/// This checker does not know how the ranges were produced. It reads a capture
+/// written by `transcripts/092/repro_receiver_crossover.py` and asserts two
+/// things a correct allocator cannot violate:
+///
+/// 1. every pair of live ranges is disjoint, and
+/// 2. every in-flight request received the embeddings of the image it sent.
+///
+/// Each record: `case`, `buffer_bytes`, `live_buffer_ranges` (the `[start, end)`
+/// pairs still outstanding), `aliased_pairs`, and
+/// `per_request_sent_and_received` (`[sent_tag, received_tag]` per request). The
+/// tags are synthetic per-image markers written by the harness, so a mismatch is
+/// a measured cross-request substitution rather than a heuristic.
+pub fn ring_buffer_allocations_are_disjoint(jsonl: &str) -> Verdict {
+    let records = match capture_records(jsonl) {
+        Ok(r) => r,
+        Err(e) => return Verdict::Violation(format!("unparseable capture: {e}")),
+    };
+    for (idx, (_, record)) in records.iter().enumerate() {
+        let case = record
+            .get("case")
+            .and_then(Value::as_str)
+            .unwrap_or("unknown");
+        let ranges: Vec<(i64, i64)> =
+            match record.get("live_buffer_ranges").and_then(Value::as_array) {
+                Some(items) => {
+                    let mut out = Vec::with_capacity(items.len());
+                    for item in items {
+                        let pair = match item.as_array() {
+                            Some(p) if p.len() == 2 => p,
+                            _ => {
+                                return Verdict::Violation(format!(
+                                    "record {idx} ({case}): live_buffer_ranges entry is not a \
+                                     [start, end] pair: {item}"
+                                ))
+                            }
+                        };
+                        let (Some(start), Some(end)) = (pair[0].as_i64(), pair[1].as_i64()) else {
+                            return Verdict::Violation(format!(
+                                "record {idx} ({case}): live_buffer_ranges entry is not integral: \
+                                 {item}"
+                            ));
+                        };
+                        if end <= start {
+                            return Verdict::Violation(format!(
+                                "record {idx} ({case}): empty or inverted live range \
+                                 [{start}, {end})"
+                            ));
+                        }
+                        out.push((start, end));
+                    }
+                    out
+                }
+                None => {
+                    return Verdict::Violation(format!(
+                        "record {idx} ({case}): missing live_buffer_ranges: {record}"
+                    ))
+                }
+            };
+
+        // 1. Disjointness of every simultaneously live buffer.
+        for i in 0..ranges.len() {
+            for j in (i + 1)..ranges.len() {
+                let (a_start, a_end) = ranges[i];
+                let (b_start, b_end) = ranges[j];
+                if a_start < b_end && b_start < a_end {
+                    return Verdict::Violation(format!(
+                        "record {idx} ({case}): two live buffers alias, [{a_start}, {a_end}) \
+                         and [{b_start}, {b_end}); the allocator handed the same bytes to two \
+                         in-flight requests"
+                    ));
+                }
+            }
+        }
+
+        // 2. Each in-flight request must hold the image it sent.
+        let Some(pairs) = record
+            .get("per_request_sent_and_received")
+            .and_then(Value::as_array)
+        else {
+            return Verdict::Violation(format!(
+                "record {idx} ({case}): missing per_request_sent_and_received: {record}"
+            ));
+        };
+        for (n, pair) in pairs.iter().enumerate() {
+            let pair = match pair.as_array() {
+                Some(p) if p.len() == 2 => p,
+                _ => {
+                    return Verdict::Violation(format!(
+                        "record {idx} ({case}): sent/received entry {n} is not a pair: {pair}"
+                    ))
+                }
+            };
+            let (Some(sent), Some(received)) = (pair[0].as_i64(), pair[1].as_i64()) else {
+                return Verdict::Violation(format!(
+                    "record {idx} ({case}): sent/received entry {n} is not an integer: {pair:?}"
+                ));
+            };
+            if sent != received {
+                return Verdict::Violation(format!(
+                    "record {idx} ({case}): in-flight request {n} sent image {sent} and holds \
+                     image {received}; a concurrent request's transfer overwrote its embeddings"
+                ));
+            }
+        }
+    }
+    Verdict::Conformant
+}
+
 /// Invariant (bug 075): when Gemini's raw `generateContent` response carries an
 /// `inlineData` part (a base64 image or audio blob, as image-generation models
 /// such as `gemini-2.5-flash-image` return), Bifrost's OpenAI-shaped chat
@@ -2350,6 +2464,54 @@ pub fn mcp_tool_executes_once(ledger_jsonl: &str) -> Verdict {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn ring_buffer_aliased_live_ranges_are_caught() {
+        // [0,12) and [0,14) are both live, so they alias.
+        let bug = r#"{"body":{"case":"bug","buffer_bytes":25165824,"live_buffer_ranges":[[0,12582912],[0,14680064]],"aliased_pairs":[[2,3]],"per_request_sent_and_received":[[3,4],[4,4]]}}"#;
+        let v = ring_buffer_allocations_are_disjoint(bug);
+        assert!(matches!(v, Verdict::Violation(_)), "must catch: {v:?}");
+    }
+
+    #[test]
+    fn ring_buffer_disjoint_live_ranges_are_conformant() {
+        // Adjacent, non-overlapping ranges: the correct allocator's output.
+        let ok = r#"{"body":{"case":"control","buffer_bytes":67108864,"live_buffer_ranges":[[20971520,24117248],[24117248,36700160],[36700160,51380224]],"aliased_pairs":[],"per_request_sent_and_received":[[2,2],[3,3],[4,4]]}}"#;
+        assert_eq!(
+            ring_buffer_allocations_are_disjoint(ok),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn ring_buffer_matched_request_markers_are_conformant() {
+        // Ranges disjoint but one request holds another image's embeddings: the
+        // allocator handed out distinct bytes, so only the second half of the
+        // invariant can fire. It must still fire.
+        let crossed = r#"{"body":{"case":"control","buffer_bytes":67108864,"live_buffer_ranges":[[0,100],[100,200]],"aliased_pairs":[],"per_request_sent_and_received":[[3,4]]}}"#;
+        let v = ring_buffer_allocations_are_disjoint(crossed);
+        assert!(matches!(v, Verdict::Violation(_)), "must catch: {v:?}");
+    }
+
+    #[test]
+    fn ring_buffer_empty_live_set_is_conformant() {
+        // Nothing in flight: the invariant has nothing to say.
+        let empty = r#"{"body":{"case":"idle","buffer_bytes":1024,"live_buffer_ranges":[],"aliased_pairs":[],"per_request_sent_and_received":[]}}"#;
+        assert_eq!(
+            ring_buffer_allocations_are_disjoint(empty),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn ring_buffer_malformed_capture_is_rejected() {
+        // A range that is not a [start, end) pair must not silently pass.
+        let malformed = r#"{"body":{"case":"bug","live_buffer_ranges":[[5]],"per_request_sent_and_received":[]}}"#;
+        assert!(matches!(
+            ring_buffer_allocations_are_disjoint(malformed),
+            Verdict::Violation(_)
+        ));
+    }
 
     #[test]
     fn ogx_adaptive_checker_is_non_vacuous_and_checks_trial_count() {
