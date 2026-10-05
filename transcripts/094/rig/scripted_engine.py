@@ -2,9 +2,17 @@
 
 The frontend under test (dynamo.frontend) does all OpenAI/Anthropic/Responses
 handling, chat templating, tokenization, and tool/reasoning parsing. This
-engine only stands in for the GPU: it records exactly what it was forwarded
-(token ids plus the decoded prompt) and replies with the token ids of a
-scripted completion chosen by a `SCRIPT:<name>` marker in the prompt.
+engine only stands in for the GPU: it replies with the token ids of a scripted
+completion chosen by a `SCRIPT:<name>` marker in the prompt, and honors the
+forwarded `stop_conditions.max_tokens` the way a real engine does (finish
+reason "length").
+
+Each request is recorded twice in the same `forwarded-*.json` file: once before
+the first yield, and again when the generator ends. The final record keeps the
+plan (`planned_completion`) separate from what was actually handed to the Dynamo
+runtime (`emitted_payloads`, `emitted_token_ids`, `emitted_text`) and says how
+generation ended (`termination`). The frontend usually cancels the stream after
+it detects a stop sequence, so the emitted text is shorter than the plan.
 """
 
 from __future__ import annotations
@@ -108,53 +116,83 @@ class ScriptedEngine(LLMEngine):
         if os.path.exists(flag):
             die_after = int(open(flag).read().strip() or "5")
             os.remove(flag)
+        planned_ids = out_ids
+        budget = (request.get("stop_conditions") or {}).get("max_tokens")
+        finish = "stop"
+        if budget is not None and len(out_ids) > budget:
+            out_ids = out_ids[:budget]
+            finish = "length"
         os.makedirs(CAPTURE_DIR, exist_ok=True)
-        with open(os.path.join(CAPTURE_DIR, f"forwarded-{time.time_ns()}-{n:04d}.json"), "w") as f:
-            json.dump(
-                {
-                    "seq": n,
-                    "time": time.time(),
-                    "script": name,
-                    "request": request,
-                    "decoded_prompt": prompt,
-                    "scripted_completion": text,
-                    "completion_token_ids": out_ids,
-                    "resume_from": resume,
-                    "die_after": die_after,
-                    "pid": os.getpid(),
-                },
-                f,
-                indent=1,
-                default=str,
-            )
+        path = os.path.join(CAPTURE_DIR, f"forwarded-{time.time_ns()}-{n:04d}.json")
+        rec = {
+            "seq": n,
+            "time": time.time(),
+            "script": name,
+            "request": request,
+            "decoded_prompt": prompt,
+            "planned_completion": text,
+            "planned_token_ids": planned_ids,
+            "resume_from": resume,
+            "max_tokens": budget,
+            "die_after": die_after,
+            "pid": os.getpid(),
+            "termination": "running",
+            "emitted_payloads": [],
+            "emitted_token_ids": [],
+            "emitted_text": "",
+        }
+
+        def save():
+            rec["emitted_text"] = self.tok.decode(rec["emitted_token_ids"], skip_special_tokens=False)
+            rec["end_time"] = time.time()
+            with open(path, "w") as f:
+                json.dump(rec, f, indent=1, default=str)
+
+        save()
         step = self.tokens_per_chunk
         delay = float(os.environ.get("TOKEN_DELAY", "0.002"))
-        sent = 0; stopped = False
+
+        def emit(payload):
+            # Recorded when handed to the runtime, before the consumer resumes us.
+            rec["emitted_payloads"].append(payload)
+            rec["emitted_token_ids"].extend(payload["token_ids"])
+            return payload
+
         try:
             for i in range(0, len(out_ids), step):
                 if context.is_stopped():
-                    stopped = True
+                    rec["termination"] = "context_stopped"
                     break
-                if die_after is not None and sent >= die_after:
-                    with open(os.path.join(CAPTURE_DIR, "lifecycle.jsonl"), "a") as f:
-                        f.write(json.dumps({"seq": n, "event": "worker_exit", "pid": os.getpid(), "sent": sent, "t": time.time()}) + "\n")
+                if die_after is not None and len(rec["emitted_token_ids"]) >= die_after:
+                    rec["termination"] = "worker_exit"
+                    save()
                     os._exit(1)
-                yield {"token_ids": out_ids[i : i + step], "index": 0}
-                sent += len(out_ids[i : i + step])
+                yield emit({"token_ids": out_ids[i : i + step], "index": 0})
                 await asyncio.sleep(delay)
+            else:
+                yield emit({
+                    "token_ids": [],
+                    "index": 0,
+                    "finish_reason": finish,
+                    "completion_usage": {
+                        "prompt_tokens": len(token_ids),
+                        "completion_tokens": len(out_ids),
+                        "total_tokens": len(token_ids) + len(out_ids),
+                    },
+                })
+                rec["termination"] = f"finished_{finish}"
+        except GeneratorExit:
+            rec["termination"] = "closed_by_consumer"
+            raise
+        except asyncio.CancelledError:
+            rec["termination"] = "cancelled"
+            raise
         finally:
+            save()
             with open(os.path.join(CAPTURE_DIR, "lifecycle.jsonl"), "a") as f:
-                f.write(json.dumps({"seq": n, "script": name, "planned": len(out_ids), "sent": sent, "stopped_seen": stopped, "t": time.time()}) + "\n")
-        yield {
-            "token_ids": [],
-            "index": 0,
-            "finish_reason": "stop",
-            "completion_usage": {
-                "prompt_tokens": len(token_ids),
-                "completion_tokens": len(out_ids),
-                "total_tokens": len(token_ids) + len(out_ids),
-            },
-        }
+                f.write(json.dumps({"seq": n, "script": name, "planned": len(planned_ids),
+                                    "sent": len(rec["emitted_token_ids"]),
+                                    "termination": rec["termination"], "t": time.time()}) + "\n")
 
     async def cleanup(self):
         pass

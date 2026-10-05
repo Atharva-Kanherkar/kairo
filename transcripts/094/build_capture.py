@@ -3,9 +3,11 @@
 
 Each record describes one Anthropic Messages exchange:
   label, source (raw response file), stream, stop_sequences (requested),
-  generation (what the engine actually generated, from the forwarded record;
-              null when the upstream is a hosted provider and not observable),
-  text (concatenated text the client received), stop_reason, stop_sequence.
+  generation (the text the engine actually handed to the Dynamo runtime,
+              `emitted_text` in the forwarded record, never the planned
+              completion; null when the upstream is a hosted provider),
+  text (concatenated text the client received), stop_reason, stop_sequence,
+  max_tokens (requested), output_tokens (usage reported to the client).
 
 usage: python3 build_capture.py   (run from transcripts/094)
 """
@@ -23,8 +25,8 @@ def parse_messages_response(text, stream):
     if not stream:
         d = json.loads(text)
         out = "".join(b.get("text", "") for b in d.get("content", []) if b.get("type") == "text")
-        return out, d.get("stop_reason"), d.get("stop_sequence")
-    out, sr, ss = "", None, None
+        return out, d.get("stop_reason"), d.get("stop_sequence"), d.get("usage", {}).get("output_tokens")
+    out, sr, ss, used = "", None, None, None
     for line in text.splitlines():
         if not line.startswith("data:"):
             continue
@@ -37,37 +39,46 @@ def parse_messages_response(text, stream):
         if e.get("type") == "message_delta":
             sr = e["delta"].get("stop_reason")
             ss = e["delta"].get("stop_sequence")
-    return out, sr, ss
+            used = e.get("usage", {}).get("output_tokens", used)
+    return out, sr, ss, used
 
 
 def dynamo_records(subdir, label_prefix):
     reqs = sorted(glob.glob(os.path.join(HERE, subdir, "*-request.http")))
-    fwd = sorted(glob.glob(os.path.join(HERE, subdir, "forwarded", "*.json")))
+    fwd = sorted(glob.glob(os.path.join(HERE, subdir, "forwarded", "forwarded-*.json")))
     gens = [json.load(open(f)) for f in fwd]
-    recs, gi = [], 0
-    for rq in reqs:
+    # One engine record per exchange, in order. Check the pairing instead of
+    # trusting it.
+    assert len(gens) == len(reqs), (subdir, len(gens), len(reqs))
+    recs = []
+    for rq, gen in zip(reqs, gens):
         path = open(rq, "rb").read().split(b" ", 2)[1].decode()
         b = json.loads(body(rq))
-        rs = rq.replace("-request.http", "-response.http")
-        if gi < len(gens):
-            gen = gens[gi]
-        else:
-            gen = None
-        gi += 1
+        cond = gen["request"]["stop_conditions"]
+        assert cond["max_tokens"] == b["max_tokens"], rq
+        assert (cond.get("stop") or []) == (b.get("stop_sequences") or b.get("stop") or []), rq
+        assert gen["termination"] != "running", rq
         if path != "/v1/messages":
             continue
+        rs = rq.replace("-request.http", "-response.http")
         stream = bool(b.get("stream"))
-        text, sr, ss = parse_messages_response(body(rs), stream)
+        text, sr, ss, used = parse_messages_response(body(rs), stream)
+        kind = "trigger-removed" if not b.get("stop_sequences") else (
+            "length-boundary" if b["max_tokens"] < 200 else "bug")
         recs.append({
-            "label": f"{label_prefix} {'stream' if stream else 'non-stream'}"
-                     f"{'' if b.get('stop_sequences') else ' trigger-removed'}",
+            "label": f"{label_prefix} {'stream' if stream else 'non-stream'} {kind}",
+            "kind": kind,
             "source": os.path.relpath(rs, HERE),
+            "engine_record": os.path.relpath(fwd[gens.index(gen)], HERE),
+            "termination": gen["termination"],
             "stream": stream,
             "stop_sequences": b.get("stop_sequences") or [],
-            "generation": gen["scripted_completion"] if gen else None,
+            "generation": gen["emitted_text"],
             "text": text,
             "stop_reason": sr,
             "stop_sequence": ss,
+            "max_tokens": b["max_tokens"],
+            "output_tokens": used,
         })
     return recs
 
@@ -78,7 +89,7 @@ def live_records():
         rq = rs.replace("-response.http", "-request.http")
         b = json.loads(body(rq))
         stream = bool(b.get("stream"))
-        text, sr, ss = parse_messages_response(body(rs), stream)
+        text, sr, ss, used = parse_messages_response(body(rs), stream)
         recs.append({
             "label": f"live Anthropic API {'stream' if stream else 'non-stream'}",
             "source": os.path.relpath(rs, HERE),
@@ -88,6 +99,8 @@ def live_records():
             "text": text,
             "stop_reason": sr,
             "stop_sequence": ss,
+            "max_tokens": b.get("max_tokens"),
+            "output_tokens": used,
         })
     return recs
 
@@ -100,6 +113,11 @@ def write(name, recs):
 
 
 dyn = dynamo_records("dynamo", "Dynamo 1.6.0.dev20261004")
-write("capture-dynamo-bug.jsonl", [r for r in dyn if r["stop_sequences"]])
-write("capture-dynamo-trigger-removed.jsonl", [r for r in dyn if not r["stop_sequences"]])
+rel = dynamo_records("dynamo-release-1.5.0", "Dynamo 1.5.0")
+write("capture-dynamo-bug.jsonl", [r for r in dyn if r["kind"] == "bug"])
+write("capture-dynamo-release-1.5.0-bug.jsonl", [r for r in rel if r["kind"] == "bug"])
+write("capture-dynamo-trigger-removed.jsonl",
+      [r for r in dyn + rel if r["kind"] == "trigger-removed"])
+write("capture-dynamo-length-boundary.jsonl",
+      [r for r in dyn + rel if r["kind"] == "length-boundary"])
 write("capture-provider-control.jsonl", live_records())

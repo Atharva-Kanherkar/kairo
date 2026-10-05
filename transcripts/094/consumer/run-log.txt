@@ -1,5 +1,7 @@
-run start 2026-10-05T11:31:39Z
+run start 2026-10-05T19:29:20Z
 anthropics/anthropic-tools @ 795f706ddaabd2dc71f6c6d47ba087e7df03205a, anthropic==0.16.0
+ai-dynamo                1.6.0.dev20261004
+ai-dynamo-runtime        1.6.0.dev20261004
 dynamo #1: RAISED ValueError Hit maximum number of retries attempting to use tools.
 dynamo #2: RAISED ValueError Hit maximum number of retries attempting to use tools.
 dynamo #3: RAISED ValueError Hit maximum number of retries attempting to use tools.
@@ -12,4 +14,4 @@ counterfactual #4: RESULT "2 plus 3 is 5."
 counterfactual #5: RESULT "2 plus 3 is 5."
 tool executions by mode:
    5 {"mode": "counterfactual", "tool": "perform_addition", "a": 2.0, "b": 3.0}
-run end 2026-10-05T11:31:53Z
+run end 2026-10-05T19:29:26Z

@@ -4734,14 +4734,49 @@ fn agentgateway_empty_text_delta_between_arguments_is_conformant() {
 
 /// Bug 094: Dynamo's Anthropic Messages endpoint stops at a requested stop
 /// sequence but reports `stop_reason: "end_turn"` and `stop_sequence: null`,
-/// unary and streamed. Recorded against `ai-dynamo` 1.6.0.dev20261004 with a
-/// deterministic engine whose generation is captured next to each response.
+/// unary and streamed. Each record pairs the client response with the text the
+/// deterministic engine actually emitted before the frontend cancelled it.
+/// Every record must fail on its own, so the capture proves N of N.
+fn assert_every_094_record_violates(rel: &str) {
+    let capture = fixture(rel);
+    let lines: Vec<&str> = capture.lines().filter(|l| !l.trim().is_empty()).collect();
+    assert_eq!(
+        lines.len(),
+        8,
+        "{rel} must hold 5 unary and 3 streamed exchanges"
+    );
+    for (i, line) in lines.iter().enumerate() {
+        let v = anthropic_stop_sequence_reported(line);
+        assert!(
+            matches!(&v, Verdict::Violation(reason) if reason.contains("\"</answer>\"") && reason.contains("end_turn")),
+            "{rel} record {i}: expected the dropped </answer> stop to be caught, got {v:?}"
+        );
+    }
+}
+
 #[test]
 fn dynamo_messages_stop_sequence_not_reported_violation() {
-    let v = anthropic_stop_sequence_reported(&fixture("transcripts/094/capture-dynamo-bug.jsonl"));
-    assert!(
-        matches!(&v, Verdict::Violation(reason) if reason.contains("\"</answer>\"") && reason.contains("end_turn")),
-        "expected the dropped </answer> stop to be caught, got {v:?}"
+    assert_every_094_record_violates("transcripts/094/capture-dynamo-bug.jsonl");
+}
+
+/// The same defect on the current release, 1.5.0. Its text also ends in a
+/// partial `</answer` (a separate leak fixed upstream by #14378), which must not
+/// hide the wrong stop report.
+#[test]
+fn dynamo_release_messages_stop_sequence_not_reported_violation() {
+    assert_every_094_record_violates("transcripts/094/capture-dynamo-release-1.5.0-bug.jsonl");
+}
+
+/// Length control at the delimiter boundary: with `max_tokens` equal to the
+/// tokens before `</answer>`, the engine stops on length without emitting the
+/// delimiter and Dynamo correctly reports `max_tokens`, on both versions.
+#[test]
+fn dynamo_messages_length_stop_at_delimiter_boundary_is_conformant() {
+    assert_eq!(
+        anthropic_stop_sequence_reported(&fixture(
+            "transcripts/094/capture-dynamo-length-boundary.jsonl"
+        )),
+        Verdict::Conformant
     );
 }
 
@@ -4758,7 +4793,8 @@ fn anthropic_live_stop_sequence_report_is_conformant() {
 }
 
 /// Trigger-removed control: the same Dynamo frontend and generation with no
-/// `stop_sequences` runs to its natural end and correctly reports `end_turn`.
+/// `stop_sequences` runs to its natural end and correctly reports `end_turn`,
+/// on both versions.
 #[test]
 fn dynamo_messages_without_stop_sequences_is_conformant() {
     assert_eq!(

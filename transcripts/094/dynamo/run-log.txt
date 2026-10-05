@@ -1,4 +1,6 @@
-run start 2026-10-05T11:31:05Z
+run start 2026-10-05T19:28:41Z
+ai-dynamo                1.6.0.dev20261004
+ai-dynamo-runtime        1.6.0.dev20261004
 bug messages non-stream #1: reason='end_turn' matched=None text_tail='<answer>2 plus 3 is 5'
 bug messages non-stream #2: reason='end_turn' matched=None text_tail='<answer>2 plus 3 is 5'
 bug messages non-stream #3: reason='end_turn' matched=None text_tail='<answer>2 plus 3 is 5'
@@ -13,4 +15,10 @@ control same-frontend chat (nvext.stop_reason) #3: reason='stop' matched='</answ
 control trigger removed (no stop_sequences) #1: reason='end_turn' matched=None text_tail='is text must never be generated.'
 control trigger removed (no stop_sequences) #2: reason='end_turn' matched=None text_tail='is text must never be generated.'
 control trigger removed (no stop_sequences) #3: reason='end_turn' matched=None text_tail='is text must never be generated.'
-run end 2026-10-05T11:31:05Z
+control length stop at delimiter boundary non-stream #1: reason='max_tokens' matched=None text_tail='<answer>2 plus 3 is 5'
+control length stop at delimiter boundary non-stream #2: reason='max_tokens' matched=None text_tail='<answer>2 plus 3 is 5'
+control length stop at delimiter boundary non-stream #3: reason='max_tokens' matched=None text_tail='<answer>2 plus 3 is 5'
+control length stop at delimiter boundary stream #1: reason='max_tokens' matched=None text_tail='<answer>2 plus 3 is 5'
+control length stop at delimiter boundary stream #2: reason='max_tokens' matched=None text_tail='<answer>2 plus 3 is 5'
+control length stop at delimiter boundary stream #3: reason='max_tokens' matched=None text_tail='<answer>2 plus 3 is 5'
+run end 2026-10-05T19:28:42Z

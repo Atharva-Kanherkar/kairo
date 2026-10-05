@@ -1,0 +1,203 @@
+{
+ "seq": 5,
+ "time": 1791228541.7325153,
+ "script": "answer",
+ "request": {
+  "model": "Qwen/Qwen3-0.6B",
+  "token_ids": [
+   151644,
+   872,
+   198,
+   24787,
+   25,
+   9217,
+   151645,
+   198,
+   151644,
+   77091,
+   198
+  ],
+  "stop_conditions": {
+   "max_tokens": 200,
+   "stop": [
+    "</answer>",
+    "\n\nHuman:"
+   ],
+   "stop_token_ids": null,
+   "stop_token_ids_visible": null,
+   "stop_token_ids_hidden": [
+    151645,
+    151643
+   ],
+   "min_tokens": null,
+   "ignore_eos": null,
+   "max_thinking_tokens": null
+  },
+  "sampling_options": {
+   "n": null,
+   "best_of": null,
+   "presence_penalty": null,
+   "frequency_penalty": null,
+   "repetition_penalty": null,
+   "temperature": null,
+   "top_p": null,
+   "top_k": null,
+   "min_p": null,
+   "use_beam_search": null,
+   "length_penalty": null,
+   "seed": null,
+   "include_stop_str_in_output": null,
+   "guided_decoding": null
+  },
+  "output_options": {
+   "logprobs": null,
+   "prompt_logprobs": null,
+   "skip_special_tokens": null,
+   "formatted_prompt": null,
+   "return_tokens_as_token_ids": null
+  },
+  "eos_token_ids": [
+   151645,
+   151643
+  ],
+  "mdc_sum": "f41e499ec383248cb67a11055530f81c8b213d3dd97e214fb1d6abb909eb4b7a",
+  "annotations": [],
+  "routing": {},
+  "router_config_override": null,
+  "extra_args": {
+   "reasoning_parser_kwargs": {
+    "chat_template_kwargs": {
+     "truncate_history_thinking": false,
+     "thinking": true,
+     "enable_thinking": true
+    }
+   }
+  }
+ },
+ "decoded_prompt": "<|im_start|>user\nSCRIPT:answer<|im_end|>\n<|im_start|>assistant\n",
+ "planned_completion": "<answer>2 plus 3 is 5</answer>\nThis text must never be generated.",
+ "planned_token_ids": [
+  27,
+  9217,
+  29,
+  17,
+  5519,
+  220,
+  18,
+  374,
+  220,
+  20,
+  522,
+  9217,
+  397,
+  1986,
+  1467,
+  1969,
+  2581,
+  387,
+  7907,
+  13
+ ],
+ "resume_from": 0,
+ "max_tokens": 200,
+ "die_after": null,
+ "pid": 194,
+ "termination": "context_stopped",
+ "emitted_payloads": [
+  {
+   "token_ids": [
+    27
+   ],
+   "index": 0
+  },
+  {
+   "token_ids": [
+    9217
+   ],
+   "index": 0
+  },
+  {
+   "token_ids": [
+    29
+   ],
+   "index": 0
+  },
+  {
+   "token_ids": [
+    17
+   ],
+   "index": 0
+  },
+  {
+   "token_ids": [
+    5519
+   ],
+   "index": 0
+  },
+  {
+   "token_ids": [
+    220
+   ],
+   "index": 0
+  },
+  {
+   "token_ids": [
+    18
+   ],
+   "index": 0
+  },
+  {
+   "token_ids": [
+    374
+   ],
+   "index": 0
+  },
+  {
+   "token_ids": [
+    220
+   ],
+   "index": 0
+  },
+  {
+   "token_ids": [
+    20
+   ],
+   "index": 0
+  },
+  {
+   "token_ids": [
+    522
+   ],
+   "index": 0
+  },
+  {
+   "token_ids": [
+    9217
+   ],
+   "index": 0
+  },
+  {
+   "token_ids": [
+    397
+   ],
+   "index": 0
+  }
+ ],
+ "emitted_token_ids": [
+  27,
+  9217,
+  29,
+  17,
+  5519,
+  220,
+  18,
+  374,
+  220,
+  20,
+  522,
+  9217,
+  397
+ ],
+ "emitted_text": "<answer>2 plus 3 is 5</answer>\n",
+ "end_time": 1791228541.7719946
+}
