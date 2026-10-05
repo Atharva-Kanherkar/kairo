@@ -1,0 +1,13 @@
+run start 2026-10-05T11:31:14Z
+model claude-haiku-4-5, stop_sequences ["</answer>", "
+
+Human:"]
+run-01 200 stop_reason stop_sequence stop_sequence '</answer>' text_tail '<answer>2 plus 3 is 5'
+run-02 200 stop_reason stop_sequence stop_sequence '</answer>' text_tail '<answer>2 plus 3 is 5'
+run-03 200 stop_reason stop_sequence stop_sequence '</answer>' text_tail '<answer>2 plus 3 is 5'
+run-04 200 stop_reason stop_sequence stop_sequence '</answer>' text_tail '<answer>2 plus 3 is 5'
+run-05 200 stop_reason stop_sequence stop_sequence '</answer>' text_tail '<answer>2 plus 3 is 5'
+run-01-stream 200 stop_reason stop_sequence stop_sequence '</answer>'
+run-02-stream 200 stop_reason stop_sequence stop_sequence '</answer>'
+run-03-stream 200 stop_reason stop_sequence stop_sequence '</answer>'
+run end 2026-10-05T11:31:21Z

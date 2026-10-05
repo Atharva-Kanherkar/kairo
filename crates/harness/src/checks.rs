@@ -2347,6 +2347,96 @@ pub fn mcp_tool_executes_once(ledger_jsonl: &str) -> Verdict {
     }
 }
 
+/// Invariant (bug 094): when generation ends because a requested stop sequence
+/// was produced, an Anthropic Messages response MUST say so. `stop_reason` is
+/// `"stop_sequence"` and `stop_sequence` names the matched sequence, in both
+/// the unary body and the streamed `message_delta`. Clients that pass several
+/// delimiters (for example `"</function_calls>"` and `"\n\nHuman:"`) have no
+/// other way to learn which one fired, because the matched text is excluded
+/// from the content.
+///
+/// Each capture line is one exchange: `stop_sequences` (requested), `generation`
+/// (what the engine produced, or `null` when the upstream is a hosted provider),
+/// `text` (what the client received), `stop_reason`, and `stop_sequence`.
+///
+/// - A reported `stop_sequence` stop must name a requested sequence that is not
+///   inside the returned text.
+/// - When the generation is known and the returned text stops exactly where a
+///   requested sequence begins, the response must report that sequence.
+/// - When no requested sequence occurs in the known generation, the response
+///   must not claim a `stop_sequence` stop.
+pub fn anthropic_stop_sequence_reported(jsonl: &str) -> Verdict {
+    let mut checked = 0usize;
+    for (idx, line) in jsonl.lines().filter(|l| !l.trim().is_empty()).enumerate() {
+        let record: Value = match serde_json::from_str(line) {
+            Ok(v) => v,
+            Err(e) => return Verdict::Violation(format!("record {idx}: unparseable capture: {e}")),
+        };
+        let Some(requested) = record.get("stop_sequences").and_then(Value::as_array) else {
+            return Verdict::Violation(format!("record {idx}: missing stop_sequences list"));
+        };
+        let requested: Vec<&str> = requested.iter().filter_map(Value::as_str).collect();
+        let Some(text) = record.get("text").and_then(Value::as_str) else {
+            return Verdict::Violation(format!("record {idx}: missing text"));
+        };
+        let Some(stop_reason) = record.get("stop_reason").and_then(Value::as_str) else {
+            return Verdict::Violation(format!("record {idx}: missing stop_reason"));
+        };
+        let reported = record.get("stop_sequence").and_then(Value::as_str);
+        let generation = record.get("generation").and_then(Value::as_str);
+
+        if stop_reason == "stop_sequence" {
+            let Some(seq) = reported else {
+                return Verdict::Violation(format!(
+                    "record {idx}: stop_reason is \"stop_sequence\" but stop_sequence is null"
+                ));
+            };
+            if !requested.contains(&seq) {
+                return Verdict::Violation(format!(
+                    "record {idx}: reported stop_sequence {seq:?} was not requested ({requested:?})"
+                ));
+            }
+            if text.contains(seq) {
+                return Verdict::Violation(format!(
+                    "record {idx}: matched stop_sequence {seq:?} is still inside the returned text"
+                ));
+            }
+            if generation.is_some_and(|g| !g.contains(seq)) {
+                return Verdict::Violation(format!(
+                    "record {idx}: stop_sequence {seq:?} is reported but never occurs in the generation"
+                ));
+            }
+            checked += 1;
+            continue;
+        }
+
+        let Some(generation) = generation else {
+            // Hosted upstream that did not report a stop sequence: nothing here
+            // proves one was generated.
+            continue;
+        };
+        let hit = requested
+            .iter()
+            .filter(|s| !s.is_empty())
+            .filter_map(|s| generation.find(*s).map(|at| (at, *s)))
+            .min_by_key(|(at, _)| *at);
+        // A hit only counts when the returned text ends exactly where the sequence
+        // begins. Otherwise the exchange stopped earlier (for example on length).
+        if let Some((_, seq)) = hit.filter(|(at, _)| generation.get(..*at) == Some(text)) {
+            return Verdict::Violation(format!(
+                "record {idx}: generation hit requested stop sequence {seq:?} and the text \
+                 ends exactly there, but the response reports stop_reason={stop_reason:?} \
+                 stop_sequence={reported:?}"
+            ));
+        }
+        checked += 1;
+    }
+    if checked == 0 {
+        return Verdict::Violation("capture holds no decidable exchange".to_owned());
+    }
+    Verdict::Conformant
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -3458,5 +3548,94 @@ data: [DONE]
                 "{endpoint} must reject {capture:?}"
             );
         }
+    }
+    fn stop_record(
+        stop: &[&str],
+        generation: Option<&str>,
+        text: &str,
+        reason: &str,
+        seq: Option<&str>,
+    ) -> String {
+        serde_json::json!({
+            "stop_sequences": stop,
+            "generation": generation,
+            "text": text,
+            "stop_reason": reason,
+            "stop_sequence": seq,
+        })
+        .to_string()
+    }
+
+    #[test]
+    fn anthropic_stop_sequence_dropped_is_caught() {
+        let line = stop_record(
+            &["</a>", "\n\nHuman:"],
+            Some("<a>x</a> tail"),
+            "<a>x",
+            "end_turn",
+            None,
+        );
+        let v = anthropic_stop_sequence_reported(&line);
+        assert!(
+            matches!(&v, Verdict::Violation(r) if r.contains("\"</a>\"")),
+            "{v:?}"
+        );
+    }
+
+    #[test]
+    fn anthropic_stop_sequence_reported_is_conformant() {
+        let line = stop_record(
+            &["</a>", "\n\nHuman:"],
+            Some("<a>x</a> tail"),
+            "<a>x",
+            "stop_sequence",
+            Some("</a>"),
+        );
+        assert_eq!(anthropic_stop_sequence_reported(&line), Verdict::Conformant);
+    }
+
+    #[test]
+    fn anthropic_stop_sequence_hosted_report_is_validated() {
+        let ok = stop_record(&["</a>"], None, "<a>x", "stop_sequence", Some("</a>"));
+        assert_eq!(anthropic_stop_sequence_reported(&ok), Verdict::Conformant);
+        let unrequested = stop_record(&["</a>"], None, "<a>x", "stop_sequence", Some("</b>"));
+        assert!(!anthropic_stop_sequence_reported(&unrequested).is_conformant());
+        let invented = stop_record(
+            &["</a>"],
+            Some("<a>x tail"),
+            "<a>x",
+            "stop_sequence",
+            Some("</a>"),
+        );
+        assert!(!anthropic_stop_sequence_reported(&invented).is_conformant());
+        let null_seq = stop_record(&["</a>"], None, "<a>x", "stop_sequence", None);
+        assert!(!anthropic_stop_sequence_reported(&null_seq).is_conformant());
+        let leaked = stop_record(&["</a>"], None, "<a>x</a>", "stop_sequence", Some("</a>"));
+        assert!(!anthropic_stop_sequence_reported(&leaked).is_conformant());
+    }
+
+    #[test]
+    fn anthropic_natural_end_without_stop_sequences_is_conformant() {
+        let line = stop_record(
+            &[],
+            Some("<a>x</a> tail"),
+            "<a>x</a> tail",
+            "end_turn",
+            None,
+        );
+        assert_eq!(anthropic_stop_sequence_reported(&line), Verdict::Conformant);
+    }
+
+    #[test]
+    fn anthropic_length_stop_before_sequence_is_conformant() {
+        let line = stop_record(&["</a>"], Some("<a>xyz</a>"), "<a>x", "max_tokens", None);
+        assert_eq!(anthropic_stop_sequence_reported(&line), Verdict::Conformant);
+    }
+
+    #[test]
+    fn anthropic_stop_sequence_malformed_or_empty_capture_is_rejected() {
+        assert!(!anthropic_stop_sequence_reported("not json").is_conformant());
+        assert!(!anthropic_stop_sequence_reported("{\"text\":\"x\"}").is_conformant());
+        assert!(!anthropic_stop_sequence_reported("").is_conformant());
     }
 }

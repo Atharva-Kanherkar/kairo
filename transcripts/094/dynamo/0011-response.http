@@ -1,0 +1,7 @@
+HTTP/1.1 200 OK
+content-type: application/json
+connection: close
+transfer-encoding: chunked
+date: Mon, 05 Oct 2026 11:31:05 GMT
+
+{"id":"chatcmpl-8a7200b3-4f8a-4fe9-9f40-a72761b6a793","choices":[{"index":0,"message":{"content":"<answer>2 plus 3 is 5","refusal":null,"role":"assistant"},"finish_reason":"stop","logprobs":null}],"created":1791199865,"model":"Qwen/Qwen3-0.6B","object":"chat.completion","usage":{"prompt_tokens":11,"completion_tokens":13,"total_tokens":24,"completion_tokens_details":{"reasoning_tokens":0}},"nvext":{"stop_reason":"</answer>"}}

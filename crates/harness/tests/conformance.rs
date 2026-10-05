@@ -6,17 +6,18 @@
 //! violating the invariant, this test flips and tells us.
 
 use kairo::checks::{
-    anthropic_response_toolcall_stop_reason, anthropic_stream_block_lifecycle,
-    anthropic_stream_safety_stop_reason, anthropic_tool_choice_any_mapped_to_required,
-    anthropic_toolcall_stop_reason, capture_records, content_filter_preserved,
-    document_body_forwarded, endpoint_response_family_preserved, executed_tool_results_preserved,
-    gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
-    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
-    invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
-    json_schema_property_forwarded, mcp_tool_executes_once, model_info_capture_identity,
-    model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
-    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
-    non_text_block_not_json_dumped, ogx_adaptive_thinking_loss, openai_stream_finish_reason,
+    anthropic_response_toolcall_stop_reason, anthropic_stop_sequence_reported,
+    anthropic_stream_block_lifecycle, anthropic_stream_safety_stop_reason,
+    anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
+    content_filter_preserved, document_body_forwarded, endpoint_response_family_preserved,
+    executed_tool_results_preserved, gemini_inline_media_preserved_in_chat_response,
+    gemini_inline_media_preserved_in_chat_stream, id_conforms, image_url_cache_key_case_sensitive,
+    instruction_messages_preserved, invalid_credential_rejected_before_upstream,
+    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
+    mcp_tool_executes_once, model_info_capture_identity, model_info_envelope_body,
+    model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
+    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
+    ogx_adaptive_thinking_loss, openai_stream_finish_reason,
     openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
     outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
     reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
@@ -4727,6 +4728,43 @@ fn agentgateway_reopens_tool_use_block_after_text_interleaves() {
 fn agentgateway_empty_text_delta_between_arguments_is_conformant() {
     assert_eq!(
         anthropic_stream_block_lifecycle(&fixture("transcripts/091/rig/control-empty-delta.sse")),
+        Verdict::Conformant
+    );
+}
+
+/// Bug 094: Dynamo's Anthropic Messages endpoint stops at a requested stop
+/// sequence but reports `stop_reason: "end_turn"` and `stop_sequence: null`,
+/// unary and streamed. Recorded against `ai-dynamo` 1.6.0.dev20261004 with a
+/// deterministic engine whose generation is captured next to each response.
+#[test]
+fn dynamo_messages_stop_sequence_not_reported_violation() {
+    let v = anthropic_stop_sequence_reported(&fixture("transcripts/094/capture-dynamo-bug.jsonl"));
+    assert!(
+        matches!(&v, Verdict::Violation(reason) if reason.contains("\"</answer>\"") && reason.contains("end_turn")),
+        "expected the dropped </answer> stop to be caught, got {v:?}"
+    );
+}
+
+/// Provider control: the live Anthropic Messages API, same request and same
+/// returned text, reports `stop_reason: "stop_sequence"` and names `</answer>`.
+#[test]
+fn anthropic_live_stop_sequence_report_is_conformant() {
+    assert_eq!(
+        anthropic_stop_sequence_reported(&fixture(
+            "transcripts/094/capture-provider-control.jsonl"
+        )),
+        Verdict::Conformant
+    );
+}
+
+/// Trigger-removed control: the same Dynamo frontend and generation with no
+/// `stop_sequences` runs to its natural end and correctly reports `end_turn`.
+#[test]
+fn dynamo_messages_without_stop_sequences_is_conformant() {
+    assert_eq!(
+        anthropic_stop_sequence_reported(&fixture(
+            "transcripts/094/capture-dynamo-trigger-removed.jsonl"
+        )),
         Verdict::Conformant
     );
 }

@@ -1,0 +1,7 @@
+POST /v1/messages HTTP/1.1
+Host: api.anthropic.com
+content-type: application/json
+anthropic-version: 2023-06-01
+x-api-key: [REDACTED]
+
+{"model": "claude-haiku-4-5", "max_tokens": 200, "temperature": 0, "stop_sequences": ["</answer>", "\n\nHuman:"], "messages": [{"role": "user", "content": "Reply with exactly the following text and nothing else, character for character:\n<answer>2 plus 3 is 5</answer>\nThis text must never be generated."}], "stream": true}
