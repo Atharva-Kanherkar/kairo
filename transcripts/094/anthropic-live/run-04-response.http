@@ -1,0 +1,30 @@
+HTTP/1.1 200
+Date: Mon, 05 Oct 2026 11:31:18 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: close
+anthropic-ratelimit-input-tokens-limit: [REDACTED]
+anthropic-ratelimit-input-tokens-remaining: [REDACTED]
+anthropic-ratelimit-input-tokens-reset: [REDACTED]
+anthropic-ratelimit-output-tokens-limit: [REDACTED]
+anthropic-ratelimit-output-tokens-remaining: [REDACTED]
+anthropic-ratelimit-output-tokens-reset: [REDACTED]
+anthropic-ratelimit-requests-limit: [REDACTED]
+anthropic-ratelimit-requests-remaining: [REDACTED]
+anthropic-ratelimit-requests-reset: [REDACTED]
+anthropic-ratelimit-tokens-limit: [REDACTED]
+anthropic-ratelimit-tokens-remaining: [REDACTED]
+anthropic-ratelimit-tokens-reset: [REDACTED]
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+request-id: [REDACTED]
+traceresponse: [REDACTED]
+anthropic-organization-id: [REDACTED]
+anthropic-workspace-id: [REDACTED]
+vary: Accept-Encoding
+Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
+Server: cloudflare
+cf-cache-status: DYNAMIC
+X-Robots-Tag: none
+CF-RAY: [REDACTED]
+
+{"model":"claude-haiku-4-5-20251001","id":"msg_011Cfj1qKKT956dqU69DrgaB","type":"message","role":"assistant","content":[{"type":"text","text":"<answer>2 plus 3 is 5"}],"container":null,"stop_reason":"stop_sequence","stop_sequence":"</answer>","stop_details":null,"usage":{"input_tokens":45,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":15,"service_tier":"standard","inference_geo":"not_available"},"diagnostics":null}

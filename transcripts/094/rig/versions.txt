@@ -1,0 +1,8 @@
+Name: ai-dynamo
+Version: 1.6.0.dev20261004
+Name: ai-dynamo-runtime
+Version: 1.6.0.dev20261004
+Name: transformers
+Version: 5.18.0
+Python 3.12.15
+aarch64

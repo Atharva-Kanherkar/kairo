@@ -1,0 +1,7 @@
+HTTP/1.1 200 OK
+content-type: application/json
+connection: close
+transfer-encoding: chunked
+date: Mon, 05 Oct 2026 19:28:42 GMT
+
+{"id":"msg_4f4d6083b36e4df8a7c7c31b4c9ce520","type":"message","role":"assistant","content":[{"type":"text","text":"<answer>2 plus 3 is 5"}],"model":"Qwen/Qwen3-0.6B","stop_reason":"max_tokens","stop_sequence":null,"usage":{"input_tokens":11,"output_tokens":10,"cache_creation_input_tokens":0}}
