@@ -1,0 +1,10 @@
+== nixlBasicDesc::covers with the len==0 normalization applied ==
+base{addr=0,    len=SIZE_MAX}.covers(q{4096,4096}) = true
+base{addr=4096, len=SIZE_MAX}.covers(q{4096,4096}) = false
+
+raw arithmetic at addr=4096: (addr + SIZE_MAX) mod 2^64 = 4095
+raw arithmetic at addr=0:    (addr + SIZE_MAX) mod 2^64 = 18446744073709551615
+
+control, base{addr=4096, len=4096}.covers(q{4096,4096}) = true
+
+VERDICT as_expected

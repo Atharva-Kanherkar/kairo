@@ -26,12 +26,12 @@ offline with no provider keys.
 <!-- kairo-counts:start -->
 | Metric | Value |
 |---|---|
-| Reproduced issue folders | 67 |
-| Gateways under test | LiteLLM, NVIDIA Switchyard, Bifrost, GoModel, AxonHub, any-llm, Dynamo, OGX, and agentgateway |
-| Harness tests | 239 (186 conformance checks against recorded transcripts, 53 unit) |
+| Reproduced issue folders | 69 |
+| Gateways under test | LiteLLM, NVIDIA Switchyard, Bifrost, GoModel, AxonHub, any-llm, Dynamo, NIXL, OGX, and agentgateway |
+| Harness tests | 249 (192 conformance checks against recorded transcripts, 57 unit) |
 <!-- kairo-counts:end -->
 
-The 67 folders cover reproduced findings, multi-defect reports, and honest
+The 69 folders cover reproduced findings, multi-defect reports, and honest
 negative results. Versions and reproduction outcomes are recorded per finding
 in [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md), including cited bugs that did
 not reproduce.
@@ -85,6 +85,17 @@ forwards them as visible `output_text`, which puts private reasoning into the
 model's visible context. An image inside a `tool_result` is JSON-dumped into a
 text string by Switchyard, so the model receives literal base64, and is deleted
 outright by LiteLLM.
+
+Two NIXL results sit one layer further down, and they went opposite ways. A
+`len == 0` registration for a block or file region is accepted and deregisterable
+but can never be resolved for a transfer unless its address is 0, because
+`covers()` wraps `addr + SIZE_MAX` to `addr - 1`
+([095](issues/095-nixl-len0-registration-invisible-to-transfers)). The same
+library's early `releaseXferReq` looks like it loses three quarters of a transfer
+while reporting success, but that is cancellation behaving as
+[nixl#1955](https://github.com/ai-dynamo/nixl/issues/1955) specifies, so the
+framing was withdrawn and kept as a negative
+([096](issues/096-nixl-release-truncation-is-cancellation-not-a-bug)).
 
 A streaming translator has a second way to break the same loop. agentgateway's
 OpenAI-to-Anthropic stream translation closes an open `tool_use` block when a text
