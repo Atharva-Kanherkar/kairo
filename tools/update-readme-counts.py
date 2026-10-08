@@ -36,6 +36,7 @@ GATEWAYS = (
     ("axonhub", "AxonHub"),
     ("any-llm", "any-llm"),
     ("dynamo", "Dynamo"),
+    ("nixl", "NIXL"),
     ("ogx", "OGX"),
     ("agentgateway", "agentgateway"),
 )

@@ -1,0 +1,8 @@
+{"mode":"bug","descriptors":64,"post":1,"poll":-1,"release":0,"regions_written":64,"regions_missing":0,"bytes_written":33554432,"bytes_requested":33554432}
+{"mode":"control","descriptors":64,"post":1,"poll":0,"release":0,"regions_written":64,"regions_missing":0,"bytes_written":33554432,"bytes_requested":33554432}
+{"mode":"bug","descriptors":128,"post":1,"poll":-1,"release":0,"regions_written":128,"regions_missing":0,"bytes_written":67108864,"bytes_requested":67108864}
+{"mode":"control","descriptors":128,"post":1,"poll":0,"release":0,"regions_written":128,"regions_missing":0,"bytes_written":67108864,"bytes_requested":67108864}
+{"mode":"bug","descriptors":130,"post":1,"poll":-1,"release":0,"regions_written":128,"regions_missing":2,"bytes_written":67108864,"bytes_requested":68157440}
+{"mode":"control","descriptors":130,"post":1,"poll":0,"release":0,"regions_written":130,"regions_missing":0,"bytes_written":68157440,"bytes_requested":68157440}
+{"mode":"bug","descriptors":512,"post":1,"poll":-1,"release":0,"regions_written":128,"regions_missing":384,"bytes_written":67108864,"bytes_requested":268435456}
+{"mode":"control","descriptors":512,"post":1,"poll":0,"release":0,"regions_written":512,"regions_missing":0,"bytes_written":268435456,"bytes_requested":268435456}

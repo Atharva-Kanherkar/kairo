@@ -2502,6 +2502,76 @@ pub fn anthropic_stop_sequence_reported(jsonl: &str) -> Verdict {
     Verdict::Conformant
 }
 
+/// Invariant (bug 095): a registration that the tool accepts and later hands
+/// back must also be resolvable by the transfer path.
+///
+/// Registration and lookup are two different code paths over the same
+/// descriptor list. A tool that normalizes a descriptor on the way in, and again
+/// on one lookup but not the other, produces a registration that deregistration
+/// can find and the transfer path can never resolve. The caller is left holding
+/// memory it can free but not use.
+///
+/// NIXL is the recorded case. `nixlSecDescList::normalizeSecDesc()` rewrites
+/// `len == 0` to `SIZE_MAX` for `BLK_SEG`, `OBJ_SEG` and `FILE_SEG`
+/// (`src/infra/mem_section.h:131`), and `normalizeQuery()` repeats it inside
+/// `getIndex()` (`mem_section.h:150`). `getCoveringIndex()` does not, and
+/// `nixlBasicDesc::covers()` evaluates `addr + len >= query.addr + query.len`,
+/// which wraps when `len == SIZE_MAX` and `addr != 0`.
+///
+/// The invariant is stated over the trial record, so the same checker scores any
+/// tool that registers memory in two stages. A cell is conformant unless it was
+/// accepted for registration, can be deregistered by the descriptor that created
+/// it, and yet cannot be resolved for a transfer the registration covers.
+///
+/// One JSON object per cell:
+///
+/// ```json
+/// {"register": 0, "deregister": 0, "createXferReq": -4, "covered": true}
+/// ```
+///
+/// `covered` is not an assertion by the caller. The harness computes it from the
+/// addresses the cell actually used, and records `offset`, `reg_end` and
+/// `xfer_end` alongside so the containment can be recomputed from the fixture. A
+/// cell where the transfer range is *not* covered is correctly refused, so it is
+/// conformant.
+pub fn registration_resolvable_by_both_paths(cell: &str) -> Verdict {
+    let value: Value = match serde_json::from_str(cell) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("cell record is not JSON: {e}")),
+    };
+    let Some(object) = value.as_object() else {
+        return Verdict::Violation("cell record is not a JSON object".to_owned());
+    };
+    let int = |key: &str| -> Option<i64> { object.get(key).and_then(Value::as_i64) };
+    let (Some(register), Some(deregister), Some(create), Some(covered)) = (
+        int("register"),
+        int("deregister"),
+        int("createXferReq"),
+        object.get("covered").and_then(Value::as_bool),
+    ) else {
+        return Verdict::Violation(
+            "cell record needs integer `register`, `deregister` and `createXferReq`, and boolean `covered`"
+                .to_owned(),
+        );
+    };
+
+    if register != 0 || !covered {
+        // Never registered, or the transfer asked for something outside the
+        // registration. Refusing either is correct and proves nothing.
+        return Verdict::Conformant;
+    }
+    if create == 0 {
+        return Verdict::Conformant;
+    }
+    if deregister == 0 {
+        return Verdict::Violation(format!(
+            "registration was accepted and can be deregistered by the descriptor that created it, \
+             but a transfer inside its range failed to resolve (status {create})"
+        ));
+    }
+    Verdict::Conformant
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -3803,5 +3873,77 @@ data: [DONE]
         assert!(!anthropic_stop_sequence_reported("not json").is_conformant());
         assert!(!anthropic_stop_sequence_reported("{\"text\":\"x\"}").is_conformant());
         assert!(!anthropic_stop_sequence_reported("").is_conformant());
+    }
+
+    #[test]
+    fn registration_checker_flags_a_registration_only_one_path_can_see() {
+        // Recorded from NIXL's POSIX backend: FILE_SEG registered with len == 0 at
+        // offset 4096. Register and deregister both succeed, the transfer fails.
+        let cell = r#"{"cell":"B","reg_len":0,"offset":4096,"register":0,
+            "createXferReq":-4,"covered":true,"deregister":0}"#;
+        let verdict = registration_resolvable_by_both_paths(cell);
+        assert!(
+            matches!(&verdict, Verdict::Violation(reason)
+                if reason.contains("accepted and can be deregistered")),
+            "{verdict:?}"
+        );
+    }
+
+    #[test]
+    fn registration_checker_accepts_both_controls() {
+        // len == 0 at offset 0 resolves, because the wrapped add cannot wrap at 0.
+        assert_eq!(
+            registration_resolvable_by_both_paths(
+                r#"{"cell":"A","register":0,"createXferReq":0,"covered":true,"deregister":0}"#
+            ),
+            Verdict::Conformant
+        );
+        // An explicit len at the same offset resolves.
+        assert_eq!(
+            registration_resolvable_by_both_paths(
+                r#"{"cell":"C","register":0,"createXferReq":0,"covered":true,"deregister":0}"#
+            ),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn registration_checker_does_not_flag_a_correct_refusal() {
+        // The transfer range is outside the registration. Refusing is right, and a
+        // registration the transfer path never claimed must not be scored.
+        assert_eq!(
+            registration_resolvable_by_both_paths(
+                r#"{"register":0,"createXferReq":-4,"covered":false,"deregister":0}"#
+            ),
+            Verdict::Conformant
+        );
+        // Nothing was registered at all.
+        assert_eq!(
+            registration_resolvable_by_both_paths(
+                r#"{"register":-3,"createXferReq":-4,"covered":true,"deregister":-4}"#
+            ),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn registration_checker_rejects_vacuous_and_malformed_evidence() {
+        for bad in [
+            "",
+            "not json",
+            "[]",
+            r#"{"register":0,"deregister":0}"#,
+            r#"{"register":0,"createXferReq":-4,"deregister":0}"#,
+            r#"{"register":"0","createXferReq":-4,"covered":true,"deregister":0}"#,
+            r#"{"register":0,"createXferReq":-4,"covered":"yes","deregister":0}"#,
+        ] {
+            assert!(
+                matches!(
+                    registration_resolvable_by_both_paths(bad),
+                    Verdict::Violation(_)
+                ),
+                "{bad:?} must not pass as evidence"
+            );
+        }
     }
 }

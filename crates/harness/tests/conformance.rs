@@ -20,8 +20,8 @@ use kairo::checks::{
     ogx_adaptive_thinking_loss, openai_stream_finish_reason,
     openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
     outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
-    reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
-    response_conversation_preserves_history, response_omits_secret,
+    reasoning_text_order_preserved, refusal_text_preserved, registration_resolvable_by_both_paths,
+    response_content_not_empty, response_conversation_preserves_history, response_omits_secret,
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
     responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
@@ -4803,4 +4803,139 @@ fn dynamo_messages_without_stop_sequences_is_conformant() {
         )),
         Verdict::Conformant
     );
+}
+
+// ---- bug 095: NIXL's len==0 registration is invisible to the transfer path ----
+//
+// Recorded from ai-dynamo/nixl `main` = 464c86388d2c6373ab922d852fa245d81bfb5fb6,
+// POSIX backend on the kernel AIO queue, real file, real nixlAgent. No mocks.
+
+fn cells_095(cell: &str) -> Vec<String> {
+    (1..=10)
+        .map(|r| fixture(&format!("transcripts/095/cells/{cell}-round{r:02}.json")))
+        .collect()
+}
+
+/// The claim: a FILE_SEG registered with `len == 0` at a nonzero offset is
+/// accepted and deregisterable, but no transfer can resolve it. 10 of 10.
+#[test]
+fn nixl_len0_registration_at_nonzero_offset_is_unresolvable() {
+    let trials = cells_095("B_len0_offset4096");
+    assert_eq!(trials.len(), 10);
+    for (i, trial) in trials.iter().enumerate() {
+        let v = registration_resolvable_by_both_paths(trial);
+        assert!(
+            matches!(&v, Verdict::Violation(reason) if reason.contains("can be deregistered")),
+            "round {}: {v:?}",
+            i + 1
+        );
+    }
+}
+
+/// Control A: the same `len == 0` registration at offset 0. The wrapped add
+/// cannot wrap at zero, so the transfer resolves and the bytes are verified on
+/// disk. Offset is the only variable.
+#[test]
+fn nixl_len0_registration_at_offset_zero_resolves() {
+    for trial in cells_095("A_len0_offset0") {
+        assert_eq!(
+            registration_resolvable_by_both_paths(&trial),
+            Verdict::Conformant
+        );
+    }
+}
+
+/// Control B: the same offset with an explicit length. Length is the only
+/// variable relative to the failing cell.
+#[test]
+fn nixl_explicit_len_at_the_same_offset_resolves() {
+    for trial in cells_095("C_len4096_offset4096") {
+        assert_eq!(
+            registration_resolvable_by_both_paths(&trial),
+            Verdict::Conformant
+        );
+    }
+}
+
+/// The `covered` flag the checker relies on must be recomputable from the
+/// fixture, not taken on trust. Every recorded cell's transfer range must lie
+/// inside its registration when `covered` is true, and `reg_end` must be the
+/// unbounded form exactly when the registration was made with `len == 0`.
+#[test]
+fn nixl_recorded_cells_self_certify_their_containment() {
+    for cell in [
+        "A_len0_offset0",
+        "B_len0_offset4096",
+        "C_len4096_offset4096",
+    ] {
+        for trial in cells_095(cell) {
+            let v: Value = serde_json::from_str(&trial).expect("cell record is JSON");
+            let offset = v["offset"].as_u64().expect("offset");
+            let xfer_end = v["xfer_end"].as_u64().expect("xfer_end");
+            let reg_len = v["reg_len"].as_u64().expect("reg_len");
+            let unbounded = v["reg_end"].as_str() == Some("SIZE_MAX");
+            assert_eq!(unbounded, reg_len == 0, "{cell}: len 0 must mean unbounded");
+            let reg_end = if unbounded {
+                u64::MAX
+            } else {
+                offset + reg_len
+            };
+            assert_eq!(
+                v["covered"].as_bool(),
+                Some(offset <= xfer_end && xfer_end <= reg_end),
+                "{cell}: covered must equal the containment the addresses imply"
+            );
+        }
+    }
+}
+
+/// The asymmetry is the whole finding: the failing cell is still deregisterable.
+#[test]
+fn nixl_unresolvable_registration_is_still_deregisterable() {
+    for trial in cells_095("D_len0_offset4096_dereg_only") {
+        let v: Value = serde_json::from_str(&trial).expect("cell record is JSON");
+        assert_eq!(
+            v["register"].as_i64(),
+            Some(0),
+            "the registration was accepted"
+        );
+        assert_eq!(
+            v["deregister"].as_i64(),
+            Some(0),
+            "and it can be removed again"
+        );
+        assert_eq!(v["createXferReq"].as_i64(), Some(-4), "but never resolved");
+    }
+}
+
+/// The checker must not turn a correct refusal into a finding, and must not
+/// accept records that cannot support a conclusion.
+#[test]
+fn nixl_registration_evidence_must_be_sound() {
+    // Out of range, and never registered: both are correct refusals.
+    for cell in [
+        r#"{"register":0,"createXferReq":-4,"covered":false,"deregister":0}"#,
+        r#"{"register":-3,"createXferReq":-4,"covered":true,"deregister":-4}"#,
+    ] {
+        assert_eq!(
+            registration_resolvable_by_both_paths(cell),
+            Verdict::Conformant,
+            "{cell}"
+        );
+    }
+    // Vacuous or malformed records must not pass as evidence either way.
+    for bad in [
+        "",
+        "[]",
+        r#"{"register":0,"deregister":0}"#,
+        r#"{"register":0,"createXferReq":-4,"covered":"yes","deregister":0}"#,
+    ] {
+        assert!(
+            matches!(
+                registration_resolvable_by_both_paths(bad),
+                Verdict::Violation(_)
+            ),
+            "{bad:?} must not pass as evidence"
+        );
+    }
 }
