@@ -10,14 +10,14 @@ use kairo::checks::{
     anthropic_stream_block_lifecycle, anthropic_stream_safety_stop_reason,
     anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
     content_filter_preserved, document_body_forwarded, endpoint_response_family_preserved,
-    executed_tool_results_preserved, gemini_inline_media_preserved_in_chat_response,
-    gemini_inline_media_preserved_in_chat_stream, id_conforms, image_url_cache_key_case_sensitive,
-    instruction_messages_preserved, invalid_credential_rejected_before_upstream,
-    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
-    mcp_tool_executes_once, model_info_capture_identity, model_info_envelope_body,
-    model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
-    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
-    ogx_adaptive_thinking_loss, openai_stream_finish_reason,
+    executed_tool_results_preserved, forwarded_body_preserves_values,
+    gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
+    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
+    invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
+    json_schema_property_forwarded, mcp_tool_executes_once, model_info_capture_identity,
+    model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
+    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
+    non_text_block_not_json_dumped, ogx_adaptive_thinking_loss, openai_stream_finish_reason,
     openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
     outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
     reasoning_text_order_preserved, refusal_text_preserved, registration_resolvable_by_both_paths,
@@ -4938,4 +4938,254 @@ fn nixl_registration_evidence_must_be_sound() {
             "{bad:?} must not pass as evidence"
         );
     }
+}
+
+// ---- bug 097: llm-d Router coordinator rounds large schema integers ----
+//
+// The coordinator decodes the request body into map[string]any (Go's
+// encoding/json, no UseNumber) and re-marshals it for the render, prefill and
+// decode legs. Every integer above 2^53 is therefore rounded before any engine
+// sees it. The writeup pins handler line 125 at 567e35d752c8.
+
+fn issue_095_capture(relative: &str) -> String {
+    fixture(&format!("transcripts/097/capture/{relative}"))
+}
+
+#[test]
+fn llm_d_coordinator_rounds_the_schema_integer_on_every_leg() {
+    // Every leg the coordinator dispatches carries the rounded value, so the
+    // defect is in the parse, not in one step's edit.
+    for leg in ["render", "prefill", "decode"] {
+        let verdict = forwarded_body_preserves_values(
+            &issue_095_capture("large-01/client-request.http"),
+            &issue_095_capture(&format!("large-01/{leg}-request.http")),
+            &[
+                "kv_transfer_params",
+                "max_completion_tokens",
+                "max_tokens",
+                "stream",
+            ],
+        );
+        assert!(
+            matches!(&verdict, Verdict::Violation(reason) if reason.contains("client sent 9007199254740993, forwarded 9007199254740992")),
+            "{leg} leg must report the rounding, got {verdict:?}"
+        );
+    }
+}
+
+#[test]
+fn llm_d_coordinator_small_integer_control_preserves_the_value() {
+    // Same request, same route, same coordinator, identifier 42: the value
+    // survives, so the trigger is the magnitude and nothing else.
+    assert_eq!(
+        forwarded_body_preserves_values(
+            &issue_095_capture("safe-01/client-request.http"),
+            &issue_095_capture("safe-01/render-request.http"),
+            &[]
+        ),
+        Verdict::Conformant
+    );
+}
+
+#[test]
+fn llm_d_coordinator_removed_from_the_path_preserves_the_value() {
+    // The differential control: the same request sent straight to the upstream.
+    // Identical bytes arrive with the integer intact.
+    assert_eq!(
+        forwarded_body_preserves_values(
+            &issue_095_capture("large-01/client-request.http"),
+            &issue_095_capture("direct-01/direct-request.http"),
+            &[]
+        ),
+        Verdict::Conformant
+    );
+}
+
+#[test]
+fn llm_d_coordinator_prefill_leg_declares_only_its_transfer_fields() {
+    // The prefill leg adds disaggregation metadata and caps the token budget.
+    // Declared, that is conformant; undeclared, the same additions fail, so an
+    // undisclosed field change still gets caught.
+    let client = issue_095_capture("safe-02/client-request.http");
+    let prefill = issue_095_capture("safe-02/prefill-request.http");
+    let allowed = [
+        "kv_transfer_params",
+        "max_completion_tokens",
+        "max_tokens",
+        "stream",
+    ];
+    assert_eq!(
+        forwarded_body_preserves_values(&client, &prefill, &allowed),
+        Verdict::Conformant
+    );
+    assert!(matches!(
+        forwarded_body_preserves_values(&client, &prefill, &[]),
+        Verdict::Violation(reason) if reason.contains("was added")
+    ));
+}
+
+#[test]
+fn llm_d_coordinator_five_run_matrix_matches_the_recorded_capture() {
+    let summary: Value = serde_json::from_str(&issue_095_capture("results.json"))
+        .expect("095 summary must be valid JSON");
+    assert_eq!(
+        summary.get("pin").and_then(Value::as_str),
+        Some("567e35d752c841521fd7c450e8335e5dae108a7c"),
+        "the capture must be pinned to the reviewed commit"
+    );
+    let runs = summary
+        .get("results")
+        .and_then(Value::as_array)
+        .expect("results array");
+    assert_eq!(runs.len(), 15, "five runs per case across three cases");
+    let mut corrupted = 0_usize;
+    let mut clean = 0_usize;
+    for run in runs {
+        let case = run.get("case").and_then(Value::as_str).expect("case");
+        let index = run.get("run").and_then(Value::as_u64).expect("run");
+        let trial = format!("{case}-{index:02}");
+        let submitted = run.get("submitted_id").and_then(Value::as_u64);
+        let returned = run.get("returned_id").and_then(Value::as_u64);
+        let errors = run
+            .get("consumer_validation_errors")
+            .and_then(Value::as_array)
+            .expect("consumer_validation_errors");
+        match case {
+            "large" => {
+                assert_eq!(submitted, Some(9_007_199_254_740_993), "{trial}: input");
+                assert_eq!(returned, Some(9_007_199_254_740_992), "{trial}: returned");
+                assert!(
+                    errors.iter().any(|e| e
+                        .as_str()
+                        .is_some_and(|m| m.contains("is not one of [9007199254740993]"))),
+                    "{trial}: the client's own validator must reject the rounded value"
+                );
+                for leg in ["render", "prefill", "decode"] {
+                    let verdict = forwarded_body_preserves_values(
+                        &issue_095_capture(&format!("{trial}/client-request.http")),
+                        &issue_095_capture(&format!("{trial}/{leg}-request.http")),
+                        &[
+                            "kv_transfer_params",
+                            "max_completion_tokens",
+                            "max_tokens",
+                            "stream",
+                        ],
+                    );
+                    assert!(
+                        matches!(verdict, Verdict::Violation(_)),
+                        "{trial}: {leg} leg must violate, got {verdict:?}"
+                    );
+                }
+                corrupted += 1;
+            }
+            "safe" | "direct" => {
+                assert_eq!(submitted, returned, "{trial}: value must survive");
+                assert!(errors.is_empty(), "{trial}: no validation errors");
+                let legs: &[&str] = if case == "safe" {
+                    &["render", "prefill", "decode"]
+                } else {
+                    &["direct"]
+                };
+                for leg in legs {
+                    let verdict = forwarded_body_preserves_values(
+                        &issue_095_capture(&format!("{trial}/client-request.http")),
+                        &issue_095_capture(&format!("{trial}/{leg}-request.http")),
+                        &[
+                            "kv_transfer_params",
+                            "max_completion_tokens",
+                            "max_tokens",
+                            "stream",
+                        ],
+                    );
+                    assert_eq!(
+                        verdict,
+                        Verdict::Conformant,
+                        "{trial}: {leg} leg must be conformant"
+                    );
+                }
+                clean += 1;
+            }
+            other => panic!("unexpected case {other}"),
+        }
+    }
+    assert_eq!(corrupted, 5, "5/5 large runs corrupted");
+    assert_eq!(clean, 10, "5/5 safe and 5/5 direct runs preserved");
+}
+
+#[test]
+fn llm_d_coordinator_capture_is_deterministic_across_runs() {
+    // The rounding is a decode-time constant, not a race: every run forwarded
+    // the same rounded value on the same legs.
+    for run in 1..=5 {
+        for leg in ["render", "prefill", "decode"] {
+            let first = issue_095_capture(&format!("large-01/{leg}-request.http"));
+            let other = issue_095_capture(&format!("large-{run:02}/{leg}-request.http"));
+            let body = |raw: &str| raw.split_once("\r\n\r\n").unwrap().1.to_owned();
+            assert_eq!(body(&first), body(&other), "run {run} {leg} leg drifted");
+        }
+    }
+}
+
+/// Whether a `float64` can hold this integer exactly. Every integer below 2^53
+/// is exact; above it the ulp doubles at each power of two, so only multiples of
+/// the spacing survive.
+fn representable_in_f64(value: u64) -> bool {
+    if value == 0 {
+        return true;
+    }
+    let exponent = value.ilog2();
+    if exponent < 53 {
+        return true;
+    }
+    value.is_multiple_of(1_u64 << (exponent - 52))
+}
+
+#[test]
+fn llm_d_coordinator_forwarded_values_match_float64_exactly() {
+    // The trigger is the magnitude, not the value: the coordinator forwards
+    // whatever a float64 decode produces, so a value only survives when a float64
+    // can hold it. The boundary sweep pins that rule from both sides. 2^53+2
+    // survives and 2^53+1 does not, which is the signature of a float64 decode
+    // rather than a truncation or a format change.
+    //
+    // The forwarded values are compared as digit strings, not as numbers: a value
+    // above 2^63 no longer round-trips through a typed JSON number, and a typed
+    // comparison would report two rounded values as equal.
+    let sweep = fixture("transcripts/097/capture/boundary/boundary.jsonl");
+    let mut rows = 0_usize;
+    let mut rounded = 0_usize;
+    for line in sweep.lines().filter(|line| !line.trim().is_empty()) {
+        let row: Value = serde_json::from_str(line).expect("boundary row");
+        let submitted = row
+            .get("submitted")
+            .and_then(Value::as_u64)
+            .expect("submitted");
+        let rendered = line
+            .split("\"render\": ")
+            .nth(1)
+            .and_then(|rest| rest.split(',').next())
+            .expect("rendered value");
+        if representable_in_f64(submitted) {
+            assert_eq!(
+                submitted.to_string(),
+                rendered,
+                "{submitted} is representable as a float64 and must survive"
+            );
+        } else {
+            assert!(
+                submitted.to_string() != rendered,
+                "{submitted} is not representable as a float64 and must be reported as rounded"
+            );
+            rounded += 1;
+        }
+        rows += 1;
+    }
+    assert!(
+        rows >= 8,
+        "the sweep must cover both sides of 2^53, got {rows}"
+    );
+    assert!(
+        rounded >= 4,
+        "the sweep must show rounding too, got {rounded}"
+    );
 }
