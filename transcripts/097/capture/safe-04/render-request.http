@@ -1,0 +1,10 @@
+POST /v1/chat/completions/render HTTP/1.1
+Host: 127.0.0.1:62575
+User-Agent: Go-http-client/1.1
+Content-Length: 338
+Content-Type: application/json
+X-Llm-D-Revision-Decision-Id: 4f370ab6-3b88-48ee-832e-a4c4c79527e9
+X-Request-Id: safe-04
+Accept-Encoding: gzip
+
+{"max_tokens":32,"messages":[{"content":"Return the allowed record ID.","role":"user"}],"model":"capture-model","response_format":{"json_schema":{"name":"record","schema":{"additionalProperties":false,"properties":{"record_id":{"enum":[42],"type":"integer"}},"required":["record_id"],"type":"object"},"strict":true},"type":"json_schema"}}

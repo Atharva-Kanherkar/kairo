@@ -1,0 +1,10 @@
+POST /v1/chat/completions HTTP/1.1
+Host: 127.0.0.1:62575
+Content-Length: 425
+Content-Type: application/json
+X-Llm-D-Epp-Profile: decode
+X-Llm-D-Revision-Decision-Id: 71b181f0-68c6-499e-9763-67f7e2960c55
+X-Request-Id: large-05
+Accept-Encoding: gzip
+
+{"kv_transfer_params":{"do_remote_decode":false,"do_remote_prefill":true},"max_tokens":32,"messages":[{"content":"Return the allowed record ID.","role":"user"}],"model":"capture-model","response_format":{"json_schema":{"name":"record","schema":{"additionalProperties":false,"properties":{"record_id":{"enum":[9007199254740992],"type":"integer"}},"required":["record_id"],"type":"object"},"strict":true},"type":"json_schema"}}

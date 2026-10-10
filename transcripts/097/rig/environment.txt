@@ -1,0 +1,6 @@
+567e35d752c841521fd7c450e8335e5dae108a7c
+coordinator binary built with go1.27.2 (go.mod requires go 1.27.2, fetched by
+GOTOOLCHAIN=auto from the local go1.26.1), darwin/arm64
+jsonschema 4.25.1 on Python 3.9.6
+darwin arm64, macOS 26.5.1, 10 cores
+llm-d-router cmd/coordinator, no GPU, no inference engine, no provider keys
