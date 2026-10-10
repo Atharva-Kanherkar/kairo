@@ -1,0 +1,203 @@
+{
+  "pin": "567e35d752c841521fd7c450e8335e5dae108a7c",
+  "jsonschema_version": "4.25.1",
+  "runs_per_case": 5,
+  "results": [
+    {
+      "case": "large",
+      "run": 1,
+      "submitted_id": 9007199254740993,
+      "forwarded_ids": {
+        "render": 9007199254740992,
+        "prefill": 9007199254740992,
+        "decode": 9007199254740992
+      },
+      "returned_id": 9007199254740992,
+      "consumer_validation_errors": [
+        "9007199254740992 is not one of [9007199254740993]"
+      ],
+      "status": 200
+    },
+    {
+      "case": "large",
+      "run": 2,
+      "submitted_id": 9007199254740993,
+      "forwarded_ids": {
+        "render": 9007199254740992,
+        "prefill": 9007199254740992,
+        "decode": 9007199254740992
+      },
+      "returned_id": 9007199254740992,
+      "consumer_validation_errors": [
+        "9007199254740992 is not one of [9007199254740993]"
+      ],
+      "status": 200
+    },
+    {
+      "case": "large",
+      "run": 3,
+      "submitted_id": 9007199254740993,
+      "forwarded_ids": {
+        "render": 9007199254740992,
+        "prefill": 9007199254740992,
+        "decode": 9007199254740992
+      },
+      "returned_id": 9007199254740992,
+      "consumer_validation_errors": [
+        "9007199254740992 is not one of [9007199254740993]"
+      ],
+      "status": 200
+    },
+    {
+      "case": "large",
+      "run": 4,
+      "submitted_id": 9007199254740993,
+      "forwarded_ids": {
+        "render": 9007199254740992,
+        "prefill": 9007199254740992,
+        "decode": 9007199254740992
+      },
+      "returned_id": 9007199254740992,
+      "consumer_validation_errors": [
+        "9007199254740992 is not one of [9007199254740993]"
+      ],
+      "status": 200
+    },
+    {
+      "case": "large",
+      "run": 5,
+      "submitted_id": 9007199254740993,
+      "forwarded_ids": {
+        "render": 9007199254740992,
+        "prefill": 9007199254740992,
+        "decode": 9007199254740992
+      },
+      "returned_id": 9007199254740992,
+      "consumer_validation_errors": [
+        "9007199254740992 is not one of [9007199254740993]"
+      ],
+      "status": 200
+    },
+    {
+      "case": "safe",
+      "run": 1,
+      "submitted_id": 42,
+      "forwarded_ids": {
+        "render": 42,
+        "prefill": 42,
+        "decode": 42
+      },
+      "returned_id": 42,
+      "consumer_validation_errors": [],
+      "status": 200
+    },
+    {
+      "case": "safe",
+      "run": 2,
+      "submitted_id": 42,
+      "forwarded_ids": {
+        "render": 42,
+        "prefill": 42,
+        "decode": 42
+      },
+      "returned_id": 42,
+      "consumer_validation_errors": [],
+      "status": 200
+    },
+    {
+      "case": "safe",
+      "run": 3,
+      "submitted_id": 42,
+      "forwarded_ids": {
+        "render": 42,
+        "prefill": 42,
+        "decode": 42
+      },
+      "returned_id": 42,
+      "consumer_validation_errors": [],
+      "status": 200
+    },
+    {
+      "case": "safe",
+      "run": 4,
+      "submitted_id": 42,
+      "forwarded_ids": {
+        "render": 42,
+        "prefill": 42,
+        "decode": 42
+      },
+      "returned_id": 42,
+      "consumer_validation_errors": [],
+      "status": 200
+    },
+    {
+      "case": "safe",
+      "run": 5,
+      "submitted_id": 42,
+      "forwarded_ids": {
+        "render": 42,
+        "prefill": 42,
+        "decode": 42
+      },
+      "returned_id": 42,
+      "consumer_validation_errors": [],
+      "status": 200
+    },
+    {
+      "case": "direct",
+      "run": 1,
+      "submitted_id": 9007199254740993,
+      "forwarded_ids": {
+        "direct": 9007199254740993
+      },
+      "returned_id": 9007199254740993,
+      "consumer_validation_errors": [],
+      "status": 200
+    },
+    {
+      "case": "direct",
+      "run": 2,
+      "submitted_id": 9007199254740993,
+      "forwarded_ids": {
+        "direct": 9007199254740993
+      },
+      "returned_id": 9007199254740993,
+      "consumer_validation_errors": [],
+      "status": 200
+    },
+    {
+      "case": "direct",
+      "run": 3,
+      "submitted_id": 9007199254740993,
+      "forwarded_ids": {
+        "direct": 9007199254740993
+      },
+      "returned_id": 9007199254740993,
+      "consumer_validation_errors": [],
+      "status": 200
+    },
+    {
+      "case": "direct",
+      "run": 4,
+      "submitted_id": 9007199254740993,
+      "forwarded_ids": {
+        "direct": 9007199254740993
+      },
+      "returned_id": 9007199254740993,
+      "consumer_validation_errors": [],
+      "status": 200
+    },
+    {
+      "case": "direct",
+      "run": 5,
+      "submitted_id": 9007199254740993,
+      "forwarded_ids": {
+        "direct": 9007199254740993
+      },
+      "returned_id": 9007199254740993,
+      "consumer_validation_errors": [],
+      "status": 200
+    }
+  ],
+  "scope": "Real coordinator forwarding and real JSON Schema consumer validation; deterministic capture upstream, no live inference engine."
+}

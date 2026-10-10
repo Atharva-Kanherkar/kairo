@@ -1,0 +1,6 @@
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 279
+Connection: close
+
+{"id":"chatcmpl-capture","object":"chat.completion","created":0,"model":"capture-model","choices":[{"index":0,"message":{"role":"assistant","content":"{\"record_id\": 9007199254740992}"},"finish_reason":"stop"}],"usage":{"prompt_tokens":3,"completion_tokens":1,"total_tokens":4}}

@@ -1,0 +1,13 @@
+{
+  "case": "safe",
+  "run": 3,
+  "submitted_id": 42,
+  "forwarded_ids": {
+    "render": 42,
+    "prefill": 42,
+    "decode": 42
+  },
+  "returned_id": 42,
+  "consumer_validation_errors": [],
+  "status": 200
+}
