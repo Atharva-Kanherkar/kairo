@@ -2502,7 +2502,7 @@ pub fn anthropic_stop_sequence_reported(jsonl: &str) -> Verdict {
     Verdict::Conformant
 }
 
-/// Invariant (bug 095): a registration that the tool accepts and later hands
+/// Invariant (bug 097): a registration that the tool accepts and later hands
 /// back must also be resolvable by the transfer path.
 ///
 /// Registration and lookup are two different code paths over the same
@@ -2570,6 +2570,181 @@ pub fn registration_resolvable_by_both_paths(cell: &str) -> Verdict {
         ));
     }
     Verdict::Conformant
+}
+
+/// Return the JSON body of a raw HTTP request or response capture.
+fn http_json_body(raw: &str, label: &str) -> Result<Value, String> {
+    let Some((head, body)) = raw.split_once("\r\n\r\n") else {
+        return Err(format!("{label}: not a raw HTTP message"));
+    };
+    if head.lines().next().is_none_or(str::is_empty) {
+        return Err(format!("{label}: missing request or status line"));
+    }
+    if body.is_empty() {
+        return Err(format!("{label}: empty body"));
+    }
+    if head
+        .to_ascii_lowercase()
+        .contains("transfer-encoding: chunked")
+    {
+        return Err(format!(
+            "{label}: chunked body must be de-chunked before comparison"
+        ));
+    }
+    serde_json::from_str(body).map_err(|e| format!("{label}: body is not valid JSON: {e}"))
+}
+
+/// Compare two JSON numbers exactly. Integers are never compared through `f64`,
+/// because every integer in `[2^53, 2^54)` shares one `float64` with a
+/// neighbour, which is the rounding this invariant is written to catch.
+///
+/// A number beyond `u64::MAX` no longer fits a typed `serde_json` value, so it
+/// arrives here as `f64` and the comparison cannot be exact. Such a value is
+/// reported as equal to anything that rounds to the same `float64`, so this
+/// checker does not cover integers above 2^64.
+fn numbers_differ(client: &serde_json::Number, forwarded: &serde_json::Number) -> bool {
+    if let (Some(client), Some(forwarded)) = (client.as_i64(), forwarded.as_i64()) {
+        return client != forwarded;
+    }
+    if let (Some(client), Some(forwarded)) = (client.as_u64(), forwarded.as_u64()) {
+        return client != forwarded;
+    }
+    client.as_f64() != forwarded.as_f64()
+}
+
+/// Walk both bodies and record every value the forwarded leg changed.
+///
+/// `allowed_fields` names the top-level request fields a hop may add or rewrite.
+/// It applies only at the top level: a field the client sent inside a nested
+/// object is never exempt, so a rounded `max_tokens` or `stream` buried in a
+/// nested object is still reported.
+fn value_diff(
+    client: &Value,
+    forwarded: &Value,
+    path: &str,
+    allowed_fields: &[&str],
+    diffs: &mut Vec<String>,
+) {
+    match (client, forwarded) {
+        (Value::Object(client), Value::Object(forwarded)) => {
+            for (key, expected) in client {
+                if path.is_empty() && allowed_fields.contains(&key.as_str()) {
+                    continue;
+                }
+                match forwarded.get(key) {
+                    Some(actual) => value_diff(
+                        expected,
+                        actual,
+                        &format!("{path}/{key}"),
+                        allowed_fields,
+                        diffs,
+                    ),
+                    None => diffs.push(format!("{path}/{key} is absent from the forwarded body")),
+                }
+            }
+            for key in forwarded.keys() {
+                let declared = path.is_empty() && allowed_fields.contains(&key.as_str());
+                if !client.contains_key(key) && !declared {
+                    diffs.push(format!("{path}/{key} was added by the forwarded leg"));
+                }
+            }
+        }
+        (Value::Array(client), Value::Array(forwarded)) => {
+            if client.len() != forwarded.len() {
+                diffs.push(format!(
+                    "{path}: array of {} entries forwarded as {}",
+                    client.len(),
+                    forwarded.len()
+                ));
+            }
+            for (index, (expected, actual)) in client.iter().zip(forwarded.iter()).enumerate() {
+                value_diff(
+                    expected,
+                    actual,
+                    &format!("{path}/{index}"),
+                    allowed_fields,
+                    diffs,
+                );
+            }
+        }
+        (Value::Number(client), Value::Number(forwarded)) => {
+            if numbers_differ(client, forwarded) {
+                diffs.push(format!(
+                    "{path}: client sent {client}, forwarded {forwarded}"
+                ));
+            }
+        }
+        (client, forwarded) => {
+            if client != forwarded {
+                diffs.push(format!(
+                    "{path}: client sent {client}, forwarded {forwarded}"
+                ));
+            }
+        }
+    }
+}
+
+/// Invariant (bug 097): a gateway that decodes a request body into a generic
+/// map and re-marshals it for every hop must forward the mathematical value of
+/// every JSON number it does not intentionally change.
+///
+/// Go's `encoding/json` decodes a JSON number into `float64` unless the decoder
+/// opts into `UseNumber`, and a `float64` holds integers exactly only up to
+/// `2^53`. A record id of `9007199254740993` then leaves such a gateway as
+/// `9007199254740992`, so the engine is asked for a value the client's schema
+/// forbids and the client's own validator fails on a number the gateway chose.
+///
+/// The comparison is order-insensitive, because a re-marshaled Go map sorts its
+/// keys and that is not the defect. `allowed_fields` names the top-level
+/// orchestration fields a hop is allowed to add or rewrite, such as
+/// disaggregation transfer parameters and the prefill token budget, so intended
+/// edits are not reported while a change inside a nested object still is.
+/// The client body must carry a `response_format/json_schema/schema` object, so
+/// a capture that lost its schema fails instead of passing vacuously.
+pub fn forwarded_body_preserves_values(
+    client_http: &str,
+    forwarded_http: &str,
+    allowed_fields: &[&str],
+) -> Verdict {
+    let client = match http_json_body(client_http, "client request") {
+        Ok(body) => body,
+        Err(reason) => return Verdict::Violation(reason),
+    };
+    let forwarded = match http_json_body(forwarded_http, "forwarded request") {
+        Ok(body) => body,
+        Err(reason) => return Verdict::Violation(reason),
+    };
+    if client
+        .pointer("/response_format/json_schema/schema")
+        .is_none()
+    {
+        return Verdict::Violation(
+            "client request carries no response_format/json_schema/schema to compare".to_owned(),
+        );
+    }
+    if !client
+        .pointer("/response_format/json_schema/schema")
+        .is_some_and(Value::is_object)
+    {
+        return Verdict::Violation(
+            "client response_format/json_schema/schema is not a JSON object".to_owned(),
+        );
+    }
+    if forwarded
+        .pointer("/response_format/json_schema/schema")
+        .is_none()
+    {
+        return Verdict::Violation(
+            "forwarded request carries no response_format/json_schema/schema".to_owned(),
+        );
+    }
+    let mut diffs = Vec::new();
+    value_diff(&client, &forwarded, "", allowed_fields, &mut diffs);
+    match diffs.len() {
+        0 => Verdict::Conformant,
+        1 => Verdict::Violation(format!("1 value changed: {}", diffs[0])),
+        count => Verdict::Violation(format!("{count} values changed: {}", diffs.join("; "))),
+    }
 }
 
 #[cfg(test)]
@@ -3945,5 +4120,182 @@ data: [DONE]
                 "{bad:?} must not pass as evidence"
             );
         }
+    }
+
+    /// A chat-completions request whose structured-output schema pins one
+    /// integer. The identifier is spliced as raw JSON text so a test can pin an
+    /// integer that no `f64` can represent.
+    fn schema_request(identifier: &str) -> String {
+        r#"{"model":"capture-model","messages":[{"role":"user","content":"Return the allowed record ID."}],"max_tokens":32,"response_format":{"type":"json_schema","json_schema":{"name":"record","strict":true,"schema":{"type":"object","properties":{"record_id":{"type":"integer","enum":[IDENT]}},"required":["record_id"],"additionalProperties":false}}}}"#.replace("IDENT", identifier)
+    }
+
+    fn http_request(body: &str) -> String {
+        format!(
+            "POST /v1/chat/completions HTTP/1.1\r\nHost: localhost:8443\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
+            body.len()
+        )
+    }
+
+    #[test]
+    fn forwarded_body_checker_reports_a_rounded_integer() {
+        let client = http_request(&schema_request("9007199254740993"));
+        let forwarded = http_request(&schema_request("9007199254740992"));
+        assert!(
+            matches!(&forwarded_body_preserves_values(&client, &forwarded, &[]), Verdict::Violation(reason) if reason.contains("9007199254740993, forwarded 9007199254740992")),
+            "the rounding must be named with both values: {client:?} vs {forwarded:?}"
+        );
+    }
+
+    #[test]
+    fn forwarded_body_checker_accepts_the_same_large_integer() {
+        let request = http_request(&schema_request("9007199254740993"));
+        assert_eq!(
+            forwarded_body_preserves_values(&request, &request, &[]),
+            Verdict::Conformant
+        );
+        // 2^53 exactly is the last integer f64 holds without rounding, so the
+        // boundary value itself must not be reported.
+        let boundary = http_request(&schema_request("9007199254740992"));
+        assert_eq!(
+            forwarded_body_preserves_values(&boundary, &boundary, &[]),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn forwarded_body_checker_accepts_reordered_object_keys() {
+        // A re-marshaled Go map sorts keys at every depth. Same values, same
+        // key sets, different order: that is not the defect.
+        let client = http_request(&schema_request("9007199254740993"));
+        let reordered = r#"{"max_tokens":32,"messages":[{"content":"Return the allowed record ID.","role":"user"}],"model":"capture-model","response_format":{"json_schema":{"name":"record","schema":{"additionalProperties":false,"properties":{"record_id":{"enum":[9007199254740993],"type":"integer"}},"required":["record_id"],"type":"object"},"strict":true},"type":"json_schema"}}"#;
+        assert_eq!(
+            forwarded_body_preserves_values(&client, &http_request(reordered), &[]),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn forwarded_body_checker_allows_declared_orchestration_fields() {
+        let client = http_request(&schema_request("9007199254740993"));
+        // The prefill leg adds transfer metadata and caps the budget. Both are
+        // documented coordinator behaviour, so they must be declared, not
+        // reported.
+        let prefill = r#"{"kv_transfer_params":{"do_remote_decode":true,"do_remote_prefill":false},"max_completion_tokens":1,"max_tokens":1,"messages":[{"content":"Return the allowed record ID.","role":"user"}],"model":"capture-model","response_format":{"json_schema":{"name":"record","schema":{"additionalProperties":false,"properties":{"record_id":{"enum":[9007199254740993],"type":"integer"}},"required":["record_id"],"type":"object"},"strict":true},"type":"json_schema"},"stream":false}"#;
+        let allowed = [
+            "kv_transfer_params",
+            "max_completion_tokens",
+            "max_tokens",
+            "stream",
+        ];
+        assert_eq!(
+            forwarded_body_preserves_values(&client, &http_request(prefill), &allowed),
+            Verdict::Conformant
+        );
+        // Without the declaration the same additions are reported, so an
+        // undisclosed field change still fails.
+        assert!(matches!(
+            forwarded_body_preserves_values(&client, &http_request(prefill), &[]),
+            Verdict::Violation(reason) if reason.contains("was added")
+        ));
+    }
+
+    #[test]
+    fn forwarded_body_checker_exempts_declared_fields_only_at_the_top_level() {
+        // The allowlist names request fields, not key names: a rounded integer
+        // inside a nested object must still be reported even when the nested
+        // key happens to carry a declared name.
+        let large = 9_007_199_254_740_993_i64;
+        let client_body = serde_json::json!({
+            "model": "capture-model",
+            "messages": [],
+            "max_tokens": 32,
+            "nested": {"stream": large},
+            "response_format": {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "record",
+                    "strict": true,
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "record_id": {"type": "integer", "enum": [large]}
+                        },
+                        "required": ["record_id"],
+                        "additionalProperties": false
+                    }
+                }
+            }
+        });
+        let mut rounded = client_body.clone();
+        rounded["nested"]["stream"] = serde_json::json!(large - 1);
+        let mut capped = client_body.clone();
+        capped["max_tokens"] = serde_json::json!(1);
+        let client = http_request(&client_body.to_string());
+        let allowed = ["max_tokens", "stream"];
+        assert!(matches!(
+            forwarded_body_preserves_values(
+                &client,
+                &http_request(&rounded.to_string()),
+                &allowed
+            ),
+            Verdict::Violation(reason) if reason.contains("/nested/stream")
+        ));
+        // Both changes at once: the declared one is still exempt, the nested one
+        // is still reported.
+        let mut both = capped.clone();
+        both["nested"]["stream"] = serde_json::json!(large - 1);
+        assert!(matches!(
+            forwarded_body_preserves_values(&client, &http_request(&both.to_string()), &allowed),
+            Verdict::Violation(reason) if reason.contains("/nested/stream")
+        ));
+        // Only the declared top-level field changed: that is conformant.
+        assert_eq!(
+            forwarded_body_preserves_values(&client, &http_request(&capped.to_string()), &allowed),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn forwarded_body_checker_fails_closed_on_absent_or_malformed_evidence() {
+        let client = http_request(&schema_request("9007199254740993"));
+        let no_schema = http_request(r#"{"model":"capture-model","messages":[]}"#);
+        let malformed = http_request(r#"{"model":"capture-model","messages":"#);
+        let not_http = "no header terminator at all";
+        let no_client_schema = http_request(r#"{"model":"capture-model","messages":[]}"#);
+        assert!(matches!(
+            forwarded_body_preserves_values(&client, &no_schema, &[]),
+            Verdict::Violation(reason) if reason.contains("carries no response_format")
+        ));
+        assert!(matches!(
+            forwarded_body_preserves_values(&client, &malformed, &[]),
+            Verdict::Violation(reason) if reason.contains("not valid JSON")
+        ));
+        assert!(matches!(
+            forwarded_body_preserves_values(&client, not_http, &[]),
+            Verdict::Violation(reason) if reason.contains("not a raw HTTP message")
+        ));
+        assert!(matches!(
+            forwarded_body_preserves_values(&no_client_schema, &no_schema, &[]),
+            Verdict::Violation(reason) if reason.contains("carries no response_format")
+        ));
+    }
+
+    #[test]
+    fn forwarded_body_checker_reports_other_value_changes() {
+        let client = http_request(&schema_request("9007199254740993"));
+        let dropped_entry = http_request(
+            r#"{"model":"capture-model","messages":[],"max_tokens":32,"response_format":{"type":"json_schema","json_schema":{"name":"record","strict":true,"schema":{"type":"object","properties":{"record_id":{"type":"integer","enum":[]}},"required":["record_id"],"additionalProperties":false}}}}"#,
+        );
+        assert!(matches!(
+            forwarded_body_preserves_values(&client, &dropped_entry, &[]),
+            Verdict::Violation(reason) if reason.contains("/enum")
+        ));
+        let renamed_type = http_request(
+            r#"{"model":"capture-model","messages":[],"max_tokens":32,"response_format":{"type":"json_schema","json_schema":{"name":"record","strict":true,"schema":{"type":"object","properties":{"record_id":{"type":"string","enum":["9007199254740993"]}},"required":["record_id"],"additionalProperties":false}}}}"#,
+        );
+        assert!(matches!(
+            forwarded_body_preserves_values(&client, &renamed_type, &[]),
+            Verdict::Violation(reason) if reason.contains("client sent \"integer\"")
+        ));
     }
 }

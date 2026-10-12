@@ -39,6 +39,7 @@ GATEWAYS = (
     ("nixl", "NIXL"),
     ("ogx", "OGX"),
     ("agentgateway", "agentgateway"),
+    ("llm-d", "llm-d Router"),
 )
 
 TEST_RE = re.compile(r"^\s*#\[test\]", re.MULTILINE)
