@@ -1,0 +1,88 @@
+{
+  "base_as_expected": "3/3",
+  "base_commit": "abde73ca50384317d28e333954f605fa05e9e6ab",
+  "env": "gomodel-abde73c",
+  "gold_as_expected": "3/3",
+  "gold_source": "kairo-reference",
+  "image_id": "sha256:9b19ec77a035f73da5efdfa0f84023deff8b20a0102cf61b46714fc37fcdfda7",
+  "kind": "bug",
+  "ok": true,
+  "problems": [],
+  "repeats": 3,
+  "task": "gomodel-042-output-format-dropped",
+  "tests": {
+    "go_unit_tests_anthropicapi": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "no_response_format_invented": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "openai_route_keeps_response_format": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "output_config_schema_forwarded": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "output_format_schema_forwarded": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "stop_sequences_still_forwarded": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  },
+  "validated_at": "2026-09-24T16:10:50+00:00"
+}

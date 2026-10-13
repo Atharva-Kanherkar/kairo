@@ -1,0 +1,51 @@
+{
+  "base_as_expected": "3/3",
+  "base_commit": "3ee84f6a3482f86d4c02c25643613809944709d1",
+  "env": "any-llm-3ee84f6",
+  "gold_as_expected": "n/a",
+  "gold_source": "none",
+  "image_id": "sha256:0e7d4898d71661e541d4f6939f26c1cef940e0be3ddefd151c7a85929b86e5bf",
+  "kind": "no-bug",
+  "ok": true,
+  "problems": [],
+  "repeats": 3,
+  "task": "any-llm-nobug-stop-sequences",
+  "tests": {
+    "no_stop_invented": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "plain_conversation_unchanged": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "single_stop_sequence_forwarded": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "stop_sequences_forwarded_as_stop": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "upstream_unit_tests_messages_compat": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  },
+  "validated_at": "2026-09-24T17:28:28+00:00"
+}

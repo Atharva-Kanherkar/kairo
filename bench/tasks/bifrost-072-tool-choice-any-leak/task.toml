@@ -1,0 +1,40 @@
+id = "bifrost-072-tool-choice-any-leak"
+title = "Anthropic tool_choice {type: any} is forwarded to OpenAI as the invalid string \"any\""
+kind = "bug"
+env = "bifrost-98af761"
+category = "request-field-drop"
+difficulty = "easy"
+finding = "072"
+languages = ["go"]
+splits = ["kairo-30"]
+
+[repo]
+name = "maximhq/bifrost"
+url = "https://github.com/maximhq/bifrost"
+base_commit = "98af761c0adab5dee4c91c7c5121034a73c10488"
+base_ref = "dev on 2026-09-07"
+
+[upstream]
+issues = ["https://github.com/maximhq/bifrost/issues/6887"]
+fix = "https://github.com/maximhq/bifrost/pull/6888"
+status = "fixed"
+
+[gold]
+source = "upstream-merged"
+url = "https://github.com/maximhq/bifrost/pull/6888"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 1800
+reset_paths = ["core/providers/openai/toolchoiceany_test.go", "core/providers/anthropic/toolchoiceany_test.go"]
+fail_to_pass = [
+  "tool_choice_any_mapped_on_responses_route",
+  "tool_choice_any_mapped_on_chat_route",
+]
+pass_to_pass = [
+  "tool_choice_auto_preserved",
+  "tool_choice_named_tool_preserved",
+  "tool_call_reply_translated",
+  "go_unit_tests_openai_provider",
+  "go_unit_tests_anthropic_provider",
+]

@@ -1,0 +1,30 @@
+id = "litellm-nobug-messages-empty-candidates-crash"
+title = "Report: /v1/messages crashes with IndexError when Gemini returns no candidates (fixed before this commit)"
+kind = "no-bug"
+env = "litellm-e7bff27"
+category = "crash"
+difficulty = "medium"
+finding = "008 (reproduced on 1.96.2, handled by this base)"
+languages = ["python"]
+splits = ["negatives"]
+
+[repo]
+name = "BerriAI/litellm"
+url = "https://github.com/BerriAI/litellm"
+base_commit = "e7bff277a6f93ec4a26850d05ce2f6c2842c1512"
+base_ref = "main on 2026-09-21"
+
+[upstream]
+issues = ["https://github.com/BerriAI/litellm/issues/17904"]
+status = "fixed"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 1200
+reset_paths = ["tests"]
+pass_to_pass = [
+  "empty_candidates_no_server_error",
+  "empty_candidates_with_long_tool_name_no_server_error",
+  "blocked_turn_not_reported_as_success_text",
+  "normal_turn_unchanged",
+]

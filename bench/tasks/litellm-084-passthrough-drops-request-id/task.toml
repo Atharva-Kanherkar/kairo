@@ -1,0 +1,42 @@
+id = "litellm-084-passthrough-drops-request-id"
+title = "OpenAI pass-through strips a provider-required top-level id from the request body"
+kind = "bug"
+env = "litellm-e7bff27"
+category = "request-field-drop"
+difficulty = "medium"
+finding = "084"
+languages = ["python"]
+splits = ["kairo-30"]
+
+[repo]
+name = "BerriAI/litellm"
+url = "https://github.com/BerriAI/litellm"
+base_commit = "e7bff277a6f93ec4a26850d05ce2f6c2842c1512"
+base_ref = "main on 2026-09-21"
+
+[upstream]
+issues = ["https://github.com/BerriAI/litellm/issues/42656"]
+fix = "https://github.com/BerriAI/litellm/pull/42661"
+status = "duplicate-open"
+
+[gold]
+source = "upstream-open-pr"
+url = "https://github.com/BerriAI/litellm/pull/42661"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 900
+reset_paths = ["tests"]
+fail_to_pass = [
+  "alpha_search_id_forwarded",
+  "passthrough_id_forwarded_on_other_endpoint",
+]
+pass_to_pass = [
+  "passthrough_forwards_other_fields",
+  "passthrough_uses_deployment_key",
+  "passthrough_keeps_litellm_control_params_internal",
+  "upstream_unit_tests_pass_through",
+]
+
+[agent]
+timeout_sec = 2700

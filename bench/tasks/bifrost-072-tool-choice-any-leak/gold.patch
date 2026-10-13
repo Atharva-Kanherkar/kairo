@@ -1,0 +1,69 @@
+diff --git a/core/providers/openai/chat.go b/core/providers/openai/chat.go
+index a0c2a19e7..5ced043d1 100644
+--- a/core/providers/openai/chat.go
++++ b/core/providers/openai/chat.go
+@@ -48,6 +48,18 @@ func ToOpenAIChatRequest(ctx *schemas.BifrostContext, bifrostReq *schemas.Bifros
+ 		}
+ 		// Drop user field if it exceeds OpenAI's 64 character limit
+ 		openaiReq.ChatParameters.User = SanitizeUserField(openaiReq.ChatParameters.User)
++		// The Anthropic integration emits the provider-generic forced tool choice "any".
++		// OpenAI accepts only "none", "auto" and "required" as string tool choices and
++		// rejects "any" with HTTP 400, so map it to "required" on a copy of the choice
++		// without mutating the caller's parameters. Destinations that accept "any"
++		// natively keep it.
++		if tc := openaiReq.ChatParameters.ToolChoice; tc != nil && tc.ChatToolChoiceStr != nil &&
++			*tc.ChatToolChoiceStr == string(schemas.ChatToolChoiceTypeAny) &&
++			!toolChoiceAnySupported(bifrostReq.Provider, bifrostReq.Model) {
++			openaiReq.ChatParameters.ToolChoice = &schemas.ChatToolChoice{
++				ChatToolChoiceStr: schemas.Ptr(string(schemas.ChatToolChoiceTypeRequired)),
++			}
++		}
+ 		openaiReq.ExtraParams = bifrostReq.Params.ExtraParams
+ 
+ 		// Normalize tool parameters for deterministic JSON serialization (improves prompt caching)
+diff --git a/core/providers/openai/responses.go b/core/providers/openai/responses.go
+index adf15ca2e..aee1c1543 100644
+--- a/core/providers/openai/responses.go
++++ b/core/providers/openai/responses.go
+@@ -312,6 +312,18 @@ func ToOpenAIResponsesRequest(ctx *schemas.BifrostContext, bifrostReq *schemas.B
+ 		}
+ 		// Drop user field if it exceeds OpenAI's 64 character limit
+ 		req.ResponsesParameters.User = SanitizeUserField(req.ResponsesParameters.User)
++		// The Anthropic integration emits the provider-generic forced tool choice "any".
++		// OpenAI accepts only "none", "auto" and "required" as string tool choices and
++		// rejects "any" with HTTP 400, so map it to "required" on a copy of the choice
++		// without mutating the caller's parameters. Destinations that accept "any"
++		// natively keep it.
++		if tc := req.ResponsesParameters.ToolChoice; tc != nil && tc.ResponsesToolChoiceStr != nil &&
++			*tc.ResponsesToolChoiceStr == string(schemas.ResponsesToolChoiceTypeAny) &&
++			!toolChoiceAnySupported(bifrostReq.Provider, bifrostReq.Model) {
++			req.ResponsesParameters.ToolChoice = &schemas.ResponsesToolChoice{
++				ResponsesToolChoiceStr: schemas.Ptr(string(schemas.ResponsesToolChoiceTypeRequired)),
++			}
++		}
+ 
+ 		// Handle reasoning parameter: OpenAI uses effort-based reasoning
+ 		// Priority: effort (native) > max_tokens (estimated)
+diff --git a/core/providers/openai/utils.go b/core/providers/openai/utils.go
+index c7e53bba9..2e78ac775 100644
+--- a/core/providers/openai/utils.go
++++ b/core/providers/openai/utils.go
+@@ -247,3 +247,18 @@ func SanitizeUserField(user *string) *string {
+ 	}
+ 	return user
+ }
++
++// toolChoiceAnySupported reports whether the target accepts the provider-generic
++// forced tool choice "any" on the wire. Mistral's API accepts "any" natively,
++// including Mistral models served through Vertex, so the OpenAI-only rewrite of
++// "any" to "required" must not run for those destinations.
++func toolChoiceAnySupported(provider schemas.ModelProvider, model string) bool {
++	switch provider {
++	case schemas.Mistral:
++		return true
++	case schemas.Vertex:
++		return schemas.IsMistralModel(model)
++	default:
++		return false
++	}
++}

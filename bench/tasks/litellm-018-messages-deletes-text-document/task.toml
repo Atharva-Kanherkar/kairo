@@ -1,0 +1,36 @@
+id = "litellm-018-messages-deletes-text-document"
+title = "/v1/messages silently deletes plain-text document blocks on the Responses hop"
+kind = "bug"
+env = "litellm-e7bff27"
+category = "content-loss"
+difficulty = "medium"
+finding = "018"
+languages = ["python"]
+splits = ["kairo-30"]
+
+[repo]
+name = "BerriAI/litellm"
+url = "https://github.com/BerriAI/litellm"
+base_commit = "e7bff277a6f93ec4a26850d05ce2f6c2842c1512"
+base_ref = "main on 2026-09-21"
+
+[upstream]
+status = "novel"
+
+[gold]
+source = "kairo-reference"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 1200
+reset_paths = ["tests"]
+fail_to_pass = [
+  "text_document_reaches_upstream",
+  "content_document_reaches_upstream",
+]
+pass_to_pass = [
+  "pdf_document_still_input_file",
+  "url_document_still_input_file",
+  "user_text_unchanged",
+  "upstream_unit_tests_responses_adapters",
+]

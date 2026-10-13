@@ -1,0 +1,100 @@
+{
+  "base_as_expected": "3/3",
+  "base_commit": "b9f5cd60364aae12b654c3e01aa43173e4003e71",
+  "env": "litellm-b9f5cd6",
+  "gold_as_expected": "3/3",
+  "gold_source": "upstream-merged",
+  "image_id": "sha256:d0482bffb77d4d2de33a4d5674d091a1cbcc25b75185ea03944793b878b0f739",
+  "kind": "bug",
+  "ok": true,
+  "problems": [],
+  "repeats": 3,
+  "task": "litellm-067-messages-refusal-erased",
+  "tests": {
+    "plain_text_stream_unchanged": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "plain_text_turn_unchanged": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "refusal_reported_as_refusal": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "refusal_text_reaches_client": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "streamed_refusal_text_reaches_client": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "tool_call_turn_unchanged": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "upstream_unit_tests_responses_adapters": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  },
+  "validated_at": "2026-09-24T17:29:51+00:00"
+}

@@ -1,0 +1,36 @@
+id = "switchyard-025-transport-error-echoes-query-key"
+title = "Transport 502 errors echo base_url query credentials to the caller"
+kind = "bug"
+env = "switchyard-e9767d6"
+category = "credential-boundary"
+difficulty = "easy"
+finding = "025"
+languages = ["rust"]
+splits = ["kairo-30"]
+
+[repo]
+name = "NVIDIA-NeMo/Switchyard"
+url = "https://github.com/NVIDIA-NeMo/Switchyard"
+base_commit = "e9767d642461af63e7f11dc74a85f1e9f56c1e78"
+base_ref = "main on 2026-08-13"
+
+[upstream]
+issues = ["https://github.com/NVIDIA-NeMo/Switchyard/issues/423"]
+status = "duplicate-open"
+
+[gold]
+source = "kairo-reference"
+url = "https://github.com/NVIDIA-NeMo/Switchyard/issues/423"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 2400
+fail_to_pass = [
+  "chat_502_omits_query_key",
+  "messages_502_omits_query_key",
+]
+pass_to_pass = [
+  "unreachable_upstream_still_502",
+  "reachable_upstream_still_works",
+  "cargo_tests_llm_client",
+]

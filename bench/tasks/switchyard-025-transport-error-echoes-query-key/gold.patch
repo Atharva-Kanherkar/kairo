@@ -1,0 +1,14 @@
+diff --git a/crates/libsy-llm-client/src/client.rs b/crates/libsy-llm-client/src/client.rs
+index 61a2bf0..26322b6 100644
+--- a/crates/libsy-llm-client/src/client.rs
++++ b/crates/libsy-llm-client/src/client.rs
+@@ -614,6 +614,9 @@ fn record_gen_ai_request(url: &str, model: &str, streaming: bool) {
+ }
+ 
+ fn convert_reqwest_error(error: reqwest::Error) -> LlmClientError {
++    // A reqwest error displays the request URL, and a configured base_url can carry a
++    // credential in its query string (`?key=`). Errors travel to callers, so drop it.
++    let error = error.without_url();
+     // Reqwest labels truncated or otherwise unreadable response bodies as decode
+     // errors, so distinguish them from serde JSON failures at the call site.
+     if error.is_timeout() {

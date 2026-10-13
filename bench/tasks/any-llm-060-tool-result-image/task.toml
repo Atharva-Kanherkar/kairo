@@ -1,0 +1,39 @@
+id = "any-llm-060-tool-result-image"
+title = "Messages bridge deletes image bytes inside tool results"
+kind = "bug"
+env = "any-llm-3ee84f6"
+category = "content-loss"
+difficulty = "medium"
+finding = "060"
+languages = ["python"]
+splits = ["kairo-30"]
+
+[repo]
+name = "mozilla-ai/any-llm"
+url = "https://github.com/mozilla-ai/any-llm"
+base_commit = "3ee84f6a3482f86d4c02c25643613809944709d1"
+base_ref = "main before PR #1312"
+
+[upstream]
+issues = ["https://github.com/mozilla-ai/any-llm/issues/1311", "https://github.com/mozilla-ai/any-llm/issues/1295"]
+fix = "https://github.com/mozilla-ai/any-llm/pull/1312"
+status = "fixed"
+
+[gold]
+source = "upstream-merged"
+url = "https://github.com/mozilla-ai/any-llm/pull/1312"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 600
+reset_paths = ["tests"]
+fail_to_pass = [
+  "tool_result_image_forwarded",
+  "image_forwarded_from_parallel_tool_results",
+]
+pass_to_pass = [
+  "tool_messages_follow_openai_rules",
+  "tool_result_text_preserved",
+  "user_image_still_forwarded",
+  "upstream_unit_tests_messages_compat",
+]

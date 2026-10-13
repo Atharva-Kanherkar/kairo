@@ -1,0 +1,44 @@
+{
+  "base_as_expected": "3/3",
+  "base_commit": "98af761c0adab5dee4c91c7c5121034a73c10488",
+  "env": "bifrost-98af761",
+  "gold_as_expected": "n/a",
+  "gold_source": "none",
+  "image_id": "sha256:d9bea9da32fddbf37c61a5679277e59f0637b2c3cbe68c826056a27214a27ec5",
+  "kind": "no-bug",
+  "ok": true,
+  "problems": [],
+  "repeats": 3,
+  "task": "bifrost-nobug-long-tool-name",
+  "tests": {
+    "go_unit_tests_anthropic_provider": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "long_tool_name_no_server_error": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "long_tool_name_no_stack_trace": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "normal_tool_request_succeeds": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  },
+  "validated_at": "2026-09-24T16:10:17+00:00"
+}
