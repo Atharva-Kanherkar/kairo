@@ -8,7 +8,7 @@
 //! Same checkers, both directions.
 
 use serde_json::Value;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Verdict {
@@ -2747,6 +2747,229 @@ pub fn forwarded_body_preserves_values(
     }
 }
 
+/// Collect the tools a Responses request declared: the names offered at the top
+/// level with no namespace, and the `(namespace, name)` pairs offered inside
+/// `namespace` containers.
+fn declared_responses_tools(request: &Value) -> (HashSet<String>, Vec<(String, String)>) {
+    fn walk(
+        tool: &Value,
+        namespace: Option<&str>,
+        plain: &mut HashSet<String>,
+        namespaced: &mut Vec<(String, String)>,
+    ) {
+        let Some(tool) = tool.as_object() else { return };
+        match tool.get("type").and_then(Value::as_str) {
+            Some("namespace") => {
+                let container = tool
+                    .get("name")
+                    .and_then(Value::as_str)
+                    .filter(|name| !name.is_empty());
+                let Some(children) = tool.get("tools").and_then(Value::as_array) else {
+                    return;
+                };
+                for child in children {
+                    // A nested container keeps its own name; the innermost
+                    // namespace is the one that identifies the tool.
+                    match container {
+                        Some(container)
+                            if child.get("type").and_then(Value::as_str) != Some("namespace") =>
+                        {
+                            if let Some(name) = child.get("name").and_then(Value::as_str) {
+                                namespaced.push((container.to_string(), name.to_string()));
+                            }
+                        }
+                        _ => walk(child, container, plain, namespaced),
+                    }
+                }
+            }
+            _ => {
+                if let Some(namespace) = namespace {
+                    if let Some(name) = tool.get("name").and_then(Value::as_str) {
+                        namespaced.push((namespace.to_string(), name.to_string()));
+                    }
+                } else {
+                    let nested = tool
+                        .get("function")
+                        .and_then(Value::as_object)
+                        .and_then(|function| function.get("name"))
+                        .and_then(Value::as_str);
+                    if let Some(name) = tool
+                        .get("name")
+                        .and_then(Value::as_str)
+                        .or(nested)
+                        .filter(|name| !name.is_empty())
+                    {
+                        plain.insert(name.to_string());
+                    }
+                }
+            }
+        }
+    }
+
+    let mut plain = HashSet::new();
+    let mut namespaced = Vec::new();
+    if let Some(tools) = request.get("tools").and_then(Value::as_array) {
+        for tool in tools {
+            walk(tool, None, &mut plain, &mut namespaced);
+        }
+    }
+    (plain, namespaced)
+}
+
+/// Collect each distinct `function_call` a Responses response emitted, from a
+/// buffered body or from SSE frames. A streamed call appears on more than one
+/// frame, so results are deduplicated by call id.
+fn returned_function_calls(response_raw: &str) -> Vec<Value> {
+    fn walk(value: &Value, out: &mut Vec<Value>) {
+        match value {
+            Value::Array(items) => items.iter().for_each(|item| walk(item, out)),
+            Value::Object(map) => {
+                if matches!(
+                    map.get("type").and_then(Value::as_str),
+                    Some("function_call" | "response.function_call_arguments.done")
+                ) {
+                    out.push(Value::Object(map.clone()));
+                }
+                map.values().for_each(|value| walk(value, out));
+            }
+            _ => {}
+        }
+    }
+
+    let mut out = Vec::new();
+    let trimmed = response_raw.trim_start();
+    if trimmed.starts_with('{') || trimmed.starts_with('[') {
+        if let Ok(value) = serde_json::from_str::<Value>(response_raw) {
+            walk(&value, &mut out);
+        }
+    } else {
+        for payload in sse_data_json(response_raw) {
+            walk(&payload, &mut out);
+        }
+    }
+
+    let mut seen = HashSet::new();
+    out.retain(|call| {
+        let key = (
+            call.get("call_id")
+                .and_then(Value::as_str)
+                .unwrap_or_default()
+                .to_string(),
+            call.get("name")
+                .and_then(Value::as_str)
+                .unwrap_or_default()
+                .to_string(),
+            call.get("namespace")
+                .and_then(Value::as_str)
+                .unwrap_or_default()
+                .to_string(),
+        );
+        seen.insert(key)
+    });
+    out
+}
+
+/// Invariant (bug 102): a returned `function_call` must not be given a
+/// `namespace` the model did not choose. The client dispatches on the exact
+/// `(namespace, name)` pair, so a namespace added to a call the model made
+/// against a top-level tool sends it to a server the model never picked.
+///
+/// The returned call alone cannot tell a hijack from a valid restore: both are
+/// `{"name": "search", "namespace": "mcp__docs__"}`. Only the name the backend
+/// was recorded calling upstream separates them, so each record must carry
+/// `called_upstream_name`. When that name is the bare name of a tool the request
+/// also declared at the top level, the call is the top-level tool and any
+/// namespace on it is a hijack. Otherwise the namespace is a correct restore.
+///
+/// Reads the recorded client request, the recorded upstream call name and the
+/// recorded client response, so the checker names no gateway function.
+///
+/// Bounded: it assumes one call per record and that the gateway adds a namespace
+/// without also renaming the call. A gateway that renamed the call, or a
+/// response carrying several calls behind one recorded upstream name, needs
+/// evidence this shape does not carry.
+pub fn codex_namespace_only_applies_to_namespaced_tools(
+    capture_jsonl: &str,
+    expected_trials: usize,
+) -> Verdict {
+    if expected_trials == 0 {
+        return Verdict::Violation("namespace checker received an empty invariant".into());
+    }
+    let mut trials = 0usize;
+    let mut calls = 0usize;
+    let mut wrong: Vec<String> = Vec::new();
+    for line in capture_jsonl.lines().filter(|line| !line.trim().is_empty()) {
+        let record: Value = match serde_json::from_str(line) {
+            Ok(record) => record,
+            Err(error) => {
+                return Verdict::Violation(format!("capture is not valid JSONL: {error}"));
+            }
+        };
+        let (Some(request_raw), Some(response_raw)) = (
+            record
+                .get("client_request_body_raw")
+                .and_then(Value::as_str),
+            record
+                .get("client_response_body_raw")
+                .and_then(Value::as_str),
+        ) else {
+            return Verdict::Violation("capture is missing a client request or response".into());
+        };
+        let Some(called_upstream_name) = record
+            .get("called_upstream_name")
+            .and_then(Value::as_str)
+            .filter(|name| !name.is_empty())
+        else {
+            return Verdict::Violation(
+                "capture is missing the upstream name the backend called, so a hijack \
+                 cannot be told apart from a valid restore"
+                    .into(),
+            );
+        };
+        let request: Value = match serde_json::from_str(request_raw) {
+            Ok(request) => request,
+            Err(error) => {
+                return Verdict::Violation(format!(
+                    "captured client request is not valid JSON: {error}"
+                ));
+            }
+        };
+        let (plain, namespaced) = declared_responses_tools(&request);
+        trials += 1;
+        for call in returned_function_calls(response_raw) {
+            calls += 1;
+            let name = call.get("name").and_then(Value::as_str).unwrap_or_default();
+            let Some(namespace) = call.get("namespace").and_then(Value::as_str) else {
+                continue;
+            };
+            let declared = namespaced
+                .iter()
+                .any(|(declared, tool)| declared == namespace && tool == name);
+            if !declared {
+                wrong.push(format!(
+                    "came back as {namespace}/{name}, which the request never declared"
+                ));
+            } else if called_upstream_name == name && plain.contains(name) {
+                wrong.push(format!(
+                    "the backend called the bare top-level tool {name:?} and it came back \
+                     as namespace {namespace:?}"
+                ));
+            }
+        }
+    }
+    if trials != expected_trials {
+        return Verdict::Violation(format!("expected {expected_trials} trials, found {trials}"));
+    }
+    if let Some(first) = wrong.first() {
+        return Verdict::Violation(format!(
+            "{}/{} returned calls carry a namespace the model did not choose: {first}",
+            wrong.len(),
+            calls
+        ));
+    }
+    Verdict::Conformant
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -4297,5 +4520,155 @@ data: [DONE]
             forwarded_body_preserves_values(&client, &renamed_type, &[]),
             Verdict::Violation(reason) if reason.contains("client sent \"integer\"")
         ));
+    }
+
+    #[test]
+    fn codex_namespace_checker_uses_the_upstream_call_name_not_the_returned_bytes() {
+        let plain_and_nested = serde_json::json!({
+            "tools": [
+                {"type": "function", "name": "search", "parameters": {}},
+                {"type": "namespace", "name": "mcp__docs__", "tools": [
+                    {"type": "function", "name": "search", "parameters": {}}
+                ]}
+            ]
+        });
+        let response = serde_json::json!({
+            "output": [{"type": "function_call", "call_id": "c1", "name": "search",
+                        "namespace": "mcp__docs__"}]
+        });
+
+        // The model called the bare top-level tool. The namespace is a hijack.
+        let hijack = serde_json::json!({
+            "called_upstream_name": "search",
+            "client_request_body_raw": plain_and_nested.to_string(),
+            "client_response_body_raw": response.to_string(),
+        });
+        assert!(matches!(
+            codex_namespace_only_applies_to_namespaced_tools(&hijack.to_string(), 1),
+            Verdict::Violation(_)
+        ));
+
+        // The SAME response bytes, but the backend called the qualified name.
+        // Restoring the pair is correct, so this must pass. This is the case a
+        // request-and-response-only checker gets wrong.
+        let valid_restore = serde_json::json!({
+            "called_upstream_name": "mcp__docs____search",
+            "client_request_body_raw": plain_and_nested.to_string(),
+            "client_response_body_raw": response.to_string(),
+        });
+        assert_eq!(
+            codex_namespace_only_applies_to_namespaced_tools(&valid_restore.to_string(), 1),
+            Verdict::Conformant
+        );
+
+        // A pair the request never declared, whichever name was called.
+        let undeclared = serde_json::json!({
+            "called_upstream_name": "search",
+            "client_request_body_raw": serde_json::json!({"tools": [
+                {"type": "function", "name": "search", "parameters": {}}
+            ]}).to_string(),
+            "client_response_body_raw": response.to_string(),
+        });
+        assert!(matches!(
+            codex_namespace_only_applies_to_namespaced_tools(&undeclared.to_string(), 1),
+            Verdict::Violation(_)
+        ));
+
+        // No namespace on a top-level tool is conformant.
+        let plain_only = serde_json::json!({
+            "called_upstream_name": "search",
+            "client_request_body_raw": serde_json::json!({"tools": [
+                {"type": "function", "name": "search", "parameters": {}}
+            ]}).to_string(),
+            "client_response_body_raw": serde_json::json!({
+                "output": [{"type": "function_call", "call_id": "c1", "name": "search"}]
+            }).to_string(),
+        });
+        assert_eq!(
+            codex_namespace_only_applies_to_namespaced_tools(&plain_only.to_string(), 1),
+            Verdict::Conformant
+        );
+
+        // The streamed shape is judged the same way.
+        let stream = format!(
+            "data: {}\n\ndata: {}\n\n",
+            serde_json::json!({"type": "response.output_item.added", "item": {
+                "type": "function_call", "call_id": "c1", "name": "search",
+                "namespace": "mcp__docs__"}}),
+            serde_json::json!({"type": "response.output_item.done", "item": {
+                "type": "function_call", "call_id": "c1", "name": "search",
+                "namespace": "mcp__docs__"}}),
+        );
+        for (called, conformant) in [("search", false), ("mcp__docs____search", true)] {
+            let streamed = serde_json::json!({
+                "called_upstream_name": called,
+                "client_request_body_raw": plain_and_nested.to_string(),
+                "client_response_body_raw": stream,
+            });
+            let verdict =
+                codex_namespace_only_applies_to_namespaced_tools(&streamed.to_string(), 1);
+            if conformant {
+                assert_eq!(verdict, Verdict::Conformant, "called {called}");
+            } else {
+                assert!(matches!(verdict, Verdict::Violation(_)), "called {called}");
+            }
+        }
+    }
+
+    #[test]
+    fn codex_namespace_checker_refuses_evidence_it_cannot_judge() {
+        let request = serde_json::json!({"tools": [
+            {"type": "function", "name": "search", "parameters": {}},
+            {"type": "namespace", "name": "mcp__docs__", "tools": [
+                {"type": "function", "name": "search", "parameters": {}}
+            ]}
+        ]})
+        .to_string();
+        let response = serde_json::json!({
+            "output": [{"type": "function_call", "call_id": "c1", "name": "search",
+                        "namespace": "mcp__docs__"}]
+        })
+        .to_string();
+        let record = |called: Option<&str>| match called {
+            Some(name) => serde_json::json!({
+                "called_upstream_name": name,
+                "client_request_body_raw": request,
+                "client_response_body_raw": response,
+            })
+            .to_string(),
+            None => serde_json::json!({
+                "client_request_body_raw": request,
+                "client_response_body_raw": response,
+            })
+            .to_string(),
+        };
+        let hijack = record(Some("search"));
+        let valid = record(Some("mcp__docs____search"));
+
+        // Vacuous, foreign, and over-claimed trial counts never pass.
+        for evidence in ["", "not-json", r#"{"auth_scope":"attacker"}"#, &hijack] {
+            assert!(
+                matches!(
+                    codex_namespace_only_applies_to_namespaced_tools(evidence, 2),
+                    Verdict::Violation(_)
+                ),
+                "{evidence:?} must not pass as evidence"
+            );
+        }
+        assert!(matches!(
+            codex_namespace_only_applies_to_namespaced_tools(&hijack, 0),
+            Verdict::Violation(_)
+        ));
+        // Without the recorded upstream call the checker cannot tell a hijack
+        // from a valid restore, so it must refuse rather than guess.
+        assert!(matches!(
+            codex_namespace_only_applies_to_namespaced_tools(&record(None), 1),
+            Verdict::Violation(_)
+        ));
+        // The valid restore is still judged on its own merits.
+        assert_eq!(
+            codex_namespace_only_applies_to_namespaced_tools(&valid, 1),
+            Verdict::Conformant
+        );
     }
 }

@@ -1,0 +1,15 @@
+schema_version = 1
+
+[llm_clients.responses]
+format = "openai_responses"
+base_url = "http://127.0.0.1:19331/v1"
+max_retries = 0
+
+[targets.responses]
+id = "model/responses"
+llm_client = "responses"
+
+[routes.responses]
+id = "switchyard/responses"
+type = "passthrough"
+target = "responses"

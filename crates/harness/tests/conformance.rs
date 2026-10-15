@@ -9,15 +9,16 @@ use kairo::checks::{
     anthropic_response_toolcall_stop_reason, anthropic_stop_sequence_reported,
     anthropic_stream_block_lifecycle, anthropic_stream_safety_stop_reason,
     anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
-    content_filter_preserved, document_body_forwarded, endpoint_response_family_preserved,
-    executed_tool_results_preserved, forwarded_body_preserves_values,
-    gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
-    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
-    invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
-    json_schema_property_forwarded, mcp_tool_executes_once, model_info_capture_identity,
-    model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
-    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
-    non_text_block_not_json_dumped, ogx_adaptive_thinking_loss, openai_stream_finish_reason,
+    codex_namespace_only_applies_to_namespaced_tools, content_filter_preserved,
+    document_body_forwarded, endpoint_response_family_preserved, executed_tool_results_preserved,
+    forwarded_body_preserves_values, gemini_inline_media_preserved_in_chat_response,
+    gemini_inline_media_preserved_in_chat_stream, id_conforms, image_url_cache_key_case_sensitive,
+    instruction_messages_preserved, invalid_credential_rejected_before_upstream,
+    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
+    mcp_tool_executes_once, model_info_capture_identity, model_info_envelope_body,
+    model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
+    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
+    ogx_adaptive_thinking_loss, openai_stream_finish_reason,
     openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
     outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
     reasoning_text_order_preserved, refusal_text_preserved, registration_resolvable_by_both_paths,
@@ -5187,5 +5188,198 @@ fn llm_d_coordinator_forwarded_values_match_float64_exactly() {
     assert!(
         rounded >= 4,
         "the sweep must show rounding too, got {rounded}"
+    );
+}
+
+// ---- bug 102: Switchyard stamps an MCP namespace onto an un-namespaced tool ----
+
+#[test]
+fn switchyard_codex_namespace_hijacks_a_top_level_tool() {
+    // The request declares a top-level `search` and a namespace holding its own
+    // `search`. The backend was offered both, called the top-level one, and the
+    // returned call must not have gained a namespace.
+    for kind in ["buffered", "stream"] {
+        let capture = fixture(&format!("transcripts/102/capture-bug-{kind}.jsonl"));
+        let verdict = codex_namespace_only_applies_to_namespaced_tools(&capture, 5);
+        assert!(
+            matches!(verdict, Verdict::Violation(_)),
+            "{kind}: {verdict:?}"
+        );
+
+        let records: Vec<Value> = capture
+            .lines()
+            .map(|line| serde_json::from_str(line).expect("102 bug capture is JSON"))
+            .collect();
+        assert_eq!(records.len(), 5, "{kind}");
+        assert!(records.iter().all(|record| {
+            record["called_upstream_name"] == "search"
+                && record["call_names"] == serde_json::json!(["search"])
+                && record["call_namespaces"] == serde_json::json!(["mcp__docs__"])
+        }));
+    }
+}
+
+#[test]
+fn switchyard_codex_namespace_same_tool_set_valid_restore_is_conformant() {
+    // The pair a valid restore produces is byte-identical to the hijack:
+    // {"name": "search", "namespace": "mcp__docs__"}. Only the name the backend
+    // was recorded calling separates them, so the checker must read the
+    // forwarded record rather than the response alone. Without this case the
+    // checker would flag correct gateway behaviour.
+    for kind in ["buffered", "stream"] {
+        let capture = fixture(&format!(
+            "transcripts/102/capture-cross-qualified-{kind}.jsonl"
+        ));
+        let records: Vec<Value> = capture
+            .lines()
+            .map(|line| serde_json::from_str(line).expect("102 cross-qualified is JSON"))
+            .collect();
+        assert_eq!(records.len(), 5, "{kind}");
+        assert!(records.iter().all(|record| {
+            record["called_upstream_name"] == "mcp__docs____search"
+                && record["call_names"] == serde_json::json!(["search"])
+                && record["call_namespaces"] == serde_json::json!(["mcp__docs__"])
+        }));
+        assert_eq!(
+            codex_namespace_only_applies_to_namespaced_tools(&capture, 5),
+            Verdict::Conformant,
+            "cross-qualified {kind}"
+        );
+    }
+}
+
+#[test]
+fn switchyard_codex_namespace_trigger_removed_controls_are_conformant() {
+    // Same gateway, same route. Only the tool set changes.
+    for kind in ["buffered", "stream"] {
+        // Namespace container only: the qualified call restores correctly.
+        assert_eq!(
+            codex_namespace_only_applies_to_namespaced_tools(
+                &fixture(&format!(
+                    "transcripts/102/capture-control-qualified-{kind}.jsonl"
+                )),
+                5,
+            ),
+            Verdict::Conformant,
+            "control-qualified {kind}"
+        );
+        // Namespace container removed: nothing may come back namespaced.
+        let local = fixture(&format!(
+            "transcripts/102/capture-control-local-only-{kind}.jsonl"
+        ));
+        assert_eq!(
+            codex_namespace_only_applies_to_namespaced_tools(&local, 5),
+            Verdict::Conformant,
+            "control-local-only {kind}"
+        );
+        let records: Vec<Value> = local
+            .lines()
+            .map(|line| serde_json::from_str(line).expect("102 local control is JSON"))
+            .collect();
+        assert!(records
+            .iter()
+            .all(|record| record["called_upstream_name"] == "search"
+                && record["call_namespaces"] == serde_json::json!([])));
+    }
+}
+
+#[test]
+fn switchyard_codex_namespace_forwarded_bytes_offered_two_distinct_tools() {
+    // Proves the backend chose the top-level tool rather than the namespaced one,
+    // and that the two stayed distinct upstream with different descriptions.
+    let forwarded = fixture("transcripts/102/forwarded.jsonl");
+    let records: Vec<Value> = forwarded
+        .lines()
+        .map(|line| serde_json::from_str(line).expect("102 forwarded is JSON"))
+        .collect();
+    assert!(
+        !records.is_empty(),
+        "102 forwarded capture recorded no requests"
+    );
+    assert!(records.iter().any(|record| {
+        record["called_upstream_name"] == "search"
+            && record["tool_names_offered_upstream"]
+                == serde_json::json!(["search", "mcp__docs____search"])
+    }));
+    for record in &records {
+        let body: Value = serde_json::from_str(record["body_raw"].as_str().unwrap())
+            .expect("102 forwarded body is JSON");
+        for tool in body["tools"].as_array().expect("102 forwarded tools") {
+            let name = tool
+                .pointer("/function/name")
+                .and_then(Value::as_str)
+                .unwrap_or("");
+            let description = tool
+                .pointer("/function/description")
+                .and_then(Value::as_str)
+                .unwrap_or("");
+            match name {
+                "search" => assert_eq!(description, "LOCAL ripgrep over the working tree"),
+                "mcp__docs____search" => {
+                    assert_eq!(description, "REMOTE documentation search");
+                }
+                other => panic!("unexpected upstream tool {other:?}"),
+            }
+        }
+    }
+}
+
+#[test]
+fn switchyard_codex_namespace_checker_rejects_evidence_without_the_upstream_call() {
+    // Without the recorded upstream call name the checker cannot tell a hijack
+    // from a valid restore, so it must refuse rather than guess.
+    let capture = fixture("transcripts/102/capture-bug-buffered.jsonl");
+    let stripped: String = capture
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .map(|line| {
+            let mut record: Value = serde_json::from_str(line).expect("102 capture is JSON");
+            record
+                .as_object_mut()
+                .expect("102 record is an object")
+                .remove("called_upstream_name");
+            record.to_string()
+        })
+        .collect::<Vec<String>>()
+        .join("\n");
+    assert!(matches!(
+        codex_namespace_only_applies_to_namespaced_tools(&stripped, 5),
+        Verdict::Violation(_)
+    ));
+}
+
+#[test]
+fn switchyard_codex_namespace_hijack_is_not_confined_to_cross_format() {
+    // Same claim on a Responses -> Responses passthrough route, so the defect is
+    // not mistaken for a translation artifact between dialects.
+    let bug = fixture("transcripts/102/capture-same-format-bug.jsonl");
+    assert!(matches!(
+        codex_namespace_only_applies_to_namespaced_tools(&bug, 5),
+        Verdict::Violation(_)
+    ));
+    let records: Vec<Value> = bug
+        .lines()
+        .map(|line| serde_json::from_str(line).expect("102 same-format bug is JSON"))
+        .collect();
+    assert!(records
+        .iter()
+        .all(|record| record["called_upstream_name"] == "search"
+            && record["call_namespaces"] == serde_json::json!(["mcp__docs__"])));
+
+    // The same tool set with the qualified call is a valid restore.
+    assert_eq!(
+        codex_namespace_only_applies_to_namespaced_tools(
+            &fixture("transcripts/102/capture-same-format-cross-qualified.jsonl"),
+            5,
+        ),
+        Verdict::Conformant
+    );
+    // And with the namespace container removed, nothing comes back namespaced.
+    assert_eq!(
+        codex_namespace_only_applies_to_namespaced_tools(
+            &fixture("transcripts/102/capture-same-format-control-local-only.jsonl"),
+            5,
+        ),
+        Verdict::Conformant
     );
 }
