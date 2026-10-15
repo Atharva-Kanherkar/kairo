@@ -1,0 +1,43 @@
+HTTP/1.1 200 OK
+content-type: text/event-stream
+cache-control: no-cache
+connection: close
+transfer-encoding: chunked
+date: Thu, 15 Oct 2026 02:42:05 GMT
+
+12E
+event: message_start
+data: {"type":"message_start","message":{"id":"msg_8679c5c73bd44f50a2294f3ce4dbb411","type":"message","role":"assistant","content":[],"model":"Qwen/Qwen3-0.6B","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":61,"output_tokens":0,"cache_creation_input_tokens":0}}}
+
+
+BC
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_3db901d54cfa4a36980172ce876bd650","name":"write_file","input":{}}}
+
+
+19B
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"path\": \"tests/fixtures/hermes_sample.txt\", \"content\": \"<tool_call>\\n{\\\"name\\\": \\\"get_weather\\\", \\\"arguments\\\": {\\\"city\\\": \\\"Paris\\\"}}\\n<\\/tool_call>\"}"},"usage":{"input_tokens":168,"output_tokens":55,"cache_creation_input_tokens":0,"total_tokens":223}}
+
+
+49
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+
+
+A8
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"tool_use"},"usage":{"input_tokens":168,"output_tokens":55,"cache_creation_input_tokens":0}}
+
+
+33
+event: message_stop
+data: {"type":"message_stop"}
+
+
+E
+data: [DONE]
+
+
+0
+

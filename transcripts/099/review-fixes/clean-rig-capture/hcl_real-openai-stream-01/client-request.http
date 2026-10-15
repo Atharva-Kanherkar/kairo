@@ -1,0 +1,7 @@
+POST /v1/chat/completions HTTP/1.1
+Host: localhost:8000
+Content-Type: application/json
+Content-Length: 354
+Connection: close
+
+{"model":"Qwen/Qwen3-0.6B","stream":true,"max_tokens":400,"tools":[{"type":"function","function":{"name":"write_file","description":"Write a file","parameters":{"type":"object","properties":{"path":{"type":"string"},"content":{"type":"string"}},"required":["path","content"]}}}],"messages":[{"role":"user","content":"SCRIPT:hcl_real write the fixture"}]}

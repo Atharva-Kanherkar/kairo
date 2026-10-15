@@ -10,14 +10,15 @@ use kairo::checks::{
     anthropic_stream_block_lifecycle, anthropic_stream_safety_stop_reason,
     anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
     content_filter_preserved, document_body_forwarded, endpoint_response_family_preserved,
-    executed_tool_results_preserved, forwarded_body_preserves_values,
-    gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
-    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
-    invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
-    json_schema_property_forwarded, mcp_tool_executes_once, model_info_capture_identity,
-    model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
-    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
-    non_text_block_not_json_dumped, ogx_adaptive_thinking_loss, openai_stream_finish_reason,
+    engine_tool_calls_reach_client, executed_tool_results_preserved,
+    forwarded_body_preserves_values, gemini_inline_media_preserved_in_chat_response,
+    gemini_inline_media_preserved_in_chat_stream, id_conforms, image_url_cache_key_case_sensitive,
+    instruction_messages_preserved, invalid_credential_rejected_before_upstream,
+    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
+    mcp_tool_executes_once, model_info_capture_identity, model_info_envelope_body,
+    model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
+    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
+    ogx_adaptive_thinking_loss, openai_stream_finish_reason,
     openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
     outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
     reasoning_text_order_preserved, refusal_text_preserved, registration_resolvable_by_both_paths,
@@ -5187,5 +5188,123 @@ fn llm_d_coordinator_forwarded_values_match_float64_exactly() {
     assert!(
         rounded >= 4,
         "the sweep must show rounding too, got {rounded}"
+    );
+}
+
+// ---- bug 099: Dynamo hermes parser ends a tool call at a </tool_call> inside a JSON string ----
+
+/// Every cell under `transcripts/099/capture/<build>`, as
+/// `(cell name, engine-emitted text, raw client response)`.
+fn dynamo_099_cells(build: &str) -> Vec<(String, String, String)> {
+    let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../transcripts/099/capture")
+        .join(build);
+    let mut cells: Vec<_> = fs::read_dir(&dir)
+        .unwrap_or_else(|e| panic!("read {}: {e}", dir.display()))
+        .map(|entry| entry.expect("cell entry").path())
+        .filter(|path| path.is_dir())
+        .collect();
+    cells.sort();
+    cells
+        .into_iter()
+        .map(|cell| {
+            let name = cell.file_name().unwrap().to_string_lossy().into_owned();
+            let engine: Value = serde_json::from_str(
+                &fs::read_to_string(cell.join("engine-emitted.json")).expect("engine record"),
+            )
+            .expect("engine record JSON");
+            let text = engine["emitted_text"]
+                .as_str()
+                .expect("emitted_text")
+                .to_owned();
+            let response =
+                fs::read_to_string(cell.join("client-response.http")).expect("client response");
+            (name, text, response)
+        })
+        .collect()
+}
+
+/// A trigger cell's engine text carries a literal `</tool_call>` inside a JSON
+/// string argument. A control cell (`_ctrl`) carries the same value with the
+/// slash escaped, `<\/tool_call>`, which decodes to the same string.
+fn is_099_control(cell: &str) -> bool {
+    cell.split('-')
+        .next()
+        .is_some_and(|case| case.ends_with("_ctrl"))
+}
+
+/// Assert every trigger cell in a build loses the call and every control keeps
+/// it, and return the (trigger, control) counts.
+fn assert_099_build(build: &str) -> (usize, usize) {
+    let (mut triggers, mut controls) = (0, 0);
+    for (cell, text, response) in dynamo_099_cells(build) {
+        let verdict = engine_tool_calls_reach_client(&text, &response);
+        if is_099_control(&cell) {
+            assert_eq!(verdict, Verdict::Conformant, "{build}/{cell}");
+            controls += 1;
+        } else {
+            assert!(
+                matches!(&verdict, Verdict::Violation(reason)
+                    if reason.contains("engine emitted 1 tool call(s) [write_file], client received 0")),
+                "{build}/{cell}: expected the write_file call to be lost, got {verdict:?}"
+            );
+            triggers += 1;
+        }
+    }
+    (triggers, controls)
+}
+
+#[test]
+fn dynamo_nightly_hermes_literal_close_tag_drops_call_violation() {
+    assert_eq!(assert_099_build("nightly-tpc1"), (40, 20));
+    assert_eq!(assert_099_build("nightly-tpc5"), (40, 20));
+}
+
+#[test]
+fn dynamo_release_hermes_literal_close_tag_drops_call_violation() {
+    assert_eq!(assert_099_build("release-1.5.0-tpc1"), (24, 12));
+}
+
+/// The twelve well-formed calls Qwen3-235B-A22B-2507 actually wrote, replayed
+/// verbatim, and their slash-escaped controls.
+#[test]
+fn dynamo_hermes_real_model_completions_drop_call_violation() {
+    assert_eq!(assert_099_build("nightly-realmodel-tpc1"), (48, 48));
+}
+
+/// Every recorded real-model completion that holds a well-formed call has the
+/// literal closer inside an argument, which is what makes the replay cells
+/// above representative rather than constructed.
+#[test]
+fn dynamo_099_real_model_calls_carry_literal_closer() {
+    let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../transcripts/099/realmodel");
+    let mut with_call = 0;
+    for entry in fs::read_dir(&dir).expect("realmodel dir") {
+        let path = entry.expect("entry").path();
+        let Ok(text) = fs::read_to_string(path.join("completion.txt")) else {
+            continue;
+        };
+        let start = text.find("<tool_call>");
+        let end = text.rfind("</tool_call>");
+        let (Some(start), Some(end)) = (start, end) else {
+            continue;
+        };
+        if end <= start {
+            continue;
+        }
+        let Ok(payload) = serde_json::from_str::<Value>(&text[start + "<tool_call>".len()..end])
+        else {
+            continue;
+        };
+        with_call += 1;
+        assert!(
+            payload["arguments"].to_string().contains("</tool_call>"),
+            "{}: well-formed call without the literal closer",
+            path.display()
+        );
+    }
+    assert_eq!(
+        with_call, 12,
+        "6 verbatim and 6 edit completions are well formed"
     );
 }

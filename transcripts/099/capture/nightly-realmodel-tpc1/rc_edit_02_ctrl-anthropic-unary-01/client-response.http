@@ -1,0 +1,10 @@
+HTTP/1.1 200 OK
+content-type: application/json
+connection: close
+transfer-encoding: chunked
+date: Thu, 15 Oct 2026 02:41:50 GMT
+
+22E
+{"id":"msg_a0d763e73b9b4a50a2391dd9e488a015","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_82e243fc65c641a6985eb5bfcb0582d7","name":"write_file","input":{"path":"tests/fixtures/single_call.txt","content":"Model output used by test_parse_single_call:\n<tool_call>\n{\"name\": \"get_weather\", \"arguments\": {\"city\": \"Berlin\", \"unit\": \"celsius\"}}\n</tool_call>\n"}}],"model":"Qwen/Qwen3-0.6B","stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":167,"output_tokens":72,"cache_creation_input_tokens":0}}
+0
+

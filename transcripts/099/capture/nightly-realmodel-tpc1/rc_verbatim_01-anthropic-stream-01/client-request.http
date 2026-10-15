@@ -1,0 +1,8 @@
+POST /v1/messages HTTP/1.1
+Host: localhost:8000
+Content-Type: application/json
+anthropic-version: 2023-06-01
+Content-Length: 331
+Connection: close
+
+{"model":"Qwen/Qwen3-0.6B","stream":true,"max_tokens":400,"tools":[{"name":"write_file","description":"Write a file","input_schema":{"type":"object","properties":{"path":{"type":"string"},"content":{"type":"string"}},"required":["path","content"]}}],"messages":[{"role":"user","content":"SCRIPT:rc_verbatim_01 write the fixture"}]}

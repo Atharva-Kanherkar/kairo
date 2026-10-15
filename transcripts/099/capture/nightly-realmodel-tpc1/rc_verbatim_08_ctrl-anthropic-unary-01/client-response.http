@@ -1,0 +1,10 @@
+HTTP/1.1 200 OK
+content-type: application/json
+connection: close
+transfer-encoding: chunked
+date: Thu, 15 Oct 2026 02:42:03 GMT
+
+1E8
+{"id":"msg_46691220dce74d1caef6c6aa7a1c390f","type":"message","role":"assistant","content":[{"type":"tool_use","id":"toolu_3439ff9b39614cd189b928760b617d5a","name":"write_file","input":{"path":"tests/fixtures/hermes_sample.txt","content":"<tool_call>\n{\"name\": \"get_weather\", \"arguments\": {\"city\": \"Paris\"}}\n</tool_call>"}}],"model":"Qwen/Qwen3-0.6B","stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":168,"output_tokens":55,"cache_creation_input_tokens":0}}
+0
+

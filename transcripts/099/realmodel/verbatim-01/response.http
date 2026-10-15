@@ -1,0 +1,15 @@
+HTTP/1.1 200 OK
+Date: Thu, 15 Oct 2026 02:39:49 GMT
+Content-Type: application/json
+
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1792031988-vjbN9vTmwW7qr1nbFaFE","object":"text_completion","created":1792031988,"model":"qwen/qwen3-235b-a22b-2507","provider":"Parasail","choices":[{"index":0,"text":"<tool_call>\n{\"name\": \"write_file\", \"arguments\": {\"path\": \"tests/fixtures/hermes_sample.txt\", \"content\": \"<tool_call>\\\\n{\\\"name\\\": \\\"get_weather\\\", \\\"arguments\\\": {\\\"city\\\": \\\"Paris\\\"}}\\\\n</tool_call>\"}}\n</tool_call>","reasoning":null,"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop"}],"usage":{"prompt_tokens":200,"completion_tokens":54,"total_tokens":254,"cost":0.0000712,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.0000712,"upstream_inference_prompt_cost":0.000028,"upstream_inference_completions_cost":0.0000432},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0,"audio_tokens":0},"service_tier":null}}

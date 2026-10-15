@@ -1,0 +1,6 @@
+verbatim-01/completion.txt [plain] tool_calls=0 normal_text_len=0 args=[]
+verbatim-01/completion.txt [recovery] tool_calls=1 normal_text_len=0 args=["write_file:{\"path\": \"tests/fixtures/hermes_sample.txt\", \"content\": \"<tool_call>\\\\n{\\\"name\\\": \\\"get_weather\\\", \\\"arguments\\\": {\\\"city\\\": \\\"Paris\\\"}}\\\\n\"}"]
+edit-01/completion.txt [plain] tool_calls=0 normal_text_len=0 args=[]
+edit-01/completion.txt [recovery] tool_calls=1 normal_text_len=0 args=["write_file:{\"path\": \"tests/fixtures/single_call.txt\", \"content\": \"<tool_call>\\n{\\\"name\\\": \\\"get_weather\\\", \\\"arguments\\\": {\\\"city\\\": \\\"Berlin\\\", \\\"unit\\\": \\\"celsius\\\"}}\\n\"}"]
+rig/scripts/rc_edit_01_ctrl.txt [plain] tool_calls=1 normal_text_len=0 args=["write_file:{\"path\": \"tests/fixtures/single_call.txt\", \"content\": \"<tool_call>\\n{\\\"name\\\": \\\"get_weather\\\", \\\"arguments\\\": {\\\"city\\\": \\\"Berlin\\\", \\\"unit\\\": \\\"celsius\\\"}}\\n<\\/tool_call>\"}"]
+rig/scripts/rc_edit_01_ctrl.txt [recovery] tool_calls=1 normal_text_len=0 args=["write_file:{\"path\": \"tests/fixtures/single_call.txt\", \"content\": \"<tool_call>\\n{\\\"name\\\": \\\"get_weather\\\", \\\"arguments\\\": {\\\"city\\\": \\\"Berlin\\\", \\\"unit\\\": \\\"celsius\\\"}}\\n<\\/tool_call>\"}"]

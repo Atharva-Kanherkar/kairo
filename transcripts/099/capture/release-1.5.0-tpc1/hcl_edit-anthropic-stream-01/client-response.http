@@ -1,0 +1,53 @@
+HTTP/1.1 200 OK
+content-type: text/event-stream
+cache-control: no-cache
+connection: close
+transfer-encoding: chunked
+date: Thu, 15 Oct 2026 02:39:28 GMT
+
+12E
+event: message_start
+data: {"type":"message_start","message":{"id":"msg_664b196fd88041b3badecb744de98fa3","type":"message","role":"assistant","content":[],"model":"Qwen/Qwen3-0.6B","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":58,"output_tokens":0,"cache_creation_input_tokens":0}}}
+
+
+75
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}}
+
+
+D9
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\\n"},"usage":{"input_tokens":163,"output_tokens":57,"cache_creation_input_tokens":0,"total_tokens":220}}
+
+
+DC
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"\"}}\n"},"usage":{"input_tokens":163,"output_tokens":58,"cache_creation_input_tokens":0,"total_tokens":221}}
+
+
+E2
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"</tool_call>"},"usage":{"input_tokens":163,"output_tokens":59,"cache_creation_input_tokens":0,"total_tokens":222}}
+
+
+49
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+
+
+A8
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"input_tokens":163,"output_tokens":59,"cache_creation_input_tokens":0}}
+
+
+33
+event: message_stop
+data: {"type":"message_stop"}
+
+
+E
+data: [DONE]
+
+
+0
+

@@ -1,0 +1,25 @@
+HTTP/1.1 200 OK
+content-type: text/event-stream
+cache-control: no-cache
+connection: close
+transfer-encoding: chunked
+date: Thu, 15 Oct 2026 02:39:12 GMT
+
+F5
+data: {"id":"chatcmpl-5f36fd99-4660-4d4c-81cd-7078a5817f0a","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":null,"logprobs":null}],"created":1792031952,"model":"Qwen/Qwen3-0.6B","object":"chat.completion.chunk"}
+
+
+F4
+data: {"id":"chatcmpl-5f36fd99-4660-4d4c-81cd-7078a5817f0a","choices":[{"index":0,"delta":{"content":"\"}}\n</tool_call>"},"finish_reason":null,"logprobs":null}],"created":1792031952,"model":"Qwen/Qwen3-0.6B","object":"chat.completion.chunk"}
+
+
+D8
+data: {"id":"chatcmpl-5f36fd99-4660-4d4c-81cd-7078a5817f0a","choices":[{"index":0,"delta":{},"finish_reason":"stop","logprobs":null}],"created":1792031952,"model":"Qwen/Qwen3-0.6B","object":"chat.completion.chunk"}
+
+
+E
+data: [DONE]
+
+
+0
+

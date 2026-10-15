@@ -1,0 +1,21 @@
+HTTP/1.1 200 OK
+content-type: text/event-stream
+cache-control: no-cache
+connection: close
+transfer-encoding: chunked
+date: Thu, 15 Oct 2026 02:38:56 GMT
+
+23A
+data: {"id":"chatcmpl-fc51f56b-887a-4e9a-b98f-b3039f8fe4ec","choices":[{"index":0,"delta":{"content":"","tool_calls":[{"index":0,"id":"call-f4d16798-0188-47cd-b8fa-873a6922d25b","type":"function","function":{"name":"write_file","arguments":"{\"path\": \"tests/fixtures/hermes_sample.txt\", \"content\": \"<tool_call>\\n{\\\"name\\\": \\\"get_weather\\\", \\\"arguments\\\": {\\\"city\\\": \\\"Paris\\\"}}\\n<\\/tool_call>\"}"}}],"role":"assistant"},"finish_reason":null,"logprobs":null}],"created":1792031936,"model":"Qwen/Qwen3-0.6B","object":"chat.completion.chunk"}
+
+
+DE
+data: {"id":"chatcmpl-fc51f56b-887a-4e9a-b98f-b3039f8fe4ec","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls","logprobs":null}],"created":1792031936,"model":"Qwen/Qwen3-0.6B","object":"chat.completion.chunk"}
+
+
+E
+data: [DONE]
+
+
+0
+
