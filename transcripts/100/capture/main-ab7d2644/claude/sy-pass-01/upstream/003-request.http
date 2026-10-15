@@ -1,0 +1,9 @@
+POST /v1/messages HTTP/1.1
+content-type: application/json
+anthropic-version: 2023-06-01
+x-api-key: [REDACTED: credential]
+accept: */*
+host: 127.0.0.1:9101
+content-length: 843
+
+{"model":"claude-sonnet-5-5","messages":[{"role":"user","content":[{"type":"text","text":"Perform a web search for the query: latest stable Rust release version","cache_control":{"type":"ephemeral"}}]}],"system":[{"type":"text","text":"x-anthropic-billing-header: cc_version=2.1.289.fc9; cc_entrypoint=sdk-ts;"},{"type":"text","text":"You are a Claude agent, built on Anthropic's Claude Agent SDK."},{"type":"text","text":"You are an assistant for performing a web search tool use"}],"tools":[{"type":"web_search_20250305","name":"web_search","max_uses":8}],"tool_choice":{"type":"auto"},"metadata":{"user_id":"{\"device_id\":\"[REDACTED: device id]\",\"account_uuid\":\"\",\"session_id\":\"bd0fdf09-fc85-4033-bd24-ade05643d987\"}"},"max_tokens":32000,"output_config":{"effort":"high"},"stream":true}
