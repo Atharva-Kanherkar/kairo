@@ -2747,9 +2747,157 @@ pub fn forwarded_body_preserves_values(
     }
 }
 
+/// Reason returned when a gateway answers a request successfully after removing
+/// a declared tool that its target cannot express. Tests match this string so
+/// an unrelated parse failure cannot pass as the 101 finding.
+pub const HOST_TOOL_SILENTLY_ERASED: &str =
+    "gateway returned success after erasing a declared host tool the target cannot express";
+
+/// Invariant (bug 101): a tool the caller declared is either carried to the
+/// target in some representation, or the request is refused. Returning HTTP 2xx
+/// after deleting a tool the target cannot express leaves the caller believing
+/// the model can use it while the model was never told, and nothing on the wire
+/// records the loss.
+///
+/// `client_status` is the status the gateway returned to the caller. A non-2xx
+/// status is conformant: failing closed is the correct behavior for a target
+/// that has no representation. Function and custom tools are excluded because
+/// every dialect can express them, so their survival says nothing about this
+/// invariant.
+pub fn host_tool_not_silently_erased(
+    client_status: u16,
+    client_body: &str,
+    forwarded_body: &str,
+) -> Verdict {
+    let Ok(client) = serde_json::from_str::<Value>(client_body) else {
+        return Verdict::Violation("client request body is not valid JSON".into());
+    };
+    let Ok(forwarded) = serde_json::from_str::<Value>(forwarded_body) else {
+        return Verdict::Violation("forwarded request body is not valid JSON".into());
+    };
+    if !client.is_object() {
+        return Verdict::Violation("client request body is not a JSON object".into());
+    }
+    if !forwarded.is_object() {
+        return Verdict::Violation("forwarded request body is not a JSON object".into());
+    }
+
+    // Each declared host tool, as the tokens that prove it reached the target.
+    let mut declared: Vec<(String, Vec<String>)> = Vec::new();
+    for tool in client
+        .get("tools")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+    {
+        let Some(kind) = tool.get("type").and_then(Value::as_str) else {
+            continue; // untyped tools are function tools in the Responses dialect
+        };
+        if matches!(kind, "function" | "custom") {
+            continue;
+        }
+        let tokens = ["server_label", "server_url", "name"]
+            .into_iter()
+            .filter_map(|field| tool.get(field).and_then(Value::as_str))
+            .map(str::to_owned)
+            .chain([kind.to_owned()])
+            .collect();
+        declared.push((kind.to_owned(), tokens));
+    }
+    if declared.is_empty() || !(200..300).contains(&client_status) {
+        return Verdict::Conformant;
+    }
+
+    // Every string anywhere in the forwarded tools array, in any dialect shape.
+    let forwarded_tools = forwarded.get("tools").cloned().unwrap_or(Value::Null);
+    let mut present = Vec::new();
+    collect_strings(&forwarded_tools, &mut present);
+
+    let erased: Vec<&str> = declared
+        .iter()
+        .filter(|(_, tokens)| !tokens.iter().all(|token| present.contains(token)))
+        .map(|(kind, _)| kind.as_str())
+        .collect();
+    if erased.is_empty() {
+        return Verdict::Conformant;
+    }
+    Verdict::Violation(format!(
+        "{HOST_TOOL_SILENTLY_ERASED}: {erased:?} absent from the forwarded tools array"
+    ))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn host_tool_checker_flags_a_successful_emptying_and_accepts_a_refusal() {
+        let client =
+            r#"{"tools":[{"type":"mcp","server_label":"srv","server_url":"https://x/mcp"}]}"#;
+        let emptied = r#"{"messages":[{"role":"user","content":"go"}]}"#;
+        assert_eq!(
+            host_tool_not_silently_erased(200, client, emptied),
+            Verdict::Violation(
+                HOST_TOOL_SILENTLY_ERASED.to_string()
+                    + ": [\"mcp\"] absent from the forwarded tools array"
+            )
+        );
+        // Failing closed is conformant.
+        assert_eq!(
+            host_tool_not_silently_erased(400, client, emptied),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn host_tool_checker_accepts_a_preserved_tool_in_any_dialect_shape() {
+        let client =
+            r#"{"tools":[{"type":"mcp","server_label":"srv","server_url":"https://x/mcp"}]}"#;
+        // Forwarded verbatim on the Responses-dialect route.
+        assert_eq!(
+            host_tool_not_silently_erased(
+                200,
+                client,
+                r#"{"input":"go","tools":[{"type":"mcp","server_url":"https://x/mcp","server_label":"srv"}]}"#
+            ),
+            Verdict::Conformant
+        );
+        // Rewritten but faithful: every identifying coordinate is still there.
+        assert_eq!(
+            host_tool_not_silently_erased(
+                200,
+                client,
+                r#"{"messages":[],"tools":[{"type":"mcp","server_label":"srv","server_url":"https://x/mcp","extra":1}]}"#
+            ),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn host_tool_checker_ignores_representable_and_empty_requests() {
+        assert_eq!(
+            host_tool_not_silently_erased(
+                200,
+                r#"{"tools":[{"type":"function","name":"f","parameters":{}}]}"#,
+                r#"{"messages":[]}"#
+            ),
+            Verdict::Conformant
+        );
+        assert_eq!(
+            host_tool_not_silently_erased(200, r#"{"input":"go"}"#, r#"{"input":"go"}"#),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn host_tool_checker_rejects_unparseable_evidence() {
+        for bad in ["", "not json", "[]"] {
+            assert!(matches!(
+                host_tool_not_silently_erased(200, bad, bad),
+                Verdict::Violation(_)
+            ));
+        }
+    }
 
     #[test]
     fn ogx_adaptive_checker_is_non_vacuous_and_checks_trial_count() {
