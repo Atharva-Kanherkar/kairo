@@ -2747,6 +2747,73 @@ pub fn forwarded_body_preserves_values(
     }
 }
 
+/// Invariant (bug 100): an Anthropic server tool the client declares must reach
+/// an Anthropic Messages upstream as the same definition.
+///
+/// A server tool is a `tools[]` entry whose `type` names a provider-run tool,
+/// such as `web_search_20250305`, rather than `custom`. Anthropic runs it, so it
+/// carries no `input_schema`. A gateway that rebuilds the tool list as client
+/// functions forwards `{"name":"web_search","description":"","input_schema":{}}`
+/// instead, and Anthropic rejects that with `400 tools.0.custom.input_schema.type:
+/// Field required`. Claude Code's WebSearch tool then reports an API error and
+/// returns no results.
+///
+/// Every server tool in the client body must appear in the forwarded body with
+/// an equal JSON value; key order is ignored. Custom tools are not compared. The
+/// client body must declare at least one server tool, so a capture that lost the
+/// tool fails instead of passing vacuously.
+pub fn anthropic_server_tools_forwarded(client_http: &str, forwarded_http: &str) -> Verdict {
+    let client = match http_json_body(client_http, "client request") {
+        Ok(body) => body,
+        Err(reason) => return Verdict::Violation(reason),
+    };
+    let forwarded = match http_json_body(forwarded_http, "forwarded request") {
+        Ok(body) => body,
+        Err(reason) => return Verdict::Violation(reason),
+    };
+    let is_server_tool = |tool: &&Value| {
+        tool.get("type")
+            .and_then(Value::as_str)
+            .is_some_and(|kind| kind != "custom")
+    };
+    let declared: Vec<&Value> = client
+        .get("tools")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter(is_server_tool)
+        .collect();
+    if declared.is_empty() {
+        return Verdict::Violation("client request declares no Anthropic server tool".to_owned());
+    }
+    let forwarded_tools: Vec<&Value> = forwarded
+        .get("tools")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .collect();
+    let mut problems = Vec::new();
+    for tool in declared {
+        let name = tool.get("name").and_then(Value::as_str).unwrap_or_default();
+        let kind = tool.get("type").and_then(Value::as_str).unwrap_or_default();
+        match forwarded_tools
+            .iter()
+            .find(|candidate| candidate.get("name").and_then(Value::as_str) == Some(name))
+        {
+            None => problems.push(format!("server tool {name:?} ({kind}) was not forwarded")),
+            Some(sent) if *sent == tool => {}
+            Some(sent) => problems.push(format!(
+                "server tool {name:?} ({kind}) was forwarded as {sent}"
+            )),
+        }
+    }
+    if problems.is_empty() {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation(problems.join("; "))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -4296,6 +4363,61 @@ data: [DONE]
         assert!(matches!(
             forwarded_body_preserves_values(&client, &renamed_type, &[]),
             Verdict::Violation(reason) if reason.contains("client sent \"integer\"")
+        ));
+    }
+
+    #[test]
+    fn server_tool_checker_passes_an_unchanged_definition() {
+        let client = http_request(
+            r#"{"model":"m","messages":[],"tools":[{"type":"web_search_20250305","name":"web_search","max_uses":8},{"name":"Bash","input_schema":{"type":"object"}}]}"#,
+        );
+        let reordered = http_request(
+            r#"{"model":"target","messages":[],"tools":[{"name":"Bash","input_schema":{"type":"object"}},{"max_uses":8,"name":"web_search","type":"web_search_20250305"}]}"#,
+        );
+        assert_eq!(
+            anthropic_server_tools_forwarded(&client, &reordered),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn server_tool_checker_reports_a_rebuilt_or_missing_tool() {
+        let client = http_request(
+            r#"{"model":"m","messages":[],"tools":[{"type":"web_search_20250305","name":"web_search","max_uses":8}]}"#,
+        );
+        let rebuilt = http_request(
+            r#"{"model":"target","messages":[],"tools":[{"name":"web_search","description":"","input_schema":{}}]}"#,
+        );
+        assert!(matches!(
+            anthropic_server_tools_forwarded(&client, &rebuilt),
+            Verdict::Violation(reason) if reason.contains("web_search_20250305") && reason.contains("input_schema")
+        ));
+        let dropped = http_request(r#"{"model":"target","messages":[]}"#);
+        assert!(matches!(
+            anthropic_server_tools_forwarded(&client, &dropped),
+            Verdict::Violation(reason) if reason.contains("was not forwarded")
+        ));
+        let lost_option = http_request(
+            r#"{"model":"target","messages":[],"tools":[{"type":"web_search_20250305","name":"web_search"}]}"#,
+        );
+        assert!(matches!(
+            anthropic_server_tools_forwarded(&client, &lost_option),
+            Verdict::Violation(reason) if reason.contains("was forwarded as")
+        ));
+    }
+
+    #[test]
+    fn server_tool_checker_is_not_vacuous() {
+        let custom_only = http_request(
+            r#"{"model":"m","messages":[],"tools":[{"type":"custom","name":"Bash","input_schema":{"type":"object"}}]}"#,
+        );
+        assert!(matches!(
+            anthropic_server_tools_forwarded(&custom_only, &custom_only),
+            Verdict::Violation(reason) if reason.contains("declares no Anthropic server tool")
+        ));
+        assert!(matches!(
+            anthropic_server_tools_forwarded("not http", &custom_only),
+            Verdict::Violation(reason) if reason.contains("not a raw HTTP message")
         ));
     }
 }

@@ -1,0 +1,30 @@
+# Switchyard deployment for finding 100. One server, two routes, the same two
+# targets on the same Anthropic client. Only the route type differs.
+schema_version = 1
+
+[llm_clients.anthropic]
+format = "anthropic_messages"
+# The upstream relay (rig/relay.py) in front of https://api.anthropic.com.
+base_url = "http://127.0.0.1:9101"
+api_key_env = "ANTHROPIC_API_KEY"
+
+[targets.capable]
+id = "claude-sonnet-5-5"
+llm_client = "anthropic"
+
+[targets.efficient]
+id = "claude-haiku-5-5"
+llm_client = "anthropic"
+
+# The documented plan/execute example, with Anthropic targets.
+[routes.plan]
+id = "sy-plan"
+type = "plan_execute"
+capable_target = "capable"
+efficient_target = "efficient"
+
+# Control: same server, same target, no router-added text.
+[routes.pass]
+id = "sy-pass"
+type = "passthrough"
+target = "capable"

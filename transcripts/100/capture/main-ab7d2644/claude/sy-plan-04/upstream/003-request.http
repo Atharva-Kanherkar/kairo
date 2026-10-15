@@ -1,0 +1,9 @@
+POST /v1/messages HTTP/1.1
+content-type: application/json
+anthropic-version: 2023-06-01
+x-api-key: [REDACTED: credential]
+accept: */*
+host: 127.0.0.1:9101
+content-length: 1058
+
+{"model":"claude-sonnet-5-5","system":"You are in the planning phase. Inspect the task and relevant code, then form a concrete implementation plan before modifying any files. Use read-only tools as needed. Do not edit until the plan is complete. Your first edit hands execution to another model.\n\nx-anthropic-billing-header: cc_version=2.1.289.fc9; cc_entrypoint=sdk-ts;\n\nYou are a Claude agent, built on Anthropic's Claude Agent SDK.\n\nYou are an assistant for performing a web search tool use","messages":[{"role":"user","content":[{"type":"text","text":"Perform a web search for the query: latest stable Rust release version","cache_control":{"type":"ephemeral"}}]}],"tools":[{"name":"web_search","description":"","input_schema":{}}],"tool_choice":{"type":"auto"},"metadata":{"user_id":"{\"device_id\":\"[REDACTED: device id]\",\"account_uuid\":\"\",\"session_id\":\"1db8a945-ff90-4c0c-a1ca-0c9e577c10b3\"}"},"max_tokens":32000,"stream":true,"thinking":{"type":"adaptive"},"output_config":{"effort":"high"}}
