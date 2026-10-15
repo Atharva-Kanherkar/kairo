@@ -8,6 +8,7 @@ PY=${PY:-python}
 RP=""; [ "$2" != "none" ] && RP="--reasoning-parser $2"
 TP=""; [ "$1" != "none" ] && TP="--tool-call-parser $1"
 cd /rig
+mkdir -p /rig/logs
 nohup $PY -m dynamo.frontend --http-port 8000 --discovery-backend file --enable-anthropic-api > /rig/logs/frontend.log 2>&1 &
 TOKEN_DELAY=${TOKEN_DELAY:-0.002} nohup $PY /rig/scripted_engine.py --model $MODEL $TP $RP --discovery-backend file ${TPC:+--tokens-per-chunk $TPC} > /rig/logs/engine.log 2>&1 &
 for i in $(seq 1 120); do curl -sf localhost:8000/v1/models | grep -q '"id"' && break; sleep 1; done

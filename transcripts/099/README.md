@@ -24,3 +24,5 @@ All bytes here were recorded on 2026-10-15. See `rig/environment.txt` for pins.
   the OpenAI and Anthropic SDKs.
 - `libprobe/`: a 30-line Rust program calling `dynamo-parsers` 10.0.2 directly,
   and its output.
+- `review-fixes/`: what changed after the first independent review, and a
+  clean-rig capture showing startup and final-record polling.

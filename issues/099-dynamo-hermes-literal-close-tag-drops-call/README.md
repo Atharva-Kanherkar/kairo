@@ -231,6 +231,7 @@ cp transcripts/099/rig/scripts/*.txt /rig/scripts/
 TPC=1 /rig/start.sh hermes none
 python3 /rig/capture.py /rig/out 5 hcl_real hcl_ctrl hcl_edit
 python3 /rig/agent_loop.py 5
+python3 /rig/test_capture.py
 
 cargo test --workspace -- 099 engine_calls
 ```
