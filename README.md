@@ -28,7 +28,7 @@ offline with no provider keys.
 |---|---|
 | Reproduced issue folders | 70 |
 | Gateways under test | LiteLLM, NVIDIA Switchyard, Bifrost, GoModel, AxonHub, any-llm, Dynamo, NIXL, OGX, agentgateway, and llm-d Router |
-| Harness tests | 263 (199 conformance checks against recorded transcripts, 64 unit) |
+| Harness tests | 272 (204 conformance checks against recorded transcripts, 68 unit) |
 <!-- kairo-counts:end -->
 
 The 70 folders cover reproduced findings, multi-defect reports, and honest
