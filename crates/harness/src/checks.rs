@@ -30,9 +30,11 @@ impl Verdict {
 
 /// Parse an SSE body into the JSON payload of each `data:` line, skipping
 /// `data: [DONE]` and any `event:` lines. Malformed data lines are ignored.
+/// The space after `data:` is optional, as the SSE specification allows.
 fn sse_data_json(body: &str) -> Vec<Value> {
     body.lines()
-        .filter_map(|line| line.strip_prefix("data: "))
+        .filter_map(|line| line.strip_prefix("data:"))
+        .map(|d| d.strip_prefix(' ').unwrap_or(d))
         .filter(|d| *d != "[DONE]")
         .filter_map(|d| serde_json::from_str::<Value>(d).ok())
         .collect()
@@ -4596,6 +4598,25 @@ data: [DONE]
                 engine_tool_calls_reach_client(text, &client),
                 Verdict::Violation(reason) if reason.contains("no well-formed Hermes tool call")
             ));
+        }
+    }
+
+    #[test]
+    fn engine_calls_checker_accepts_sse_data_without_the_optional_space() {
+        let events = [
+            r#"{"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"name":"write_file","arguments":"{\"path\":\"a.txt\","}}]}}]}"#,
+            r#"{"choices":[{"index":0,"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\"content\":\"x </tool_call> y\"}"}}]}}]}"#,
+        ];
+        for separator in ["data: ", "data:"] {
+            let body = events
+                .map(|event| format!("{separator}{event}\n\n"))
+                .concat();
+            let client = format!("HTTP/1.1 200 OK\r\ncontent-type: text/event-stream\r\n\r\n{body}{separator}[DONE]\n\n");
+            assert_eq!(
+                engine_tool_calls_reach_client(ENGINE_099, &client),
+                Verdict::Conformant,
+                "separator {separator:?}"
+            );
         }
     }
 
