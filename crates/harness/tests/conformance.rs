@@ -6,18 +6,19 @@
 //! violating the invariant, this test flips and tells us.
 
 use kairo::checks::{
-    anthropic_response_toolcall_stop_reason, anthropic_stop_sequence_reported,
-    anthropic_stream_block_lifecycle, anthropic_stream_safety_stop_reason,
-    anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
-    content_filter_preserved, document_body_forwarded, endpoint_response_family_preserved,
-    executed_tool_results_preserved, forwarded_body_preserves_values,
-    gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
-    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
-    invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
-    json_schema_property_forwarded, mcp_tool_executes_once, model_info_capture_identity,
-    model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
-    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
-    non_text_block_not_json_dumped, ogx_adaptive_thinking_loss, openai_stream_finish_reason,
+    anthropic_response_toolcall_stop_reason, anthropic_server_tools_forwarded,
+    anthropic_stop_sequence_reported, anthropic_stream_block_lifecycle,
+    anthropic_stream_safety_stop_reason, anthropic_tool_choice_any_mapped_to_required,
+    anthropic_toolcall_stop_reason, capture_records, content_filter_preserved,
+    document_body_forwarded, endpoint_response_family_preserved, executed_tool_results_preserved,
+    forwarded_body_preserves_values, gemini_inline_media_preserved_in_chat_response,
+    gemini_inline_media_preserved_in_chat_stream, id_conforms, image_url_cache_key_case_sensitive,
+    instruction_messages_preserved, invalid_credential_rejected_before_upstream,
+    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
+    mcp_tool_executes_once, model_info_capture_identity, model_info_envelope_body,
+    model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
+    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
+    ogx_adaptive_thinking_loss, openai_stream_finish_reason,
     openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
     outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
     reasoning_text_order_preserved, refusal_text_preserved, registration_resolvable_by_both_paths,
@@ -5188,6 +5189,206 @@ fn llm_d_coordinator_forwarded_values_match_float64_exactly() {
         rounded >= 4,
         "the sweep must show rounding too, got {rounded}"
     );
+}
+
+// ---- bug 100: Switchyard plan_execute rebuilds Anthropic server tools ----
+//
+// Plan/execute prepends its planning instruction on every planning turn, which
+// drops same-format exact replay. The Anthropic codec then re-encodes the tool
+// list from the normalized request, where a server tool such as
+// `web_search_20250305` is a function with an empty schema. Anthropic rejects
+// the result, and Claude Code's WebSearch returns an API error. Captures were
+// recorded through rig/relay.py on both hops, against live Anthropic.
+
+const ISSUE_100_BUILDS: [&str; 2] = ["main-ab7d2644", "v0.3.0"];
+const ISSUE_100_REJECTION: &str = "tools.0.custom.input_schema.type: Field required";
+const ISSUE_100_WEBSEARCH: &str = "Perform a web search for the query";
+
+fn issue_100_capture(relative: &str) -> String {
+    fixture(&format!("transcripts/100/capture/{relative}"))
+}
+
+fn issue_100_status(raw_http: &str) -> u16 {
+    raw_http
+        .split(' ')
+        .nth(1)
+        .and_then(|status| status.parse().ok())
+        .expect("status line")
+}
+
+/// The single client and upstream exchange in a minimal or direct case.
+fn issue_100_exchange(case: &str, hop: &str) -> (String, String) {
+    (
+        issue_100_capture(&format!("{case}/{hop}/001-request.http")),
+        issue_100_capture(&format!("{case}/{hop}/001-response.http")),
+    )
+}
+
+/// The Claude Code WebSearch sub-request in one hop: the only request whose
+/// messages ask for a web search.
+fn issue_100_websearch(run: &str, hop: &str) -> (String, String) {
+    let mut dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    dir.push(format!(
+        "../../transcripts/100/capture/main-ab7d2644/claude/{run}/{hop}"
+    ));
+    let mut found: Vec<(String, String)> = Vec::new();
+    let mut requests: Vec<PathBuf> = fs::read_dir(&dir)
+        .unwrap_or_else(|e| panic!("read {}: {e}", dir.display()))
+        .map(|entry| entry.expect("dir entry").path())
+        .filter(|path| path.to_string_lossy().ends_with("-request.http"))
+        .collect();
+    requests.sort();
+    for request in requests {
+        let raw = fs::read_to_string(&request).expect("request");
+        if raw.contains(ISSUE_100_WEBSEARCH) {
+            let response = request
+                .to_string_lossy()
+                .replace("-request.http", "-response.http");
+            found.push((raw, fs::read_to_string(response).expect("response")));
+        }
+    }
+    assert_eq!(found.len(), 1, "{run}/{hop}: one WebSearch sub-request");
+    found.remove(0)
+}
+
+#[test]
+fn anthropic_rejects_the_tool_switchyard_forwards_and_accepts_the_original() {
+    // Rung 1 of the control ladder, no gateway: the provider runs the server
+    // tool, and rejects the custom-function shape Switchyard sends in its place.
+    for run in 1..=5 {
+        let (_, served) = issue_100_exchange(
+            &format!("main-ab7d2644/direct/server-tool-{run:02}"),
+            "upstream",
+        );
+        assert_eq!(issue_100_status(&served), 200, "server tool run {run}");
+        assert!(
+            served.contains("web_search_tool_result"),
+            "server tool run {run} must search"
+        );
+        let (_, rejected) = issue_100_exchange(
+            &format!("main-ab7d2644/direct/reencoded-tool-{run:02}"),
+            "upstream",
+        );
+        assert_eq!(
+            issue_100_status(&rejected),
+            400,
+            "re-encoded tool run {run}"
+        );
+        assert!(
+            rejected.contains(ISSUE_100_REJECTION),
+            "re-encoded tool run {run}"
+        );
+    }
+}
+
+#[test]
+fn switchyard_plan_execute_rebuilds_the_web_search_server_tool() {
+    for build in ISSUE_100_BUILDS {
+        for run in 1..=5 {
+            let case = format!("{build}/minimal/sy-plan-{run:02}");
+            let (client, client_response) = issue_100_exchange(&case, "client");
+            let (forwarded, upstream_response) = issue_100_exchange(&case, "upstream");
+            assert!(
+                matches!(
+                    anthropic_server_tools_forwarded(&client, &forwarded),
+                    Verdict::Violation(reason)
+                        if reason.contains("web_search_20250305") && reason.contains("\"input_schema\":{}")
+                ),
+                "{case}: the server tool must be reported as rebuilt"
+            );
+            assert_eq!(issue_100_status(&upstream_response), 400, "{case}");
+            assert_eq!(issue_100_status(&client_response), 400, "{case}");
+            assert!(client_response.contains(ISSUE_100_REJECTION), "{case}");
+        }
+    }
+}
+
+#[test]
+fn switchyard_passthrough_forwards_the_web_search_server_tool_unchanged() {
+    // Same server, same target, same request; only the router-added planning
+    // instruction is absent, so exact replay survives.
+    for build in ISSUE_100_BUILDS {
+        for run in 1..=5 {
+            let case = format!("{build}/minimal/sy-pass-{run:02}");
+            let (client, client_response) = issue_100_exchange(&case, "client");
+            let (forwarded, _) = issue_100_exchange(&case, "upstream");
+            assert_eq!(
+                anthropic_server_tools_forwarded(&client, &forwarded),
+                Verdict::Conformant,
+                "{case}"
+            );
+            assert_eq!(issue_100_status(&client_response), 200, "{case}");
+            assert!(client_response.contains("web_search_tool_result"), "{case}");
+        }
+    }
+}
+
+#[test]
+fn claude_code_websearch_fails_only_on_the_plan_execute_route() {
+    for run in 1..=5 {
+        let plan = format!("sy-plan-{run:02}");
+        let (client, _) = issue_100_websearch(&plan, "client");
+        let (forwarded, upstream_response) = issue_100_websearch(&plan, "upstream");
+        assert!(
+            !anthropic_server_tools_forwarded(&client, &forwarded).is_conformant(),
+            "{plan}: Claude Code's server tool must be reported as rebuilt"
+        );
+        assert_eq!(issue_100_status(&upstream_response), 400, "{plan}");
+        let stdout = issue_100_capture(&format!("main-ab7d2644/claude/{plan}/claude-stdout.json"));
+        assert!(
+            stdout.contains("input_schema.type: Field required"),
+            "{plan}: Claude Code reports the rejection"
+        );
+
+        let pass = format!("sy-pass-{run:02}");
+        let (client, _) = issue_100_websearch(&pass, "client");
+        let (forwarded, upstream_response) = issue_100_websearch(&pass, "upstream");
+        assert_eq!(
+            anthropic_server_tools_forwarded(&client, &forwarded),
+            Verdict::Conformant,
+            "{pass}"
+        );
+        assert_eq!(issue_100_status(&upstream_response), 200, "{pass}");
+        assert!(
+            upstream_response.contains("web_search_tool_result"),
+            "{pass}: search ran"
+        );
+    }
+}
+
+#[test]
+fn switchyard_server_tool_matrix_matches_the_recorded_runs() {
+    for (build, commit, claude) in [
+        (
+            "main-ab7d2644",
+            "ab7d26443899239632e97d9d9d8aedaa58c96b99",
+            true,
+        ),
+        ("v0.3.0", "336196f6fbfc97ddc71c1700f6092e564e9f23c2", false),
+    ] {
+        let results: Value =
+            serde_json::from_str(&issue_100_capture(&format!("{build}/results.json")))
+                .expect("results.json");
+        assert_eq!(results["identity"]["switchyard_commit"], commit, "{build}");
+        assert_eq!(
+            results["identity"]["switchyard_tree_clean"], true,
+            "{build}"
+        );
+        let summary = &results["summary"];
+        assert_eq!(summary["runs_per_case"], 5, "{build}");
+        for key in [
+            "direct_server_tool_ok",
+            "direct_reencoded_tool_400",
+            "plan_forwarded_custom_tool_400",
+            "pass_forwarded_server_tool_ok",
+        ] {
+            assert_eq!(summary[key], 5, "{build}: {key}");
+        }
+        if claude {
+            assert_eq!(summary["claude_plan_websearch_failed"], 5, "{build}");
+            assert_eq!(summary["claude_pass_websearch_ok"], 5, "{build}");
+        }
+    }
 }
 
 // ---- bug 101: Switchyard erases Responses host tools on a cross-format route ----

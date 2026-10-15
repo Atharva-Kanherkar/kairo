@@ -1,0 +1,19 @@
+HTTP/1.1 400 Bad Request
+Date: Thu, 15 Oct 2026 03:06:08 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: keep-alive
+x-should-retry: false
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+request-id: req_011Cg3HQCasB1DmdnLv66kZK
+traceresponse: 00-2f06e0b000d0f3b26be11c593eafd490-e1ae6fa7388bfef2-01
+anthropic-organization-id: [REDACTED: tenant id]
+anthropic-workspace-id: [REDACTED: tenant id]
+vary: Accept-Encoding
+Server: cloudflare
+X-Robots-Tag: none
+Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
+cf-cache-status: DYNAMIC
+CF-RAY: a4ab9b289d15d767-NRT
+
+{"type":"error","error":{"type":"invalid_request_error","message":"tools.0.custom.input_schema.type: Field required"},"request_id":"req_011Cg3HQCasB1DmdnLv66kZK"}

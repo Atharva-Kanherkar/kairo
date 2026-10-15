@@ -26,12 +26,12 @@ offline with no provider keys.
 <!-- kairo-counts:start -->
 | Metric | Value |
 |---|---|
-| Reproduced issue folders | 71 |
+| Reproduced issue folders | 72 |
 | Gateways under test | LiteLLM, NVIDIA Switchyard, Bifrost, GoModel, AxonHub, any-llm, Dynamo, NIXL, OGX, agentgateway, and llm-d Router |
-| Harness tests | 272 (204 conformance checks against recorded transcripts, 68 unit) |
+| Harness tests | 280 (209 conformance checks against recorded transcripts, 71 unit) |
 <!-- kairo-counts:end -->
 
-The 71 folders cover reproduced findings, multi-defect reports, and honest
+The 72 folders cover reproduced findings, multi-defect reports, and honest
 negative results. Versions and reproduction outcomes are recorded per finding
 in [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md), including cited bugs that did
 not reproduce.
@@ -69,7 +69,7 @@ reproduction commands.
 | One public stream has one response lifecycle and output namespace | [074](issues/074-litellm-mcp-responses-stream-collision) | | | | | | |
 | A cached replay carries the requesting endpoint's API family | | | [086](issues/086-bifrost-semantic-cache-cross-endpoint-hit) | | | | |
 | One client turn executes a side-effecting gateway tool at most once | [087](issues/087-litellm-mcp-retry-reexecutes-tool) | | | | | | |
-| Request constraints survive (`disable_parallel_tool_use`, `stop_sequences`, `tools[].strict`, `output_format`) | [017](issues/017-parallel-tool-flag-dropped), [041](issues/041-litellm-drops-stop-sequences), [064](issues/064-litellm-drops-tool-strict) | [006](issues/006-switchyard-crossformat-losses), [017](issues/017-parallel-tool-flag-dropped), [040](issues/040-switchyard-drops-output-format), [065](issues/065-switchyard-responses-instruction-loss), [066](issues/066-switchyard-drops-tool-strict) | [031](issues/031-bifrost-drops-parallel-tool-flag), [032](issues/032-bifrost-drops-stop-sequences), [072](issues/072-bifrost-anthropic-tool-choice-any-leak) | [042](issues/042-gomodel-drops-output-format), [043](issues/043-gomodel-drops-parallel-tool-flag) | [051](issues/051-axonhub-drops-output-format) | [058](issues/058-any-llm-drops-parallel-tool-flag), [062](issues/062-any-llm-empty-schema-shell) | [081](issues/081-ogx-messages-translation-losses) |
+| Request constraints survive (`disable_parallel_tool_use`, `stop_sequences`, `tools[].strict`, `output_format`, server tool definitions) | [017](issues/017-parallel-tool-flag-dropped), [041](issues/041-litellm-drops-stop-sequences), [064](issues/064-litellm-drops-tool-strict) | [006](issues/006-switchyard-crossformat-losses), [017](issues/017-parallel-tool-flag-dropped), [040](issues/040-switchyard-drops-output-format), [065](issues/065-switchyard-responses-instruction-loss), [066](issues/066-switchyard-drops-tool-strict), [100](issues/100-switchyard-plan-execute-rebuilds-server-tools) | [031](issues/031-bifrost-drops-parallel-tool-flag), [032](issues/032-bifrost-drops-stop-sequences), [072](issues/072-bifrost-anthropic-tool-choice-any-leak) | [042](issues/042-gomodel-drops-output-format), [043](issues/043-gomodel-drops-parallel-tool-flag) | [051](issues/051-axonhub-drops-output-format) | [058](issues/058-any-llm-drops-parallel-tool-flag), [062](issues/062-any-llm-empty-schema-shell) | [081](issues/081-ogx-messages-translation-losses) |
 | Provider-owned request fields survive pass-through | [084](issues/084-litellm-openai-passthrough-drops-id) | | | | | | |
 | Content blocks survive (refusal, `is_error`, image and document blocks in tool results and user turns) | [006](issues/006-switchyard-crossformat-losses), [007](issues/007-switchyard-toolresult-multimodal-stringified), [018](issues/018-user-document-dropped), [067](issues/067-litellm-drops-refusal-content) | [006](issues/006-switchyard-crossformat-losses), [007](issues/007-switchyard-toolresult-multimodal-stringified), [018](issues/018-user-document-dropped), [068](issues/068-switchyard-drops-refusal-content), [069](issues/069-switchyard-responses-refusal) | | | | [059](issues/059-any-llm-drops-is-error), [060](issues/060-any-llm-drops-toolresult-image), [061](issues/061-any-llm-drops-toolresult-document) | |
 | Assistant history survives replay (`thinking` blocks, signatures, and stored continuations) | [016](issues/016-thinking-history-lost) (leaked as visible text) | [016](issues/016-thinking-history-lost) (dropped), [083](issues/083-switchyard-conversation-continuation-loss) | [033](issues/033-bifrost-drops-thinking-history) | | | [057](issues/057-any-llm-drops-thinking-history) | |

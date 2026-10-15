@@ -1,0 +1,44 @@
+█████░█░  █░█████░█████░█████░█░  █░█░  █░█████░█████░████░
+█░    █░  █░  █░    █░  █░    █░  █░█░  █░█░  █░█░  █░█░  █░
+█████░█░█░█░  █░    █░  █░    █████░ █░█░ █████░█████░█░  █░
+    █░█░█░█░  █░    █░  █░    █░  █░  █░  █░  █░█░█░  █░  █░
+    █░██░██░  █░    █░  █░    █░  █░  █░  █░  █░█░ █░ █░  █░
+█████░█░  █░█████░  █░  █████░█░  █░  █░  █░  █░█░  █░████░
+Switchyard libsy server
+  listening: http://127.0.0.1:9000
+  routes: sy-pass, sy-plan
+
+endpoints:
+  POST /v1/chat/completions    OpenAI Chat Completions
+  POST /v1/messages            Anthropic Messages
+  POST /v1/responses           OpenAI Responses
+  POST /v1/messages/count_tokens
+  POST /v1/responses/input_tokens
+  POST /v1/responses/compact
+  ANY  unmatched paths          optional fallback client
+  GET  /v1/models              configured routes
+  GET  /v1/stats               routing stats
+  POST /v1/stats/reset
+  GET  /metrics                Prometheus metrics
+  GET  /health
+
+example:
+  curl -s 'http://127.0.0.1:9000/v1/chat/completions' \
+    -H 'Content-Type: application/json' \
+    -d '{"model":"sy-pass","messages":[{"role":"user","content":"Hello from Switchyard"}]}'
+2026-10-15T03:06:08.238684Z  WARN switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}: switchyard_server::request: LLM request failed wire_format=anthropic_messages status=400 requested_model="sy-plan" selected_model="" streaming=false session_id="" correlation_id="" handling_duration_ms=283.050792 error="tools.0.custom.input_schema.type: Field required"
+2026-10-15T03:06:08.985155Z  WARN switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}: switchyard_server::request: LLM request failed wire_format=anthropic_messages status=400 requested_model="sy-plan" selected_model="" streaming=false session_id="" correlation_id="" handling_duration_ms=331.34125 error="tools.0.custom.input_schema.type: Field required"
+2026-10-15T03:06:09.699017Z  WARN switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}: switchyard_server::request: LLM request failed wire_format=anthropic_messages status=400 requested_model="sy-plan" selected_model="" streaming=false session_id="" correlation_id="" handling_duration_ms=298.757542 error="tools.0.custom.input_schema.type: Field required"
+2026-10-15T03:06:10.407310Z  WARN switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}: switchyard_server::request: LLM request failed wire_format=anthropic_messages status=400 requested_model="sy-plan" selected_model="" streaming=false session_id="" correlation_id="" handling_duration_ms=296.328375 error="tools.0.custom.input_schema.type: Field required"
+2026-10-15T03:06:11.103889Z  WARN switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}: switchyard_server::request: LLM request failed wire_format=anthropic_messages status=400 requested_model="sy-plan" selected_model="" streaming=false session_id="" correlation_id="" handling_duration_ms=278.049792 error="tools.0.custom.input_schema.type: Field required"
+2026-10-15T03:06:11.519864Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}:libsy.run{algorithm="passthrough" switchyard.algorithm="passthrough" openinference.span.kind="CHAIN" switchyard.route="sy-pass"}: switchyard_libsy::algorithms::passthrough: passthrough selected target target=claude-sonnet-5-5
+2026-10-15T03:06:15.239269Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}: switchyard_server::request: LLM request handled wire_format=anthropic_messages status=200 requested_model="sy-pass" selected_model="claude-sonnet-5-5" streaming=false session_id="" correlation_id="" handling_duration_ms=3719.417625 error=""
+2026-10-15T03:06:15.657414Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}:libsy.run{algorithm="passthrough" switchyard.algorithm="passthrough" openinference.span.kind="CHAIN" switchyard.route="sy-pass"}: switchyard_libsy::algorithms::passthrough: passthrough selected target target=claude-sonnet-5-5
+2026-10-15T03:06:18.826313Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}: switchyard_server::request: LLM request handled wire_format=anthropic_messages status=200 requested_model="sy-pass" selected_model="claude-sonnet-5-5" streaming=false session_id="" correlation_id="" handling_duration_ms=3168.949167 error=""
+2026-10-15T03:06:19.242552Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}:libsy.run{algorithm="passthrough" switchyard.algorithm="passthrough" openinference.span.kind="CHAIN" switchyard.route="sy-pass"}: switchyard_libsy::algorithms::passthrough: passthrough selected target target=claude-sonnet-5-5
+2026-10-15T03:06:22.928460Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}: switchyard_server::request: LLM request handled wire_format=anthropic_messages status=200 requested_model="sy-pass" selected_model="claude-sonnet-5-5" streaming=false session_id="" correlation_id="" handling_duration_ms=3685.945959 error=""
+2026-10-15T03:06:23.339420Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}:libsy.run{algorithm="passthrough" switchyard.algorithm="passthrough" openinference.span.kind="CHAIN" switchyard.route="sy-pass"}: switchyard_libsy::algorithms::passthrough: passthrough selected target target=claude-sonnet-5-5
+2026-10-15T03:06:26.599716Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}: switchyard_server::request: LLM request handled wire_format=anthropic_messages status=200 requested_model="sy-pass" selected_model="claude-sonnet-5-5" streaming=false session_id="" correlation_id="" handling_duration_ms=3260.3338750000003 error=""
+2026-10-15T03:06:27.024453Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}:libsy.run{algorithm="passthrough" switchyard.algorithm="passthrough" openinference.span.kind="CHAIN" switchyard.route="sy-pass"}: switchyard_libsy::algorithms::passthrough: passthrough selected target target=claude-sonnet-5-5
+2026-10-15T03:06:30.732919Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}: switchyard_server::request: LLM request handled wire_format=anthropic_messages status=200 requested_model="sy-pass" selected_model="claude-sonnet-5-5" streaming=false session_id="" correlation_id="" handling_duration_ms=3708.492875 error=""
+2026-10-15T03:06:30.736705Z  INFO switchyard_server: shutdown signal received; draining active requests timeout=30s
