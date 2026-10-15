@@ -1,0 +1,31 @@
+schema_version = 1
+
+[llm_clients.chat_live]
+format = "openai_chat"
+base_url = "http://127.0.0.1:9997/v1"
+max_retries = 1
+api_key_env = "OPENAI_API_KEY"
+
+[llm_clients.resp_live]
+format = "openai_responses"
+base_url = "http://127.0.0.1:9998/v1"
+max_retries = 1
+api_key_env = "OPENAI_API_KEY"
+
+[targets.chat_live]
+id = "gpt-4o-mini"
+llm_client = "chat_live"
+
+[targets.resp_live]
+id = "gpt-4o-mini"
+llm_client = "resp_live"
+
+[routes.route_chat_live]
+id = "model-chat-live"
+type = "passthrough"
+target = "chat_live"
+
+[routes.route_resp_live]
+id = "model-resp-live"
+type = "passthrough"
+target = "resp_live"

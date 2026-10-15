@@ -1,0 +1,37 @@
+█████░█░  █░█████░█████░█████░█░  █░█░  █░█████░█████░████░
+█░    █░  █░  █░    █░  █░    █░  █░█░  █░█░  █░█░  █░█░  █░
+█████░█░█░█░  █░    █░  █░    █████░ █░█░ █████░█████░█░  █░
+    █░█░█░█░  █░    █░  █░    █░  █░  █░  █░  █░█░█░  █░  █░
+    █░██░██░  █░    █░  █░    █░  █░  █░  █░  █░█░ █░ █░  █░
+█████░█░  █░█████░  █░  █████░█░  █░  █░  █░  █░█░  █░████░
+Switchyard libsy server
+  listening: http://127.0.0.1:19403
+  routes: model-chat-live, model-resp-live
+
+endpoints:
+  POST /v1/chat/completions    OpenAI Chat Completions
+  POST /v1/messages            Anthropic Messages
+  POST /v1/responses           OpenAI Responses
+  POST /v1/messages/count_tokens
+  POST /v1/responses/input_tokens
+  POST /v1/responses/compact
+  ANY  unmatched paths          optional fallback client
+  GET  /v1/models              configured routes
+  GET  /v1/stats               routing stats
+  POST /v1/stats/reset
+  GET  /metrics                Prometheus metrics
+  GET  /health
+
+example:
+  curl -s 'http://127.0.0.1:19403/v1/chat/completions' \
+    -H 'Content-Type: application/json' \
+    -d '{"model":"model-chat-live","messages":[{"role":"user","content":"Hello from Switchyard"}]}'
+2026-10-15T03:49:13.837561Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}:libsy.run{algorithm="passthrough" switchyard.algorithm="passthrough" openinference.span.kind="CHAIN" switchyard.route="model-resp-live"}: switchyard_libsy::algorithms::passthrough: passthrough selected target target=gpt-4o-mini
+2026-10-15T03:49:17.928600Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}: switchyard_server::request: LLM request handled wire_format=openai_responses status=200 requested_model="model-resp-live" selected_model="gpt-4o-mini" streaming=false session_id="" correlation_id="" handling_duration_ms=4091.110375 error=""
+2026-10-15T03:49:17.930352Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}:libsy.run{algorithm="passthrough" switchyard.algorithm="passthrough" openinference.span.kind="CHAIN" switchyard.route="model-resp-live"}: switchyard_libsy::algorithms::passthrough: passthrough selected target target=gpt-4o-mini
+2026-10-15T03:49:20.833590Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}: switchyard_server::request: LLM request handled wire_format=openai_responses status=200 requested_model="model-resp-live" selected_model="gpt-4o-mini" streaming=false session_id="" correlation_id="" handling_duration_ms=2903.239083 error=""
+2026-10-15T03:49:20.834982Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}:libsy.run{algorithm="passthrough" switchyard.algorithm="passthrough" openinference.span.kind="CHAIN" switchyard.route="model-chat-live"}: switchyard_libsy::algorithms::passthrough: passthrough selected target target=gpt-4o-mini
+2026-10-15T03:49:22.089242Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}: switchyard_server::request: LLM request handled wire_format=openai_responses status=200 requested_model="model-chat-live" selected_model="gpt-4o-mini" streaming=false session_id="" correlation_id="" handling_duration_ms=1254.278333 error=""
+2026-10-15T03:49:22.093683Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}:libsy.run{algorithm="passthrough" switchyard.algorithm="passthrough" openinference.span.kind="CHAIN" switchyard.route="model-chat-live"}: switchyard_libsy::algorithms::passthrough: passthrough selected target target=gpt-4o-mini
+2026-10-15T03:49:23.084374Z  INFO switchyard.request{otel.kind="server" openinference.span.kind="CHAIN"}: switchyard_server::request: LLM request handled wire_format=openai_responses status=200 requested_model="model-chat-live" selected_model="gpt-4o-mini" streaming=false session_id="" correlation_id="" handling_duration_ms=990.794834 error=""
+2026-10-15T03:51:30.184720Z  INFO switchyard_server: shutdown signal received; draining active requests timeout=30s

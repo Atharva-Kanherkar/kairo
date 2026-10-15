@@ -5390,3 +5390,139 @@ fn switchyard_server_tool_matrix_matches_the_recorded_runs() {
         }
     }
 }
+
+// ---- bug 101: Switchyard erases Responses host tools on a cross-format route ----
+
+use kairo::checks::{host_tool_not_silently_erased, HOST_TOOL_SILENTLY_ERASED};
+
+/// Reads a `capture-<case>.jsonl` file recorded by
+/// `transcripts/101-switchyard-responses-builtin-tools-erased/run_repro.sh` and
+/// checks every run with one checker call. The expected tool list is read from
+/// the client's own request bytes, never from a field the transcript recorded.
+fn assert_case(case: &str, conformant: bool) {
+    let capture = fixture(&format!(
+        "transcripts/101-switchyard-responses-builtin-tools-erased/capture-{case}.jsonl"
+    ));
+    let records: Vec<Value> = capture
+        .lines()
+        .map(|line| serde_json::from_str(line).expect("101 capture line is JSON"))
+        .collect();
+    assert!(!records.is_empty(), "{case} captured no runs");
+    for record in &records {
+        let status = u16::try_from(
+            record["client_status"]
+                .as_u64()
+                .expect("101 status is a number"),
+        )
+        .expect("101 status fits in u16");
+        let client = record["client_request"]
+            .as_str()
+            .expect("101 client request");
+        let forwarded = record["forwarded_raw"]
+            .as_str()
+            .expect("101 forwarded body");
+        let verdict = host_tool_not_silently_erased(status, client, forwarded);
+
+        // Host tools in this client's request, derived from the request alone.
+        let declared: Vec<String> = serde_json::from_str::<Value>(client)
+            .expect("101 client request is JSON")
+            .get("tools")
+            .and_then(Value::as_array)
+            .expect("101 client request has tools")
+            .iter()
+            .filter_map(|tool| tool.get("type").and_then(Value::as_str))
+            .filter(|kind| !matches!(*kind, "function" | "custom"))
+            .map(str::to_owned)
+            .collect();
+
+        if conformant {
+            assert!(
+                verdict.is_conformant(),
+                "{case} run {} should satisfy the invariant, got {verdict:?}",
+                record["run"]
+            );
+        } else {
+            assert_eq!(
+                verdict,
+                Verdict::Violation(format!(
+                    "{HOST_TOOL_SILENTLY_ERASED}: {declared:?} absent from the forwarded tools array"
+                )),
+                "{case} run {} should violate the invariant for {declared:?}",
+                record["run"]
+            );
+            // The frozen failure is silent: the caller is told the call succeeded.
+            assert_eq!(status, 200);
+            assert!(
+                !forwarded.contains("\"tools\"") || record["forwarded_tools"].is_null(),
+                "the forwarded body must not reintroduce the erased tool"
+            );
+        }
+    }
+}
+
+#[test]
+fn switchyard_101_erases_mcp_tool_on_cross_format_routes() {
+    assert_case("bug-mcp-chat", false);
+    assert_case("bug-mcp-anth", false);
+}
+
+#[test]
+fn switchyard_101_erases_every_responses_host_tool_it_cannot_express() {
+    for case in [
+        "bug-web-search-chat",
+        "bug-file-search-chat",
+        "bug-code-interpreter-chat",
+        "bug-computer-use-chat",
+        "bug-image-generation-chat",
+        "bug-local-shell-chat",
+        "bug-mcp-chat-stream",
+    ] {
+        assert_case(case, false);
+    }
+}
+
+#[test]
+fn switchyard_101_same_dialect_route_keeps_the_tool() {
+    // The same client request, differing only in the `model` field that
+    // selects the route, on the Responses-dialect route.
+    for case in [
+        "control-same-dialect-mcp",
+        "control-same-dialect-computer-use",
+        "control-same-dialect-image-generation",
+        "control-same-dialect-web-search",
+    ] {
+        assert_case(case, true);
+    }
+}
+
+#[test]
+fn switchyard_101_function_tools_survive_the_same_routes() {
+    // The hop itself is not lossy: only tools with no function shape disappear.
+    assert_case("control-function-chat", true);
+    assert_case("control-function-anth", true);
+}
+
+#[test]
+fn switchyard_101_a_host_tool_with_an_id_becomes_an_empty_function() {
+    // The erasure is a decode decision, not a filter on tool type: give the
+    // same tool an `id` and it survives as a function nobody can run.
+    let capture = fixture(
+        "transcripts/101-switchyard-responses-builtin-tools-erased/capture-data-mcp-with-id-chat.jsonl",
+    );
+    for line in capture.lines() {
+        let record: Value = serde_json::from_str(line).expect("101 capture line is JSON");
+        let tools = record["forwarded_tools"]
+            .as_array()
+            .expect("101 forwarded tools array");
+        assert_eq!(tools.len(), 1);
+        assert_eq!(tools[0]["function"]["name"], "codex-tool-x1");
+        assert_eq!(tools[0]["function"]["parameters"], serde_json::json!({}));
+        assert!(
+            !record["forwarded_raw"]
+                .as_str()
+                .expect("101 forwarded body")
+                .contains("example.invalid"),
+            "the MCP server URL must not survive into a function tool"
+        );
+    }
+}

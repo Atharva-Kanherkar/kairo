@@ -1,0 +1,54 @@
+# Finding 101: Switchyard routes a Responses client to three targets.
+#
+# `model-chat` and `model-anth` are cross-format routes: the client speaks
+# OpenAI Responses, the target speaks Chat Completions or Anthropic Messages.
+# `model-resp` is the same-dialect control.
+#
+# No credentials: every key is a canary string read from KAIRO_CANARY_KEY and
+# every upstream is the local capture server on 127.0.0.1:9996.
+schema_version = 1
+
+[llm_clients.chat_cap]
+format = "openai_chat"
+base_url = "http://127.0.0.1:9996/chat"
+max_retries = 0
+api_key_env = "KAIRO_CANARY_KEY"
+
+[llm_clients.anth_cap]
+format = "anthropic_messages"
+base_url = "http://127.0.0.1:9996/anth"
+max_retries = 0
+api_key_env = "KAIRO_CANARY_KEY"
+
+[llm_clients.resp_cap]
+format = "openai_responses"
+base_url = "http://127.0.0.1:9996/resp"
+max_retries = 0
+api_key_env = "KAIRO_CANARY_KEY"
+
+[targets.chat_cap]
+id = "captured-model"
+llm_client = "chat_cap"
+
+[targets.anth_cap]
+id = "captured-model"
+llm_client = "anth_cap"
+
+[targets.resp_cap]
+id = "captured-model"
+llm_client = "resp_cap"
+
+[routes.route_chat]
+id = "model-chat"
+type = "passthrough"
+target = "chat_cap"
+
+[routes.route_anth]
+id = "model-anth"
+type = "passthrough"
+target = "anth_cap"
+
+[routes.route_resp]
+id = "model-resp"
+type = "passthrough"
+target = "resp_cap"
