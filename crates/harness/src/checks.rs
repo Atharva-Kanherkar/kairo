@@ -2747,6 +2747,250 @@ pub fn forwarded_body_preserves_values(
     }
 }
 
+const HERMES_CALL_START: &str = "<tool_call>";
+const HERMES_CALL_END: &str = "</tool_call>";
+
+/// Every well-formed Hermes tool call in an engine's raw completion, in order,
+/// as `(name, arguments)`.
+///
+/// The payload is read as one JSON value starting right after `<tool_call>`, so
+/// a `</tool_call>` inside a JSON string is part of the value, not its end. A
+/// call counts only when that value is an object with a string `name` and an
+/// object `arguments`, and the next non-whitespace text is `</tool_call>`. A
+/// malformed payload is skipped: the invariant covers calls the model wrote
+/// correctly.
+fn hermes_calls(text: &str) -> Vec<(String, Value)> {
+    let mut calls = Vec::new();
+    let mut from = 0;
+    while let Some(rel) = text[from..].find(HERMES_CALL_START) {
+        let payload_start = from + rel + HERMES_CALL_START.len();
+        from = payload_start;
+        let mut values =
+            serde_json::Deserializer::from_str(&text[payload_start..]).into_iter::<Value>();
+        let Some(Ok(payload)) = values.next() else {
+            continue;
+        };
+        let payload_end = payload_start + values.byte_offset();
+        let Some(rest) = text[payload_end..]
+            .trim_start()
+            .strip_prefix(HERMES_CALL_END)
+        else {
+            continue;
+        };
+        if let (Some(name), Some(arguments)) = (
+            payload.get("name").and_then(Value::as_str),
+            payload.get("arguments").filter(|a| a.is_object()),
+        ) {
+            calls.push((name.to_owned(), arguments.clone()));
+            from = text.len() - rest.len();
+        }
+    }
+    calls
+}
+
+/// Decode an HTTP/1.1 chunked body.
+fn dechunk(body: &str) -> Result<String, String> {
+    let mut out = String::new();
+    let mut rest = body;
+    loop {
+        let (size_line, after) = rest
+            .split_once("\r\n")
+            .ok_or("chunked body: missing chunk size line")?;
+        let size_hex = size_line.split(';').next().unwrap_or_default().trim();
+        let size = usize::from_str_radix(size_hex, 16)
+            .map_err(|e| format!("chunked body: bad chunk size {size_hex:?}: {e}"))?;
+        if size == 0 {
+            return Ok(out);
+        }
+        let chunk = after
+            .get(..size)
+            .ok_or("chunked body: chunk shorter than its declared size")?;
+        out.push_str(chunk);
+        rest = after[size..]
+            .strip_prefix("\r\n")
+            .ok_or("chunked body: chunk not followed by CRLF")?;
+    }
+}
+
+/// The tool calls a client receives in one OpenAI Chat Completions or Anthropic
+/// Messages response, unary or streamed, as `(name, arguments)`.
+fn client_tool_calls(response_http: &str) -> Result<Vec<(String, Value)>, String> {
+    let (head, body) = response_http
+        .split_once("\r\n\r\n")
+        .ok_or("client response: not a raw HTTP message")?;
+    let status = head.lines().next().unwrap_or_default();
+    if status.split_whitespace().nth(1) != Some("200") {
+        return Err(format!("client response: status line {status:?}"));
+    }
+    let body = if head
+        .to_ascii_lowercase()
+        .contains("transfer-encoding: chunked")
+    {
+        dechunk(body)?
+    } else {
+        body.to_owned()
+    };
+    let parse_args = |name: &str, raw: &str| {
+        serde_json::from_str::<Value>(raw)
+            .map_err(|e| format!("client tool call {name:?}: arguments are not JSON: {e}"))
+    };
+    let mut calls = Vec::new();
+    if body.trim_start().starts_with('{') {
+        let response: Value = serde_json::from_str(&body)
+            .map_err(|e| format!("client response: body is not JSON: {e}"))?;
+        if let Some(tool_calls) = response
+            .pointer("/choices/0/message/tool_calls")
+            .and_then(Value::as_array)
+        {
+            for call in tool_calls {
+                let name = call
+                    .pointer("/function/name")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default();
+                let raw = call
+                    .pointer("/function/arguments")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default();
+                calls.push((name.to_owned(), parse_args(name, raw)?));
+            }
+        }
+        for block in response
+            .get("content")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+        {
+            if block.get("type").and_then(Value::as_str) == Some("tool_use") {
+                let name = block
+                    .get("name")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default();
+                let input = block.get("input").cloned().unwrap_or(Value::Null);
+                calls.push((name.to_owned(), input));
+            }
+        }
+        return Ok(calls);
+    }
+    streamed_tool_calls(&body)
+}
+
+/// Accumulate the names and argument fragments of a streamed OpenAI or
+/// Anthropic response per call, in order.
+fn streamed_tool_calls(body: &str) -> Result<Vec<(String, Value)>, String> {
+    let parse_args = |name: &str, raw: &str| {
+        serde_json::from_str::<Value>(raw)
+            .map_err(|e| format!("client tool call {name:?}: arguments are not JSON: {e}"))
+    };
+    let mut calls = Vec::new();
+    let mut streamed: BTreeMap<(u8, u64), (String, String)> = BTreeMap::new();
+    for event in sse_data_json(body) {
+        for choice in event
+            .get("choices")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+        {
+            for call in choice
+                .pointer("/delta/tool_calls")
+                .and_then(Value::as_array)
+                .into_iter()
+                .flatten()
+            {
+                let index = call.get("index").and_then(Value::as_u64).unwrap_or(0);
+                let entry = streamed.entry((0, index)).or_default();
+                if let Some(name) = call.pointer("/function/name").and_then(Value::as_str) {
+                    entry.0.push_str(name);
+                }
+                if let Some(args) = call.pointer("/function/arguments").and_then(Value::as_str) {
+                    entry.1.push_str(args);
+                }
+            }
+        }
+        let index = event.get("index").and_then(Value::as_u64).unwrap_or(0);
+        match event.get("type").and_then(Value::as_str) {
+            Some("content_block_start")
+                if event.pointer("/content_block/type").and_then(Value::as_str)
+                    == Some("tool_use") =>
+            {
+                let name = event
+                    .pointer("/content_block/name")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default();
+                name.clone_into(&mut streamed.entry((1, index)).or_default().0);
+            }
+            Some("content_block_delta")
+                if event.pointer("/delta/type").and_then(Value::as_str)
+                    == Some("input_json_delta") =>
+            {
+                let part = event
+                    .pointer("/delta/partial_json")
+                    .and_then(Value::as_str)
+                    .unwrap_or_default();
+                streamed.entry((1, index)).or_default().1.push_str(part);
+            }
+            _ => {}
+        }
+    }
+    for (name, raw) in streamed.into_values() {
+        let raw = if raw.is_empty() { "{}" } else { raw.as_str() };
+        let arguments = parse_args(&name, raw)?;
+        calls.push((name, arguments));
+    }
+    Ok(calls)
+}
+
+/// Invariant (bug 099): every well-formed tool call the engine emitted reaches
+/// the client as a tool call with the same name and the same arguments.
+///
+/// `engine_text` is the raw completion the engine produced, in the Hermes
+/// `<tool_call>` JSON format. `client_response_http` is the raw HTTP response
+/// the gateway sent, OpenAI Chat Completions or Anthropic Messages, unary or
+/// streamed. Arguments are compared as JSON values, so whitespace, key order,
+/// and equivalent escapes such as `<\/tool_call>` versus `</tool_call>` do not
+/// matter, while a changed, truncated, or missing value does. The engine text
+/// must contain at least one well-formed call, so a capture with nothing to
+/// compare fails instead of passing vacuously.
+pub fn engine_tool_calls_reach_client(engine_text: &str, client_response_http: &str) -> Verdict {
+    let emitted = hermes_calls(engine_text);
+    if emitted.is_empty() {
+        return Verdict::Violation(
+            "engine text contains no well-formed Hermes tool call to compare".to_owned(),
+        );
+    }
+    let received = match client_tool_calls(client_response_http) {
+        Ok(calls) => calls,
+        Err(reason) => return Verdict::Violation(reason),
+    };
+    if emitted == received {
+        return Verdict::Conformant;
+    }
+    let names = |calls: &[(String, Value)]| {
+        calls
+            .iter()
+            .map(|(name, _)| name.as_str())
+            .collect::<Vec<_>>()
+            .join(", ")
+    };
+    if emitted.len() != received.len() {
+        return Verdict::Violation(format!(
+            "engine emitted {} tool call(s) [{}], client received {} [{}]",
+            emitted.len(),
+            names(&emitted),
+            received.len(),
+            names(&received)
+        ));
+    }
+    for (index, (sent, got)) in emitted.iter().zip(&received).enumerate() {
+        if sent != got {
+            return Verdict::Violation(format!(
+                "tool call {index}: engine emitted {} {}, client received {} {}",
+                sent.0, sent.1, got.0, got.1
+            ));
+        }
+    }
+    Verdict::Conformant
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -4297,5 +4541,81 @@ data: [DONE]
             forwarded_body_preserves_values(&client, &renamed_type, &[]),
             Verdict::Violation(reason) if reason.contains("client sent \"integer\"")
         ));
+    }
+
+    const ENGINE_099: &str = "<tool_call>\n{\"name\": \"write_file\", \"arguments\": {\"path\": \"a.txt\", \"content\": \"x </tool_call> y\"}}\n</tool_call>";
+
+    fn openai_unary(arguments: &str) -> String {
+        let body = serde_json::json!({"choices": [{"message": {"tool_calls": [
+            {"type": "function", "function": {"name": "write_file", "arguments": arguments}}
+        ]}}]});
+        format!("HTTP/1.1 200 OK\r\ncontent-type: application/json\r\n\r\n{body}")
+    }
+
+    #[test]
+    fn hermes_scan_keeps_a_closer_inside_a_json_string() {
+        let calls = hermes_calls(ENGINE_099);
+        assert_eq!(calls.len(), 1);
+        assert_eq!(calls[0].1["content"], "x </tool_call> y");
+        let escaped = ENGINE_099.replacen("x </tool_call>", "x <\\/tool_call>", 1);
+        assert_eq!(hermes_calls(&escaped), calls);
+    }
+
+    #[test]
+    fn engine_calls_checker_accepts_equivalent_escapes() {
+        let client = openai_unary(r#"{"content":"x <\/tool_call> y","path":"a.txt"}"#);
+        assert_eq!(
+            engine_tool_calls_reach_client(ENGINE_099, &client),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn engine_calls_checker_catches_truncated_arguments() {
+        let client = openai_unary(r#"{"path":"a.txt","content":"x "}"#);
+        assert!(matches!(
+            engine_tool_calls_reach_client(ENGINE_099, &client),
+            Verdict::Violation(reason) if reason.contains("tool call 0")
+        ));
+    }
+
+    #[test]
+    fn engine_calls_checker_catches_a_lost_call() {
+        let client = "HTTP/1.1 200 OK\r\ncontent-type: application/json\r\n\r\n{\"choices\":[{\"message\":{\"content\":\"\\\"}}\\n</tool_call>\"}}]}";
+        assert!(matches!(
+            engine_tool_calls_reach_client(ENGINE_099, client),
+            Verdict::Violation(reason) if reason.contains("client received 0")
+        ));
+    }
+
+    #[test]
+    fn engine_calls_checker_is_not_vacuous() {
+        let client = openai_unary("{}");
+        for text in ["plain answer", "<tool_call>\n{\"name\": \"write_file\", \"arguments\": {\"content\": \"x </tool_call>\n"] {
+            assert!(matches!(
+                engine_tool_calls_reach_client(text, &client),
+                Verdict::Violation(reason) if reason.contains("no well-formed Hermes tool call")
+            ));
+        }
+    }
+
+    #[test]
+    fn engine_calls_checker_reads_chunked_anthropic_stream() {
+        let events = [
+            r#"{"type":"content_block_start","index":0,"content_block":{"type":"tool_use","name":"write_file","input":{}}}"#,
+            r#"{"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"path\":\"a.txt\","}}"#,
+            r#"{"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\"content\":\"x </tool_call> y\"}"}}"#,
+        ];
+        let mut body = String::new();
+        for event in events {
+            let chunk = format!("event: x\ndata: {event}\n\n");
+            body = format!("{body}{:X}\r\n{chunk}\r\n", chunk.len());
+        }
+        body.push_str("0\r\n\r\n");
+        let client = format!("HTTP/1.1 200 OK\r\ntransfer-encoding: chunked\r\n\r\n{body}");
+        assert_eq!(
+            engine_tool_calls_reach_client(ENGINE_099, &client),
+            Verdict::Conformant
+        );
     }
 }
