@@ -1,0 +1,356 @@
+HTTP/1.1 200 OK
+content-type: text/event-stream
+cache-control: no-cache
+anthropic-ratelimit-input-tokens-limit: 10000000
+anthropic-ratelimit-input-tokens-remaining: 9998000
+anthropic-ratelimit-input-tokens-reset: 2026-10-15T03:05:30Z
+anthropic-ratelimit-output-tokens-limit: 2000000
+anthropic-ratelimit-output-tokens-remaining: 2000000
+anthropic-ratelimit-output-tokens-reset: 2026-10-15T03:05:30Z
+anthropic-ratelimit-requests-limit: 10000
+anthropic-ratelimit-requests-remaining: 9999
+anthropic-ratelimit-requests-reset: 2026-10-15T03:05:30Z
+anthropic-ratelimit-tokens-limit: 12000000
+anthropic-ratelimit-tokens-remaining: 11998000
+anthropic-ratelimit-tokens-reset: 2026-10-15T03:05:30Z
+request-id: req_011Cg3HMSRjSt2LwpoqBckgY
+x-model-router-selected-model: claude-sonnet-5-5
+transfer-encoding: chunked
+date: Thu, 15 Oct 2026 03:05:36 GMT
+
+event: message_start
+data: {"type":"message_start","message":{"model":"claude-sonnet-5-5","id":"msg_011Cg3HMSeNUa6ztkvNBuZV4","type":"message","role":"assistant","content":[],"container":null,"stop_reason":null,"stop_sequence":null,"stop_details":null,"usage":{"input_tokens":4,"cache_creation_input_tokens":0,"cache_read_input_tokens":2875,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":16,"service_tier":"standard","inference_geo":"global"},"diagnostics":null}}
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"server_tool_use","id":"srvtoolu_01XFcD5fovvXC7RXg59q59H4","name":"web_search","input":{}}}
+
+event: ping
+data: {"type":"ping"}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"query"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"\": \"lat"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"est sta"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"ble Rus"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"t relea"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"se vers"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"ion\"}"}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+
+event: content_block_start
+data: {"type":"content_block_start","index":1,"content_block":{"type":"web_search_tool_result","tool_use_id":"srvtoolu_01XFcD5fovvXC7RXg59q59H4","content":[{"type":"web_search_result","title":"What’s new in the Rust programming language","url":"https://www.infoworld.com/article/2266609/whats-new-in-the-rust-language.html","encrypted_content":"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","page_age":"979 days ago"},{"type":"web_search_result","title":"Rust Release Notes","url":"https://doc.rust-lang.org/beta/releases.html","encrypted_content":"EvgGCioIFBgCIiQxZmExYWQzMC0wMWU5LTRhMDYtYjEwZi1kNjc2MzgxODE2NDUSDJlOwUuvsjbyZtm3nRoMbrDBS8DshvTiG1SkIjA5ZmH4QrLY6ALkZfCDHDnTwdv4/52mRRkpAqq6zbT4O2YjJ8HJ8b7Zlq2m0tozk18q+wUmFz5sXeVO2q2dDTv32PZJz68/b/N+oyqqAlwve8OGj7k/JuheBLX6b1eG9v6NvugcXhfUMIuyTzjcWOow61dguIm5+zaPc1RcJIiKZseC/2rHlee7/wdBBxY2BSV3GVkFJQCmOv2jAa6H0Dlfk/9Rkug7pXNWGk7M/uFQNCUU+tDpIUPLJv75Rw4NjSiCmNYV31ZcZheNBe4LB+frXX6TIZuKtcR7/EC9HhYDaYdYN8bD7JJWwWZDouIs5U94RiCIaYW+q7nDhidm0vUy1xGBUMA1OfoZ8pnHYfVfLJVgAV0lplM0lkjkTKn6BZOlDjHTZaRhrBx/UAEOtkNSuwmc/17njGnDb/dGT3VYPZT3B+wrGbQW1nizyuVnSPesnAXj7GWhHGqfnq1O58rllqVZNYtLEBkVf/jN/exICfU8TMfLKI2rNqIOKZDIbnp//qlFapbRQvhUrQqeV1v+gGeCKsF2OVDeQrpLsED5gRP1RidbP7p7sA7gNHxNaHqhYNDTVQFUhFejUT1/oUyZbFU4rANvQmp2DA9hZ20JfQU10SPQmgzaeh4BQIKMsmAadA83n5iN7BG40svgvnk3lONx6MuUHtVYNHEXQ3CYx7yC6JpUbAetR2jEJxtU+Jn+N+ZE2Wv8+J4sQlzJ39MYlNlxQt0jBAlbf8h09BQ6KQBzimVFcD0RQkf3tTVtNH4TKixOJvm+4EKGfqXdX4He0u09hSPCibja76wdw9DJjjS5xtcmXlTkbEx+xPS2SXlA3oiiizo+AoX1V7fV0HYxSZnn7XSSdyMj0akUdqJWDjDTzSvZRCq0slvXeaYGwWAr4AQ3VhIz+2amwRzUekR0uS9xUMp3W1bx42hrKtvRO8OhHXSysjdUaKdqm1fHhngbaAUInWSmTxvgmc24UP6vrzQcouewt5kBXOcJRSpeMQKCAEhBm86xXmz5kqFnA2VhIN0M5M2qmjsYh5ISW4Mp2ri8UWTZMYdD7KPsQXGcUc14ixBhgk6gj/KP+uKkGAM=","page_age":"42 days ago"},{"type":"web_search_result","title":"Rust","url":"https://endoflife.date/rust","encrypted_content":"Ev8GCioIFBgCIiQxZmExYWQzMC0wMWU5LTRhMDYtYjEwZi1kNjc2MzgxODE2NDUSDMV18Z4jI3+jz2K5khoMWZt1KP1GfnLZhjN6IjDMo/fz7im8pceCx+vt9LttXTft0gq+lbBqKKF8KdvvRKUBMu2sq+rXVSJ3k2lK8VgqggbmVBQZJsjZ8PupD569QiWyH8hu8pJM7fRuuf4rhx54WKBmDkvaZlkPg3T3UCFCthLcYzfPLQNZQcawY8TlXkezoSH1scXRxuhl2N3/1mN5npgDrN+nqyLtQJLkU0BahceI+w6hLbqORKlat0y/+uICIlEz3V675K2hdA3Wz3WHrB/uGv9YlaFH+T+uPy26HpcRyVLsnI8eWEd7VWdAiAgMhs/RoCoA7WWxKNLOqYQ0HS1lsSBwOm3LQXUJ3DcaB2v+/OoRNJ3sPpkBmyG6Y4phLstT/gY4KoJLn+UzTvvL+Sw4YI43UF7hcicX5JVWVnluHlrk6GnUDG/dtfWu6SoX7x7H9KcgPp9WoJnZntiFJ5bCyDiMTH/BV8tKo4IOGqxNwRLEn6tFKz0SaMcUh/9o+d5YY5AAroPtHEuaLja93NtvrM5BjhbhqAvYm9NtADw9g9IaROTNBVc/T6AOySQva1soswXd6psjAJifuqiBavg4LWkTbvBFCyRoLl5tWQH/GwS9NVxnBTitFio6pxMFyX8KPw4976NWrlGo9K8OKJEwZZWAq4zbDlYZD9gHRdX4Jm6I/ulJLXiScU4g/+NwtnT0JdQO5v6A6vc30B8PJC8wj17i4pTrD/4vr5spBmrRzvJMg6c3RYjCOVstdcPE5rxYSKmy7Afw+sLdE/l/lj3MHLfdGheOkx0BHxtVcu2MwAizUfAO+cX0bNUqTF1JU0VeNJ6x2g4YaQGqlpOk0AlmTb4Y/PrhZf0WRr6So4qzA8RrNzlBA9wGCgjJ50fXfcgbsSPHdX9fW3fwVa1Y3sAgET6o7gp3oylEfsY68oenvTtZF1mEaI1dTDqXJddH7dFO4c3nxBCAu6OYvDXox5wH+HdVbgew2uKEprk57tmx8DkEQcRdgHkQ4etP7YleBhqelNMv2qqGitm6+fxX9uAVp/XRtj+VKRwR6gp1Qln32jd726YRv4ftdmB3H+lnJ3KIL+Y5ZljwFXpJcWJGb17jTb0Xdq4tp6FZSYR0QS2S0BgD","page_age":"10 days ago"},{"type":"web_search_result","title":"Announcing Rust 1.85.0 and Rust 2024","url":"https://blog.rust-lang.org/2025/02/20/Rust-1.85.0/","encrypted_content":"EuUICioIFBgCIiQxZmExYWQzMC0wMWU5LTRhMDYtYjEwZi1kNjc2MzgxODE2NDUSDCUeJCAEsA8ov7tKeBoMZ1Wy/uIF702I4oVcIjCh+XiVAFwmhBlM72V42w4pHmWMovxepcEwD/HGqoqA3xaBc+KhFrIogQmUWMGoB/Uq6AcjrtKXGFqygdxnr9ydkvlJLndEui/02/cDjOwtjTbP9fSVh1/56kVP15XfA+TpSz9zZAL0c45cyrjWyaCGoMWFki+A3jsK9C28PKvSb+uiObRTbnHydFbZS0woRXKRFSf3wRfUUU9iuVZQr8F0YGYA93q2Q2eVhVVFaDjZ+0mnjkOneMulNb4W0WS+cUoZZ0Qhk03phIhVNS50Nb4ZlEySyynHJPnEEn9yCqk3sUVYavX6Cg3Q7689tqpiNL4ACGPDd34oASh7aCIL9vTRoxa6Z0fsJE1R2FtAXcBZfwshISwogzWYP5v8dXwcBXM6zx5DAc5t5on3bfJoKRVWDH0QjY/0Sbl+QSQAJKttgz3K67WX6k7CpZBAldf4UzcK6y2WWk/D/bh8Ckb3+z5lm3/LmSbaG63RIpeykXI2OpFOZ87724tfunWtdMA2MLg8nyc91QZvOap8Zs3aKHGXfsAEhY3IZxyiIqJ5AZu7W401WLDotYj6umzHV2FuypOgerGRHskXXMyXe9M5QhLDtltKJZWxCHqZVE4JMEbBLYBQqkzgoggr7tmHJbwIEZaJUicmrzw8Ap+ocMMswwigs/e5YoeNYgfUuYjfxI5tDAZ5LACY1ZigyDpRMeLOWfDTLOyAUc98OgVqGe7Xs5iaX2jag8sj78NqVxHDFjjqx8wfuwpULDrFKs7UdKLLuO6j+TKfWNEWYarjHN0ucFmtE9N4Uhdvw5+jZxorPX2OkaF32kd8QiOHAOt9Te/bRc9AbsJP5bPVbeqHVHON0atBIGJm7SGBmsaUOPpPfH4I8lxb/cupcDRMzmJgZAZPJQEH0B+ad1ey2Doixf+wiyGVJcxYuVSKsusvvV2L2XSylI3h0H1wGTfvTI7+kb8BJs6c8J2kTs3wnJHDVp/HEzkLL4tY49jwG7IbQ9etui3BuF6HRqcNejZkhf4ZeHHK/oYzerXkGeZWQNMbl7Mu7g4aZe+BZuu7zdeCqUx14CrIzSlLc4gzNHn2M810MB9X+eWDDXMcSyQyzx6fPUIeHglI68I7RqpOsx2ujcTR/K+7Ivv/ColVCtZIj25jQRibq/pFJJ09CP70QoRitKur/ikqWNXRM1SOqrJT1RS/fwc7SlhN0+FUaPqEShO9NcmWw3r8pCxj8TOYg5xkgV1Qhd7ICwU+DNPKAeCGa69VQoxLs2JtwTAXW66opkD2oFYaOjMQnV+GdzVo+nVVcpcn40Lgvobi6PegNLrttcD3nD6l+K8A6XX90tQDIEgf1LnoAHg2iVfx+uud4yaE8QujaO/5He3k6J7t4GphoU7wvWAuAWTETpO1Mg7qr6GFGAM=","page_age":"602 days ago"},{"type":"web_search_result","title":"Announcing Rust 1.88.0","url":"https://blog.rust-lang.org/2025/06/26/Rust-1.88.0/","encrypted_content":"EpcICioIFBgCIiQxZmExYWQzMC0wMWU5LTRhMDYtYjEwZi1kNjc2MzgxODE2NDUSDCj9lysMMRT8csTo8BoMu4teGLmv5kN8F8oXIjCXELF4V/cVC3IzqdF4XlCN7xGfgbayLGqR2DLVsfM6LMmfEzezeX4SU5pQ7pl5Ey0qmgdOsY3bvbrzSVWPnRZ6dbpqxvpESoqiIfxPiVGtiUQ5txLhIlLZLNZmdRBpi1PE504y+HcqIelJOUeNF9KFhIIja7MkiGer7FMayfVjwEtAHWv6zhHEngrx1O6unPcya5jFz5L+3vLw3qR/+XDr81Upan46tJhapc/S2RIZBUhlU4J9+ck0VD5bE4duu4Y5TcoN2XV9syYnHLprc+YajYGHH0XCoQ1E63MaujCvF5eWO2DmHpRrSEF2msz/esfBK/IubelDpGfeRj+SENk92Zd9eA8hMHNulzOBQrkNzH1ZD7pvM/ztFw5OXSfHV1BXwjCOiiAhVhzInfCmRVNj9OiHZbVOUYls7sSDGkA/HgF4l9hGfdPW9ZAiYQV/AqwrUQYoho6qZQ0g2dnR4Rzh7JGX3BUyxVymUe68ZGbFN7L9IVE1KV/W2ICnWiNLs90YxFSkk4/HFj8DbJHs4S+fnhdBgut9hST/3O6YXdpXJM92Z+OsgiYN/OI7RbdAv5WRIZko+C/adSp1WNqaDnpo72f0W1pmhfhG8IH+S2YgysblJb9bQxEZMgqPuTqk5lPdgWSO1ofed/ukJxsLOyaWqKTRroueLzEJt+1NAIZ3W3vEgVnmoC3BIrJTDUCU7nhh1hNaoGzXOoptPU0EEWcMim3pKVdZm6F4QxMRddF+axpXofZskVuJ0nLFTbspZ4y72XTOJ8SDmcF9HcKgwZKXWpRL9F9Wz7mlZFuARM6EAgW+ozotwYdkdNDj7armUDgJXEI0IAlrAtQ8CyX60Yp0ySkVo+0PMNhyETOeCFzHXMr0Gc/Wb6G1nAvQP6eF/9avAtr5jN4DH7kVstdbOMyEeECGILnV/muTx+gwUkPYBvC+k4A2EQrTzLT8AqytKyq4/Knq+fOB7ntTAsoW9QwlOhIO2Xkx9YFPIUeB+OmA+rgwCzIFLM1QivVYdCN3aob+1I4zVdRzgReYNigTNfI5lhZLQCYeAnTDhNfbQhbCYphNzIE830ptupbHRt8pbrio9QTQ71sRYKB4+BzKRCkj7ZBgAbW2zlBeQSjxw/LFTa/vnpyw2BghPNa0ig9HDByJT9gh0Ubih2yFe/fUlSMURkMoc8xlCGDZNZpsR+QLlMNemMBBikHhzUks88gtKv0KX0u/bVfol/AT9rGe3hM3Il6kQd9GBnc07hZvpFIAqRtEXdAVb8Vb9IFL19EhBMlbzjIlYJlDb022VgFCGAM=","page_age":"476 days ago"},{"type":"web_search_result","title":"Librsvg","url":"https://en.wikipedia.org/wiki/Librsvg","encrypted_content":"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","page_age":null},{"type":"web_search_result","title":"Announcing Rust 1.87.0 and ten years of Rust!","url":"https://blog.rust-lang.org/2025/05/15/Rust-1.87.0/","encrypted_content":"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","page_age":"518 days ago"},{"type":"web_search_result","title":"Announcing Rust 1.86.0","url":"https://blog.rust-lang.org/2025/04/03/Rust-1.86.0/","encrypted_content":"EscICioIFBgCIiQxZmExYWQzMC0wMWU5LTRhMDYtYjEwZi1kNjc2MzgxODE2NDUSDFxay6WX/WVsrkP4yxoMz14Lul6Ppvrgz3G/IjB20ymPyHMSyugo/xAIcr9wsPCRz/Shh876B8LOzOF4EmlM7pab+Wn8Ljm3Z/kkLTAqygfHwWBTpUEOyqRrqRJA3pHjg4cudAGLrEyV3CLte0fRCgukJRpcb5s1S8mrJagt1AqTJjsphkNZM0xKoBOuME4DtdJAv+97XcUIWwRc25e5KhygeKwMQDZ5ozu0wlWa0Bd6MRLWQYAYRBB/EJQXaax+ucFmBnz0o6qzSj0dRUGD5RDMHNO+oUs/p62ND0uLe0OeUNMGfZPsMaFyDYNEYa5V9WebkT2XWX2rEkRkJYMt2FT1y6slu3Kt1feF+2klGSa6jpkU/eZYK+xbxJ8fr9hB/eEhypwWSQjKolmFogLxzSDNRElnj/b0iPNz39fRzVDFZZWxmROQryyprzL9G2pd0/Eb2AaoY/My1qD9SvnzDZkvlxy1h6zaiNzOUpgzYJcmTFffbjf/l+e0rlzLE+130YrDA/7jrvlS3iiIZ9oK3o8Ku1mdfC+X7Lim36fADcqRGeYUQmexSVubmZFb6ITdCGQv/xXi2D0gKhb3/nJUaMCbTLD/wEEn68tRQFqt237lcjKCKVgQiZPrn1OL2IKH0WyhjmTn6G7m2ixKdKVwBRUqC5gcxBVI0GjlxlHv9xf0VfxFFctU0pyqMPYyokzW7N5ySUBrZ0Lh7mfRtoXamIUvByQW07uC9X/HNsdxxw7HESq2cn/FRk5B7NB9AzzDBK5g+WbVGfF2u/WxjbgbkloaNUiL2SwgDqSj77mVdTxWzxmHiZ+6vpgitcVwlhaF31xlUR+8jWCjpryX6z4bsMbbpAWyvzY4smfXLtvzucZgrharlCSekZXQDy26tWBdEidJwSjiNyz0qBl13RYaQr/xWQ/AGO2IFVcNGFTfxm5sH4CZEWduqAVqsjhQPW3ttN2HrB4bEtGh/tI4whaMcp/gx0DqW0FKSTqWRa/r4PfZE4TCf9ASGdawwi8I5TufJKIPuoRqjrAelvvJySQFJ7ygbirovBuGn3Wt79YI3ENltxYS7zZ9BAcKihsyJHrn+YBOkclj712atpUrofbpSiYhmhm6/Q5G3LJBVpatSP+QyJqCXF4MNAd5qoM/8v7O3CXxXdv/oEDStL3NZ4Oz3C9DwyCKrs5wvIpb5wiyDKfQO8vwTX4XqyoLT5EUKVgk9N0f7c/ZN9I8JeUX8qVp5udymkKMqpGLOni68Mdfjvjam+BYX7mSBXkGzY5yov4JhemfXrtG7la9k80eIORIUuftHl5tsBD/hQ+PtIeea/Zd3byEPjUEGvJ7ViryIk7WuN+ZxdhNqSF/ox4WGyoySjKFPCy0+vboVvOrpOJ9N6Rzgp/QJmVaJ0YeGAM=","page_age":"560 days ago"},{"type":"web_search_result","title":"Rust (programming language)","url":"https://en.wikipedia.org/wiki/Rust_(programming_language)","encrypted_content":"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","page_age":null},{"type":"web_search_result","title":"Tokio (software)","url":"https://en.wikipedia.org/wiki/Tokio_(software)","encrypted_content":"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","page_age":null}],"caller":{"type":"direct"}}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":1}
+
+event: content_block_start
+data: {"type":"content_block_start","index":2,"content_block":{"type":"thinking","thinking":"","signature":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":2,"delta":{"type":"thinking_delta","thinking":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":2,"delta":{"type":"signature_delta","signature":"CAQSzgYKEAgSGAI4AUIIdGhpbmtpbmcSDB9aA1QC7JgQ3MFM5xoMXjHxYKGDV5h344WcIjAvAnHxfb5vQZZDXWEflxqg/rnU6txvou2Ntg9F6/hl+Fbap1rh1VCTaZLFUKVK12Yq6wVbT1JLAgoutVOCUR9TPRpxeseFtQ2rjDIRllOBPxvVUvmGTJuJNVB1iPZy9xFmZvZ6MrYWFZc8pm6q/TigkE+4VtVBnjl71VrqjZyJ5Ym/ijsCL+ebeHUBTeVk6Zw474osMsBwolfMXT91z/o3ueRW2Wli/lKcT115XliW6VNKJrXxHWqFvEBEbIT9KK6gSoZ89KaNIBUSPKTASv359DYx3tyQ5qCZyxCx7V4K2/H9KpZcnqSAbkZvEfUYyheS4nrPZvLQWilt6JNcswlAsRzhTAkvZFpIGERjKE2tU3hr2B4Z1uR4a6WMw9uXrejiqjBCy659yCbdCTLwzUUwvlQX9PTUkGj5WmYpoeBiejaBvIq5Y3190vwgZYKUwnwtV9afyQZOmy1OTNkRGOQcsuKpCDSXA8f/m0rFOjYCDPpIU7ggYTcxCFhE/9o9pBFWJcXZVnAzTNURLWFuAkOSGAda39HlLHrqdr3AXAwFVinxvxyFxyIzwHZZeJr8VBb4rXC6ZxvSJbNDeIpqF+Yj0v3rSdtZyNV7llJX7SC4/HeVc2cf1IB9leJgG2IFXMoDU7fmupPPRImjrwqK/zqMqcFTIxI+7byigXtvTVoKPqAKv1tIJvKKM67Dz9clGdSqoMkiFMNqH6LUCWwMqKiFai+fqxcS1QT0J9ET87vGsweBzeAPmrZr1YYRY8xnO1wDCnxV0eEojH08rY1ASwWHxrRvjuHnhJgZ8OMiVJc7p+T3UlSqnLnXNDOtONXThkKnPfNsMdFza4bDzZ7ChFwfECxFtMGzzkV6pmJQ1UccgF5y4MTqp+PD5BYsjpMRAViwopuNjodwz465kvagBiEfHtNLe5tqDHNdwpaSFxvUK72lzugtx9zIPbQ5X07wJ16p4t0bdMYzBGi8WZXyCc4H1GGyAxsFHz+po89ESUzi89ZmmNzlF6WArYpsy0Pj35e0qePcAE8hc+RWYsgMVsvwh6kGVrTzJggXgFF90DQYAQ=="}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":2}
+
+event: content_block_start
+data: {"type":"content_block_start","index":3,"content_block":{"type":"text","text":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":"The latest stable R"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":"ust release is **1.99."}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":"0**, released on October 1"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":3,"delta":{"type":"text_delta","text":", 2026. "}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":3}
+
+event: content_block_start
+data: {"type":"content_block_start","index":4,"content_block":{"citations":[],"type":"text","text":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":4,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"- Paradigms: Multi-paradigm: concurrent; functional; generic; imperative; structured;\n- Developer: The Rust Team\n- First appeared: January 20, 2012; 1...","url":"https://en.wikipedia.org/wiki/Rust_(programming_language)","title":"Rust (programming language)","encrypted_index":"Eo8BCioIFBgCIiQxZmExYWQzMC0wMWU5LTRhMDYtYjEwZi1kNjc2MzgxODE2NDUSDEX7ZU5mgVRXYMV6xxoMUrEQznFws0iD+kOCIjCk4mx+IgXYUfGuitIwQt5E7gIBZTuS1KqTSB2GrZzqxi44Yb7cgtVaES+MGkfGkRkqE8aItb5j5vnhyCQ03eqf8tkLjSEYBA=="}}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":4,"delta":{"type":"text_delta","text":"Wikipedia's"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":4,"delta":{"type":"text_delta","text":" Rust page lists the st"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":4,"delta":{"type":"text_delta","text":"able release as 1.99."}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":4,"delta":{"type":"text_delta","text":"0 / October 1, "}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":4,"delta":{"type":"text_delta","text":"2026."}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":4}
+
+event: content_block_start
+data: {"type":"content_block_start","index":5,"content_block":{"type":"text","text":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":5,"delta":{"type":"text_delta","text":"\n\n-"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":5,"delta":{"type":"text_delta","text":" **Next"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":5,"delta":{"type":"text_delta","text":" release"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":5,"delta":{"type":"text_delta","text":":** The"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":5,"delta":{"type":"text_delta","text":" Rust release notes page curr"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":5,"delta":{"type":"text_delta","text":"ently shows "}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":5}
+
+event: content_block_start
+data: {"type":"content_block_start","index":6,"content_block":{"citations":[],"type":"text","text":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":6,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"Refer to Rust’s platform support page for more information on Rust’s tiered platform support\n\nRust logo Rust 1.100.0-beta.5 8ea38001b\n\n# §Version 1.98...","url":"https://doc.rust-lang.org/beta/releases.html","title":"Rust Release Notes","encrypted_index":"Eo8BCioIFBgCIiQxZmExYWQzMC0wMWU5LTRhMDYtYjEwZi1kNjc2MzgxODE2NDUSDDOywORaWUYuGqGkHxoMlsZYShZdZmRQS11JIjC6TD8KEUrmnlkaQDXtlkvuYVnDtgHcZCEHtz1XQfHLTVBlOdfW3cNdpUz7GMjT4RAqE/6RAxKLQe7ms+59Y0dafcmuQO8YBA=="}}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":"Rust 1"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":".100.0-beta."}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":6,"delta":{"type":"text_delta","text":"5"}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":6}
+
+event: content_block_start
+data: {"type":"content_block_start","index":7,"content_block":{"type":"text","text":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":", so 1.100 "}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":"is the"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":" beta and"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":" is next"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":" in"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":7,"delta":{"type":"text_delta","text":" line. "}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":7}
+
+event: content_block_start
+data: {"type":"content_block_start","index":8,"content_block":{"citations":[],"type":"text","text":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":8,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"It enforces memory safety, meaning that all references point to valid memory, without requiring the use of ...\n\n# Rust\nA new stable release is produce...","url":"https://endoflife.date/rust","title":"Rust","encrypted_index":"Eo8BCioIFBgCIiQxZmExYWQzMC0wMWU5LTRhMDYtYjEwZi1kNjc2MzgxODE2NDUSDDKIBiAY/8eCE7WN0BoMNLNj11MzDfv00gGRIjA6JuvBcLEeIZ5m1Ze9+a6aIqLqYq8zQZASbgLxTj/T9nt2Vmt/2Amc3fFhjSfbJHIqEz+MNworYsPl3KdwgtXFbW1zmfcYBA=="}}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":8,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"Each new stable release spends the preceding six-week period as the Beta release.\n\n","url":"https://endoflife.date/rust","title":"Rust","encrypted_index":"Eo8BCioIFBgCIiQxZmExYWQzMC0wMWU5LTRhMDYtYjEwZi1kNjc2MzgxODE2NDUSDF6RYq781oaTtOQNJRoMwhKK/XsNMONiJfreIjCII1NkHrkvgOJEzxW80HNSPwiY43v/cgmQP0xKm7Ui8gSRllWC7LfTUzQL8FGVdgoqE815HGxpPadYLKdNLegnnpqPtVsYBA=="}}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":"A new stable"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":" release com"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":"es out every six weeks,"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":" and each one"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":" spends the preceding six we"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":8,"delta":{"type":"text_delta","text":"eks as the beta."}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":8}
+
+event: content_block_start
+data: {"type":"content_block_start","index":9,"content_block":{"type":"text","text":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":9,"delta":{"type":"text_delta","text":"\n-"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":9,"delta":{"type":"text_delta","text":" **Previ"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":9,"delta":{"type":"text_delta","text":"ous release"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":9,"delta":{"type":"text_delta","text":":** The release"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":9,"delta":{"type":"text_delta","text":" notes list"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":9,"delta":{"type":"text_delta","text":" a"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":9,"delta":{"type":"text_delta","text":" point release,"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":9,"delta":{"type":"text_delta","text":" "}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":9}
+
+event: content_block_start
+data: {"type":"content_block_start","index":10,"content_block":{"citations":[],"type":"text","text":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":10,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"Refer to Rust’s platform support page for more information on Rust’s tiered platform support\n\nRust logo Rust 1.100.0-beta.5 8ea38001b\n\n# §Version 1.98...","url":"https://doc.rust-lang.org/beta/releases.html","title":"Rust Release Notes","encrypted_index":"Eo8BCioIFBgCIiQxZmExYWQzMC0wMWU5LTRhMDYtYjEwZi1kNjc2MzgxODE2NDUSDMlK1r1pZhFmnExFsBoM0TizCIOmXpIWsPpjIjB+MPIayxU4rEkz85frOav1jsGXwjpnjiuH+57izG62iooNqrCaQCYLLDm6/Wo8FY0qE5qml4gLSw1a2AD/NB8RSQfIcDsYBA=="}}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":"Version 1.98.1 "}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":10,"delta":{"type":"text_delta","text":"(2026-09-03)"}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":10}
+
+event: content_block_start
+data: {"type":"content_block_start","index":11,"content_block":{"type":"text","text":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":","}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" which came"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" before 1.99.0."}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":"\n- **Upd"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":"ating:** If"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" you install"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":"ed Rust with rustup"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":", run"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":" `rustup update stable`"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":11,"delta":{"type":"text_delta","text":". "}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":11}
+
+event: content_block_start
+data: {"type":"content_block_start","index":12,"content_block":{"citations":[],"type":"text","text":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":12,"delta":{"type":"citations_delta","citation":{"type":"web_search_result_location","cited_text":"If you have a previous version of Rust installed via rustup, you can get 1.85.0 with:\n\n```\n$ rustup update stable\n```\n\nIf you don't have it already, y...","url":"https://blog.rust-lang.org/2025/02/20/Rust-1.85.0/","title":"Announcing Rust 1.85.0 and Rust 2024","encrypted_index":"Eo8BCioIFBgCIiQxZmExYWQzMC0wMWU5LTRhMDYtYjEwZi1kNjc2MzgxODE2NDUSDMIQb01vFUL2s/9UVBoMsg7PXi975ffSdpJqIjC4eTivD8MDDM/BXTDYN6ne5f1p0EMdp1qe/oV7CLx8LYsCWfb6TIkcZn4A49E+xqYqE3EoAFE+xKZ7Que746I4sDHhVvUYBA=="}}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":"The official release"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":" announcements give"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":12,"delta":{"type":"text_delta","text":" this command."}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":12}
+
+event: content_block_start
+data: {"type":"content_block_start","index":13,"content_block":{"type":"text","text":""}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":"\n\nI didn't find the official "}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":"1.99.0 announc"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":"ement on bl"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":"og.rust-lang."}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":"org in"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" these results."}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" To confirm the version"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":", check the blog or run"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" `rustc --version` after"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":" upd"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":13,"delta":{"type":"text_delta","text":"ating."}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":13}
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null,"stop_details":null,"container":null},"usage":{"input_tokens":6,"cache_creation_input_tokens":8289,"cache_read_input_tokens":5750,"output_tokens":594,"output_tokens_details":{"thinking_tokens":150},"server_tool_use":{"web_search_requests":1,"web_fetch_requests":0}}}
+
+event: message_stop
+data: {"type":"message_stop"}
+

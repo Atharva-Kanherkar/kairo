@@ -1,0 +1,8 @@
+POST /v1/messages HTTP/1.1
+Host: 127.0.0.1:9100
+Accept-Encoding: identity
+Content-Length: 231
+content-type: application/json
+anthropic-version: 2023-06-01
+
+{"model": "sy-pass", "max_tokens": 400, "tools": [{"type": "web_search_20250305", "name": "web_search", "max_uses": 1}], "messages": [{"role": "user", "content": "Search the web for the latest stable Rust version. One sentence."}]}
