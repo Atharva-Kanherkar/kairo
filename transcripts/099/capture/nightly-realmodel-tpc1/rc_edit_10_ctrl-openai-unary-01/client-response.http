@@ -1,0 +1,10 @@
+HTTP/1.1 200 OK
+content-type: application/json
+connection: close
+transfer-encoding: chunked
+date: Thu, 15 Oct 2026 02:41:56 GMT
+
+2A3
+{"id":"chatcmpl-21e12f79-c57f-4062-abe8-ed6b044cc231","choices":[{"index":0,"message":{"content":null,"refusal":null,"tool_calls":[{"id":"call-6ba36802-cb52-428d-92e1-ff72ef2fd5a7","type":"function","function":{"name":"write_file","arguments":"{\"path\": \"tests/fixtures/single_call.txt\", \"content\": \"<tool_call>\\n{\\\"name\\\": \\\"get_weather\\\", \\\"arguments\\\": {\\\"city\\\": \\\"Berlin\\\", \\\"unit\\\": \\\"celsius\\\"}}\\n<\\/tool_call>\"}"}}],"role":"assistant"},"finish_reason":"tool_calls","logprobs":null}],"created":1792032116,"model":"Qwen/Qwen3-0.6B","object":"chat.completion","usage":{"prompt_tokens":167,"completion_tokens":61,"total_tokens":228}}
+0
+

@@ -1,0 +1,10 @@
+HTTP/1.1 200 OK
+content-type: application/json
+connection: close
+transfer-encoding: chunked
+date: Thu, 15 Oct 2026 02:39:00 GMT
+
+157
+{"id":"chatcmpl-5f80a3c8-2b93-42f8-b94f-ce12e1370601","choices":[{"index":0,"message":{"content":"\\n\"}}\n</tool_call>","refusal":null,"role":"assistant"},"finish_reason":"stop","logprobs":null}],"created":1792031940,"model":"Qwen/Qwen3-0.6B","object":"chat.completion","usage":{"prompt_tokens":163,"completion_tokens":59,"total_tokens":222}}
+0
+

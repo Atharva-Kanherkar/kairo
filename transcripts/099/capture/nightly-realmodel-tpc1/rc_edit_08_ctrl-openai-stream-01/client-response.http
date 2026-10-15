@@ -1,0 +1,21 @@
+HTTP/1.1 200 OK
+content-type: text/event-stream
+cache-control: no-cache
+connection: close
+transfer-encoding: chunked
+date: Thu, 15 Oct 2026 02:41:54 GMT
+
+258
+data: {"id":"chatcmpl-b847f39d-6bb5-4e1c-8165-15df63fe537f","choices":[{"index":0,"delta":{"content":"","tool_calls":[{"index":0,"id":"call-f3bb4491-6ca0-4143-8f10-9262c351a928","type":"function","function":{"name":"write_file","arguments":"{\"path\": \"tests/fixtures/single_call.txt\", \"content\": \"<tool_call>\\n{\\\"name\\\": \\\"get_weather\\\", \\\"arguments\\\": {\\\"city\\\": \\\"Berlin\\\", \\\"unit\\\": \\\"celsius\\\"}}\\n<\\/tool_call>\"}"}}],"role":"assistant"},"finish_reason":null,"logprobs":null}],"created":1792032114,"model":"Qwen/Qwen3-0.6B","object":"chat.completion.chunk"}
+
+
+DE
+data: {"id":"chatcmpl-b847f39d-6bb5-4e1c-8165-15df63fe537f","choices":[{"index":0,"delta":{},"finish_reason":"tool_calls","logprobs":null}],"created":1792032114,"model":"Qwen/Qwen3-0.6B","object":"chat.completion.chunk"}
+
+
+E
+data: [DONE]
+
+
+0
+

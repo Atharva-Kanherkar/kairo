@@ -1,0 +1,29 @@
+HTTP/1.1 200 OK
+content-type: text/event-stream
+cache-control: no-cache
+connection: close
+transfer-encoding: chunked
+date: Thu, 15 Oct 2026 02:41:58 GMT
+
+F5
+data: {"id":"chatcmpl-31c95844-b780-45c8-8901-142ddca1ea44","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":null,"logprobs":null}],"created":1792032118,"model":"Qwen/Qwen3-0.6B","object":"chat.completion.chunk"}
+
+
+E8
+data: {"id":"chatcmpl-31c95844-b780-45c8-8901-142ddca1ea44","choices":[{"index":0,"delta":{"content":"\"}}\n"},"finish_reason":null,"logprobs":null}],"created":1792032118,"model":"Qwen/Qwen3-0.6B","object":"chat.completion.chunk"}
+
+
+EE
+data: {"id":"chatcmpl-31c95844-b780-45c8-8901-142ddca1ea44","choices":[{"index":0,"delta":{"content":"</tool_call>"},"finish_reason":null,"logprobs":null}],"created":1792032118,"model":"Qwen/Qwen3-0.6B","object":"chat.completion.chunk"}
+
+
+D8
+data: {"id":"chatcmpl-31c95844-b780-45c8-8901-142ddca1ea44","choices":[{"index":0,"delta":{},"finish_reason":"stop","logprobs":null}],"created":1792032118,"model":"Qwen/Qwen3-0.6B","object":"chat.completion.chunk"}
+
+
+E
+data: [DONE]
+
+
+0
+

@@ -1,0 +1,31 @@
+HTTP/1.1 200 OK
+Date: Thu, 15 Oct 2026 02:40:37 GMT
+Content-Type: application/json
+
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+
+         
+{"id":"gen-1792032036-4LLWdF1sEkT1xflqNQVh","object":"text_completion","created":1792032036,"model":"qwen/qwen3-235b-a22b-2507","provider":"DeepInfra","choices":[{"index":0,"text":"<tool_call>\n{\"name\": \"write_file\", \"arguments\": {\"path\": \"tests/fixtures/single_call.txt\", \"content\": \"Model output used by test_parse_single_call:\\n<tool_call>\\n{\\\"name\\\": \\\"get_weather\\\", \\\"arguments\\\": {\\\"city\\\": \\\"Berlin\\\", \\\"unit\\\": \\\"celsius\\\"}}\\n</tool_call>\\n\"}}\n</tool_call>","reasoning":null,"logprobs":null,"finish_reason":"stop","native_finish_reason":"stop"}],"usage":{"prompt_tokens":311,"completion_tokens":70,"total_tokens":381,"cost":0.00006649,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.00006649,"upstream_inference_prompt_cost":0.00002799,"upstream_inference_completions_cost":0.0000385},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0,"audio_tokens":0},"service_tier":"default"}}

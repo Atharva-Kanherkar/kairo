@@ -1,0 +1,43 @@
+HTTP/1.1 200 OK
+content-type: text/event-stream
+cache-control: no-cache
+connection: close
+transfer-encoding: chunked
+date: Thu, 15 Oct 2026 02:41:51 GMT
+
+12E
+event: message_start
+data: {"type":"message_start","message":{"id":"msg_750ace2d05754228895de347b0ca84d0","type":"message","role":"assistant","content":[],"model":"Qwen/Qwen3-0.6B","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":60,"output_tokens":0,"cache_creation_input_tokens":0}}}
+
+
+BC
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_4754c8955bda404e800582e91714c644","name":"write_file","input":{}}}
+
+
+1B9
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"path\": \"tests/fixtures/single_call.txt\", \"content\": \"<tool_call>\\n{\\\"name\\\": \\\"get_weather\\\", \\\"arguments\\\": {\\\"city\\\": \\\"Berlin\\\", \\\"unit\\\": \\\"celsius\\\"}}\\n<\\/tool_call>\"}"},"usage":{"input_tokens":167,"output_tokens":61,"cache_creation_input_tokens":0,"total_tokens":228}}
+
+
+49
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+
+
+A8
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"tool_use"},"usage":{"input_tokens":167,"output_tokens":61,"cache_creation_input_tokens":0}}
+
+
+33
+event: message_stop
+data: {"type":"message_stop"}
+
+
+E
+data: [DONE]
+
+
+0
+

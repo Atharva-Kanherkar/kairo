@@ -1,0 +1,1 @@
+{"name": "write_file", "arguments": {"path": "tests/fixtures/hermes_sample.txt", "content": "\n{\"name\": \"get_weather\", \"arguments\": {\"city\": \"Paris\"}}\n"}}

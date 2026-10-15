@@ -1,0 +1,10 @@
+HTTP/1.1 200 OK
+content-type: application/json
+connection: close
+transfer-encoding: chunked
+date: Thu, 15 Oct 2026 02:38:54 GMT
+
+121
+{"id":"msg_c8dbded18afe48b9b04862b1116d9327","type":"message","role":"assistant","content":[{"type":"text","text":"\"}}\n</tool_call>"}],"model":"Qwen/Qwen3-0.6B","stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":163,"output_tokens":52,"cache_creation_input_tokens":0}}
+0
+
