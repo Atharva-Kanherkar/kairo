@@ -48,8 +48,8 @@ transcripts/101-switchyard-responses-builtin-tools-erased/run_repro.sh \
   one line per run holding the exact client request bytes, the exact forwarded
   request bytes and headers, the client response bytes, and the client status.
 - Reproduction rate: 11 cells recorded as expecting erasure, 0/5 tool kept with
-  5/5 HTTP 2xx in each (9 hosted-tool erasures, 1 streamed cell, 1 cell with a
-  top-level unknown field), and 7 control cells at 5/5 kept. Byte-identical on a
+  5/5 HTTP 2xx in each (8 buffered hosted-tool cells, 1 streamed cell, and two
+  data cells: `data-mcp-with-id-chat` and `data-preservation-bypass-chat`), and 7 control cells at 5/5 kept. Byte-identical on a
   second run.
 - Smallest isolated trigger: change only the `tools[].type` of the same client
   request. `type: "function"` survives the identical route 5/5; `type: "mcp"`
@@ -159,8 +159,9 @@ and [`live-forwarded.jsonl`](../../transcripts/101-switchyard-responses-builtin-
 | Switchyard, Responses-dialect route | 2 | `[{"type":"web_search_preview"}]` | 2/2 | current officeholder, cited |
 | Switchyard, Chat-dialect route | 2 | absent | 0/2 | "as of my last knowledge update in October 2023, the President ... was Joe Biden", uncited |
 
-- Measured impact: the capability is missing from the model's input in 10/10
-  capture bug cells and 2/2 live bug cells, and the failure is silent in every
+- Measured impact: the capability is missing from the model's input in 11/11
+  capture erasure cells (in `data-mcp-with-id-chat` it survives only as an empty
+  function with no server URL) and 2/2 live bug cells, and the failure is silent in every
   one, at both the client and the provider boundary.
 - Inferred impact: any workflow that depends on a hosted tool degrades to
   ungrounded answers, and application code cannot detect the loss because the
@@ -198,7 +199,7 @@ Requests with only `function` or `custom` tools are unaffected.
   "Reject Anthropic provider tool requests when targeting Chat Completions or
   Responses, including when lossy conversions are allowed", and "Responses
   supports MCP, but this conversion is not yet implemented". Shipped
-  `CHANGELOG.md` for v0.2.0: "Unsupported cross-format native output fails
+  `CHANGELOG.md` `[0.3.0]` section (lines 240-241): "Unsupported cross-format native output fails
   explicitly instead of disappearing." Merged PR #782 rejected rather than
   dropped a tool-choice restriction and called the alternative a security bug.
   Commit `ab7d2644` added `LossyConversion("MCP and provider tool encoding is
@@ -243,7 +244,7 @@ What exists upstream:
 | #958 reject Anthropic provider tools on Chat and Responses targets | closed draft, 2026-10-08 | states the intended remedy, reject; explicitly says the Responses MCP conversion is unimplemented |
 | #917 keep Anthropic server tools out of translated requests | **open**, 2026-10-06 | mirror Anthropic case; proposes silent exclusion, keeps same-format replay; does not touch the Responses ingress |
 | #515 Codex tools never reach a translated upstream | closed | names the same fallthrough to `push_responses_id_tool` and the same discarded `bool`, scoped to Codex `custom` and `additional_tools`; fixed at HEAD by #648, so it does not cover hosted tools |
-| #516 fix for #515 | merged | same scope, same function |
+| #516 fix for #515 | closed unmerged | same scope, same function; #515 was closed by #648 instead, merged 2026-09-10 |
 | #782 translate `allowed_tools`, reject when not possible | merged | same "reject rather than drop" precedent, called a security bug there |
 | #729 preserve Responses built-in tool history | merged | rejects Chat and Anthropic translations that would turn the item into text |
 | #993 represent MCP tools and backend history | merged, HEAD | added `Tool::Mcp` plus encoder errors; `Tool::Mcp` is unreachable from the wire because no decoder constructs it |
@@ -343,7 +344,7 @@ changes.
 | Formatting | `cargo fmt --all -- --check` | PASS |
 | Lint | `cargo clippy --workspace --all-targets -- -D warnings` | PASS |
 | README counts | `python3 tools/update-readme-counts.py --check` | PASS |
-| Independent review | `.github/agents/kairo-reproduction-reviewer.agent.md` | first pass REJECT on the upstream record and the root-cause paragraph; both corrected, re-review pending |
+| Independent review | `.github/agents/kairo-reproduction-reviewer.agent.md` | third pass on PR #67: all three gates PASS, NEEDS EVIDENCE only on README counts, fixed |
 
 ## Security and scope
 
@@ -386,4 +387,14 @@ here: the preservation bypass is stated in the root cause with two committed
 data cells as evidence, the isolation argument now rests on the trigger cell, the
 line numbers are 1105 and 1016-1109, `helpers.rs:31-43`, the SCOREBOARD row
 matches the rig, the stale strings are gone, and #515/#516 are recorded with the
-reason they do not transfer. Re-review pending.
+reason they do not transfer.
+
+Third pass, 2026-10-15, on PR #67 head `83ad397`: all three gates PASS, with the
+reproduction rerun byte-identical and three new reviewer-owned probes (GA
+`web_search` beside a function tool is partially erased, `tool_choice:
+"required"` does not prevent erasure, `file_search` on the Anthropic route is
+erased, each 3/3). Overall NEEDS EVIDENCE only because the README count check
+was stale. Fixed together with five wording items: the #516 state, the
+changelog section, the cell breakdown, the measured-impact count, and the
+SCOREBOARD upstream cell. The reviewer noted it shares a model family with the
+author.
