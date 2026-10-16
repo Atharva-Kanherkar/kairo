@@ -23,14 +23,15 @@ use kairo::checks::{
     openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
     outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
     reasoning_text_order_preserved, refusal_text_preserved, registration_resolvable_by_both_paths,
-    response_content_not_empty, response_conversation_preserves_history, response_omits_secret,
+    replayed_calls_keep_returned_namespace, response_content_not_empty,
+    response_conversation_preserves_history, response_omits_secret,
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
-    responses_single_lifecycle, searched_tool_calls_keep_namespace, stop_sequence_forwarded,
-    thinking_not_leaked_as_visible_text, thinking_text_forwarded, tool_strict_forwarded,
-    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
-    upstream_omits_header_value, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
-    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT, SEARCHED_TOOL_CALL_WITHOUT_NAMESPACE,
+    responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
+    thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
+    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, FunctionToolFormat,
+    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    REPLAYED_CALL_NAMESPACE_CHANGED,
 };
 use serde_json::Value;
 use std::fs;
@@ -5724,21 +5725,25 @@ fn switchyard_codex_namespace_hijack_is_not_confined_to_cross_format() {
 
 // ---- bug 103: Bifrost drops the namespace of a call to a searched-in tool ----
 //
-// On /anthropic/v1/messages to OpenAI gpt-5.4+, Bifrost rewrites a client tool
-// search (Claude Code's ToolSearch) or Anthropic's server-side tool search into
-// OpenAI tool_search items. OpenAI loads the deferred tool into a namespace and
-// returns the model's call with `namespace` set, but an Anthropic `tool_use` has
-// no field for it, and Bifrost rebuilds the replayed call without one. OpenAI
-// rejects every later turn. Captures were recorded through rig/reproduce.py on
-// both hops, against live OpenAI.
+// On /anthropic/v1/messages to OpenAI, Bifrost rewrites a client tool search
+// (Claude Code's ToolSearch) or Anthropic's server-side tool search into OpenAI
+// tool_search items. When OpenAI returns the model's call to the loaded tool
+// with a `namespace`, an Anthropic `tool_use` has no field for it, and Bifrost
+// rebuilds the replayed call without one, so OpenAI rejects the next turn.
+// GPT-5.4 and GPT-5.5 set the namespace on both search paths. The four GPT-6
+// models tested set it only on the server-side path, so Claude Code's client
+// search works there. Captures were recorded through rig/reproduce.py on both
+// hops, against live OpenAI.
 
 const ISSUE_103_DEV: &str = "dev-6c0f795d";
+const ISSUE_103_HEAD: &str = "capture-9bcea677";
+const ISSUE_103_GPT6: [&str; 4] = ["gpt-6.1-sol", "gpt-6-sol", "gpt-6-luna", "gpt-6-astra"];
 const ISSUE_103_TOOL: &str = "mcp__orders__lookup_order";
 const ISSUE_103_REJECTION: &str = "Missing namespace for function_call 'mcp__orders__lookup_order'";
 const ISSUE_103_CANARY: &str = "SHIPPED-CANARY-7731";
 
 fn issue_103_capture(relative: &str) -> String {
-    fixture(&format!("transcripts/103/capture/{relative}"))
+    fixture(&format!("transcripts/103/{relative}"))
 }
 
 fn issue_103_status(raw_http: &str) -> u16 {
@@ -5759,7 +5764,7 @@ fn issue_103_body(raw_http: &str) -> &str {
 /// Every exchange on one hop of a case, in order, as (request, response).
 fn issue_103_exchanges(case: &str, hop: &str) -> Vec<(String, String)> {
     let mut dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    dir.push(format!("../../transcripts/103/capture/{case}/{hop}"));
+    dir.push(format!("../../transcripts/103/{case}/{hop}"));
     let mut requests: Vec<PathBuf> = fs::read_dir(&dir)
         .unwrap_or_else(|e| panic!("read {}: {e}", dir.display()))
         .map(|entry| entry.expect("dir entry").path())
@@ -5788,8 +5793,33 @@ fn issue_103_forwarded(case: &str) -> Vec<(String, String)> {
         .collect()
 }
 
-/// The namespaces OpenAI set on the model's calls to the order tool, from a
-/// buffered body or from SSE frames.
+/// The first forwarded request that hands a tool result back, the provider
+/// responses before it, and the provider's answer to it.
+fn issue_103_replay(case: &str) -> (Vec<String>, String, String) {
+    let forwarded = issue_103_forwarded(case);
+    let at = forwarded
+        .iter()
+        .position(|(request, _)| request.contains("\"function_call_output\""))
+        .unwrap_or_else(|| panic!("{case}: no forwarded tool result"));
+    assert!(at > 0, "{case}: the tool result follows a provider turn");
+    let earlier = forwarded[..at]
+        .iter()
+        .map(|(_, response)| issue_103_body(response).to_string())
+        .collect();
+    let (request, response) = forwarded[at].clone();
+    (earlier, issue_103_body(&request).to_string(), response)
+}
+
+fn issue_103_judge(case: &str) -> (Verdict, String) {
+    let (earlier, request, response) = issue_103_replay(case);
+    let earlier: Vec<&str> = earlier.iter().map(String::as_str).collect();
+    (
+        replayed_calls_keep_returned_namespace(&earlier, &request),
+        response,
+    )
+}
+
+/// The namespaces OpenAI set on the model's calls to the order tool.
 fn issue_103_returned_namespaces(raw_http: &str) -> Vec<String> {
     fn walk(value: &Value, out: &mut Vec<String>) {
         match value {
@@ -5841,25 +5871,27 @@ fn issue_103_ledger_lines(case: &str) -> usize {
         .count()
 }
 
+fn issue_103_rejected(response: &str) -> bool {
+    issue_103_status(response) == 400 && response.contains(ISSUE_103_REJECTION)
+}
+
 #[test]
 fn bifrost_103_openai_rejects_the_forwarded_replay_and_accepts_it_with_the_namespace() {
-    // Rung 1, no gateway: the exact body Bifrost forwarded, sent to OpenAI as
-    // recorded and with only `namespace` added to the replayed call.
+    // Rung 1, no gateway, GPT-5.4: the exact body Bifrost forwarded, sent to
+    // OpenAI as recorded and with only `namespace` added to the replayed call.
     for run in 1..=5 {
-        let forwarded = issue_103_capture(&format!(
-            "{ISSUE_103_DEV}/direct/as-forwarded-{run:02}/001-request.http"
-        ));
-        let rejected = issue_103_capture(&format!(
-            "{ISSUE_103_DEV}/direct/as-forwarded-{run:02}/001-response.http"
-        ));
+        let case = format!("capture/{ISSUE_103_DEV}/direct");
+        let forwarded =
+            issue_103_capture(&format!("{case}/as-forwarded-{run:02}/001-request.http"));
+        let rejected =
+            issue_103_capture(&format!("{case}/as-forwarded-{run:02}/001-response.http"));
         let restored = issue_103_capture(&format!(
-            "{ISSUE_103_DEV}/direct/namespace-restored-{run:02}/001-request.http"
+            "{case}/namespace-restored-{run:02}/001-request.http"
         ));
         let served = issue_103_capture(&format!(
-            "{ISSUE_103_DEV}/direct/namespace-restored-{run:02}/001-response.http"
+            "{case}/namespace-restored-{run:02}/001-response.http"
         ));
-        assert_eq!(issue_103_status(&rejected), 400, "run {run}");
-        assert!(rejected.contains(ISSUE_103_REJECTION), "run {run}");
+        assert!(issue_103_rejected(&rejected), "run {run}");
         assert_eq!(issue_103_status(&served), 200, "run {run}");
         assert!(served.contains(ISSUE_103_CANARY), "run {run}");
 
@@ -5872,60 +5904,41 @@ fn bifrost_103_openai_rejects_the_forwarded_replay_and_accepts_it_with_the_names
         }
         let original: Value = serde_json::from_str(issue_103_body(&forwarded)).expect("json");
         assert_eq!(without, original, "run {run}");
+    }
+}
 
-        assert!(matches!(
-            searched_tool_calls_keep_namespace(issue_103_body(&forwarded)),
-            Verdict::Violation(reason) if reason.starts_with(SEARCHED_TOOL_CALL_WITHOUT_NAMESPACE)
-        ));
-        assert_eq!(
-            searched_tool_calls_keep_namespace(issue_103_body(&restored)),
-            Verdict::Conformant,
-            "run {run}"
+#[test]
+fn bifrost_103_client_tool_search_replay_is_rejected_on_gpt_5() {
+    for mode in ["nonstream", "stream"] {
+        for run in 1..=5 {
+            let case = format!("capture/{ISSUE_103_DEV}/minimal/deferred-{mode}-{run:02}");
+            let forwarded = issue_103_forwarded(&case);
+            assert_eq!(forwarded.len(), 1, "{case}");
+            let (request, response) = &forwarded[0];
+            assert!(request.contains("\"tool_search_output\""), "{case}");
+            assert!(!request.contains("\"namespace\""), "{case}");
+            assert!(issue_103_rejected(response), "{case}");
+            let (_, client) = &issue_103_exchanges(&case, "client")[0];
+            assert!(issue_103_rejected(client), "{case}");
+        }
+    }
+    for run in 1..=2 {
+        let case = format!("capture/{ISSUE_103_DEV}/minimal/deferred-nonstream-gpt-5.5-{run:02}");
+        assert!(
+            issue_103_rejected(&issue_103_forwarded(&case)[0].1),
+            "{case}"
         );
     }
 }
 
 #[test]
-fn bifrost_103_client_tool_search_replay_loses_the_namespace() {
-    for mode in ["nonstream", "stream"] {
-        for run in 1..=5 {
-            let case = format!("{ISSUE_103_DEV}/minimal/deferred-{mode}-{run:02}");
-            let forwarded = issue_103_forwarded(&case);
-            assert_eq!(forwarded.len(), 1, "{case}");
-            let (request, response) = &forwarded[0];
-            assert!(
-                !searched_tool_calls_keep_namespace(issue_103_body(request)).is_conformant(),
-                "{case}"
-            );
-            assert_eq!(issue_103_status(response), 400, "{case}");
-            assert!(response.contains(ISSUE_103_REJECTION), "{case}");
-            let (_, client) = &issue_103_exchanges(&case, "client")[0];
-            assert_eq!(issue_103_status(client), 400, "{case}");
-            assert!(client.contains(ISSUE_103_REJECTION), "{case}");
-        }
-    }
-    // Not specific to one model.
-    for run in 1..=2 {
-        let case = format!("{ISSUE_103_DEV}/minimal/deferred-nonstream-gpt-5.5-{run:02}");
-        let (_, response) = &issue_103_forwarded(&case)[0];
-        assert!(response.contains(ISSUE_103_REJECTION), "{case}");
-    }
-}
-
-#[test]
 fn bifrost_103_trigger_removed_eager_tool_is_served() {
-    // The same history with the tool sent eagerly: no search, no namespace.
     for mode in ["nonstream", "stream"] {
         for run in 1..=5 {
-            let case = format!("{ISSUE_103_DEV}/minimal/eager-{mode}-{run:02}");
+            let case = format!("capture/{ISSUE_103_DEV}/minimal/eager-{mode}-{run:02}");
             let forwarded = issue_103_forwarded(&case);
             assert_eq!(forwarded.len(), 1, "{case}");
             let (request, response) = &forwarded[0];
-            assert_eq!(
-                searched_tool_calls_keep_namespace(issue_103_body(request)),
-                Verdict::Conformant,
-                "{case}"
-            );
             assert!(!request.contains("tool_search"), "{case}");
             assert_eq!(issue_103_status(response), 200, "{case}");
             let (_, client) = &issue_103_exchanges(&case, "client")[0];
@@ -5935,60 +5948,58 @@ fn bifrost_103_trigger_removed_eager_tool_is_served() {
 }
 
 #[test]
-fn bifrost_103_hosted_tool_search_replay_loses_the_namespace() {
+fn bifrost_103_hosted_tool_search_replay_drops_the_returned_namespace() {
     // Anthropic's server-side tool_search_tool_bm25, turn 1 generated live.
-    for run in 1..=5 {
-        let case = format!("{ISSUE_103_DEV}/minimal/hosted-nonstream-{run:02}");
-        let forwarded = issue_103_forwarded(&case);
+    let mut cases: Vec<String> = (1..=5)
+        .map(|run| format!("capture/{ISSUE_103_DEV}/minimal/hosted-nonstream-{run:02}"))
+        .collect();
+    for model in ISSUE_103_GPT6 {
+        let runs = if model == "gpt-6.1-sol" { 3 } else { 2 };
+        cases.extend((1..=runs).map(|run| {
+            format!("{ISSUE_103_HEAD}/{model}/dev-9bcea677/minimal/hosted-nonstream-{run:02}")
+        }));
+    }
+    assert_eq!(cases.len(), 14);
+    for case in &cases {
+        let forwarded = issue_103_forwarded(case);
         assert_eq!(forwarded.len(), 2, "{case}");
-        let (turn1, served) = &forwarded[0];
-        assert!(turn1.contains("\"tool_search\""), "{case}");
-        assert_eq!(issue_103_status(served), 200, "{case}");
         // OpenAI put the searched-in tool in a namespace of its own name.
         assert_eq!(
-            issue_103_returned_namespaces(served),
+            issue_103_returned_namespaces(&forwarded[0].1),
             vec![ISSUE_103_TOOL.to_string()],
             "{case}"
         );
-        let (turn2, rejected) = &forwarded[1];
+        let (verdict, response) = issue_103_judge(case);
         assert!(
-            !searched_tool_calls_keep_namespace(issue_103_body(turn2)).is_conformant(),
-            "{case}"
+            matches!(&verdict, Verdict::Violation(reason) if reason.starts_with(REPLAYED_CALL_NAMESPACE_CHANGED)),
+            "{case}: {verdict:?}"
         );
-        assert_eq!(issue_103_status(rejected), 400, "{case}");
-        assert!(rejected.contains(ISSUE_103_REJECTION), "{case}");
+        assert!(issue_103_rejected(&response), "{case}");
     }
 }
 
 #[test]
 fn bifrost_103_responses_route_forwards_the_namespace_the_client_sends() {
     // Rung 2: a Responses-dialect client can carry `namespace`, and the same
-    // build forwards it. Without it OpenAI answers with the same 400.
+    // build forwards it. Without it GPT-5.4 answers with the same 400.
     for run in 1..=5 {
-        let kept = format!("{ISSUE_103_DEV}/responses/with-namespace-{run:02}");
+        let kept = format!("capture/{ISSUE_103_DEV}/responses/with-namespace-{run:02}");
         let (request, response) = &issue_103_forwarded(&kept)[0];
-        assert_eq!(
-            searched_tool_calls_keep_namespace(issue_103_body(request)),
-            Verdict::Conformant,
-            "{kept}"
-        );
+        assert!(request.contains("\"namespace\""), "{kept}");
         assert_eq!(issue_103_status(response), 200, "{kept}");
         assert!(response.contains(ISSUE_103_CANARY), "{kept}");
 
-        let bare = format!("{ISSUE_103_DEV}/responses/without-namespace-{run:02}");
+        let bare = format!("capture/{ISSUE_103_DEV}/responses/without-namespace-{run:02}");
         let (request, response) = &issue_103_forwarded(&bare)[0];
-        assert!(
-            !searched_tool_calls_keep_namespace(issue_103_body(request)).is_conformant(),
-            "{bare}"
-        );
-        assert!(response.contains(ISSUE_103_REJECTION), "{bare}");
+        assert!(!request.contains("\"namespace\""), "{bare}");
+        assert!(issue_103_rejected(response), "{bare}");
     }
 }
 
 #[test]
-fn bifrost_103_claude_code_halts_after_running_the_searched_in_tool() {
+fn bifrost_103_claude_code_halts_on_gpt_5_after_running_the_searched_in_tool() {
     for run in 1..=5 {
-        let case = format!("{ISSUE_103_DEV}/claude/tool-search-on-{run:02}");
+        let case = format!("capture/{ISSUE_103_DEV}/claude/tool-search-on-{run:02}");
         let result =
             issue_103_claude_result(&issue_103_capture(&format!("{case}/claude-stdout.jsonl")));
         assert!(result.starts_with("API Error: 400"), "{case}: {result}");
@@ -5996,26 +6007,12 @@ fn bifrost_103_claude_code_halts_after_running_the_searched_in_tool() {
         // The MCP tool ran once before the session failed.
         assert_eq!(issue_103_ledger_lines(&case), 1, "{case}");
 
-        let forwarded = issue_103_forwarded(&case);
-        let returned = forwarded
-            .iter()
-            .flat_map(|(_, response)| issue_103_returned_namespaces(response))
-            .collect::<Vec<_>>();
-        assert_eq!(returned, vec![ISSUE_103_TOOL.to_string()], "{case}");
-        let (first_rejected, _) = forwarded
-            .iter()
-            .find(|(_, response)| issue_103_status(response) == 400)
-            .expect("a rejected turn");
+        let (verdict, response) = issue_103_judge(&case);
         assert!(
-            !searched_tool_calls_keep_namespace(issue_103_body(first_rejected)).is_conformant(),
-            "{case}"
+            matches!(&verdict, Verdict::Violation(reason) if reason.starts_with(REPLAYED_CALL_NAMESPACE_CHANGED)),
+            "{case}: {verdict:?}"
         );
-        for (request, response) in &forwarded {
-            if issue_103_status(response) == 400 {
-                assert!(response.contains(ISSUE_103_REJECTION), "{case}");
-                assert!(request.contains("\"tool_search_output\""), "{case}");
-            }
-        }
+        assert!(issue_103_rejected(&response), "{case}");
 
         // Resuming the session replays the same history and fails the same way,
         // without running the tool again.
@@ -6027,17 +6024,15 @@ fn bifrost_103_claude_code_halts_after_running_the_searched_in_tool() {
         assert!(!continued.is_empty(), "{case}");
         assert!(continued
             .iter()
-            .all(|(_, response)| issue_103_status(response) == 400));
+            .all(|(_, response)| issue_103_rejected(response)));
         assert_eq!(issue_103_ledger_lines(&case), 1, "{case}");
     }
 }
 
 #[test]
 fn bifrost_103_claude_code_without_tool_search_answers() {
-    // Trigger removed in the real client: ENABLE_TOOL_SEARCH=false loads the
-    // MCP tools upfront, and the same question is answered.
     for run in 1..=5 {
-        let case = format!("{ISSUE_103_DEV}/claude/tool-search-off-{run:02}");
+        let case = format!("capture/{ISSUE_103_DEV}/claude/tool-search-off-{run:02}");
         let result =
             issue_103_claude_result(&issue_103_capture(&format!("{case}/claude-stdout.jsonl")));
         assert!(result.contains(ISSUE_103_CANARY), "{case}: {result}");
@@ -6050,13 +6045,93 @@ fn bifrost_103_claude_code_without_tool_search_answers() {
 }
 
 #[test]
+fn bifrost_103_claude_code_completes_on_gpt_6_where_no_namespace_is_returned() {
+    // Model scope: gpt-6.1-sol returns the call to a tool loaded by client
+    // search with no namespace, so Bifrost's namespace-less replay is a correct
+    // round trip, and Claude Code answers.
+    for run in 1..=3 {
+        let case =
+            format!("{ISSUE_103_HEAD}/gpt-6.1-sol/dev-9bcea677/claude/tool-search-on-{run:02}");
+        let result =
+            issue_103_claude_result(&issue_103_capture(&format!("{case}/claude-stdout.jsonl")));
+        assert!(result.contains(ISSUE_103_CANARY), "{case}: {result}");
+        // The rig resumes every tool-search session once; on GPT-6 the resumed
+        // session is served too and looks the order up again.
+        let resumed = issue_103_claude_result(&issue_103_capture(&format!(
+            "{case}/continue/claude-stdout.jsonl"
+        )));
+        assert!(!resumed.contains(ISSUE_103_REJECTION), "{case}: {resumed}");
+        assert!(issue_103_forwarded(&format!("{case}/continue"))
+            .iter()
+            .all(|(_, response)| issue_103_status(response) == 200));
+        assert_eq!(issue_103_ledger_lines(&case), 2, "{case}");
+        let forwarded = issue_103_forwarded(&case);
+        assert!(forwarded
+            .iter()
+            .any(|(request, _)| request.contains("\"tool_search_output\"")));
+        let returned: Vec<String> = forwarded
+            .iter()
+            .flat_map(|(_, response)| issue_103_returned_namespaces(response))
+            .collect();
+        assert_eq!(returned, vec![String::new()], "{case}");
+        let (verdict, response) = issue_103_judge(&case);
+        assert_eq!(verdict, Verdict::Conformant, "{case}");
+        assert_eq!(issue_103_status(&response), 200, "{case}");
+        assert!(forwarded
+            .iter()
+            .all(|(_, response)| issue_103_status(response) == 200));
+    }
+}
+
+#[test]
+fn bifrost_103_client_tool_search_replay_is_served_on_gpt_6() {
+    let mut cases = Vec::new();
+    for mode in ["nonstream", "stream"] {
+        cases.extend((1..=3).map(|run| {
+            format!("{ISSUE_103_HEAD}/gpt-6.1-sol/dev-9bcea677/minimal/deferred-{mode}-{run:02}")
+        }));
+        for model in &ISSUE_103_GPT6[1..] {
+            cases.extend((1..=2).map(|run| {
+                format!("{ISSUE_103_HEAD}/{model}/dev-9bcea677/minimal/deferred-{mode}-{run:02}")
+            }));
+        }
+    }
+    for model in &ISSUE_103_GPT6[1..] {
+        cases.extend((1..=2).map(|run| {
+            format!("{ISSUE_103_HEAD}/gpt-6.1-sol/dev-9bcea677/minimal/deferred-nonstream-{model}-{run:02}")
+        }));
+    }
+    assert_eq!(cases.len(), 24);
+    for case in &cases {
+        let forwarded = issue_103_forwarded(case);
+        assert_eq!(forwarded.len(), 1, "{case}");
+        let (request, response) = &forwarded[0];
+        assert!(request.contains("\"tool_search_output\""), "{case}");
+        assert!(!request.contains("\"namespace\""), "{case}");
+        assert_eq!(issue_103_status(response), 200, "{case}");
+    }
+    // The same build still fails on GPT-5.4, so the difference is the model.
+    for mode in ["nonstream", "stream"] {
+        for run in 1..=2 {
+            let case = format!(
+                "{ISSUE_103_HEAD}/gpt-5.4-mini/dev-9bcea677/minimal/deferred-{mode}-{run:02}"
+            );
+            assert!(
+                issue_103_rejected(&issue_103_forwarded(&case)[0].1),
+                "{case}"
+            );
+        }
+    }
+}
+
+#[test]
 fn bifrost_103_release_v2_3_0_fails_earlier_for_a_fixed_reason() {
     // On the latest release the deferred request never gets a tool_search
     // (bifrost#8361, fixed on dev by #8503), so it fails on the first turn and
     // the namespace question never comes up.
     for mode in ["nonstream", "stream"] {
         for run in 1..=5 {
-            let case = format!("v2.3.0/minimal/deferred-{mode}-{run:02}");
+            let case = format!("capture/v2.3.0/minimal/deferred-{mode}-{run:02}");
             let (request, response) = &issue_103_forwarded(&case)[0];
             assert!(!request.contains("\"tool_search\""), "{case}");
             assert!(
@@ -6064,32 +6139,47 @@ fn bifrost_103_release_v2_3_0_fails_earlier_for_a_fixed_reason() {
                 "{case}"
             );
             assert!(!response.contains(ISSUE_103_REJECTION), "{case}");
-            let eager = format!("v2.3.0/minimal/eager-{mode}-{run:02}");
+            let eager = format!("capture/v2.3.0/minimal/eager-{mode}-{run:02}");
             assert_eq!(issue_103_status(&issue_103_forwarded(&eager)[0].1), 200);
         }
     }
 }
 
+fn issue_103_rows(results: &str) -> Vec<Value> {
+    serde_json::from_str(&issue_103_capture(results)).expect("results.json")
+}
+
+fn issue_103_count(
+    rows: &[Value],
+    prefix: &str,
+    predicate: &dyn Fn(&Value) -> bool,
+) -> (usize, usize) {
+    let matching: Vec<&Value> = rows
+        .iter()
+        .filter(|row| {
+            row["case"]
+                .as_str()
+                .is_some_and(|case| case.starts_with(prefix))
+        })
+        .collect();
+    (
+        matching.iter().filter(|row| predicate(row)).count(),
+        matching.len(),
+    )
+}
+
+fn issue_103_row_rejected(row: &Value) -> bool {
+    row["namespace_rejection"] == true && row["client_status"] == 400
+}
+
+fn issue_103_row_answered(row: &Value) -> bool {
+    row["exit_code"] == 0 && row["canary_answer"] == true && row["tool_executions"] == 1
+}
+
 #[test]
 fn bifrost_103_matrix_matches_the_recorded_runs() {
-    let rows: Vec<Value> =
-        serde_json::from_str(&issue_103_capture("results.json")).expect("results.json");
-    let count = |prefix: &str, predicate: &dyn Fn(&Value) -> bool| {
-        let matching: Vec<&Value> = rows
-            .iter()
-            .filter(|row| {
-                row["case"]
-                    .as_str()
-                    .is_some_and(|case| case.starts_with(prefix))
-            })
-            .collect();
-        (
-            matching.iter().filter(|row| predicate(row)).count(),
-            matching.len(),
-        )
-    };
-    let rejected = |row: &Value| row["namespace_rejection"] == true && row["client_status"] == 400;
     let served = |row: &Value| row["canary_answer"] == true && row["client_status"] == 200;
+    let rows = issue_103_rows("capture/results.json");
     let dev = |rest: &str| format!("{ISSUE_103_DEV}/{rest}");
     for (prefix, expected) in [
         (dev("minimal/deferred-nonstream-0"), (5, 5)),
@@ -6099,7 +6189,11 @@ fn bifrost_103_matrix_matches_the_recorded_runs() {
         (dev("responses/without-namespace-0"), (5, 5)),
         (dev("direct/as-forwarded-0"), (5, 5)),
     ] {
-        assert_eq!(count(&prefix, &rejected), expected, "{prefix}");
+        assert_eq!(
+            issue_103_count(&rows, &prefix, &issue_103_row_rejected),
+            expected,
+            "{prefix}"
+        );
     }
     for prefix in [
         dev("minimal/eager-nonstream-0"),
@@ -6107,7 +6201,7 @@ fn bifrost_103_matrix_matches_the_recorded_runs() {
         dev("responses/with-namespace-0"),
         dev("direct/namespace-restored-0"),
     ] {
-        assert_eq!(count(&prefix, &served), (5, 5), "{prefix}");
+        assert_eq!(issue_103_count(&rows, &prefix, &served), (5, 5), "{prefix}");
     }
     let halted = |row: &Value| {
         row["exit_code"] == 1
@@ -6116,9 +6210,84 @@ fn bifrost_103_matrix_matches_the_recorded_runs() {
             && row["continue_namespace_rejection"] == true
             && row["tool_executions_after_continue"] == 1
     };
-    assert_eq!(count(&dev("claude/tool-search-on-"), &halted), (5, 5));
-    let answered = |row: &Value| {
-        row["exit_code"] == 0 && row["canary_answer"] == true && row["tool_executions"] == 1
-    };
-    assert_eq!(count(&dev("claude/tool-search-off-"), &answered), (5, 5));
+    assert_eq!(
+        issue_103_count(&rows, &dev("claude/tool-search-on-"), &halted),
+        (5, 5)
+    );
+    assert_eq!(
+        issue_103_count(
+            &rows,
+            &dev("claude/tool-search-off-"),
+            &issue_103_row_answered
+        ),
+        (5, 5)
+    );
+}
+
+#[test]
+fn bifrost_103_gpt_6_matrix_matches_the_recorded_runs() {
+    let ok = |row: &Value| row["namespace_rejection"] == false && row["client_status"] == 200;
+    let head = "dev-9bcea677";
+    let sol = issue_103_rows(&format!("{ISSUE_103_HEAD}/gpt-6.1-sol/results.json"));
+    for prefix in ["minimal/deferred-nonstream-0", "minimal/deferred-stream-0"] {
+        assert_eq!(
+            issue_103_count(&sol, &format!("{head}/{prefix}"), &ok),
+            (3, 3),
+            "{prefix}"
+        );
+    }
+    assert_eq!(
+        issue_103_count(
+            &sol,
+            &format!("{head}/minimal/hosted-nonstream-0"),
+            &issue_103_row_rejected
+        ),
+        (3, 3)
+    );
+    for session in ["tool-search-on-", "tool-search-off-"] {
+        assert_eq!(
+            issue_103_count(
+                &sol,
+                &format!("{head}/claude/{session}"),
+                &issue_103_row_answered
+            ),
+            (3, 3),
+            "{session}"
+        );
+    }
+    for model in &ISSUE_103_GPT6[1..] {
+        let other = issue_103_rows(&format!("{ISSUE_103_HEAD}/{model}/results.json"));
+        for prefix in ["minimal/deferred-nonstream-0", "minimal/deferred-stream-0"] {
+            assert_eq!(
+                issue_103_count(&other, &format!("{head}/{prefix}"), &ok),
+                (2, 2),
+                "{model}"
+            );
+        }
+        assert_eq!(
+            issue_103_count(
+                &other,
+                &format!("{head}/minimal/hosted-nonstream-0"),
+                &issue_103_row_rejected
+            ),
+            (2, 2),
+            "{model}"
+        );
+    }
+    let control = issue_103_rows(&format!("{ISSUE_103_HEAD}/gpt-5.4-mini/results.json"));
+    for prefix in [
+        "minimal/deferred-nonstream-0",
+        "minimal/deferred-stream-0",
+        "minimal/hosted-nonstream-0",
+    ] {
+        assert_eq!(
+            issue_103_count(
+                &control,
+                &format!("{head}/{prefix}"),
+                &issue_103_row_rejected
+            ),
+            (2, 2),
+            "{prefix}"
+        );
+    }
 }

@@ -3116,70 +3116,102 @@ pub fn codex_namespace_only_applies_to_namespaced_tools(
     Verdict::Conformant
 }
 
-/// Message prefix for [`searched_tool_calls_keep_namespace`].
-pub const SEARCHED_TOOL_CALL_WITHOUT_NAMESPACE: &str =
-    "a replayed function_call for a tool loaded by tool search lost its namespace";
+/// Message prefix for [`replayed_calls_keep_returned_namespace`].
+pub const REPLAYED_CALL_NAMESPACE_CHANGED: &str =
+    "a replayed function_call does not carry the namespace the provider returned";
 
-/// Invariant (bug 103): in an OpenAI Responses request, a replayed
-/// `function_call` for a function that an earlier `tool_search_output` in the
-/// same input loaded must carry the namespace the provider gave it. OpenAI puts
-/// a plain function loaded by tool search in a namespace named after the
-/// function, returns that `namespace` on the model's `function_call`, and
+/// Collect `call_id -> namespace` for every `function_call` in OpenAI Responses
+/// bodies, buffered or SSE. A call seen with a namespace on any frame keeps it.
+fn returned_call_namespaces(bodies: &[&str]) -> BTreeMap<String, Option<String>> {
+    fn walk(value: &Value, out: &mut BTreeMap<String, Option<String>>) {
+        match value {
+            Value::Array(items) => items.iter().for_each(|item| walk(item, out)),
+            Value::Object(map) => {
+                if map.get("type").and_then(Value::as_str) == Some("function_call") {
+                    if let Some(call_id) = map.get("call_id").and_then(Value::as_str) {
+                        let namespace = map
+                            .get("namespace")
+                            .and_then(Value::as_str)
+                            .map(str::to_owned);
+                        let entry = out.entry(call_id.to_owned()).or_insert(None);
+                        if namespace.is_some() {
+                            *entry = namespace;
+                        }
+                    }
+                }
+                map.values().for_each(|value| walk(value, out));
+            }
+            _ => {}
+        }
+    }
+    let mut out = BTreeMap::new();
+    for body in bodies {
+        match serde_json::from_str::<Value>(body) {
+            Ok(value) => walk(&value, &mut out),
+            Err(_) => sse_data_json(body)
+                .iter()
+                .for_each(|value| walk(value, &mut out)),
+        }
+    }
+    out
+}
+
+/// Invariant (bug 103): when a gateway replays a model's `function_call` to an
+/// OpenAI Responses backend, the replayed item carries exactly the `namespace`
+/// the provider returned on that call. OpenAI sets a namespace on a call to a tool that
+/// tool search loaded on some models and paths, returns it to the client, and
 /// rejects a replay without it (`400 Missing namespace for function_call`). A
 /// gateway that rebuilds the history from a dialect with no namespace field,
-/// such as an Anthropic `tool_use`, must restore it, or every turn after the
-/// first call to a searched-in tool fails.
+/// such as an Anthropic `tool_use`, has to restore it.
 ///
-/// Reads one forwarded request body, so it names no gateway function. Calls to
-/// functions no `tool_search_output` loaded, and functions inside a loaded
-/// `namespace` container, are not judged.
-pub fn searched_tool_calls_keep_namespace(forwarded_body: &str) -> Verdict {
+/// Reads the provider's earlier response bodies and the forwarded request body,
+/// so it names no gateway function and makes no assumption about which models
+/// assign a namespace. Calls are matched by `call_id`. A call the provider
+/// returned without a namespace is matched but not judged: OpenAI accepted its
+/// replay both with and without one. Evidence in which no replayed call matches
+/// a returned call does not exercise the invariant and is refused.
+pub fn replayed_calls_keep_returned_namespace(
+    provider_responses: &[&str],
+    forwarded_body: &str,
+) -> Verdict {
     let Ok(request) = serde_json::from_str::<Value>(forwarded_body) else {
         return Verdict::Violation("forwarded request body is not valid JSON".into());
     };
     let Some(input) = request.get("input").and_then(Value::as_array) else {
         return Verdict::Violation("forwarded request has no input array".into());
     };
+    let returned = returned_call_namespaces(provider_responses);
 
-    let mut loaded: HashSet<&str> = HashSet::new();
-    let mut lost = Vec::new();
+    let mut judged = 0usize;
+    let mut changed = Vec::new();
     for item in input {
-        match item.get("type").and_then(Value::as_str) {
-            Some("tool_search_output") => {
-                for tool in item
-                    .get("tools")
-                    .and_then(Value::as_array)
-                    .into_iter()
-                    .flatten()
-                {
-                    if tool.get("type").and_then(Value::as_str) == Some("namespace") {
-                        continue;
-                    }
-                    if let Some(name) = tool.get("name").and_then(Value::as_str) {
-                        loaded.insert(name);
-                    }
-                }
-            }
-            Some("function_call") => {
-                let name = item.get("name").and_then(Value::as_str).unwrap_or_default();
-                if !loaded.contains(name) {
-                    continue;
-                }
-                match item.get("namespace").and_then(Value::as_str) {
-                    Some(namespace) if namespace == name => {}
-                    Some(namespace) => lost.push(format!(
-                        "{name} carries namespace {namespace:?}, expected {name:?}"
-                    )),
-                    None => lost.push(format!("{name} has no namespace")),
-                }
-            }
-            _ => {}
+        if item.get("type").and_then(Value::as_str) != Some("function_call") {
+            continue;
+        }
+        let Some(call_id) = item.get("call_id").and_then(Value::as_str) else {
+            continue;
+        };
+        let Some(expected) = returned.get(call_id) else {
+            continue;
+        };
+        judged += 1;
+        let replayed = item.get("namespace").and_then(Value::as_str);
+        if expected.is_some() && replayed != expected.as_deref() {
+            let name = item.get("name").and_then(Value::as_str).unwrap_or_default();
+            changed.push(format!(
+                "{name} ({call_id}) returned with namespace {expected:?}, replayed with {replayed:?}"
+            ));
         }
     }
-    if let Some(first) = lost.first() {
+    if judged == 0 {
+        return Verdict::Violation(
+            "no replayed function_call matches a call the provider returned".into(),
+        );
+    }
+    if let Some(first) = changed.first() {
         return Verdict::Violation(format!(
-            "{SEARCHED_TOOL_CALL_WITHOUT_NAMESPACE}: {} call(s), first: {first}",
-            lost.len()
+            "{REPLAYED_CALL_NAMESPACE_CHANGED}: {} of {judged} call(s), first: {first}",
+            changed.len()
         ));
     }
     Verdict::Conformant
@@ -3190,43 +3222,52 @@ mod tests {
     use super::*;
 
     #[test]
-    fn searched_tool_namespace_checker_judges_only_searched_in_calls() {
-        let search = r#"{"type":"tool_search_call","call_id":"s1","execution":"client","arguments":{"query":"select:lookup"}}"#;
-        let output = r#"{"type":"tool_search_output","call_id":"s1","execution":"client","tools":[{"type":"function","name":"lookup","defer_loading":true}]}"#;
-        let body = |call: &str| format!(r#"{{"input":[{search},{output},{call}]}}"#);
-        let call = r#"{"type":"function_call","call_id":"c1","name":"lookup","arguments":"{}""#;
+    fn replayed_namespace_checker_round_trips_what_the_provider_returned() {
+        let namespaced = r#"{"output":[{"type":"function_call","call_id":"c1","name":"lookup","namespace":"lookup","arguments":"{}"}]}"#;
+        let plain = r#"{"output":[{"type":"function_call","call_id":"c1","name":"lookup","arguments":"{}"}]}"#;
+        let streamed = "event: response.output_item.done\ndata: {\"type\":\"response.output_item.done\",\"item\":{\"type\":\"function_call\",\"call_id\":\"c1\",\"name\":\"lookup\",\"namespace\":\"lookup\"}}\n\n";
+        let replay = |namespace: &str| {
+            format!(
+                r#"{{"input":[{{"role":"user","content":"go"}},{{"type":"function_call","call_id":"c1","name":"lookup","arguments":"{{}}"{namespace}}},{{"type":"function_call_output","call_id":"c1","output":"ok"}}]}}"#
+            )
+        };
+        let bare = replay("");
+        let kept = replay(r#","namespace":"lookup""#);
+        let other = replay(r#","namespace":"other""#);
 
-        let bare = body(&format!("{call}}}"));
-        let kept = body(&format!(r#"{call},"namespace":"lookup"}}"#));
-        let wrong = body(&format!(r#"{call},"namespace":"other"}}"#));
+        // The provider set a namespace: the replay must carry it.
         assert!(matches!(
-            searched_tool_calls_keep_namespace(&bare),
-            Verdict::Violation(reason) if reason.starts_with(SEARCHED_TOOL_CALL_WITHOUT_NAMESPACE)
+            replayed_calls_keep_returned_namespace(&[namespaced], &bare),
+            Verdict::Violation(reason) if reason.starts_with(REPLAYED_CALL_NAMESPACE_CHANGED)
         ));
+        assert!(!replayed_calls_keep_returned_namespace(&[streamed], &bare).is_conformant());
         assert_eq!(
-            searched_tool_calls_keep_namespace(&kept),
+            replayed_calls_keep_returned_namespace(&[namespaced], &kept),
             Verdict::Conformant
         );
-        assert!(!searched_tool_calls_keep_namespace(&wrong).is_conformant());
-
-        // A call made before the search loaded the tool, or to a tool no search
-        // loaded, is outside the invariant.
-        let earlier = format!(r#"{{"input":[{call}}},{search},{output}]}}"#);
+        assert!(!replayed_calls_keep_returned_namespace(&[namespaced], &other).is_conformant());
+        // The provider set none: either replay is accepted.
         assert_eq!(
-            searched_tool_calls_keep_namespace(&earlier),
+            replayed_calls_keep_returned_namespace(&[plain], &bare),
             Verdict::Conformant
         );
-        let eager = format!(r#"{{"input":[{call}}}]}}"#);
         assert_eq!(
-            searched_tool_calls_keep_namespace(&eager),
+            replayed_calls_keep_returned_namespace(&[plain], &kept),
             Verdict::Conformant
         );
 
-        // Bodies that are not a Responses request never pass.
-        for evidence in ["", "not-json", r#"{"messages":[]}"#] {
+        // Evidence that does not exercise the invariant never passes.
+        let unrelated = r#"{"output":[{"type":"function_call","call_id":"c9","name":"lookup"}]}"#;
+        for (responses, forwarded) in [
+            (vec![unrelated], bare.as_str()),
+            (vec![], bare.as_str()),
+            (vec![namespaced], ""),
+            (vec![namespaced], "not-json"),
+            (vec![namespaced], r#"{"messages":[]}"#),
+        ] {
             assert!(
-                !searched_tool_calls_keep_namespace(evidence).is_conformant(),
-                "{evidence:?} must not pass"
+                !replayed_calls_keep_returned_namespace(&responses, forwarded).is_conformant(),
+                "{forwarded:?} must not pass"
             );
         }
     }
