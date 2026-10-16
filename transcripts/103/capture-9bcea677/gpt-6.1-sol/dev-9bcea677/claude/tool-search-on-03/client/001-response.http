@@ -1,0 +1,62 @@
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Fri, 16 Oct 2026 07:17:19 GMT
+Content-Type: text/event-stream
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID, X-Bifrost-Setup-Token
+Access-Control-Max-Age: 86400
+Access-Control-Expose-Headers: x-bifrost-request-id, x-bifrost-trace-id, x-request-id, x-bifrost-provider, x-bifrost-original-model, x-bifrost-resolved-model, x-bifrost-fallback-index, x-bifrost-request-type, x-bifrost-upstream-latency-ms, x-bifrost-routing-info-provider, x-bifrost-routing-info-model, x-bifrost-routing-info-key, x-bifrost-routing-info-alias-model-id, x-bifrost-routing-info-alias-model-name, x-bifrost-routing-info-alias-model-family, x-bifrost-routing-info-is-fallback, x-bifrost-routing-info-primary-provider, x-bifrost-routing-info-primary-model, x-bifrost-routing-info-server-side-fallback-model, x-bifrost-routing-info-requested-provider, x-bifrost-routing-info-requested-model, x-bifrost-cache-hit, x-bifrost-cache-id, x-bifrost-cache-hit-type, x-bifrost-cache-hit-latency-ms, x-bifrost-cache-requested-provider, x-bifrost-cache-requested-model, x-bifrost-cache-similarity, x-bifrost-cache-threshold, x-bifrost-cache-provider-used, x-bifrost-cache-model-used, x-bifrost-cache-input-tokens, x-bifrost-latency-ms, x-bifrost-pricing-request-type, x-bifrost-converted-request-type, x-bifrost-dropped-compat-params, x-bifrost-dropped-unsupported-tools, x-bifrost-passthrough-path, x-bifrost-error-type, x-bifrost-retry-after-ms
+Vary: Origin
+X-Bifrost-Request-Id: fdcf167b-1441-4b87-bdd5-9d1a5d909c90
+X-Request-Id: [REDACTED: trace id]
+X-Bifrost-Trace-Id: 98d335450471416c92b510518202ae25
+X-Ratelimit-Reset-Requests: [REDACTED: rate limit]
+X-Ratelimit-Reset-Tokens: [REDACTED: rate limit]
+Cf-Ray: [REDACTED: trace id]
+Openai-Processing-Ms: [REDACTED: trace id]
+X-Ratelimit-Remaining-Requests: [REDACTED: rate limit]
+X-Ratelimit-Remaining-Tokens: [REDACTED: rate limit]
+Cf-Cache-Status: DYNAMIC
+Openai-Organization: [REDACTED: tenant id]
+Openai-Project: [REDACTED: tenant id]
+Openai-Version: 2020-10-01
+X-Ratelimit-Limit-Requests: [REDACTED: rate limit]
+X-Ratelimit-Limit-Tokens: [REDACTED: rate limit]
+X-Bifrost-Provider: openai
+X-Bifrost-Original-Model: gpt-6.1-sol
+X-Bifrost-Resolved-Model: gpt-6.1-sol
+X-Bifrost-Request-Type: responses_stream
+X-Bifrost-Routing-Info-Provider: openai
+X-Bifrost-Routing-Info-Model: gpt-6.1-sol
+X-Bifrost-Routing-Info-Key: k1
+X-Bifrost-Routing-Info-Requested-Provider: openai
+X-Bifrost-Routing-Info-Requested-Model: gpt-6.1-sol
+X-Bifrost-Upstream-Latency-Ms: 2752.116
+Cache-Control: no-cache
+Connection: keep-alive
+Transfer-Encoding: chunked
+
+event: message_start
+data: {"type":"message_start","message":{"id":"resp_0a43e5ff702087f7006ad1cf7d271487d08011cdf9ecae8341","type":"message","role":"assistant","content":[],"model":"gpt-6.1-sol","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":0,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":0}}}
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"call_Yr0AgT9YBB9KJh9yaE7AFhET","name":"ToolSearch","input":{}}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"query\":\"select:mcp__orders__lookup_order\",\"max_results\":1}","stop_sequence":null}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":""},"usage":{"input_tokens":3,"cache_creation_input_tokens":8738,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":32,"output_tokens_details":{"thinking_tokens":0}}}
+
+event: message_stop
+data: {"type":"message_stop"}
+

@@ -1,0 +1,43 @@
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Fri, 16 Oct 2026 07:15:47 GMT
+Content-Type: application/json
+Content-Length: 527
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID, X-Bifrost-Setup-Token
+Access-Control-Max-Age: 86400
+Access-Control-Expose-Headers: x-bifrost-request-id, x-bifrost-trace-id, x-request-id, x-bifrost-provider, x-bifrost-original-model, x-bifrost-resolved-model, x-bifrost-fallback-index, x-bifrost-request-type, x-bifrost-upstream-latency-ms, x-bifrost-routing-info-provider, x-bifrost-routing-info-model, x-bifrost-routing-info-key, x-bifrost-routing-info-alias-model-id, x-bifrost-routing-info-alias-model-name, x-bifrost-routing-info-alias-model-family, x-bifrost-routing-info-is-fallback, x-bifrost-routing-info-primary-provider, x-bifrost-routing-info-primary-model, x-bifrost-routing-info-server-side-fallback-model, x-bifrost-routing-info-requested-provider, x-bifrost-routing-info-requested-model, x-bifrost-cache-hit, x-bifrost-cache-id, x-bifrost-cache-hit-type, x-bifrost-cache-hit-latency-ms, x-bifrost-cache-requested-provider, x-bifrost-cache-requested-model, x-bifrost-cache-similarity, x-bifrost-cache-threshold, x-bifrost-cache-provider-used, x-bifrost-cache-model-used, x-bifrost-cache-input-tokens, x-bifrost-latency-ms, x-bifrost-pricing-request-type, x-bifrost-converted-request-type, x-bifrost-dropped-compat-params, x-bifrost-dropped-unsupported-tools, x-bifrost-passthrough-path, x-bifrost-error-type, x-bifrost-retry-after-ms
+Vary: Origin
+X-Bifrost-Request-Id: 9df62874-fdee-4860-b1e0-c9e99660f4cc
+X-Request-Id: [REDACTED: trace id]
+X-Bifrost-Trace-Id: 0720cddb701f428485b1ec3ef7511952
+Cf-Cache-Status: DYNAMIC
+X-Ratelimit-Limit-Requests: [REDACTED: rate limit]
+X-Ratelimit-Limit-Tokens: [REDACTED: rate limit]
+X-Ratelimit-Remaining-Requests: [REDACTED: rate limit]
+X-Ratelimit-Reset-Requests: [REDACTED: rate limit]
+X-Ratelimit-Reset-Tokens: [REDACTED: rate limit]
+Cf-Ray: [REDACTED: trace id]
+Openai-Organization: [REDACTED: tenant id]
+Openai-Processing-Ms: [REDACTED: trace id]
+Openai-Project: [REDACTED: tenant id]
+Openai-Version: 2020-10-01
+X-Ratelimit-Remaining-Tokens: [REDACTED: rate limit]
+X-Bifrost-Provider: openai
+X-Bifrost-Original-Model: gpt-6.1-sol
+X-Bifrost-Resolved-Model: gpt-6.1-sol
+X-Bifrost-Request-Type: responses
+X-Bifrost-Routing-Info-Provider: openai
+X-Bifrost-Routing-Info-Model: gpt-6.1-sol
+X-Bifrost-Routing-Info-Key: k1
+X-Bifrost-Routing-Info-Requested-Provider: openai
+X-Bifrost-Routing-Info-Requested-Model: gpt-6.1-sol
+X-Bifrost-Upstream-Latency-Ms: 3031.276
+
+{"id":"resp_01887cd8643df8c3006ad1cf2064f887d0ac4e1e184ec1c599","type":"message","role":"assistant","content":[{"type":"text","text":"Order **A-1001** has shipping status: **SHIPPED-CANARY-7731**."}],"model":"gpt-6.1-sol","stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":159,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":27,"output_tokens_details":{"thinking_tokens":0},"service_tier":"standard"}}

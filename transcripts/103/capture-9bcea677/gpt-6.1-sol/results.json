@@ -1,0 +1,434 @@
+[
+  {
+    "case": "dev-9bcea677/minimal/deferred-nonstream-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/minimal/deferred-nonstream-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/minimal/deferred-nonstream-03",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/minimal/deferred-stream-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/minimal/deferred-stream-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/minimal/deferred-stream-03",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/minimal/eager-nonstream-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/minimal/eager-nonstream-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/minimal/eager-nonstream-03",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/minimal/eager-stream-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/minimal/eager-stream-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/minimal/eager-stream-03",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/minimal/hosted-nonstream-01",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      200,
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-6.1-sol",
+    "turn1_called_tool": true,
+    "turn1_blocks": [
+      "server_tool_use",
+      "tool_search_tool_result",
+      "tool_use"
+    ]
+  },
+  {
+    "case": "dev-9bcea677/minimal/hosted-nonstream-02",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      200,
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-6.1-sol",
+    "turn1_called_tool": true,
+    "turn1_blocks": [
+      "server_tool_use",
+      "tool_search_tool_result",
+      "tool_use"
+    ]
+  },
+  {
+    "case": "dev-9bcea677/minimal/hosted-nonstream-03",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      200,
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-6.1-sol",
+    "turn1_called_tool": true,
+    "turn1_blocks": [
+      "server_tool_use",
+      "tool_search_tool_result",
+      "tool_use"
+    ]
+  },
+  {
+    "case": "dev-9bcea677/minimal/deferred-nonstream-gpt-6-sol-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6-sol"
+  },
+  {
+    "case": "dev-9bcea677/minimal/deferred-nonstream-gpt-6-sol-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-6-sol"
+  },
+  {
+    "case": "dev-9bcea677/minimal/deferred-nonstream-gpt-6-luna-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6-luna"
+  },
+  {
+    "case": "dev-9bcea677/minimal/deferred-nonstream-gpt-6-luna-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-6-luna"
+  },
+  {
+    "case": "dev-9bcea677/minimal/deferred-nonstream-gpt-6-astra-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6-astra"
+  },
+  {
+    "case": "dev-9bcea677/minimal/deferred-nonstream-gpt-6-astra-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6-astra"
+  },
+  {
+    "case": "dev-9bcea677/responses/with-namespace-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/responses/with-namespace-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/responses/with-namespace-03",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/responses/without-namespace-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/responses/without-namespace-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/responses/without-namespace-03",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6.1-sol"
+  },
+  {
+    "case": "dev-9bcea677/direct/as-forwarded-01",
+    "client_status": 200,
+    "namespace_rejection": false,
+    "canary_answer": true
+  },
+  {
+    "case": "dev-9bcea677/direct/as-forwarded-02",
+    "client_status": 200,
+    "namespace_rejection": false,
+    "canary_answer": true
+  },
+  {
+    "case": "dev-9bcea677/direct/as-forwarded-03",
+    "client_status": 200,
+    "namespace_rejection": false,
+    "canary_answer": true
+  },
+  {
+    "case": "dev-9bcea677/direct/namespace-restored-01",
+    "client_status": 200,
+    "namespace_rejection": false,
+    "canary_answer": true
+  },
+  {
+    "case": "dev-9bcea677/direct/namespace-restored-02",
+    "client_status": 200,
+    "namespace_rejection": false,
+    "canary_answer": true
+  },
+  {
+    "case": "dev-9bcea677/direct/namespace-restored-03",
+    "client_status": 200,
+    "namespace_rejection": false,
+    "canary_answer": true
+  },
+  {
+    "case": "dev-9bcea677/claude/tool-search-on-01",
+    "enable_tool_search": "true",
+    "exit_code": 0,
+    "tool_executions": 1,
+    "result": "Order **A-1001** has shipped. The orders system reports status: `SHIPPED-CANARY-7731`.",
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "upstream_post_statuses": [
+      200,
+      200,
+      200
+    ],
+    "continue_exit_code": 0,
+    "continue_result": "I checked again. Order **A-1001** still shows shipping status: `SHIPPED-CANARY-7731`.",
+    "continue_namespace_rejection": false,
+    "continue_upstream_post_statuses": [
+      200,
+      200
+    ],
+    "tool_executions_after_continue": 2
+  },
+  {
+    "case": "dev-9bcea677/claude/tool-search-on-02",
+    "enable_tool_search": "true",
+    "exit_code": 0,
+    "tool_executions": 1,
+    "result": "Order **A-1001** has shipped. The order system reports status: `SHIPPED-CANARY-7731`.",
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "upstream_post_statuses": [
+      200,
+      200,
+      200
+    ],
+    "continue_exit_code": 0,
+    "continue_result": "I checked again: order **A-1001** is **shipped**. The orders tool returned the same status: `SHIPPED-CANARY-7731`.",
+    "continue_namespace_rejection": false,
+    "continue_upstream_post_statuses": [
+      200,
+      200
+    ],
+    "tool_executions_after_continue": 2
+  },
+  {
+    "case": "dev-9bcea677/claude/tool-search-on-03",
+    "enable_tool_search": "true",
+    "exit_code": 0,
+    "tool_executions": 1,
+    "result": "Order **A-1001** has shipped. The reported shipping status is `SHIPPED-CANARY-7731`.",
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "upstream_post_statuses": [
+      200,
+      200,
+      200
+    ],
+    "continue_exit_code": 0,
+    "continue_result": "I checked again: order **A-1001** still shows shipping status `SHIPPED-CANARY-7731`. No tracking or delivery estimate was provided.",
+    "continue_namespace_rejection": false,
+    "continue_upstream_post_statuses": [
+      200,
+      200
+    ],
+    "tool_executions_after_continue": 2
+  },
+  {
+    "case": "dev-9bcea677/claude/tool-search-off-01",
+    "enable_tool_search": "false",
+    "exit_code": 0,
+    "tool_executions": 1,
+    "result": "Order **A-1001** has shipping status: **SHIPPED-CANARY-7731**.",
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "upstream_post_statuses": [
+      200,
+      200
+    ]
+  },
+  {
+    "case": "dev-9bcea677/claude/tool-search-off-02",
+    "enable_tool_search": "false",
+    "exit_code": 0,
+    "tool_executions": 1,
+    "result": "Order **A-1001** has shipping status: **SHIPPED-CANARY-7731**.",
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "upstream_post_statuses": [
+      200,
+      200
+    ]
+  },
+  {
+    "case": "dev-9bcea677/claude/tool-search-off-03",
+    "enable_tool_search": "false",
+    "exit_code": 0,
+    "tool_executions": 1,
+    "result": "Order **A-1001** has shipping status: **SHIPPED-CANARY-7731**.",
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "upstream_post_statuses": [
+      200,
+      200
+    ]
+  }
+]
