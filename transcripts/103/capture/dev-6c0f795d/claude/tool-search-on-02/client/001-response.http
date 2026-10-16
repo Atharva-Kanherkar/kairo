@@ -1,0 +1,317 @@
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Fri, 16 Oct 2026 06:25:51 GMT
+Content-Type: text/event-stream
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID, X-Bifrost-Setup-Token
+Access-Control-Max-Age: 86400
+Access-Control-Expose-Headers: x-bifrost-request-id, x-bifrost-trace-id, x-request-id, x-bifrost-provider, x-bifrost-original-model, x-bifrost-resolved-model, x-bifrost-fallback-index, x-bifrost-request-type, x-bifrost-upstream-latency-ms, x-bifrost-routing-info-provider, x-bifrost-routing-info-model, x-bifrost-routing-info-key, x-bifrost-routing-info-alias-model-id, x-bifrost-routing-info-alias-model-name, x-bifrost-routing-info-alias-model-family, x-bifrost-routing-info-is-fallback, x-bifrost-routing-info-primary-provider, x-bifrost-routing-info-primary-model, x-bifrost-routing-info-server-side-fallback-model, x-bifrost-routing-info-requested-provider, x-bifrost-routing-info-requested-model, x-bifrost-cache-hit, x-bifrost-cache-id, x-bifrost-cache-hit-type, x-bifrost-cache-hit-latency-ms, x-bifrost-cache-requested-provider, x-bifrost-cache-requested-model, x-bifrost-cache-similarity, x-bifrost-cache-threshold, x-bifrost-cache-provider-used, x-bifrost-cache-model-used, x-bifrost-cache-input-tokens, x-bifrost-latency-ms, x-bifrost-pricing-request-type, x-bifrost-converted-request-type, x-bifrost-dropped-compat-params, x-bifrost-dropped-unsupported-tools, x-bifrost-passthrough-path, x-bifrost-error-type, x-bifrost-retry-after-ms
+Vary: Origin
+X-Bifrost-Request-Id: dd9ae89d-b34f-42f4-afca-3fdc7850da99
+X-Request-Id: [REDACTED: trace id]
+X-Bifrost-Trace-Id: 3dbd9bd286c548b799edd15c1546e5e7
+X-Ratelimit-Limit-Tokens: [REDACTED: rate limit]
+X-Ratelimit-Remaining-Tokens: [REDACTED: rate limit]
+Openai-Processing-Ms: [REDACTED: trace id]
+Openai-Project: [REDACTED: tenant id]
+X-Ratelimit-Remaining-Requests: [REDACTED: rate limit]
+X-Ratelimit-Reset-Requests: [REDACTED: rate limit]
+X-Ratelimit-Reset-Tokens: [REDACTED: rate limit]
+Cf-Ray: [REDACTED: trace id]
+Cf-Cache-Status: DYNAMIC
+Openai-Organization: [REDACTED: tenant id]
+Openai-Version: 2020-10-01
+X-Ratelimit-Limit-Requests: [REDACTED: rate limit]
+X-Bifrost-Provider: openai
+X-Bifrost-Original-Model: gpt-5.4-mini
+X-Bifrost-Resolved-Model: gpt-5.4-mini
+X-Bifrost-Request-Type: responses_stream
+X-Bifrost-Routing-Info-Provider: openai
+X-Bifrost-Routing-Info-Model: gpt-5.4-mini
+X-Bifrost-Routing-Info-Key: k1
+X-Bifrost-Routing-Info-Requested-Provider: openai
+X-Bifrost-Routing-Info-Requested-Model: gpt-5.4-mini
+X-Bifrost-Upstream-Latency-Ms: 2793.996
+Cache-Control: no-cache
+Connection: keep-alive
+Transfer-Encoding: chunked
+
+event: message_start
+data: {"type":"message_start","message":{"id":"resp_0f856075daedb327006ad1c36d574887d0ace172f114a450a5","type":"message","role":"assistant","content":[],"model":"gpt-5.4-mini-2026-03-17","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":0,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":0}}}
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"redacted_thinking","data":"brid_rs_0f856075daedb327006ad1c36dda1087d0b761f66aa97f0763:gAAAAABq0cNtiQQbj2ix2-ca1iinNbxSSJIZxSEgtZmk2DjAhdat1TuDBDhkz2lbLBuhtMX_fV4mVGBtJnTSY4JEqGRgnnwsuR8Ca40RqZHn8lQ3jZ_eA_Tp2VhNUdp2cONjT7kD2HmUvhBFFPHW4duZ3R2lQQmMF4pFNXmyCiS6ZXYR9YEWvvNrAjiugBU1KkVCC8urk57UPMw46x5UQ_r081YekhCm8CCZT1FdD-_Zpc79vdnmnzDi8x49bCuxMkttfH498zMog1IC5IlfTytIkLxqjJLCX9avdmGkv-vjAPEzt3BXQPsEhKE9AdaZ-JPkIVu9ede7Y8vRpByR3KRlB0twsokuegpTxO-17QQOBCzu8L8KA3G3uzDKmRFnhR_z9bcrBhIwmToaH509SjaG-xEfXvwe1V3yinC_nt304ZWw3HzQE_xe0AHajdqH1DMyffCiDt94Y1DVFiogGrHT8afC9ZrDcdlgURWYxi5ZuqjpPCmh_KAKaxPqwDueVpJ1Jw9LJg0LL4oH5VUZATuoxxolJFJNslZDaQ9jgH45h7PL1prUfN19Wuuk5z15tZm_X5Hpg3T3_L8C1rBNb2zP5LRtqS-ZnDSKS_CBmECzF4xTJujqEqIOkdAlPGiu7Q0Ff06xvoEGFYPwlaVpx6tHd2P0KouxOdZYsGaoWSyYyQxOhC-n-t-7Zqqgey5eXb-9BIqtnZ1bWMPlCPPsv_8rnL8ov7YrNAqa6603T_pWTlojS-V7rJ2n3ceFLALr21fjFfiU6uRRiB0SG98yzblirxmcJtZc8EgcUza-hYA_58-DgCmeRODjGMEJATAGDGeoTwKNXM5XjY7klKGZv55GjaBWQkMGEpx3y41pvu2hnTlfPoppBz99lhMKBWUWoNahyIPa04pYFr6s7js05-F-0MkoTPo8vJRm7fy--0owrMleyRgFslf66_0AabbOSRcmO2EKycsezq9NbPEG8aYkUSMFGYIu-D7NXynmueH6ZTXLcDADJNYJUjAtYejQGGel4KbFPdT1KJ16HPwC9Tdubn_xOZD-1gXrREdb0gb5NwTxHD2Dz5ck9QRD8G0L519lt7T-IRfSJIrlQa_f3uG2v069Dq5nS4uz4akwsxfnqb9byvAffKeQSZv-0QWdvW3OD3aHYD8HPN9pwif6MRXLBB3ZJBSb744s_OOeTfpfgr9x_doStYY5f-oO7JM05H_Gtj1T7LvDorMv0SioEaveiwaKKQprdw=="}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+
+event: content_block_start
+data: {"type":"content_block_start","index":1,"content_block":{"type":"thinking","thinking":"","signature":"brid_rs_0f856075daedb327006ad1c36dda1087d0b761f66aa97f0763:"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":"**Fetching order status**\n\nI","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" need","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" to","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" respond","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" to","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" the","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" user","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" about","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" the","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" shipping","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" status","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" of","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" their","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" order","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" A","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":"-","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":"100","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":"1","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":".","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" To","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" do","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" that","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":",","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" I","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":"’ll","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" use","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" the","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" orders","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" tools","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":".","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" First","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":",","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" I","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":"’ll","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" load","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" the","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" schema","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" using","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" the","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" tool","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" to","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" search","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" for","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" the","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" specific","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" order","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":".","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" This","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" is","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" a","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" straightforward","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" lookup","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":".","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" I","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":"’ll","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" probably","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" just","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" use","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" the","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" search","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" tool","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" and","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" then","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" call","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" the","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" relevant","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" function","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" to","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" get","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" the","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" information","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":".","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" Let","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":"’s","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" go","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" ahead","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" and","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" fetch","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" that","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":" schema","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"thinking_delta","thinking":"!","stop_sequence":null}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":1}
+
+event: content_block_start
+data: {"type":"content_block_start","index":2,"content_block":{"type":"tool_use","id":"call_TCHOpEoyH5xbUCYyeBQKYEel","name":"ToolSearch","input":{}}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":2,"delta":{"type":"input_json_delta","partial_json":"{\"query\":\"select:mcp__orders__lookup_order\",\"max_results\":5}","stop_sequence":null}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":2}
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":""},"usage":{"input_tokens":8740,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":99,"output_tokens_details":{"thinking_tokens":65}}}
+
+event: message_stop
+data: {"type":"message_stop"}
+

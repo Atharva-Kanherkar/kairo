@@ -1,0 +1,42 @@
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Fri, 16 Oct 2026 06:27:06 GMT
+Content-Type: application/json
+Content-Length: 521
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID, X-Bifrost-Setup-Token
+Access-Control-Max-Age: 86400
+Vary: Origin
+X-Bifrost-Request-Id: dce5cc96-c3e0-40b8-b8e4-955576a5d9ac
+X-Request-Id: [REDACTED: trace id]
+X-Bifrost-Trace-Id: a70a566343954db79f71953d15245226
+X-Ratelimit-Reset-Requests: [REDACTED: rate limit]
+Cf-Ray: [REDACTED: trace id]
+Cf-Cache-Status: DYNAMIC
+Openai-Organization: [REDACTED: tenant id]
+Openai-Processing-Ms: [REDACTED: trace id]
+X-Ratelimit-Limit-Requests: [REDACTED: rate limit]
+X-Ratelimit-Remaining-Tokens: [REDACTED: rate limit]
+X-Ratelimit-Reset-Tokens: [REDACTED: rate limit]
+Openai-Project: [REDACTED: tenant id]
+Openai-Version: 2020-10-01
+X-Ratelimit-Limit-Tokens: [REDACTED: rate limit]
+X-Ratelimit-Remaining-Requests: [REDACTED: rate limit]
+X-Bifrost-Provider: openai
+X-Bifrost-Original-Model: gpt-5.4-mini
+X-Bifrost-Resolved-Model: gpt-5.4-mini
+X-Bifrost-Request-Type: responses
+X-Bifrost-Routing-Info-Provider: openai
+X-Bifrost-Routing-Info-Model: gpt-5.4-mini
+X-Bifrost-Routing-Info-Key: k1
+X-Bifrost-Routing-Info-Requested-Provider: openai
+X-Bifrost-Routing-Info-Requested-Model: gpt-5.4-mini
+X-Bifrost-Upstream-Latency-Ms: 1111.561
+
+{"id":"resp_012127bcc7bdfd7a006ad1c3b9aa2887d0acaf79752aaef1ff","type":"message","role":"assistant","content":[{"type":"text","text":"Order A-1001 status: **SHIPPED-CANARY-7731**"}],"model":"gpt-5.4-mini-2026-03-17","stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":159,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":22,"output_tokens_details":{"thinking_tokens":0},"service_tier":"standard"}}

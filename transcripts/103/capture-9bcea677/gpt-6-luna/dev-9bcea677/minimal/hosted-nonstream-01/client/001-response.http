@@ -1,0 +1,47 @@
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Fri, 16 Oct 2026 07:19:21 GMT
+Content-Type: application/json
+Content-Length: 1010
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID, X-Bifrost-Setup-Token
+Access-Control-Max-Age: 86400
+Access-Control-Expose-Headers: x-bifrost-request-id, x-bifrost-trace-id, x-request-id, x-bifrost-provider, x-bifrost-original-model, x-bifrost-resolved-model, x-bifrost-fallback-index, x-bifrost-request-type, x-bifrost-upstream-latency-ms, x-bifrost-routing-info-provider, x-bifrost-routing-info-model, x-bifrost-routing-info-key, x-bifrost-routing-info-alias-model-id, x-bifrost-routing-info-alias-model-name, x-bifrost-routing-info-alias-model-family, x-bifrost-routing-info-is-fallback, x-bifrost-routing-info-primary-provider, x-bifrost-routing-info-primary-model, x-bifrost-routing-info-server-side-fallback-model, x-bifrost-routing-info-requested-provider, x-bifrost-routing-info-requested-model, x-bifrost-cache-hit, x-bifrost-cache-id, x-bifrost-cache-hit-type, x-bifrost-cache-hit-latency-ms, x-bifrost-cache-requested-provider, x-bifrost-cache-requested-model, x-bifrost-cache-similarity, x-bifrost-cache-threshold, x-bifrost-cache-provider-used, x-bifrost-cache-model-used, x-bifrost-cache-input-tokens, x-bifrost-latency-ms, x-bifrost-pricing-request-type, x-bifrost-converted-request-type, x-bifrost-dropped-compat-params, x-bifrost-dropped-unsupported-tools, x-bifrost-passthrough-path, x-bifrost-error-type, x-bifrost-retry-after-ms
+Vary: Origin
+X-Bifrost-Request-Id: f57cd8aa-2b18-40d8-a6b3-d09ce95b43c5
+X-Request-Id: [REDACTED: trace id]
+X-Bifrost-Trace-Id: 4661e6ecea9e4b20bb1bb0c605aa12a6
+Cf-Cache-Status: DYNAMIC
+Openai-Organization: [REDACTED: tenant id]
+Openai-Processing-Ms: [REDACTED: trace id]
+Openai-Version: 2020-10-01
+X-Ratelimit-Limit-Tokens: [REDACTED: rate limit]
+X-Ratelimit-Remaining-Tokens: [REDACTED: rate limit]
+X-Ratelimit-Reset-Requests: [REDACTED: rate limit]
+Cf-Ray: [REDACTED: trace id]
+Openai-Project: [REDACTED: tenant id]
+X-Ratelimit-Limit-Requests: [REDACTED: rate limit]
+X-Ratelimit-Remaining-Requests: [REDACTED: rate limit]
+X-Ratelimit-Reset-Tokens: [REDACTED: rate limit]
+X-Bifrost-Provider: openai
+X-Bifrost-Original-Model: gpt-6-luna
+X-Bifrost-Resolved-Model: gpt-6-luna
+X-Bifrost-Request-Type: responses
+X-Bifrost-Routing-Info-Provider: openai
+X-Bifrost-Routing-Info-Model: gpt-6-luna
+X-Bifrost-Routing-Info-Key: k1
+X-Bifrost-Routing-Info-Requested-Provider: openai
+X-Bifrost-Routing-Info-Requested-Model: gpt-6-luna
+X-Bifrost-Upstream-Latency-Ms: 2735.807
+
+{"id":"resp_0bf13ecf764b6606006ad1cff6f96487d08f80176ef752d165","type":"message","role":"assistant","content":[{"type":"server_tool_use","id":"tsc_0bf13ecf764b6606006ad1cff8064087d0b643de42d1b480ee","name":"tool_search_tool_bm25","input":{
+        "paths": [
+          "mcp__orders__lookup_order"
+        ]
+      }},{"type":"tool_search_tool_result","tool_use_id":"tsc_0bf13ecf764b6606006ad1cff8064087d0b643de42d1b480ee","content":{"type":"tool_search_tool_search_result","tool_references":[{"type":"tool_reference","tool_name":"mcp__orders__lookup_order"}]}},{"type":"tool_use","id":"call_BxUGP2RFPayseZ3gn5hfnGml","name":"mcp__orders__lookup_order","input":{"order_id":"A-1001"}}],"model":"gpt-6-luna","stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":598,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":57,"output_tokens_details":{"thinking_tokens":25},"service_tier":"standard"}}

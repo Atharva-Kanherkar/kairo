@@ -1,0 +1,8 @@
+POST /v1/responses HTTP/1.1
+User-Agent: fasthttp
+Host: 127.0.0.1:9940
+Content-Type: application/json
+Content-Length: 1322
+Authorization: [REDACTED: credential]
+
+{"model":"gpt-5.4-mini","max_output_tokens":1024,"input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"What is the shipping status of order A-1001? Find the right tool and call it."}]},{"arguments":{"paths":["mcp__orders__lookup_order"]},"type":"tool_search_call","status":"completed","execution":"server"},{"tools":[{"type":"function","name":"mcp__orders__lookup_order","description":"Look up the shipping status of a customer order by its order id.","defer_loading":true,"parameters":{"type":"object","properties":{"order_id":{"type":"string"}},"required":["order_id"]},"strict":false}],"type":"tool_search_output","status":"completed","execution":"server"},{"arguments":"{\"order_id\": \"A-1001\"}","id":"fc_60fc9492e98b86222e863334b9a20ef6cb21bc8c5c01d0ae1e","type":"function_call","call_id":"call_Bh0g42qaJ8J1xCpj3S22pmDg","name":"mcp__orders__lookup_order"},{"type":"function_call_output","call_id":"call_Bh0g42qaJ8J1xCpj3S22pmDg","output":"Order A-1001 status: SHIPPED-CANARY-7731"}],"tools":[{"type":"tool_search"},{"type":"function","name":"mcp__orders__lookup_order","description":"Look up the shipping status of a customer order by its order id.","defer_loading":true,"parameters":{"type":"object","properties":{"order_id":{"type":"string"}},"required":["order_id"]},"strict":false}]}

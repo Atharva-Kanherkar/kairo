@@ -1,0 +1,9 @@
+POST /anthropic/v1/messages HTTP/1.1
+Host: 127.0.0.1:9941
+Accept-Encoding: identity
+Content-Length: 1278
+content-type: application/json
+anthropic-version: 2023-06-01
+x-api-key: [REDACTED: credential]
+
+{"model": "openai/gpt-5.4-mini", "max_tokens": 1024, "tools": [{"type": "tool_search_tool_bm25_20251119", "name": "tool_search_tool_bm25"}, {"name": "mcp__orders__lookup_order", "description": "Look up the shipping status of a customer order by its order id.", "input_schema": {"type": "object", "properties": {"order_id": {"type": "string"}}, "required": ["order_id"]}, "defer_loading": true}], "messages": [{"role": "user", "content": "What is the shipping status of order A-1001? Find the right tool and call it."}, {"role": "assistant", "content": [{"type": "server_tool_use", "id": "tsc_0b85728610d68357006ad1c35199b487d0beb26bf5b8905e07", "name": "tool_search_tool_bm25", "input": {"paths": ["mcp__orders__lookup_order"]}}, {"type": "tool_search_tool_result", "tool_use_id": "tsc_0b85728610d68357006ad1c35199b487d0beb26bf5b8905e07", "content": {"type": "tool_search_tool_search_result", "tool_references": [{"type": "tool_reference", "tool_name": "mcp__orders__lookup_order"}]}}, {"type": "tool_use", "id": "call_Bh0g42qaJ8J1xCpj3S22pmDg", "name": "mcp__orders__lookup_order", "input": {"order_id": "A-1001"}}]}, {"role": "user", "content": [{"type": "tool_result", "tool_use_id": "call_Bh0g42qaJ8J1xCpj3S22pmDg", "content": "Order A-1001 status: SHIPPED-CANARY-7731"}]}]}

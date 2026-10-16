@@ -1,0 +1,1092 @@
+[
+  {
+    "case": "dev-6c0f795d/minimal/deferred-nonstream-01",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/deferred-nonstream-02",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/deferred-nonstream-03",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/deferred-nonstream-04",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/deferred-nonstream-05",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/deferred-stream-01",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/deferred-stream-02",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/deferred-stream-03",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/deferred-stream-04",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/deferred-stream-05",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/eager-nonstream-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/eager-nonstream-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/eager-nonstream-03",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/eager-nonstream-04",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/eager-nonstream-05",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/eager-stream-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/eager-stream-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/eager-stream-03",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/eager-stream-04",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/eager-stream-05",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/hosted-nonstream-01",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      200,
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini",
+    "turn1_called_tool": true,
+    "turn1_blocks": [
+      "server_tool_use",
+      "tool_search_tool_result",
+      "tool_use"
+    ]
+  },
+  {
+    "case": "dev-6c0f795d/minimal/hosted-nonstream-02",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      200,
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini",
+    "turn1_called_tool": true,
+    "turn1_blocks": [
+      "server_tool_use",
+      "tool_search_tool_result",
+      "tool_use"
+    ]
+  },
+  {
+    "case": "dev-6c0f795d/minimal/hosted-nonstream-03",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      200,
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini",
+    "turn1_called_tool": true,
+    "turn1_blocks": [
+      "server_tool_use",
+      "tool_search_tool_result",
+      "tool_use"
+    ]
+  },
+  {
+    "case": "dev-6c0f795d/minimal/hosted-nonstream-04",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      200,
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini",
+    "turn1_called_tool": true,
+    "turn1_blocks": [
+      "server_tool_use",
+      "tool_search_tool_result",
+      "tool_use"
+    ]
+  },
+  {
+    "case": "dev-6c0f795d/minimal/hosted-nonstream-05",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      200,
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini",
+    "turn1_called_tool": true,
+    "turn1_blocks": [
+      "server_tool_use",
+      "tool_search_tool_result",
+      "tool_use"
+    ]
+  },
+  {
+    "case": "dev-6c0f795d/minimal/deferred-nonstream-gpt-5.5-01",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.5"
+  },
+  {
+    "case": "dev-6c0f795d/minimal/deferred-nonstream-gpt-5.5-02",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.5"
+  },
+  {
+    "case": "dev-6c0f795d/responses/with-namespace-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/responses/with-namespace-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/responses/with-namespace-03",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/responses/with-namespace-04",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/responses/with-namespace-05",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/responses/without-namespace-01",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/responses/without-namespace-02",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/responses/without-namespace-03",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/responses/without-namespace-04",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/responses/without-namespace-05",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "dev-6c0f795d/direct/as-forwarded-01",
+    "client_status": 400,
+    "namespace_rejection": true,
+    "canary_answer": false
+  },
+  {
+    "case": "dev-6c0f795d/direct/as-forwarded-02",
+    "client_status": 400,
+    "namespace_rejection": true,
+    "canary_answer": false
+  },
+  {
+    "case": "dev-6c0f795d/direct/as-forwarded-03",
+    "client_status": 400,
+    "namespace_rejection": true,
+    "canary_answer": false
+  },
+  {
+    "case": "dev-6c0f795d/direct/as-forwarded-04",
+    "client_status": 400,
+    "namespace_rejection": true,
+    "canary_answer": false
+  },
+  {
+    "case": "dev-6c0f795d/direct/as-forwarded-05",
+    "client_status": 400,
+    "namespace_rejection": true,
+    "canary_answer": false
+  },
+  {
+    "case": "dev-6c0f795d/direct/namespace-restored-01",
+    "client_status": 200,
+    "namespace_rejection": false,
+    "canary_answer": true
+  },
+  {
+    "case": "dev-6c0f795d/direct/namespace-restored-02",
+    "client_status": 200,
+    "namespace_rejection": false,
+    "canary_answer": true
+  },
+  {
+    "case": "dev-6c0f795d/direct/namespace-restored-03",
+    "client_status": 200,
+    "namespace_rejection": false,
+    "canary_answer": true
+  },
+  {
+    "case": "dev-6c0f795d/direct/namespace-restored-04",
+    "client_status": 200,
+    "namespace_rejection": false,
+    "canary_answer": true
+  },
+  {
+    "case": "dev-6c0f795d/direct/namespace-restored-05",
+    "client_status": 200,
+    "namespace_rejection": false,
+    "canary_answer": true
+  },
+  {
+    "case": "dev-6c0f795d/claude/tool-search-on-01",
+    "enable_tool_search": "true",
+    "exit_code": 1,
+    "tool_executions": 1,
+    "result": "API Error: 400 Missing namespace for function_call 'mcp__orders__lookup_order'. It does not exist in the default namespace. Round-trip the model's function_call item with its namespace field included.",
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "upstream_post_statuses": [
+      200,
+      200,
+      400,
+      400,
+      400
+    ],
+    "continue_exit_code": 1,
+    "continue_result": "API Error: 400 Missing namespace for function_call 'mcp__orders__lookup_order'. It does not exist in the default namespace. Round-trip the model's function_call item with its namespace field included.",
+    "continue_namespace_rejection": true,
+    "continue_upstream_post_statuses": [
+      400,
+      400,
+      400
+    ],
+    "tool_executions_after_continue": 1
+  },
+  {
+    "case": "dev-6c0f795d/claude/tool-search-on-02",
+    "enable_tool_search": "true",
+    "exit_code": 1,
+    "tool_executions": 1,
+    "result": "API Error: 400 Missing namespace for function_call 'mcp__orders__lookup_order'. It does not exist in the default namespace. Round-trip the model's function_call item with its namespace field included.",
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "upstream_post_statuses": [
+      200,
+      200,
+      400,
+      400,
+      400
+    ],
+    "continue_exit_code": 1,
+    "continue_result": "API Error: 400 Missing namespace for function_call 'mcp__orders__lookup_order'. It does not exist in the default namespace. Round-trip the model's function_call item with its namespace field included.",
+    "continue_namespace_rejection": true,
+    "continue_upstream_post_statuses": [
+      400,
+      400,
+      400
+    ],
+    "tool_executions_after_continue": 1
+  },
+  {
+    "case": "dev-6c0f795d/claude/tool-search-on-03",
+    "enable_tool_search": "true",
+    "exit_code": 1,
+    "tool_executions": 1,
+    "result": "API Error: 400 Missing namespace for function_call 'mcp__orders__lookup_order'. It does not exist in the default namespace. Round-trip the model's function_call item with its namespace field included.",
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "upstream_post_statuses": [
+      200,
+      200,
+      400,
+      400,
+      400
+    ],
+    "continue_exit_code": 1,
+    "continue_result": "API Error: 400 Missing namespace for function_call 'mcp__orders__lookup_order'. It does not exist in the default namespace. Round-trip the model's function_call item with its namespace field included.",
+    "continue_namespace_rejection": true,
+    "continue_upstream_post_statuses": [
+      400,
+      400,
+      400
+    ],
+    "tool_executions_after_continue": 1
+  },
+  {
+    "case": "dev-6c0f795d/claude/tool-search-on-04",
+    "enable_tool_search": "true",
+    "exit_code": 1,
+    "tool_executions": 1,
+    "result": "API Error: 400 Missing namespace for function_call 'mcp__orders__lookup_order'. It does not exist in the default namespace. Round-trip the model's function_call item with its namespace field included.",
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "upstream_post_statuses": [
+      200,
+      200,
+      400,
+      400,
+      400
+    ],
+    "continue_exit_code": 1,
+    "continue_result": "API Error: 400 Missing namespace for function_call 'mcp__orders__lookup_order'. It does not exist in the default namespace. Round-trip the model's function_call item with its namespace field included.",
+    "continue_namespace_rejection": true,
+    "continue_upstream_post_statuses": [
+      400,
+      400,
+      400
+    ],
+    "tool_executions_after_continue": 1
+  },
+  {
+    "case": "dev-6c0f795d/claude/tool-search-on-05",
+    "enable_tool_search": "true",
+    "exit_code": 1,
+    "tool_executions": 1,
+    "result": "API Error: 400 Missing namespace for function_call 'mcp__orders__lookup_order'. It does not exist in the default namespace. Round-trip the model's function_call item with its namespace field included.",
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "upstream_post_statuses": [
+      200,
+      200,
+      400,
+      400,
+      400
+    ],
+    "continue_exit_code": 1,
+    "continue_result": "API Error: 400 Missing namespace for function_call 'mcp__orders__lookup_order'. It does not exist in the default namespace. Round-trip the model's function_call item with its namespace field included.",
+    "continue_namespace_rejection": true,
+    "continue_upstream_post_statuses": [
+      400,
+      400,
+      400
+    ],
+    "tool_executions_after_continue": 1
+  },
+  {
+    "case": "dev-6c0f795d/claude/tool-search-off-01",
+    "enable_tool_search": "false",
+    "exit_code": 0,
+    "tool_executions": 1,
+    "result": "Order **A-1001** is **SHIPPED-CANARY-7731**.",
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "upstream_post_statuses": [
+      200,
+      200
+    ]
+  },
+  {
+    "case": "dev-6c0f795d/claude/tool-search-off-02",
+    "enable_tool_search": "false",
+    "exit_code": 0,
+    "tool_executions": 1,
+    "result": "Order **A-1001** is **SHIPPED-CANARY-7731**.",
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "upstream_post_statuses": [
+      200,
+      200
+    ]
+  },
+  {
+    "case": "dev-6c0f795d/claude/tool-search-off-03",
+    "enable_tool_search": "false",
+    "exit_code": 0,
+    "tool_executions": 1,
+    "result": "Order A-1001 is **SHIPPED-CANARY-7731**.",
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "upstream_post_statuses": [
+      200,
+      200
+    ]
+  },
+  {
+    "case": "dev-6c0f795d/claude/tool-search-off-04",
+    "enable_tool_search": "false",
+    "exit_code": 0,
+    "tool_executions": 1,
+    "result": "Order **A-1001** is **SHIPPED-CANARY-7731**.",
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "upstream_post_statuses": [
+      200,
+      200
+    ]
+  },
+  {
+    "case": "dev-6c0f795d/claude/tool-search-off-05",
+    "enable_tool_search": "false",
+    "exit_code": 0,
+    "tool_executions": 1,
+    "result": "Order **A-1001** is **SHIPPED-CANARY-7731**.",
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "upstream_post_statuses": [
+      200,
+      200
+    ]
+  },
+  {
+    "case": "v2.3.0/minimal/deferred-nonstream-01",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/deferred-nonstream-02",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/deferred-nonstream-03",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/deferred-nonstream-04",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/deferred-nonstream-05",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/deferred-stream-01",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/deferred-stream-02",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/deferred-stream-03",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/deferred-stream-04",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/deferred-stream-05",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/eager-nonstream-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/eager-nonstream-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/eager-nonstream-03",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/eager-nonstream-04",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/eager-nonstream-05",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/eager-stream-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/eager-stream-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/eager-stream-03",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/eager-stream-04",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/eager-stream-05",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/minimal/hosted-nonstream-01",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini",
+    "turn1_called_tool": false
+  },
+  {
+    "case": "v2.3.0/minimal/hosted-nonstream-02",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini",
+    "turn1_called_tool": false
+  },
+  {
+    "case": "v2.3.0/minimal/hosted-nonstream-03",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini",
+    "turn1_called_tool": false
+  },
+  {
+    "case": "v2.3.0/minimal/hosted-nonstream-04",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini",
+    "turn1_called_tool": false
+  },
+  {
+    "case": "v2.3.0/minimal/hosted-nonstream-05",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini",
+    "turn1_called_tool": false
+  },
+  {
+    "case": "v2.3.0/minimal/deferred-nonstream-gpt-5.5-01",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-5.5"
+  },
+  {
+    "case": "v2.3.0/minimal/deferred-nonstream-gpt-5.5-02",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": false,
+    "canary_answer": false,
+    "model": "openai/gpt-5.5"
+  },
+  {
+    "case": "v2.3.0/responses/with-namespace-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/responses/with-namespace-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/responses/with-namespace-03",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/responses/with-namespace-04",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/responses/with-namespace-05",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/responses/without-namespace-01",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/responses/without-namespace-02",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/responses/without-namespace-03",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/responses/without-namespace-04",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/responses/without-namespace-05",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-5.4-mini"
+  },
+  {
+    "case": "v2.3.0/direct/as-forwarded-01",
+    "client_status": 400,
+    "namespace_rejection": false,
+    "canary_answer": false
+  },
+  {
+    "case": "v2.3.0/direct/as-forwarded-02",
+    "client_status": 400,
+    "namespace_rejection": false,
+    "canary_answer": false
+  },
+  {
+    "case": "v2.3.0/direct/as-forwarded-03",
+    "client_status": 400,
+    "namespace_rejection": false,
+    "canary_answer": false
+  },
+  {
+    "case": "v2.3.0/direct/as-forwarded-04",
+    "client_status": 400,
+    "namespace_rejection": false,
+    "canary_answer": false
+  },
+  {
+    "case": "v2.3.0/direct/as-forwarded-05",
+    "client_status": 400,
+    "namespace_rejection": false,
+    "canary_answer": false
+  },
+  {
+    "case": "v2.3.0/direct/namespace-restored-01",
+    "client_status": 400,
+    "namespace_rejection": false,
+    "canary_answer": false
+  },
+  {
+    "case": "v2.3.0/direct/namespace-restored-02",
+    "client_status": 400,
+    "namespace_rejection": false,
+    "canary_answer": false
+  },
+  {
+    "case": "v2.3.0/direct/namespace-restored-03",
+    "client_status": 400,
+    "namespace_rejection": false,
+    "canary_answer": false
+  },
+  {
+    "case": "v2.3.0/direct/namespace-restored-04",
+    "client_status": 400,
+    "namespace_rejection": false,
+    "canary_answer": false
+  },
+  {
+    "case": "v2.3.0/direct/namespace-restored-05",
+    "client_status": 400,
+    "namespace_rejection": false,
+    "canary_answer": false
+  }
+]

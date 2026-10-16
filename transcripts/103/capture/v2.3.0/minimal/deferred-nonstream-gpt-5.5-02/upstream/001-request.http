@@ -1,0 +1,8 @@
+POST /v1/responses HTTP/1.1
+User-Agent: fasthttp
+Host: 127.0.0.1:9940
+Content-Type: application/json
+Content-Length: 1326
+Authorization: [REDACTED: credential]
+
+{"model":"gpt-5.5","max_output_tokens":400,"input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"What is the shipping status of order A-1001? Use the orders tools."}]},{"arguments":"{\"query\": \"select:mcp__orders__lookup_order\", \"max_results\": 5}","id":"fc_dfadfd6bd92c5aa178daddd5d315117afbfab6d330581bb016","type":"function_call","call_id":"toolu_kairo_search_1","name":"ToolSearch"},{"type":"function_call_output","call_id":"toolu_kairo_search_1","output":""},{"arguments":"{\"order_id\": \"A-1001\"}","id":"fc_8badb864a3125b102485f458fe34520ad836bbb3404ee6c02d","type":"function_call","call_id":"toolu_kairo_lookup_1","name":"mcp__orders__lookup_order"},{"type":"function_call_output","call_id":"toolu_kairo_lookup_1","output":"Order A-1001 status: SHIPPED-CANARY-7731"}],"tools":[{"type":"function","name":"ToolSearch","description":"Search for deferred tools and load them.","parameters":{"type":"object","properties":{"query":{"type":"string"},"max_results":{"type":"number"}},"required":["query"]},"strict":false},{"type":"function","name":"mcp__orders__lookup_order","description":"Look up the shipping status of a customer order by its order id.","defer_loading":true,"parameters":{"type":"object","properties":{"order_id":{"type":"string"}},"required":["order_id"]},"strict":false}]}

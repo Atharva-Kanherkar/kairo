@@ -1,0 +1,116 @@
+[
+  {
+    "case": "dev-9bcea677/minimal/deferred-nonstream-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6-astra"
+  },
+  {
+    "case": "dev-9bcea677/minimal/deferred-nonstream-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6-astra"
+  },
+  {
+    "case": "dev-9bcea677/minimal/deferred-stream-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6-astra"
+  },
+  {
+    "case": "dev-9bcea677/minimal/deferred-stream-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6-astra"
+  },
+  {
+    "case": "dev-9bcea677/minimal/eager-nonstream-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6-astra"
+  },
+  {
+    "case": "dev-9bcea677/minimal/eager-nonstream-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6-astra"
+  },
+  {
+    "case": "dev-9bcea677/minimal/eager-stream-01",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6-astra"
+  },
+  {
+    "case": "dev-9bcea677/minimal/eager-stream-02",
+    "client_status": 200,
+    "upstream_post_statuses": [
+      200
+    ],
+    "namespace_rejection": false,
+    "canary_answer": true,
+    "model": "openai/gpt-6-astra"
+  },
+  {
+    "case": "dev-9bcea677/minimal/hosted-nonstream-01",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      200,
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-6-astra",
+    "turn1_called_tool": true,
+    "turn1_blocks": [
+      "server_tool_use",
+      "tool_search_tool_result",
+      "tool_use"
+    ]
+  },
+  {
+    "case": "dev-9bcea677/minimal/hosted-nonstream-02",
+    "client_status": 400,
+    "upstream_post_statuses": [
+      200,
+      400
+    ],
+    "namespace_rejection": true,
+    "canary_answer": false,
+    "model": "openai/gpt-6-astra",
+    "turn1_called_tool": true,
+    "turn1_blocks": [
+      "server_tool_use",
+      "tool_search_tool_result",
+      "tool_use"
+    ]
+  }
+]
