@@ -1,0 +1,12 @@
+{
+  "$schema": "https://www.getbifrost.ai/schema",
+  "config_store": { "enabled": false },
+  "logs_store": { "enabled": false },
+  "client": { "enable_logging": false, "initial_pool_size": 50 },
+  "providers": {
+    "openai": {
+      "keys": [ { "name": "k1", "value": "env.OPENAI_API_KEY", "weight": 1, "models": ["*"] } ],
+      "network_config": { "base_url": "http://127.0.0.1:9940" }
+    }
+  }
+}
