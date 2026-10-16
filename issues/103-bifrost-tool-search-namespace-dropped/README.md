@@ -44,10 +44,11 @@ The tool has already run by then. Every later turn of the conversation replays
 the same call, so the session cannot continue.
 
 Whether OpenAI sets the namespace depends on the model and the search path, so the
-failure does too. GPT-5.4 and GPT-5.5 set it on both paths. The four GPT-6 models
-tested return the call to a tool that **client** search loaded with no namespace
-and accept the replay without one, so Claude Code works there; they still set it
-on the **server-side** search path, which fails the same way. See
+failure does too. GPT-5.4 and GPT-5.5 set it on both paths. On the **client**
+search path, `gpt-6.1-sol` returned the call with no namespace (recorded in its
+Claude Code runs), and all four GPT-6 models tested served the replay without one,
+so Claude Code works there. On the **server-side** search path all four still set
+it, and the replay fails the same way. See
 [Model scope](#model-scope).
 
 ## What breaks
@@ -456,3 +457,22 @@ model scope; the GPT-6 captures were added under `transcripts/103/capture-9bcea6
 and the checker was replaced with `replayed_calls_keep_returned_namespace`,
 because the round 1 checker assumed every searched-in call needs the tool's name
 as namespace and would have flagged GPT-6 replays that OpenAI serves.
+
+### Round 2: ACCEPT
+
+The same reviewer reviewed the delta (`a236353..0e0f6a2`) on 2026-10-16. It reran
+the rig on its own `9bcea677` build: `gpt-6.1-sol` and `gpt-6-luna` served the
+client-search replay 2/2 buffered and 2/2 streamed and rejected the server-side
+replay 2/2 each with the namespace OpenAI had returned; real Claude Code on
+`gpt-6.1-sol` answered 2/2 and the returned call carried no namespace. Adding only
+the returned namespace to a rejected server-side body was served, 1/1 per model.
+It audited all 183 `results.json` rows against the raw captures and scanned the
+428 new capture files (no credential or account identifier), confirmed the
+replacement checker rejects the failing conversations and passes the served ones,
+and that disabling its comparison fails exactly two conformance tests and the unit
+test. Current `dev` (`56197a27`, four commits newer) leaves the tool-search code
+unchanged. No blocking findings. Non-blocking: only `gpt-6.1-sol` has recorded
+evidence that GPT-6 returns no namespace on the client path, the other three
+GPT-6 models show replay acceptance (wording tightened above); "served" means
+protocol acceptance, not the exact canary wording.
+
