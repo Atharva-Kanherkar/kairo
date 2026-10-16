@@ -3116,9 +3116,120 @@ pub fn codex_namespace_only_applies_to_namespaced_tools(
     Verdict::Conformant
 }
 
+/// Message prefix for [`searched_tool_calls_keep_namespace`].
+pub const SEARCHED_TOOL_CALL_WITHOUT_NAMESPACE: &str =
+    "a replayed function_call for a tool loaded by tool search lost its namespace";
+
+/// Invariant (bug 103): in an OpenAI Responses request, a replayed
+/// `function_call` for a function that an earlier `tool_search_output` in the
+/// same input loaded must carry the namespace the provider gave it. OpenAI puts
+/// a plain function loaded by tool search in a namespace named after the
+/// function, returns that `namespace` on the model's `function_call`, and
+/// rejects a replay without it (`400 Missing namespace for function_call`). A
+/// gateway that rebuilds the history from a dialect with no namespace field,
+/// such as an Anthropic `tool_use`, must restore it, or every turn after the
+/// first call to a searched-in tool fails.
+///
+/// Reads one forwarded request body, so it names no gateway function. Calls to
+/// functions no `tool_search_output` loaded, and functions inside a loaded
+/// `namespace` container, are not judged.
+pub fn searched_tool_calls_keep_namespace(forwarded_body: &str) -> Verdict {
+    let Ok(request) = serde_json::from_str::<Value>(forwarded_body) else {
+        return Verdict::Violation("forwarded request body is not valid JSON".into());
+    };
+    let Some(input) = request.get("input").and_then(Value::as_array) else {
+        return Verdict::Violation("forwarded request has no input array".into());
+    };
+
+    let mut loaded: HashSet<&str> = HashSet::new();
+    let mut lost = Vec::new();
+    for item in input {
+        match item.get("type").and_then(Value::as_str) {
+            Some("tool_search_output") => {
+                for tool in item
+                    .get("tools")
+                    .and_then(Value::as_array)
+                    .into_iter()
+                    .flatten()
+                {
+                    if tool.get("type").and_then(Value::as_str) == Some("namespace") {
+                        continue;
+                    }
+                    if let Some(name) = tool.get("name").and_then(Value::as_str) {
+                        loaded.insert(name);
+                    }
+                }
+            }
+            Some("function_call") => {
+                let name = item.get("name").and_then(Value::as_str).unwrap_or_default();
+                if !loaded.contains(name) {
+                    continue;
+                }
+                match item.get("namespace").and_then(Value::as_str) {
+                    Some(namespace) if namespace == name => {}
+                    Some(namespace) => lost.push(format!(
+                        "{name} carries namespace {namespace:?}, expected {name:?}"
+                    )),
+                    None => lost.push(format!("{name} has no namespace")),
+                }
+            }
+            _ => {}
+        }
+    }
+    if let Some(first) = lost.first() {
+        return Verdict::Violation(format!(
+            "{SEARCHED_TOOL_CALL_WITHOUT_NAMESPACE}: {} call(s), first: {first}",
+            lost.len()
+        ));
+    }
+    Verdict::Conformant
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn searched_tool_namespace_checker_judges_only_searched_in_calls() {
+        let search = r#"{"type":"tool_search_call","call_id":"s1","execution":"client","arguments":{"query":"select:lookup"}}"#;
+        let output = r#"{"type":"tool_search_output","call_id":"s1","execution":"client","tools":[{"type":"function","name":"lookup","defer_loading":true}]}"#;
+        let body = |call: &str| format!(r#"{{"input":[{search},{output},{call}]}}"#);
+        let call = r#"{"type":"function_call","call_id":"c1","name":"lookup","arguments":"{}""#;
+
+        let bare = body(&format!("{call}}}"));
+        let kept = body(&format!(r#"{call},"namespace":"lookup"}}"#));
+        let wrong = body(&format!(r#"{call},"namespace":"other"}}"#));
+        assert!(matches!(
+            searched_tool_calls_keep_namespace(&bare),
+            Verdict::Violation(reason) if reason.starts_with(SEARCHED_TOOL_CALL_WITHOUT_NAMESPACE)
+        ));
+        assert_eq!(
+            searched_tool_calls_keep_namespace(&kept),
+            Verdict::Conformant
+        );
+        assert!(!searched_tool_calls_keep_namespace(&wrong).is_conformant());
+
+        // A call made before the search loaded the tool, or to a tool no search
+        // loaded, is outside the invariant.
+        let earlier = format!(r#"{{"input":[{call}}},{search},{output}]}}"#);
+        assert_eq!(
+            searched_tool_calls_keep_namespace(&earlier),
+            Verdict::Conformant
+        );
+        let eager = format!(r#"{{"input":[{call}}}]}}"#);
+        assert_eq!(
+            searched_tool_calls_keep_namespace(&eager),
+            Verdict::Conformant
+        );
+
+        // Bodies that are not a Responses request never pass.
+        for evidence in ["", "not-json", r#"{"messages":[]}"#] {
+            assert!(
+                !searched_tool_calls_keep_namespace(evidence).is_conformant(),
+                "{evidence:?} must not pass"
+            );
+        }
+    }
 
     #[test]
     fn host_tool_checker_flags_a_successful_emptying_and_accepts_a_refusal() {
