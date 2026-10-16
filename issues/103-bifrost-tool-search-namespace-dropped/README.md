@@ -1,4 +1,4 @@
-# 103, Bifrost drops the namespace OpenAI gives a searched-in tool, so Claude Code with tool search halts on the turn after its first MCP call
+# 103, Bifrost drops the namespace OpenAI gives a searched-in tool call, so Claude Code tool search halts on GPT-5.4 and GPT-5.5 (not on GPT-6)
 
 - **Upstream**: [maximhq/bifrost](https://github.com/maximhq/bifrost). No issue or
   pull request reports this on 2026-10-16. It is the next failure on the path
@@ -16,11 +16,17 @@
   provider `openai` with its default base URL replaced by a recording relay to
   `https://api.openai.com`. Live models `openai/gpt-5.4-mini` (served as
   `gpt-5.4-mini-2026-03-17`) and `openai/gpt-5.5`. Claude Code `2.1.289` with
-  `ENABLE_TOOL_SEARCH=true` and a stdio MCP server
+  `ENABLE_TOOL_SEARCH=true` and a stdio MCP server. Model scope rerun the same
+  day on the newer `dev` head `9bcea6777488adc674dc8d326bd4933b71746a22` against
+  `openai/gpt-6.1-sol`, `gpt-6-sol`, `gpt-6-luna`, `gpt-6-astra`, with
+  `gpt-5.4-mini` as the same-build control
+- **Model scope label**: Claude Code's client tool search reproduces on GPT-5.4 and
+  GPT-5.5 only; it does **not** reproduce on any of the four GPT-6 models. Anthropic's
+  server-side tool search reproduces on every model tested, GPT-6 included
 
 ## Claim
 
-On `/anthropic/v1/messages` to OpenAI gpt-5.4 and later, Bifrost turns a tool
+On `/anthropic/v1/messages` to OpenAI, Bifrost turns a tool
 search (Claude Code's client `ToolSearch`, or Anthropic's server-side
 `tool_search_tool_bm25`) into OpenAI `tool_search` items. OpenAI loads the
 deferred tool into a namespace named after the tool and returns the model's call
@@ -37,9 +43,16 @@ its namespace field included.
 The tool has already run by then. Every later turn of the conversation replays
 the same call, so the session cannot continue.
 
+Whether OpenAI sets the namespace depends on the model and the search path, so the
+failure does too. GPT-5.4 and GPT-5.5 set it on both paths. The four GPT-6 models
+tested return the call to a tool that **client** search loaded with no namespace
+and accept the replay without one, so Claude Code works there; they still set it
+on the **server-side** search path, which fails the same way. See
+[Model scope](#model-scope).
+
 ## What breaks
 
-Claude Code behind Bifrost, on a GPT-5.4+ model, with MCP servers and tool search
+Claude Code behind Bifrost, on GPT-5.4 or GPT-5.5, with MCP servers and tool search
 on. This is the setup Bifrost's unreleased changelog says now works: "deferred
 tools on OpenAI gpt-5.4+ ... get the tool_search OpenAI requires instead of a
 400, a client search function (Claude Code's ToolSearch) becomes a
@@ -62,6 +75,24 @@ answers `Order A-1001 is SHIPPED-CANARY-7731`, 5/5.
 An Anthropic SDK application that declares Anthropic's server-side
 `tool_search_tool_bm25` with `defer_loading` tools hits the same 400 on its second
 turn, 5/5, with turn 1 generated live by the model.
+
+## Model scope
+
+Same build (`dev` `9bcea677`), same rig, same requests, live OpenAI:
+
+| Path | gpt-5.4-mini | gpt-6.1-sol | gpt-6-sol, gpt-6-luna, gpt-6-astra |
+|---|---|---|---|
+| Client search replay (Claude Code's `ToolSearch` history) | 400 `Missing namespace`, 4/4 | served, 6/6 buffered and streamed | served, 6/6 per model |
+| Real Claude Code with MCP, tool search on | halts (5/5 on `6c0f795d`) | answers, 3/3; `--continue` served 3/3 | not run |
+| Server-side search (`tool_search_tool_bm25`), turn 2 | 400, 2/2 | 400, 3/3 | 400, 2/2 per model |
+| Namespace OpenAI set on the returned call, client search | the tool's name | none | not recorded (no turn 1 in the minimal replay) |
+| Namespace OpenAI set on the returned call, server-side search | the tool's name | the tool's name | the tool's name |
+
+GPT-6 also serves Bifrost's forwarded client-search body with `namespace` added
+(`direct/namespace-restored-NN` on `gpt-6.1-sol`, 3/3), so restoring the namespace
+does not break the models that do not need it. Captures:
+[`capture-9bcea677/`](../../transcripts/103/capture-9bcea677/), one directory per
+model, each with its own `results.json`.
 
 ## Wire evidence
 
@@ -240,8 +271,10 @@ eager control is served on `v2.3.0` too, 10/10.
 ### Who gets bitten
 
 - Affected user or customer: teams that run Claude Code through Bifrost on
-  OpenAI GPT-5.4 or later (Bifrost's Claude Code guide uses `openai/gpt-5.5` as
-  its example) and connect MCP servers. The same gate covers Azure and Bedrock
+  OpenAI GPT-5.4 or GPT-5.5 (Bifrost's Claude Code guide uses `openai/gpt-5.5` as
+  its example) and connect MCP servers. Claude Code on GPT-6 is not affected.
+  Anthropic SDK applications that use the server-side tool search are affected on
+  GPT-5.4, GPT-5.5 and GPT-6. The same gate covers Azure and Bedrock
   GPT deployments (`defaultSupportsToolSearch`), which were not tested.
 - Real workflow: a coding or ops agent session in which the model has to find an
   MCP tool through tool search and then call it.
@@ -250,9 +283,9 @@ eager control is served on `v2.3.0` too, 10/10.
   ([Claude Code docs](https://code.claude.com/docs/en/mcp), "Configure tool
   search"), and Bifrost's dev branch added support for exactly this (#8361,
   #8503). Once those hold, every session fails on the turn after its first call
-  to a deferred tool, 100% of the time. Anthropic SDK applications that use the
-  server-side tool search with deferred tools against these models fail the same
-  way. The defect is on the default branch, not in a release yet; `v2.3.0` fails
+  to a deferred tool, 100% of the time on GPT-5.4 and GPT-5.5. Anthropic SDK
+  applications that use the server-side tool search with deferred tools fail the
+  same way on every model tested. The defect is on the default branch, not in a release yet; `v2.3.0` fails
   this workflow earlier for a reason `dev` fixed.
 
 ### Observable consequence
@@ -267,9 +300,11 @@ eager control is served on `v2.3.0` too, 10/10.
 - Consumer-boundary demonstration or transcript:
   `capture/dev-6c0f795d/claude/tool-search-on-NN/claude-stdout.jsonl`,
   `.../continue/claude-stdout.jsonl` and `ledger.jsonl`.
-- Measured impact: 5/5 Claude Code sessions halted after one MCP execution; 5/5
-  resumed sessions failed with no further execution; 5/5 sessions answered with
-  tool search off. 5/5 live hosted-search conversations failed on turn 2.
+- Measured impact: on `gpt-5.4-mini`, 5/5 Claude Code sessions halted after one
+  MCP execution; 5/5 resumed sessions failed with no further execution; 5/5
+  sessions answered with tool search off. On `gpt-6.1-sol`, 3/3 Claude Code
+  sessions with tool search on answered. Live server-side-search conversations
+  failed on turn 2: 5/5 on GPT-5.4 and 9/9 across the four GPT-6 models.
 - Inferred impact, clearly labeled: a side-effecting MCP tool (a refund, a
   deploy, a ticket update) has already acted when the session dies, so a user
   who starts over to get past the error repeats the action. Not measured here;
@@ -302,7 +337,8 @@ eager control is served on `v2.3.0` too, 10/10.
   replays a `tool_search_output` that loads deferred functions, set `namespace`
   to the function's name on later `function_call` items for those functions
   that have none.
-- Label: `bug`
+- Label: `bug`, scoped by model: Claude Code's path on GPT-5.4 and GPT-5.5;
+  the server-side search path on every model tested.
 
 ## Gate 3: upstream status
 
@@ -352,35 +388,71 @@ known. It is new on `dev` and not in a release yet, so it can be fixed before th
 ## Frozen invariant
 
 - Issue writeup: this file.
-- Checker added or updated: `searched_tool_calls_keep_namespace` in
-  `crates/harness/src/checks.rs`. In a forwarded Responses request, a
-  `function_call` for a plain function that an earlier `tool_search_output`
-  loaded must carry that function's name as `namespace`.
-- Conformance test added or updated: nine `bifrost_103_*` tests in
+- Checker added or updated: `replayed_calls_keep_returned_namespace` in
+  `crates/harness/src/checks.rs`. Given the provider's earlier responses and the
+  forwarded request, a replayed `function_call` must carry the `namespace` the
+  provider returned on the same `call_id`. A call returned without one is not
+  judged, because OpenAI accepted its replay both ways.
+- Conformance test added or updated: twelve `bifrost_103_*` tests in
   `crates/harness/tests/conformance.rs` over the committed captures, and one unit
   test in `checks.rs`.
 - Why the checker tests the invariant rather than one implementation detail: it
-  reads only the forwarded request body and applies OpenAI's rule, so it judges
-  any gateway that replays tool-search history. It flags Bifrost's forwarded
-  bodies (Anthropic route, hosted and client search, Claude Code) and passes
-  the bodies OpenAI served: the namespace-restored direct body, the Responses
-  route with the field, and the eager history. Disabling its missing-namespace
-  branch fails five of the nine tests and the unit test.
+  reads only provider responses and the forwarded body and applies the rule in
+  OpenAI's own error ("round-trip the model's function_call item with its
+  namespace field included"), so it judges any gateway and makes no assumption
+  about which models set a namespace. It flags every real conversation OpenAI
+  rejected (Claude Code on GPT-5.4, server-side search on GPT-5.4 and all four
+  GPT-6 models) and passes the Claude Code conversations OpenAI served on
+  GPT-6, where no namespace came back. An earlier version assumed the namespace
+  always equals the tool name and would have flagged those served GPT-6 bodies;
+  it was replaced after the GPT-6 runs. Disabling the comparison fails two of
+  the twelve tests and the unit test; the synthetic-history cases are judged by
+  OpenAI's status in the tests, not by the checker.
 
 ## Validation
 
 | Check | Command | Result |
 |---|---|---|
-| Reproduction | `python3 transcripts/103/rig/reproduce.py ... --runs 5` | 10/10 minimal, 5/5 hosted, 2/2 gpt-5.5, 5/5 Claude Code, 5/5 `--continue` |
-| Control | same run | direct restored 5/5, Responses route 5/5, eager 10/10, tool search off 5/5 |
-| Harness | `cargo test --workspace` | pass |
+| Reproduction, GPT-5 | `python3 transcripts/103/rig/reproduce.py ... --runs 5` on `6c0f795d` | 10/10 minimal, 5/5 hosted, 2/2 gpt-5.5, 5/5 Claude Code, 5/5 `--continue` |
+| Control, GPT-5 | same run | direct restored 5/5, Responses route 5/5, eager 10/10, tool search off 5/5 |
+| Model scope, GPT-6 | same rig on `9bcea677`, `--model openai/gpt-6.1-sol --runs 3` and `--runs 2` per other GPT-6 model | client-search replay served 24/24 (plus 3/3 sent directly and 3/3 on `/v1/responses` without `namespace`), Claude Code answered 3/3; server-side search 400 9/9; same-build `gpt-5.4-mini` 400 6/6 |
+| Harness | `cargo test --workspace` | pass (227 conformance, 74 unit, 10 adversarial) |
 | Formatting | `cargo fmt --all -- --check` | pass |
 | Lint | `cargo clippy --workspace --all-targets -- -D warnings` | pass |
 | README counts | `python3 tools/update-readme-counts.py --check` | pass |
 
 ## Confidence
 
-High that the defect is real, current on `dev`, and halts Claude Code: the
-provider's own error names the field, the corrected body is served, and the real
-client fails every run. Not verified: Azure and Bedrock GPT deployments, which
-pass the same gate in code; `gpt-5.6` and `gpt-6` models; a side-effecting tool.
+High that the defect is real and current on `dev`: the provider's own error names
+the field, the corrected body is served, and the real client fails every run on
+GPT-5.4. High that its reach depends on the model: Claude Code's path does not
+fail on any of the four GPT-6 models, while the server-side search path fails on
+all of them. Not verified: Azure and Bedrock GPT deployments, which pass the same
+gate in code; `gpt-5.6` models; a side-effecting tool.
+
+## Independent review
+
+### Round 1: ACCEPT
+
+On 2026-10-16 an independent reviewer (OpenAI Codex CLI 0.159.3, not a Claude
+model) followed `.github/agents/kairo-reproduction-reviewer.agent.md` against
+head `a236353`. It cloned both repositories fresh, rebuilt `6c0f795d` and the
+newer `dev` head `9bcea677` with `vcs.modified=false`, and reran the committed rig
+(3/3 per cell, 2/2 on `gpt-5.5`) plus its own requests with different tool names,
+prompts and order ids: client search 3/3 buffered and 3/3 streamed, server-side
+search 3/3, each forwarded body rejected directly and served with `namespace`
+alone, eager controls served. Real Claude Code halted 3/3 after one MCP execution
+and failed again on resume 3/3; with tool search off it answered 3/3. Upstream
+search found no matching issue or pull request. Repository checks passed. No
+blocking findings. Non-blocking: the `dev` head moved during the review (the
+defect remains), and `reproduce.py` reports outcomes rather than failing on an
+unexpected matrix.
+
+### Changes after round 1
+
+The author then ran the rig on GPT-6 and found Claude Code's path does not
+reproduce there. The title, claim, scope and usefulness sections now state the
+model scope; the GPT-6 captures were added under `transcripts/103/capture-9bcea677/`;
+and the checker was replaced with `replayed_calls_keep_returned_namespace`,
+because the round 1 checker assumed every searched-in call needs the tool's name
+as namespace and would have flagged GPT-6 replays that OpenAI serves.

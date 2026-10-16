@@ -80,3 +80,12 @@ the issue writeup.
 
 All seven held, N = 5 per cell (2 for `gpt-5.5`). Recorded in
 `transcripts/103/capture/results.json`.
+
+## Model scope (after review round 1)
+
+The user asked for a GPT-6 rerun. On `dev` `9bcea677`, Claude Code's client search
+path does not reproduce on `gpt-6.1-sol`, `gpt-6-sol`, `gpt-6-luna` or `gpt-6-astra`
+(OpenAI returns the call with no namespace and accepts the replay); the server-side
+search path still fails on all four. The finding is labeled model-scoped, the claim
+narrowed, the evidence added, and the checker changed to compare each replayed call
+with the namespace the provider actually returned.

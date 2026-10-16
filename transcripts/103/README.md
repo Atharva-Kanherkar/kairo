@@ -25,6 +25,16 @@ Writeup: [`issues/103-bifrost-tool-search-namespace-dropped`](../../issues/103-b
 | `direct` | `{as-forwarded,namespace-restored}-NN` | Bifrost's forwarded body for `deferred-nonstream-01`, sent to OpenAI as is and with only `namespace` added |
 | `claude` | `tool-search-{on,off}-NN` | Claude Code 2.1.289 with `ENABLE_TOOL_SEARCH=true` / `false` |
 
+`capture-9bcea677/<model>/` is the model-scope rerun on the newer `dev` head
+`9bcea6777488adc674dc8d326bd4933b71746a22`, same rig and cases, one directory per
+model with its own `results.json`:
+
+| Directory | Command |
+|---|---|
+| `gpt-6.1-sol/` | `--model openai/gpt-6.1-sol --runs 3 --extra-model openai/gpt-6-sol --extra-model openai/gpt-6-luna --extra-model openai/gpt-6-astra --claude dev-9bcea677` |
+| `gpt-6-sol/`, `gpt-6-luna/`, `gpt-6-astra/` | `--model openai/<model> --runs 2 --groups minimal` |
+| `gpt-5.4-mini/` | `--model openai/gpt-5.4-mini --runs 2 --groups minimal` (same-build control) |
+
 Ten client response bodies on the `responses` route had provider headers echoed inside
 the JSON (`Openai-Project`, `Cf-Ray`, rate limits). Those values were redacted after
 recording with the same `redact_body` the relay now applies, so `Content-Length` in
