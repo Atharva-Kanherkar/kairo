@@ -26,12 +26,12 @@ offline with no provider keys.
 <!-- kairo-counts:start -->
 | Metric | Value |
 |---|---|
-| Reproduced issue folders | 73 |
+| Reproduced issue folders | 74 |
 | Gateways under test | LiteLLM, NVIDIA Switchyard, Bifrost, GoModel, AxonHub, any-llm, Dynamo, NIXL, OGX, agentgateway, and llm-d Router |
-| Harness tests | 288 (215 conformance checks against recorded transcripts, 73 unit) |
+| Harness tests | 298 (224 conformance checks against recorded transcripts, 74 unit) |
 <!-- kairo-counts:end -->
 
-The 73 folders cover reproduced findings, multi-defect reports, and honest
+The 74 folders cover reproduced findings, multi-defect reports, and honest
 negative results. Versions and reproduction outcomes are recorded per finding
 in [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md), including cited bugs that did
 not reproduce.
@@ -72,7 +72,7 @@ reproduction commands.
 | Request constraints survive (`disable_parallel_tool_use`, `stop_sequences`, `tools[].strict`, `output_format`, server tool definitions) | [017](issues/017-parallel-tool-flag-dropped), [041](issues/041-litellm-drops-stop-sequences), [064](issues/064-litellm-drops-tool-strict) | [006](issues/006-switchyard-crossformat-losses), [017](issues/017-parallel-tool-flag-dropped), [040](issues/040-switchyard-drops-output-format), [065](issues/065-switchyard-responses-instruction-loss), [066](issues/066-switchyard-drops-tool-strict), [100](issues/100-switchyard-plan-execute-rebuilds-server-tools) | [031](issues/031-bifrost-drops-parallel-tool-flag), [032](issues/032-bifrost-drops-stop-sequences), [072](issues/072-bifrost-anthropic-tool-choice-any-leak) | [042](issues/042-gomodel-drops-output-format), [043](issues/043-gomodel-drops-parallel-tool-flag) | [051](issues/051-axonhub-drops-output-format) | [058](issues/058-any-llm-drops-parallel-tool-flag), [062](issues/062-any-llm-empty-schema-shell) | [081](issues/081-ogx-messages-translation-losses) |
 | Provider-owned request fields survive pass-through | [084](issues/084-litellm-openai-passthrough-drops-id) | | | | | | |
 | Content blocks survive (refusal, `is_error`, image and document blocks in tool results and user turns) | [006](issues/006-switchyard-crossformat-losses), [007](issues/007-switchyard-toolresult-multimodal-stringified), [018](issues/018-user-document-dropped), [067](issues/067-litellm-drops-refusal-content) | [006](issues/006-switchyard-crossformat-losses), [007](issues/007-switchyard-toolresult-multimodal-stringified), [018](issues/018-user-document-dropped), [068](issues/068-switchyard-drops-refusal-content), [069](issues/069-switchyard-responses-refusal) | | | | [059](issues/059-any-llm-drops-is-error), [060](issues/060-any-llm-drops-toolresult-image), [061](issues/061-any-llm-drops-toolresult-document) | |
-| Assistant history survives replay (`thinking` blocks, signatures, and stored continuations) | [016](issues/016-thinking-history-lost) (leaked as visible text) | [016](issues/016-thinking-history-lost) (dropped), [083](issues/083-switchyard-conversation-continuation-loss) | [033](issues/033-bifrost-drops-thinking-history) | | | [057](issues/057-any-llm-drops-thinking-history) | |
+| Assistant history survives replay (`thinking` blocks, signatures, stored continuations, and tool-call namespaces) | [016](issues/016-thinking-history-lost) (leaked as visible text) | [016](issues/016-thinking-history-lost) (dropped), [083](issues/083-switchyard-conversation-continuation-loss) | [033](issues/033-bifrost-drops-thinking-history), [103](issues/103-bifrost-tool-search-namespace-dropped) | | | [057](issues/057-any-llm-drops-thinking-history) | |
 | Tool-call ids round-trip | [004](issues/004-gemini-thought-signature) | [005](issues/005-switchyard-toolid-sanitizer) | [037](issues/037-bifrost-toolid-not-restored) | | | | |
 | Nothing is invented (empty text blocks, phantom message items, `cache_control`) | [001](issues/001-anthropic-stream-toolcall-translation), [009](issues/009-litellm-responses-phantom-message) | [019](issues/019-switchyard-invents-prompt-cache), [045](issues/045-switchyard-empty-text-before-tooluse), [068](issues/068-switchyard-drops-refusal-content) | | | | | |
 | Malformed input fails closed | [008](issues/008-litellm-messages-indexerror-crash) | | | | | | |
