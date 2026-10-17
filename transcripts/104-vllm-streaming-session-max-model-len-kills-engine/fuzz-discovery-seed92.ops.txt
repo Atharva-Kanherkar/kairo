@@ -1,0 +1,104 @@
+add r0 prefix=48 total=80
+add r1 prefix=64 total=104
+add r2 prefix=64 total=79
+add r3 prefix=64 total=112
+add r4 prefix=64 total=80
+add r5 prefix=75 total=95
+add r6 prefix=48 total=79
+add r7 prefix=54 total=89
+add r8 prefix=16 total=19
+add r9 prefix=64 total=78
+add r10 prefix=28 total=53
+add r11 prefix=28 total=63
+add r12 prefix=54 total=69
+session-update r3 new_tokens=32
+add r14 prefix=78 total=99
+add r15 prefix=64 total=80
+session-update r3 new_tokens=36
+add r17 prefix=16 total=35
+add r18 prefix=48 total=56
+add r19 prefix=48 total=65
+session-update r3 new_tokens=33
+add r21 prefix=78 total=111
+add r22 prefix=16 total=57
+add r23 prefix=16 total=33
+add r24 prefix=64 total=102
+add r25 prefix=64 total=88
+add r26 prefix=28 total=52
+session-update r21 new_tokens=1
+add r28 prefix=64 total=100
+add r29 prefix=48 total=61
+add r30 prefix=48 total=79
+add r31 prefix=78 total=94
+session-update r3 new_tokens=24
+add r33 prefix=64 total=98
+add r34 prefix=28 total=48
+add r35 prefix=54 total=62
+session-update r21 new_tokens=29
+add r37 prefix=75 total=108
+add r38 prefix=64 total=102
+add r39 prefix=48 total=71
+add r40 prefix=64 total=93
+add r41 prefix=64 total=69
+add r42 prefix=54 total=68
+add r43 prefix=64 total=78
+add r44 prefix=54 total=90
+add r45 prefix=54 total=82
+abort r12
+add r46 prefix=64 total=92
+session-update r40 new_tokens=27
+abort r45
+add r48 prefix=75 total=77
+add r49 prefix=75 total=84
+add r50 prefix=48 total=86
+session-update r40 new_tokens=34
+abort r30
+reset running=False ok=False
+session-update r21 new_tokens=19
+abort r44
+session-update r40 new_tokens=27
+add r54 prefix=75 total=111
+add r55 prefix=64 total=84
+add r56 prefix=64 total=97
+abort r38
+session-update r40 new_tokens=32
+abort r11
+add r58 prefix=78 total=103
+add r59 prefix=75 total=110
+abort r48
+session-update r40 new_tokens=15
+abort r29
+session-update r55 new_tokens=43
+add r62 prefix=54 total=90
+add r63 prefix=75 total=108
+abort r8
+abort r46
+session-update r3 new_tokens=100
+session-update r40 new_tokens=100
+add r66 prefix=78 total=86
+add r67 prefix=75 total=92
+session-update r55 new_tokens=44
+session-update r21 new_tokens=26
+abort r7
+session-update r21 new_tokens=57
+abort r66
+add r71 prefix=54 total=101
+add r72 prefix=64 total=69
+abort r17
+session-update r40 new_tokens=33
+session-update r40 new_tokens=31
+session-update r40 new_tokens=77
+session-update r3 new_tokens=79
+abort r40
+add r77 prefix=64 total=69
+session-update r3 new_tokens=48
+session-update r3 new_tokens=18
+add r80 prefix=64 total=67
+add r81 prefix=54 total=102
+add r82 prefix=28 total=43
+session-update r55 new_tokens=41
+session-update r80 new_tokens=26
+abort r39
+session-update r55 new_tokens=59
+abort r10
+drain

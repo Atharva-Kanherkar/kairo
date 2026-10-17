@@ -1,0 +1,82 @@
+W1018 01:33:07.376000 25589 .venv/lib/python3.12/site-packages/torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W1018 01:33:07.377000 25589 .venv/lib/python3.12/site-packages/torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W1018 01:33:07.377000 25589 .venv/lib/python3.12/site-packages/torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+objc[25589]: Class AVFFrameReceiver is implemented in both /opt/homebrew/Cellar/ffmpeg/8.1.2_1/lib/libavdevice.62.3.102.dylib (0x11b32c328) and /Users/atharva/kairo/tools/vllm/.venv/lib/python3.12/site-packages/cv2/.dylibs/libavdevice.61.3.100.dylib (0x11bb203a8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+objc[25589]: Class AVFAudioReceiver is implemented in both /opt/homebrew/Cellar/ffmpeg/8.1.2_1/lib/libavdevice.62.3.102.dylib (0x11b32c378) and /Users/atharva/kairo/tools/vllm/.venv/lib/python3.12/site-packages/cv2/.dylibs/libavdevice.61.3.100.dylib (0x11bb203f8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+(MainProcess pid=25589) INFO 10-18 01:33:11 [model.py:733] Resolved architecture: OPTForCausalLM
+(MainProcess pid=25589) INFO 10-18 01:33:11 [model.py:2152] Using max model len 1024
+(MainProcess pid=25589) INFO 10-18 01:33:11 [scheduler.py:310] Chunked prefill is enabled with max_num_batched_tokens=2048.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+(MainProcess pid=25589) WARNING 10-18 01:33:12 [config.py:1434] Could not retrieve safetensors metadata for facebook/opt-125m (Hub fetch failed and the cached snapshot holds no weights yet).
+(MainProcess pid=25589) WARNING 10-18 01:33:12 [vllm.py:1747] Enforce eager set, disabling torch.compile, CUDAGraphs, and JIT kernel warmup. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none and --kernel_config.enable_jit_warmup=False
+(MainProcess pid=25589) WARNING 10-18 01:33:12 [vllm.py:1771] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+(MainProcess pid=25589) INFO 10-18 01:33:12 [kernel.py:476] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'], gelu_and_mul_sparse=['native'])
+(MainProcess pid=25589) WARNING 10-18 01:33:12 [vllm.py:726] Model Runner V2 requires Triton; using the V1 model runner instead.
+(MainProcess pid=25589) INFO 10-18 01:33:12 [compilation.py:317] Enabled custom fusions: norm_quant, act_quant
+W1018 01:33:12.534000 25589 .venv/lib/python3.12/site-packages/torch/_library/triton.py:53] Triton not available, find_triton_kernels = []
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 6311.44it/s]
+W1018 01:33:13.132000 25897 .venv/lib/python3.12/site-packages/torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W1018 01:33:13.132000 25897 .venv/lib/python3.12/site-packages/torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W1018 01:33:13.132000 25897 .venv/lib/python3.12/site-packages/torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+objc[25897]: Class AVFFrameReceiver is implemented in both /opt/homebrew/Cellar/ffmpeg/8.1.2_1/lib/libavdevice.62.3.102.dylib (0x11c778328) and /Users/atharva/kairo/tools/vllm/.venv/lib/python3.12/site-packages/cv2/.dylibs/libavdevice.61.3.100.dylib (0x12013c3a8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+objc[25897]: Class AVFAudioReceiver is implemented in both /opt/homebrew/Cellar/ffmpeg/8.1.2_1/lib/libavdevice.62.3.102.dylib (0x11c778378) and /Users/atharva/kairo/tools/vllm/.venv/lib/python3.12/site-packages/cv2/.dylibs/libavdevice.61.3.100.dylib (0x12013c3f8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+(EngineCore pid=25897) INFO 10-18 01:33:15 [core.py:133] Initializing a V1 LLM engine (v0.1.dev1+g237d99b4a) with config: model='facebook/opt-125m', speculative_config=None, tokenizer='facebook/opt-125m', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revision=main, trust_remote_code=False, dtype=torch.float16, max_seq_len=1024, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=None, quantization_config=None, enforce_eager=True, aux_output_config=AuxOutputConfig(enable_return_routed_experts=False, max_bytes=None), kv_cache_dtype=auto, device_config=cpu, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, custom_histogram_buckets=None, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=facebook/opt-125m, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all', '+gelu', '+gelu_tanh', '+gelu_and_mul'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'cudagraph_decoder_replay': True, 'decoder_replay_cudagraph_capture_sizes': [], 'decoder_replay_trim_threshold': 768, 'compile_sizes': None, 'compile_ranges_endpoints': [2048], 'inductor_compile_config': {'enable_auto_functionalized_v2': False}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.NONE: 0>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': None, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'], gelu_and_mul_sparse=['native']), enable_flashinfer_autotune=True, enable_rocm_segmented_attn_autotune=False, enable_cutedsl_warmup=True, enable_jit_warmup=False, monokernel=False, moe_backend='auto', sparse_indexer_topk_backend='auto', linear_backend='auto', linear_backend_per_quant=None)
+(EngineCore pid=25897) INFO 10-18 01:33:15 [multiproc_executor.py:153] DP group leader: node_rank=0, node_rank_within_dp=0, master_addr=127.0.0.1, mq_connect_ip=192.168.2.113 (local), world_size=1, local_world_size=1
+(EngineCore pid=25897) INFO 10-18 01:33:15 [ompmultiprocessing.py:185] OpenMP thread binding info: 
+(EngineCore pid=25897) INFO 10-18 01:33:15 [ompmultiprocessing.py:185] 	VLLM_CPU_OMP_THREADS_BIND='auto', auto_setup=True, skip_setup=False
+(EngineCore pid=25897) INFO 10-18 01:33:15 [ompmultiprocessing.py:185] 	local_world_size=1, reserve_cpu_num=1
+(EngineCore pid=25897) INFO 10-18 01:33:15 [ompmultiprocessing.py:185] 	local_rank=0, core ids=[0, 1, 2, 3, 4, 5, 6, 7, 8]
+(EngineCore pid=25897) INFO 10-18 01:33:15 [ompmultiprocessing.py:185] 	reserved_cpus=[9]
+W1018 01:33:16.195000 26006 .venv/lib/python3.12/site-packages/torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W1018 01:33:16.195000 26006 .venv/lib/python3.12/site-packages/torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W1018 01:33:16.195000 26006 .venv/lib/python3.12/site-packages/torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+objc[26006]: Class AVFFrameReceiver is implemented in both /opt/homebrew/Cellar/ffmpeg/8.1.2_1/lib/libavdevice.62.3.102.dylib (0x11745c328) and /Users/atharva/kairo/tools/vllm/.venv/lib/python3.12/site-packages/cv2/.dylibs/libavdevice.61.3.100.dylib (0x11bb9c3a8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+objc[26006]: Class AVFAudioReceiver is implemented in both /opt/homebrew/Cellar/ffmpeg/8.1.2_1/lib/libavdevice.62.3.102.dylib (0x11745c378) and /Users/atharva/kairo/tools/vllm/.venv/lib/python3.12/site-packages/cv2/.dylibs/libavdevice.61.3.100.dylib (0x11bb9c3f8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+/Users/atharva/kairo/tools/vllm/vllm/triton_utils/dispatcher.py:138: FutureWarning: `torch.distributed.reduce_op` is deprecated, please use `torch.distributed.ReduceOp` instead
+  if hasattr(value, "__dict__"):
+/Users/atharva/kairo/tools/vllm/vllm/triton_utils/dispatcher.py:139: FutureWarning: `torch.distributed.reduce_op` is deprecated, please use `torch.distributed.ReduceOp` instead
+  wrapper = lookup(vars(value).get("kernel"))
+W1018 01:33:19.030000 26006 .venv/lib/python3.12/site-packages/torch/_library/triton.py:53] Triton not available, find_triton_kernels = []
+(VllmWorker-0 pid=26006) WARNING 10-18 01:33:19 [vllm.py:726] Model Runner V2 requires Triton; using the V1 model runner instead.
+(Worker pid=26006) INFO 10-18 01:33:19 [parallel_state.py:1911] world_size=1 rank=0 local_rank=0 distributed_init_method=file:///var/folders/h7/02529x_j2196_9dnc1k5pnr80000gn/T/vllm_dist_543b1a171f58468dabf5a513a8a1edc6 backend=gloo
+[W1018 01:33:19.587730000 ProcessGroupGloo.cpp:558] Warning: Unable to resolve hostname to a (local) address. Using the loopback address as fallback. Manually set the network interface to bind to with GLOO_SOCKET_IFNAME. (function operator())
+(Worker pid=26006) INFO 10-18 01:33:19 [parallel_state.py:2355] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, ETP rank 0, EP rank N/A, EPLB rank N/A
+(Worker pid=26006) INFO 10-18 01:33:19 [cpu_model_runner.py:68] Starting to load model facebook/opt-125m...
+(Worker pid=26006) WARNING 10-18 01:33:19 [compilation.py:1355] Op 'gelu' not present in model, enabling with '+gelu' has no effect
+(Worker pid=26006) WARNING 10-18 01:33:19 [compilation.py:1355] Op 'gelu_tanh' not present in model, enabling with '+gelu_tanh' has no effect
+(Worker pid=26006) WARNING 10-18 01:33:19 [compilation.py:1355] Op 'gelu_and_mul' not present in model, enabling with '+gelu_and_mul' has no effect
+(Worker pid=26006) INFO 10-18 01:33:19 [base_loader.py:82] Initializing model took 0.085166 seconds
+Loading pt checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+Loading pt checkpoint shards: 100% Completed | 1/1 [00:00<00:00, 14.09it/s]
+
+(Worker pid=26006) INFO 10-18 01:33:20 [default_loader.py:501] Loading weights took 0.07 seconds
+(Worker pid=26006) WARNING 10-18 01:33:20 [torch_utils.py:283] OMP_NUM_THREADS=9 is set; leaving Torch threads at 9 for serving. Multi-threaded torch CPU ops during serving can degrade performance through spin-wait contention and cgroup CPU-quota throttling.
+(EngineCore pid=25897) INFO 10-18 01:33:20 [torch_utils.py:295] Reducing Torch threads from 4 to 1 for serving. Set OMP_NUM_THREADS in the external environment to override.
+(EngineCore pid=25897) INFO 10-18 01:33:20 [utils.py:348] Using LBHNC KV cache layout.
+(Worker pid=26006) INFO 10-18 01:33:20 [cpu_worker.py:274] Auto set (10.19/32.0) GiB for KV cache on node 0, with 11.2 GiB requested memory for the worker. 1.01 GiB memory was consumed by non-kv usages.
+(EngineCore pid=25897) INFO 10-18 01:33:20 [kv_cache_planning.py:1564] Overriding num_gpu_blocks=9274 with num_gpu_blocks_override=33
+(EngineCore pid=25897) INFO 10-18 01:33:20 [kv_cache_utils.py:1101] CPU KV cache size: 1,056 tokens, Maximum concurrency for 1,024 tokens per request: 1.03x
+(EngineCore pid=25897) INFO 10-18 01:33:20 [core.py:402] init engine (profile, create kv cache, warmup model) took 0.00 s
+W1018 01:33:20.518000 25897 .venv/lib/python3.12/site-packages/torch/_library/triton.py:53] Triton not available, find_triton_kernels = []
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 5402.71it/s]
+(EngineCore pid=25897) WARNING 10-18 01:33:20 [vllm.py:726] Model Runner V2 requires Triton; using the V1 model runner instead.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+(EngineCore pid=25897) WARNING 10-18 01:33:21 [config.py:1434] Could not retrieve safetensors metadata for facebook/opt-125m (Hub fetch failed and the cached snapshot holds no weights yet).
+(EngineCore pid=25897) WARNING 10-18 01:33:21 [vllm.py:1747] Enforce eager set, disabling torch.compile, CUDAGraphs, and JIT kernel warmup. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none and --kernel_config.enable_jit_warmup=False
+(EngineCore pid=25897) WARNING 10-18 01:33:21 [vllm.py:1771] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+(EngineCore pid=25897) INFO 10-18 01:33:21 [kernel.py:476] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'], gelu_and_mul_sparse=['native'])
+(EngineCore pid=25897) INFO 10-18 01:33:21 [compilation.py:317] Enabled custom fusions: norm_quant, act_quant
+[single-1024] outputs=0 finished=False error=VLLMValidationError: The decoder prompt (length 1024) plus the number of requested output tokens (at least 1) is longer than the maximum model length of 1024. Make sure that `max_model_len` is no smaller than the number of text tokens (prompt + requested output tokens).
+(MainProcess pid=25589) INFO 10-18 01:33:21 [core_client.py:788] [shutdown] MPClient: start timeout=default
+(MainProcess pid=25589) INFO 10-18 01:33:21 [core_client.py:790] [shutdown] MPClient: stopping engine manager
+(MainProcess pid=25589) INFO 10-18 01:33:21 [utils.py:628] [shutdown] Process manager: send sigterm to process EngineCore
+(EngineCore pid=25897) INFO 10-18 01:33:21 [core.py:1487] [shutdown] EngineCore: trigger received signal=SIGTERM
+(EngineCore pid=25897) INFO 10-18 01:33:21 [core.py:1668] [shutdown] EngineCore: start mode=abort timeout=0s
+(EngineCore pid=25897) INFO 10-18 01:33:21 [core.py:1699] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=25897) INFO 10-18 01:33:21 [core.py:1532] [shutdown] EngineCore: exiting busy loop
+(EngineCore pid=25897) INFO 10-18 01:33:21 [multiproc_executor.py:479] [shutdown] Executor: waiting for worker exit count=1
+(Worker pid=26006) INFO 10-18 01:33:21 [multiproc_executor.py:843] Parent process exited, terminating worker queues
+(EngineCore pid=25897) INFO 10-18 01:33:21 [multiproc_executor.py:486] [shutdown] Executor: all workers exited gracefully
+(MainProcess pid=25589) INFO 10-18 01:33:22 [core_client.py:792] [shutdown] MPClient: engine manager stopped
+(MainProcess pid=25589) INFO 10-18 01:33:22 [core_client.py:793] [shutdown] MPClient: cleaning up background resources
+(MainProcess pid=25589) INFO 10-18 01:33:22 [core_client.py:795] [shutdown] MPClient: complete
