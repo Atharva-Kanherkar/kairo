@@ -1,0 +1,86 @@
+add r0 prefix=80 total=95
+add r1 prefix=48 total=70
+add r2 prefix=49 total=57
+add r3 prefix=16 total=41
+add r4 prefix=48 total=64
+add r5 prefix=95 total=111
+add r6 prefix=49 total=95
+add r7 prefix=43 total=71
+add r8 prefix=80 total=95
+add r9 prefix=32 total=71
+add r10 prefix=43 total=63
+add r11 prefix=43 total=84
+add r12 prefix=48 total=59
+add r13 prefix=49 total=72
+add r14 prefix=80 total=103
+add r15 prefix=48 total=73
+add r16 prefix=16 total=32
+add r17 prefix=80 total=108
+add r18 prefix=80 total=86
+add r19 prefix=43 total=74
+add r20 prefix=49 total=69
+add r21 prefix=16 total=36
+add r22 prefix=32 total=33
+add r23 prefix=95 total=100
+session-update r22 new_tokens=23
+add r25 prefix=49 total=72
+add r26 prefix=49 total=52
+add r27 prefix=48 total=82
+add r28 prefix=43 total=74
+add r29 prefix=32 total=57
+add r30 prefix=43 total=63
+add r31 prefix=49 total=92
+add r32 prefix=80 total=101
+add r33 prefix=16 total=18
+add r34 prefix=43 total=55
+add r35 prefix=48 total=60
+add r36 prefix=95 total=101
+add r37 prefix=16 total=41
+add r38 prefix=80 total=122
+add r39 prefix=26 total=43
+add r40 prefix=49 total=75
+session-update r39 new_tokens=30
+abort r40
+add r42 prefix=49 total=51
+add r43 prefix=80 total=93
+add r44 prefix=48 total=65
+session-update r39 new_tokens=100
+session-update r22 new_tokens=68
+session-update r39 new_tokens=21
+abort r42
+abort r36
+add r48 prefix=80 total=127
+session-update r22 new_tokens=59
+reset running=False ok=False
+session-update r22 new_tokens=25
+session-update r39 new_tokens=119
+session-update r22 new_tokens=16
+abort r14
+session-update r22 new_tokens=24
+add r54 prefix=80 total=93
+add r55 prefix=95 total=98
+add r56 prefix=26 total=70
+session-update r22 new_tokens=3
+session-update r22 new_tokens=11
+session-update r39 new_tokens=96
+abort r28
+session-update r22 new_tokens=63
+session-update r39 new_tokens=4
+abort r27
+session-update r22 new_tokens=4
+add r63 prefix=95 total=100
+add r64 prefix=95 total=117
+session-update r22 new_tokens=20
+abort r13
+abort r5
+add r66 prefix=49 total=59
+session-update r22 new_tokens=10
+abort r30
+add r68 prefix=80 total=96
+add r69 prefix=80 total=125
+add r70 prefix=43 total=70
+abort r43
+session-update r22 new_tokens=68
+session-update r39 new_tokens=27
+session-update r22 new_tokens=64
+drain

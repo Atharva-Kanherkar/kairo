@@ -1,0 +1,60 @@
+W1018 01:40:43.496000 63328 .venv/lib/python3.12/site-packages/torch/_opaque_base.py:6] torch._opaque_base is deprecated, use torch._custom_class_base instead
+W1018 01:40:43.496000 63328 .venv/lib/python3.12/site-packages/torch/_library/opaque_object.py:288] register_opaque_type is deprecated, use register_custom_class instead
+W1018 01:40:43.496000 63328 .venv/lib/python3.12/site-packages/torch/_library/opaque_object.py:211] typ='value' is deprecated, use typ='constant' instead
+objc[63328]: Class AVFFrameReceiver is implemented in both /opt/homebrew/Cellar/ffmpeg/8.1.2_1/lib/libavdevice.62.3.102.dylib (0x11839c328) and /Users/atharva/kairo/tools/vllm/.venv/lib/python3.12/site-packages/cv2/.dylibs/libavdevice.61.3.100.dylib (0x11bb9c3a8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+objc[63328]: Class AVFAudioReceiver is implemented in both /opt/homebrew/Cellar/ffmpeg/8.1.2_1/lib/libavdevice.62.3.102.dylib (0x11839c378) and /Users/atharva/kairo/tools/vllm/.venv/lib/python3.12/site-packages/cv2/.dylibs/libavdevice.61.3.100.dylib (0x11bb9c3f8). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+W1018 01:40:48.313000 63328 .venv/lib/python3.12/site-packages/torch/_library/triton.py:53] Triton not available, find_triton_kernels = []
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Could not retrieve safetensors metadata for facebook/opt-125m (Hub fetch failed and the cached snapshot holds no weights yet).
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+Model Runner V2 requires Triton; using the V1 model runner instead.
+Fetching 9 files:   0%|          | 0/9 [00:00<?, ?it/s]Fetching 9 files: 100%|██████████| 9/9 [00:00<00:00, 6967.28it/s]
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+CPU backend prefers block_size is multiples of 32, otherwise the performance is not optimized.
+BUG     : scheduled=1000 status=WAITING_FOR_STREAMING_REQ computed=1032 blocks=64/65 max_model_len=1024 over_model_len=True kv_overrun=True
+CTRL-A  : scheduled=800 status=WAITING_FOR_STREAMING_REQ computed=832 blocks=52/52 max_model_len=1024 over_model_len=False kv_overrun=False
+CTRL-B  : scheduled=1000 status=WAITING_FOR_STREAMING_REQ computed=1032 blocks=65/65 max_model_len=2048 over_model_len=False kv_overrun=False
+CTRL-C  : scheduled=991 status=WAITING_FOR_STREAMING_REQ computed=1023 blocks=64/64 max_model_len=1024 over_model_len=False kv_overrun=False
+round 1: REPRO OK
+
+BUG     : scheduled=1000 status=WAITING_FOR_STREAMING_REQ computed=1032 blocks=64/65 max_model_len=1024 over_model_len=True kv_overrun=True
+CTRL-A  : scheduled=800 status=WAITING_FOR_STREAMING_REQ computed=832 blocks=52/52 max_model_len=1024 over_model_len=False kv_overrun=False
+CTRL-B  : scheduled=1000 status=WAITING_FOR_STREAMING_REQ computed=1032 blocks=65/65 max_model_len=2048 over_model_len=False kv_overrun=False
+CTRL-C  : scheduled=991 status=WAITING_FOR_STREAMING_REQ computed=1023 blocks=64/64 max_model_len=1024 over_model_len=False kv_overrun=False
+round 2: REPRO OK
+
+BUG     : scheduled=1000 status=WAITING_FOR_STREAMING_REQ computed=1032 blocks=64/65 max_model_len=1024 over_model_len=True kv_overrun=True
+CTRL-A  : scheduled=800 status=WAITING_FOR_STREAMING_REQ computed=832 blocks=52/52 max_model_len=1024 over_model_len=False kv_overrun=False
+CTRL-B  : scheduled=1000 status=WAITING_FOR_STREAMING_REQ computed=1032 blocks=65/65 max_model_len=2048 over_model_len=False kv_overrun=False
+CTRL-C  : scheduled=991 status=WAITING_FOR_STREAMING_REQ computed=1023 blocks=64/64 max_model_len=1024 over_model_len=False kv_overrun=False
+round 3: REPRO OK
+
+BUG     : scheduled=1000 status=WAITING_FOR_STREAMING_REQ computed=1032 blocks=64/65 max_model_len=1024 over_model_len=True kv_overrun=True
+CTRL-A  : scheduled=800 status=WAITING_FOR_STREAMING_REQ computed=832 blocks=52/52 max_model_len=1024 over_model_len=False kv_overrun=False
+CTRL-B  : scheduled=1000 status=WAITING_FOR_STREAMING_REQ computed=1032 blocks=65/65 max_model_len=2048 over_model_len=False kv_overrun=False
+CTRL-C  : scheduled=991 status=WAITING_FOR_STREAMING_REQ computed=1023 blocks=64/64 max_model_len=1024 over_model_len=False kv_overrun=False
+round 4: REPRO OK
+
+BUG     : scheduled=1000 status=WAITING_FOR_STREAMING_REQ computed=1032 blocks=64/65 max_model_len=1024 over_model_len=True kv_overrun=True
+CTRL-A  : scheduled=800 status=WAITING_FOR_STREAMING_REQ computed=832 blocks=52/52 max_model_len=1024 over_model_len=False kv_overrun=False
+CTRL-B  : scheduled=1000 status=WAITING_FOR_STREAMING_REQ computed=1032 blocks=65/65 max_model_len=2048 over_model_len=False kv_overrun=False
+CTRL-C  : scheduled=991 status=WAITING_FOR_STREAMING_REQ computed=1023 blocks=64/64 max_model_len=1024 over_model_len=False kv_overrun=False
+round 5: REPRO OK
+
