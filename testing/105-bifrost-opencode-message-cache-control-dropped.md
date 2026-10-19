@@ -36,6 +36,13 @@ on Claude showed 0 cache reads and writes on every step while GPT and Gemini cac
 4. No upstream issue or pull request may already cover it. #2469 and #3942 were
    read in full and are different defects.
 
+Upstream history found in review: opencode #25984 (May 2026) described Bifrost
+ignoring message-level markers and #25985 proposed a client-side workaround; both were
+closed by inactivity bots. There is no Bifrost ticket, so the finding is
+`discussed-no-ticket`. What this adds: a reproduction on the current Bifrost release
+and `dev`, the decoder-level root cause, forwarded bytes for two providers, a direct
+control showing the provider honors the message-level form, and measured cost.
+
 ## Review contract
 
 A reviewer accepts only after rerunning, at minimum:

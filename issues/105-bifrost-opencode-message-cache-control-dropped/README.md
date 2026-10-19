@@ -1,11 +1,22 @@
 # 105, Bifrost drops message-level `cache_control` on Chat Completions, so opencode on Claude never hits the prompt cache
 
-- **Upstream**: [maximhq/bifrost](https://github.com/maximhq/bifrost). No issue or
-  pull request reports this on 2026-10-19. Related, different defects:
-  [#2469](https://github.com/maximhq/bifrost/issues/2469) (clients that send no
-  marker, answered by the opt-in `prompt_cache.auto_inject`) and
+- **Upstream**: [maximhq/bifrost](https://github.com/maximhq/bifrost). No Bifrost
+  issue or pull request reports this on 2026-10-19. The behavior was described from
+  the client side in opencode
+  [#25984](https://github.com/anomalyco/opencode/issues/25984) (2026-05-06, "Bifrost
+  ignores this for caching", auto-closed as stale on 2026-07-09, `not_planned`), and
+  opencode [#25985](https://github.com/anomalyco/opencode/pull/25985) proposed moving
+  the markers onto content blocks (auto-closed unmerged on 2026-06-06). Neither is a
+  maintainer ruling or a shipped fix. Classified `discussed-no-ticket`. Related,
+  different Bifrost defects: [#2469](https://github.com/maximhq/bifrost/issues/2469)
+  (clients that send no marker, answered by the opt-in `prompt_cache.auto_inject`) and
   [#3942](https://github.com/maximhq/bifrost/issues/3942) (block-level markers
   stripped on OpenRouter, fixed; the block-level control below passes)
+- **What this report adds to the opencode threads**: a reproduction on the current
+  Bifrost release and `dev`, the decoder-level root cause in Bifrost, the forwarded
+  bytes for two providers, a direct control showing the provider caches on the
+  message-level form (so the client is not at fault), the gateway's own documented
+  opencode setup as the trigger, and measured cost
 - **Tool under test**: Bifrost HTTP transport, latest release
   [`transports/v2.3.0`](https://github.com/maximhq/bifrost/releases/tag/transports%2Fv2.3.0)
   at `9237ec06672406e437b3cb33fc793ffd0403b3ae` (clean VCS build, `vcs.modified=false`)
@@ -75,8 +86,9 @@ what the first wrote:
 | Bifrost, same markers moved onto content blocks (trigger removed) | 28,032 to 28,035 | $0.00289 | 5/5 |
 | Direct to OpenRouter, opencode's message-level markers | 27,891 to 27,895 | $0.00323 | 5/5 |
 
-That is 8.7 times the input cost of a turn whose prefix should have come from the
-cache.
+That is 8.7 times the total call cost of a turn whose prefix should have come from
+the cache. Counting the prompt cost alone (`cost_details.upstream_inference_prompt_cost`),
+it is 8.9 times the direct control and 10.0 times the block-level control.
 
 Real opencode 1.19.3, five sessions per arm, same five-step task (create a file, read
 it, edit it, run `wc -l`), `openrouter/anthropic/claude-haiku-4.5`:
@@ -192,8 +204,10 @@ it.
   config produces exactly these requests. OpenRouter accepts the same
   message-level form and caches on it.
 - **Maintainer ruling**: none found. #2469 was decided for clients that send no
-  marker; this client sends one. No comment, denylist or commit classifies
-  message-level `cache_control` as unsupported.
+  marker; this client sends one. No Bifrost comment, denylist or commit classifies
+  message-level `cache_control` as unsupported. opencode #25984 and #25985 framed the
+  same symptom as an opencode change and were closed by inactivity bots, not by a
+  maintainer of either project.
 - **Supported usage with default settings**: yes. `bifrost run opencode`, default
   provider config, a Claude model.
 - **Boundary**: not a disclosure claim. The consequence is cost and latency.
@@ -206,12 +220,16 @@ it.
 ## Test
 
 Checker `client_cache_breakpoints_reach_provider` in
-`crates/harness/src/checks.rs`. Invariant: the forwarded request carries at least
-as many provider-native cache breakpoints (`cache_control`, `cachePoint`,
-`prompt_cache_breakpoint`, anywhere) as the client asked for, counted per marked
-message or tool at either level and capped at Anthropic's four. It counts rather
-than matching positions, so any placement a fix chooses passes, and it refuses a
-client request with no marker.
+`crates/harness/src/checks.rs`. Invariant: the forwarded request carries at least as
+many provider-native cache breakpoints as the client asked for, capped at Anthropic's
+four. The client side counts a message-level marker, each marked content block and
+each marked tool individually, so losing one of two markers in a message is caught.
+The forwarded side counts `cache_control`, `cachePoint` and `prompt_cache_breakpoint`
+only where a dialect puts a breakpoint (the request itself, system blocks, a message
+and its content blocks including nested tool results, Responses input items, and tool
+definitions), so a tool parameter that happens to be named `cache_control` does not
+count. It accepts any placement a fix chooses and refuses a client request with no
+marker.
 
 Conformance tests in `crates/harness/tests/conformance.rs`:
 
@@ -227,23 +245,31 @@ Conformance tests in `crates/harness/tests/conformance.rs`:
 
 ## Reproduce
 
-Rig in [`transcripts/105/rig/`](../../transcripts/105/rig/). Environment variable
-names only: `OPENROUTER_API_KEY`, `ANTHROPIC_API_KEY` (loaded from a local `.env`).
+Rig in [`transcripts/105/rig/`](../../transcripts/105/rig/), run from the repository
+root. Environment variable names only: `OPENROUTER_API_KEY` and `ANTHROPIC_API_KEY`,
+read from the dotenv file `ENV_FILE` points at. No key is written to disk: the
+opencode config references `{env:OC_KEY}` and the value stays in the process
+environment.
 
 ```bash
-# Bifrost v2.3.0 binary built at 9237ec06 (core v1.12.0); config routes the
-# anthropic and openrouter providers through recording relays.
-cp transcripts/105/rig/bifrost-config.json "$BIFROST_APP_DIR/config.json"
-bifrost -app-dir "$BIFROST_APP_DIR" -port 8191 &
-transcripts/105/rig/relays.sh "$PWD/ev1"          # 4 relays: client, anthropic, openrouter, direct
-ROOT="$PWD/ev1" python3 transcripts/105/rig/live_matrix.py
-# real opencode sessions (OPENCODE_BIN points at opencode 1.19.3)
-transcripts/105/rig/relays.sh "$PWD/ev2" && transcripts/105/rig/oc-matrix.sh
+# Bifrost transports v2.3.0 binary (vcs.revision 9237ec06, core v1.12.0). The config
+# routes the anthropic and openrouter providers through recording relays.
+export ENV_FILE=/path/to/.env
+BIFROST_BIN=/path/to/bifrost APP_DIR=/tmp/k105-app transcripts/105/rig/run-bf.sh
+transcripts/105/rig/relays.sh /tmp/k105-ev1   # client, anthropic, openrouter, direct
+set -a; . "$ENV_FILE"; set +a
+TRIALS=5 ROOT=/tmp/k105-ev1 python3 transcripts/105/rig/live_matrix.py   # needs httpx
+# real opencode sessions (opencode 1.19.3), RUNS per arm
+transcripts/105/rig/relays.sh /tmp/k105-ev2
+RUNS=5 RUNS_DIR=/tmp/k105-runs OPENCODE_BIN=/path/to/opencode transcripts/105/rig/oc-matrix.sh
 cargo test -p kairo --test conformance bug105
 ```
 
-`oc.sh`, `batch.sh` and `run-bf.sh` hold paths from the recording machine; adjust
-them before reuse.
+These commands were rerun from a clean shell at the repository root on 2026-10-19
+with `TRIALS=1` and `RUNS=1`: the replay reproduced (0 cached tokens through Bifrost,
+28,033 with block-level markers, 27,895 direct) and the opencode arms reproduced (0
+cache reads through Bifrost on 5/5 steps, about 28k on steps 2 to 5 direct), with no
+key in any of the 7,413 files the runs wrote.
 
 ## Limits
 

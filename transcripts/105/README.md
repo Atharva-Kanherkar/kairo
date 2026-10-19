@@ -18,7 +18,7 @@ byte-for-byte as recorded.
 | `wire/bifrost-to-openrouter/` | what Bifrost forwarded to `openrouter.ai`, and the live answers |
 | `wire/client-to-openrouter-direct/` | the gateway-removed control, straight to OpenRouter |
 | `opencode/capture/` | five real opencode 1.19.3 sessions through Bifrost and five direct, same hops as above |
-| `opencode/runs/` | each session's `opencode run --format json` event log and its `opencode.json` (API key redacted) |
+| `opencode/runs/` | each session's `opencode run --format json` event log and its `opencode.json` (the recorded runs wrote the key into the file and it was redacted on copy; the current [`rig/oc.sh`](rig/oc.sh) writes `{env:OC_KEY}` instead) |
 | `supplementary-native-anthropic/` | three earlier opencode 1.18.31 sessions through Bifrost's `anthropic` provider against live Anthropic, event logs only, not wire-captured |
 | `auto-inject/` | the `prompt_cache.auto_inject` checks: the per-request header first, then `auto_inject` set on the provider ([`rig/bifrost-config-auto-inject.json`](rig/bifrost-config-auto-inject.json)); exchange map below |
 
