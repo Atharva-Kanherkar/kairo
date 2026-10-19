@@ -1,0 +1,28 @@
+HTTP/1.1 200 OK
+Date: Mon, 19 Oct 2026 03:10:26 GMT
+Content-Type: text/event-stream
+Access-Control-Allow-Origin: *
+Cache-Control: no-cache
+X-Generation-Id: <redacted>
+access-control-expose-headers: X-Generation-Id,X-Provider-Name,request-id,cf-ray
+set-cookie: <redacted>
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+X-Content-Type-Options: nosniff
+Server: cloudflare
+CF-RAY: <redacted>
+
+data: {"id":"gen-1792379422-AsranTPhhWB8trIrsgKP","object":"chat.completion.chunk","created":1792379422,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"I'll help you with","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379422-AsranTPhhWB8trIrsgKP","object":"chat.completion.chunk","created":1792379422,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" that. Let me break this down into","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379422-AsranTPhhWB8trIrsgKP","object":"chat.completion.chunk","created":1792379422,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" steps and","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379422-AsranTPhhWB8trIrsgKP","object":"chat.completion.chunk","created":1792379422,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" track","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379422-AsranTPhhWB8trIrsgKP","object":"chat.completion.chunk","created":1792379422,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":"length","native_finish_reason":"max_tokens"}]}
+
+data: {"id":"gen-1792379422-AsranTPhhWB8trIrsgKP","object":"chat.completion.chunk","created":1792379422,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","service_tier":"default","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":"length","native_finish_reason":"max_tokens"}],"usage":{"prompt_tokens":28033,"completion_tokens":16,"total_tokens":28049,"cost":0.028113,"is_byok":false,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.028113,"upstream_inference_prompt_cost":0.028033,"upstream_inference_completions_cost":0.00008},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0,"audio_tokens":0}}}
+
+data: [DONE]
+

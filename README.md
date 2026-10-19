@@ -26,12 +26,12 @@ offline with no provider keys.
 <!-- kairo-counts:start -->
 | Metric | Value |
 |---|---|
-| Reproduced issue folders | 75 |
+| Reproduced issue folders | 76 |
 | Gateways under test | LiteLLM, NVIDIA Switchyard, Bifrost, GoModel, AxonHub, any-llm, Dynamo, NIXL, OGX, agentgateway, llm-d Router, and vLLM |
-| Harness tests | 301 (227 conformance checks against recorded transcripts, 74 unit) |
+| Harness tests | 305 (230 conformance checks against recorded transcripts, 75 unit) |
 <!-- kairo-counts:end -->
 
-The 75 folders cover reproduced findings, multi-defect reports, and honest
+The 76 folders cover reproduced findings, multi-defect reports, and honest
 negative results. Versions and reproduction outcomes are recorded per finding
 in [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md), including cited bugs that did
 not reproduce.
@@ -75,6 +75,7 @@ reproduction commands.
 | Assistant history survives replay (`thinking` blocks, signatures, stored continuations, and tool-call namespaces) | [016](issues/016-thinking-history-lost) (leaked as visible text) | [016](issues/016-thinking-history-lost) (dropped), [083](issues/083-switchyard-conversation-continuation-loss) | [033](issues/033-bifrost-drops-thinking-history), [103](issues/103-bifrost-tool-search-namespace-dropped) | | | [057](issues/057-any-llm-drops-thinking-history) | |
 | Tool-call ids round-trip | [004](issues/004-gemini-thought-signature) | [005](issues/005-switchyard-toolid-sanitizer) | [037](issues/037-bifrost-toolid-not-restored) | | | | |
 | Nothing is invented (empty text blocks, phantom message items, `cache_control`) | [001](issues/001-anthropic-stream-toolcall-translation), [009](issues/009-litellm-responses-phantom-message) | [019](issues/019-switchyard-invents-prompt-cache), [045](issues/045-switchyard-empty-text-before-tooluse), [068](issues/068-switchyard-drops-refusal-content) | | | | | |
+| Client prompt-cache breakpoints reach the provider (`cache_control` at message or block level) | | | [105](issues/105-bifrost-opencode-message-cache-control-dropped) | | | | |
 | Malformed input fails closed | [008](issues/008-litellm-messages-indexerror-crash) | | | | | | |
 | Credentials stay behind their intended trust boundary | [020](issues/020-litellm-client-api-key), [024](issues/024-litellm-health-extra-headers), [026](issues/026-litellm-extra-headers-org), [028](issues/028-litellm-gemini-passthrough-upload-url), [071](issues/071-litellm-model-info-api-base-leak) | [023](issues/023-switchyard-forwards-org-api-key), [025](issues/025-switchyard-transport-query-key), [027](issues/027-switchyard-forwards-x-goog-api-key), [063](issues/063-switchyard-redirect-follows-x-api-key) | [077](issues/077-bifrost-custom-response-header-secret-leak), [079](issues/079-bifrost-forged-realtime-key-admission) | | | | |
 

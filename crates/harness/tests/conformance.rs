@@ -9,7 +9,7 @@ use kairo::checks::{
     anthropic_response_toolcall_stop_reason, anthropic_server_tools_forwarded,
     anthropic_stop_sequence_reported, anthropic_stream_block_lifecycle,
     anthropic_stream_safety_stop_reason, anthropic_tool_choice_any_mapped_to_required,
-    anthropic_toolcall_stop_reason, capture_records,
+    anthropic_toolcall_stop_reason, capture_records, client_cache_breakpoints_reach_provider,
     codex_namespace_only_applies_to_namespaced_tools, content_filter_preserved,
     document_body_forwarded, endpoint_response_family_preserved, executed_tool_results_preserved,
     forwarded_body_preserves_values, gemini_inline_media_preserved_in_chat_response,
@@ -34,6 +34,7 @@ use kairo::checks::{
     REPLAYED_CALL_NAMESPACE_CHANGED,
 };
 use serde_json::Value;
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::PathBuf;
 
@@ -6290,4 +6291,223 @@ fn bifrost_103_gpt_6_matrix_matches_the_recorded_runs() {
             "{prefix}"
         );
     }
+}
+
+// ---- bug 105: Bifrost drops message-level cache_control from Chat Completions ----
+//
+// opencode, through the `@ai-sdk/openai-compatible` provider Bifrost documents and
+// `bifrost run opencode` generates, marks its system and latest user messages with
+// `cache_control` on the message itself. Bifrost's ChatMessage has no such field,
+// so the marker is lost before any provider sees it: Anthropic and OpenRouter get
+// no breakpoint and never cache. The same markers on content blocks survive.
+// Captured with transcripts/105/rig (relays on every hop), Bifrost v2.3.0.
+
+fn issue_105_body(raw_http: &str) -> Value {
+    let body = raw_http
+        .split_once("\r\n\r\n")
+        .map(|(_, body)| body)
+        .expect("http body");
+    serde_json::from_str(body).expect("json body")
+}
+
+fn issue_105_raw(relative: &str) -> String {
+    fixture(&format!("transcripts/105/{relative}"))
+}
+
+/// The last `usage` object a buffered or streamed Chat Completions response carried.
+fn issue_105_usage(raw_http: &str) -> Value {
+    let body = raw_http
+        .split_once("\r\n\r\n")
+        .map(|(_, body)| body)
+        .expect("http body");
+    body.lines()
+        .filter_map(|line| line.strip_prefix("data: "))
+        .filter_map(|data| serde_json::from_str::<Value>(data).ok())
+        .filter_map(|frame| frame.get("usage").filter(|u| u.is_object()).cloned())
+        .next_back()
+        .unwrap_or_else(|| panic!("no usage in response"))
+}
+
+fn issue_105_cached_tokens(raw_http: &str) -> u64 {
+    issue_105_usage(raw_http)["prompt_tokens_details"]["cached_tokens"]
+        .as_u64()
+        .unwrap_or(0)
+}
+
+fn issue_105_rows() -> Vec<Value> {
+    serde_json::from_str::<Value>(&issue_105_raw("wire/results.json"))
+        .expect("results.json")
+        .as_array()
+        .expect("rows")
+        .clone()
+}
+
+fn issue_105_exchange(row: &Value, hop: &str) -> String {
+    let name = row["exchanges"][hop][0].as_str().expect("exchange name");
+    name.to_string()
+}
+
+#[test]
+fn bug105_message_level_cache_control_never_reaches_the_provider() {
+    let mut counts: BTreeMap<(String, bool), usize> = BTreeMap::new();
+    for row in issue_105_rows() {
+        let case = row["case"].as_str().expect("case");
+        let hop = if case.starts_with("anthropic-") {
+            "bifrost-to-anthropic"
+        } else if case.starts_with("openrouter-") {
+            "bifrost-to-openrouter"
+        } else {
+            continue;
+        };
+        let request = issue_105_exchange(&row, "client-to-bifrost");
+        let client = issue_105_raw(&format!("wire/client-to-bifrost/{request}"));
+        let forwarded_name = issue_105_exchange(&row, hop);
+        let forwarded = issue_105_raw(&format!("wire/{hop}/{forwarded_name}"));
+        let client_json = issue_105_body(&client);
+        let forwarded_json = issue_105_body(&forwarded);
+        let message_level = client_json["messages"]
+            .as_array()
+            .expect("messages")
+            .iter()
+            .any(|m| m.get("cache_control").is_some());
+        assert_eq!(
+            message_level,
+            case.contains("message-level"),
+            "{case} {request}"
+        );
+        let verdict = client_cache_breakpoints_reach_provider(
+            &client_json.to_string(),
+            &forwarded_json.to_string(),
+        );
+        if message_level {
+            assert!(
+                matches!(&verdict, Verdict::Violation(reason) if reason.contains("forwarded body carries 0")),
+                "{case} {forwarded_name}: {verdict:?}"
+            );
+        } else {
+            assert_eq!(verdict, Verdict::Conformant, "{case} {forwarded_name}");
+        }
+        *counts
+            .entry((case.to_string(), verdict.is_conformant()))
+            .or_default() += 1;
+    }
+    for (case, conformant) in [
+        ("anthropic-message-level", false),
+        ("openrouter-message-level", false),
+        ("anthropic-block-level-control", true),
+        ("openrouter-block-level-control", true),
+    ] {
+        assert_eq!(
+            counts.get(&(case.to_string(), conformant)),
+            Some(&10),
+            "{case}"
+        );
+    }
+}
+
+#[test]
+fn bug105_dropped_breakpoints_bill_every_turn_uncached() {
+    // Each trial sent the same turn twice with a fresh nonce; the second call can
+    // only read a cache the first one wrote.
+    let mut seen: BTreeMap<String, Vec<u64>> = BTreeMap::new();
+    for row in issue_105_rows() {
+        if row["call"].as_u64() != Some(2) {
+            continue;
+        }
+        let case = row["case"].as_str().expect("case").to_string();
+        let hop = match case.as_str() {
+            "openrouter-message-level" | "openrouter-block-level-control" => {
+                "bifrost-to-openrouter"
+            }
+            "direct-openrouter-message-level-control" => "client-to-openrouter-direct",
+            _ => continue,
+        };
+        let name = issue_105_exchange(&row, hop).replace("-request.http", "-response.http");
+        let response = issue_105_raw(&format!("wire/{hop}/{name}"));
+        assert!(response.starts_with("HTTP/1.1 200"), "{case} {name}");
+        seen.entry(case)
+            .or_default()
+            .push(issue_105_cached_tokens(&response));
+    }
+    assert_eq!(seen["openrouter-message-level"], vec![0; 5]);
+    for control in [
+        "openrouter-block-level-control",
+        "direct-openrouter-message-level-control",
+    ] {
+        let cached = &seen[control];
+        assert_eq!(cached.len(), 5, "{control}");
+        assert!(
+            cached.iter().all(|&tokens| tokens > 20_000),
+            "{control}: {cached:?}"
+        );
+    }
+}
+
+#[test]
+fn bug105_opencode_sessions_through_bifrost_never_cache() {
+    let dir = |hop: &str| {
+        let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        path.push(format!("../../transcripts/105/opencode/capture/{hop}"));
+        let mut requests: Vec<String> = fs::read_dir(&path)
+            .unwrap_or_else(|e| panic!("read {}: {e}", path.display()))
+            .map(|entry| {
+                entry
+                    .expect("entry")
+                    .file_name()
+                    .to_string_lossy()
+                    .into_owned()
+            })
+            .filter(|name| name.ends_with("-request.http"))
+            .collect();
+        requests.sort();
+        requests
+    };
+    let read = |hop: &str, name: &str| issue_105_raw(&format!("opencode/capture/{hop}/{name}"));
+
+    let client = dir("client-to-bifrost");
+    let upstream = dir("bifrost-to-openrouter");
+    assert_eq!(client.len(), upstream.len());
+    let mut judged = 0;
+    for (sent, forwarded) in client.iter().zip(&upstream) {
+        let client_json = issue_105_body(&read("client-to-bifrost", sent));
+        let forwarded_raw = read("bifrost-to-openrouter", forwarded);
+        let response = read(
+            "bifrost-to-openrouter",
+            &forwarded.replace("-request.http", "-response.http"),
+        );
+        assert_eq!(issue_105_cached_tokens(&response), 0, "{forwarded}");
+        let marked = client_json["messages"]
+            .as_array()
+            .expect("messages")
+            .iter()
+            .any(|m| m.get("cache_control").is_some());
+        if !marked {
+            continue;
+        }
+        judged += 1;
+        assert!(
+            !client_cache_breakpoints_reach_provider(
+                &client_json.to_string(),
+                &issue_105_body(&forwarded_raw).to_string()
+            )
+            .is_conformant(),
+            "{sent} -> {forwarded}"
+        );
+    }
+    assert!(judged >= 25, "only {judged} marked opencode requests");
+
+    // The same opencode build sent straight to OpenRouter reads the cache on
+    // every step after the first of each of the five sessions.
+    let direct = dir("client-to-openrouter-direct");
+    let reads = direct
+        .iter()
+        .map(|name| {
+            issue_105_cached_tokens(&read(
+                "client-to-openrouter-direct",
+                &name.replace("-request.http", "-response.http"),
+            ))
+        })
+        .filter(|&tokens| tokens > 20_000)
+        .count();
+    assert!(reads >= 20, "direct cache reads: {reads}");
 }

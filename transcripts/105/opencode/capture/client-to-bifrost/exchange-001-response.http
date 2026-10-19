@@ -1,0 +1,53 @@
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Mon, 19 Oct 2026 03:11:37 GMT
+Content-Type: text/event-stream
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID, X-Bifrost-Setup-Token
+Access-Control-Max-Age: 86400
+Vary: Origin
+X-Bifrost-Request-Id: bcbd979e-aa74-4a33-9593-f5ef8858b098
+X-Request-Id: <redacted>
+X-Bifrost-Trace-Id: 9c35bf760507481391154606713958b1
+Cf-Ray: <redacted>
+Cache-Control: no-cache
+X-Generation-Id: <redacted>
+X-Bifrost-Provider: openrouter
+X-Bifrost-Original-Model: anthropic/claude-haiku-4.5
+X-Bifrost-Resolved-Model: anthropic/claude-haiku-4.5
+X-Bifrost-Request-Type: chat_completion_stream
+X-Bifrost-Routing-Info-Provider: openrouter
+X-Bifrost-Routing-Info-Model: anthropic/claude-haiku-4.5
+X-Bifrost-Routing-Info-Key: or
+X-Bifrost-Routing-Info-Requested-Provider: openrouter
+X-Bifrost-Routing-Info-Requested-Model: anthropic/claude-haiku-4.5
+X-Bifrost-Upstream-Latency-Ms: 1278.259
+
+data: {"id":"gen-1792379496-5T6A28IboDxm2cFilJ8W","choices":[{"index":0,"finish_reason":null,"logprobs":null,"delta":{"role":"assistant","content":"Create"}}],"created":1792379496,"model":"anthropic/claude-haiku-4.5","object":"chat.completion.chunk","system_fingerprint":"","usage":null,"extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openrouter","model":"anthropic/claude-haiku-4.5","key":"or","requested_provider":"openrouter","requested_model":"anthropic/claude-haiku-4.5"},"provider":"openrouter","original_model_requested":"anthropic/claude-haiku-4.5","resolved_model_used":"anthropic/claude-haiku-4.5","latency":1278,"chunk_index":0}}
+
+data: {"id":"gen-1792379496-5T6A28IboDxm2cFilJ8W","choices":[{"index":0,"finish_reason":null,"logprobs":null,"delta":{"role":"assistant","content":" notes.txt and"}}],"created":1792379496,"model":"anthropic/claude-haiku-4.5","object":"chat.completion.chunk","system_fingerprint":"","usage":null,"extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openrouter","model":"anthropic/claude-haiku-4.5","key":"or","requested_provider":"openrouter","requested_model":"anthropic/claude-haiku-4.5"},"provider":"openrouter","original_model_requested":"anthropic/claude-haiku-4.5","resolved_model_used":"anthropic/claude-haiku-4.5","latency":134,"chunk_index":1}}
+
+data: {"id":"gen-1792379496-5T6A28IboDxm2cFilJ8W","choices":[{"index":0,"finish_reason":null,"logprobs":null,"delta":{"role":"assistant","content":" append"}}],"created":1792379496,"model":"anthropic/claude-haiku-4.5","object":"chat.completion.chunk","system_fingerprint":"","usage":null,"extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openrouter","model":"anthropic/claude-haiku-4.5","key":"or","requested_provider":"openrouter","requested_model":"anthropic/claude-haiku-4.5"},"provider":"openrouter","original_model_requested":"anthropic/claude-haiku-4.5","resolved_model_used":"anthropic/claude-haiku-4.5","latency":0,"chunk_index":2}}
+
+data: {"id":"gen-1792379496-5T6A28IboDxm2cFilJ8W","choices":[{"index":0,"finish_reason":null,"logprobs":null,"delta":{"role":"assistant","content":" lines"}}],"created":1792379496,"model":"anthropic/claude-haiku-4.5","object":"chat.completion.chunk","system_fingerprint":"","usage":null,"extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openrouter","model":"anthropic/claude-haiku-4.5","key":"or","requested_provider":"openrouter","requested_model":"anthropic/claude-haiku-4.5"},"provider":"openrouter","original_model_requested":"anthropic/claude-haiku-4.5","resolved_model_used":"anthropic/claude-haiku-4.5","latency":0,"chunk_index":3}}
+
+data: {"id":"gen-1792379496-5T6A28IboDxm2cFilJ8W","choices":[{"index":0,"finish_reason":null,"logprobs":null,"delta":{"role":"assistant","content":" with"}}],"created":1792379496,"model":"anthropic/claude-haiku-4.5","object":"chat.completion.chunk","system_fingerprint":"","usage":null,"extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openrouter","model":"anthropic/claude-haiku-4.5","key":"or","requested_provider":"openrouter","requested_model":"anthropic/claude-haiku-4.5"},"provider":"openrouter","original_model_requested":"anthropic/claude-haiku-4.5","resolved_model_used":"anthropic/claude-haiku-4.5","latency":0,"chunk_index":4}}
+
+data: {"id":"gen-1792379496-5T6A28IboDxm2cFilJ8W","choices":[{"index":0,"finish_reason":null,"logprobs":null,"delta":{"role":"assistant","content":" w"}}],"created":1792379496,"model":"anthropic/claude-haiku-4.5","object":"chat.completion.chunk","system_fingerprint":"","usage":null,"extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openrouter","model":"anthropic/claude-haiku-4.5","key":"or","requested_provider":"openrouter","requested_model":"anthropic/claude-haiku-4.5"},"provider":"openrouter","original_model_requested":"anthropic/claude-haiku-4.5","resolved_model_used":"anthropic/claude-haiku-4.5","latency":7,"chunk_index":5}}
+
+data: {"id":"gen-1792379496-5T6A28IboDxm2cFilJ8W","choices":[{"index":0,"finish_reason":null,"logprobs":null,"delta":{"role":"assistant","content":"c"}}],"created":1792379496,"model":"anthropic/claude-haiku-4.5","object":"chat.completion.chunk","system_fingerprint":"","usage":null,"extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openrouter","model":"anthropic/claude-haiku-4.5","key":"or","requested_provider":"openrouter","requested_model":"anthropic/claude-haiku-4.5"},"provider":"openrouter","original_model_requested":"anthropic/claude-haiku-4.5","resolved_model_used":"anthropic/claude-haiku-4.5","latency":0,"chunk_index":6}}
+
+data: {"id":"gen-1792379496-5T6A28IboDxm2cFilJ8W","choices":[{"index":0,"finish_reason":"stop","logprobs":null,"delta":{"role":"assistant","content":""}}],"created":1792379496,"model":"anthropic/claude-haiku-4.5","object":"chat.completion.chunk","system_fingerprint":"","usage":null,"extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openrouter","model":"anthropic/claude-haiku-4.5","key":"or","requested_provider":"openrouter","requested_model":"anthropic/claude-haiku-4.5"},"provider":"openrouter","original_model_requested":"anthropic/claude-haiku-4.5","resolved_model_used":"anthropic/claude-haiku-4.5","latency":7,"chunk_index":7}}
+
+data: {"id":"gen-1792379496-5T6A28IboDxm2cFilJ8W","choices":[{"index":0,"finish_reason":"stop","logprobs":null,"delta":{"role":"assistant","content":""}}],"created":1792379496,"model":"anthropic/claude-haiku-4.5","object":"chat.completion.chunk","service_tier":"default","system_fingerprint":"","usage":null,"extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openrouter","model":"anthropic/claude-haiku-4.5","key":"or","requested_provider":"openrouter","requested_model":"anthropic/claude-haiku-4.5"},"provider":"openrouter","original_model_requested":"anthropic/claude-haiku-4.5","resolved_model_used":"anthropic/claude-haiku-4.5","latency":0,"chunk_index":8}}
+
+data: {"id":"gen-1792379496-5T6A28IboDxm2cFilJ8W","choices":[{"index":0,"finish_reason":null,"logprobs":null,"delta":{}}],"created":1792379496,"model":"anthropic/claude-haiku-4.5","object":"chat.completion.chunk","service_tier":"default","system_fingerprint":"","extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openrouter","model":"anthropic/claude-haiku-4.5","key":"or","requested_provider":"openrouter","requested_model":"anthropic/claude-haiku-4.5"},"provider":"openrouter","original_model_requested":"anthropic/claude-haiku-4.5","resolved_model_used":"anthropic/claude-haiku-4.5","latency":1434,"upstream_latency":1432,"chunk_index":9},"usage":{"prompt_tokens":607,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0},"completion_tokens":13,"completion_tokens_details":{"image_tokens":0},"total_tokens":620,"cost":0.000672}}
+
+data: [DONE]
+

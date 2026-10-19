@@ -1,0 +1,922 @@
+[
+ {
+  "trial": 1,
+  "case": "anthropic-message-level",
+  "call": 1,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-001-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-001-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 1,
+  "case": "anthropic-message-level",
+  "call": 2,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-002-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-002-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 1,
+  "case": "anthropic-block-level-control",
+  "call": 1,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-003-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-003-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 1,
+  "case": "anthropic-block-level-control",
+  "call": 2,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-004-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-004-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 1,
+  "case": "openrouter-message-level",
+  "call": 1,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28038,
+  "cache_write_tokens": 0,
+  "cached_tokens": 0,
+  "cost": 0.028118,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-005-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-001-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 1,
+  "case": "openrouter-message-level",
+  "call": 2,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28038,
+  "cache_write_tokens": 0,
+  "cached_tokens": 0,
+  "cost": 0.028118,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-006-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-002-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 1,
+  "case": "openrouter-block-level-control",
+  "call": 1,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28037,
+  "cache_write_tokens": 28034,
+  "cached_tokens": 0,
+  "cost": 0.0351255,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-007-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-003-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 1,
+  "case": "openrouter-block-level-control",
+  "call": 2,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28037,
+  "cache_write_tokens": 0,
+  "cached_tokens": 28034,
+  "cost": 0.0028864,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-008-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-004-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 1,
+  "case": "direct-openrouter-message-level-control",
+  "call": 1,
+  "model": "anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28257,
+  "cache_write_tokens": 27893,
+  "cached_tokens": 0,
+  "cost": 0.03531025,
+  "exchanges": {
+   "client-to-openrouter-direct": [
+    "exchange-001-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 1,
+  "case": "direct-openrouter-message-level-control",
+  "call": 2,
+  "model": "anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28257,
+  "cache_write_tokens": 0,
+  "cached_tokens": 27893,
+  "cost": 0.0032333,
+  "exchanges": {
+   "client-to-openrouter-direct": [
+    "exchange-002-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 2,
+  "case": "anthropic-message-level",
+  "call": 1,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-009-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-005-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 2,
+  "case": "anthropic-message-level",
+  "call": 2,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-010-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-006-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 2,
+  "case": "anthropic-block-level-control",
+  "call": 1,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-011-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-007-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 2,
+  "case": "anthropic-block-level-control",
+  "call": 2,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-012-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-008-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 2,
+  "case": "openrouter-message-level",
+  "call": 1,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28039,
+  "cache_write_tokens": 0,
+  "cached_tokens": 0,
+  "cost": 0.028119,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-013-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-005-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 2,
+  "case": "openrouter-message-level",
+  "call": 2,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28039,
+  "cache_write_tokens": 0,
+  "cached_tokens": 0,
+  "cost": 0.028119,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-014-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-006-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 2,
+  "case": "openrouter-block-level-control",
+  "call": 1,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28038,
+  "cache_write_tokens": 28035,
+  "cached_tokens": 0,
+  "cost": 0.03512675,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-015-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-007-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 2,
+  "case": "openrouter-block-level-control",
+  "call": 2,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28038,
+  "cache_write_tokens": 0,
+  "cached_tokens": 28035,
+  "cost": 0.0028865,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-016-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-008-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 2,
+  "case": "direct-openrouter-message-level-control",
+  "call": 1,
+  "model": "anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28255,
+  "cache_write_tokens": 27891,
+  "cached_tokens": 0,
+  "cost": 0.03530775,
+  "exchanges": {
+   "client-to-openrouter-direct": [
+    "exchange-003-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 2,
+  "case": "direct-openrouter-message-level-control",
+  "call": 2,
+  "model": "anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28255,
+  "cache_write_tokens": 0,
+  "cached_tokens": 27891,
+  "cost": 0.0032331,
+  "exchanges": {
+   "client-to-openrouter-direct": [
+    "exchange-004-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 3,
+  "case": "anthropic-message-level",
+  "call": 1,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-017-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-009-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 3,
+  "case": "anthropic-message-level",
+  "call": 2,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-018-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-010-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 3,
+  "case": "anthropic-block-level-control",
+  "call": 1,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-019-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-011-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 3,
+  "case": "anthropic-block-level-control",
+  "call": 2,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-020-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-012-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 3,
+  "case": "openrouter-message-level",
+  "call": 1,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28038,
+  "cache_write_tokens": 0,
+  "cached_tokens": 0,
+  "cost": 0.028118,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-021-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-009-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 3,
+  "case": "openrouter-message-level",
+  "call": 2,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28038,
+  "cache_write_tokens": 0,
+  "cached_tokens": 0,
+  "cost": 0.028118,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-022-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-010-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 3,
+  "case": "openrouter-block-level-control",
+  "call": 1,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28035,
+  "cache_write_tokens": 28032,
+  "cached_tokens": 0,
+  "cost": 0.035123,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-023-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-011-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 3,
+  "case": "openrouter-block-level-control",
+  "call": 2,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28035,
+  "cache_write_tokens": 0,
+  "cached_tokens": 28032,
+  "cost": 0.0028862,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-024-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-012-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 3,
+  "case": "direct-openrouter-message-level-control",
+  "call": 1,
+  "model": "anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28258,
+  "cache_write_tokens": 27894,
+  "cached_tokens": 0,
+  "cost": 0.0353115,
+  "exchanges": {
+   "client-to-openrouter-direct": [
+    "exchange-005-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 3,
+  "case": "direct-openrouter-message-level-control",
+  "call": 2,
+  "model": "anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28258,
+  "cache_write_tokens": 0,
+  "cached_tokens": 27894,
+  "cost": 0.0032334,
+  "exchanges": {
+   "client-to-openrouter-direct": [
+    "exchange-006-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 4,
+  "case": "anthropic-message-level",
+  "call": 1,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-025-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-013-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 4,
+  "case": "anthropic-message-level",
+  "call": 2,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-026-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-014-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 4,
+  "case": "anthropic-block-level-control",
+  "call": 1,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-027-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-015-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 4,
+  "case": "anthropic-block-level-control",
+  "call": 2,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-028-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-016-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 4,
+  "case": "openrouter-message-level",
+  "call": 1,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28033,
+  "cache_write_tokens": 0,
+  "cached_tokens": 0,
+  "cost": 0.028113,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-029-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-013-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 4,
+  "case": "openrouter-message-level",
+  "call": 2,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28033,
+  "cache_write_tokens": 0,
+  "cached_tokens": 0,
+  "cost": 0.028113,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-030-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-014-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 4,
+  "case": "openrouter-block-level-control",
+  "call": 1,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28035,
+  "cache_write_tokens": 28032,
+  "cached_tokens": 0,
+  "cost": 0.035123,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-031-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-015-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 4,
+  "case": "openrouter-block-level-control",
+  "call": 2,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28035,
+  "cache_write_tokens": 0,
+  "cached_tokens": 28032,
+  "cost": 0.0028862,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-032-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-016-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 4,
+  "case": "direct-openrouter-message-level-control",
+  "call": 1,
+  "model": "anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28259,
+  "cache_write_tokens": 27895,
+  "cached_tokens": 0,
+  "cost": 0.03531275,
+  "exchanges": {
+   "client-to-openrouter-direct": [
+    "exchange-007-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 4,
+  "case": "direct-openrouter-message-level-control",
+  "call": 2,
+  "model": "anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28259,
+  "cache_write_tokens": 0,
+  "cached_tokens": 27895,
+  "cost": 0.0032335,
+  "exchanges": {
+   "client-to-openrouter-direct": [
+    "exchange-008-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 5,
+  "case": "anthropic-message-level",
+  "call": 1,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-033-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-017-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 5,
+  "case": "anthropic-message-level",
+  "call": 2,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-034-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-018-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 5,
+  "case": "anthropic-block-level-control",
+  "call": 1,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-035-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-019-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 5,
+  "case": "anthropic-block-level-control",
+  "call": 2,
+  "model": "anthropic/claude-haiku-4-5",
+  "status": 400,
+  "prompt_tokens": null,
+  "cache_write_tokens": null,
+  "cached_tokens": null,
+  "cost": null,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-036-request.http"
+   ],
+   "bifrost-to-anthropic": [
+    "exchange-020-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 5,
+  "case": "openrouter-message-level",
+  "call": 1,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28038,
+  "cache_write_tokens": 0,
+  "cached_tokens": 0,
+  "cost": 0.028118,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-037-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-017-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 5,
+  "case": "openrouter-message-level",
+  "call": 2,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28038,
+  "cache_write_tokens": 0,
+  "cached_tokens": 0,
+  "cost": 0.028118,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-038-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-018-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 5,
+  "case": "openrouter-block-level-control",
+  "call": 1,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28038,
+  "cache_write_tokens": 28035,
+  "cached_tokens": 0,
+  "cost": 0.03512675,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-039-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-019-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 5,
+  "case": "openrouter-block-level-control",
+  "call": 2,
+  "model": "openrouter/anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28038,
+  "cache_write_tokens": 0,
+  "cached_tokens": 28035,
+  "cost": 0.0028865,
+  "exchanges": {
+   "client-to-bifrost": [
+    "exchange-040-request.http"
+   ],
+   "bifrost-to-openrouter": [
+    "exchange-020-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 5,
+  "case": "direct-openrouter-message-level-control",
+  "call": 1,
+  "model": "anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28256,
+  "cache_write_tokens": 27892,
+  "cached_tokens": 0,
+  "cost": 0.035309,
+  "exchanges": {
+   "client-to-openrouter-direct": [
+    "exchange-009-request.http"
+   ]
+  }
+ },
+ {
+  "trial": 5,
+  "case": "direct-openrouter-message-level-control",
+  "call": 2,
+  "model": "anthropic/claude-haiku-4.5",
+  "status": 200,
+  "prompt_tokens": 28256,
+  "cache_write_tokens": 0,
+  "cached_tokens": 27892,
+  "cost": 0.0032332,
+  "exchanges": {
+   "client-to-openrouter-direct": [
+    "exchange-010-request.http"
+   ]
+  }
+ }
+]

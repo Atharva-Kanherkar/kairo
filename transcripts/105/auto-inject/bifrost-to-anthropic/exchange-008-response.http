@@ -1,0 +1,17 @@
+HTTP/1.1 400 Bad Request
+Date: Mon, 19 Oct 2026 03:19:44 GMT
+Content-Type: application/json
+x-should-retry: false
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+request-id: <redacted>
+traceresponse: <redacted>
+anthropic-organization-id: <redacted>
+anthropic-workspace-id: <redacted>
+vary: Accept-Encoding
+Server: cloudflare
+X-Robots-Tag: none
+Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
+cf-cache-status: DYNAMIC
+CF-RAY: <redacted>
+
+{"type":"error","error":{"type":"invalid_request_error","message":"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits."},"request_id":"<redacted>"}
