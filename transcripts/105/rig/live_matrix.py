@@ -1,10 +1,12 @@
-"""5 trials x 4 cases. Each trial sends the captured opencode turn twice (stream, like opencode)
+"""TRIALS (default 5) trials x 5 cases. Each trial sends the captured opencode turn twice (stream, like opencode)
 with a fresh nonce in the system text, and records which relay exchanges each call produced."""
 import glob, httpx, json, os, time, uuid
 ROOT = os.environ["ROOT"]
+HERE = os.path.dirname(os.path.abspath(__file__))
+TRIALS = int(os.environ.get("TRIALS", "5"))
 CLIENT = "http://127.0.0.1:19971/openai/v1/chat/completions"
 DIRECT = "http://127.0.0.1:19974/api/v1/chat/completions"
-msg = json.load(open("req-oc-turn.json")); blk = json.load(open("req-block-level.json"))
+msg = json.load(open(os.path.join(HERE, "req-oc-turn.json"))); blk = json.load(open(os.path.join(HERE, "req-block-level.json")))
 CASES = [
     ("anthropic-message-level", CLIENT, "anthropic/claude-haiku-4-5", msg, False),
     ("anthropic-block-level-control", CLIENT, "anthropic/claude-haiku-4-5", blk, False),
@@ -28,7 +30,7 @@ def call(url, body, direct):
         if st != 200: u = {"error_body_seen": True}
     return st, u
 rows = []
-for trial in range(1, 6):
+for trial in range(1, TRIALS + 1):
     for name, url, model, base, direct in CASES:
         nonce = uuid.uuid4().hex
         for callno in (1, 2):
