@@ -1,0 +1,62 @@
+HTTP/1.1 200 OK
+Date: Mon, 19 Oct 2026 03:12:12 GMT
+Content-Type: text/event-stream
+Access-Control-Allow-Origin: *
+Cache-Control: no-cache
+X-Generation-Id: <redacted>
+access-control-expose-headers: X-Generation-Id,X-Provider-Name,request-id,cf-ray
+set-cookie: <redacted>
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+X-Content-Type-Options: nosniff
+Server: cloudflare
+CF-RAY: <redacted>
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"The","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" file has **","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"2 lines**.\n\nHere","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"'s what","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" happened","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":":\n-","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" Created","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" notes","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":".txt with \"alpha\"","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"\n- Read","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" it back (","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"confirmed","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" it contained","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" \"alpha\")\n-","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" Appended \"beta\" as","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" a","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" new line\n- `","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"wc -l notes.txt`","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" returned:","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":" **","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"2 lines**","role":"assistant"},"finish_reason":null,"native_finish_reason":null}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":"stop","native_finish_reason":"end_turn"}]}
+
+data: {"id":"gen-1792379530-AZCqFt3iQTL7iXKnPl33","object":"chat.completion.chunk","created":1792379530,"model":"anthropic/claude-haiku-4.5","provider":"Amazon Bedrock","service_tier":"default","choices":[{"index":0,"delta":{"content":"","role":"assistant"},"finish_reason":"stop","native_finish_reason":"end_turn"}],"usage":{"prompt_tokens":28947,"completion_tokens":69,"total_tokens":29016,"cost":0.00334745,"is_byok":false,"prompt_tokens_details":{"cached_tokens":28852,"cache_write_tokens":89,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.00334745,"upstream_inference_prompt_cost":0.00300245,"upstream_inference_completions_cost":0.000345},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0,"audio_tokens":0}}}
+
+data: [DONE]
+

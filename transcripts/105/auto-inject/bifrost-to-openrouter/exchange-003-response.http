@@ -1,0 +1,15 @@
+HTTP/1.1 200 OK
+Date: Mon, 19 Oct 2026 03:19:41 GMT
+Content-Type: application/json
+Server-Timing: cfEdge;dur=5,cfOrigin;dur=0,cfWorker;dur=13
+Access-Control-Allow-Origin: *
+Cache-Control: private, no-store
+Access-Control-Expose-Headers: X-Generation-Id,X-Provider-Name,request-id,cf-ray
+set-cookie: <redacted>
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+X-Content-Type-Options: nosniff
+Server: cloudflare
+CF-RAY: <redacted>
+
+{"data":{"label":"sk-or-v1-f30...fa1","is_management_key":false,"is_provisioning_key":false,"limit":null,"limit_reset":null,"limit_remaining":null,"include_byok_in_limit":false,"budgets":[],"effective_budget":null,"usage":4.09655045,"usage_daily":2.6139562,"usage_weekly":2.6139562,"usage_monthly":4.08485436,"byok_usage":0.01941775,"byok_usage_daily":0,"byok_usage_weekly":0,"byok_usage_monthly":0.01938565,"is_free_tier":false,"expires_at":null,"creator_user_id":"user_354PWWpiko1rARLEdSeKCoLp0AY","organization_id":null,"workspace_id":"86a2ef71-b2f3-5606-8cb5-2b425aa1b4a0","allowed_data_regions":["global"],"free_model_daily_requests":{"used":0,"limit":1000,"remaining":1000},"rate_limit":{"requests":-1,"interval":"10s","note":"This field is deprecated and safe to ignore."}}}

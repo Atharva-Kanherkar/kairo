@@ -3217,6 +3217,111 @@ pub fn replayed_calls_keep_returned_namespace(
     Verdict::Conformant
 }
 
+/// Message prefix for [`client_cache_breakpoints_reach_provider`].
+pub const CLIENT_CACHE_BREAKPOINT_DROPPED: &str =
+    "a prompt-cache breakpoint the client sent never reaches the provider";
+
+/// Anthropic accepts at most four `cache_control` breakpoints per request, and
+/// every dialect that carries one derives from that ceiling.
+const MAX_CACHE_BREAKPOINTS: usize = 4;
+
+fn is_marker(value: Option<&Value>) -> bool {
+    value.is_some_and(Value::is_object)
+}
+
+/// Breakpoints an OpenAI Chat Completions client asked for: one per message
+/// that carries `cache_control` itself or on any content block, and one per
+/// tool that carries it.
+fn client_cache_breakpoints(request: &Value) -> usize {
+    let messages = request
+        .get("messages")
+        .and_then(Value::as_array)
+        .map(Vec::as_slice)
+        .unwrap_or_default();
+    let marked_messages = messages
+        .iter()
+        .filter(|message| {
+            is_marker(message.get("cache_control"))
+                || message
+                    .get("content")
+                    .and_then(Value::as_array)
+                    .is_some_and(|blocks| {
+                        blocks
+                            .iter()
+                            .any(|block| is_marker(block.get("cache_control")))
+                    })
+        })
+        .count();
+    let marked_tools = request
+        .get("tools")
+        .and_then(Value::as_array)
+        .map_or(0, |tools| {
+            tools
+                .iter()
+                .filter(|tool| is_marker(tool.get("cache_control")))
+                .count()
+        });
+    marked_messages + marked_tools
+}
+
+/// Every provider-native breakpoint in a forwarded body, wherever the dialect
+/// puts it: Anthropic and OpenAI-compatible `cache_control`, Bedrock
+/// `cachePoint`, OpenAI `prompt_cache_breakpoint`.
+fn forwarded_cache_breakpoints(value: &Value) -> usize {
+    match value {
+        Value::Object(map) => map
+            .iter()
+            .map(|(key, child)| {
+                let own = usize::from(
+                    matches!(
+                        key.as_str(),
+                        "cache_control" | "cachePoint" | "prompt_cache_breakpoint"
+                    ) && child.is_object(),
+                );
+                own + forwarded_cache_breakpoints(child)
+            })
+            .sum(),
+        Value::Array(items) => items.iter().map(forwarded_cache_breakpoints).sum(),
+        _ => 0,
+    }
+}
+
+/// Invariant (bug 105): a prompt-cache breakpoint the client sent reaches the
+/// provider. A Chat Completions client may mark a message with `cache_control`
+/// on the message itself or on one of its content blocks; either way the
+/// forwarded request has to carry at least as many provider-native breakpoints
+/// as the client asked for, up to the four Anthropic allows. Providers that
+/// cache only on explicit breakpoints (Anthropic, and Anthropic models behind
+/// OpenRouter or Bedrock) otherwise bill the whole prompt at the uncached rate
+/// on every turn.
+///
+/// Counts markers rather than matching positions, so it accepts any placement a
+/// gateway chooses (for example moving a message-level marker onto the
+/// message's last block) and names no gateway function. A client request with
+/// no marker does not exercise the invariant and is refused.
+pub fn client_cache_breakpoints_reach_provider(client_body: &str, forwarded_body: &str) -> Verdict {
+    let Ok(client) = serde_json::from_str::<Value>(client_body) else {
+        return Verdict::Violation("client request body is not valid JSON".into());
+    };
+    let Ok(forwarded) = serde_json::from_str::<Value>(forwarded_body) else {
+        return Verdict::Violation("forwarded request body is not valid JSON".into());
+    };
+    let requested = client_cache_breakpoints(&client).min(MAX_CACHE_BREAKPOINTS);
+    if requested == 0 {
+        return Verdict::Violation(
+            "client request carries no cache_control breakpoint, so it does not exercise the invariant"
+                .into(),
+        );
+    }
+    let delivered = forwarded_cache_breakpoints(&forwarded);
+    if delivered < requested {
+        return Verdict::Violation(format!(
+            "{CLIENT_CACHE_BREAKPOINT_DROPPED}: client asked for {requested}, forwarded body carries {delivered}"
+        ));
+    }
+    Verdict::Conformant
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -5090,6 +5195,59 @@ data: [DONE]
         // The valid restore is still judged on its own merits.
         assert_eq!(
             codex_namespace_only_applies_to_namespaced_tools(&valid, 1),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn client_cache_breakpoints_must_reach_the_provider() {
+        let message_level = r#"{"messages":[{"role":"system","content":"sys","cache_control":{"type":"ephemeral"}},{"role":"user","content":"hi","cache_control":{"type":"ephemeral"}}]}"#;
+        let block_level = r#"{"messages":[{"role":"system","content":[{"type":"text","text":"sys","cache_control":{"type":"ephemeral"}}]},{"role":"user","content":[{"type":"text","text":"hi","cache_control":{"type":"ephemeral"}}]}]}"#;
+        let unmarked = r#"{"messages":[{"role":"user","content":"hi"}]}"#;
+        let anthropic_dropped = r#"{"system":"sys","messages":[{"role":"user","content":[{"type":"text","text":"hi"}]}]}"#;
+        let anthropic_kept = r#"{"system":[{"type":"text","text":"sys","cache_control":{"type":"ephemeral"}}],"messages":[{"role":"user","content":[{"type":"text","text":"hi","cache_control":{"type":"ephemeral"}}]}]}"#;
+        let anthropic_one = r#"{"system":[{"type":"text","text":"sys","cache_control":{"type":"ephemeral"}}],"messages":[{"role":"user","content":"hi"}]}"#;
+        let bedrock_kept = r#"{"system":[{"text":"sys"},{"cachePoint":{"type":"default"}}],"messages":[{"role":"user","content":[{"text":"hi"},{"cachePoint":{"type":"default"}}]}]}"#;
+
+        for client in [message_level, block_level] {
+            assert!(matches!(
+                client_cache_breakpoints_reach_provider(client, anthropic_dropped),
+                Verdict::Violation(reason) if reason.starts_with(CLIENT_CACHE_BREAKPOINT_DROPPED)
+            ));
+            assert!(
+                !client_cache_breakpoints_reach_provider(client, anthropic_one).is_conformant()
+            );
+            assert_eq!(
+                client_cache_breakpoints_reach_provider(client, anthropic_kept),
+                Verdict::Conformant
+            );
+            assert_eq!(
+                client_cache_breakpoints_reach_provider(client, bedrock_kept),
+                Verdict::Conformant
+            );
+        }
+        // A client that asked for nothing does not exercise the invariant.
+        assert!(!client_cache_breakpoints_reach_provider(unmarked, anthropic_kept).is_conformant());
+        // Markers beyond Anthropic's four are not required.
+        let six: Vec<String> = (0..6)
+            .map(|i| {
+                format!(
+                    r#"{{"role":"user","content":"m{i}","cache_control":{{"type":"ephemeral"}}}}"#
+                )
+            })
+            .collect();
+        let many = format!(r#"{{"messages":[{}]}}"#, six.join(","));
+        let four: Vec<String> = (0..4)
+            .map(|i| {
+                format!(r#"{{"type":"text","text":"m{i}","cache_control":{{"type":"ephemeral"}}}}"#)
+            })
+            .collect();
+        let clamped = format!(
+            r#"{{"messages":[{{"role":"user","content":[{}]}}]}}"#,
+            four.join(",")
+        );
+        assert_eq!(
+            client_cache_breakpoints_reach_provider(&many, &clamped),
             Verdict::Conformant
         );
     }

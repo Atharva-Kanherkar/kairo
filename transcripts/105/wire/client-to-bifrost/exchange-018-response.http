@@ -1,0 +1,37 @@
+HTTP/1.1 400 Bad Request
+Server: fasthttp
+Date: Mon, 19 Oct 2026 03:09:40 GMT
+Content-Type: application/json
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID, X-Bifrost-Setup-Token
+Access-Control-Max-Age: 86400
+Vary: Accept-Encoding
+X-Bifrost-Request-Id: f33c1c85-948b-42b7-904b-1f0e7f7342ce
+X-Request-Id: <redacted>
+X-Bifrost-Trace-Id: 7a25658a851f4172927fbffbd2dd0092
+Traceresponse: <redacted>
+Anthropic-Organization-Id: <redacted>
+Cf-Cache-Status: DYNAMIC
+X-Robots-Tag: none
+Cf-Ray: <redacted>
+X-Should-Retry: false
+Request-Id: <redacted>
+Anthropic-Workspace-Id: <redacted>
+X-Bifrost-Provider: anthropic
+X-Bifrost-Original-Model: claude-haiku-4-5
+X-Bifrost-Resolved-Model: claude-haiku-4-5
+X-Bifrost-Request-Type: chat_completion_stream
+X-Bifrost-Routing-Info-Provider: anthropic
+X-Bifrost-Routing-Info-Model: claude-haiku-4-5
+X-Bifrost-Routing-Info-Key: an
+X-Bifrost-Routing-Info-Requested-Provider: anthropic
+X-Bifrost-Routing-Info-Requested-Model: claude-haiku-4-5
+X-Bifrost-Upstream-Latency-Ms: 286.968
+
+{"is_bifrost_error":false,"status_code":400,"error":{"type":"invalid_request_error","message":"Your credit balance is too low to access the Anthropic API. Please go to Plans \u0026 Billing to upgrade or purchase credits."},"extra_fields":{"routing_info":{"provider":"anthropic","model":"claude-haiku-4-5","key":"an","requested_provider":"anthropic","requested_model":"claude-haiku-4-5"},"provider":"anthropic","original_model_requested":"claude-haiku-4-5","resolved_model_used":"claude-haiku-4-5","request_type":"chat_completion_stream","latency":286}}

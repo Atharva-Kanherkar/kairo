@@ -1,0 +1,6 @@
+GET /api/v1/models?output_modalities=decisions HTTP/1.1
+User-Agent: fasthttp
+Host: 127.0.0.1:19973
+Content-Type: application/json
+Authorization: <redacted>
+
