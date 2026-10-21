@@ -1,0 +1,5 @@
+name, driver_version, memory.total [MiB]
+NVIDIA RTX A6000, 595.91.07, 46068 MiB
+CUDA Version: 13.2
+7aaf17b62691a5dc1141f71da1d5bca72ce6667d
+Tue Oct 20 18:57:18 UTC 2026

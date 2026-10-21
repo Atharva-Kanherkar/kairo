@@ -3365,9 +3365,302 @@ pub fn client_cache_breakpoints_reach_provider(client_body: &str, forwarded_body
     Verdict::Conformant
 }
 
+pub const WORKER_LOSS_SURFACED: &str = "worker loss surfaced to the client";
+
+/// Invariant (106): when the worker serving a stream dies and the request is
+/// one the gateway documents as migratable, the loss stays invisible to the
+/// client. The stream carries no error event, ends in the endpoint's normal
+/// terminal state, and every tool call it starts finishes with arguments that
+/// parse as JSON.
+///
+/// The precondition matters. Dynamo documents guided-decoding requests,
+/// including tool calls under its default structural tags, as excluded from
+/// migration, so a loss on such a request reaching the client is documented
+/// behavior, not a violation of this invariant. The caller supplies a stream
+/// recorded while a worker was killed mid-stream; the checker judges only what
+/// the client received and names no gateway function. Malformed SSE data, a
+/// stream with no JSON data, or an endpoint without a rule fails closed.
+pub fn worker_loss_stays_invisible(endpoint: &str, sse_body: &str) -> Verdict {
+    let payloads = match strict_sse_payloads(sse_body) {
+        Ok(payloads) => payloads,
+        Err(bad) => return surfaced(&format!("malformed SSE data {bad}")),
+    };
+    if payloads.is_empty() {
+        return Verdict::Violation("stream carried no JSON data".into());
+    }
+    match endpoint {
+        "/v1/chat/completions" => chat_stream_survives(&payloads),
+        "/v1/messages" => messages_stream_survives(&payloads),
+        "/v1/responses" => responses_stream_survives(&payloads),
+        _ => Verdict::Violation(format!("no rule for endpoint {endpoint:?}")),
+    }
+}
+
+/// Every SSE event's `data` field as JSON, joining multi-line data per the SSE
+/// spec and skipping `[DONE]`. Unlike `sse_data_json`, a data field that is not
+/// JSON is an error rather than silently dropped, because a client SDK rejects it.
+fn strict_sse_payloads(body: &str) -> Result<Vec<Value>, String> {
+    let mut payloads = Vec::new();
+    let mut data: Vec<&str> = Vec::new();
+    let mut flush = |data: &mut Vec<&str>| -> Result<(), String> {
+        if data.is_empty() {
+            return Ok(());
+        }
+        let joined = data.join("\n");
+        data.clear();
+        if joined == "[DONE]" {
+            return Ok(());
+        }
+        serde_json::from_str::<Value>(&joined)
+            .map(|value| payloads.push(value))
+            .map_err(|_| truncate_for_reason(&joined))
+    };
+    for line in body.lines() {
+        if line.is_empty() {
+            flush(&mut data)?;
+        } else if let Some(rest) = line.strip_prefix("data:") {
+            data.push(rest.strip_prefix(' ').unwrap_or(rest));
+        }
+    }
+    flush(&mut data)?;
+    Ok(payloads)
+}
+
+fn surfaced(detail: &str) -> Verdict {
+    Verdict::Violation(format!(
+        "{WORKER_LOSS_SURFACED}: {}",
+        truncate_for_reason(detail)
+    ))
+}
+
+fn unparseable_arguments(arguments: &[String]) -> Option<Verdict> {
+    arguments.iter().find_map(|args| {
+        let args = if args.is_empty() { "{}" } else { args.as_str() };
+        serde_json::from_str::<Value>(args)
+            .err()
+            .map(|error| surfaced(&format!("tool call arguments are not JSON ({error})")))
+    })
+}
+
+fn kind(payload: &Value) -> &str {
+    payload.get("type").and_then(Value::as_str).unwrap_or("")
+}
+
+fn chat_stream_survives(payloads: &[Value]) -> Verdict {
+    if let Some(error) = payloads.iter().find_map(|p| p.get("error")) {
+        return surfaced(&format!("error event {error}"));
+    }
+    let mut arguments: BTreeMap<u64, String> = BTreeMap::new();
+    let mut finished = false;
+    for choice in payloads
+        .iter()
+        .filter_map(|p| p.get("choices").and_then(Value::as_array))
+        .flatten()
+    {
+        finished |= choice
+            .get("finish_reason")
+            .and_then(Value::as_str)
+            .is_some();
+        for call in choice
+            .pointer("/delta/tool_calls")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+        {
+            let index = call.get("index").and_then(Value::as_u64).unwrap_or(0);
+            let piece = call
+                .pointer("/function/arguments")
+                .and_then(Value::as_str)
+                .unwrap_or("");
+            arguments.entry(index).or_default().push_str(piece);
+        }
+    }
+    if !finished {
+        return surfaced("stream ended without a finish_reason");
+    }
+    let arguments: Vec<String> = arguments.into_values().collect();
+    unparseable_arguments(&arguments).unwrap_or(Verdict::Conformant)
+}
+
+fn messages_stream_survives(payloads: &[Value]) -> Verdict {
+    if let Some(error) = payloads.iter().find(|p| kind(p) == "error") {
+        return surfaced(&format!("error event {error}"));
+    }
+    let mut tool_blocks: BTreeMap<u64, String> = BTreeMap::new();
+    for payload in payloads {
+        let index = payload.get("index").and_then(Value::as_u64).unwrap_or(0);
+        match kind(payload) {
+            "content_block_start"
+                if payload
+                    .pointer("/content_block/type")
+                    .and_then(Value::as_str)
+                    == Some("tool_use") =>
+            {
+                tool_blocks.insert(index, String::new());
+            }
+            "content_block_delta" => {
+                if let (Some(buffer), Some(piece)) = (
+                    tool_blocks.get_mut(&index),
+                    payload
+                        .pointer("/delta/partial_json")
+                        .and_then(Value::as_str),
+                ) {
+                    buffer.push_str(piece);
+                }
+            }
+            _ => {}
+        }
+    }
+    let stopped = payloads.iter().any(|p| kind(p) == "message_stop");
+    let stop_reason = payloads
+        .iter()
+        .filter(|p| kind(p) == "message_delta")
+        .find_map(|p| p.pointer("/delta/stop_reason").and_then(Value::as_str));
+    if !stopped || stop_reason.is_none() {
+        return surfaced("stream ended without message_stop and a stop_reason");
+    }
+    let arguments: Vec<String> = tool_blocks.into_values().collect();
+    unparseable_arguments(&arguments).unwrap_or(Verdict::Conformant)
+}
+
+fn responses_stream_survives(payloads: &[Value]) -> Verdict {
+    if let Some(failure) = payloads
+        .iter()
+        .find(|p| matches!(kind(p), "error" | "response.failed"))
+    {
+        let detail = failure
+            .pointer("/response/error")
+            .unwrap_or(failure)
+            .to_string();
+        return surfaced(&format!("{} {detail}", kind(failure)));
+    }
+    let terminal = payloads
+        .iter()
+        .map(kind)
+        .filter(|k| matches!(*k, "response.completed" | "response.incomplete"))
+        .count();
+    if terminal != 1 {
+        return surfaced(&format!(
+            "expected one completed or incomplete terminal event, saw {terminal}"
+        ));
+    }
+    // Every function call the stream starts must finish with its arguments,
+    // from `function_call_arguments.done` or the finished output item.
+    let mut started: BTreeSet<u64> = BTreeSet::new();
+    let mut finished: BTreeMap<u64, String> = BTreeMap::new();
+    for payload in payloads {
+        let index = payload.get("output_index").and_then(Value::as_u64);
+        let is_call =
+            payload.pointer("/item/type").and_then(Value::as_str) == Some("function_call");
+        match (kind(payload), index) {
+            ("response.output_item.added", Some(i)) if is_call => {
+                started.insert(i);
+            }
+            ("response.function_call_arguments.done", Some(i)) => {
+                started.insert(i);
+                if let Some(args) = payload.get("arguments").and_then(Value::as_str) {
+                    finished.insert(i, args.to_owned());
+                }
+            }
+            ("response.output_item.done", Some(i)) if is_call => {
+                started.insert(i);
+                if let Some(args) = payload.pointer("/item/arguments").and_then(Value::as_str) {
+                    finished.entry(i).or_insert_with(|| args.to_owned());
+                }
+            }
+            _ => {}
+        }
+    }
+    if let Some(open) = started.iter().find(|i| !finished.contains_key(i)) {
+        return surfaced(&format!(
+            "function call at output_index {open} started but never finished"
+        ));
+    }
+    let arguments: Vec<String> = finished.into_values().collect();
+    unparseable_arguments(&arguments).unwrap_or(Verdict::Conformant)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn worker_loss_checker_judges_every_endpoint_and_fails_closed() {
+        let chat = |tail: &str| {
+            format!(
+                "data: {{\"choices\":[{{\"index\":0,\"delta\":{{\"tool_calls\":[{{\"index\":0,\"function\":{{\"name\":\"w\",\"arguments\":\"{{\\\"a\\\": \"}}}}]}}}}]}}\n\n{tail}data: [DONE]\n\n"
+            )
+        };
+        let finished = chat("data: {\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"arguments\":\"1}\"}}]},\"finish_reason\":\"tool_calls\"}]}\n\n");
+        assert_eq!(
+            worker_loss_stays_invisible("/v1/chat/completions", &finished),
+            Verdict::Conformant
+        );
+        // An error event, a stream that never finishes, and a cut tool call all fail.
+        for body in [
+            chat("data: {\"error\":{\"message\":\"Service temporarily unavailable\",\"code\":503}}\n\n"),
+            chat(""),
+            chat("data: {\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"tool_calls\"}]}\n\n"),
+        ] {
+            assert!(matches!(
+                worker_loss_stays_invisible("/v1/chat/completions", &body),
+                Verdict::Violation(reason) if reason.starts_with(WORKER_LOSS_SURFACED)
+            ));
+        }
+
+        let start = "data: {\"type\":\"message_start\",\"message\":{}}\n\n";
+        let tool = "data: {\"type\":\"content_block_start\",\"index\":0,\"content_block\":{\"type\":\"tool_use\",\"name\":\"w\",\"input\":{}}}\n\ndata: {\"type\":\"content_block_delta\",\"index\":0,\"delta\":{\"type\":\"input_json_delta\",\"partial_json\":\"{\\\"a\\\": 1}\"}}\n\ndata: {\"type\":\"content_block_stop\",\"index\":0}\n\n";
+        let end = "data: {\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"tool_use\"}}\n\ndata: {\"type\":\"message_stop\"}\n\n";
+        let overloaded = "data: {\"type\":\"error\",\"error\":{\"type\":\"overloaded_error\"}}\n\n";
+        assert_eq!(
+            worker_loss_stays_invisible("/v1/messages", &format!("{start}{tool}{end}")),
+            Verdict::Conformant
+        );
+        assert!(
+            !worker_loss_stays_invisible("/v1/messages", &format!("{start}{overloaded}"))
+                .is_conformant()
+        );
+        assert!(
+            !worker_loss_stays_invisible("/v1/messages", &format!("{start}{tool}")).is_conformant()
+        );
+
+        let created = "data: {\"type\":\"response.created\",\"response\":{}}\n\n";
+        let done = "data: {\"type\":\"response.function_call_arguments.done\",\"arguments\":\"{\\\"a\\\": 1}\"}\n\n";
+        let completed = "data: {\"type\":\"response.completed\",\"response\":{}}\n\n";
+        let failed = "data: {\"type\":\"response.failed\",\"response\":{\"error\":{\"code\":\"server_error\"}}}\n\n";
+        assert_eq!(
+            worker_loss_stays_invisible("/v1/responses", &format!("{created}{done}{completed}")),
+            Verdict::Conformant
+        );
+        assert!(
+            !worker_loss_stays_invisible("/v1/responses", &format!("{created}{failed}"))
+                .is_conformant()
+        );
+        assert!(!worker_loss_stays_invisible("/v1/responses", created).is_conformant());
+
+        // Review counterexamples: a started call whose arguments never finish,
+        // and malformed SSE data between valid chat frames, both fail.
+        let added = "data: {\"type\":\"response.output_item.added\",\"output_index\":0,\"item\":{\"type\":\"function_call\",\"arguments\":\"\"}}\n\n";
+        let partial = "data: {\"type\":\"response.function_call_arguments.delta\",\"output_index\":0,\"delta\":\"{\\\"a\\\": \"}\n\n";
+        assert!(matches!(
+            worker_loss_stays_invisible("/v1/responses", &format!("{created}{added}{partial}{completed}")),
+            Verdict::Violation(reason) if reason.contains("never finished")
+        ));
+        // Without the malformed frame this stream is conformant (see `finished`).
+        let garbled = finished.replacen(
+            "data: [DONE]",
+            "data: {\"choices\": [oops\n\ndata: [DONE]",
+            1,
+        );
+        assert!(matches!(
+            worker_loss_stays_invisible("/v1/chat/completions", &garbled),
+            Verdict::Violation(reason) if reason.contains("malformed SSE data")
+        ));
+
+        // Evidence that cannot exercise the invariant never passes.
+        assert!(!worker_loss_stays_invisible("/v1/chat/completions", "").is_conformant());
+        assert!(!worker_loss_stays_invisible("/v1/embeddings", &finished).is_conformant());
+    }
 
     #[test]
     fn replayed_namespace_checker_round_trips_what_the_provider_returned() {

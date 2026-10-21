@@ -1,0 +1,15 @@
+def chat_tools s4 1 :: HTTP 200 finish None seq None tool [] errs ['{"error":{"message":"Service temporarily unavailable","type":"service_unavailable","code":503}}'] issues None usage None
+def chat_tools s4 2 :: HTTP 200 finish None seq None tool [] errs ['{"error":{"message":"Service temporarily unavailable","type":"service_unavailable","code":503}}'] issues None usage None
+def chat_tools s4 3 :: HTTP 200 finish None seq None tool [] errs ['{"error":{"message":"Service temporarily unavailable","type":"service_unavailable","code":503}}'] issues None usage None
+def chat_tools s4 4 :: HTTP 200 finish None seq None tool [] errs ['{"error":{"message":"Service temporarily unavailable","type":"service_unavailable","code":503}}'] issues None usage None
+def chat_tools s4 5 :: HTTP 200 finish None seq None tool [] errs ['{"error":{"message":"Service temporarily unavailable","type":"service_unavailable","code":503}}'] issues None usage None
+def messages_tools s4 1 :: HTTP 200 finish None seq None tool [] errs ['{"type":"error","error":{"type":"overloaded_error","message":"Service temporarily unavailable"}}'] issues ['message_stop x0'] usage {'input_tokens': 101, 'output_tokens': 0, 'cache_creation_input_tokens': 0}
+def messages_tools s4 2 :: HTTP 200 finish None seq None tool [] errs ['{"type":"error","error":{"type":"overloaded_error","message":"Service temporarily unavailable"}}'] issues ['message_stop x0'] usage {'input_tokens': 101, 'output_tokens': 0, 'cache_creation_input_tokens': 0}
+def messages_tools s4 3 :: HTTP 200 finish None seq None tool [] errs ['{"type":"error","error":{"type":"overloaded_error","message":"Service temporarily unavailable"}}'] issues ['message_stop x0'] usage {'input_tokens': 101, 'output_tokens': 0, 'cache_creation_input_tokens': 0}
+def messages_tools s4 4 :: HTTP 200 finish None seq None tool [] errs ['{"type":"error","error":{"type":"overloaded_error","message":"Service temporarily unavailable"}}'] issues ['message_stop x0'] usage {'input_tokens': 101, 'output_tokens': 0, 'cache_creation_input_tokens': 0}
+def messages_tools s4 5 :: HTTP 200 finish None seq None tool [] errs ['{"type":"error","error":{"type":"overloaded_error","message":"Service temporarily unavailable"}}'] issues ['message_stop x0'] usage {'input_tokens': 101, 'output_tokens': 0, 'cache_creation_input_tokens': 0}
+def responses_tools s4 1 :: HTTP 200 finish ['failed'] seq None tool [] errs [] issues [] usage None
+def responses_tools s4 2 :: HTTP 200 finish ['failed'] seq None tool [] errs [] issues [] usage None
+def responses_tools s4 3 :: HTTP 200 finish ['failed'] seq None tool [] errs [] issues [] usage None
+def responses_tools s4 4 :: HTTP 200 finish ['failed'] seq None tool [] errs [] issues [] usage None
+def responses_tools s4 5 :: HTTP 200 finish ['failed'] seq None tool [] errs [] issues [] usage None
