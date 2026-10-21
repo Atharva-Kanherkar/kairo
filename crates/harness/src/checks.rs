@@ -3367,17 +3367,24 @@ pub fn client_cache_breakpoints_reach_provider(client_body: &str, forwarded_body
 
 pub const WORKER_LOSS_SURFACED: &str = "worker loss surfaced to the client";
 
-/// Invariant (bug 106): when the worker serving a stream dies and the gateway
-/// still has migration retries left, the loss stays invisible to the client.
-/// The stream carries no error event, ends in the endpoint's normal terminal
-/// state, and every tool call it delivers has arguments that parse as JSON.
+/// Invariant (106): when the worker serving a stream dies and the request is
+/// one the gateway documents as migratable, the loss stays invisible to the
+/// client. The stream carries no error event, ends in the endpoint's normal
+/// terminal state, and every tool call it starts finishes with arguments that
+/// parse as JSON.
 ///
-/// The caller supplies a stream recorded while a worker was killed mid-stream
-/// with migration enabled; the checker judges only what the client received, so
-/// it holds for any migration design and names no gateway function. A stream
-/// with no JSON data, or an endpoint without a rule, fails closed.
+/// The precondition matters. Dynamo documents guided-decoding requests,
+/// including tool calls under its default structural tags, as excluded from
+/// migration, so a loss on such a request reaching the client is documented
+/// behavior, not a violation of this invariant. The caller supplies a stream
+/// recorded while a worker was killed mid-stream; the checker judges only what
+/// the client received and names no gateway function. Malformed SSE data, a
+/// stream with no JSON data, or an endpoint without a rule fails closed.
 pub fn worker_loss_stays_invisible(endpoint: &str, sse_body: &str) -> Verdict {
-    let payloads = sse_data_json(sse_body);
+    let payloads = match strict_sse_payloads(sse_body) {
+        Ok(payloads) => payloads,
+        Err(bad) => return surfaced(&format!("malformed SSE data {bad}")),
+    };
     if payloads.is_empty() {
         return Verdict::Violation("stream carried no JSON data".into());
     }
@@ -3387,6 +3394,36 @@ pub fn worker_loss_stays_invisible(endpoint: &str, sse_body: &str) -> Verdict {
         "/v1/responses" => responses_stream_survives(&payloads),
         _ => Verdict::Violation(format!("no rule for endpoint {endpoint:?}")),
     }
+}
+
+/// Every SSE event's `data` field as JSON, joining multi-line data per the SSE
+/// spec and skipping `[DONE]`. Unlike `sse_data_json`, a data field that is not
+/// JSON is an error rather than silently dropped, because a client SDK rejects it.
+fn strict_sse_payloads(body: &str) -> Result<Vec<Value>, String> {
+    let mut payloads = Vec::new();
+    let mut data: Vec<&str> = Vec::new();
+    let mut flush = |data: &mut Vec<&str>| -> Result<(), String> {
+        if data.is_empty() {
+            return Ok(());
+        }
+        let joined = data.join("\n");
+        data.clear();
+        if joined == "[DONE]" {
+            return Ok(());
+        }
+        serde_json::from_str::<Value>(&joined)
+            .map(|value| payloads.push(value))
+            .map_err(|_| truncate_for_reason(&joined))
+    };
+    for line in body.lines() {
+        if line.is_empty() {
+            flush(&mut data)?;
+        } else if let Some(rest) = line.strip_prefix("data:") {
+            data.push(rest.strip_prefix(' ').unwrap_or(rest));
+        }
+    }
+    flush(&mut data)?;
+    Ok(payloads)
 }
 
 fn surfaced(detail: &str) -> Verdict {
@@ -3507,12 +3544,39 @@ fn responses_stream_survives(payloads: &[Value]) -> Verdict {
             "expected one completed or incomplete terminal event, saw {terminal}"
         ));
     }
-    let arguments: Vec<String> = payloads
-        .iter()
-        .filter(|p| kind(p) == "response.function_call_arguments.done")
-        .filter_map(|p| p.get("arguments").and_then(Value::as_str))
-        .map(str::to_owned)
-        .collect();
+    // Every function call the stream starts must finish with its arguments,
+    // from `function_call_arguments.done` or the finished output item.
+    let mut started: BTreeSet<u64> = BTreeSet::new();
+    let mut finished: BTreeMap<u64, String> = BTreeMap::new();
+    for payload in payloads {
+        let index = payload.get("output_index").and_then(Value::as_u64);
+        let is_call =
+            payload.pointer("/item/type").and_then(Value::as_str) == Some("function_call");
+        match (kind(payload), index) {
+            ("response.output_item.added", Some(i)) if is_call => {
+                started.insert(i);
+            }
+            ("response.function_call_arguments.done", Some(i)) => {
+                started.insert(i);
+                if let Some(args) = payload.get("arguments").and_then(Value::as_str) {
+                    finished.insert(i, args.to_owned());
+                }
+            }
+            ("response.output_item.done", Some(i)) if is_call => {
+                started.insert(i);
+                if let Some(args) = payload.pointer("/item/arguments").and_then(Value::as_str) {
+                    finished.entry(i).or_insert_with(|| args.to_owned());
+                }
+            }
+            _ => {}
+        }
+    }
+    if let Some(open) = started.iter().find(|i| !finished.contains_key(i)) {
+        return surfaced(&format!(
+            "function call at output_index {open} started but never finished"
+        ));
+    }
+    let arguments: Vec<String> = finished.into_values().collect();
     unparseable_arguments(&arguments).unwrap_or(Verdict::Conformant)
 }
 
@@ -3573,6 +3637,25 @@ mod tests {
                 .is_conformant()
         );
         assert!(!worker_loss_stays_invisible("/v1/responses", created).is_conformant());
+
+        // Review counterexamples: a started call whose arguments never finish,
+        // and malformed SSE data between valid chat frames, both fail.
+        let added = "data: {\"type\":\"response.output_item.added\",\"output_index\":0,\"item\":{\"type\":\"function_call\",\"arguments\":\"\"}}\n\n";
+        let partial = "data: {\"type\":\"response.function_call_arguments.delta\",\"output_index\":0,\"delta\":\"{\\\"a\\\": \"}\n\n";
+        assert!(matches!(
+            worker_loss_stays_invisible("/v1/responses", &format!("{created}{added}{partial}{completed}")),
+            Verdict::Violation(reason) if reason.contains("never finished")
+        ));
+        // Without the malformed frame this stream is conformant (see `finished`).
+        let garbled = finished.replacen(
+            "data: [DONE]",
+            "data: {\"choices\": [oops\n\ndata: [DONE]",
+            1,
+        );
+        assert!(matches!(
+            worker_loss_stays_invisible("/v1/chat/completions", &garbled),
+            Verdict::Violation(reason) if reason.contains("malformed SSE data")
+        ));
 
         // Evidence that cannot exercise the invariant never passes.
         assert!(!worker_loss_stays_invisible("/v1/chat/completions", "").is_conformant());

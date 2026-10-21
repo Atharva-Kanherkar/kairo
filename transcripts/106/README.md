@@ -1,6 +1,7 @@
 # Transcripts for finding 106
 
-Dynamo tool-carrying requests are not migrated when their worker dies. See
+Dynamo tool-carrying requests are not migrated when their worker dies. This is
+documented guided-decoding behavior, and the finding is withdrawn as a bug. See
 [`issues/106-dynamo-tool-requests-skip-migration/`](../../issues/106-dynamo-tool-requests-skip-migration/README.md).
 
 Recorded 2026-10-20 17:20 to 18:57 UTC on one RunPod secure-cloud pod: NVIDIA
@@ -37,8 +38,9 @@ endpoint: `chat*` is `/v1/chat/completions`, `messages*` is `/v1/messages`,
 - `consumer/`: one JSON line per SDK agent turn from `scripts/consumer.py`.
   `default.jsonl` is defaults with a kill at 4 s, `nost.jsonl` is the same with
   structural tags off, and `default-nokill.jsonl` is defaults with no kill.
-- `logs/frontend.log`: the frontend log for every rig start, with ANSI color
-  codes removed and nothing else changed. Each start begins with an
+- `logs/frontend.log.txt`: the frontend log for every rig start, with ANSI color
+  codes removed and nothing else changed. It is stored as `.txt` because the
+  repository ignores `*.log`. Each start begins with an
   `== start <UTC time>` line. Dynamo's own log text is kept verbatim.
 - `logs/nofn-default.txt`, `logs/nofn-nost.txt`: the matrix summaries for the
   two 15-run sets.

@@ -6512,7 +6512,8 @@ fn bug105_opencode_sessions_through_bifrost_never_cache() {
     assert!(reads >= 20, "direct cache reads: {reads}");
 }
 
-// ---- bug 106: Dynamo tool requests skip migration when a worker dies ----
+// ---- 106, withdrawn as a bug: Dynamo documents guided-decoding requests,
+// including tool calls under default structural tags, as not migrated ----
 
 /// Every run directory of one transcript group, as (cell, endpoint, SSE body,
 /// killed worker). The probe writes `HTTP <status>` on the first line and then
@@ -6550,12 +6551,15 @@ fn issue_106_runs(group: &str) -> Vec<(String, &'static str, String, Option<u64>
         .collect()
 }
 
-/// Current Dynamo main with its default structural tags: SIGKILLing the
-/// serving worker 4 s into a tool-call stream reaches the client as a 503
-/// error event, an Anthropic `overloaded_error`, or `response.failed`, 15/15,
-/// although the frontend runs with `--migration-limit 3`.
+/// Documented behavior, kept as a measurement: on current Dynamo main the
+/// default structural tags make every tool request a guided-decoding request,
+/// which the migration docs exclude. SIGKILLing the serving worker 4 s into a
+/// tool-call stream reaches the client as a 503 error event, an Anthropic
+/// `overloaded_error`, or `response.failed`, 15/15, under `--migration-limit 3`.
+/// The checker's precondition (a request documented as migratable) does not
+/// hold here, so this records what clients see rather than a defect.
 #[test]
-fn dynamo_tool_stream_worker_loss_default_structural_tags_violation() {
+fn dynamo_guided_tool_stream_worker_loss_reaches_client_as_documented() {
     let runs = issue_106_runs("main-default-kill");
     assert_eq!(runs.len(), 15);
     for (name, endpoint, body, killed) in runs {
@@ -6567,9 +6571,9 @@ fn dynamo_tool_stream_worker_loss_default_structural_tags_violation() {
     }
 }
 
-/// Trigger removed: the same build and the same kill with only
-/// `DYN_ENABLE_STRUCTURAL_TAG=false` migrates every stream, and each delivered
-/// tool call parses, 15/15.
+/// With guidance off (`DYN_ENABLE_STRUCTURAL_TAG=false` only) the same tool
+/// requests are not guided, so they are migratable: the same kill migrates
+/// every stream, and each delivered tool call parses, 15/15.
 #[test]
 fn dynamo_tool_stream_worker_loss_structural_tags_off_is_conformant() {
     let runs = issue_106_runs("main-structural-tag-off-kill");
