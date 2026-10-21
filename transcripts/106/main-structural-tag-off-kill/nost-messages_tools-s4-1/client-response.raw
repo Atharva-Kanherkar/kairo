@@ -1,0 +1,21 @@
+HTTP 200
+event: message_start
+data: {"type":"message_start","message":{"id":"msg_de12197edde04a7e9253f52b6706d8a0","type":"message","role":"assistant","content":[],"model":"Qwen/Qwen3-4B-Instruct-2507","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":101,"output_tokens":0,"cache_creation_input_tokens":0}}}
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_799187fdac9f4ef19dbe453c29bc33d9","name":"write_file","input":{}}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"input_json_delta","partial_json":"{\"path\": \"nums.txt\", \"content\": \"1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200\"}"},"usage":{"input_tokens":0,"output_tokens":716,"cache_creation_input_tokens":0,"cache_read_input_tokens":192,"total_tokens":908}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"tool_use"},"usage":{"input_tokens":0,"output_tokens":717,"cache_creation_input_tokens":0,"cache_read_input_tokens":192}}
+
+event: message_stop
+data: {"type":"message_stop"}
+
+data: [DONE]
+

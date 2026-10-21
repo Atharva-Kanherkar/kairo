@@ -29,9 +29,9 @@ use kairo::checks::{
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
     responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
     thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
-    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, FunctionToolFormat,
-    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
-    REPLAYED_CALL_NAMESPACE_CHANGED,
+    truncation_preserved, upstream_bearer_is, upstream_omits_header_value,
+    worker_loss_stays_invisible, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
+    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT, REPLAYED_CALL_NAMESPACE_CHANGED,
 };
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -6510,4 +6510,123 @@ fn bug105_opencode_sessions_through_bifrost_never_cache() {
         .filter(|&tokens| tokens > 20_000)
         .count();
     assert!(reads >= 20, "direct cache reads: {reads}");
+}
+
+// ---- bug 106: Dynamo tool requests skip migration when a worker dies ----
+
+/// Every run directory of one transcript group, as (cell, endpoint, SSE body,
+/// killed worker). The probe writes `HTTP <status>` on the first line and then
+/// the raw body bytes; `kill.json` records the worker it SIGKILLed mid-stream.
+fn issue_106_runs(group: &str) -> Vec<(String, &'static str, String, Option<u64>)> {
+    let mut root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    root.push("../../transcripts/106");
+    root.push(group);
+    let mut names: Vec<String> = fs::read_dir(&root)
+        .unwrap_or_else(|e| panic!("read {}: {e}", root.display()))
+        .map(|entry| entry.unwrap().file_name().into_string().unwrap())
+        .collect();
+    names.sort();
+    names
+        .into_iter()
+        .map(|name| {
+            let raw = fixture(&format!(
+                "transcripts/106/{group}/{name}/client-response.raw"
+            ));
+            let (status, body) = raw.split_once('\n').expect("status line");
+            assert_eq!(status, "HTTP 200", "{group}/{name}");
+            let endpoint = if name.contains("messages") {
+                "/v1/messages"
+            } else if name.contains("responses") {
+                "/v1/responses"
+            } else {
+                "/v1/chat/completions"
+            };
+            let killed = fs::read_to_string(root.join(&name).join("kill.json"))
+                .ok()
+                .map(|k| serde_json::from_str::<serde_json::Value>(&k).unwrap())
+                .and_then(|k| k.get("worker").and_then(serde_json::Value::as_u64));
+            (name, endpoint, body.to_owned(), killed)
+        })
+        .collect()
+}
+
+/// Current Dynamo main with its default structural tags: SIGKILLing the
+/// serving worker 4 s into a tool-call stream reaches the client as a 503
+/// error event, an Anthropic `overloaded_error`, or `response.failed`, 15/15,
+/// although the frontend runs with `--migration-limit 3`.
+#[test]
+fn dynamo_tool_stream_worker_loss_default_structural_tags_violation() {
+    let runs = issue_106_runs("main-default-kill");
+    assert_eq!(runs.len(), 15);
+    for (name, endpoint, body, killed) in runs {
+        assert!(killed.is_some(), "{name}: no worker was killed");
+        assert!(
+            matches!(worker_loss_stays_invisible(endpoint, &body), Verdict::Violation(reason) if reason.contains("unavailable")),
+            "{name}: expected the worker loss to surface"
+        );
+    }
+}
+
+/// Trigger removed: the same build and the same kill with only
+/// `DYN_ENABLE_STRUCTURAL_TAG=false` migrates every stream, and each delivered
+/// tool call parses, 15/15.
+#[test]
+fn dynamo_tool_stream_worker_loss_structural_tags_off_is_conformant() {
+    let runs = issue_106_runs("main-structural-tag-off-kill");
+    assert_eq!(runs.len(), 15);
+    for (name, endpoint, body, killed) in runs {
+        assert!(killed.is_some(), "{name}: no worker was killed");
+        assert_eq!(
+            worker_loss_stays_invisible(endpoint, &body),
+            Verdict::Conformant,
+            "{name}"
+        );
+    }
+}
+
+/// Version control: release 1.5.1, whose structural tags default to off,
+/// migrates the same tool-call streams, 6/6, plus its no-kill control.
+#[test]
+fn dynamo_release_1_5_1_tool_stream_worker_loss_is_conformant() {
+    let runs = issue_106_runs("release-1.5.1-kill");
+    assert_eq!(runs.len(), 7);
+    let killed = runs.iter().filter(|run| run.3.is_some()).count();
+    assert_eq!(killed, 6);
+    for (name, endpoint, body, _) in runs {
+        assert_eq!(
+            worker_loss_stays_invisible(endpoint, &body),
+            Verdict::Conformant,
+            "{name}"
+        );
+    }
+}
+
+/// Text-only streams on current main migrate through the same kill on every
+/// endpoint, and the unkilled tool and text requests finish normally.
+#[test]
+fn dynamo_text_stream_worker_loss_and_no_kill_controls_are_conformant() {
+    let text = issue_106_runs("main-text-kill-controls");
+    let streamed: Vec<_> = text
+        .iter()
+        .filter(|run| !run.0.contains("nonstream"))
+        .collect();
+    assert_eq!(streamed.len(), 4);
+    for (name, endpoint, body, killed) in streamed {
+        assert!(killed.is_some(), "{name}: no worker was killed");
+        assert_eq!(
+            worker_loss_stays_invisible(endpoint, body),
+            Verdict::Conformant,
+            "{name}"
+        );
+    }
+    let controls = issue_106_runs("main-no-kill-controls");
+    assert_eq!(controls.len(), 6);
+    for (name, endpoint, body, killed) in controls {
+        assert!(killed.is_none(), "{name}");
+        assert_eq!(
+            worker_loss_stays_invisible(endpoint, &body),
+            Verdict::Conformant,
+            "{name}"
+        );
+    }
 }

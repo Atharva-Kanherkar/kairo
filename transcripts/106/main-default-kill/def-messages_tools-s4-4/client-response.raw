@@ -1,0 +1,9 @@
+HTTP 200
+event: message_start
+data: {"type":"message_start","message":{"id":"msg_1e1573cda3ac486888f41cbf52e2ad2d","type":"message","role":"assistant","content":[],"model":"Qwen/Qwen3-4B-Instruct-2507","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":101,"output_tokens":0,"cache_creation_input_tokens":0}}}
+
+event: error
+data: {"type":"error","error":{"type":"overloaded_error","message":"Service temporarily unavailable"}}
+
+data: [DONE]
+
