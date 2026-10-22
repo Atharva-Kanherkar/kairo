@@ -38,8 +38,8 @@ supported "for Gemini 3 and later models", and the Gemini 2.5 models answer it w
 model.` Until `v1.89.0`, LiteLLM sent the image as a sibling `inline_data` part next
 to the `function_response`, which Gemini 2.5 accepts and reads.
 
-The client replays the tool result on every later turn, so once an image tool result
-is in the history, every request in that session fails with the same 400.
+Clients replay the tool result on every later turn, so while an image tool result
+stays in the history, every request in that session fails with the same 400.
 
 ## What breaks
 
@@ -161,8 +161,12 @@ text it shows into answer.txt.", [`agents/codex/results.txt`](../../transcripts/
 `v1.106.2` + `fix.diff` wrote `ZEBRA-7342`, 3/3; `v1.106.2` with gemini-3.8-flash
 wrote `ZEBRA-7342`, 3/3.
 
-Measured: every image tool result on a Gemini 2.5 model fails the turn, and every
-later turn of that session fails too. Inferred, not measured: the same applies to
+Measured: every image tool result on a Gemini 2.5 model fails the turn, and the
+next turn of that session fails too while the image stays in the replayed history.
+Not measured: recovery after the history is cleared or rewound, and how often
+users hit image tools. The 400 is deterministic once the image tool runs, but
+whether the agent chooses to call the tool varies (one exploratory Claude Code run
+on Flash-Lite wrote an answer without calling `Read`). Inferred, not measured: the same applies to
 PDF and other file blocks in tool results, which take the same `inline_data_list`
 path, and to the Vertex `vertex_ai/` provider, which shares this code but was not
 run (no GCP credentials; Google retired 2.5 on Vertex on 2026-10-20).
@@ -220,16 +224,28 @@ Classification: `regression`.
   [`crates/harness/src/checks.rs`](../../crates/harness/src/checks.rs). Invariant: an
   image a client returns in a tool result reaches the provider, and the provider
   accepts the turn that carries it. It finds tool-result images in Chat, Anthropic
-  and Responses request bodies, looks for each payload anywhere in the forwarded body
-  (raw base64 or a data URL, nested or not), and then judges by the provider's own
-  status. It names no gateway function and encodes no provider schema. Unit test
-  `tool_result_images_must_reach_an_accepting_provider` covers drops, rejections,
-  remote URLs, duplicates, truncation and non-JSON input.
+  and Responses request bodies, then counts only image parts (Gemini `inline_data`
+  with an image MIME type, Chat `image_url`, Anthropic `image`, Responses
+  `input_image`) in the forwarded tool-result turn, nested or beside the result, or
+  in the user turn right after it. A data URL pasted into text or a JSON function
+  response, or a matching image elsewhere in the history, does not count. It then
+  judges by the provider's own status and names no gateway function. Unit test
+  `tool_result_images_must_reach_an_accepting_provider` covers drops, the pasted
+  data URL, JSON-dumped images, earlier-image masking, non-image MIME types, images
+  outside the tool-result turn, rejections, remote URLs, duplicates, truncation,
+  unknown dialects and non-JSON input.
 - [`crates/harness/tests/conformance.rs`](../../crates/harness/tests/conformance.rs):
   `bug107_gemini_2_5_rejects_the_tool_result_media_litellm_forwards` runs the checker
   over all 81 wire cells, `bug107_direct_gemini_takes_sibling_media_on_2_5_and_both_shapes_on_3`
-  pins the direct control, and `bug107_claude_code_session_cannot_continue_after_an_image_read`
-  pins the consumer matrix.
+  pins the direct control, `bug107_claude_code_session_cannot_continue_after_an_image_read`
+  pins the consumer matrix, and
+  `bug107_image_pasted_as_text_into_the_function_response_is_not_delivery` runs the
+  checker over three live captures of the #23712 shape
+  ([`adversarial/`](../../transcripts/107/adversarial), from
+  [`rig/adversarial_raw.py`](../../transcripts/107/rig/adversarial_raw.py)): Gemini
+  2.5 Pro answers 200 and never reads the image (3/3), and the checker reports the
+  drop. Against the first version of the checker, which matched the bytes anywhere
+  in the body, the new unit test and this test both fail.
 
 ## Reproduce
 

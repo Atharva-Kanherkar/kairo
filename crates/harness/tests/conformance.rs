@@ -32,7 +32,7 @@ use kairo::checks::{
     toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
     upstream_omits_header_value, worker_loss_stays_invisible, FunctionToolFormat, Verdict,
     EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
-    REPLAYED_CALL_NAMESPACE_CHANGED,
+    REPLAYED_CALL_NAMESPACE_CHANGED, TOOL_RESULT_IMAGE_DROPPED,
 };
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -6808,4 +6808,46 @@ fn bug107_claude_code_session_cannot_continue_after_an_image_read() {
             assert_eq!(read("ok.txt").trim(), "OK", "{cell}");
         }
     }
+}
+
+#[test]
+fn bug107_image_pasted_as_text_into_the_function_response_is_not_delivery() {
+    // The #23712 failure shape, recorded live: the v1.88.2 forwarded turn with its
+    // image part removed and the data URL pasted into functionResponse.response.
+    // Gemini 2.5 Pro accepts it with 200 and never sees the image, so a checker
+    // that matched bytes anywhere in the body would call it delivered.
+    let (_, client) = issue_107_split(&issue_107_raw(
+        "wire/messages-g25p-v1.88.2-r1/client-request.http",
+    ));
+    let mut judged = 0;
+    for run in 1..=3 {
+        let cell = format!("adversarial/text-data-url-gemini-2.5-pro-r{run}");
+        let (_, forwarded) = issue_107_split(&issue_107_raw(&format!("{cell}/request.http")));
+        let (status, provider) = issue_107_split(&issue_107_raw(&format!("{cell}/response.http")));
+        assert_eq!(status, 200, "{cell}");
+        assert!(!provider.contains("ZEBRA-7342"), "{cell}");
+        let image = issue_107_body_image(&client);
+        assert!(
+            forwarded.contains(&image),
+            "{cell} still carries the bytes as text"
+        );
+        assert!(
+            matches!(
+                tool_result_images_reach_provider(&client, &forwarded, status, &provider),
+                Verdict::Violation(reason) if reason.starts_with(TOOL_RESULT_IMAGE_DROPPED)
+            ),
+            "{cell}"
+        );
+        judged += 1;
+    }
+    assert_eq!(judged, 3);
+}
+
+/// The base64 image of the committed Anthropic-dialect client request.
+fn issue_107_body_image(client_body: &str) -> String {
+    let client: Value = serde_json::from_str(client_body).expect("client json");
+    client["messages"][2]["content"][0]["content"][0]["source"]["data"]
+        .as_str()
+        .expect("tool_result image")
+        .to_string()
 }
