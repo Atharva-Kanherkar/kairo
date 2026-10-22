@@ -5828,141 +5828,176 @@ data: [DONE]
         );
     }
 
-    #[test]
-    fn tool_result_images_must_reach_an_accepting_provider() {
-        let img = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk";
-        let png = |data: &str| format!("data:image/png;base64,{data}");
-        let chat = format!(
+    const IMG_107: &str = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk";
+    const CALL_107: &str = r#"{"role":"model","parts":[{"function_call":{"name":"f","args":{}}}]}"#;
+    const REJECTED_107: &str = r#"{"error":{"code":400,"message":"Multimodal function responses are not supported for this model.","status":"INVALID_ARGUMENT"}}"#;
+
+    fn png_107(data: &str) -> String {
+        format!("data:image/png;base64,{data}")
+    }
+
+    /// A Gemini body: the model's function call, then `tool_turn`, optionally
+    /// after an earlier user turn.
+    fn gemini_107(before: &str, tool_turn: &str) -> String {
+        format!(r#"{{"contents":[{before}{CALL_107},{tool_turn}]}}"#)
+    }
+
+    fn chat_client_107() -> String {
+        format!(
             r#"{{"messages":[{{"role":"tool","tool_call_id":"c","content":[{{"type":"text","text":"t"}},{{"type":"image_url","image_url":{{"url":"{}"}}}}]}}]}}"#,
-            png(img)
+            png_107(IMG_107)
+        )
+    }
+
+    /// The same tool-result image in the Chat, Anthropic and Responses dialects.
+    fn clients_107() -> [String; 3] {
+        [
+            chat_client_107(),
+            format!(
+                r#"{{"messages":[{{"role":"user","content":[{{"type":"tool_result","tool_use_id":"t","content":[{{"type":"image","source":{{"type":"base64","media_type":"image/png","data":"{IMG_107}"}}}}]}}]}}]}}"#
+            ),
+            format!(
+                r#"{{"input":[{{"type":"function_call_output","call_id":"c","output":[{{"type":"input_image","image_url":"{}"}}]}}]}}"#,
+                png_107(IMG_107)
+            ),
+        ]
+    }
+
+    fn nested_107() -> String {
+        gemini_107(
+            "",
+            &format!(
+                r#"{{"role":"user","parts":[{{"function_response":{{"name":"f","response":{{}},"parts":[{{"inline_data":{{"mime_type":"image/png","data":"{IMG_107}"}}}}]}}}}]}}"#
+            ),
+        )
+    }
+
+    fn sibling_107() -> String {
+        gemini_107(
+            "",
+            &format!(
+                r#"{{"role":"user","parts":[{{"function_response":{{"name":"f","response":{{}}}}}},{{"inline_data":{{"mime_type":"image/png","data":"{IMG_107}"}}}}]}}"#
+            ),
+        )
+    }
+
+    /// A Gemini tool turn whose function response carries `response` and no image part.
+    fn text_only_107(before: &str, response: &str) -> String {
+        gemini_107(
+            before,
+            &format!(
+                r#"{{"role":"user","parts":[{{"function_response":{{"name":"f","response":{response}}}}}]}}"#
+            ),
+        )
+    }
+
+    #[test]
+    fn tool_result_images_count_wherever_the_tool_result_turn_carries_them() {
+        let camel = gemini_107(
+            "",
+            &format!(
+                r#"{{"role":"user","parts":[{{"functionResponse":{{"name":"f","response":{{}},"parts":[{{"inlineData":{{"mimeType":"image/png","data":"{IMG_107}"}}}}]}}}}]}}"#
+            ),
         );
-        let anthropic = format!(
-            r#"{{"messages":[{{"role":"user","content":[{{"type":"tool_result","tool_use_id":"t","content":[{{"type":"image","source":{{"type":"base64","media_type":"image/png","data":"{img}"}}}}]}}]}}]}}"#
-        );
-        let responses = format!(
-            r#"{{"input":[{{"type":"function_call_output","call_id":"c","output":[{{"type":"input_image","image_url":"{}"}}]}}]}}"#,
-            png(img)
-        );
-        let call = r#"{"role":"model","parts":[{"function_call":{"name":"f","args":{}}}]}"#;
-        let gemini = |turns: &str| format!(r#"{{"contents":[{turns}]}}"#);
-        let nested = gemini(&format!(
-            r#"{call},{{"role":"user","parts":[{{"function_response":{{"name":"f","response":{{}},"parts":[{{"inline_data":{{"mime_type":"image/png","data":"{img}"}}}}]}}}}]}}"#
-        ));
-        let sibling = gemini(&format!(
-            r#"{call},{{"role":"user","parts":[{{"function_response":{{"name":"f","response":{{}}}}}},{{"inline_data":{{"mime_type":"image/png","data":"{img}"}}}}]}}"#
-        ));
-        let camel = gemini(&format!(
-            r#"{call},{{"role":"user","parts":[{{"functionResponse":{{"name":"f","response":{{}},"parts":[{{"inlineData":{{"mimeType":"image/png","data":"{img}"}}}}]}}}}]}}"#
-        ));
         // An OpenAI-compatible gateway may move the image into the user turn
         // right after the tool message, because tool messages carry text only.
         let chat_moved = format!(
             r#"{{"messages":[{{"role":"tool","tool_call_id":"c","content":"t"}},{{"role":"user","content":[{{"type":"image_url","image_url":{{"url":"{}"}}}}]}}]}}"#,
-            png(img)
+            png_107(IMG_107)
         );
-        let anthropic_fwd = anthropic.clone();
-        let rejected = r#"{"error":{"code":400,"message":"Multimodal function responses are not supported for this model.","status":"INVALID_ARGUMENT"}}"#;
-
-        // Delivery failures: dropped outright; pasted as text into the function
-        // response (the #23712 shape, accepted by Gemini with 200 and unseen);
-        // dumped as JSON into the function response; kept only as an earlier
-        // user image; carried with a non-image MIME type; or forwarded outside
-        // any tool-result turn.
-        let dropped = gemini(&format!(
-            r#"{call},{{"role":"user","parts":[{{"function_response":{{"name":"f","response":{{"content":"t"}}}}}}]}}"#
-        ));
-        let text_data_url = gemini(&format!(
-            r#"{call},{{"role":"user","parts":[{{"function_response":{{"name":"f","response":{{"content":"{}"}}}}}}]}}"#,
-            png(img)
-        ));
-        let json_dumped = gemini(&format!(
-            r#"{call},{{"role":"user","parts":[{{"function_response":{{"name":"f","response":{{"content":[{{"type":"image_url","image_url":{{"url":"{}"}}}}]}}}}}}]}}"#,
-            png(img)
-        ));
-        let earlier_image = gemini(&format!(
-            r#"{{"role":"user","parts":[{{"text":"look"}},{{"inline_data":{{"mime_type":"image/png","data":"{img}"}}}}]}},{call},{{"role":"user","parts":[{{"function_response":{{"name":"f","response":{{"content":"t"}}}}}}]}}"#
-        ));
-        let wrong_mime = sibling.replace("image/png", "text/plain");
-        let outside = format!(
-            r#"{{"messages":[{{"role":"user","content":[{{"type":"image_url","image_url":{{"url":"{}"}}}}]}}]}}"#,
-            png(img)
-        );
-        // A user turn after an unrelated assistant turn is not tool-result delivery.
-        let late_user = format!(
-            r#"{{"messages":[{{"role":"tool","tool_call_id":"c","content":"t"}},{{"role":"assistant","content":"ok"}},{{"role":"user","content":[{{"type":"image_url","image_url":{{"url":"{}"}}}}]}}]}}"#,
-            png(img)
-        );
-
-        for client in [&chat, &anthropic, &responses] {
-            for forwarded in [
-                &nested,
-                &sibling,
-                &camel,
-                &chat_moved,
-                &anthropic_fwd,
-                &chat,
-                &responses,
-            ] {
+        let clients = clients_107();
+        let mut forwarded = vec![nested_107(), sibling_107(), camel, chat_moved];
+        forwarded.extend(clients.iter().cloned());
+        for client in &clients {
+            for body in &forwarded {
                 assert_eq!(
-                    tool_result_images_reach_provider(client, forwarded, 200, "{}"),
+                    tool_result_images_reach_provider(client, body, 200, "{}"),
                     Verdict::Conformant,
-                    "{forwarded}"
-                );
-            }
-            for forwarded in [
-                &dropped,
-                &text_data_url,
-                &json_dumped,
-                &earlier_image,
-                &wrong_mime,
-                &outside,
-                &late_user,
-            ] {
-                assert!(
-                    matches!(
-                        tool_result_images_reach_provider(client, forwarded, 200, "{}"),
-                        Verdict::Violation(reason) if reason.starts_with(TOOL_RESULT_IMAGE_DROPPED)
-                    ),
-                    "{forwarded}"
+                    "{body}"
                 );
             }
             assert!(matches!(
-                tool_result_images_reach_provider(client, &nested, 400, rejected),
+                tool_result_images_reach_provider(client, &nested_107(), 400, REJECTED_107),
                 Verdict::Violation(reason) if reason.starts_with(TOOL_RESULT_TURN_REJECTED)
                     && reason.contains("Multimodal function responses")
             ));
         }
-        // An image outside any tool result does not exercise the invariant.
-        assert!(!tool_result_images_reach_provider(&outside, &nested, 200, "{}").is_conformant());
-        // A remote image URL is not a payload the checker can follow.
-        let remote = r#"{"messages":[{"role":"tool","tool_call_id":"c","content":[{"type":"image_url","image_url":{"url":"https://example.com/a.png"}}]}]}"#;
-        assert!(!tool_result_images_reach_provider(remote, &nested, 200, "{}").is_conformant());
-        // Two images need two deliveries; one copy is not enough, and an
-        // earlier user copy does not make up the second.
-        let two = chat.replace(
-            r#"{"type":"text","text":"t"}"#,
-            &format!(
-                r#"{{"type":"image_url","image_url":{{"url":"{}"}}}}"#,
-                png(img)
-            ),
+    }
+
+    #[test]
+    fn tool_result_images_not_delivered_as_image_parts_with_the_result_are_dropped() {
+        let earlier = format!(
+            r#"{{"role":"user","parts":[{{"text":"look"}},{{"inline_data":{{"mime_type":"image/png","data":"{IMG_107}"}}}}]}},"#
         );
+        let image_url = format!(
+            r#"{{"type":"image_url","image_url":{{"url":"{}"}}}}"#,
+            png_107(IMG_107)
+        );
+        let lost = [
+            // dropped outright
+            text_only_107("", r#"{"content":"t"}"#),
+            // pasted as text into the function response: the #23712 shape,
+            // which Gemini accepts with 200 and cannot see
+            text_only_107("", &format!(r#"{{"content":"{}"}}"#, png_107(IMG_107))),
+            // dumped as JSON into the function response
+            text_only_107("", &format!(r#"{{"content":[{image_url}]}}"#)),
+            // kept only as an earlier user image
+            text_only_107(&earlier, r#"{"content":"t"}"#),
+            // carried with a non-image MIME type
+            sibling_107().replace("image/png", "text/plain"),
+            // forwarded outside any tool-result turn
+            format!(r#"{{"messages":[{{"role":"user","content":[{image_url}]}}]}}"#),
+            // in a user turn after an unrelated assistant turn
+            format!(
+                r#"{{"messages":[{{"role":"tool","tool_call_id":"c","content":"t"}},{{"role":"assistant","content":"ok"}},{{"role":"user","content":[{image_url}]}}]}}"#
+            ),
+        ];
+        for client in &clients_107() {
+            for body in &lost {
+                assert!(
+                    matches!(
+                        tool_result_images_reach_provider(client, body, 200, "{}"),
+                        Verdict::Violation(reason) if reason.starts_with(TOOL_RESULT_IMAGE_DROPPED)
+                    ),
+                    "{body}"
+                );
+            }
+        }
+        // Two tool-result images need two deliveries; an earlier user copy does
+        // not make up the second.
+        let chat = chat_client_107();
+        let two = chat.replace(r#"{"type":"text","text":"t"}"#, &image_url);
         assert!(matches!(
-            tool_result_images_reach_provider(&two, &nested, 200, "{}"),
+            tool_result_images_reach_provider(&two, &nested_107(), 200, "{}"),
             Verdict::Violation(reason) if reason.contains("client sent 2, forwarded tool-result turns carry 1")
         ));
-        let masked = earlier_image.replace(
-            r#"{"function_response":{"name":"f","response":{"content":"t"}}}"#,
-            &format!(
-                r#"{{"function_response":{{"name":"f","response":{{}}}}}},{{"inline_data":{{"mime_type":"image/png","data":"{img}"}}}}"#
-            ),
+        let masked = sibling_107().replacen(
+            r#"{"contents":["#,
+            &format!(r#"{{"contents":[{earlier}"#),
+            1,
         );
         assert!(!tool_result_images_reach_provider(&two, &masked, 200, "{}").is_conformant());
         assert_eq!(
             tool_result_images_reach_provider(&chat, &masked, 200, "{}"),
             Verdict::Conformant
         );
+    }
+
+    #[test]
+    fn tool_result_image_checker_refuses_bad_and_unexercised_input() {
+        let chat = chat_client_107();
+        let nested = nested_107();
+        // An image outside any tool result does not exercise the invariant.
+        let outside = format!(
+            r#"{{"messages":[{{"role":"user","content":[{{"type":"image_url","image_url":{{"url":"{}"}}}}]}}]}}"#,
+            png_107(IMG_107)
+        );
+        assert!(!tool_result_images_reach_provider(&outside, &nested, 200, "{}").is_conformant());
+        // A remote image URL is not a payload the checker can follow.
+        let remote = r#"{"messages":[{"role":"tool","tool_call_id":"c","content":[{"type":"image_url","image_url":{"url":"https://example.com/a.png"}}]}]}"#;
+        assert!(!tool_result_images_reach_provider(remote, &nested, 200, "{}").is_conformant());
         // A truncated payload is not the image.
-        let truncated = nested.replace(img, &img[..20]);
+        let truncated = nested.replace(IMG_107, &IMG_107[..20]);
         assert!(!tool_result_images_reach_provider(&chat, &truncated, 200, "{}").is_conformant());
         // A non-JSON provider error still fails, with its text.
         assert!(matches!(
@@ -5973,7 +6008,7 @@ data: [DONE]
         assert!(!tool_result_images_reach_provider(&chat, "nope", 200, "{}").is_conformant());
         // A body in an unrecognized dialect has no tool-result turn.
         let bedrock = format!(
-            r#"{{"messages":[{{"role":"user","content":[{{"toolResult":{{"content":[{{"image":{{"source":{{"bytes":"{img}"}}}}}}]}}}}]}}]}}"#
+            r#"{{"messages":[{{"role":"user","content":[{{"toolResult":{{"content":[{{"image":{{"source":{{"bytes":"{IMG_107}"}}}}}}]}}}}]}}]}}"#
         );
         assert!(!tool_result_images_reach_provider(&chat, &bedrock, 200, "{}").is_conformant());
     }
