@@ -1,0 +1,35 @@
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 03:30:03 GMT
+content-length: 982
+content-type: application/json
+x-litellm-call-id: 91ad4027-8cd5-4c6f-90e2-11fd56febc1f
+x-litellm-model-id: d2ebe638e451989de6b031e749cfecf7d8056670ed868c5725da6bdaa1985183
+x-litellm-model-name: gemini/gemini-3.8-flash
+x-litellm-model-api-base: http://127.0.0.1:4097/v1beta
+x-litellm-version: 1.106.2
+x-litellm-response-cost: 0.0010185
+x-litellm-response-cost-original: 0.0010185
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-response-cost-input: 0.0008835000000000001
+x-litellm-response-cost-output: 0.000135
+x-litellm-response-cost-reasoning: 0.00010875
+x-litellm-response-cost-tool-usage: 0.0
+x-litellm-key-spend: 0.0010185
+x-litellm-response-duration-ms: 2644.0348625183105
+x-litellm-overhead-duration-ms: 2.9449
+x-litellm-callback-duration-ms: 0.0
+x-litellm-model-group: g38f
+x-ratelimit-remaining-tokens: 798786
+x-ratelimit-limit-tokens: 800000
+x-ratelimit-remaining-requests: 1999
+x-ratelimit-limit-requests: 2000
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin, Accept-Encoding
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+
+{"id":"PIPZapqxKY69vr0P-siTqQU","created":1792639804,"model":"g38f","object":"chat.completion","choices":[{"finish_reason":"stop","index":0,"message":{"content":"ZEBRA-7342","role":"assistant","images":[],"thinking_blocks":[],"provider_specific_fields":{"thought_signatures":["EswBCskBAWkUfRM5HmLmm6GJKrMXXFADhoYrOaBSiptqzSC1VBQTIr6rR0jbbuM9/DcSev9qNhljqgA2Ymf9agOTFnRuDPy4LWw28ULQ+Wxew1hOzqi8vAw3YlySo+whLexblZPm5IChzATLDqUZewf+88DoOB97XgDMVhUD1RWaoOzYEG6tjvpEGWq+Jhv3FAAkvXpvOw1Mw+8nId/OIEk3tfnfY9a4ya/rL1WlHxSM6EA/FXR0X+Ous9ylUbtg4TOQ/qNBo07Jr21E43zI"]}},"provider_specific_fields":{"native_finish_reason":"STOP"}}],"usage":{"completion_tokens":36,"prompt_tokens":1178,"total_tokens":1214,"completion_tokens_details":{"reasoning_tokens":29,"text_tokens":7},"prompt_tokens_details":{"text_tokens":98,"image_tokens":1080}},"vertex_ai_grounding_metadata":[],"vertex_ai_url_context_metadata":[],"vertex_ai_safety_results":[],"vertex_ai_citation_metadata":[],"service_tier":"default"}

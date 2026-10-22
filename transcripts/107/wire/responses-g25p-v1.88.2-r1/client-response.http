@@ -1,0 +1,28 @@
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 03:31:07 GMT
+server: uvicorn
+content-length: 1206
+content-type: application/json
+x-litellm-call-id: 837fa6e2-33fd-4ecf-ae65-18235ad55e65
+x-litellm-model-id: 1c087597a5a733bd1fbb66fa811cf0e8dcd9b42211de8f65f1fe8e2d976adb5c
+x-litellm-model-api-base: http://127.0.0.1:4099/v1beta
+x-litellm-version: 1.88.2
+x-litellm-response-cost: 0.001425
+x-litellm-response-cost-original: 0.001425
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-key-spend: 0.001425
+x-litellm-response-duration-ms: 6166.988
+x-litellm-overhead-duration-ms: 5.271
+x-litellm-callback-duration-ms: 0.0
+x-litellm-model-group: g25p
+x-ratelimit-remaining-tokens: 799553
+x-ratelimit-limit-tokens: 800000
+x-ratelimit-remaining-requests: 1999
+x-ratelimit-limit-requests: 2000
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin
+
+{"id":"resp_JHc0s7xcCARheigknBHf0GraBPOO0faHu1MsxPXZ8gPxlES4K2yLTmxEBmLB2JEa6glrGVX1U2qmmgo0btiwBZzA_gLO5gzYjrRyKoCxqMICxFZDDgSHfmgAeH_UwGRsYMvBwBVKCInEqy3MTgE9iQPO9RB6nOkG17KYcgzVU5kD-1Cs76Lif5SI6Rl7c3pz1R_apLXgVwr89pnMM41Qrd2ZLidVaCe7-KUnvnRHdNDkIq-0YK32nci9a2jQcTODMWywobyAST9_zFiKWs1xXxqJl6hcuIGnaw4LyEZArkKCyKpVLjIWs7bQZZGYD7JohTWunS7DbUBE8GyTwQLc-mYs5TmK3MXd_tb0W4nxZTfNDOqEEiC7YUPV-tUBq9IHowKh_CLtPHTqGG8PA6hAA9SQhGcb0g==","created_at":1792639867,"error":null,"incomplete_details":null,"instructions":null,"metadata":{},"model":"g25p","object":"response","output":[{"type":"message","id":"fIPZary0AYeX9tMPvJnJuQg","status":"completed","role":"assistant","content":[{"type":"output_text","text":"ZEBRA-7342","annotations":[]}],"phase":null}],"parallel_tool_calls":false,"temperature":0.0,"tool_choice":"auto","tools":[],"top_p":null,"max_output_tokens":null,"previous_response_id":null,"reasoning":null,"status":"completed","text":{},"truncation":null,"usage":{"input_tokens":348,"input_tokens_details":{"audio_tokens":null,"cached_tokens":0,"text_tokens":90},"output_tokens":99,"output_tokens_details":{"reasoning_tokens":92,"text_tokens":7},"total_tokens":447,"cost":null},"user":null,"store":null}

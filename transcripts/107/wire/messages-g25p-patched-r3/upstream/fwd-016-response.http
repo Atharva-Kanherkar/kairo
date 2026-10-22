@@ -1,0 +1,51 @@
+HTTP/1.1 200
+X-Gemini-Service-Tier: standard
+Content-Type: application/json; charset=UTF-8
+Vary: X-Origin
+Vary: Referer
+Date: Thu, 22 Oct 2026 03:30:52 GMT
+Server: scaffolding on HTTPServer2
+X-XSS-Protection: 0
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Server-Timing: gfet4t7; dur=3637
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Accept-Ranges: none
+Vary: Origin,Accept-Encoding
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "ZEBRA-7342",
+            "thoughtSignature": "CqkFAWkUfRN70T51SYNAkJTzDdL3L9ATeBKBlr0KjQAwo8/E4m1Ay2FqlPEp6ocPCbjusovVcFNhweykHHZpUvde5KEYV9AppX/9xy5tfZrXW5pBkQJoVaMfLL72wwaAm4h04GHmRsNgG8+TKHinv8VlxXc2gA1TBvFBX558Dq+awPTA9FS4s+1JbWRrhD0SKuoULXCqYCwXOTSd/XOyMaF+ArISdpGNG41HKwiE+R4wxKggv+iS8o3zau6I0KtvlU6kF6SbvU0aUUmI0s2AxCGVi4gTXo6QPgF2Us2/ASy8Eb84doDePYIpxh2tCEijheP+hQGYvnRYsZknJ12y+n7k1prGGWp70NouV3XUW/20MpB6LzjidmhbBFxix0osshnmM68IZeD4d15kyRqzHvoef/1Z7rEmuhE8Dkw7o+5H+HLNi2sOVJPdQPmIFYJFu1ZQf1s1FOnS9dUfXNhcS/5gT4BPoxCLdszR1+P0/U5hzMqzo3rx9NpS1XDTQqXeupsrx7HQc8PvWsfFDpAnAYeaA0yX0YWqRbky50kCCDvGkLLkQdxC5gFnT68HQdSoujhBsUWsXf9kpMOUAjF8HEMoFfKyRj+qElfTPwsTIEVWFyGtwTzlpO9dPDS0u6LtMN+jEhw9Y3weWevD+zPShVCYD1sfulN06kgmLs2Pl9IZHyxDkzcnLYNm6wOut1jYq2f5M4s1V1szmBy2cAgMpXV8GT3OBxKq6TJgHtmZq5bQ3wXbFuoMXaZg7MOZ38ZxxF5cPOjtzocn8+BPHhUv/xl2vVR2jrb2z/GYyX/cSgKWioqW7vFDYWLuxjhYiRCwdTYPsPf4I87is7v+hxZ1iaPt17zNhPsbPXIYkxflYyiHL2OjzxmtQTFATiHFKIrVCxslYN2YqHKS+hOu"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 348,
+    "candidatesTokenCount": 7,
+    "totalTokenCount": 516,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 90
+      },
+      {
+        "modality": "IMAGE",
+        "tokenCount": 258
+      }
+    ],
+    "thoughtsTokenCount": 161,
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-2.5-pro",
+  "responseId": "aIPZapDdJ6HjrfcP7dHawAE"
+}

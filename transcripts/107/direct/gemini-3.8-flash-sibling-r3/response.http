@@ -1,0 +1,52 @@
+HTTP/1.1 200 OK
+X-Gemini-Service-Tier: standard
+Content-Type: application/json; charset=UTF-8
+Vary: X-Origin
+Vary: Referer
+Date: Thu, 22 Oct 2026 03:28:06 GMT
+Server: scaffolding on HTTPServer2
+X-XSS-Protection: 0
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Server-Timing: gfet4t7; dur=1949
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Accept-Ranges: none
+Vary: Origin,Accept-Encoding
+Transfer-Encoding: chunked
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "ZEBRA-7342",
+            "thoughtSignature": "ErsBCrgBAWkUfROaZAFE9C4xbu9183LxXJc2eXDs6bDofM+1zfPJhu20J9ra8fv4IlXiEAJzUESdyb7/bx5f288UfW5mj4eeKBAoM/LYY163HCoTcAuuSZOLvMWeqRkx50DZgYpNUH3op9dJtJKiTHIUlAsMJtlL0WuUjjff02n9PK66lRLlBc0FidbVnI+0+XcrG1X66WVKQplTdZTYiZx1+c+vQcON638AzyuacERQKi52ineTeD3ew4Bbzw=="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 1173,
+    "candidatesTokenCount": 7,
+    "totalTokenCount": 1205,
+    "promptTokensDetails": [
+      {
+        "modality": "IMAGE",
+        "tokenCount": 1080
+      },
+      {
+        "modality": "TEXT",
+        "tokenCount": 93
+      }
+    ],
+    "thoughtsTokenCount": 25,
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-3.8-flash",
+  "responseId": "xILZaoSPJ5WN1e8P0fOC4Ao"
+}

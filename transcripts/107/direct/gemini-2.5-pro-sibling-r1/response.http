@@ -1,0 +1,55 @@
+HTTP/1.1 200 OK
+X-Gemini-Service-Tier: standard
+Content-Type: application/json; charset=UTF-8
+Vary: X-Origin
+Vary: Referer
+Date: Thu, 22 Oct 2026 03:27:34 GMT
+Server: scaffolding on HTTPServer2
+X-XSS-Protection: 0
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Server-Timing: gfet4t7; dur=4204
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Accept-Ranges: none
+Vary: Origin,Accept-Encoding
+Transfer-Encoding: chunked
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "ZEBRA-7342\n"
+          },
+          {
+            "text": "ZEBRA-7342",
+            "thoughtSignature": "CscEAWkUfRPcbDfYBSfQczKMoKhaxVufnlqdwNPvRRd8Udv6IhRN5HZqQuXie9OXjG5HjGpgkSc5CXMQarHfEvcrzAX83JJF7Yhl8y2MiMFviM4yko50q0hBq3WQzaI0aeDmYCuzRzx2y8+ZErpvZd5PRCjFuDh0DMqNHJiYoKAY9RmXmHfoZLwyNcowQgY2NH3d8+zhxNp3YnQi3TptUoGl4cl9y+mkppILngAPf9aPhbsTG65H5WXOjp9a0lkTEzUTOrrTJLkzIgwXjeJkb+r9HdP0g8qCaBnQ/GrXbaA343GbSTlWdUQT26XEevy1sXHUFdJoPkxWGAKGZq1H4HeOYlpECOzWzphKIbsEaidWYScowBRmLQhJpBULPA+hhpZP30kxAUBe83qSMQ81+u2DMlXnMiLGBhvFenjbe/r0p1ov4VeqjHwAkJh4+SmtqXiZyQr//8i5UMTMvwkAcDh9SPgS9KnoWNXgR/sT4f3gGkO2nMZpIUniP4WVXc6VxYq6/6rGazRuL2ddNqVAJWMPlohcNvRVWTaCXLxvxxWbvHdPRD4n3YnU8+dsgzCgYQBtDnd58N7XJWH+fY2754yAtuGBVr0e8954mJIlVBx2MeEiyjwgn+jhKTRSh7XS9Bml/BKkBO3dpZD08yrdOJIlUbQsN+nCWlg6J265IpfArvZqvxGQQVdFnI32izsdAsc3V0LL1x0xeRm1NUVsh8aINgWWbk+ymUtkonejX7Ob2b5I42ac9H7jShF6uoLTOi1foJqier/OSg=="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 346,
+    "candidatesTokenCount": 16,
+    "totalTokenCount": 508,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 88
+      },
+      {
+        "modality": "IMAGE",
+        "tokenCount": 258
+      }
+    ],
+    "thoughtsTokenCount": 146,
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-2.5-pro",
+  "responseId": "o4LZasJ8w5L20w-5paKgDw"
+}

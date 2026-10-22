@@ -1,0 +1,28 @@
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 03:17:43 GMT
+server: uvicorn
+content-length: 1575
+content-type: application/json
+x-litellm-call-id: e3d0f60f-e57a-4d70-863a-38bf5297f50e
+x-litellm-model-id: 1c087597a5a733bd1fbb66fa811cf0e8dcd9b42211de8f65f1fe8e2d976adb5c
+x-litellm-model-api-base: http://127.0.0.1:4099/v1beta
+x-litellm-version: 1.88.2
+x-litellm-response-cost: 0.00233875
+x-litellm-response-cost-original: 0.00233875
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-key-spend: 0.00233875
+x-litellm-response-duration-ms: 3921.597
+x-litellm-overhead-duration-ms: 1.439
+x-litellm-callback-duration-ms: 0.0
+x-litellm-model-group: g25p
+x-ratelimit-remaining-tokens: 798803
+x-ratelimit-limit-tokens: 800000
+x-ratelimit-remaining-requests: 1998
+x-ratelimit-limit-requests: 2000
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin
+
+{"id":"WIDZau_eFb2T9tMPhe3d-A4","created":1792639064,"model":"g25p","object":"chat.completion","choices":[{"finish_reason":"stop","index":0,"message":{"content":"ZEBRA-7342\nZEBRA-7342","role":"assistant","images":[],"thinking_blocks":[],"provider_specific_fields":{"thought_signatures":["CqsFAWkUfRPbevXqf1Xgb2ZMnwZ6hXdTCaDxCWVxELDEkfvh29BiIRnPvN8YdFNE5UsuQCZi1Vhpwe+P5dLiRqTjvir5jt2bZ+4to8w86nyUdykTIHmSg3aY053THpcDto1emStrFFcNMqH+e7OmDDyQk2MIMcOknkjwLrqCPSVbBZr28812CmqHRPWEZHTtXgib5y+wNvFyWKJc3RcjGe5ATmfpPyN2C7Fl3Y+YiuZcOUObApEZFl/XPhMfhVN+rYuFLtMWM8ixjir2RzhhWrVIUNTv3pzBRC6ax0uXuZzwgJS6EhkfW1hrLM7vy/tLnNUvUoTJzOPnd+x7ZtI/lyjn0njB6yOGG80Ocu6mi5IJw0xlTZf3/cV0p9s/ktWNQd9USZikrB9ZpZrHgWPc/Kq3nQzzV8xdqMU3GvqS+T6gtWyQ9Hb8q+B9jiikOPN48gHv+RcYW96viIUyo+wFvAh00cxoXeOcy6Fju6SYnONegvVmvJZbQoa/P51sf6Lv7cuXtq8AJePvaLWafsOUBu++OG9GMYhu1WK1fMiCXkH6IewybOpkm/PnrbFjt+heXj5xJcoVVEjnITXEqUyMMnLjSiAFIqwPoIbaVQgUsuDytIiTxvkmfDvjk2vpuFy4wmx4xYTD0F+iki91Fobhh+FzE+YHVGVrCLKMGr0yKt7yVjEt1YNoRJc+Ek5nm2KeDnkXbPtntBJqqB4qWOQlqxSqP5/B5kaMl0GHIDm/phTS4C81cUiJCPFaeuZGsloR22nhvHCKiLCI/lKml1zahUaaiWTKXxEeBTiwQJ5vzTWwhbe1tC0HuxasQEi0NK8kRpBEOKv8aCtHKmDURGq5GFOD9cR6cFSLwh8u0Su1K92WBRLidlxww7W6+/OFOd5vIyVC4pIok09+tVMZ/Kk="]}}}],"usage":{"completion_tokens":190,"prompt_tokens":351,"total_tokens":541,"completion_tokens_details":{"reasoning_tokens":174,"text_tokens":16},"prompt_tokens_details":{"text_tokens":93,"image_tokens":258}},"vertex_ai_grounding_metadata":[],"vertex_ai_url_context_metadata":[],"vertex_ai_safety_results":[],"vertex_ai_citation_metadata":[],"service_tier":"default"}

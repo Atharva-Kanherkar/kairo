@@ -1,0 +1,146 @@
+[
+ {
+  "cell": "gemini-2.5-flash-lite-nested-r1",
+  "model": "gemini-2.5-flash-lite",
+  "shape": "nested",
+  "run": 1,
+  "status": 400,
+  "image_text_in_reply": false
+ },
+ {
+  "cell": "gemini-2.5-flash-lite-nested-r2",
+  "model": "gemini-2.5-flash-lite",
+  "shape": "nested",
+  "run": 2,
+  "status": 400,
+  "image_text_in_reply": false
+ },
+ {
+  "cell": "gemini-2.5-flash-lite-nested-r3",
+  "model": "gemini-2.5-flash-lite",
+  "shape": "nested",
+  "run": 3,
+  "status": 400,
+  "image_text_in_reply": false
+ },
+ {
+  "cell": "gemini-2.5-flash-lite-sibling-r1",
+  "model": "gemini-2.5-flash-lite",
+  "shape": "sibling",
+  "run": 1,
+  "status": 200,
+  "image_text_in_reply": true
+ },
+ {
+  "cell": "gemini-2.5-flash-lite-sibling-r2",
+  "model": "gemini-2.5-flash-lite",
+  "shape": "sibling",
+  "run": 2,
+  "status": 200,
+  "image_text_in_reply": true
+ },
+ {
+  "cell": "gemini-2.5-flash-lite-sibling-r3",
+  "model": "gemini-2.5-flash-lite",
+  "shape": "sibling",
+  "run": 3,
+  "status": 200,
+  "image_text_in_reply": true
+ },
+ {
+  "cell": "gemini-2.5-pro-nested-r1",
+  "model": "gemini-2.5-pro",
+  "shape": "nested",
+  "run": 1,
+  "status": 400,
+  "image_text_in_reply": false
+ },
+ {
+  "cell": "gemini-2.5-pro-nested-r2",
+  "model": "gemini-2.5-pro",
+  "shape": "nested",
+  "run": 2,
+  "status": 400,
+  "image_text_in_reply": false
+ },
+ {
+  "cell": "gemini-2.5-pro-nested-r3",
+  "model": "gemini-2.5-pro",
+  "shape": "nested",
+  "run": 3,
+  "status": 400,
+  "image_text_in_reply": false
+ },
+ {
+  "cell": "gemini-2.5-pro-sibling-r1",
+  "model": "gemini-2.5-pro",
+  "shape": "sibling",
+  "run": 1,
+  "status": 200,
+  "image_text_in_reply": true
+ },
+ {
+  "cell": "gemini-2.5-pro-sibling-r2",
+  "model": "gemini-2.5-pro",
+  "shape": "sibling",
+  "run": 2,
+  "status": 200,
+  "image_text_in_reply": true
+ },
+ {
+  "cell": "gemini-2.5-pro-sibling-r3",
+  "model": "gemini-2.5-pro",
+  "shape": "sibling",
+  "run": 3,
+  "status": 200,
+  "image_text_in_reply": true
+ },
+ {
+  "cell": "gemini-3.8-flash-nested-r1",
+  "model": "gemini-3.8-flash",
+  "shape": "nested",
+  "run": 1,
+  "status": 200,
+  "image_text_in_reply": true
+ },
+ {
+  "cell": "gemini-3.8-flash-nested-r2",
+  "model": "gemini-3.8-flash",
+  "shape": "nested",
+  "run": 2,
+  "status": 200,
+  "image_text_in_reply": true
+ },
+ {
+  "cell": "gemini-3.8-flash-nested-r3",
+  "model": "gemini-3.8-flash",
+  "shape": "nested",
+  "run": 3,
+  "status": 200,
+  "image_text_in_reply": true
+ },
+ {
+  "cell": "gemini-3.8-flash-sibling-r1",
+  "model": "gemini-3.8-flash",
+  "shape": "sibling",
+  "run": 1,
+  "status": 200,
+  "image_text_in_reply": true
+ },
+ {
+  "cell": "gemini-3.8-flash-sibling-r2",
+  "model": "gemini-3.8-flash",
+  "shape": "sibling",
+  "run": 2,
+  "status": 200,
+  "image_text_in_reply": true
+ },
+ {
+  "cell": "gemini-3.8-flash-sibling-r3",
+  "model": "gemini-3.8-flash",
+  "shape": "sibling",
+  "run": 3,
+  "status": 200,
+  "image_text_in_reply": true
+ }
+]

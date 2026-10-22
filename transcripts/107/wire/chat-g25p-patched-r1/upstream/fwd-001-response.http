@@ -1,0 +1,54 @@
+HTTP/1.1 200
+X-Gemini-Service-Tier: standard
+Content-Type: application/json; charset=UTF-8
+Vary: X-Origin
+Vary: Referer
+Date: Thu, 22 Oct 2026 03:30:01 GMT
+Server: scaffolding on HTTPServer2
+X-XSS-Protection: 0
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Server-Timing: gfet4t7; dur=4717
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Accept-Ranges: none
+Vary: Origin,Accept-Encoding
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "ZEBRA-7342\n"
+          },
+          {
+            "text": "ZEBRA-7342",
+            "thoughtSignature": "CuwEAWkUfRMrfqnnasdgMA5tWz099vl4QkexWZ6fewoQzKWxNBmfF+WIE8XZ5rjz/9AXomZp56hEZSq7k+VqtEVmvFAWC/qlOKn3xHGL1UZ5EpgQhEbYnvYHD4DvoatOezCQTlqEMc0UIcPyfagSHswI3seXk6XYM0lF2bnojVlhfYpK6GD0xQ2NsElDvFgNuZkOlvFLf7ENsjmPny4fkuunrgRLQwEYWw7WZISVcjTzBBapoAV1V279Sn4KbzgP+5wiSYHXd14KaSDHYW2OYXxE955W0dd4jKEjxG32TjCCvJd/eVpnMxVqUX35iMi+VXUc1zgZfW0+2VHNmdXcNC2INdjgDkkSziVgtyMzReg8tK1JWCkaSBVNXpBroQz6rTbF1EBYeZx5V0ZPZSLIUDxgoGWZKbZ9TiGcDdzbtNXAnAUmqps2QA+YfxsKJlvL71XAaVRO7MDEOfpyvUBw/8Io1lKmmf4n2t7amL0FNjf9J91A7+ndxM78l1fPHVvQV7sYDUdjPksRCeG1YlRfnUtJg/AS+8+/bKeJLjkzAwosANTNDqiLWsSLxVdi4HR/U+nH2bJIonAW3GN5Nu2YBFKTVwxVTP8GHkYu1posQpbOA9BlKMBlxxfXs6U9xHP9t7RvIDzE/w6TV8Tz8fGSr/Cdx2ng6937S2blgVhFSbgHZ/pmLtEINguil+NTkPdH/PK2qAfnbwW4+Zt42fO64wyGYTO/9nTcBol1bzV+U3QOzY/p0J/YfwKmGUuYiL7sKnQXD7zGSjEOUJU2fmigQYlZHbEJD2AJlMLPv6vlVRGkvP0PsRPMgVvvQ17EWwY="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 351,
+    "candidatesTokenCount": 16,
+    "totalTokenCount": 524,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 93
+      },
+      {
+        "modality": "IMAGE",
+        "tokenCount": 258
+      }
+    ],
+    "thoughtsTokenCount": 157,
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-2.5-pro",
+  "responseId": "NYPZaoC1GvOzvr0Pysrd-A4"
+}

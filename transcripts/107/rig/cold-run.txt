@@ -1,0 +1,46 @@
+work dir: /Users/atharva/.cache/kr-hunt-1022/cold
+Note: switching to '49943cd52ea46aacf8db2e5cb2b890d580fe9bb4'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+chat g25p v1.106.2: 400 False litellm.BadRequestError: GeminiException BadRequestError - {   "error": {     "code": 400,     "message": "Multimodal fu
+chat g25p v1.88.2: 200 True ZEBRA-7342 ZEBRA-7342
+chat g25p patched: 200 True ZEBRA-7342 ZEBRA-7342
+chat g25fl v1.106.2: 400 False litellm.BadRequestError: GeminiException BadRequestError - {   "error": {     "code": 400,     "message": "Multimodal fu
+chat g25fl v1.88.2: 200 True ZEBRA-7342
+chat g25fl patched: 200 True ZEBRA-7342
+chat g38f v1.106.2: 200 True ZEBRA-7342
+chat g38f v1.88.2: 200 True ZEBRA-7342
+chat g38f patched: 200 True ZEBRA-7342
+messages g25p v1.106.2: 400 False litellm.BadRequestError: GeminiException BadRequestError - {   "error": {     "code": 400,     "message": "Multimodal fu
+messages g25p v1.88.2: 200 True ZEBRA-7342
+messages g25p patched: 200 True ZEBRA-7342
+messages g25fl v1.106.2: 400 False litellm.BadRequestError: GeminiException BadRequestError - {   "error": {     "code": 400,     "message": "Multimodal fu
+messages g25fl v1.88.2: 200 True ZEBRA-7342
+messages g25fl patched: 200 True ZEBRA-7342
+messages g38f v1.106.2: 200 True ZEBRA-7342
+messages g38f v1.88.2: 200 True ZEBRA-7342
+messages g38f patched: 200 True ZEBRA-7342
+responses g25p v1.106.2: 400 False litellm.BadRequestError: GeminiException BadRequestError - {   "error": {     "code": 400,     "message": "Multimodal fu
+responses g25p v1.88.2: 200 True ZEBRA-7342
+responses g25p patched: 200 True ZEBRA-7342
+responses g25fl v1.106.2: 400 False litellm.BadRequestError: GeminiException BadRequestError - {   "error": {     "code": 400,     "message": "Multimodal fu
+responses g25fl v1.88.2: 200 True ZEBRA-7342
+responses g25fl patched: 200 True ZEBRA-7342
+responses g38f v1.106.2: 200 True ZEBRA-7342
+responses g38f v1.88.2: 200 True ZEBRA-7342
+responses g38f patched: 200 True ZEBRA-7342
+forwarded bytes: /Users/atharva/.cache/kr-hunt-1022/cold/{cur,ctl,fix}/fwd

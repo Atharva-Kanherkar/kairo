@@ -1,0 +1,16 @@
+HTTP/1.1 400 Bad Request
+date: Thu, 22 Oct 2026 03:17:34 GMT
+x-litellm-call-id: 1cb70141-c21c-4ef1-82c3-1d54c4795d93
+x-litellm-model-id: 5ccb6438ca9fa3c82b08cba437538c022a107e8e0b650a010e45f17c809debb3
+x-litellm-version: 1.106.2
+x-litellm-response-cost: 0
+x-litellm-key-spend: 0.0
+x-litellm-timeout: 600.0
+content-length: 389
+content-type: application/json
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+
+{"type":"error","error":{"type":"invalid_request_error","message":"litellm.BadRequestError: GeminiException BadRequestError - {\n  \"error\": {\n    \"code\": 400,\n    \"message\": \"Multimodal function responses are not supported for this model.\",\n    \"status\": \"INVALID_ARGUMENT\"\n  }\n}\n\n\nLiteLLM: model group 'g25fl' failed with the error above. No fallback was attempted."}}

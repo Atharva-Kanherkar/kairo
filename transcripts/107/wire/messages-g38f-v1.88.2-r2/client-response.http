@@ -1,0 +1,16 @@
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 03:18:04 GMT
+server: uvicorn
+content-length: 246
+content-type: application/json
+x-litellm-call-id: 7dd33db5-7a82-48de-bd48-6ddc4887947b
+x-litellm-model-id: 1da18fc2d05d3a59e0fa8c4d13373a336279e4cd10666e916574ae5359b627ad
+x-litellm-version: 1.88.2
+x-litellm-response-cost-original: 0.00100125
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-key-spend: 0.0
+vary: Origin
+
+{"id":"bYDZauONBvmz9tMP_7yHsQM","type":"message","role":"assistant","model":"g38f","stop_sequence":null,"usage":{"input_tokens":1175,"output_tokens":32,"total_tokens":1207},"content":[{"type":"text","text":"ZEBRA-7342"}],"stop_reason":"end_turn"}

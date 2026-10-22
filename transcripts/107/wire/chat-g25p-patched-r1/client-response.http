@@ -1,0 +1,35 @@
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 03:29:56 GMT
+content-length: 1550
+content-type: application/json
+x-litellm-call-id: a6b84168-2c58-49b6-967c-450dbf30eed9
+x-litellm-model-id: d4a9c226924a796259dc9085597fb613efdedf241389b9a195a3f6b9253cb44a
+x-litellm-model-name: gemini/gemini-2.5-pro
+x-litellm-model-api-base: http://127.0.0.1:4097/v1beta
+x-litellm-version: 1.106.2
+x-litellm-response-cost: 0.00216875
+x-litellm-response-cost-original: 0.00216875
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-response-cost-input: 0.00043875
+x-litellm-response-cost-output: 0.0017300000000000002
+x-litellm-response-cost-reasoning: 0.0015700000000000002
+x-litellm-response-cost-tool-usage: 0.0
+x-litellm-key-spend: 0.00216875
+x-litellm-response-duration-ms: 4993.236064910889
+x-litellm-overhead-duration-ms: 206.876
+x-litellm-callback-duration-ms: 0.0
+x-litellm-model-group: g25p
+x-ratelimit-remaining-tokens: 799476
+x-ratelimit-limit-tokens: 800000
+x-ratelimit-remaining-requests: 1999
+x-ratelimit-limit-requests: 2000
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin, Accept-Encoding
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+
+{"id":"NYPZaoC1GvOzvr0Pysrd-A4","created":1792639796,"model":"g25p","object":"chat.completion","choices":[{"finish_reason":"stop","index":0,"message":{"content":"ZEBRA-7342\nZEBRA-7342","role":"assistant","images":[],"thinking_blocks":[],"provider_specific_fields":{"thought_signatures":["CuwEAWkUfRMrfqnnasdgMA5tWz099vl4QkexWZ6fewoQzKWxNBmfF+WIE8XZ5rjz/9AXomZp56hEZSq7k+VqtEVmvFAWC/qlOKn3xHGL1UZ5EpgQhEbYnvYHD4DvoatOezCQTlqEMc0UIcPyfagSHswI3seXk6XYM0lF2bnojVlhfYpK6GD0xQ2NsElDvFgNuZkOlvFLf7ENsjmPny4fkuunrgRLQwEYWw7WZISVcjTzBBapoAV1V279Sn4KbzgP+5wiSYHXd14KaSDHYW2OYXxE955W0dd4jKEjxG32TjCCvJd/eVpnMxVqUX35iMi+VXUc1zgZfW0+2VHNmdXcNC2INdjgDkkSziVgtyMzReg8tK1JWCkaSBVNXpBroQz6rTbF1EBYeZx5V0ZPZSLIUDxgoGWZKbZ9TiGcDdzbtNXAnAUmqps2QA+YfxsKJlvL71XAaVRO7MDEOfpyvUBw/8Io1lKmmf4n2t7amL0FNjf9J91A7+ndxM78l1fPHVvQV7sYDUdjPksRCeG1YlRfnUtJg/AS+8+/bKeJLjkzAwosANTNDqiLWsSLxVdi4HR/U+nH2bJIonAW3GN5Nu2YBFKTVwxVTP8GHkYu1posQpbOA9BlKMBlxxfXs6U9xHP9t7RvIDzE/w6TV8Tz8fGSr/Cdx2ng6937S2blgVhFSbgHZ/pmLtEINguil+NTkPdH/PK2qAfnbwW4+Zt42fO64wyGYTO/9nTcBol1bzV+U3QOzY/p0J/YfwKmGUuYiL7sKnQXD7zGSjEOUJU2fmigQYlZHbEJD2AJlMLPv6vlVRGkvP0PsRPMgVvvQ17EWwY="]}},"provider_specific_fields":{"native_finish_reason":"STOP"}}],"usage":{"completion_tokens":173,"prompt_tokens":351,"total_tokens":524,"completion_tokens_details":{"reasoning_tokens":157,"text_tokens":16},"prompt_tokens_details":{"text_tokens":93,"image_tokens":258}},"vertex_ai_grounding_metadata":[],"vertex_ai_url_context_metadata":[],"vertex_ai_safety_results":[],"vertex_ai_citation_metadata":[],"service_tier":"default"}

@@ -28,10 +28,11 @@ use kairo::checks::{
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
     responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
-    thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
-    truncation_preserved, upstream_bearer_is, upstream_omits_header_value,
-    worker_loss_stays_invisible, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
-    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT, REPLAYED_CALL_NAMESPACE_CHANGED,
+    thinking_text_forwarded, tool_result_images_reach_provider, tool_strict_forwarded,
+    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    upstream_omits_header_value, worker_loss_stays_invisible, FunctionToolFormat, Verdict,
+    EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    REPLAYED_CALL_NAMESPACE_CHANGED, TOOL_RESULT_IMAGE_DROPPED,
 };
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -6633,4 +6634,220 @@ fn dynamo_text_stream_worker_loss_and_no_kill_controls_are_conformant() {
             "{name}"
         );
     }
+}
+
+// ---- 107: LiteLLM nests tool-result media in functionResponse.parts for every
+// Gemini model; Gemini 2.5 rejects that shape, so the turn after an image tool
+// result fails with HTTP 400 on every later turn of the session ----
+// Captured with transcripts/107/rig: LiteLLM v1.106.2, v1.88.2 (last release
+// before the nesting) and v1.106.2 with rig/fix.diff, each behind a recording
+// relay to the live Gemini API.
+
+fn issue_107_raw(relative: &str) -> String {
+    fixture(&format!("transcripts/107/{relative}"))
+}
+
+fn issue_107_split(raw_http: &str) -> (u16, String) {
+    let (head, body) = raw_http.split_once("\r\n\r\n").expect("http body");
+    let status = head
+        .split_whitespace()
+        .nth(1)
+        .and_then(|code| code.parse().ok())
+        .unwrap_or(0);
+    (status, body.to_string())
+}
+
+fn issue_107_rows(index: &str) -> Vec<Value> {
+    serde_json::from_str::<Value>(&issue_107_raw(index))
+        .expect("results.json")
+        .as_array()
+        .expect("rows")
+        .clone()
+}
+
+#[test]
+fn bug107_gemini_2_5_rejects_the_tool_result_media_litellm_forwards() {
+    let mut counts: BTreeMap<(String, String, bool), usize> = BTreeMap::new();
+    for row in issue_107_rows("wire/results.json") {
+        let cell = row["cell"].as_str().expect("cell");
+        let build = row["build"].as_str().expect("build");
+        let model = row["model"].as_str().expect("model");
+        let read = |name: &str| issue_107_raw(&format!("wire/{cell}/{name}"));
+        let (_, client) = issue_107_split(&read("client-request.http"));
+        let (_, forwarded) =
+            issue_107_split(&read(row["forwarded_request"].as_str().expect("fwd")));
+        let (status, provider) =
+            issue_107_split(&read(row["forwarded_response"].as_str().expect("fwd")));
+        let verdict = tool_result_images_reach_provider(&client, &forwarded, status, &provider);
+        let broken = build == "v1.106.2" && model.starts_with("gemini-2.5-");
+        if broken {
+            assert!(
+                matches!(&verdict, Verdict::Violation(reason)
+                    if reason.contains("HTTP 400: Multimodal function responses are not supported for this model.")),
+                "{cell}: {verdict:?}"
+            );
+            // The client sees the same refusal, not a reply.
+            let (client_status, _) = issue_107_split(&read("client-response.http"));
+            assert_eq!(client_status, 400, "{cell}");
+        } else {
+            assert_eq!(verdict, Verdict::Conformant, "{cell}");
+            assert_eq!(row["image_text_in_reply"], true, "{cell}");
+        }
+        *counts
+            .entry((
+                build.to_string(),
+                model.to_string(),
+                verdict.is_conformant(),
+            ))
+            .or_default() += 1;
+    }
+    for build in ["v1.106.2", "v1.88.2", "patched"] {
+        for model in [
+            "gemini-2.5-pro",
+            "gemini-2.5-flash-lite",
+            "gemini-3.8-flash",
+        ] {
+            let conformant = !(build == "v1.106.2" && model.starts_with("gemini-2.5-"));
+            assert_eq!(
+                counts.get(&(build.to_string(), model.to_string(), conformant)),
+                Some(&9),
+                "{build} {model}"
+            );
+        }
+    }
+}
+
+#[test]
+fn bug107_direct_gemini_takes_sibling_media_on_2_5_and_both_shapes_on_3() {
+    let mut judged = 0;
+    for row in issue_107_rows("direct/results.json") {
+        let cell = row["cell"].as_str().expect("cell");
+        let (_, request) = issue_107_split(&issue_107_raw(&format!("direct/{cell}/request.http")));
+        let (status, body) =
+            issue_107_split(&issue_107_raw(&format!("direct/{cell}/response.http")));
+        let request: Value = serde_json::from_str(&request).expect("request json");
+        let turn = request["contents"]
+            .as_array()
+            .expect("contents")
+            .last()
+            .expect("turn");
+        let parts = turn["parts"].as_array().expect("parts");
+        let nested = parts[0]["functionResponse"]["parts"].is_array();
+        assert_eq!(nested, row["shape"] == "nested", "{cell}");
+        assert_eq!(parts.len(), if nested { 1 } else { 2 }, "{cell}");
+        let rejected = nested
+            && row["model"]
+                .as_str()
+                .expect("model")
+                .starts_with("gemini-2.5-");
+        if rejected {
+            assert_eq!(status, 400, "{cell}");
+            assert!(
+                body.contains("Multimodal function responses are not supported for this model.")
+            );
+        } else {
+            assert_eq!(status, 200, "{cell}");
+            assert!(body.contains("ZEBRA-7342"), "{cell}");
+        }
+        judged += 1;
+    }
+    assert_eq!(judged, 18);
+}
+
+#[test]
+fn bug107_claude_code_session_cannot_continue_after_an_image_read() {
+    let base =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../transcripts/107/agents/claude-code");
+    let mut cells: Vec<String> = fs::read_dir(&base)
+        .expect("claude-code dir")
+        .filter_map(Result::ok)
+        .filter(|e| e.path().is_dir())
+        .map(|e| e.file_name().to_string_lossy().into_owned())
+        .collect();
+    cells.sort();
+    assert_eq!(cells.len(), 18);
+    for cell in cells {
+        let read = |name: &str| issue_107_raw(&format!("agents/claude-code/{cell}/{name}"));
+        // Every session really returned an image from the Read tool.
+        let image_results = read("session.jsonl")
+            .lines()
+            .filter_map(|line| serde_json::from_str::<Value>(line).ok())
+            .filter(|e| e["type"] == "user")
+            .flat_map(|e| {
+                e["message"]["content"]
+                    .as_array()
+                    .cloned()
+                    .unwrap_or_default()
+            })
+            .filter(|b| {
+                b["type"] == "tool_result"
+                    && b["content"]
+                        .as_array()
+                        .is_some_and(|c| c.iter().any(|x| x["type"] == "image"))
+            })
+            .count();
+        assert!(image_results >= 1, "{cell}");
+        let first: Value = serde_json::from_str(&read("out.json")).expect("out.json");
+        let follow_up: Value = serde_json::from_str(&read("out2.json")).expect("out2.json");
+        if cell.starts_with("g25") && cell.contains("-v1062-") {
+            // The image turn fails, and so does a text-only follow-up in the same
+            // session, because the tool result is replayed every turn.
+            for (turn, out) in [("image", &first), ("follow-up", &follow_up)] {
+                assert_eq!(out["is_error"], true, "{cell} {turn}");
+                assert!(
+                    out["result"].as_str().is_some_and(
+                        |r| r.contains("Multimodal function responses are not supported")
+                    ),
+                    "{cell} {turn}"
+                );
+            }
+        } else {
+            assert_eq!(first["is_error"], false, "{cell}");
+            assert_eq!(follow_up["is_error"], false, "{cell}");
+            assert_eq!(read("answer.txt").trim(), "ZEBRA-7342", "{cell}");
+            assert_eq!(read("ok.txt").trim(), "OK", "{cell}");
+        }
+    }
+}
+
+#[test]
+fn bug107_image_pasted_as_text_into_the_function_response_is_not_delivery() {
+    // The #23712 failure shape, recorded live: the v1.88.2 forwarded turn with its
+    // image part removed and the data URL pasted into functionResponse.response.
+    // Gemini 2.5 Pro accepts it with 200 and never sees the image, so a checker
+    // that matched bytes anywhere in the body would call it delivered.
+    let (_, client) = issue_107_split(&issue_107_raw(
+        "wire/messages-g25p-v1.88.2-r1/client-request.http",
+    ));
+    let mut judged = 0;
+    for run in 1..=3 {
+        let cell = format!("adversarial/text-data-url-gemini-2.5-pro-r{run}");
+        let (_, forwarded) = issue_107_split(&issue_107_raw(&format!("{cell}/request.http")));
+        let (status, provider) = issue_107_split(&issue_107_raw(&format!("{cell}/response.http")));
+        assert_eq!(status, 200, "{cell}");
+        assert!(!provider.contains("ZEBRA-7342"), "{cell}");
+        let image = issue_107_body_image(&client);
+        assert!(
+            forwarded.contains(&image),
+            "{cell} still carries the bytes as text"
+        );
+        assert!(
+            matches!(
+                tool_result_images_reach_provider(&client, &forwarded, status, &provider),
+                Verdict::Violation(reason) if reason.starts_with(TOOL_RESULT_IMAGE_DROPPED)
+            ),
+            "{cell}"
+        );
+        judged += 1;
+    }
+    assert_eq!(judged, 3);
+}
+
+/// The base64 image of the committed Anthropic-dialect client request.
+fn issue_107_body_image(client_body: &str) -> String {
+    let client: Value = serde_json::from_str(client_body).expect("client json");
+    client["messages"][2]["content"][0]["content"][0]["source"]["data"]
+        .as_str()
+        .expect("tool_result image")
+        .to_string()
 }
