@@ -229,8 +229,10 @@ Classification: `regression`.
   `input_image`) in the forwarded tool-result turn, nested or beside the result, or
   in the user turn right after it. A data URL pasted into text or a JSON function
   response, or a matching image elsewhere in the history, does not count. It then
-  judges by the provider's own status and names no gateway function. Unit test
-  `tool_result_images_must_reach_an_accepting_provider` covers drops, the pasted
+  judges by the provider's own status and names no gateway function. Unit tests
+  `tool_result_images_count_wherever_the_tool_result_turn_carries_them`,
+  `tool_result_images_not_delivered_as_image_parts_with_the_result_are_dropped` and
+  `tool_result_image_checker_refuses_bad_and_unexercised_input` cover drops, the pasted
   data URL, JSON-dumped images, earlier-image masking, non-image MIME types, images
   outside the tool-result turn, rejections, remote URLs, duplicates, truncation,
   unknown dialects and non-JSON input.
