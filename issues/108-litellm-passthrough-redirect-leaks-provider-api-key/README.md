@@ -1,4 +1,8 @@
-# 108, LiteLLM pass-through follows a cross-origin redirect and leaks the provider `api-key`
+# 108, LiteLLM pass-through follows a cross-origin redirect with the provider `api-key`: hardening, not a bug
+
+**Verdict: false positive as a bug. Withdrawn after independent review (REJECT)
+and kept as an honest negative. Label `hardening`. The bytes reproduce; the
+threat model does not hold. See "Why this is not a bug".**
 
 ## Claim
 
@@ -260,7 +264,43 @@ redirect.
 - Fix a maintainer would ship, in one sentence: set `follow_redirects=False` on
   the pass-through client, or strip `api-key` and the other provider credential
   headers on a cross-origin redirect.
-- Label: `bug`
+- Label: `hardening` after review (the original draft said `bug`)
+
+## Why this is not a bug
+
+The independent review on 2026-10-22 reproduced the bytes (trigger 5/5,
+control 5/5, captures match the committed files after port and date
+normalization) and rejected the usefulness gate.
+
+- No product boundary is crossed. The only party that chooses the redirect
+  target is the configured origin, and it already receives the key in both
+  `authorization` and `api-key`. A compromised first hop gains nothing by
+  redirecting. LiteLLM's own boundary for this class is
+  [GHSA-3cv6-jpf6-8222](https://github.com/BerriAI/litellm/security/advisories/GHSA-3cv6-jpf6-8222):
+  an authenticated proxy user steering a provider call to a destination they
+  control. No step here lets a proxy user choose the sink.
+- The trigger is not supported usage. It needs the trusted provider to emit a
+  cross-origin redirect to an untrusted host, which means an open redirect on
+  the provider. Unauthenticated probes of `api.openai.com` (`/`, `/v1`,
+  `/v1/chat/completions/`, `http://.../v1/models`) returned 421, 404, 404, and
+  403, with no redirect.
+- The Azure routes behave exactly like the provider's own client. With the
+  official `openai` 2.54.0 SDK pointed straight at the same 307 origin,
+  `AzureOpenAI` forwards `api-key` to the sink, and LiteLLM's normal
+  `/v1/chat/completions` Azure route does the same. Plain `OpenAI` sends only
+  `authorization`, which `httpx` strips. The only LiteLLM-specific delta is that
+  the `/openai` pass-through adds an Azure-style `api-key` header to OpenAI
+  requests.
+- The Switchyard 063 precedent was accepted on 2026-08-19, before the
+  bug-or-not checks were added to `AGENTS.md` on 2026-09-06.
+- Correction to the maintainer-ruling bullet below: `httpx` is not the only
+  redirect credential policy in the stack. LiteLLM sets `follow_redirects=False`
+  for its Anthropic model listing and OAuth token calls, and rejects cross-host
+  MCP redirects ([#42033](https://github.com/BerriAI/litellm/pull/42033)).
+
+What would reopen it: a supported setup where an authenticated proxy user can
+make a real provider endpoint, reached through the pass-through, redirect to a
+host that user controls.
 
 ## Gate 3: upstream status
 
@@ -332,7 +372,7 @@ redirect.
 | Formatting | `cargo fmt --all -- --check` | PASS |
 | Lint | `cargo clippy --workspace --all-targets -- -D warnings` | PASS |
 | README counts | `python3 tools/update-readme-counts.py --check` | PASS, 79 folders and 320 Rust tests |
-| Independent review | `.github/agents/kairo-reproduction-reviewer.agent.md` | PASS, ACCEPT (2026-10-22) |
+| Independent review | `.github/agents/kairo-reproduction-reviewer.agent.md` | REJECT (2026-10-22), usefulness FAIL, label `hardening` |
 
 ## Security and scope
 
@@ -356,24 +396,25 @@ that report. No public upstream issue should be filed for this finding.
 ## Author verdict
 
 - Correctness: PASS
-- Usefulness: PASS
-- Upstream status: PASS
-- Overall: ACCEPT
+- Usefulness: FAIL, label `hardening`
+- Upstream status: PASS, `novel` on public sources
+- Overall: REJECT, withdrawn as a bug and kept as a negative
 
 ## Independent review
 
-Reviewed on 2026-10-22 by the kairo reproduction reviewer against `origin/main`
-`6229551`. Verdict: `ACCEPT`.
+Reviewed on 2026-10-22 against LiteLLM `v1.106.2` and `main` `f2118fc7`.
+Verdict: `REJECT`. Correctness PASS, usefulness FAIL (`hardening`), upstream
+status PASS.
 
-The reviewer independently reran `transcripts/108/reproduce.py` (trigger 5/5,
-control 5/5), the three focused conformance tests, `cargo test --workspace`,
-`cargo fmt --all -- --check`, `cargo clippy --workspace --all-targets -- -D
-warnings`, and the README counts check. It inspected the raw trigger and control
-bytes and searched the current upstream state. It confirmed the sink `api-key`
-leak, the `authorization` strip, the empty control sink, the silent HTTP 200, and
-the `novel` public-source classification. It found no blocking issues.
+The reviewer installed `litellm[proxy]==1.106.2` in a fresh environment, reran
+`transcripts/108/reproduce.py` (trigger 5/5, control 5/5), and diffed its
+captures against the committed files. It added controls the original draft
+lacked: the official `OpenAI` and `AzureOpenAI` SDKs called directly, LiteLLM's
+normal OpenAI and Azure routes, the `/azure` pass-through, a custom
+`pass_through_endpoints` entry with `x-api-key`, and 301, 302, 303, and 308
+redirects. Every `api-key` or `x-api-key` header crossed; `authorization` never
+did. `cargo test --workspace`, `cargo fmt --all -- --check`, clippy 1.99 with
+`--all-features --locked -D warnings`, and the README counts check passed.
 
-Non-blocking notes addressed here: the `/health` field is omitted rather than
-masked (wording corrected), the origin 307 response is not separately recorded
-(disclosed in Gate 1), and the control 5/5 loop is now frozen in the conformance
-suite. The reviewer's captures are outside the repository.
+An earlier draft of this section reported an ACCEPT. No review evidence for it
+was attached to the pull request, and it is superseded by this review.
