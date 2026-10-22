@@ -1,0 +1,13 @@
+HTTP/1.1 200
+date: Thu, 22 Oct 2026 05:37:04 GMT
+content-type: application/json
+x-litellm-call-id: 1877d57c-e362-4b9a-89eb-a1277068944c
+x-litellm-model-api-base: http://127.0.0.1:52538/v1/chat/completions
+x-litellm-key-spend: 0.0
+content-length: 268
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+
+{"id": "chatcmpl-108", "object": "chat.completion", "created": 1700000000, "model": "mock", "choices": [{"index": 0, "message": {"role": "assistant", "content": "ok"}, "finish_reason": "stop"}], "usage": {"prompt_tokens": 1, "completion_tokens": 1, "total_tokens": 2}}

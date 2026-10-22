@@ -6851,3 +6851,69 @@ fn issue_107_body_image(client_body: &str) -> String {
         .expect("tool_result image")
         .to_string()
 }
+
+// ---- bug 108: LiteLLM pass-through follows a cross-origin redirect with the
+// provider api-key ----
+
+#[test]
+fn litellm_passthrough_redirect_sink_keeps_provider_api_key() {
+    // The configured origin is allowed to hold the provider key. The redirect
+    // target is not, but the recorded sink request carries it in `api-key`.
+    let origin = upstream_omits_header_value(
+        &fixture("transcripts/108/trigger/run-01/origin.jsonl"),
+        "CANARY_PROVIDER_KEY",
+    );
+    assert!(
+        matches!(origin, Verdict::Violation(_)),
+        "the configured origin must receive the provider key: {origin:?}"
+    );
+    let sink = upstream_omits_header_value(
+        &fixture("transcripts/108/trigger/run-01/sink.jsonl"),
+        "CANARY_PROVIDER_KEY",
+    );
+    assert!(
+        matches!(&sink, Verdict::Violation(reason) if reason.contains("api-key")),
+        "a cross-origin 307 sink must be caught holding the provider api-key: {sink:?}"
+    );
+}
+
+#[test]
+fn litellm_passthrough_direct_origin_receives_key_but_sink_does_not() {
+    // Same request and proxy config as the trigger, except the configured
+    // origin answers 200. The key is expected at the origin and must not reach
+    // the unrelated sink.
+    let origin = upstream_omits_header_value(
+        &fixture("transcripts/108/control/run-01/origin.jsonl"),
+        "CANARY_PROVIDER_KEY",
+    );
+    assert!(
+        matches!(origin, Verdict::Violation(_)),
+        "the configured origin must receive the provider key: {origin:?}"
+    );
+    let sink = fixture("transcripts/108/control/run-01/sink.jsonl");
+    assert!(
+        sink.trim().is_empty(),
+        "the control must not send a request to the redirect sink: {sink:?}"
+    );
+}
+
+#[test]
+fn litellm_passthrough_redirect_leak_5_of_5() {
+    for run in 1..=5 {
+        let path = format!("transcripts/108/trigger/run-{run:02}/result.json");
+        let value: Value = serde_json::from_str(&fixture(&path)).expect("108 result");
+        assert_eq!(value["client_status"], 200, "trigger run {run}");
+        assert_eq!(value["origin_hits"], 1, "trigger run {run}");
+        assert_eq!(value["sink_hits"], 1, "trigger run {run}");
+        assert_eq!(value["sink_api_key"], true, "trigger run {run}");
+        assert_eq!(value["sink_authorization"], false, "trigger run {run}");
+    }
+    for run in 1..=5 {
+        let path = format!("transcripts/108/control/run-{run:02}/result.json");
+        let value: Value = serde_json::from_str(&fixture(&path)).expect("108 control result");
+        assert_eq!(value["client_status"], 200, "control run {run}");
+        assert_eq!(value["origin_hits"], 1, "control run {run}");
+        assert_eq!(value["sink_hits"], 0, "control run {run}");
+        assert_eq!(value["sink_api_key"], false, "control run {run}");
+    }
+}

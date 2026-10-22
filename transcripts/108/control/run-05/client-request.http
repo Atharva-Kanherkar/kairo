@@ -1,0 +1,5 @@
+POST /openai/v1/chat/completions HTTP/1.1
+authorization: Bearer [CANARY_MASTER_KEY]
+content-type: application/json
+
+{"model": "mock", "messages": [{"role": "user", "content": "hello"}]}

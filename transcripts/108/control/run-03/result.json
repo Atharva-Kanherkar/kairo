@@ -1,0 +1,10 @@
+{
+  "run": 3,
+  "client_status": 200,
+  "origin_hits": 1,
+  "sink_hits": 0,
+  "origin_api_key": true,
+  "origin_authorization": true,
+  "sink_api_key": false,
+  "sink_authorization": false
+}
