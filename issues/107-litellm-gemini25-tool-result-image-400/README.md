@@ -247,7 +247,8 @@ Classification: `regression`.
   [`rig/adversarial_raw.py`](../../transcripts/107/rig/adversarial_raw.py)): Gemini
   2.5 Pro answers 200 and never reads the image (3/3), and the checker reports the
   drop. Against the first version of the checker, which matched the bytes anywhere
-  in the body, the new unit test and this test both fail.
+  in the body, this test and two of the three unit tests (lost deliveries, and
+  refused input such as an unknown dialect) fail; the placement test passes on both.
 
 ## Reproduce
 
