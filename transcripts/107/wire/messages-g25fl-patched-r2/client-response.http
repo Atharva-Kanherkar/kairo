@@ -1,0 +1,32 @@
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 03:30:31 GMT
+content-length: 245
+content-type: application/json
+x-litellm-call-id: 71a79c34-0b67-4c0f-848b-9e43af686638
+x-litellm-model-id: f5af34c3dc48c3215abbece6fb3906a607415509eb61abe50d45bfac99efd022
+x-litellm-model-name: gemini/gemini-2.5-flash-lite
+x-litellm-version: 1.106.2
+x-litellm-response-cost: 3.76e-05
+x-litellm-response-cost-original: 3.76e-05
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-response-cost-input: 3.48e-05
+x-litellm-response-cost-output: 2.8e-06
+x-litellm-response-cost-tool-usage: 0.0
+x-litellm-key-spend: 3.76e-05
+x-litellm-response-duration-ms: 2862.313985824585
+x-litellm-overhead-duration-ms: 4.375
+x-litellm-model-group: g25fl
+x-ratelimit-remaining-tokens: 248574
+x-ratelimit-limit-tokens: 250000
+x-ratelimit-remaining-requests: 11
+x-ratelimit-limit-requests: 15
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+
+{"id":"WIPZarKYMubf9tMP4MTuoAM","type":"message","role":"assistant","model":"g25fl","stop_sequence":null,"usage":{"input_tokens":348,"output_tokens":7},"content":[{"type":"text","text":"ZEBRA-7342"}],"stop_reason":"end_turn","stop_details":null}

@@ -1,0 +1,28 @@
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 03:17:18 GMT
+server: uvicorn
+content-length: 2299
+content-type: application/json
+x-litellm-call-id: 3ef6b57a-8a20-4313-8bf6-9c0e8c2ae69a
+x-litellm-model-id: 1c087597a5a733bd1fbb66fa811cf0e8dcd9b42211de8f65f1fe8e2d976adb5c
+x-litellm-model-api-base: http://127.0.0.1:4099/v1beta
+x-litellm-version: 1.88.2
+x-litellm-response-cost: 0.00348875
+x-litellm-response-cost-original: 0.00348875
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-key-spend: 0.00348875
+x-litellm-response-duration-ms: 5260.0740000000005
+x-litellm-overhead-duration-ms: 5.953
+x-litellm-callback-duration-ms: 0.222
+x-litellm-model-group: g25p
+x-ratelimit-remaining-tokens: 799344
+x-ratelimit-limit-tokens: 800000
+x-ratelimit-remaining-requests: 1999
+x-ratelimit-limit-requests: 2000
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin
+
+{"id":"PoDZaofwLcParfcPnsSF0A4","created":1792639038,"model":"g25p","object":"chat.completion","choices":[{"finish_reason":"stop","index":0,"message":{"content":"ZEBRA-7342\nZEBRA-7342","role":"assistant","images":[],"thinking_blocks":[],"provider_specific_fields":{"thought_signatures":["CsoJAWkUfRNN50B6Wij5Vi3dtGZiZgNIFCObEgpRKcph1t1964woG5DyoaBHaJ6AwNgnPOy6sqDdFWuOvmbBdh5M+ZL8nRBgi8ULpUiPc7gc66YvaJs7AVBDeT4nm2qpMQZdDWguSm2a5rgG1dunUm6pivoeFDdX7YHMmeoKKc99+ZyyD/fc78IS8ptxcid1yI4ID8ngBHB3+tZ+BPGvRJHXwMHNPx6TonU5PwXPgAFdulSN0AMht7cYXwPm4EAovMM/1Y6lE0kjkbRDgT+EgKx40He//uNL97ZWp5LJ+J7i59FTSWygDOUG+TQ3MYJktY6qY1jOEDzNqNIQWZbSgCceXneau01JM7UwrnZGrmTHqQ+gBCpCBs2VylBNFiPK5L0so3tEBlm7t/w9mHHH/iW6T7Z408Y7ONNuzLpHI62zLQnXoGsFVzf4cTBlH6Qc31nNHCCJvhZAQGmXN6SMxcYazAeTrOBkWprEcw6xe9VVncu+wmf7y8rb4K1yDeBXQjrzr6Jfr3JJgsotHXREKGfC1H72YMYYE+qlwVyHmyfZmkeUojOICSao/rq9nTAQiIo9sIlmDzie7tZZdq0bxV1CDf62OVjGHC9n5A2ENiSQ0Kwd09nxNkVar5AynWftsVWX9YHxAK3Q3mP32N3Kvj4OMf1huxe6+NyiN1U74uJLDLSy8vy7kuJHsxSw7V9WVSzb5DOi8ES78C4HC4k6iYaL4L8Qac8yTOGWPSKOPdSLxkDejDIAM+jqDw7DXpDAsyt6AIUrnDjMa4vBeKEVxs647JnIkcBlMEfSYxEfQTNvmatNu8Ew/NhLw97AbzfYCNrex/n2MfQDi2ZZhgfwi4S/B66UIEMuVA/XXU5xjp17RA06dSGkUZeNZ13ztaXGOkF7Sy4g1ZYQ5bVGHlg0NTq8kpWOyPEC2IBWOGTxhEEnK/0Rl7DNvoB6J3pQZbvMPmPRxHLP0dLnk5Xl/LdKUeLUbiulWaw5yqSOz8O1QaW8wkBrx+CyYzlMC2lhOT51/77KlK5jdS0uQ9IjpyyfGMEGV50KnK/ii7+AAJE0wLgr8KvfJKb0rEuYEjtkuhWxKoyyd9fVWivD3xkdzfv/O4CJrEGpSK2k5x7qAHPrEYmcpPVOnu5XFtKUtp1zTTSVhh/tuGq+PMaPL8H2VwreViljgaYRi7FvTjxYIG4TZbiQRfeszWokCwNvWzNAtKFDLLR7Q//C/2VTCIkPZQl/fRZ/0zMPhRwI2UKeHntGmrjJ0e0NhjtTZlSIA8cvN7pkDwL1Dj1hNBmw1+Ifgj+eMfxqwSm+OZorK6Kc0Vjv0Tp+1vGoRCzyQsfYTQ8ZO56DoeriaFlOcYqwq43Rup5ISyFYX+xkMPYLgSxbDAjmtU6G2j5ryyJoljmiC2hlFvTvrdo3XRwa8GnAFzz5rgVNenUZrwfoIEec4P5PljDduVLoMI8s8Exlan+5wUtahQE1G4FGCfWpk50e4kXld+HDhfKPU+WChl5y0Ctn8k6ZT5msaADJ4n2WhqmM5k8tij4u9WFaT09HNgoLe9mRqzGeGPyj5TWaelLs2K1xmSQKqDM3YQ7A7SdrgrBv1kPFyonbRNFjlUYwUFfT4eayispReAIPzLUIYGnKkQqt5V0="]}}}],"usage":{"completion_tokens":305,"prompt_tokens":351,"total_tokens":656,"completion_tokens_details":{"reasoning_tokens":289,"text_tokens":16},"prompt_tokens_details":{"text_tokens":93,"image_tokens":258}},"vertex_ai_grounding_metadata":[],"vertex_ai_url_context_metadata":[],"vertex_ai_safety_results":[],"vertex_ai_citation_metadata":[],"service_tier":"default"}

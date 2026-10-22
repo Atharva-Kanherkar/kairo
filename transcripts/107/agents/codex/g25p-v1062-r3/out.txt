@@ -1,0 +1,26 @@
+Reading additional input from stdin...
+OpenAI Codex v0.159.3
+--------
+workdir: /Users/atharva/.cache/kr-hunt-1022/agents/cximg-g25p-v1062-r3/work
+model: g25p
+provider: litellm
+approval: never
+sandbox: danger-full-access
+reasoning effort: none
+reasoning summaries: none
+session id: 01a161ab-01d2-7a33-a2e1-97a5dc1577b5
+--------
+user
+Use your view_image tool to look at code.png, then write the exact text it shows into answer.txt.
+warning: Model metadata for `g25p` not found. Defaulting to fallback metadata; this can degrade performance and cause issues.
+codex
+I'll first take a look at the image `code.png` and then write its contents into the `answer.txt` file for you.
+ERROR: Reconnecting... 1/5
+ERROR: Reconnecting... 2/5
+ERROR: Reconnecting... 3/5
+ERROR: Reconnecting... 4/5
+ERROR: Reconnecting... 5/5
+ERROR: stream disconnected before completion: litellm.BadRequestError: Vertex_ai_betaException BadRequestError - b'{\n  "error": {\n    "code": 400,\n    "message": "Multimodal function responses are not supported for this model.",\n    "status": "INVALID_ARGUMENT"\n  }\n}\n'
+ERROR: stream disconnected before completion: litellm.BadRequestError: Vertex_ai_betaException BadRequestError - b'{\n  "error": {\n    "code": 400,\n    "message": "Multimodal function responses are not supported for this model.",\n    "status": "INVALID_ARGUMENT"\n  }\n}\n'
+tokens used
+13,850

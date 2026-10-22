@@ -1,0 +1,51 @@
+HTTP/1.1 200
+X-Gemini-Service-Tier: standard
+Content-Type: application/json; charset=UTF-8
+Vary: X-Origin
+Vary: Referer
+Date: Thu, 22 Oct 2026 03:18:24 GMT
+Server: scaffolding on HTTPServer2
+X-XSS-Protection: 0
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Server-Timing: gfet4t7; dur=3686
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Accept-Ranges: none
+Vary: Origin,Accept-Encoding
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "ZEBRA-7342",
+            "thoughtSignature": "Cr4FAWkUfROeT7kRialpR5U1DUmFmSTL/1JTO2DnnQqd7Kn/LTzdN4miiYqc9Rwjp+sj9kPLLB4A5x5xW+t5WrYQy1ye1GSiW+GA8T1pD8zC99ZIn1ziIUX4biCXmuxoite4j623SHwkasko9GyYh/75LJHYwc2SEEphb5/C3j47MVJcx2vPS+8gsfZBS1+AbP0fz0cWT7lS3xOF0YM6kLtl/oCPKD+VPXgEMnzhmBFzVsYNPSxgwJPIjrvbbYTxJmcdR/D9cYwpCpqjYpmdHK+bVutQq7Ca//hEaodNun0juIUSArpW1fdU6ejlHKgeeQpwb8qNOPY09ulr49juMi3WWtDIthCFSnYuTpaxu3MiDB5xoab8knpEcCxoZGBzocDLyVQs9WwzaC8iNHarmM+EvCVPlgfLYnIVjH1wlUjIIDs9JdJAbxnCZrWPBsk7vO5LqS/JX8GSsr9oEez4qzTthVePFxulG7Sha5iY7stYUENaB3jZJzE3Ez3p3+WeuTWG8iJfZ9drlrWAe/5m3WCpCAHYFx0S2nIi4KfIBMlgwwCosZ/T8ke7/xcIuHVbapSlzqVr5Bon2geIu210i/a0kQkX1jl367IQAK8NYJPwNJ9dd/R9/+OSZU9elxrHy0frmOcbLEu9T9AyjVa5e+rjCjjp5/qDHibdPhOQ6ZR0AI4STsrHdyTzD6zLXsj394Pr1Jx3yMVMirw1dN622K9lkorlfaExU0846G3LYyEplf43pCbQ7A49yscyXyJA+VIDP/z3WJm6dRi5jS8LP0HHIeOofFgNfRTvbyHtKHFCZoY2a2xMVKqlRLive6siIPpWHhPXOoN0m/0cMpg5J30x9dwmaqOD7T7H0yn8thsvK16kqvdj14h5V7dptzfn705n1YAihFs/GGy2nbCmPlOG0EIlVwJeSoMdhGyVxyoX"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 348,
+    "candidatesTokenCount": 7,
+    "totalTokenCount": 523,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 90
+      },
+      {
+        "modality": "IMAGE",
+        "tokenCount": 258
+      }
+    ],
+    "thoughtsTokenCount": 168,
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-2.5-pro",
+  "responseId": "fYDZarGbEe_U9tMPzafMuQg"
+}

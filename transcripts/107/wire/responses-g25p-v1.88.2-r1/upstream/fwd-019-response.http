@@ -1,0 +1,51 @@
+HTTP/1.1 200
+X-Gemini-Service-Tier: standard
+Content-Type: application/json; charset=UTF-8
+Vary: X-Origin
+Vary: Referer
+Date: Thu, 22 Oct 2026 03:31:13 GMT
+Server: scaffolding on HTTPServer2
+X-XSS-Protection: 0
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Server-Timing: gfet4t7; dur=6099
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Accept-Ranges: none
+Vary: Origin,Accept-Encoding
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "ZEBRA-7342",
+            "thoughtSignature": "CtwCAWkUfRMtI3U5c45/MG/YKWufaAYhensV/H8mgQA0nrnqlTydFSc33GgtVch82tazdtybDFuiydfLlbnrRAbvvKDzrd/dxqqrzQ0lW2STHgPqqH4g+aFIc2lR4ANt+Bg5Elk2K27Z6rb4vTAc/yV8FTQTjy55a/qW04Wsa+Q8OIrvqH0e3ebk/cariVKXwGkns8ehJzWh+pB3P0pnC2b0okHIVUbSYTFciaL+wJU05FTrvidQNDVNV3i0+u2C0RYCfsG/StAEs4fNylJs+nqFzn+B82QOkMPWadbnC2Q7uY7iq4OKcIWxR6etMzdASVNOjPjrz2Ew4nXA3IxZgEF7TJ8MHhcmXL12mjvpOGtB3GkbgRXWsycHlTog/0SOJTXytBtIr2wdnIvLy/MQyO8mDG/PrC6ZBz/ZIzp4aAHHxAdKhG3l8MI6LY8RZQP3uPsGC8EChP8B4RKxDr9V"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 348,
+    "candidatesTokenCount": 7,
+    "totalTokenCount": 447,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 90
+      },
+      {
+        "modality": "IMAGE",
+        "tokenCount": 258
+      }
+    ],
+    "thoughtsTokenCount": 92,
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-2.5-pro",
+  "responseId": "fIPZary0AYeX9tMPvJnJuQg"
+}

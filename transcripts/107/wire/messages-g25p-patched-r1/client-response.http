@@ -1,0 +1,33 @@
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 03:30:06 GMT
+content-length: 246
+content-type: application/json
+x-litellm-call-id: fbae0d53-b814-4377-a07b-bf251fdeacf8
+x-litellm-model-id: d4a9c226924a796259dc9085597fb613efdedf241389b9a195a3f6b9253cb44a
+x-litellm-model-name: gemini/gemini-2.5-pro
+x-litellm-version: 1.106.2
+x-litellm-response-cost: 0.0024150000000000005
+x-litellm-response-cost-original: 0.0024150000000000005
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-response-cost-input: 0.00043500000000000006
+x-litellm-response-cost-output: 0.0019800000000000004
+x-litellm-response-cost-reasoning: 0.0019100000000000002
+x-litellm-response-cost-tool-usage: 0.0
+x-litellm-key-spend: 0.0024150000000000005
+x-litellm-response-duration-ms: 4615.715026855469
+x-litellm-overhead-duration-ms: 6.0301
+x-litellm-model-group: g25p
+x-ratelimit-remaining-tokens: 798930
+x-ratelimit-limit-tokens: 800000
+x-ratelimit-remaining-requests: 1998
+x-ratelimit-limit-requests: 2000
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+
+{"id":"QIPZasLlKoau9tMPy_3tuQg","type":"message","role":"assistant","model":"g25p","stop_sequence":null,"usage":{"input_tokens":348,"output_tokens":198},"content":[{"type":"text","text":"ZEBRA-7342"}],"stop_reason":"end_turn","stop_details":null}

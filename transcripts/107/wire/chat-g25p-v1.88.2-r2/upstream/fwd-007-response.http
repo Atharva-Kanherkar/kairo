@@ -1,0 +1,54 @@
+HTTP/1.1 200
+X-Gemini-Service-Tier: standard
+Content-Type: application/json; charset=UTF-8
+Vary: X-Origin
+Vary: Referer
+Date: Thu, 22 Oct 2026 03:17:48 GMT
+Server: scaffolding on HTTPServer2
+X-XSS-Protection: 0
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Server-Timing: gfet4t7; dur=3878
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Accept-Ranges: none
+Vary: Origin,Accept-Encoding
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "ZEBRA-7342\n"
+          },
+          {
+            "text": "ZEBRA-7342",
+            "thoughtSignature": "CqsFAWkUfRPbevXqf1Xgb2ZMnwZ6hXdTCaDxCWVxELDEkfvh29BiIRnPvN8YdFNE5UsuQCZi1Vhpwe+P5dLiRqTjvir5jt2bZ+4to8w86nyUdykTIHmSg3aY053THpcDto1emStrFFcNMqH+e7OmDDyQk2MIMcOknkjwLrqCPSVbBZr28812CmqHRPWEZHTtXgib5y+wNvFyWKJc3RcjGe5ATmfpPyN2C7Fl3Y+YiuZcOUObApEZFl/XPhMfhVN+rYuFLtMWM8ixjir2RzhhWrVIUNTv3pzBRC6ax0uXuZzwgJS6EhkfW1hrLM7vy/tLnNUvUoTJzOPnd+x7ZtI/lyjn0njB6yOGG80Ocu6mi5IJw0xlTZf3/cV0p9s/ktWNQd9USZikrB9ZpZrHgWPc/Kq3nQzzV8xdqMU3GvqS+T6gtWyQ9Hb8q+B9jiikOPN48gHv+RcYW96viIUyo+wFvAh00cxoXeOcy6Fju6SYnONegvVmvJZbQoa/P51sf6Lv7cuXtq8AJePvaLWafsOUBu++OG9GMYhu1WK1fMiCXkH6IewybOpkm/PnrbFjt+heXj5xJcoVVEjnITXEqUyMMnLjSiAFIqwPoIbaVQgUsuDytIiTxvkmfDvjk2vpuFy4wmx4xYTD0F+iki91Fobhh+FzE+YHVGVrCLKMGr0yKt7yVjEt1YNoRJc+Ek5nm2KeDnkXbPtntBJqqB4qWOQlqxSqP5/B5kaMl0GHIDm/phTS4C81cUiJCPFaeuZGsloR22nhvHCKiLCI/lKml1zahUaaiWTKXxEeBTiwQJ5vzTWwhbe1tC0HuxasQEi0NK8kRpBEOKv8aCtHKmDURGq5GFOD9cR6cFSLwh8u0Su1K92WBRLidlxww7W6+/OFOd5vIyVC4pIok09+tVMZ/Kk="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 351,
+    "candidatesTokenCount": 16,
+    "totalTokenCount": 541,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 93
+      },
+      {
+        "modality": "IMAGE",
+        "tokenCount": 258
+      }
+    ],
+    "thoughtsTokenCount": 174,
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-2.5-pro",
+  "responseId": "WIDZau_eFb2T9tMPhe3d-A4"
+}

@@ -1,0 +1,35 @@
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 03:31:23 GMT
+content-length: 1570
+content-type: application/json
+x-litellm-call-id: 9a4066f6-699c-411c-8be5-5c02f6759c0b
+x-litellm-model-id: b131c79222180b8acb5cfe1ff355ed03dd040197b4c5a1942d5571d4440f3b23
+x-litellm-model-name: gemini/gemini-3.8-flash
+x-litellm-model-api-base: http://127.0.0.1:4098/v1beta
+x-litellm-version: 1.106.2
+x-litellm-response-cost: 0.0011025000000000002
+x-litellm-response-cost-original: 0.0011025000000000002
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-response-cost-input: 0.0008812500000000001
+x-litellm-response-cost-output: 0.00022124999999999998
+x-litellm-response-cost-reasoning: 0.000195
+x-litellm-response-cost-tool-usage: 0.0
+x-litellm-key-spend: 0.0011025000000000002
+x-litellm-response-duration-ms: 2303.683042526245
+x-litellm-overhead-duration-ms: 16.3321
+x-litellm-callback-duration-ms: 0.2229
+x-litellm-model-group: g38f
+x-ratelimit-remaining-tokens: 798766
+x-ratelimit-limit-tokens: 800000
+x-ratelimit-remaining-requests: 1999
+x-ratelimit-limit-requests: 2000
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin, Accept-Encoding
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+
+{"id":"resp_MkcB8uR_5fbpy7XVhKrr53XAU_aBUFl9O8ZTBGMemdLfrpCBf-8J-vRDCtucPYDhPlSW5NrARwUj94J3pd-LJJjgK_PUwp7Q2tARavXum5mJJNKSWaJ0sWfrQjzbLNRk2fYXiNEvO8LuaGrKOLuCvG2pRd2zj_MQ1oSmYfyJMl3tCHs3dnpqXGiFGfzL_MqFicvRXngeglknM6x8qlVxjjkR2u7BfpglEBjoXnrgWNKXFjAT79tLRfrGYeQq5CUlc0k0WxCS5xO6pZCWZGkT2yt05aXa-OvIuIYfgYcETsdjiiFj6mfExByRmlv9Hf4bwqLAH8GCy_DoLcTBop--XRNzO9f2TGXH_GZeg4flyQeA1I9RkzaujjOshEh8vbzdEDb-ZnEHAgLPx5vqG01cNukRbDOUhg==","created_at":1792639884,"error":null,"incomplete_details":null,"instructions":null,"metadata":{},"model":"g38f","object":"response","output":[{"type":"message","id":"msg_c51e4272-a3e6-4b17-b219-3da738e8beda","status":"completed","role":"assistant","content":[{"type":"output_text","text":"ZEBRA-7342","annotations":[]}],"phase":null}],"parallel_tool_calls":false,"temperature":null,"tool_choice":"auto","tools":[{"name":"read_image","parameters":{"type":"object","properties":{"path":{"type":"string"}},"required":["path"]},"strict":null,"type":"function","allowed_callers":null,"defer_loading":null,"description":"Read an image file from disk","output_schema":null}],"top_p":null,"max_output_tokens":null,"previous_response_id":null,"reasoning":null,"status":"completed","text":{},"truncation":null,"usage":{"input_tokens":1175,"input_tokens_details":{"audio_tokens":null,"cached_tokens":0,"cached_tokens_details":null,"image_tokens":1080,"text_tokens":95,"video_tokens":null},"output_tokens":59,"output_tokens_details":{"audio_tokens":null,"reasoning_tokens":52,"text_tokens":7},"total_tokens":1234,"cost":null},"user":null,"store":false}

@@ -1,0 +1,28 @@
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 03:17:47 GMT
+server: uvicorn
+content-length: 567
+content-type: application/json
+x-litellm-call-id: f444bc68-83af-4451-90ce-074ad12cbf55
+x-litellm-model-id: f065fddec1088d2525d7d3021bee7667723fd1048564b435be6fd860d2f4a735
+x-litellm-model-api-base: http://127.0.0.1:4099/v1beta
+x-litellm-version: 1.88.2
+x-litellm-response-cost: 3.79e-05
+x-litellm-response-cost-original: 3.79e-05
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-key-spend: 3.79e-05
+x-litellm-response-duration-ms: 2893.4790000000003
+x-litellm-overhead-duration-ms: 0.829
+x-litellm-callback-duration-ms: 0.0
+x-litellm-model-group: g25fl
+x-ratelimit-remaining-tokens: 249284
+x-ratelimit-limit-tokens: 250000
+x-ratelimit-remaining-requests: 13
+x-ratelimit-limit-requests: 15
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin
+
+{"id":"XIDZar30JbGpvr0P5Y7NsQ8","created":1792639068,"model":"g25fl","object":"chat.completion","choices":[{"finish_reason":"stop","index":0,"message":{"content":"ZEBRA-7342","role":"assistant","images":[],"thinking_blocks":[]}}],"usage":{"completion_tokens":7,"prompt_tokens":351,"total_tokens":358,"completion_tokens_details":{"text_tokens":7},"prompt_tokens_details":{"text_tokens":93,"image_tokens":258}},"vertex_ai_grounding_metadata":[],"vertex_ai_url_context_metadata":[],"vertex_ai_safety_results":[],"vertex_ai_citation_metadata":[],"service_tier":"default"}
