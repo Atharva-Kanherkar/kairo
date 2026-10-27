@@ -1,0 +1,14 @@
+{
+  "case": "gen_query_allowed",
+  "path": "/v1/images/generations?model=allowed-model",
+  "body_model": "allowed-model",
+  "expected_status": 200,
+  "http_status": 200,
+  "expected_served": "ALLOWED",
+  "served": "ALLOWED",
+  "expected_upstream": "allowed",
+  "upstream_calls": [
+    "allowed"
+  ],
+  "pass": true
+}

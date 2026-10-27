@@ -1,0 +1,76 @@
+{
+  "target": "BerriAI/litellm",
+  "commit": "cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a",
+  "version": "1.108.0",
+  "expected_commit": "cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a",
+  "recorded_at": "2026-10-27T17:16:18Z",
+  "runs": 5,
+  "cases": {
+    "gen_body_denied": {
+      "pass": 5,
+      "total": 5,
+      "served": null,
+      "status": 403
+    },
+    "gen_query_denied": {
+      "pass": 5,
+      "total": 5,
+      "served": "DENIED",
+      "status": 200
+    },
+    "gen_deploy_denied": {
+      "pass": 5,
+      "total": 5,
+      "served": "DENIED",
+      "status": 200
+    },
+    "gen_query_denied_nobody": {
+      "pass": 5,
+      "total": 5,
+      "served": null,
+      "status": 403
+    },
+    "gen_deploy_denied_nobody": {
+      "pass": 5,
+      "total": 5,
+      "served": null,
+      "status": 403
+    },
+    "gen_query_allowed": {
+      "pass": 5,
+      "total": 5,
+      "served": "ALLOWED",
+      "status": 200
+    },
+    "gen_no_query": {
+      "pass": 5,
+      "total": 5,
+      "served": "ALLOWED",
+      "status": 200
+    },
+    "edit_body_denied": {
+      "pass": 5,
+      "total": 5,
+      "served": null,
+      "status": 403
+    },
+    "edit_query_denied": {
+      "pass": 5,
+      "total": 5,
+      "served": "DENIED",
+      "status": 200
+    },
+    "edit_deploy_denied": {
+      "pass": 5,
+      "total": 5,
+      "served": "DENIED",
+      "status": 200
+    },
+    "edit_no_query": {
+      "pass": 5,
+      "total": 5,
+      "served": "ALLOWED",
+      "status": 200
+    }
+  }
+}

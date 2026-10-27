@@ -2003,6 +2003,160 @@ pub fn executed_tool_results_preserved(executions_json: &str, client_exchange: &
     Verdict::Conformant
 }
 
+/// Invariant (bug 098): a virtual key scoped to a set of models MUST NOT be
+/// served by a model outside that set, whichever request field names the
+/// model. The image handlers bind `model` from `?model=` or the
+/// `/openai/deployments/{model:path}/...` segment and prefer it over the body,
+/// while the access check reads only the body.
+///
+/// `allowed_models` is the key's `models` list. The effective model is the
+/// URL-bound value when present (that is what the handlers route on), else the
+/// body value. A request whose effective model is outside the set must be
+/// rejected with 403 before any upstream call; one inside the set must be
+/// served. Both directions are checked so a gateway that rejects everything
+/// cannot pass.
+pub fn allowlist_bounds_served_model(
+    client_request: &str,
+    client_response: &str,
+    upstream_requests: &str,
+    allowed_models: &[&str],
+) -> Verdict {
+    let request = client_request.replace("\r\n", "\n");
+    let response = client_response.replace("\r\n", "\n");
+    let Some((head, body)) = request.split_once("\n\n") else {
+        return Verdict::Violation("client request has no header/body separator".into());
+    };
+    let Some(request_line) = head.lines().next() else {
+        return Verdict::Violation("client request has no request line".into());
+    };
+    let mut parts = request_line.split_whitespace();
+    let (Some(_method), Some(target), Some(version)) = (parts.next(), parts.next(), parts.next())
+    else {
+        return Verdict::Violation("client request has a malformed request line".into());
+    };
+    if !version.starts_with("HTTP/") || parts.next().is_some() {
+        return Verdict::Violation("client request has a malformed request line".into());
+    }
+
+    let url_model = url_bound_model(target);
+    let body_model = body_model(head, body);
+    let Some(effective) = url_model.as_deref().or(body_model.as_deref()) else {
+        return Verdict::Violation("request names no model in the URL or body".into());
+    };
+
+    let status = response
+        .lines()
+        .find(|line| line.starts_with("HTTP/"))
+        .and_then(|line| line.split_whitespace().nth(1))
+        .and_then(|code| code.parse::<u16>().ok());
+    let reached_upstream = upstream_requests
+        .lines()
+        .any(|line| !line.trim().is_empty());
+    let allowed = allowed_models.contains(&effective);
+
+    match (allowed, status, reached_upstream) {
+        (false, Some(403), false) => Verdict::Conformant,
+        (false, _, _) => Verdict::Violation(format!(
+            "key scoped to {allowed_models:?} was served or attempted {effective:?}: \
+             status {status:?}, upstream reached: {reached_upstream}"
+        )),
+        (true, Some(status), true) if (200..300).contains(&status) => Verdict::Conformant,
+        (true, _, _) => Verdict::Violation(format!(
+            "allowed model {effective:?} was not served: status {status:?}, \
+             upstream reached: {reached_upstream}"
+        )),
+    }
+}
+
+/// The model FastAPI binds from the request target: the `{model:path}` segment
+/// on the Azure-compatible deployment routes, otherwise the exact-case `model`
+/// query parameter. FastAPI ignores a same-named query parameter on a route
+/// that already binds the path segment, so the path wins there.
+fn url_bound_model(target: &str) -> Option<String> {
+    let (path, query) = match target.split_once('?') {
+        Some((path, query)) => (path, Some(query)),
+        None => (target, None),
+    };
+    if let Some(rest) = path.strip_prefix("/openai/deployments/") {
+        if let Some((model, _)) = rest.split_once("/images/") {
+            return (!model.is_empty()).then(|| model.to_owned());
+        }
+    }
+    for pair in query?.split('&') {
+        let Some((name, value)) = pair.split_once('=') else {
+            continue;
+        };
+        if name == "model" {
+            let decoded = percent_decode(value);
+            if !decoded.is_empty() {
+                return Some(decoded);
+            }
+        }
+    }
+    None
+}
+
+fn body_model(head: &str, body: &str) -> Option<String> {
+    let content_type = head
+        .lines()
+        .find_map(|line| {
+            let (name, value) = line.split_once(':')?;
+            name.eq_ignore_ascii_case("content-type")
+                .then(|| value.trim().to_ascii_lowercase())
+        })
+        .unwrap_or_default();
+    if content_type.contains("multipart/form-data") {
+        return multipart_field(body, "model");
+    }
+    serde_json::from_str::<Value>(body).ok().and_then(|value| {
+        value
+            .get("model")
+            .and_then(Value::as_str)
+            .map(str::to_owned)
+    })
+}
+
+fn multipart_field(body: &str, field: &str) -> Option<String> {
+    let marker = format!("name=\"{field}\"");
+    body.split("--").find_map(|part| {
+        if !part.contains(&marker) {
+            return None;
+        }
+        let (_, value) = part.split_once("\n\n")?;
+        let value = value.trim();
+        (!value.is_empty()).then(|| value.to_owned())
+    })
+}
+
+fn percent_decode(value: &str) -> String {
+    let bytes = value.as_bytes();
+    let mut out = Vec::with_capacity(bytes.len());
+    let mut index = 0;
+    while index < bytes.len() {
+        if bytes[index] == b'%' && index + 2 < bytes.len() {
+            if let (Some(high), Some(low)) =
+                (hex_value(bytes[index + 1]), hex_value(bytes[index + 2]))
+            {
+                out.push(high * 16 + low);
+                index += 3;
+                continue;
+            }
+        }
+        out.push(bytes[index]);
+        index += 1;
+    }
+    String::from_utf8_lossy(&out).into_owned()
+}
+
+fn hex_value(byte: u8) -> Option<u8> {
+    match byte {
+        b'0'..=b'9' => Some(byte - b'0'),
+        b'a'..=b'f' => Some(byte - b'a' + 10),
+        b'A'..=b'F' => Some(byte - b'A' + 10),
+        _ => None,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -3061,6 +3215,72 @@ data: [DONE]
                 response_conversation_preserves_history(evidence, "RECALL", "SEED CANARY", 1,),
                 Verdict::Violation(_)
             ));
+        }
+    }
+
+    #[test]
+    fn allowlist_checker_is_nonvacuous_in_both_directions() {
+        let request = "POST /v1/images/generations?model=denied-model HTTP/1.1\r\n\
+                       Content-Type: application/json\r\n\r\n\
+                       {\"model\":\"allowed-model\"}";
+        let ok = "HTTP/1.1 200 OK\r\n\r\n{}";
+        let rejected = "HTTP/1.1 403 Forbidden\r\n\r\n{}";
+        let upstream = r#"{"path":"/v1/images/generations"}"#;
+
+        assert_eq!(
+            allowlist_bounds_served_model(request, rejected, "", &["allowed-model"]),
+            Verdict::Conformant,
+            "a disallowed URL model rejected before upstream is the correct outcome"
+        );
+        assert!(
+            matches!(
+                allowlist_bounds_served_model(request, ok, upstream, &["allowed-model"]),
+                Verdict::Violation(_)
+            ),
+            "a disallowed URL model served by upstream must be caught"
+        );
+        assert!(
+            matches!(
+                allowlist_bounds_served_model(request, rejected, upstream, &["allowed-model"]),
+                Verdict::Violation(_)
+            ),
+            "a rejected request that still reached upstream must be caught"
+        );
+        let allowed = "POST /v1/images/generations HTTP/1.1\r\n\
+                       Content-Type: application/json\r\n\r\n\
+                       {\"model\":\"allowed-model\"}";
+        assert_eq!(
+            allowlist_bounds_served_model(allowed, ok, upstream, &["allowed-model"]),
+            Verdict::Conformant
+        );
+        assert!(
+            matches!(
+                allowlist_bounds_served_model(allowed, rejected, "", &["allowed-model"]),
+                Verdict::Violation(_)
+            ),
+            "an allowed model rejected without upstream must be caught"
+        );
+    }
+
+    #[test]
+    fn allowlist_checker_rejects_malformed_evidence() {
+        for bad in [
+            "",
+            "POST /v1/images/generations HTTP/1.1",
+            "POST /v1/images/generations HTTP/1.1\r\n\r\n{}",
+        ] {
+            assert!(
+                matches!(
+                    allowlist_bounds_served_model(
+                        bad,
+                        "HTTP/1.1 200 OK\r\n\r\n{}",
+                        "",
+                        &["allowed-model"]
+                    ),
+                    Verdict::Violation(_)
+                ),
+                "{bad:?} must not pass as evidence"
+            );
         }
     }
 }

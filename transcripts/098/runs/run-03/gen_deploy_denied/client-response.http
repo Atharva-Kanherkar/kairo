@@ -1,0 +1,18 @@
+HTTP/1.1 200 OK
+date: Tue, 27 Oct 2026 17:16:42 GMT
+content-length: 352
+content-type: application/json
+x-litellm-call-id: bee11273-8996-4c0f-a0d7-3fae6b4b085e
+x-litellm-model-id: c524c5e8e7b83f7a84dcd52ef7426d6d6d1d7bfc5ec8dea0a85e6ef9cc9e459c
+x-litellm-model-api-base: http://127.0.0.1:58169/v1
+x-litellm-version: 1.104.0
+x-litellm-key-spend: 0.0
+x-litellm-response-duration-ms: 58.90393257141113
+x-litellm-callback-duration-ms: 0.0
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+Connection: close
+
+{"created":1700000000,"background":null,"data":[{"b64_json":null,"revised_prompt":"SERVED_BY_DENIED_IMAGE","url":"https://example.invalid/DENIED.png","provider_specific_fields":null}],"output_format":null,"quality":null,"size":null,"usage":{"total_tokens":0,"input_tokens":0,"input_tokens_details":{"image_tokens":0,"text_tokens":0},"output_tokens":0}}

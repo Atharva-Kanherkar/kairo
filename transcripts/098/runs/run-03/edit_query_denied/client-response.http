@@ -1,0 +1,26 @@
+HTTP/1.1 200 OK
+date: Tue, 27 Oct 2026 17:16:43 GMT
+content-length: 352
+content-type: application/json
+x-litellm-call-id: 01a0509d-2624-4335-99da-c51578cea29d
+x-litellm-model-id: c524c5e8e7b83f7a84dcd52ef7426d6d6d1d7bfc5ec8dea0a85e6ef9cc9e459c
+x-litellm-model-name: openai/fake-model
+x-litellm-model-api-base: http://127.0.0.1:58169/v1
+x-litellm-version: 1.104.0
+x-litellm-key-spend: 0.0
+x-litellm-response-duration-ms: 8.59689712524414
+x-litellm-callback-duration-ms: 0.0
+llm_provider-server: BaseHTTP/0.6 Python/3.12.13
+llm_provider-date: Tue, 27 Oct 2026 17:16:44 GMT
+llm_provider-content-type: application/json
+llm_provider-content-length: 124
+x-litellm-model-group: denied-model
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+Connection: close
+
+{"created":1700000000,"background":null,"data":[{"b64_json":null,"revised_prompt":"SERVED_BY_DENIED_IMAGE","url":"https://example.invalid/DENIED.png","provider_specific_fields":null}],"output_format":null,"quality":null,"size":null,"usage":{"total_tokens":0,"input_tokens":0,"input_tokens_details":{"image_tokens":0,"text_tokens":0},"output_tokens":0}}
