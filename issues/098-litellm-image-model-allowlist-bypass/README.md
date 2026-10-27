@@ -401,8 +401,8 @@ Verdict: **ACCEPT**, recorded 2026-10-28, using
   occurrences in #41852's diff.
 - Repository checks: PASS. `cargo fmt --all -- --check`,
   `cargo clippy --workspace --all-targets -- -D warnings`,
-  `cargo test --workspace` (178 conformance, 42 unit), and
-  `python3 tools/update-readme-counts.py --check` all passed.
+  `cargo test --workspace` (253 conformance, 81 unit after merging current
+  `main`), and `python3 tools/update-readme-counts.py --check` all passed.
 - Blocking findings: none.
 
 Non-blocking observations from the review, and how they are handled here: the
