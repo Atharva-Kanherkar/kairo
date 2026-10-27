@@ -1,0 +1,29 @@
+HTTP/1.1 200 OK
+date: Tue, 27 Oct 2026 10:08:30 GMT
+content-length: 2086
+content-type: application/json
+x-litellm-call-id: 3449b6f4-d912-4c16-a52e-cb8070b34107
+x-litellm-model-id: e46520cc911ee7c3af9a98e653992c34e5b0776edbc470b96714532a125c4361
+x-litellm-model-name: openai/gpt-5.5
+x-litellm-version: 1.108.0
+x-litellm-response-cost: 0.00079
+x-litellm-response-cost-original: 0.00079
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-response-cost-input: 0.00013000000000000002
+x-litellm-response-cost-output: 0.00066
+x-litellm-response-cost-reasoning: 0.00027
+x-litellm-response-cost-tool-usage: 0.0
+x-litellm-key-spend: 0.00079
+x-litellm-response-duration-ms: 1574.4681358337402
+x-litellm-overhead-duration-ms: 8.3773
+x-litellm-model-group: g55
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+
+{"id":"resp_bGl0ZWxsbTpjdXN0b21fbGxtX3Byb3ZpZGVyOm9wZW5haTttb2RlbF9pZDplNDY1MjBjYzkxMWVlN2MzYWY5YTk4ZTY1Mzk5MmMzNGU1YjA3NzZlZGJjNDcwYjk2NzE0NTMyYTEyNWM0MzYxO3Jlc3BvbnNlX2lkOnJlc3BfMGU1ZWI2NTA3OTQwZTY5MzAwNmFlMDc4MWU4NTM4ODdkMDhmNTY4NTkyNDY2YzExZjM=","type":"message","role":"assistant","model":"g55","stop_sequence":null,"usage":{"input_tokens":26,"output_tokens":22},"content":[{"type":"redacted_thinking","data":"litellm_encrypted_reasoning:gAAAAABq4Hgf87gdX4yGEmV3pmp5zXJRx0hRQj59BfONLbS9jtqaahjHX_JNdJElYzbgwNi2U5fJi6C2gT9Sbr3EqCQsxg_DmYOhP7SzjRtFhA1azi_ZFp5JfGzleIsqwDN9WkWS5xj5yYAHq9fN2SI6P_5LpvHYh7Aa9t9AVB8lnfwaR9V0faTVbGMifOHIcXkrU_CcLckijCu00zO6fsPaDVVvrs9-t0gizfbYKQooOCwvkfHJpMkBp0DPPVe5sy8RvmJ9i02O4z6Pfz3IiLDlKyNPJakaFuLnatRV3xIkQjyYZLJowKPljUu0QSFUab3iq3q4ahUo8SpbSF4GJ6_xtn6Wkgkvm7b-3BP5e_UNDPK20Sdn_Bx7t4cFeaB4-pyRSoasAkma8eSAcZEWFEWoQ3hOPvYda6QU9Vac36ytq2ceDhsnklzNozWTvsqfI1ijzuXq0eLEsiMMNZjMUXYd7nIrCkmdj5dAIrxlMlKCpqn5wLo34AYaWzLMAdhGTcz6hHaTuAcMbEynxBWUx8UaRdkz5tnX107lRNefo7m13z7NKW2VtPBnuCiK5gXa824ZfAcuIL1wKO0HP3JW75eUkpe9riFy8Vq7DtDqAEQA-mb7v40SJSVcd9A6EX_9JxNn4Q92oXSUOoUwCcPYwLlfiIDM1KTA1FP29OPQBZBTTORml822ORTYeh_TTK1jqy5wipYQIzxtniF7HLSpcBVhOGzw0tY_NDm1AX6SYOrEVfJJ45rzBulV7bzmMvt0Q9BQ3ko1vPVO6pN_SW-drBebB898tzO5UCt9fNa-K2v6C5tvCQjxIyj12tywifv37dCCyQNJWD022THopWRJvzb6QyuG1a3oJ-HjVHuWlUCoDaX37XBU8J-B4Ow0elBYizVWR1jihl8-P0wWELlxHnSKcwEP_0tyv9pZz91P115yjIFvvxln2lUWv5lRQaic5SOl6DpKT3BwNEbsre7U43VV0jpGipwvoLwZiGG_ZNAlhT5bcQ5AhX6OHXSmSQFXeVFFkdA0NS5S0gxNF12kKqafDj_9xk8LDFRty4W7RHCDyR25X8ZsrXKTMNCDr6tS-5wLSD4Q_KdyywyXVq3oIs6DeWOpljuJRDihB7KmDsh-cF3im2gSFUcUqSgwpx26n8PktEN5MB3k7I_UOWur1TTLMFxt52B_FPFRhBuKlliTawRar2Llnmh3tCblG7Ph0tt8toas9YA_DGF-T6hHkAE010vvjeHh_5zVY7fmNHiVs7cTJGOgFXnPQxu4S7p73Wjiwq5SjjBUXerGbngRkRPl74Un2AFdGogrTRzvkC80jQqVxbPb2h-16JONqjfFmBTc7-6ysSSsX1VzoWJT9dxH6jumoxmYRc_Zn_NeVC6WsUdV4ErVFUgOZOFs8uGi2mZnAfG0Ppx0sNxwt7gMwGsFCzDSP1woOLx2oLwVGWGeOy6qPQE54alkcm98l5kCp2c_JqemI75_5UvkNa7AeL2YodRW9pfngAUor5K_R0EwMBA8CBYO7mzlhxphHfw5XcE_RpgYPWSc"},{"type":"text","text":"ALPHA STOPHERE OMEGA"}],"stop_reason":"end_turn","stop_details":null}

@@ -1,0 +1,191 @@
+[
+ {
+  "cell": "chat-gpt-4.1-mini-stop-r1",
+  "api": "chat",
+  "model": "gpt-4.1-mini",
+  "stop_sent": true,
+  "run": 1,
+  "status": 200,
+  "error": null
+ },
+ {
+  "cell": "chat-gpt-4.1-mini-stop-r2",
+  "api": "chat",
+  "model": "gpt-4.1-mini",
+  "stop_sent": true,
+  "run": 2,
+  "status": 200,
+  "error": null
+ },
+ {
+  "cell": "chat-gpt-4.1-mini-stop-r3",
+  "api": "chat",
+  "model": "gpt-4.1-mini",
+  "stop_sent": true,
+  "run": 3,
+  "status": 200,
+  "error": null
+ },
+ {
+  "cell": "chat-gpt-5.4-mini-stop-r1",
+  "api": "chat",
+  "model": "gpt-5.4-mini",
+  "stop_sent": true,
+  "run": 1,
+  "status": 400,
+  "error": "Unsupported parameter: 'stop' is not supported with this model."
+ },
+ {
+  "cell": "chat-gpt-5.4-mini-stop-r2",
+  "api": "chat",
+  "model": "gpt-5.4-mini",
+  "stop_sent": true,
+  "run": 2,
+  "status": 400,
+  "error": "Unsupported parameter: 'stop' is not supported with this model."
+ },
+ {
+  "cell": "chat-gpt-5.4-mini-stop-r3",
+  "api": "chat",
+  "model": "gpt-5.4-mini",
+  "stop_sent": true,
+  "run": 3,
+  "status": 400,
+  "error": "Unsupported parameter: 'stop' is not supported with this model."
+ },
+ {
+  "cell": "chat-gpt-5.5-stop-r1",
+  "api": "chat",
+  "model": "gpt-5.5",
+  "stop_sent": true,
+  "run": 1,
+  "status": 400,
+  "error": "Unsupported parameter: 'stop' is not supported with this model."
+ },
+ {
+  "cell": "chat-gpt-5.5-stop-r2",
+  "api": "chat",
+  "model": "gpt-5.5",
+  "stop_sent": true,
+  "run": 2,
+  "status": 400,
+  "error": "Unsupported parameter: 'stop' is not supported with this model."
+ },
+ {
+  "cell": "chat-gpt-5.5-stop-r3",
+  "api": "chat",
+  "model": "gpt-5.5",
+  "stop_sent": true,
+  "run": 3,
+  "status": 400,
+  "error": "Unsupported parameter: 'stop' is not supported with this model."
+ },
+ {
+  "cell": "responses-gpt-5.4-mini-nostop-r1",
+  "api": "responses",
+  "model": "gpt-5.4-mini",
+  "stop_sent": false,
+  "run": 1,
+  "status": 200,
+  "error": null
+ },
+ {
+  "cell": "responses-gpt-5.4-mini-nostop-r2",
+  "api": "responses",
+  "model": "gpt-5.4-mini",
+  "stop_sent": false,
+  "run": 2,
+  "status": 200,
+  "error": null
+ },
+ {
+  "cell": "responses-gpt-5.4-mini-nostop-r3",
+  "api": "responses",
+  "model": "gpt-5.4-mini",
+  "stop_sent": false,
+  "run": 3,
+  "status": 200,
+  "error": null
+ },
+ {
+  "cell": "responses-gpt-5.4-mini-stop-r1",
+  "api": "responses",
+  "model": "gpt-5.4-mini",
+  "stop_sent": true,
+  "run": 1,
+  "status": 400,
+  "error": "Unknown parameter: 'stop'."
+ },
+ {
+  "cell": "responses-gpt-5.4-mini-stop-r2",
+  "api": "responses",
+  "model": "gpt-5.4-mini",
+  "stop_sent": true,
+  "run": 2,
+  "status": 400,
+  "error": "Unknown parameter: 'stop'."
+ },
+ {
+  "cell": "responses-gpt-5.4-mini-stop-r3",
+  "api": "responses",
+  "model": "gpt-5.4-mini",
+  "stop_sent": true,
+  "run": 3,
+  "status": 400,
+  "error": "Unknown parameter: 'stop'."
+ },
+ {
+  "cell": "responses-gpt-5.5-nostop-r1",
+  "api": "responses",
+  "model": "gpt-5.5",
+  "stop_sent": false,
+  "run": 1,
+  "status": 200,
+  "error": null
+ },
+ {
+  "cell": "responses-gpt-5.5-nostop-r2",
+  "api": "responses",
+  "model": "gpt-5.5",
+  "stop_sent": false,
+  "run": 2,
+  "status": 200,
+  "error": null
+ },
+ {
+  "cell": "responses-gpt-5.5-nostop-r3",
+  "api": "responses",
+  "model": "gpt-5.5",
+  "stop_sent": false,
+  "run": 3,
+  "status": 200,
+  "error": null
+ },
+ {
+  "cell": "responses-gpt-5.5-stop-r1",
+  "api": "responses",
+  "model": "gpt-5.5",
+  "stop_sent": true,
+  "run": 1,
+  "status": 400,
+  "error": "Unknown parameter: 'stop'."
+ },
+ {
+  "cell": "responses-gpt-5.5-stop-r2",
+  "api": "responses",
+  "model": "gpt-5.5",
+  "stop_sent": true,
+  "run": 2,
+  "status": 400,
+  "error": "Unknown parameter: 'stop'."
+ },
+ {
+  "cell": "responses-gpt-5.5-stop-r3",
+  "api": "responses",
+  "model": "gpt-5.5",
+  "stop_sent": true,
+  "run": 3,
+  "status": 400,
+  "error": "Unknown parameter: 'stop'."
+ }
+]

@@ -1,0 +1,64 @@
+HTTP/1.1 200
+Date: Tue, 27 Oct 2026 10:23:52 GMT
+x-litellm-call-id: 96cb2ec9-38de-4fb3-a0f5-30d88ee763cf
+x-litellm-model-id: cb42a06ca7a4b52b863ef88c4738b4ad9e5678577dc4685914125cee4b73c24e
+x-litellm-model-name: openai/gpt-5.4-mini
+x-litellm-version: 1.108.0
+x-litellm-response-cost-original: 0.0
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-response-cost-input: 0.0
+x-litellm-response-cost-output: 0.0
+x-litellm-response-cost-tool-usage: 0.0
+x-litellm-key-spend: 0.0
+x-litellm-response-duration-ms: 831.0070037841797
+x-litellm-overhead-duration-ms: 6.8488
+x-litellm-model-group: g54m
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+Cache-Control: no-cache
+x-accel-buffering: no
+Content-Type: text/event-stream; charset=utf-8
+Vary: Origin
+X-Frame-Options: DENY
+Content-Security-Policy: frame-ancestors 'none'
+X-Content-Type-Options: nosniff
+Transfer-Encoding: chunked
+
+event: message_start
+data: {"type":"message_start","message":{"id":"msg_519b5c4d-21d4-4cca-b429-718a09b5ed9b","type":"message","role":"assistant","content":[],"model":"g54m","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":0,"output_tokens":0,"cache_creation_input_tokens":0,"cache_read_input_tokens":0}}}
+
+event: content_block_start
+data: {"type": "content_block_start", "index": 0, "content_block": {"type": "text", "text": ""}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": "Final"}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": " Answer"}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": ":"}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": " It"}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": " is"}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": " done"}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": "."}}
+
+event: content_block_stop
+data: {"type": "content_block_stop", "index": 0}
+
+event: message_delta
+data: {"type": "message_delta", "delta": {"stop_reason": "end_turn", "stop_sequence": null}, "usage": {"input_tokens": 192, "output_tokens": 11}}
+
+event: message_stop
+data: {"type": "message_stop"}
+

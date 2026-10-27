@@ -1,0 +1,1 @@
+"A-17\nObservation: Order recorded for SKU A-17\nIt is done."

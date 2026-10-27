@@ -1,0 +1,27 @@
+diff --git a/litellm/llms/anthropic/pass_through/messages/handler.py b/litellm/llms/anthropic/pass_through/messages/handler.py
+index e1757fbc2d3..03fb85a2b44 100644
+--- a/litellm/llms/anthropic/pass_through/messages/handler.py
++++ b/litellm/llms/anthropic/pass_through/messages/handler.py
+@@ -94,6 +94,13 @@ def _responses_mode_is_lost_by_prefix_strip(
+     ) and not _bridges_to_responses_api(resolved_model, custom_llm_provider, deployment_model_info)
+ 
+ 
++def _chat_completions_accepts_stop(model: str | None, custom_llm_provider: str | None) -> bool:
++    if not model or not custom_llm_provider:
++        return True
++    supported_params: Final = litellm.get_supported_openai_params(model=model, custom_llm_provider=custom_llm_provider)
++    return "stop" in (supported_params or ())
++
++
+ def _should_route_to_responses_api(
+     custom_llm_provider: str | None,
+     requested_model: str | None = None,
+@@ -108,7 +115,7 @@ def _should_route_to_responses_api(
+     """
+     if litellm.use_chat_completions_url_for_anthropic_messages:
+         return False
+-    if stop_sequences:
++    if stop_sequences and _chat_completions_accepts_stop(resolved_model, custom_llm_provider):
+         return False
+     if custom_llm_provider in _RESPONSES_API_PROVIDERS:
+         return True

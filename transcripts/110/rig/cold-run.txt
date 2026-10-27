@@ -1,0 +1,31 @@
+work dir: ~/.cache/kr-hunt-1027/cold
+main imports ~/.cache/kr-hunt-1027/cold/main/litellm/__init__.py
+pre imports ~/.cache/kr-hunt-1027/cold/pre/litellm/__init__.py
+fix imports ~/.cache/kr-hunt-1027/cold/fix/litellm/__init__.py
+g54m plain stop main: 400 0 None "" litellm.UnsupportedParamsError: openai does not support parameters: ['stop'], for model=gpt-5.4-mini. To drop 
+g54m plain stop pre: 200 1 end_turn "ALPHA STOPHERE OMEGA" 
+g54m plain stop fix: 200 1 end_turn "ALPHA STOPHERE OMEGA" 
+g54m stream stop main: 400 0 None "" litellm.UnsupportedParamsError: openai does not support parameters: ['stop'], for model=gpt-5.4-mini. To drop 
+g54m stream stop pre: 200 1 end_turn "ALPHA STOPHERE OMEGA" 
+g54m stream stop fix: 200 1 end_turn "ALPHA STOPHERE OMEGA" 
+g55 plain stop main: 400 0 None "" litellm.UnsupportedParamsError: openai does not support parameters: ['stop'], for model=gpt-5.5. To drop these
+g55 plain stop pre: 200 1 end_turn "ALPHA STOPHERE OMEGA" 
+g55 plain stop fix: 200 1 end_turn "ALPHA STOPHERE OMEGA" 
+g55 stream stop main: 400 0 None "" litellm.UnsupportedParamsError: openai does not support parameters: ['stop'], for model=gpt-5.5. To drop these
+g55 stream stop pre: 200 1 end_turn "ALPHA STOPHERE OMEGA" 
+g55 stream stop fix: 200 1 end_turn "ALPHA STOPHERE OMEGA" 
+g41m plain stop main: 200 1 end_turn "ALPHA " 
+g41m plain stop pre: 200 1 end_turn "ALPHA STOPHERE OMEGA" 
+g41m plain stop fix: 200 1 end_turn "ALPHA " 
+g41m stream stop main: 200 1 end_turn "ALPHA " 
+g41m stream stop pre: 200 1 end_turn "ALPHA STOPHERE OMEGA" 
+g41m stream stop fix: 200 1 end_turn "ALPHA " 
+g54m plain nostop main: 200 1 end_turn "ALPHA STOPHERE OMEGA" 
+g55 plain nostop main: 200 1 end_turn "ALPHA STOPHERE OMEGA" 
+react g54m main: {"model_alias": "g54m", "outcome": "raised", "exception": "langchain_anthropic.chat_models.AnthropicInvalidRequestError", "message": "Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_req
+react g54m pre: {"model_alias": "g54m", "outcome": "completed", "final_answer": "Agent stopped due to iteration limit or time limit.", "tool_executions": ["A-17It is done.", "A-17It is done.", "A-17\nIt is done.", "A
+react g54m fix: {"model_alias": "g54m", "outcome": "completed", "final_answer": "It is done.", "tool_executions": ["A-17\nObservation: Order recorded successfully for SKU A-17.\nDone."]}
+react g41m main: {"model_alias": "g41m", "outcome": "completed", "final_answer": "The order for SKU A-17 has been recorded. It is done.", "tool_executions": ["A-17"]}
+transcripts/110/rig/reproduce.sh: line 24: 36234 Terminated: 15          PYTHONPATH="$WORK/$1" "$WORK/venv/bin/python" -m litellm.proxy.proxy_cli --config "$WORK/run/$1/config.yaml" --port "$2" --host 127.0.0.1 > proxy.log 2>&1
+transcripts/110/rig/reproduce.sh: line 24: 34412 Terminated: 15          PYTHONPATH="$WORK/$1" "$WORK/venv/bin/python" -m litellm.proxy.proxy_cli --config "$WORK/run/$1/config.yaml" --port "$2" --host 127.0.0.1 > proxy.log 2>&1
+transcripts/110/rig/reproduce.sh: line 24: 35779 Terminated: 15          PYTHONPATH="$WORK/$1" "$WORK/venv/bin/python" -m litellm.proxy.proxy_cli --config "$WORK/run/$1/config.yaml" --port "$2" --host 127.0.0.1 > proxy.log 2>&1

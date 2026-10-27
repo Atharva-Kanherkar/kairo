@@ -1,0 +1,7 @@
+{
+ "model_alias": "g54m",
+ "outcome": "raised",
+ "exception": "langchain_anthropic.chat_models.AnthropicInvalidRequestError",
+ "message": "Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': \"litellm.UnsupportedParamsError: openai does not support parameters: ['stop'], for model=gpt-5.4-mini. To drop these, set `litellm.drop_params=True` or for proxy:\\n\\n`litellm_settings:\\n drop_params: true`\\n. \\n If you want to use these params dynamically send allowed_openai_params=['stop'] in your request.\\n",
+ "tool_executions": []
+}

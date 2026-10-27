@@ -1,0 +1,16 @@
+HTTP/1.1 400 Bad Request
+date: Tue, 27 Oct 2026 10:08:31 GMT
+x-litellm-call-id: 8ba3bdca-3b5d-46a5-bc2e-f75f586a8f1a
+x-litellm-model-id: 94b7bf9c8fda35cbe2b2c34227c8070f28f0a7fc87f9ef2a4d8faf00ea917792
+x-litellm-version: 1.108.0
+x-litellm-response-cost: 0
+x-litellm-key-spend: 0.0
+x-litellm-timeout: 600.0
+content-length: 458
+content-type: application/json
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+
+{"type":"error","error":{"type":"invalid_request_error","message":"litellm.UnsupportedParamsError: openai does not support parameters: ['stop'], for model=gpt-5.5. To drop these, set `litellm.drop_params=True` or for proxy:\n\n`litellm_settings:\n drop_params: true`\n. \n If you want to use these params dynamically send allowed_openai_params=['stop'] in your request.\n\nLiteLLM: model group 'g55' failed with the error above. No fallback was attempted."}}

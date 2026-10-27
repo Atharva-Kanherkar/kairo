@@ -1,0 +1,28 @@
+HTTP/1.1 200 OK
+date: Tue, 27 Oct 2026 10:07:42 GMT
+content-length: 254
+content-type: application/json
+x-litellm-call-id: 7cff64cd-f7c9-488e-8ad8-19bb37b7d70c
+x-litellm-model-id: 4ca431ea950538c456adfb8ea1d88bdec1161f49cb22b639d5f40f438b49c648
+x-litellm-model-name: openai/gpt-4.1-mini
+x-litellm-version: 1.108.0
+x-litellm-response-cost: 1.7199999999999998e-05
+x-litellm-response-cost-original: 1.7199999999999998e-05
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-response-cost-input: 1.08e-05
+x-litellm-response-cost-output: 6.4e-06
+x-litellm-response-cost-tool-usage: 0.0
+x-litellm-key-spend: 1.7199999999999998e-05
+x-litellm-response-duration-ms: 1991.7151927947998
+x-litellm-overhead-duration-ms: 14.0903
+x-litellm-model-group: g41m
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+
+{"id":"chatcmpl-EdYNlop25gwHaO2twmtfEHWgVQTgj","type":"message","role":"assistant","model":"g41m","stop_sequence":null,"usage":{"input_tokens":27,"output_tokens":4},"content":[{"type":"text","text":"ALPHA "}],"stop_reason":"end_turn","stop_details":null}

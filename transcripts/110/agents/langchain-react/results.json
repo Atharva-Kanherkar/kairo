@@ -1,0 +1,144 @@
+[
+ {
+  "cell": "g41m-main-r1",
+  "model": "gpt-4.1-mini",
+  "build": "main",
+  "run": 1,
+  "outcome": "completed",
+  "llm_calls": 2,
+  "tool_executions": [
+   "A-17"
+  ],
+  "clean_single_execution": true
+ },
+ {
+  "cell": "g41m-main-r2",
+  "model": "gpt-4.1-mini",
+  "build": "main",
+  "run": 2,
+  "outcome": "completed",
+  "llm_calls": 2,
+  "tool_executions": [
+   "A-17"
+  ],
+  "clean_single_execution": true
+ },
+ {
+  "cell": "g41m-main-r3",
+  "model": "gpt-4.1-mini",
+  "build": "main",
+  "run": 3,
+  "outcome": "completed",
+  "llm_calls": 2,
+  "tool_executions": [
+   "A-17"
+  ],
+  "clean_single_execution": true
+ },
+ {
+  "cell": "g54m-fix-r1",
+  "model": "gpt-5.4-mini",
+  "build": "fix",
+  "run": 1,
+  "outcome": "completed",
+  "llm_calls": 2,
+  "tool_executions": [
+   "A-17\nObservation: Order recorded for SKU A-17\nIt is done."
+  ],
+  "clean_single_execution": false
+ },
+ {
+  "cell": "g54m-fix-r2",
+  "model": "gpt-5.4-mini",
+  "build": "fix",
+  "run": 2,
+  "outcome": "completed",
+  "llm_calls": 6,
+  "tool_executions": [
+   "A-17Done.",
+   "A-17\n"
+  ],
+  "clean_single_execution": false
+ },
+ {
+  "cell": "g54m-fix-r3",
+  "model": "gpt-5.4-mini",
+  "build": "fix",
+  "run": 3,
+  "outcome": "completed",
+  "llm_calls": 6,
+  "tool_executions": [
+   "A-17It is done.",
+   "A-17\nDone.",
+   "A-17It is done."
+  ],
+  "clean_single_execution": false
+ },
+ {
+  "cell": "g54m-main-r1",
+  "model": "gpt-5.4-mini",
+  "build": "main",
+  "run": 1,
+  "outcome": "raised",
+  "llm_calls": 1,
+  "tool_executions": [],
+  "clean_single_execution": false
+ },
+ {
+  "cell": "g54m-main-r2",
+  "model": "gpt-5.4-mini",
+  "build": "main",
+  "run": 2,
+  "outcome": "raised",
+  "llm_calls": 1,
+  "tool_executions": [],
+  "clean_single_execution": false
+ },
+ {
+  "cell": "g54m-main-r3",
+  "model": "gpt-5.4-mini",
+  "build": "main",
+  "run": 3,
+  "outcome": "raised",
+  "llm_calls": 1,
+  "tool_executions": [],
+  "clean_single_execution": false
+ },
+ {
+  "cell": "g54m-pre-r1",
+  "model": "gpt-5.4-mini",
+  "build": "pre",
+  "run": 1,
+  "outcome": "completed",
+  "llm_calls": 4,
+  "tool_executions": [
+   "A-17It is done.",
+   "A-17"
+  ],
+  "clean_single_execution": false
+ },
+ {
+  "cell": "g54m-pre-r2",
+  "model": "gpt-5.4-mini",
+  "build": "pre",
+  "run": 2,
+  "outcome": "completed",
+  "llm_calls": 2,
+  "tool_executions": [
+   "A-17Done."
+  ],
+  "clean_single_execution": false
+ },
+ {
+  "cell": "g54m-pre-r3",
+  "model": "gpt-5.4-mini",
+  "build": "pre",
+  "run": 3,
+  "outcome": "completed",
+  "llm_calls": 2,
+  "tool_executions": [
+   "A-17\nDone."
+  ],
+  "clean_single_execution": false
+ }
+]
