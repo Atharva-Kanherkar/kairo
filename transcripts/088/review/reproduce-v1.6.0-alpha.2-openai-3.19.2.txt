@@ -1,0 +1,47 @@
+
+=== Preflight ===
+  ....  agentgateway: {"version":"1.6.0-alpha.2","git_revision":"02110e2ae82e37e72fd55702bcad19921c630218","rust_version":"1.98.1","build_profile":"release","build_target":"aarch64-apple-darwin","crypto_backend":"aws-lc-rs
+openai-python 3.19.2
+
+=== Start capture upstream on :9990 ===
+  PASS  capture upstream listening
+
+=== Start agentgateway on :4003 and :4002 ===
+  PASS  agentgateway listening on both routes
+
+=== Rung 0, capture upstream serves the Anthropic tool-use stream ===
+  PASS  upstream returned 200 text/event-stream
+  PASS  upstream carries input_tokens in message_start (Anthropic documented shape)
+  PASS  upstream emits no null union tag
+
+=== Rung 1, CONTROL, same-dialect passthrough :4002 (no conversion) ===
+  PASS  openai-python accumulated the tool call and returned a completion
+  PASS  control reports the correct prompt_tokens
+
+=== Rung 2, FAILING PATH, Anthropic -> OpenAI conversion :4003 ===
+  PASS  openai-python raised AssertionError at _completions.py:407
+  PASS  the naive chunk iterator still reassembles, so the blast radius is the accumulating API
+
+=== Rung 2b, determinism, 8 runs of the failing path ===
+  PASS  8 of 8 raised
+
+=== Rung 3, CONTROL, same conversion with stream:false ===
+  PASS  the buffered conversion returns a complete, correct tool call
+
+=== Rung 4, isolate the byte with agentgateway not in the loop ===
+      variant            client.chat.completions.stream()             detail
+      --------------------------------------------------------------------------------------------------------------
+      agw_verbatim       RAISED                                       AssertionError at openai/lib/streaming/chat/_completions.py:407
+      type_omitted       OK                                           OK  prompt=10 total=15 tool=['get_weather']
+      type_repeated      OK                                           OK  prompt=10 total=15 tool=['get_weather']
+      type_null_only     OK                                           OK  prompt=10 total=15 tool=['get_weather']
+  PASS  type_omitted does not raise, so the null tag is the trigger
+  PASS  type_repeated does not raise, so the null tag is the trigger
+  PASS  type_null_only does not raise, so the null tag is the trigger
+  PASS  agentgateway's verbatim bytes do raise
+
+=== Rung 5, frozen invariant via the harness ===
+  PASS  4 of 4 harness assertions pass against the frozen bytes
+
+=== Verdict ===
+  REPRODUCED. Every rung held; the claim stands.

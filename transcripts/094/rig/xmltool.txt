@@ -1,0 +1,11 @@
+I will add them.
+<function_calls>
+<invoke>
+<tool_name>perform_addition</tool_name>
+<parameters>
+<a>2</a>
+<b>3</b>
+</parameters>
+</invoke>
+</function_calls>
+This text must never be generated.

@@ -1,0 +1,4 @@
+date 2026-09-27T15:06:26Z
+run 1: 7 tool_call deltas; opening keys ['function', 'id', 'index', 'type']; continuation key sets [('function', 'index')]; any explicit null type: False
+run 2: 7 tool_call deltas; opening keys ['function', 'id', 'index', 'type']; continuation key sets [('function', 'index')]; any explicit null type: False
+run 3: 7 tool_call deltas; opening keys ['function', 'id', 'index', 'type']; continuation key sets [('function', 'index')]; any explicit null type: False

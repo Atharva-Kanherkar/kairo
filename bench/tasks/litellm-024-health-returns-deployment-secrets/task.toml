@@ -1,0 +1,40 @@
+id = "litellm-024-health-returns-deployment-secrets"
+title = "GET /health returns deployment extra_headers and aws_session_token in plaintext"
+kind = "bug"
+env = "litellm-72a9e1c"
+category = "credential-boundary"
+difficulty = "easy"
+finding = "024"
+languages = ["python"]
+splits = ["kairo-30"]
+
+[repo]
+name = "BerriAI/litellm"
+url = "https://github.com/BerriAI/litellm"
+base_commit = "72a9e1cf37e1aa8933e3dafd7e5a45a85f923705"
+base_ref = "litellm_internal_staging on 2026-08-26"
+
+[upstream]
+issues = ["https://github.com/BerriAI/litellm/issues/36898"]
+fix = "https://github.com/BerriAI/litellm/pull/37090"
+status = "fixed"
+
+[gold]
+source = "upstream-merged"
+url = "https://github.com/BerriAI/litellm/pull/37090"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 1200
+reset_paths = ["tests"]
+fail_to_pass = [
+  "health_hides_extra_headers_values",
+  "health_hides_headers_field_values",
+  "health_hides_aws_session_token",
+]
+pass_to_pass = [
+  "health_hides_api_key",
+  "health_reports_endpoint_status",
+  "chat_still_sends_extra_headers",
+  "upstream_unit_tests_health_endpoints",
+]

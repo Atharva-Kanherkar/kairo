@@ -1,0 +1,5 @@
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 391
+
+{"created_at":1790000000,"id":"resp_086_015","model":"gpt-4o-mini","object":"response","output":[{"content":[{"annotations":[],"text":"KAIRO_086_UPSTREAM_RESPONSES seq=015 cell=responses_then_chat run=05","type":"output_text"}],"id":"msg_086_015","role":"assistant","status":"completed","type":"message"}],"status":"completed","usage":{"input_tokens":12,"output_tokens":8,"total_tokens":20}}

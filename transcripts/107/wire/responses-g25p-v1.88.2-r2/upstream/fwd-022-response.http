@@ -1,0 +1,51 @@
+HTTP/1.1 200
+X-Gemini-Service-Tier: standard
+Content-Type: application/json; charset=UTF-8
+Vary: X-Origin
+Vary: Referer
+Date: Thu, 22 Oct 2026 03:31:35 GMT
+Server: scaffolding on HTTPServer2
+X-XSS-Protection: 0
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Server-Timing: gfet4t7; dur=3639
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Accept-Ranges: none
+Vary: Origin,Accept-Encoding
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "ZEBRA-7342",
+            "thoughtSignature": "CpsFAWkUfRONn1z7qFcyXhBXW99RbI8l9NRlGmSMJUCBCHabqrVRfGZcF0aEDSuhcVlaQxplTdgJX65bLbK9EpILpgkz4lfBQ993TgWPEkm8em6+fj2G8VSwZKgyeDgDRcuq7b7XPM6nZaWieZ77+Oa3kZIV1j40sTP91iYLbAdAwAJvfLxaEZaph6Ha6OlwhoejkEygRpYz6/tBlTgAOI6u6XwD+asVjvyoRlyJ5mov0dYGtN85VRz/dULu9brIlbDzsUzI5zCRgdS7YP4dGowacYqOElOLG8m/uEIsBv1b1A7acHXcm94g4ktCcGaWUTcgtNuvaUh+fsaugR20IOGDYqewXHpLRvoBBTP/NXffQwDTUW/uUOwXWOXX5WFklpIyt6JnCpic7XdRF1CKHPRVblJtZZ+yEx4q41Ailk3kT06MVcnM37F7dhjzzPFufXgbV8KINMtsn1MnJDe9HsyYfe6v6voy6Ie6uea6xQYttcKZLDKP7SpVruo20HGXZRx6HoV2AKyVhsSaLsYHsi47Q6kI+/9XOkOTR6HAwKQduWQtvZCU4yo2VhsddrSlNRqlwQEQ/5S+dHWWdNRrSR8pXXWOrIGuy0Rm1nY8AGdOjK+Fj0EIfGu54Y9bawBhfFKCoe/bazfli6WlTz89LVXjLs+W03UefL0i/sdqF8iSj3zx7aMPSa7NBE8SpMhAVVLcOmoOeohmS6q/fvUx4l/jOpwmfaKjFudfwqR/kSThPmnZ0DoqOUffiV+mNyJJw5Lb3dJjl0ctpn8ICkO3IQMtR6OdcP2sfe+mwFKKBx2UNeZ2pBdGLiuMdDMLgj4EBalk5zIKUKUFT0SIxveW7wFAAX+GzCWxQh38dZZSLOyrxxO/x6hvm67KB1LigA=="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 348,
+    "candidatesTokenCount": 7,
+    "totalTokenCount": 513,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 90
+      },
+      {
+        "modality": "IMAGE",
+        "tokenCount": 258
+      }
+    ],
+    "thoughtsTokenCount": 158,
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-2.5-pro",
+  "responseId": "lIPZaseJCOLgrfcP0biIiQ8"
+}

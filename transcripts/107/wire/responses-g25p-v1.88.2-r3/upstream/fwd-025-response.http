@@ -1,0 +1,51 @@
+HTTP/1.1 200
+X-Gemini-Service-Tier: standard
+Content-Type: application/json; charset=UTF-8
+Vary: X-Origin
+Vary: Referer
+Date: Thu, 22 Oct 2026 03:31:57 GMT
+Server: scaffolding on HTTPServer2
+X-XSS-Protection: 0
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Server-Timing: gfet4t7; dur=3644
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Accept-Ranges: none
+Vary: Origin,Accept-Encoding
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "ZEBRA-7342",
+            "thoughtSignature": "CtkFAWkUfROlOY08oR4/5o1y5TklodorsLpzuRKQWaYyd70xikqIgRHv62R7RDnCVkx3vYuYgFWB7qMhuyLobpo15NVnfb+bumy2Kxudhx/NdtM90Mks6Nh1aCsWpsrf3quMGJmXEDQDuiI0rCuIAg802Yc/hXwcBGya8Ro8S3MRQd+kkMum3lTWdv9zmi4uanoKYr/LLEZtX1tvy5w/tF5caBS4Rdrhs+KyOIohKWnEDyJ5FNv7zfmfa76vDfdZ0rgT52CTZu+2mnl50Qm1m4C6h9i/d+GDnB6Ohsh0kgGmxTeP4UqxKKG1a0EzaQrQzaLdl4dAJ3/YKkcM3ho8Dv3b3y25xUR7rF1/Xh/6FFT+7tVDobQ/zReAc40+hN6MwKUYaDI0aKo8rICW/YDEHesB2eZumkZ3O2jOy6bTS/ZxvsEgPBpOSfvp/JmrScXRn6cQdDVDqYAtDCpZjlycm5VMAca29MHoJqZ5PaxH3slPYH7BTvFBKs/LQfD4Kj8DwerMj+mM8IB90OQr/SUy2T1w70xxIxtDjcKm3iTS5Qh1MajAbFiTirCZXEK+aF32eP9v/4OaJtVlsOxPIkkTZSvj/9jRs1gVMvh8eHMgdTcQnxlitzWk8GTu+4MDMsglvxhLdoLxgE92CAmwyNOqKOBi2DE6RpUTZqtaAtSy+Q0PNkPt5jTbpqvfKKbncT/kwYijXYsIi3inEeRRrhVHOqDL3vKUXuGvYO2DQ04iTq2Gvt8BAu8KRJ+fxuLweVlyjfmIVgV6DZlt5iEf18KT5Qwlq93j6rXeEFwl9oVNdlN+gsstGFmoMcabD5MvNa/isXdGCwGva2tktXUYzIH+1nWip2biN5q6TT/7FIGr2umAMEoeSiK3uiB7kzth2KWJmZ+vzDb7gSXm5gpV0D/vsGcLplZgKCRSAHRzcfRIrhIE094mYdF1mNG3e5bQL3lDIh4HJetCtqoR+k/+"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 348,
+    "candidatesTokenCount": 7,
+    "totalTokenCount": 538,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 90
+      },
+      {
+        "modality": "IMAGE",
+        "tokenCount": 258
+      }
+    ],
+    "thoughtsTokenCount": 183,
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-2.5-pro",
+  "responseId": "qYPZas_WKf-2vr0P0tGmsAM"
+}

@@ -1,0 +1,11 @@
+POST /v1/chat/completions HTTP/1.1
+Accept-Encoding: identity
+Content-Length: 188
+Host: localhost:18001
+User-Agent: Python-urllib/3.9
+Content-Type: application/json
+Anthropic-Version: 2023-06-01
+X-Api-Key: [REDACTED]
+Connection: close
+
+{"model": "Qwen/Qwen3-0.6B", "max_tokens": 200, "stop": ["</answer>", "\n\nHuman:"], "messages": [{"role": "user", "content": "SCRIPT:answer"}], "nvext": {"extra_fields": ["stop_reason"]}}

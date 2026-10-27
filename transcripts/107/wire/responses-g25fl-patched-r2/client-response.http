@@ -1,0 +1,34 @@
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 03:31:41 GMT
+content-length: 1566
+content-type: application/json
+x-litellm-call-id: 1a5ee023-7d2a-4866-bf86-342665d26a80
+x-litellm-model-id: f5af34c3dc48c3215abbece6fb3906a607415509eb61abe50d45bfac99efd022
+x-litellm-model-name: gemini/gemini-2.5-flash-lite
+x-litellm-model-api-base: http://127.0.0.1:4097/v1beta
+x-litellm-version: 1.106.2
+x-litellm-response-cost: 3.76e-05
+x-litellm-response-cost-original: 3.76e-05
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-response-cost-input: 3.48e-05
+x-litellm-response-cost-output: 2.8e-06
+x-litellm-response-cost-tool-usage: 0.0
+x-litellm-key-spend: 3.76e-05
+x-litellm-response-duration-ms: 1734.4110012054443
+x-litellm-overhead-duration-ms: 4.6532
+x-litellm-callback-duration-ms: 0.1538
+x-litellm-model-group: g25fl
+x-ratelimit-remaining-tokens: 249290
+x-ratelimit-limit-tokens: 250000
+x-ratelimit-remaining-requests: 13
+x-ratelimit-limit-requests: 15
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin, Accept-Encoding
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+
+{"id":"resp_1x30RhefjM8aQDhti61ZdV-PJKJJ-flFpIxXlKxBdZnMzB2AZ-qw-UHibV7LwsWVkLDar43-s_J88hY9uAWQR85P-VxQWkhLxQmr_pw_LBg9JuQM521VBFWVsoMMEXxPsfRoe9lGW9c7oqaxo9Yq7RCsZqPXPd00qZCK_q6ENYnfvGcW8Keq9aUwgDRvqAe5DCwJ1uf87xvhEbGOTT9xhxvZMADcKWvkZ39t4LNmEeTKyA9LjQJgdcjteMRz4R2nha_kv4XO_HvyojffWZjNRhM0ONraicN4-2TXov0rVQhsy0VLJ4xsw5aii9KT7geL9dd3y4jdcqv2_G00qE_ydFnc_pGFNITgHjlvmOl5M6e3_4b-nOtABWiXM2ZfzD_QVla-3MxUMwTT82tGiRQGeVwABUvneQ==","created_at":1792639902,"error":null,"incomplete_details":null,"instructions":null,"metadata":{},"model":"g25fl","object":"response","output":[{"type":"message","id":"msg_8258df8a-1d02-4547-81d3-7d125efe10c5","status":"completed","role":"assistant","content":[{"type":"output_text","text":"ZEBRA-7342","annotations":[]}],"phase":null}],"parallel_tool_calls":false,"temperature":null,"tool_choice":"auto","tools":[{"name":"read_image","parameters":{"type":"object","properties":{"path":{"type":"string"}},"required":["path"]},"strict":null,"type":"function","allowed_callers":null,"defer_loading":null,"description":"Read an image file from disk","output_schema":null}],"top_p":null,"max_output_tokens":null,"previous_response_id":null,"reasoning":null,"status":"completed","text":{},"truncation":null,"usage":{"input_tokens":348,"input_tokens_details":{"audio_tokens":null,"cached_tokens":0,"cached_tokens_details":null,"image_tokens":258,"text_tokens":90,"video_tokens":null},"output_tokens":7,"output_tokens_details":{"audio_tokens":null,"reasoning_tokens":0,"text_tokens":7},"total_tokens":355,"cost":null},"user":null,"store":false}

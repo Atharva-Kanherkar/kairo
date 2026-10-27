@@ -1,0 +1,8 @@
+POST /v1/chat/completions HTTP/1.1
+Host: localhost:62575
+Content-Type: application/json
+X-Request-Id: direct-05
+Content-Length: 352
+Connection: close
+
+{"model":"capture-model","messages":[{"role":"user","content":"Return the allowed record ID."}],"max_tokens":32,"response_format":{"type":"json_schema","json_schema":{"name":"record","strict":true,"schema":{"type":"object","properties":{"record_id":{"type":"integer","enum":[9007199254740993]}},"required":["record_id"],"additionalProperties":false}}}}

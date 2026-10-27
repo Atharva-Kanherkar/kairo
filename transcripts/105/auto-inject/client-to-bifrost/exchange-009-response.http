@@ -1,0 +1,32 @@
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Mon, 19 Oct 2026 03:19:48 GMT
+Content-Type: application/json
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID, X-Bifrost-Setup-Token
+Access-Control-Max-Age: 86400
+Vary: Origin
+X-Bifrost-Request-Id: 9b522b9c-fd7e-4551-bc36-4f3f5c16330b
+X-Request-Id: <redacted>
+X-Bifrost-Trace-Id: d1665b031acb414db7199029b44c4647
+Cf-Ray: <redacted>
+Server-Timing: cfEdge;dur=205,cfOrigin;dur=0,cfWorker;dur=2781
+X-Generation-Id: <redacted>
+X-Bifrost-Provider: openrouter
+X-Bifrost-Original-Model: anthropic/claude-haiku-4.5
+X-Bifrost-Resolved-Model: anthropic/claude-haiku-4.5
+X-Bifrost-Request-Type: chat_completion
+X-Bifrost-Routing-Info-Provider: openrouter
+X-Bifrost-Routing-Info-Model: anthropic/claude-haiku-4.5
+X-Bifrost-Routing-Info-Key: or
+X-Bifrost-Routing-Info-Requested-Provider: openrouter
+X-Bifrost-Routing-Info-Requested-Model: anthropic/claude-haiku-4.5
+X-Bifrost-Upstream-Latency-Ms: 3536.133
+
+{"id":"gen-1792379985-msfej2RmpZKgABvyOPjE","choices":[{"index":0,"finish_reason":"length","logprobs":null,"message":{"role":"assistant","content":"I'll help you create the file, read it, append to it, and"}}],"created":1792379985,"model":"anthropic/claude-haiku-4.5","object":"chat.completion","service_tier":"default","system_fingerprint":"","extra_fields":{"request_type":"chat_completion","routing_info":{"provider":"openrouter","model":"anthropic/claude-haiku-4.5","key":"or","requested_provider":"openrouter","requested_model":"anthropic/claude-haiku-4.5"},"provider":"openrouter","original_model_requested":"anthropic/claude-haiku-4.5","resolved_model_used":"anthropic/claude-haiku-4.5","latency":3536,"upstream_latency":3536,"chunk_index":0,"provider_response_headers":{"Server-Timing":"cfEdge;dur=205,cfOrigin;dur=0,cfWorker;dur=2781","X-Generation-Id":"gen-1792379985-msfej2RmpZKgABvyOPjE","Permissions-Policy":"payment=(self \"https://checkout.stripe.com\" \"https://connect-js.stripe.com\" \"https://js.stripe.com\" \"https://*.js.stripe.com\" \"https://hooks.stripe.com\")","Referrer-Policy":"no-referrer, strict-origin-when-cross-origin","X-Content-Type-Options":"nosniff","Cf-Ray":"a4cca49c0a9b836d-KIX"}},"usage":{"prompt_tokens":28014,"prompt_tokens_details":{"cached_write_tokens":27650,"cached_tokens":0,"cache_write_tokens":27650},"completion_tokens":16,"completion_tokens_details":{"image_tokens":0},"total_tokens":28030,"cost":0.0350065}}

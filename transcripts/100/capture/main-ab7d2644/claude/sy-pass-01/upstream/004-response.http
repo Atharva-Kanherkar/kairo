@@ -1,0 +1,135 @@
+HTTP/1.1 200 OK
+Date: Thu, 15 Oct 2026 03:04:40 GMT
+Content-Type: text/event-stream; charset=utf-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+Cache-Control: no-cache
+anthropic-ratelimit-input-tokens-limit: 10000000
+anthropic-ratelimit-input-tokens-remaining: 9984000
+anthropic-ratelimit-input-tokens-reset: 2026-10-15T03:04:40Z
+anthropic-ratelimit-output-tokens-limit: 2000000
+anthropic-ratelimit-output-tokens-remaining: 2000000
+anthropic-ratelimit-output-tokens-reset: 2026-10-15T03:04:40Z
+anthropic-ratelimit-requests-limit: 10000
+anthropic-ratelimit-requests-remaining: 9999
+anthropic-ratelimit-requests-reset: 2026-10-15T03:04:40Z
+anthropic-ratelimit-tokens-limit: 12000000
+anthropic-ratelimit-tokens-remaining: 11984000
+anthropic-ratelimit-tokens-reset: 2026-10-15T03:04:40Z
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+request-id: req_011Cg3HHiZEPZTrhdxq2vYUM
+traceresponse: 00-30f5edaedbfff20ec046f2bb9f989187-5aee5029b6f72713-01
+anthropic-organization-id: [REDACTED: tenant id]
+anthropic-workspace-id: [REDACTED: tenant id]
+vary: Accept-Encoding
+Server: cloudflare
+X-Robots-Tag: none
+Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
+cf-cache-status: DYNAMIC
+CF-RAY: a4ab9902dfd6c8eb-NRT
+
+event: message_start
+data: {"type":"message_start","message":{"model":"claude-sonnet-5-5","id":"msg_011Cg3HHjNLXDb65cm1mgK53","type":"message","role":"assistant","content":[],"container":null,"stop_reason":null,"stop_sequence":null,"stop_details":null,"usage":{"input_tokens":2,"cache_creation_input_tokens":836,"cache_read_input_tokens":28927,"cache_creation":{"ephemeral_5m_input_tokens":836,"ephemeral_1h_input_tokens":0},"output_tokens":8,"service_tier":"standard","inference_geo":"global"},"diagnostics":null}      }
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"thinking","thinking":"","signature":""}       }
+
+event: ping
+data: {"type": "ping"}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"thinking_delta","thinking":""}  }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"signature_delta","signature":"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"} }
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0              }
+
+event: content_block_start
+data: {"type":"content_block_start","index":1,"content_block":{"type":"text","text":""}   }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"The search retur"}               }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"ned"}  }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Rust 1.99.0"}               }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" as the latest stable release"}    }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" ("}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"per releases.rs and"}   }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Wikipedia, dated"}               }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" October 1, 2026),"}      }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" though rele"} }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"ases.rs also lists a"}             }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" 1.99.1 ent"}         }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"ry that"}          }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" I cou"}              }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"ldn't confirm has"}      }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" shipped.\n\nSources"}            }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":":\n- [Rust"}              }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":" Versions ("}              }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"releases.rs)](https"}    }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"://releases.rs/)"}          }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"\n- [Rust (program"}  }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"ming language) – Wikip"}               }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"edia](https://en.w"}   }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"ikipedia.org/w"}               }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"iki/Rust_("}        }
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"text_delta","text":"programming_language))"}             }
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":1        }
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null,"stop_details":null,"container":null},"usage":{"input_tokens":2,"cache_creation_input_tokens":836,"cache_read_input_tokens":28927,"output_tokens":479,"output_tokens_details":{"thinking_tokens":322}}              }
+
+event: message_stop
+data: {"type":"message_stop"        }
+

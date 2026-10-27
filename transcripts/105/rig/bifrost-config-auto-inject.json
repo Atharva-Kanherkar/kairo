@@ -1,0 +1,75 @@
+{
+ "$schema": "https://www.getbifrost.ai/schema",
+ "config_store": {
+  "enabled": false
+ },
+ "logs_store": {
+  "enabled": false
+ },
+ "client": {
+  "enable_logging": false,
+  "enforce_auth_on_inference": false
+ },
+ "providers": {
+  "openai": {
+   "keys": [
+    {
+     "name": "oa",
+     "value": "env.OPENAI_API_KEY",
+     "weight": 1,
+     "models": [
+      "*"
+     ]
+    }
+   ]
+  },
+  "anthropic": {
+   "keys": [
+    {
+     "name": "an",
+     "value": "env.ANTHROPIC_API_KEY",
+     "weight": 1,
+     "models": [
+      "*"
+     ]
+    }
+   ],
+   "network_config": {
+    "base_url": "http://127.0.0.1:19972"
+   },
+   "prompt_cache": {
+    "auto_inject": true
+   }
+  },
+  "gemini": {
+   "keys": [
+    {
+     "name": "gm",
+     "value": "env.GEMINI_API_KEY",
+     "weight": 1,
+     "models": [
+      "*"
+     ]
+    }
+   ]
+  },
+  "openrouter": {
+   "keys": [
+    {
+     "name": "or",
+     "value": "env.OPENROUTER_API_KEY",
+     "weight": 1,
+     "models": [
+      "*"
+     ]
+    }
+   ],
+   "network_config": {
+    "base_url": "http://127.0.0.1:19973/api"
+   },
+   "prompt_cache": {
+    "auto_inject": true
+   }
+  }
+ }
+}

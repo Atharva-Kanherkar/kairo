@@ -1,0 +1,9 @@
+POST /v1/messages HTTP/1.1
+Host: 127.0.0.1:9101
+Accept-Encoding: identity
+Content-Length: 234
+content-type: application/json
+anthropic-version: 2023-06-01
+x-api-key: [REDACTED: credential]
+
+{"model": "claude-sonnet-5-5", "max_tokens": 400, "tools": [{"name": "web_search", "description": "", "input_schema": {}}], "messages": [{"role": "user", "content": "Search the web for the latest stable Rust version. One sentence."}]}

@@ -1,0 +1,7 @@
+POST /v1/chat/completions HTTP/1.1
+Host: api.openai.com
+Content-Type: application/json
+Authorization: [REDACTED]
+Content-Length: 187
+
+{"model": "gpt-5.5", "messages": [{"role": "user", "content": "Output exactly these three words separated by single spaces and nothing else: ALPHA STOPHERE OMEGA"}], "stop": ["STOPHERE"]}

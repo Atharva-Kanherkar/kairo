@@ -1,0 +1,35 @@
+id = "gomodel-042-output-format-dropped"
+title = "Anthropic structured output (output_config / output_format) is dropped on /v1/messages"
+kind = "bug"
+env = "gomodel-abde73c"
+category = "request-field-drop"
+difficulty = "medium"
+finding = "042"
+languages = ["go"]
+splits = ["kairo-30"]
+
+[repo]
+name = "ENTERPILOT/GoModel"
+url = "https://github.com/ENTERPILOT/GoModel"
+base_commit = "abde73ca50384317d28e333954f605fa05e9e6ab"
+base_ref = "main on 2026-08-16 (0.1.77)"
+
+[upstream]
+status = "novel"
+
+[gold]
+source = "kairo-reference"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 1800
+fail_to_pass = [
+  "output_config_schema_forwarded",
+  "output_format_schema_forwarded",
+]
+pass_to_pass = [
+  "no_response_format_invented",
+  "openai_route_keeps_response_format",
+  "stop_sequences_still_forwarded",
+  "go_unit_tests_anthropicapi",
+]

@@ -1,0 +1,11 @@
+POST /v1/responses HTTP/1.1
+host: 127.0.0.1:4131
+accept: */*
+accept-encoding: gzip, deflate
+connection: keep-alive
+user-agent: litellm/1.108.0
+content-type: application/json
+authorization: [REDACTED]
+content-length: 290
+
+{"model":"gpt-5.4-mini","input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"Output exactly these three words separated by single spaces and nothing else: ALPHA STOPHERE OMEGA"}]}],"include":["reasoning.encrypted_content"],"max_output_tokens":1024,"stream":true}

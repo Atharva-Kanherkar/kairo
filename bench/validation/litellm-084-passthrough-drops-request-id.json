@@ -1,0 +1,88 @@
+{
+  "base_as_expected": "3/3",
+  "base_commit": "e7bff277a6f93ec4a26850d05ce2f6c2842c1512",
+  "env": "litellm-e7bff27",
+  "gold_as_expected": "3/3",
+  "gold_source": "upstream-open-pr",
+  "image_id": "sha256:59c696192a0df98616f53add9faf4881408a6b68c4e1a5b8d8c11c55a366df0a",
+  "kind": "bug",
+  "ok": true,
+  "problems": [],
+  "repeats": 3,
+  "task": "litellm-084-passthrough-drops-request-id",
+  "tests": {
+    "alpha_search_id_forwarded": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "passthrough_forwards_other_fields": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "passthrough_id_forwarded_on_other_endpoint": {
+      "base": [
+        "fail",
+        "fail",
+        "fail"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "passthrough_keeps_litellm_control_params_internal": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "passthrough_uses_deployment_key": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    },
+    "upstream_unit_tests_pass_through": {
+      "base": [
+        "pass",
+        "pass",
+        "pass"
+      ],
+      "gold": [
+        "pass",
+        "pass",
+        "pass"
+      ]
+    }
+  },
+  "validated_at": "2026-09-24T16:17:16+00:00"
+}

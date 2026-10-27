@@ -1,0 +1,18 @@
+server:
+  listen_addr: "127.0.0.1:59289"
+  metrics_port: -1
+  secure_serving: true
+gateway:
+  address: "http://127.0.0.1:59288"
+pipeline:
+  kv_connector: kv-shared-storage
+  ec_connector: ec-shared-storage
+  use_openai_format: true
+  steps:
+    - type: replace-media-urls
+    - type: render
+      params:
+        address: "http://127.0.0.1:59288"
+    - type: encode
+    - type: prefill
+    - type: decode

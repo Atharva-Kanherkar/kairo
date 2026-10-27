@@ -1,0 +1,6 @@
+{"outcome": "tool_executed", "executed": [{"tool": "write_file", "path": "nums.txt", "n": 200, "ok": true}], "sdk": "openai", "kill_secs": 4.0, "killed": [1, 54050], "secs": 11.96}
+{"outcome": "tool_executed", "executed": [{"tool": "write_file", "path": "nums.txt", "n": 200, "ok": true}], "sdk": "openai", "kill_secs": 4.0, "killed": [1, 54539], "secs": 11.86}
+{"outcome": "tool_executed", "executed": [{"tool": "write_file", "path": "nums.txt", "n": 200, "ok": true}], "sdk": "openai", "kill_secs": 4.0, "killed": [1, 55030], "secs": 11.86}
+{"outcome": "tool_executed", "executed": [{"tool": "write_file", "path": "nums.txt", "n": 200, "ok": true}], "sdk": "anthropic", "kill_secs": 4.0, "killed": [1, 55523], "secs": 12.34}
+{"outcome": "tool_executed", "executed": [{"tool": "write_file", "path": "nums.txt", "n": 200, "ok": true}], "sdk": "anthropic", "kill_secs": 4.0, "killed": [1, 56077], "secs": 12.32}
+{"outcome": "tool_executed", "executed": [{"tool": "write_file", "path": "nums.txt", "n": 200, "ok": true}], "sdk": "anthropic", "kill_secs": 4.0, "killed": [1, 56569], "secs": 12.41}

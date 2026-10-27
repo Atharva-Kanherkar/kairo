@@ -1,0 +1,8 @@
+POST /v1/responses HTTP/1.1
+User-Agent: fasthttp
+Host: 127.0.0.1:9940
+Content-Type: application/json
+Content-Length: 548
+Authorization: [REDACTED: credential]
+
+{"model":"gpt-5.4-mini","max_output_tokens":1024,"input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"What is the shipping status of order A-1001? Find the right tool and call it."}]}],"tools":[{"type":"tool_search","name":"tool_search_tool_bm25"},{"type":"function","name":"mcp__orders__lookup_order","description":"Look up the shipping status of a customer order by its order id.","defer_loading":true,"parameters":{"type":"object","properties":{"order_id":{"type":"string"}},"required":["order_id"]},"strict":false}]}

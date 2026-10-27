@@ -1,0 +1,42 @@
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Fri, 16 Oct 2026 06:27:22 GMT
+Content-Type: application/json
+Content-Length: 2852
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID, X-Bifrost-Setup-Token
+Access-Control-Max-Age: 86400
+Vary: Origin
+X-Bifrost-Request-Id: 9902b036-c3d3-491f-b9ff-30c76b2553f5
+X-Request-Id: [REDACTED: trace id]
+X-Bifrost-Trace-Id: 42c3560322504b04ac3a66c136dc3384
+Cf-Cache-Status: DYNAMIC
+Openai-Organization: [REDACTED: tenant id]
+Openai-Processing-Ms: [REDACTED: trace id]
+Openai-Version: 2020-10-01
+X-Ratelimit-Limit-Requests: [REDACTED: rate limit]
+X-Ratelimit-Remaining-Requests: [REDACTED: rate limit]
+X-Ratelimit-Remaining-Tokens: [REDACTED: rate limit]
+Cf-Ray: [REDACTED: trace id]
+Openai-Project: [REDACTED: tenant id]
+X-Ratelimit-Limit-Tokens: [REDACTED: rate limit]
+X-Ratelimit-Reset-Requests: [REDACTED: rate limit]
+X-Ratelimit-Reset-Tokens: [REDACTED: rate limit]
+X-Bifrost-Provider: openai
+X-Bifrost-Original-Model: gpt-5.4-mini
+X-Bifrost-Resolved-Model: gpt-5.4-mini
+X-Bifrost-Request-Type: responses
+X-Bifrost-Routing-Info-Provider: openai
+X-Bifrost-Routing-Info-Model: gpt-5.4-mini
+X-Bifrost-Routing-Info-Key: k1
+X-Bifrost-Routing-Info-Requested-Provider: openai
+X-Bifrost-Routing-Info-Requested-Model: gpt-5.4-mini
+X-Bifrost-Upstream-Latency-Ms: 1136.717
+
+{"id":"resp_02f61592dd3993d9006ad1c3c99d3887d08b30c9ec93d5ca17","object":"response","background":false,"created_at":1792132041,"completed_at":1792132042,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":null,"max_tool_calls":null,"metadata":{},"model":"gpt-5.4-mini-2026-03-17","output":[{"id":"msg_02f61592dd3993d9006ad1c3ca1c5887d08979ab55027b34d3","type":"message","status":"completed","phase":"final_answer","role":"assistant","content":[{"type":"output_text","text":"Order A-1001 is **SHIPPED-CANARY-7731**.","annotations":[],"logprobs":[]}]}],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":"24h","presence_penalty":0,"frequency_penalty":0,"reasoning":{"context":"current_turn","effort":"none","mode":"standard","summary":null},"safety_identifier":null,"service_tier":"default","status":"completed","store":true,"temperature":1,"text":{"format":{"type":"text"},"verbosity":"medium"},"top_logprobs":0,"top_p":0.98,"tool_choice":"auto","tools":[{"type":"tool_search","description":"Search for deferred tools and load them.","execution":"client","parameters":{"type":"object","properties":{"query":{"type":"string"},"max_results":{"type":"number"}},"required":["query"]}},{"type":"namespace","name":"mcp__orders__lookup_order","description":"Look up the shipping status of a customer order by its order id.","tools":[{"type":"function","name":"mcp__orders__lookup_order","description":"Look up the shipping status of a customer order by its order id.","parameters":{"type":"object","properties":{"order_id":{"type":"string"}},"required":["order_id"]},"strict":false}]}],"truncation":"disabled","usage":{"input_tokens":333,"input_tokens_details":{"cached_read_tokens":0,"cached_write_tokens":0,"cached_tokens":0,"cache_write_tokens":0},"output_tokens":22,"output_tokens_details":{"reasoning_tokens":0},"total_tokens":355},"tool_usage":{"web_search":{"num_requests":0}},"extra_fields":{"request_type":"responses","routing_info":{"provider":"openai","model":"gpt-5.4-mini","key":"k1","requested_provider":"openai","requested_model":"gpt-5.4-mini"},"provider":"openai","original_model_requested":"gpt-5.4-mini","resolved_model_used":"gpt-5.4-mini","latency":1136,"upstream_latency":1136,"chunk_index":0,"provider_response_headers":{"Cf-Cache-Status":"DYNAMIC","X-Content-Type-Options":"nosniff","Openai-Organization":"[REDACTED: tenant id]","Openai-Processing-Ms":"[REDACTED: trace id]","Openai-Version":"2020-10-01","X-Ratelimit-Limit-Requests":"[REDACTED: rate limit]","X-Ratelimit-Remaining-Requests":"[REDACTED: rate limit]","X-Ratelimit-Remaining-Tokens":"[REDACTED: rate limit]","Cf-Ray":"[REDACTED: trace id]","Openai-Project":"[REDACTED: tenant id]","X-Ratelimit-Limit-Tokens":"[REDACTED: rate limit]","X-Ratelimit-Reset-Requests":"[REDACTED: rate limit]","X-Ratelimit-Reset-Tokens":"[REDACTED: rate limit]","X-Request-Id":"[REDACTED: trace id]"}}}

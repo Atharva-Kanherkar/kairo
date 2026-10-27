@@ -1,0 +1,6 @@
+HTTP/1.1 400 Bad Request
+content-type: application/json
+content-length: 118
+date: Thu, 15 Oct 2026 03:06:10 GMT
+
+{"type":"error","error":{"type":"invalid_request_error","message":"tools.0.custom.input_schema.type: Field required"}}

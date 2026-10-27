@@ -1,0 +1,13 @@
+diff --git a/litellm/proxy/pass_through_endpoints/pass_through_endpoints.py b/litellm/proxy/pass_through_endpoints/pass_through_endpoints.py
+index c2874ac948f5..ca259da82e6f 100644
+--- a/litellm/proxy/pass_through_endpoints/pass_through_endpoints.py
++++ b/litellm/proxy/pass_through_endpoints/pass_through_endpoints.py
+@@ -580,7 +580,7 @@ def _init_kwargs_for_pass_through_endpoint(
+         _parsed_body = _parsed_body or {}
+ 
+         litellm_params_in_body: Final = {}
+-        for k in all_litellm_params:
++        for k in (param for param in all_litellm_params if param != "id"):
+             if k in _parsed_body:
+                 litellm_params_in_body[k] = _parsed_body.pop(k, None)
+ 

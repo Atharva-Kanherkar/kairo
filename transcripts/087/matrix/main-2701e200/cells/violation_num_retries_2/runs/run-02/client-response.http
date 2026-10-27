@@ -1,0 +1,18 @@
+HTTP/1.1 500 Internal Server Error
+date: Fri, 25 Sep 2026 07:38:07 GMT
+llm_provider-server: BaseHTTP/0.6 Python/3.12.13
+llm_provider-date: Fri, 25 Sep 2026 07:38:10 GMT
+llm_provider-content-type: application/json
+llm_provider-content-length: 91
+x-litellm-call-id: 7d0e1844-c127-4137-a244-97c26e3d3a92
+x-litellm-response-cost: 0
+x-litellm-key-spend: 0.0
+x-litellm-timeout: 6000.0
+content-length: 275
+content-type: application/json
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+
+{"error":{"message":"litellm.InternalServerError: InternalServerError: OpenAIException - kairo087 injected upstream error\n\nLiteLLM: model group 'kairo-model' failed with the error above. No fallback was attempted.","type":"internal_server_error","param":null,"code":"500"}}

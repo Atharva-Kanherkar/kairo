@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Run the kairo-bench CLI with uv (Python 3.11+, no third-party dependencies).
+here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec uv run --quiet --project "$here" --python ">=3.11" python -m kairo_bench "$@"

@@ -7,27 +7,35 @@
 
 use kairo::checks::{
     allowlist_bounds_served_model, anthropic_response_toolcall_stop_reason,
-    anthropic_stream_safety_stop_reason, anthropic_tool_choice_any_mapped_to_required,
-    anthropic_toolcall_stop_reason, capture_records, content_filter_preserved,
-    document_body_forwarded, executed_tool_results_preserved,
+    anthropic_server_tools_forwarded, anthropic_stop_sequence_reported,
+    anthropic_stream_block_lifecycle, anthropic_stream_safety_stop_reason,
+    anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
+    client_cache_breakpoints_reach_provider, codex_namespace_only_applies_to_namespaced_tools,
+    content_filter_preserved, document_body_forwarded, endpoint_response_family_preserved,
+    executed_tool_results_preserved, forwarded_body_preserves_values,
     gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
     id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
     invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
-    json_schema_property_forwarded, model_info_capture_identity, model_info_envelope_body,
-    model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
-    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
-    ogx_adaptive_thinking_loss, openai_stream_finish_reason, openai_toolcall_id_charset,
+    json_schema_property_forwarded, mcp_tool_executes_once, model_info_capture_identity,
+    model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
+    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
+    non_text_block_not_json_dumped, ogx_adaptive_thinking_loss, openai_stream_finish_reason,
+    openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
     outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
-    reasoning_text_order_preserved, refusal_text_preserved, response_content_not_empty,
+    reasoning_text_order_preserved, refusal_text_preserved, registration_resolvable_by_both_paths,
+    replayed_calls_keep_returned_namespace, response_content_not_empty,
     response_conversation_preserves_history, response_omits_secret,
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
     responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
-    thinking_text_forwarded, tool_strict_forwarded, toolcall_id_restored_upstream,
-    truncation_preserved, upstream_bearer_is, upstream_omits_header_value, FunctionToolFormat,
-    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    thinking_text_forwarded, tool_result_images_reach_provider, tool_strict_forwarded,
+    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
+    upstream_omits_header_value, worker_loss_stays_invisible, FunctionToolFormat, Verdict,
+    EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    REPLAYED_CALL_NAMESPACE_CHANGED, TOOL_RESULT_IMAGE_DROPPED,
 };
 use serde_json::Value;
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::PathBuf;
 
@@ -4228,6 +4236,2891 @@ fn codex_runs_the_side_effect_twice_after_a_litellm_fallback() {
     }
 }
 
+// ---- bug 086: Bifrost direct cache serves one API family's entry to the other ----
+
+const ISSUE_086_CROSS_FAMILY: [(&str, &str); 4] = [
+    ("chat_then_responses", "/v1/responses"),
+    ("responses_then_chat", "/v1/chat/completions"),
+    ("chat_stream_then_responses_stream", "/v1/responses"),
+    ("responses_stream_then_chat_stream", "/v1/chat/completions"),
+];
+
+const ISSUE_086_CONTROLS: [(&str, &str); 4] = [
+    ("control_chat_then_chat", "/v1/chat/completions"),
+    ("control_responses_then_responses", "/v1/responses"),
+    ("control_no_cache_key", "/v1/responses"),
+    ("control_typed_responses_item", "/v1/responses"),
+];
+
+fn issue_086_first_endpoint(cell: &str) -> &'static str {
+    if cell.starts_with("responses") || cell == "control_responses_then_responses" {
+        "/v1/responses"
+    } else {
+        "/v1/chat/completions"
+    }
+}
+
+#[test]
+fn bifrost_direct_cache_serves_the_other_api_family() {
+    for (cell, endpoint) in ISSUE_086_CROSS_FAMILY {
+        let second = fixture(&format!(
+            "transcripts/086/{cell}-second-client-response.http"
+        ));
+        let verdict = endpoint_response_family_preserved(endpoint, &second);
+        assert!(
+            matches!(verdict, Verdict::Violation(_)),
+            "{cell}: a cached entry from the other API family must be flagged: {verdict:?}"
+        );
+        // The first call went upstream and is well formed for its own endpoint,
+        // so the checker is not rejecting the gateway's normal output.
+        let first = fixture(&format!(
+            "transcripts/086/{cell}-first-client-response.http"
+        ));
+        assert_eq!(
+            endpoint_response_family_preserved(issue_086_first_endpoint(cell), &first),
+            Verdict::Conformant,
+            "{cell}: the uncached first response must conform"
+        );
+    }
+}
+
+#[test]
+fn bifrost_direct_cache_controls_keep_the_endpoint_family() {
+    for (cell, endpoint) in ISSUE_086_CONTROLS {
+        for phase in ["first", "second"] {
+            let capture = fixture(&format!(
+                "transcripts/086/{cell}-{phase}-client-response.http"
+            ));
+            let phase_endpoint = if phase == "first" {
+                issue_086_first_endpoint(cell)
+            } else {
+                endpoint
+            };
+            assert_eq!(
+                endpoint_response_family_preserved(phase_endpoint, &capture),
+                Verdict::Conformant,
+                "{cell} {phase} must keep its endpoint family"
+            );
+        }
+    }
+    // Vacuity guard: the same-family hit is conformant only for its own endpoint.
+    let hit = fixture("transcripts/086/control_chat_then_chat-second-client-response.http");
+    assert!(matches!(
+        endpoint_response_family_preserved("/v1/responses", &hit),
+        Verdict::Violation(_)
+    ));
+}
+
+#[test]
+fn bifrost_direct_cache_five_run_matrix_and_consumers() {
+    let summary: Value =
+        serde_json::from_str(&fixture("transcripts/086/results.json")).expect("086 summary JSON");
+    assert_eq!(summary["complete"], true);
+    assert_eq!(summary["runs"], 5);
+    assert_eq!(summary["target"]["runtime_version"], "v2.2.3");
+    assert_eq!(summary["target"]["vector_store"], "qdrant");
+    let one_call = serde_json::json!([1, 1, 1, 1, 1]);
+    let two_calls = serde_json::json!([2, 2, 2, 2, 2]);
+    for (cell, _) in ISSUE_086_CROSS_FAMILY {
+        assert_eq!(summary["cells"][cell]["second_wrong_family"], 5, "{cell}");
+        assert_eq!(
+            summary["cells"][cell]["upstream_calls_per_run"], one_call,
+            "{cell}"
+        );
+    }
+    for (cell, calls) in [
+        ("control_chat_then_chat", &one_call),
+        ("control_responses_then_responses", &one_call),
+        ("control_no_cache_key", &two_calls),
+        ("control_typed_responses_item", &two_calls),
+    ] {
+        assert_eq!(summary["cells"][cell]["second_wrong_family"], 0, "{cell}");
+        assert_eq!(
+            &summary["cells"][cell]["upstream_calls_per_run"], calls,
+            "{cell}"
+        );
+    }
+
+    let consumer = &summary["consumer"]["cells"];
+    for (cell, failure) in [
+        ("consumer_agents_after_chat", "AttributeError"),
+        ("consumer_chat_after_agents", "AttributeError"),
+        (
+            "consumer_responses_stream_after_chat_stream",
+            "RuntimeError",
+        ),
+        ("consumer_chat_stream_after_responses_stream", "ok"),
+    ] {
+        assert_eq!(consumer[cell]["final_healthy"], 0, "{cell}");
+        assert_eq!(consumer[cell]["upstream_calls_per_run"], one_call, "{cell}");
+        assert!(
+            consumer[cell]["final_outcomes"].as_array().is_some_and(
+                |outcomes| outcomes.len() == 5 && outcomes.iter().all(|o| o == failure)
+            ),
+            "{cell}: every run must end in {failure}"
+        );
+    }
+    assert_eq!(
+        consumer["consumer_control_agents_alone"]["final_healthy"],
+        5
+    );
+    assert_eq!(
+        consumer["consumer_control_agents_after_chat_no_cache_key"]["final_healthy"],
+        5
+    );
+    assert_eq!(
+        consumer["consumer_control_agents_after_chat_no_cache_key"]["upstream_calls_per_run"],
+        two_calls
+    );
+
+    // The same matrix holds on the in-process store and on current dev.
+    for (file, runtime, store) in [
+        ("v2.2.3-chromem-results.json", "v2.2.3", "chromem"),
+        ("dev-cefde78b-qdrant-results.json", "dev-cefde78b", "qdrant"),
+    ] {
+        let matrix: Value =
+            serde_json::from_str(&fixture(&format!("transcripts/086/matrix/{file}")))
+                .expect("086 matrix JSON");
+        assert_eq!(matrix["complete"], true, "{file}");
+        assert_eq!(matrix["target"]["runtime_version"], runtime, "{file}");
+        assert_eq!(matrix["target"]["vector_store"], store, "{file}");
+        for (cell, _) in ISSUE_086_CROSS_FAMILY {
+            assert_eq!(
+                matrix["cells"][cell]["second_wrong_family"], 5,
+                "{file} {cell}"
+            );
+        }
+        assert_eq!(matrix["persistence"]["runs_all_repeats_wrong"], 5, "{file}");
+    }
+}
+
+#[test]
+fn bifrost_direct_cache_entry_stays_poisoned_for_repeat_callers() {
+    let summary: Value =
+        serde_json::from_str(&fixture("transcripts/086/results.json")).expect("086 summary JSON");
+    let persistence = &summary["persistence"];
+    assert_eq!(persistence["repeats"], 3);
+    assert_eq!(persistence["runs_all_repeats_wrong"], 5);
+    assert_eq!(
+        persistence["upstream_calls_per_run"],
+        serde_json::json!([1, 1, 1, 1, 1])
+    );
+    for run in 1..=5 {
+        for repeat in 1..=3 {
+            let capture = fixture(&format!(
+                "transcripts/086/runs/persistence_chat_then_responses-{run:02}-repeat{repeat}-client-response.http"
+            ));
+            assert!(
+                matches!(
+                    endpoint_response_family_preserved("/v1/responses", &capture),
+                    Verdict::Violation(_)
+                ),
+                "run {run} repeat {repeat} must still be the poisoned entry"
+            );
+        }
+    }
+}
+
+// ---- bug 087: LiteLLM router retry re-executes an MCP tool ----
+
+fn issue_087_path(root: &str, relative: &str) -> PathBuf {
+    let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    path.push("../../");
+    path.push(root);
+    path.push(relative);
+    path
+}
+
+fn validate_issue_087_trial(
+    root: &str,
+    cell_name: &str,
+    run: &Value,
+    index: usize,
+    tools: u64,
+    upstream: u64,
+    violation: bool,
+) -> Result<(), String> {
+    let trial = format!("{:02}", index + 1);
+    if run.get("run").and_then(Value::as_str) != Some(&trial)
+        || run.get("tool_executions").and_then(Value::as_u64) != Some(tools)
+        || run.get("upstream_calls").and_then(Value::as_u64) != Some(upstream)
+    {
+        return Err(format!(
+            "{cell_name} trial {trial}: summary counts are inconsistent"
+        ));
+    }
+    let run_rel = format!("cells/{cell_name}/runs/run-{trial}");
+    let ledger = fs::read_to_string(issue_087_path(
+        root,
+        &format!("{run_rel}/tool-ledger.jsonl"),
+    ))
+    .map_err(|error| format!("{cell_name} trial {trial}: cannot read ledger: {error}"))?;
+    let verdict = mcp_tool_executes_once(&ledger);
+    if violation != matches!(verdict, Verdict::Violation(_)) {
+        return Err(format!(
+            "{cell_name} trial {trial}: exactly-once verdict is {verdict:?}"
+        ));
+    }
+    if ledger
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .count() as u64
+        != tools
+    {
+        return Err(format!("{cell_name} trial {trial}: raw ledger disagrees"));
+    }
+
+    let upstream_dir = issue_087_path(root, &format!("{run_rel}/upstream"));
+    let raw_upstream = fs::read_dir(&upstream_dir)
+        .map_err(|error| format!("cannot read {}: {error}", upstream_dir.display()))?
+        .filter_map(Result::ok)
+        .filter(|entry| entry.path().extension().and_then(|value| value.to_str()) == Some("json"))
+        .count() as u64;
+    if raw_upstream != upstream {
+        return Err(format!(
+            "{cell_name} trial {trial}: raw upstream count disagrees"
+        ));
+    }
+
+    let request = fs::read_to_string(issue_087_path(
+        root,
+        &format!("{run_rel}/client-request.http"),
+    ))
+    .map_err(|error| format!("{cell_name} trial {trial}: no client request: {error}"))?;
+    if !request.starts_with("POST /v1/chat/completions HTTP/1.1")
+        || !request.contains("\"type\":\"mcp\"")
+        || !request.contains("\"require_approval\":\"never\"")
+    {
+        return Err(format!("{cell_name} trial {trial}: public request changed"));
+    }
+    let response = fs::read_to_string(issue_087_path(
+        root,
+        &format!("{run_rel}/client-response.http"),
+    ))
+    .map_err(|error| format!("{cell_name} trial {trial}: no client response: {error}"))?;
+    let status = if cell_name == "control_fault_off" {
+        200
+    } else {
+        500
+    };
+    if !response.starts_with(&format!("HTTP/1.1 {status} "))
+        || run.get("client_status").and_then(Value::as_u64) != Some(status)
+    {
+        return Err(format!("{cell_name} trial {trial}: client status changed"));
+    }
+    Ok(())
+}
+
+fn validate_issue_087_matrix(
+    summary: &Value,
+    root: &str,
+    version: &str,
+    source_ref: &str,
+) -> Result<(), String> {
+    if summary.get("complete").and_then(Value::as_bool) != Some(true)
+        || summary
+            .get("failures")
+            .and_then(Value::as_array)
+            .is_none_or(|v| !v.is_empty())
+        || summary.get("runs").and_then(Value::as_u64) != Some(5)
+        || summary.pointer("/target/project").and_then(Value::as_str) != Some("BerriAI/litellm")
+        || summary
+            .pointer("/target/litellm_version")
+            .and_then(Value::as_str)
+            != Some(version)
+        || summary
+            .pointer("/target/source_ref")
+            .and_then(Value::as_str)
+            != Some(source_ref)
+        || summary.pointer("/target/endpoint").and_then(Value::as_str)
+            != Some("POST /v1/chat/completions")
+    {
+        return Err("matrix provenance or completion state is invalid".to_owned());
+    }
+
+    let cells = summary
+        .get("cells")
+        .and_then(Value::as_object)
+        .ok_or("matrix has no cells object")?;
+    if cells.len() != 4 {
+        return Err(format!("matrix has {} cells, expected four", cells.len()));
+    }
+
+    let expected = [
+        ("violation_default_retries", "on", None, 3_u64, 6_u64, true),
+        ("violation_num_retries_2", "on", Some(2_u64), 3, 6, true),
+        ("control_fault_off", "off", Some(2_u64), 1, 2, false),
+        ("control_num_retries_0", "on", Some(0_u64), 1, 2, false),
+    ];
+    for (cell_name, fault, retries, tools, upstream, violation) in expected {
+        let cell = cells
+            .get(cell_name)
+            .ok_or_else(|| format!("missing cell {cell_name}"))?;
+        if cell.pointer("/spec/fault").and_then(Value::as_str) != Some(fault)
+            || cell.pointer("/spec/router_retries").and_then(Value::as_u64) != retries
+            || cell.pointer("/spec/sdk_retries").and_then(Value::as_u64) != Some(0)
+        {
+            return Err(format!("{cell_name}: cell specification changed"));
+        }
+        let runs = cell
+            .get("runs")
+            .and_then(Value::as_array)
+            .ok_or_else(|| format!("{cell_name}: no runs array"))?;
+        if runs.len() != 5 {
+            return Err(format!(
+                "{cell_name}: expected five trials, got {}",
+                runs.len()
+            ));
+        }
+        for (index, run) in runs.iter().enumerate() {
+            validate_issue_087_trial(root, cell_name, run, index, tools, upstream, violation)?;
+        }
+        let tool_counts = cell
+            .get("tool_executions_per_run")
+            .and_then(Value::as_array)
+            .ok_or_else(|| format!("{cell_name}: no tool count vector"))?;
+        let upstream_counts = cell
+            .get("upstream_calls_per_run")
+            .and_then(Value::as_array)
+            .ok_or_else(|| format!("{cell_name}: no upstream count vector"))?;
+        if tool_counts
+            .iter()
+            .any(|value| value.as_u64() != Some(tools))
+            || upstream_counts
+                .iter()
+                .any(|value| value.as_u64() != Some(upstream))
+            || tool_counts.len() != 5
+            || upstream_counts.len() != 5
+        {
+            return Err(format!("{cell_name}: aggregate vectors are inconsistent"));
+        }
+    }
+    Ok(())
+}
+
+#[test]
+fn litellm_mcp_router_retries_reexecute_the_tool() {
+    for (root, version, source_ref) in [
+        ("transcripts/087", "1.102.1", "v1.102.1"),
+        (
+            "transcripts/087/matrix/main-2701e200",
+            "1.104.0",
+            "2701e2008baee4ed2c16cba7a56ea7f96d6d0981",
+        ),
+    ] {
+        let summary: Value = serde_json::from_str(
+            &fs::read_to_string(issue_087_path(root, "results.json"))
+                .unwrap_or_else(|error| panic!("{root}: cannot read results: {error}")),
+        )
+        .unwrap_or_else(|error| panic!("{root}: malformed results JSON: {error}"));
+        validate_issue_087_matrix(&summary, root, version, source_ref)
+            .unwrap_or_else(|error| panic!("{root}: {error}"));
+    }
+}
+
+#[test]
+fn issue_087_checker_rejects_vacuous_malformed_and_inconsistent_evidence() {
+    for ledger in ["", "not-json\n", "{\"seq\":1,\"entry\":\"\"}\n"] {
+        assert!(matches!(
+            mcp_tool_executes_once(ledger),
+            Verdict::Violation(_)
+        ));
+    }
+    assert_eq!(
+        mcp_tool_executes_once("{\"seq\":7,\"entry\":\"alpha\"}\n"),
+        Verdict::Conformant
+    );
+    assert!(matches!(
+        mcp_tool_executes_once(
+            "{\"seq\":7,\"entry\":\"alpha\"}\n{\"seq\":8,\"entry\":\"alpha\"}\n"
+        ),
+        Verdict::Violation(_)
+    ));
+
+    let root = "transcripts/087";
+    let mut summary: Value = serde_json::from_str(
+        &fs::read_to_string(issue_087_path(root, "results.json")).expect("087 results"),
+    )
+    .expect("087 summary JSON");
+    summary["cells"]["violation_num_retries_2"]["runs"][4]["tool_executions"] =
+        serde_json::json!(1);
+    assert!(validate_issue_087_matrix(&summary, root, "1.102.1", "v1.102.1").is_err());
+
+    let mut vacuous: Value = serde_json::from_str(
+        &fs::read_to_string(issue_087_path(root, "results.json")).expect("087 results"),
+    )
+    .expect("087 summary JSON");
+    vacuous["cells"]["control_fault_off"]["runs"] = serde_json::json!([]);
+    assert!(validate_issue_087_matrix(&vacuous, root, "1.102.1", "v1.102.1").is_err());
+}
+
+// ---- bug 088: agentgateway Anthropic->OpenAI streaming, tool_calls[].type is null ----
+//
+// The opening tool-call delta announces "type":"function". Every argument
+// continuation delta then re-sends "type":null, because the encoder leaves the
+// field None and the upstream async-openai struct has no skip_serializing_if on
+// it. openai-python treats `type` as a union tag and overwrites unconditionally,
+// so the accumulated tag becomes null and its accumulator asserts.
+
+#[test]
+fn agentgateway_openai_stream_toolcall_type_null_violates() {
+    let v = openai_stream_toolcall_type_never_null(&fixture("transcripts/088/observed.sse"));
+    assert!(
+        matches!(&v, Verdict::Violation(reason) if reason.contains("explicit null")),
+        "expected an explicit-null violation, got {v:?}"
+    );
+}
+
+#[test]
+fn openai_stream_toolcall_type_absent_is_conformant() {
+    // Same stream with the key omitted instead of nulled. An absent key is a
+    // different wire value, which is the entire difference between the two.
+    assert_eq!(
+        openai_stream_toolcall_type_never_null(&fixture("transcripts/088/expected.sse")),
+        Verdict::Conformant
+    );
+}
+
+#[test]
+fn openai_passthrough_stream_toolcall_type_is_conformant() {
+    // Real OpenAI bytes through the gateway's passthrough route: no conversion,
+    // no violation. This is the control that isolates conversion as the trigger.
+    assert_eq!(
+        openai_stream_toolcall_type_never_null(&fixture("transcripts/088/control-passthrough.sse")),
+        Verdict::Conformant
+    );
+}
+
+#[test]
+fn checker_ignores_streams_without_tool_call_deltas() {
+    // A plain text stream has no tool_calls to check, so the checker must not
+    // report a violation for the absence of the construct.
+    let text_stream = concat!(
+        "data: {\"choices\":[{\"index\":0,\"delta\":{\"content\":\"hi\"}}]}\n\n",
+        "data: {\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\n",
+        "data: [DONE]\n\n"
+    );
+    assert_eq!(
+        openai_stream_toolcall_type_never_null(text_stream),
+        Verdict::Conformant
+    );
+}
+
+/// Bug 091: agentgateway's OpenAI Chat Completions to Anthropic Messages stream
+/// translation re-opens a `tool_use` block that it already closed, when the
+/// upstream interleaves non-empty text with a tool call's argument deltas.
+///
+/// `observed.sse` is the recorded client stream from agentgateway v1.5.0. It
+/// opens index 0 as `tool_use`, closes it, opens index 1 as text, closes it,
+/// then opens index 0 as `tool_use` again. One upstream tool call becomes two
+/// client tool calls with a reused index and split arguments.
+#[test]
+fn agentgateway_reopens_tool_use_block_after_text_interleaves() {
+    let v = anthropic_stream_block_lifecycle(&fixture("transcripts/091/rig/observed.sse"));
+    assert!(
+        matches!(&v, Verdict::Violation(reason) if reason.contains("opened twice")),
+        "expected a reused-index violation against the recorded bytes, got {v:?}"
+    );
+    assert!(
+        matches!(&v, Verdict::Violation(reason) if reason.contains("split across 2 tool_use blocks")),
+        "the same stream also splits one tool call across two blocks, got {v:?}"
+    );
+}
+
+/// Control: the empty-content-delta shape fixed upstream in #2147/#2148 is
+/// conformant on the same binary and the same route. This is the discrimination
+/// between the fixed case and this defect.
+#[test]
+fn agentgateway_empty_text_delta_between_arguments_is_conformant() {
+    assert_eq!(
+        anthropic_stream_block_lifecycle(&fixture("transcripts/091/rig/control-empty-delta.sse")),
+        Verdict::Conformant
+    );
+}
+
+/// Bug 094: Dynamo's Anthropic Messages endpoint stops at a requested stop
+/// sequence but reports `stop_reason: "end_turn"` and `stop_sequence: null`,
+/// unary and streamed. Each record pairs the client response with the text the
+/// deterministic engine actually emitted before the frontend cancelled it.
+/// Every record must fail on its own, so the capture proves N of N.
+fn assert_every_094_record_violates(rel: &str) {
+    let capture = fixture(rel);
+    let lines: Vec<&str> = capture.lines().filter(|l| !l.trim().is_empty()).collect();
+    assert_eq!(
+        lines.len(),
+        8,
+        "{rel} must hold 5 unary and 3 streamed exchanges"
+    );
+    for (i, line) in lines.iter().enumerate() {
+        let v = anthropic_stop_sequence_reported(line);
+        assert!(
+            matches!(&v, Verdict::Violation(reason) if reason.contains("\"</answer>\"") && reason.contains("end_turn")),
+            "{rel} record {i}: expected the dropped </answer> stop to be caught, got {v:?}"
+        );
+    }
+}
+
+#[test]
+fn dynamo_messages_stop_sequence_not_reported_violation() {
+    assert_every_094_record_violates("transcripts/094/capture-dynamo-bug.jsonl");
+}
+
+/// The same defect on the current release, 1.5.0. Its text also ends in a
+/// partial `</answer` (a separate leak fixed upstream by #14378), which must not
+/// hide the wrong stop report.
+#[test]
+fn dynamo_release_messages_stop_sequence_not_reported_violation() {
+    assert_every_094_record_violates("transcripts/094/capture-dynamo-release-1.5.0-bug.jsonl");
+}
+
+/// Length control at the delimiter boundary: with `max_tokens` equal to the
+/// tokens before `</answer>`, the engine stops on length without emitting the
+/// delimiter and Dynamo correctly reports `max_tokens`, on both versions.
+#[test]
+fn dynamo_messages_length_stop_at_delimiter_boundary_is_conformant() {
+    assert_eq!(
+        anthropic_stop_sequence_reported(&fixture(
+            "transcripts/094/capture-dynamo-length-boundary.jsonl"
+        )),
+        Verdict::Conformant
+    );
+}
+
+/// Provider control: the live Anthropic Messages API, same request and same
+/// returned text, reports `stop_reason: "stop_sequence"` and names `</answer>`.
+#[test]
+fn anthropic_live_stop_sequence_report_is_conformant() {
+    assert_eq!(
+        anthropic_stop_sequence_reported(&fixture(
+            "transcripts/094/capture-provider-control.jsonl"
+        )),
+        Verdict::Conformant
+    );
+}
+
+/// Trigger-removed control: the same Dynamo frontend and generation with no
+/// `stop_sequences` runs to its natural end and correctly reports `end_turn`,
+/// on both versions.
+#[test]
+fn dynamo_messages_without_stop_sequences_is_conformant() {
+    assert_eq!(
+        anthropic_stop_sequence_reported(&fixture(
+            "transcripts/094/capture-dynamo-trigger-removed.jsonl"
+        )),
+        Verdict::Conformant
+    );
+}
+
+// ---- bug 095: NIXL's len==0 registration is invisible to the transfer path ----
+//
+// Recorded from ai-dynamo/nixl `main` = 464c86388d2c6373ab922d852fa245d81bfb5fb6,
+// POSIX backend on the kernel AIO queue, real file, real nixlAgent. No mocks.
+
+fn cells_095(cell: &str) -> Vec<String> {
+    (1..=10)
+        .map(|r| fixture(&format!("transcripts/095/cells/{cell}-round{r:02}.json")))
+        .collect()
+}
+
+/// The claim: a FILE_SEG registered with `len == 0` at a nonzero offset is
+/// accepted and deregisterable, but no transfer can resolve it. 10 of 10.
+#[test]
+fn nixl_len0_registration_at_nonzero_offset_is_unresolvable() {
+    let trials = cells_095("B_len0_offset4096");
+    assert_eq!(trials.len(), 10);
+    for (i, trial) in trials.iter().enumerate() {
+        let v = registration_resolvable_by_both_paths(trial);
+        assert!(
+            matches!(&v, Verdict::Violation(reason) if reason.contains("can be deregistered")),
+            "round {}: {v:?}",
+            i + 1
+        );
+    }
+}
+
+/// Control A: the same `len == 0` registration at offset 0. The wrapped add
+/// cannot wrap at zero, so the transfer resolves and the bytes are verified on
+/// disk. Offset is the only variable.
+#[test]
+fn nixl_len0_registration_at_offset_zero_resolves() {
+    for trial in cells_095("A_len0_offset0") {
+        assert_eq!(
+            registration_resolvable_by_both_paths(&trial),
+            Verdict::Conformant
+        );
+    }
+}
+
+/// Control B: the same offset with an explicit length. Length is the only
+/// variable relative to the failing cell.
+#[test]
+fn nixl_explicit_len_at_the_same_offset_resolves() {
+    for trial in cells_095("C_len4096_offset4096") {
+        assert_eq!(
+            registration_resolvable_by_both_paths(&trial),
+            Verdict::Conformant
+        );
+    }
+}
+
+/// The `covered` flag the checker relies on must be recomputable from the
+/// fixture, not taken on trust. Every recorded cell's transfer range must lie
+/// inside its registration when `covered` is true, and `reg_end` must be the
+/// unbounded form exactly when the registration was made with `len == 0`.
+#[test]
+fn nixl_recorded_cells_self_certify_their_containment() {
+    for cell in [
+        "A_len0_offset0",
+        "B_len0_offset4096",
+        "C_len4096_offset4096",
+    ] {
+        for trial in cells_095(cell) {
+            let v: Value = serde_json::from_str(&trial).expect("cell record is JSON");
+            let offset = v["offset"].as_u64().expect("offset");
+            let xfer_end = v["xfer_end"].as_u64().expect("xfer_end");
+            let reg_len = v["reg_len"].as_u64().expect("reg_len");
+            let unbounded = v["reg_end"].as_str() == Some("SIZE_MAX");
+            assert_eq!(unbounded, reg_len == 0, "{cell}: len 0 must mean unbounded");
+            let reg_end = if unbounded {
+                u64::MAX
+            } else {
+                offset + reg_len
+            };
+            assert_eq!(
+                v["covered"].as_bool(),
+                Some(offset <= xfer_end && xfer_end <= reg_end),
+                "{cell}: covered must equal the containment the addresses imply"
+            );
+        }
+    }
+}
+
+/// The asymmetry is the whole finding: the failing cell is still deregisterable.
+#[test]
+fn nixl_unresolvable_registration_is_still_deregisterable() {
+    for trial in cells_095("D_len0_offset4096_dereg_only") {
+        let v: Value = serde_json::from_str(&trial).expect("cell record is JSON");
+        assert_eq!(
+            v["register"].as_i64(),
+            Some(0),
+            "the registration was accepted"
+        );
+        assert_eq!(
+            v["deregister"].as_i64(),
+            Some(0),
+            "and it can be removed again"
+        );
+        assert_eq!(v["createXferReq"].as_i64(), Some(-4), "but never resolved");
+    }
+}
+
+/// The checker must not turn a correct refusal into a finding, and must not
+/// accept records that cannot support a conclusion.
+#[test]
+fn nixl_registration_evidence_must_be_sound() {
+    // Out of range, and never registered: both are correct refusals.
+    for cell in [
+        r#"{"register":0,"createXferReq":-4,"covered":false,"deregister":0}"#,
+        r#"{"register":-3,"createXferReq":-4,"covered":true,"deregister":-4}"#,
+    ] {
+        assert_eq!(
+            registration_resolvable_by_both_paths(cell),
+            Verdict::Conformant,
+            "{cell}"
+        );
+    }
+    // Vacuous or malformed records must not pass as evidence either way.
+    for bad in [
+        "",
+        "[]",
+        r#"{"register":0,"deregister":0}"#,
+        r#"{"register":0,"createXferReq":-4,"covered":"yes","deregister":0}"#,
+    ] {
+        assert!(
+            matches!(
+                registration_resolvable_by_both_paths(bad),
+                Verdict::Violation(_)
+            ),
+            "{bad:?} must not pass as evidence"
+        );
+    }
+}
+
+// ---- bug 097: llm-d Router coordinator rounds large schema integers ----
+//
+// The coordinator decodes the request body into map[string]any (Go's
+// encoding/json, no UseNumber) and re-marshals it for the render, prefill and
+// decode legs. Every integer above 2^53 is therefore rounded before any engine
+// sees it. The writeup pins handler line 125 at 567e35d752c8.
+
+fn issue_095_capture(relative: &str) -> String {
+    fixture(&format!("transcripts/097/capture/{relative}"))
+}
+
+#[test]
+fn llm_d_coordinator_rounds_the_schema_integer_on_every_leg() {
+    // Every leg the coordinator dispatches carries the rounded value, so the
+    // defect is in the parse, not in one step's edit.
+    for leg in ["render", "prefill", "decode"] {
+        let verdict = forwarded_body_preserves_values(
+            &issue_095_capture("large-01/client-request.http"),
+            &issue_095_capture(&format!("large-01/{leg}-request.http")),
+            &[
+                "kv_transfer_params",
+                "max_completion_tokens",
+                "max_tokens",
+                "stream",
+            ],
+        );
+        assert!(
+            matches!(&verdict, Verdict::Violation(reason) if reason.contains("client sent 9007199254740993, forwarded 9007199254740992")),
+            "{leg} leg must report the rounding, got {verdict:?}"
+        );
+    }
+}
+
+#[test]
+fn llm_d_coordinator_small_integer_control_preserves_the_value() {
+    // Same request, same route, same coordinator, identifier 42: the value
+    // survives, so the trigger is the magnitude and nothing else.
+    assert_eq!(
+        forwarded_body_preserves_values(
+            &issue_095_capture("safe-01/client-request.http"),
+            &issue_095_capture("safe-01/render-request.http"),
+            &[]
+        ),
+        Verdict::Conformant
+    );
+}
+
+#[test]
+fn llm_d_coordinator_removed_from_the_path_preserves_the_value() {
+    // The differential control: the same request sent straight to the upstream.
+    // Identical bytes arrive with the integer intact.
+    assert_eq!(
+        forwarded_body_preserves_values(
+            &issue_095_capture("large-01/client-request.http"),
+            &issue_095_capture("direct-01/direct-request.http"),
+            &[]
+        ),
+        Verdict::Conformant
+    );
+}
+
+#[test]
+fn llm_d_coordinator_prefill_leg_declares_only_its_transfer_fields() {
+    // The prefill leg adds disaggregation metadata and caps the token budget.
+    // Declared, that is conformant; undeclared, the same additions fail, so an
+    // undisclosed field change still gets caught.
+    let client = issue_095_capture("safe-02/client-request.http");
+    let prefill = issue_095_capture("safe-02/prefill-request.http");
+    let allowed = [
+        "kv_transfer_params",
+        "max_completion_tokens",
+        "max_tokens",
+        "stream",
+    ];
+    assert_eq!(
+        forwarded_body_preserves_values(&client, &prefill, &allowed),
+        Verdict::Conformant
+    );
+    assert!(matches!(
+        forwarded_body_preserves_values(&client, &prefill, &[]),
+        Verdict::Violation(reason) if reason.contains("was added")
+    ));
+}
+
+#[test]
+fn llm_d_coordinator_five_run_matrix_matches_the_recorded_capture() {
+    let summary: Value = serde_json::from_str(&issue_095_capture("results.json"))
+        .expect("095 summary must be valid JSON");
+    assert_eq!(
+        summary.get("pin").and_then(Value::as_str),
+        Some("567e35d752c841521fd7c450e8335e5dae108a7c"),
+        "the capture must be pinned to the reviewed commit"
+    );
+    let runs = summary
+        .get("results")
+        .and_then(Value::as_array)
+        .expect("results array");
+    assert_eq!(runs.len(), 15, "five runs per case across three cases");
+    let mut corrupted = 0_usize;
+    let mut clean = 0_usize;
+    for run in runs {
+        let case = run.get("case").and_then(Value::as_str).expect("case");
+        let index = run.get("run").and_then(Value::as_u64).expect("run");
+        let trial = format!("{case}-{index:02}");
+        let submitted = run.get("submitted_id").and_then(Value::as_u64);
+        let returned = run.get("returned_id").and_then(Value::as_u64);
+        let errors = run
+            .get("consumer_validation_errors")
+            .and_then(Value::as_array)
+            .expect("consumer_validation_errors");
+        match case {
+            "large" => {
+                assert_eq!(submitted, Some(9_007_199_254_740_993), "{trial}: input");
+                assert_eq!(returned, Some(9_007_199_254_740_992), "{trial}: returned");
+                assert!(
+                    errors.iter().any(|e| e
+                        .as_str()
+                        .is_some_and(|m| m.contains("is not one of [9007199254740993]"))),
+                    "{trial}: the client's own validator must reject the rounded value"
+                );
+                for leg in ["render", "prefill", "decode"] {
+                    let verdict = forwarded_body_preserves_values(
+                        &issue_095_capture(&format!("{trial}/client-request.http")),
+                        &issue_095_capture(&format!("{trial}/{leg}-request.http")),
+                        &[
+                            "kv_transfer_params",
+                            "max_completion_tokens",
+                            "max_tokens",
+                            "stream",
+                        ],
+                    );
+                    assert!(
+                        matches!(verdict, Verdict::Violation(_)),
+                        "{trial}: {leg} leg must violate, got {verdict:?}"
+                    );
+                }
+                corrupted += 1;
+            }
+            "safe" | "direct" => {
+                assert_eq!(submitted, returned, "{trial}: value must survive");
+                assert!(errors.is_empty(), "{trial}: no validation errors");
+                let legs: &[&str] = if case == "safe" {
+                    &["render", "prefill", "decode"]
+                } else {
+                    &["direct"]
+                };
+                for leg in legs {
+                    let verdict = forwarded_body_preserves_values(
+                        &issue_095_capture(&format!("{trial}/client-request.http")),
+                        &issue_095_capture(&format!("{trial}/{leg}-request.http")),
+                        &[
+                            "kv_transfer_params",
+                            "max_completion_tokens",
+                            "max_tokens",
+                            "stream",
+                        ],
+                    );
+                    assert_eq!(
+                        verdict,
+                        Verdict::Conformant,
+                        "{trial}: {leg} leg must be conformant"
+                    );
+                }
+                clean += 1;
+            }
+            other => panic!("unexpected case {other}"),
+        }
+    }
+    assert_eq!(corrupted, 5, "5/5 large runs corrupted");
+    assert_eq!(clean, 10, "5/5 safe and 5/5 direct runs preserved");
+}
+
+#[test]
+fn llm_d_coordinator_capture_is_deterministic_across_runs() {
+    // The rounding is a decode-time constant, not a race: every run forwarded
+    // the same rounded value on the same legs.
+    for run in 1..=5 {
+        for leg in ["render", "prefill", "decode"] {
+            let first = issue_095_capture(&format!("large-01/{leg}-request.http"));
+            let other = issue_095_capture(&format!("large-{run:02}/{leg}-request.http"));
+            let body = |raw: &str| raw.split_once("\r\n\r\n").unwrap().1.to_owned();
+            assert_eq!(body(&first), body(&other), "run {run} {leg} leg drifted");
+        }
+    }
+}
+
+/// Whether a `float64` can hold this integer exactly. Every integer below 2^53
+/// is exact; above it the ulp doubles at each power of two, so only multiples of
+/// the spacing survive.
+fn representable_in_f64(value: u64) -> bool {
+    if value == 0 {
+        return true;
+    }
+    let exponent = value.ilog2();
+    if exponent < 53 {
+        return true;
+    }
+    value.is_multiple_of(1_u64 << (exponent - 52))
+}
+
+#[test]
+fn llm_d_coordinator_forwarded_values_match_float64_exactly() {
+    // The trigger is the magnitude, not the value: the coordinator forwards
+    // whatever a float64 decode produces, so a value only survives when a float64
+    // can hold it. The boundary sweep pins that rule from both sides. 2^53+2
+    // survives and 2^53+1 does not, which is the signature of a float64 decode
+    // rather than a truncation or a format change.
+    //
+    // The forwarded values are compared as digit strings, not as numbers: a value
+    // above 2^63 no longer round-trips through a typed JSON number, and a typed
+    // comparison would report two rounded values as equal.
+    let sweep = fixture("transcripts/097/capture/boundary/boundary.jsonl");
+    let mut rows = 0_usize;
+    let mut rounded = 0_usize;
+    for line in sweep.lines().filter(|line| !line.trim().is_empty()) {
+        let row: Value = serde_json::from_str(line).expect("boundary row");
+        let submitted = row
+            .get("submitted")
+            .and_then(Value::as_u64)
+            .expect("submitted");
+        let rendered = line
+            .split("\"render\": ")
+            .nth(1)
+            .and_then(|rest| rest.split(',').next())
+            .expect("rendered value");
+        if representable_in_f64(submitted) {
+            assert_eq!(
+                submitted.to_string(),
+                rendered,
+                "{submitted} is representable as a float64 and must survive"
+            );
+        } else {
+            assert!(
+                submitted.to_string() != rendered,
+                "{submitted} is not representable as a float64 and must be reported as rounded"
+            );
+            rounded += 1;
+        }
+        rows += 1;
+    }
+    assert!(
+        rows >= 8,
+        "the sweep must cover both sides of 2^53, got {rows}"
+    );
+    assert!(
+        rounded >= 4,
+        "the sweep must show rounding too, got {rounded}"
+    );
+}
+
+// ---- bug 100: Switchyard plan_execute rebuilds Anthropic server tools ----
+//
+// Plan/execute prepends its planning instruction on every planning turn, which
+// drops same-format exact replay. The Anthropic codec then re-encodes the tool
+// list from the normalized request, where a server tool such as
+// `web_search_20250305` is a function with an empty schema. Anthropic rejects
+// the result, and Claude Code's WebSearch returns an API error. Captures were
+// recorded through rig/relay.py on both hops, against live Anthropic.
+
+const ISSUE_100_BUILDS: [&str; 2] = ["main-ab7d2644", "v0.3.0"];
+const ISSUE_100_REJECTION: &str = "tools.0.custom.input_schema.type: Field required";
+const ISSUE_100_WEBSEARCH: &str = "Perform a web search for the query";
+
+fn issue_100_capture(relative: &str) -> String {
+    fixture(&format!("transcripts/100/capture/{relative}"))
+}
+
+fn issue_100_status(raw_http: &str) -> u16 {
+    raw_http
+        .split(' ')
+        .nth(1)
+        .and_then(|status| status.parse().ok())
+        .expect("status line")
+}
+
+/// The single client and upstream exchange in a minimal or direct case.
+fn issue_100_exchange(case: &str, hop: &str) -> (String, String) {
+    (
+        issue_100_capture(&format!("{case}/{hop}/001-request.http")),
+        issue_100_capture(&format!("{case}/{hop}/001-response.http")),
+    )
+}
+
+/// The Claude Code WebSearch sub-request in one hop: the only request whose
+/// messages ask for a web search.
+fn issue_100_websearch(run: &str, hop: &str) -> (String, String) {
+    let mut dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    dir.push(format!(
+        "../../transcripts/100/capture/main-ab7d2644/claude/{run}/{hop}"
+    ));
+    let mut found: Vec<(String, String)> = Vec::new();
+    let mut requests: Vec<PathBuf> = fs::read_dir(&dir)
+        .unwrap_or_else(|e| panic!("read {}: {e}", dir.display()))
+        .map(|entry| entry.expect("dir entry").path())
+        .filter(|path| path.to_string_lossy().ends_with("-request.http"))
+        .collect();
+    requests.sort();
+    for request in requests {
+        let raw = fs::read_to_string(&request).expect("request");
+        if raw.contains(ISSUE_100_WEBSEARCH) {
+            let response = request
+                .to_string_lossy()
+                .replace("-request.http", "-response.http");
+            found.push((raw, fs::read_to_string(response).expect("response")));
+        }
+    }
+    assert_eq!(found.len(), 1, "{run}/{hop}: one WebSearch sub-request");
+    found.remove(0)
+}
+
+#[test]
+fn anthropic_rejects_the_tool_switchyard_forwards_and_accepts_the_original() {
+    // Rung 1 of the control ladder, no gateway: the provider runs the server
+    // tool, and rejects the custom-function shape Switchyard sends in its place.
+    for run in 1..=5 {
+        let (_, served) = issue_100_exchange(
+            &format!("main-ab7d2644/direct/server-tool-{run:02}"),
+            "upstream",
+        );
+        assert_eq!(issue_100_status(&served), 200, "server tool run {run}");
+        assert!(
+            served.contains("web_search_tool_result"),
+            "server tool run {run} must search"
+        );
+        let (_, rejected) = issue_100_exchange(
+            &format!("main-ab7d2644/direct/reencoded-tool-{run:02}"),
+            "upstream",
+        );
+        assert_eq!(
+            issue_100_status(&rejected),
+            400,
+            "re-encoded tool run {run}"
+        );
+        assert!(
+            rejected.contains(ISSUE_100_REJECTION),
+            "re-encoded tool run {run}"
+        );
+    }
+}
+
+#[test]
+fn switchyard_plan_execute_rebuilds_the_web_search_server_tool() {
+    for build in ISSUE_100_BUILDS {
+        for run in 1..=5 {
+            let case = format!("{build}/minimal/sy-plan-{run:02}");
+            let (client, client_response) = issue_100_exchange(&case, "client");
+            let (forwarded, upstream_response) = issue_100_exchange(&case, "upstream");
+            assert!(
+                matches!(
+                    anthropic_server_tools_forwarded(&client, &forwarded),
+                    Verdict::Violation(reason)
+                        if reason.contains("web_search_20250305") && reason.contains("\"input_schema\":{}")
+                ),
+                "{case}: the server tool must be reported as rebuilt"
+            );
+            assert_eq!(issue_100_status(&upstream_response), 400, "{case}");
+            assert_eq!(issue_100_status(&client_response), 400, "{case}");
+            assert!(client_response.contains(ISSUE_100_REJECTION), "{case}");
+        }
+    }
+}
+
+#[test]
+fn switchyard_passthrough_forwards_the_web_search_server_tool_unchanged() {
+    // Same server, same target, same request; only the router-added planning
+    // instruction is absent, so exact replay survives.
+    for build in ISSUE_100_BUILDS {
+        for run in 1..=5 {
+            let case = format!("{build}/minimal/sy-pass-{run:02}");
+            let (client, client_response) = issue_100_exchange(&case, "client");
+            let (forwarded, _) = issue_100_exchange(&case, "upstream");
+            assert_eq!(
+                anthropic_server_tools_forwarded(&client, &forwarded),
+                Verdict::Conformant,
+                "{case}"
+            );
+            assert_eq!(issue_100_status(&client_response), 200, "{case}");
+            assert!(client_response.contains("web_search_tool_result"), "{case}");
+        }
+    }
+}
+
+#[test]
+fn claude_code_websearch_fails_only_on_the_plan_execute_route() {
+    for run in 1..=5 {
+        let plan = format!("sy-plan-{run:02}");
+        let (client, _) = issue_100_websearch(&plan, "client");
+        let (forwarded, upstream_response) = issue_100_websearch(&plan, "upstream");
+        assert!(
+            !anthropic_server_tools_forwarded(&client, &forwarded).is_conformant(),
+            "{plan}: Claude Code's server tool must be reported as rebuilt"
+        );
+        assert_eq!(issue_100_status(&upstream_response), 400, "{plan}");
+        let stdout = issue_100_capture(&format!("main-ab7d2644/claude/{plan}/claude-stdout.json"));
+        assert!(
+            stdout.contains("input_schema.type: Field required"),
+            "{plan}: Claude Code reports the rejection"
+        );
+
+        let pass = format!("sy-pass-{run:02}");
+        let (client, _) = issue_100_websearch(&pass, "client");
+        let (forwarded, upstream_response) = issue_100_websearch(&pass, "upstream");
+        assert_eq!(
+            anthropic_server_tools_forwarded(&client, &forwarded),
+            Verdict::Conformant,
+            "{pass}"
+        );
+        assert_eq!(issue_100_status(&upstream_response), 200, "{pass}");
+        assert!(
+            upstream_response.contains("web_search_tool_result"),
+            "{pass}: search ran"
+        );
+    }
+}
+
+#[test]
+fn switchyard_server_tool_matrix_matches_the_recorded_runs() {
+    for (build, commit, claude) in [
+        (
+            "main-ab7d2644",
+            "ab7d26443899239632e97d9d9d8aedaa58c96b99",
+            true,
+        ),
+        ("v0.3.0", "336196f6fbfc97ddc71c1700f6092e564e9f23c2", false),
+    ] {
+        let results: Value =
+            serde_json::from_str(&issue_100_capture(&format!("{build}/results.json")))
+                .expect("results.json");
+        assert_eq!(results["identity"]["switchyard_commit"], commit, "{build}");
+        assert_eq!(
+            results["identity"]["switchyard_tree_clean"], true,
+            "{build}"
+        );
+        let summary = &results["summary"];
+        assert_eq!(summary["runs_per_case"], 5, "{build}");
+        for key in [
+            "direct_server_tool_ok",
+            "direct_reencoded_tool_400",
+            "plan_forwarded_custom_tool_400",
+            "pass_forwarded_server_tool_ok",
+        ] {
+            assert_eq!(summary[key], 5, "{build}: {key}");
+        }
+        if claude {
+            assert_eq!(summary["claude_plan_websearch_failed"], 5, "{build}");
+            assert_eq!(summary["claude_pass_websearch_ok"], 5, "{build}");
+        }
+    }
+}
+
+// ---- bug 101: Switchyard erases Responses host tools on a cross-format route ----
+
+use kairo::checks::{host_tool_not_silently_erased, HOST_TOOL_SILENTLY_ERASED};
+
+/// Reads a `capture-<case>.jsonl` file recorded by
+/// `transcripts/101-switchyard-responses-builtin-tools-erased/run_repro.sh` and
+/// checks every run with one checker call. The expected tool list is read from
+/// the client's own request bytes, never from a field the transcript recorded.
+fn assert_case(case: &str, conformant: bool) {
+    let capture = fixture(&format!(
+        "transcripts/101-switchyard-responses-builtin-tools-erased/capture-{case}.jsonl"
+    ));
+    let records: Vec<Value> = capture
+        .lines()
+        .map(|line| serde_json::from_str(line).expect("101 capture line is JSON"))
+        .collect();
+    assert!(!records.is_empty(), "{case} captured no runs");
+    for record in &records {
+        let status = u16::try_from(
+            record["client_status"]
+                .as_u64()
+                .expect("101 status is a number"),
+        )
+        .expect("101 status fits in u16");
+        let client = record["client_request"]
+            .as_str()
+            .expect("101 client request");
+        let forwarded = record["forwarded_raw"]
+            .as_str()
+            .expect("101 forwarded body");
+        let verdict = host_tool_not_silently_erased(status, client, forwarded);
+
+        // Host tools in this client's request, derived from the request alone.
+        let declared: Vec<String> = serde_json::from_str::<Value>(client)
+            .expect("101 client request is JSON")
+            .get("tools")
+            .and_then(Value::as_array)
+            .expect("101 client request has tools")
+            .iter()
+            .filter_map(|tool| tool.get("type").and_then(Value::as_str))
+            .filter(|kind| !matches!(*kind, "function" | "custom"))
+            .map(str::to_owned)
+            .collect();
+
+        if conformant {
+            assert!(
+                verdict.is_conformant(),
+                "{case} run {} should satisfy the invariant, got {verdict:?}",
+                record["run"]
+            );
+        } else {
+            assert_eq!(
+                verdict,
+                Verdict::Violation(format!(
+                    "{HOST_TOOL_SILENTLY_ERASED}: {declared:?} absent from the forwarded tools array"
+                )),
+                "{case} run {} should violate the invariant for {declared:?}",
+                record["run"]
+            );
+            // The frozen failure is silent: the caller is told the call succeeded.
+            assert_eq!(status, 200);
+            assert!(
+                !forwarded.contains("\"tools\"") || record["forwarded_tools"].is_null(),
+                "the forwarded body must not reintroduce the erased tool"
+            );
+        }
+    }
+}
+
+#[test]
+fn switchyard_101_erases_mcp_tool_on_cross_format_routes() {
+    assert_case("bug-mcp-chat", false);
+    assert_case("bug-mcp-anth", false);
+}
+
+#[test]
+fn switchyard_101_erases_every_responses_host_tool_it_cannot_express() {
+    for case in [
+        "bug-web-search-chat",
+        "bug-file-search-chat",
+        "bug-code-interpreter-chat",
+        "bug-computer-use-chat",
+        "bug-image-generation-chat",
+        "bug-local-shell-chat",
+        "bug-mcp-chat-stream",
+    ] {
+        assert_case(case, false);
+    }
+}
+
+#[test]
+fn switchyard_101_same_dialect_route_keeps_the_tool() {
+    // The same client request, differing only in the `model` field that
+    // selects the route, on the Responses-dialect route.
+    for case in [
+        "control-same-dialect-mcp",
+        "control-same-dialect-computer-use",
+        "control-same-dialect-image-generation",
+        "control-same-dialect-web-search",
+    ] {
+        assert_case(case, true);
+    }
+}
+
+#[test]
+fn switchyard_101_function_tools_survive_the_same_routes() {
+    // The hop itself is not lossy: only tools with no function shape disappear.
+    assert_case("control-function-chat", true);
+    assert_case("control-function-anth", true);
+}
+
+#[test]
+fn switchyard_101_a_host_tool_with_an_id_becomes_an_empty_function() {
+    // The erasure is a decode decision, not a filter on tool type: give the
+    // same tool an `id` and it survives as a function nobody can run.
+    let capture = fixture(
+        "transcripts/101-switchyard-responses-builtin-tools-erased/capture-data-mcp-with-id-chat.jsonl",
+    );
+    for line in capture.lines() {
+        let record: Value = serde_json::from_str(line).expect("101 capture line is JSON");
+        let tools = record["forwarded_tools"]
+            .as_array()
+            .expect("101 forwarded tools array");
+        assert_eq!(tools.len(), 1);
+        assert_eq!(tools[0]["function"]["name"], "codex-tool-x1");
+        assert_eq!(tools[0]["function"]["parameters"], serde_json::json!({}));
+        assert!(
+            !record["forwarded_raw"]
+                .as_str()
+                .expect("101 forwarded body")
+                .contains("example.invalid"),
+            "the MCP server URL must not survive into a function tool"
+        );
+    }
+}
+
+// ---- bug 102: Switchyard stamps an MCP namespace onto an un-namespaced tool ----
+
+#[test]
+fn switchyard_codex_namespace_hijacks_a_top_level_tool() {
+    // The request declares a top-level `search` and a namespace holding its own
+    // `search`. The backend was offered both, called the top-level one, and the
+    // returned call must not have gained a namespace.
+    for kind in ["buffered", "stream"] {
+        let capture = fixture(&format!("transcripts/102/capture-bug-{kind}.jsonl"));
+        let verdict = codex_namespace_only_applies_to_namespaced_tools(&capture, 5);
+        assert!(
+            matches!(verdict, Verdict::Violation(_)),
+            "{kind}: {verdict:?}"
+        );
+
+        let records: Vec<Value> = capture
+            .lines()
+            .map(|line| serde_json::from_str(line).expect("102 bug capture is JSON"))
+            .collect();
+        assert_eq!(records.len(), 5, "{kind}");
+        assert!(records.iter().all(|record| {
+            record["called_upstream_name"] == "search"
+                && record["call_names"] == serde_json::json!(["search"])
+                && record["call_namespaces"] == serde_json::json!(["mcp__docs__"])
+        }));
+    }
+}
+
+#[test]
+fn switchyard_codex_namespace_same_tool_set_valid_restore_is_conformant() {
+    // The pair a valid restore produces is byte-identical to the hijack:
+    // {"name": "search", "namespace": "mcp__docs__"}. Only the name the backend
+    // was recorded calling separates them, so the checker must read the
+    // forwarded record rather than the response alone. Without this case the
+    // checker would flag correct gateway behaviour.
+    for kind in ["buffered", "stream"] {
+        let capture = fixture(&format!(
+            "transcripts/102/capture-cross-qualified-{kind}.jsonl"
+        ));
+        let records: Vec<Value> = capture
+            .lines()
+            .map(|line| serde_json::from_str(line).expect("102 cross-qualified is JSON"))
+            .collect();
+        assert_eq!(records.len(), 5, "{kind}");
+        assert!(records.iter().all(|record| {
+            record["called_upstream_name"] == "mcp__docs____search"
+                && record["call_names"] == serde_json::json!(["search"])
+                && record["call_namespaces"] == serde_json::json!(["mcp__docs__"])
+        }));
+        assert_eq!(
+            codex_namespace_only_applies_to_namespaced_tools(&capture, 5),
+            Verdict::Conformant,
+            "cross-qualified {kind}"
+        );
+    }
+}
+
+#[test]
+fn switchyard_codex_namespace_trigger_removed_controls_are_conformant() {
+    // Same gateway, same route. Only the tool set changes.
+    for kind in ["buffered", "stream"] {
+        // Namespace container only: the qualified call restores correctly.
+        assert_eq!(
+            codex_namespace_only_applies_to_namespaced_tools(
+                &fixture(&format!(
+                    "transcripts/102/capture-control-qualified-{kind}.jsonl"
+                )),
+                5,
+            ),
+            Verdict::Conformant,
+            "control-qualified {kind}"
+        );
+        // Namespace container removed: nothing may come back namespaced.
+        let local = fixture(&format!(
+            "transcripts/102/capture-control-local-only-{kind}.jsonl"
+        ));
+        assert_eq!(
+            codex_namespace_only_applies_to_namespaced_tools(&local, 5),
+            Verdict::Conformant,
+            "control-local-only {kind}"
+        );
+        let records: Vec<Value> = local
+            .lines()
+            .map(|line| serde_json::from_str(line).expect("102 local control is JSON"))
+            .collect();
+        assert!(records
+            .iter()
+            .all(|record| record["called_upstream_name"] == "search"
+                && record["call_namespaces"] == serde_json::json!([])));
+    }
+}
+
+#[test]
+fn switchyard_codex_namespace_forwarded_bytes_offered_two_distinct_tools() {
+    // Proves the backend chose the top-level tool rather than the namespaced one,
+    // and that the two stayed distinct upstream with different descriptions.
+    let forwarded = fixture("transcripts/102/forwarded.jsonl");
+    let records: Vec<Value> = forwarded
+        .lines()
+        .map(|line| serde_json::from_str(line).expect("102 forwarded is JSON"))
+        .collect();
+    assert!(
+        !records.is_empty(),
+        "102 forwarded capture recorded no requests"
+    );
+    assert!(records.iter().any(|record| {
+        record["called_upstream_name"] == "search"
+            && record["tool_names_offered_upstream"]
+                == serde_json::json!(["search", "mcp__docs____search"])
+    }));
+    for record in &records {
+        let body: Value = serde_json::from_str(record["body_raw"].as_str().unwrap())
+            .expect("102 forwarded body is JSON");
+        for tool in body["tools"].as_array().expect("102 forwarded tools") {
+            let name = tool
+                .pointer("/function/name")
+                .and_then(Value::as_str)
+                .unwrap_or("");
+            let description = tool
+                .pointer("/function/description")
+                .and_then(Value::as_str)
+                .unwrap_or("");
+            match name {
+                "search" => assert_eq!(description, "LOCAL ripgrep over the working tree"),
+                "mcp__docs____search" => {
+                    assert_eq!(description, "REMOTE documentation search");
+                }
+                other => panic!("unexpected upstream tool {other:?}"),
+            }
+        }
+    }
+}
+
+#[test]
+fn switchyard_codex_namespace_checker_rejects_evidence_without_the_upstream_call() {
+    // Without the recorded upstream call name the checker cannot tell a hijack
+    // from a valid restore, so it must refuse rather than guess.
+    let capture = fixture("transcripts/102/capture-bug-buffered.jsonl");
+    let stripped: String = capture
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .map(|line| {
+            let mut record: Value = serde_json::from_str(line).expect("102 capture is JSON");
+            record
+                .as_object_mut()
+                .expect("102 record is an object")
+                .remove("called_upstream_name");
+            record.to_string()
+        })
+        .collect::<Vec<String>>()
+        .join("\n");
+    assert!(matches!(
+        codex_namespace_only_applies_to_namespaced_tools(&stripped, 5),
+        Verdict::Violation(_)
+    ));
+}
+
+#[test]
+fn switchyard_codex_namespace_hijack_is_not_confined_to_cross_format() {
+    // Same claim on a Responses -> Responses passthrough route, so the defect is
+    // not mistaken for a translation artifact between dialects.
+    let bug = fixture("transcripts/102/capture-same-format-bug.jsonl");
+    assert!(matches!(
+        codex_namespace_only_applies_to_namespaced_tools(&bug, 5),
+        Verdict::Violation(_)
+    ));
+    let records: Vec<Value> = bug
+        .lines()
+        .map(|line| serde_json::from_str(line).expect("102 same-format bug is JSON"))
+        .collect();
+    assert!(records
+        .iter()
+        .all(|record| record["called_upstream_name"] == "search"
+            && record["call_namespaces"] == serde_json::json!(["mcp__docs__"])));
+
+    // The same tool set with the qualified call is a valid restore.
+    assert_eq!(
+        codex_namespace_only_applies_to_namespaced_tools(
+            &fixture("transcripts/102/capture-same-format-cross-qualified.jsonl"),
+            5,
+        ),
+        Verdict::Conformant
+    );
+    // And with the namespace container removed, nothing comes back namespaced.
+    assert_eq!(
+        codex_namespace_only_applies_to_namespaced_tools(
+            &fixture("transcripts/102/capture-same-format-control-local-only.jsonl"),
+            5,
+        ),
+        Verdict::Conformant
+    );
+}
+
+// ---- bug 103: Bifrost drops the namespace of a call to a searched-in tool ----
+//
+// On /anthropic/v1/messages to OpenAI, Bifrost rewrites a client tool search
+// (Claude Code's ToolSearch) or Anthropic's server-side tool search into OpenAI
+// tool_search items. When OpenAI returns the model's call to the loaded tool
+// with a `namespace`, an Anthropic `tool_use` has no field for it, and Bifrost
+// rebuilds the replayed call without one, so OpenAI rejects the next turn.
+// GPT-5.4 and GPT-5.5 set the namespace on both search paths. The four GPT-6
+// models tested set it only on the server-side path, so Claude Code's client
+// search works there. Captures were recorded through rig/reproduce.py on both
+// hops, against live OpenAI.
+
+const ISSUE_103_DEV: &str = "dev-6c0f795d";
+const ISSUE_103_HEAD: &str = "capture-9bcea677";
+const ISSUE_103_GPT6: [&str; 4] = ["gpt-6.1-sol", "gpt-6-sol", "gpt-6-luna", "gpt-6-astra"];
+const ISSUE_103_TOOL: &str = "mcp__orders__lookup_order";
+const ISSUE_103_REJECTION: &str = "Missing namespace for function_call 'mcp__orders__lookup_order'";
+const ISSUE_103_CANARY: &str = "SHIPPED-CANARY-7731";
+
+fn issue_103_capture(relative: &str) -> String {
+    fixture(&format!("transcripts/103/{relative}"))
+}
+
+fn issue_103_status(raw_http: &str) -> u16 {
+    raw_http
+        .split(' ')
+        .nth(1)
+        .and_then(|status| status.parse().ok())
+        .expect("status line")
+}
+
+fn issue_103_body(raw_http: &str) -> &str {
+    raw_http
+        .split_once("\r\n\r\n")
+        .map(|(_, body)| body)
+        .expect("http body")
+}
+
+/// Every exchange on one hop of a case, in order, as (request, response).
+fn issue_103_exchanges(case: &str, hop: &str) -> Vec<(String, String)> {
+    let mut dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    dir.push(format!("../../transcripts/103/{case}/{hop}"));
+    let mut requests: Vec<PathBuf> = fs::read_dir(&dir)
+        .unwrap_or_else(|e| panic!("read {}: {e}", dir.display()))
+        .map(|entry| entry.expect("dir entry").path())
+        .filter(|path| path.to_string_lossy().ends_with("-request.http"))
+        .collect();
+    requests.sort();
+    requests
+        .into_iter()
+        .map(|request| {
+            let response = request
+                .to_string_lossy()
+                .replace("-request.http", "-response.http");
+            (
+                fs::read_to_string(&request).expect("request"),
+                fs::read_to_string(response).expect("response"),
+            )
+        })
+        .collect()
+}
+
+/// The `POST /v1/responses` requests Bifrost sent to OpenAI in one case.
+fn issue_103_forwarded(case: &str) -> Vec<(String, String)> {
+    issue_103_exchanges(case, "upstream")
+        .into_iter()
+        .filter(|(request, _)| request.starts_with("POST /v1/responses "))
+        .collect()
+}
+
+/// The first forwarded request that hands a tool result back, the provider
+/// responses before it, and the provider's answer to it.
+fn issue_103_replay(case: &str) -> (Vec<String>, String, String) {
+    let forwarded = issue_103_forwarded(case);
+    let at = forwarded
+        .iter()
+        .position(|(request, _)| request.contains("\"function_call_output\""))
+        .unwrap_or_else(|| panic!("{case}: no forwarded tool result"));
+    assert!(at > 0, "{case}: the tool result follows a provider turn");
+    let earlier = forwarded[..at]
+        .iter()
+        .map(|(_, response)| issue_103_body(response).to_string())
+        .collect();
+    let (request, response) = forwarded[at].clone();
+    (earlier, issue_103_body(&request).to_string(), response)
+}
+
+fn issue_103_judge(case: &str) -> (Verdict, String) {
+    let (earlier, request, response) = issue_103_replay(case);
+    let earlier: Vec<&str> = earlier.iter().map(String::as_str).collect();
+    (
+        replayed_calls_keep_returned_namespace(&earlier, &request),
+        response,
+    )
+}
+
+/// The namespaces OpenAI set on the model's calls to the order tool.
+fn issue_103_returned_namespaces(raw_http: &str) -> Vec<String> {
+    fn walk(value: &Value, out: &mut Vec<String>) {
+        match value {
+            Value::Array(items) => items.iter().for_each(|item| walk(item, out)),
+            Value::Object(map) => {
+                if map.get("type").and_then(Value::as_str) == Some("function_call")
+                    && map.get("name").and_then(Value::as_str) == Some(ISSUE_103_TOOL)
+                {
+                    out.push(
+                        map.get("namespace")
+                            .and_then(Value::as_str)
+                            .unwrap_or_default()
+                            .to_string(),
+                    );
+                }
+                map.values().for_each(|value| walk(value, out));
+            }
+            _ => {}
+        }
+    }
+    let body = issue_103_body(raw_http);
+    let mut out = Vec::new();
+    match serde_json::from_str::<Value>(body) {
+        Ok(value) => walk(&value, &mut out),
+        Err(_) => body
+            .lines()
+            .filter_map(|line| line.strip_prefix("data: "))
+            .filter_map(|data| serde_json::from_str::<Value>(data).ok())
+            .for_each(|value| walk(&value, &mut out)),
+    }
+    out.sort();
+    out.dedup();
+    out
+}
+
+fn issue_103_claude_result(stdout: &str) -> String {
+    stdout
+        .lines()
+        .filter_map(|line| serde_json::from_str::<Value>(line).ok())
+        .find(|event| event["type"] == "result")
+        .and_then(|event| event["result"].as_str().map(str::to_string))
+        .expect("Claude Code result event")
+}
+
+fn issue_103_ledger_lines(case: &str) -> usize {
+    issue_103_capture(&format!("{case}/ledger.jsonl"))
+        .lines()
+        .filter(|line| !line.trim().is_empty())
+        .count()
+}
+
+fn issue_103_rejected(response: &str) -> bool {
+    issue_103_status(response) == 400 && response.contains(ISSUE_103_REJECTION)
+}
+
+#[test]
+fn bifrost_103_openai_rejects_the_forwarded_replay_and_accepts_it_with_the_namespace() {
+    // Rung 1, no gateway, GPT-5.4: the exact body Bifrost forwarded, sent to
+    // OpenAI as recorded and with only `namespace` added to the replayed call.
+    for run in 1..=5 {
+        let case = format!("capture/{ISSUE_103_DEV}/direct");
+        let forwarded =
+            issue_103_capture(&format!("{case}/as-forwarded-{run:02}/001-request.http"));
+        let rejected =
+            issue_103_capture(&format!("{case}/as-forwarded-{run:02}/001-response.http"));
+        let restored = issue_103_capture(&format!(
+            "{case}/namespace-restored-{run:02}/001-request.http"
+        ));
+        let served = issue_103_capture(&format!(
+            "{case}/namespace-restored-{run:02}/001-response.http"
+        ));
+        assert!(issue_103_rejected(&rejected), "run {run}");
+        assert_eq!(issue_103_status(&served), 200, "run {run}");
+        assert!(served.contains(ISSUE_103_CANARY), "run {run}");
+
+        // The two bodies differ only by the namespace on the replayed call.
+        let mut without: Value = serde_json::from_str(issue_103_body(&restored)).expect("json");
+        for item in without["input"].as_array_mut().expect("input") {
+            if let Some(map) = item.as_object_mut() {
+                map.remove("namespace");
+            }
+        }
+        let original: Value = serde_json::from_str(issue_103_body(&forwarded)).expect("json");
+        assert_eq!(without, original, "run {run}");
+    }
+}
+
+#[test]
+fn bifrost_103_client_tool_search_replay_is_rejected_on_gpt_5() {
+    for mode in ["nonstream", "stream"] {
+        for run in 1..=5 {
+            let case = format!("capture/{ISSUE_103_DEV}/minimal/deferred-{mode}-{run:02}");
+            let forwarded = issue_103_forwarded(&case);
+            assert_eq!(forwarded.len(), 1, "{case}");
+            let (request, response) = &forwarded[0];
+            assert!(request.contains("\"tool_search_output\""), "{case}");
+            assert!(!request.contains("\"namespace\""), "{case}");
+            assert!(issue_103_rejected(response), "{case}");
+            let (_, client) = &issue_103_exchanges(&case, "client")[0];
+            assert!(issue_103_rejected(client), "{case}");
+        }
+    }
+    for run in 1..=2 {
+        let case = format!("capture/{ISSUE_103_DEV}/minimal/deferred-nonstream-gpt-5.5-{run:02}");
+        assert!(
+            issue_103_rejected(&issue_103_forwarded(&case)[0].1),
+            "{case}"
+        );
+    }
+}
+
+#[test]
+fn bifrost_103_trigger_removed_eager_tool_is_served() {
+    for mode in ["nonstream", "stream"] {
+        for run in 1..=5 {
+            let case = format!("capture/{ISSUE_103_DEV}/minimal/eager-{mode}-{run:02}");
+            let forwarded = issue_103_forwarded(&case);
+            assert_eq!(forwarded.len(), 1, "{case}");
+            let (request, response) = &forwarded[0];
+            assert!(!request.contains("tool_search"), "{case}");
+            assert_eq!(issue_103_status(response), 200, "{case}");
+            let (_, client) = &issue_103_exchanges(&case, "client")[0];
+            assert_eq!(issue_103_status(client), 200, "{case}");
+        }
+    }
+}
+
+#[test]
+fn bifrost_103_hosted_tool_search_replay_drops_the_returned_namespace() {
+    // Anthropic's server-side tool_search_tool_bm25, turn 1 generated live.
+    let mut cases: Vec<String> = (1..=5)
+        .map(|run| format!("capture/{ISSUE_103_DEV}/minimal/hosted-nonstream-{run:02}"))
+        .collect();
+    for model in ISSUE_103_GPT6 {
+        let runs = if model == "gpt-6.1-sol" { 3 } else { 2 };
+        cases.extend((1..=runs).map(|run| {
+            format!("{ISSUE_103_HEAD}/{model}/dev-9bcea677/minimal/hosted-nonstream-{run:02}")
+        }));
+    }
+    assert_eq!(cases.len(), 14);
+    for case in &cases {
+        let forwarded = issue_103_forwarded(case);
+        assert_eq!(forwarded.len(), 2, "{case}");
+        // OpenAI put the searched-in tool in a namespace of its own name.
+        assert_eq!(
+            issue_103_returned_namespaces(&forwarded[0].1),
+            vec![ISSUE_103_TOOL.to_string()],
+            "{case}"
+        );
+        let (verdict, response) = issue_103_judge(case);
+        assert!(
+            matches!(&verdict, Verdict::Violation(reason) if reason.starts_with(REPLAYED_CALL_NAMESPACE_CHANGED)),
+            "{case}: {verdict:?}"
+        );
+        assert!(issue_103_rejected(&response), "{case}");
+    }
+}
+
+#[test]
+fn bifrost_103_responses_route_forwards_the_namespace_the_client_sends() {
+    // Rung 2: a Responses-dialect client can carry `namespace`, and the same
+    // build forwards it. Without it GPT-5.4 answers with the same 400.
+    for run in 1..=5 {
+        let kept = format!("capture/{ISSUE_103_DEV}/responses/with-namespace-{run:02}");
+        let (request, response) = &issue_103_forwarded(&kept)[0];
+        assert!(request.contains("\"namespace\""), "{kept}");
+        assert_eq!(issue_103_status(response), 200, "{kept}");
+        assert!(response.contains(ISSUE_103_CANARY), "{kept}");
+
+        let bare = format!("capture/{ISSUE_103_DEV}/responses/without-namespace-{run:02}");
+        let (request, response) = &issue_103_forwarded(&bare)[0];
+        assert!(!request.contains("\"namespace\""), "{bare}");
+        assert!(issue_103_rejected(response), "{bare}");
+    }
+}
+
+#[test]
+fn bifrost_103_claude_code_halts_on_gpt_5_after_running_the_searched_in_tool() {
+    for run in 1..=5 {
+        let case = format!("capture/{ISSUE_103_DEV}/claude/tool-search-on-{run:02}");
+        let result =
+            issue_103_claude_result(&issue_103_capture(&format!("{case}/claude-stdout.jsonl")));
+        assert!(result.starts_with("API Error: 400"), "{case}: {result}");
+        assert!(result.contains(ISSUE_103_REJECTION), "{case}");
+        // The MCP tool ran once before the session failed.
+        assert_eq!(issue_103_ledger_lines(&case), 1, "{case}");
+
+        let (verdict, response) = issue_103_judge(&case);
+        assert!(
+            matches!(&verdict, Verdict::Violation(reason) if reason.starts_with(REPLAYED_CALL_NAMESPACE_CHANGED)),
+            "{case}: {verdict:?}"
+        );
+        assert!(issue_103_rejected(&response), "{case}");
+
+        // Resuming the session replays the same history and fails the same way,
+        // without running the tool again.
+        let resumed = issue_103_claude_result(&issue_103_capture(&format!(
+            "{case}/continue/claude-stdout.jsonl"
+        )));
+        assert!(resumed.contains(ISSUE_103_REJECTION), "{case}");
+        let continued = issue_103_forwarded(&format!("{case}/continue"));
+        assert!(!continued.is_empty(), "{case}");
+        assert!(continued
+            .iter()
+            .all(|(_, response)| issue_103_rejected(response)));
+        assert_eq!(issue_103_ledger_lines(&case), 1, "{case}");
+    }
+}
+
+#[test]
+fn bifrost_103_claude_code_without_tool_search_answers() {
+    for run in 1..=5 {
+        let case = format!("capture/{ISSUE_103_DEV}/claude/tool-search-off-{run:02}");
+        let result =
+            issue_103_claude_result(&issue_103_capture(&format!("{case}/claude-stdout.jsonl")));
+        assert!(result.contains(ISSUE_103_CANARY), "{case}: {result}");
+        assert_eq!(issue_103_ledger_lines(&case), 1, "{case}");
+        for (request, response) in issue_103_forwarded(&case) {
+            assert_eq!(issue_103_status(&response), 200, "{case}");
+            assert!(!request.contains("\"tool_search\""), "{case}");
+        }
+    }
+}
+
+#[test]
+fn bifrost_103_claude_code_completes_on_gpt_6_where_no_namespace_is_returned() {
+    // Model scope: gpt-6.1-sol returns the call to a tool loaded by client
+    // search with no namespace, so Bifrost's namespace-less replay is a correct
+    // round trip, and Claude Code answers.
+    for run in 1..=3 {
+        let case =
+            format!("{ISSUE_103_HEAD}/gpt-6.1-sol/dev-9bcea677/claude/tool-search-on-{run:02}");
+        let result =
+            issue_103_claude_result(&issue_103_capture(&format!("{case}/claude-stdout.jsonl")));
+        assert!(result.contains(ISSUE_103_CANARY), "{case}: {result}");
+        // The rig resumes every tool-search session once; on GPT-6 the resumed
+        // session is served too and looks the order up again.
+        let resumed = issue_103_claude_result(&issue_103_capture(&format!(
+            "{case}/continue/claude-stdout.jsonl"
+        )));
+        assert!(!resumed.contains(ISSUE_103_REJECTION), "{case}: {resumed}");
+        assert!(issue_103_forwarded(&format!("{case}/continue"))
+            .iter()
+            .all(|(_, response)| issue_103_status(response) == 200));
+        assert_eq!(issue_103_ledger_lines(&case), 2, "{case}");
+        let forwarded = issue_103_forwarded(&case);
+        assert!(forwarded
+            .iter()
+            .any(|(request, _)| request.contains("\"tool_search_output\"")));
+        let returned: Vec<String> = forwarded
+            .iter()
+            .flat_map(|(_, response)| issue_103_returned_namespaces(response))
+            .collect();
+        assert_eq!(returned, vec![String::new()], "{case}");
+        let (verdict, response) = issue_103_judge(&case);
+        assert_eq!(verdict, Verdict::Conformant, "{case}");
+        assert_eq!(issue_103_status(&response), 200, "{case}");
+        assert!(forwarded
+            .iter()
+            .all(|(_, response)| issue_103_status(response) == 200));
+    }
+}
+
+#[test]
+fn bifrost_103_client_tool_search_replay_is_served_on_gpt_6() {
+    let mut cases = Vec::new();
+    for mode in ["nonstream", "stream"] {
+        cases.extend((1..=3).map(|run| {
+            format!("{ISSUE_103_HEAD}/gpt-6.1-sol/dev-9bcea677/minimal/deferred-{mode}-{run:02}")
+        }));
+        for model in &ISSUE_103_GPT6[1..] {
+            cases.extend((1..=2).map(|run| {
+                format!("{ISSUE_103_HEAD}/{model}/dev-9bcea677/minimal/deferred-{mode}-{run:02}")
+            }));
+        }
+    }
+    for model in &ISSUE_103_GPT6[1..] {
+        cases.extend((1..=2).map(|run| {
+            format!("{ISSUE_103_HEAD}/gpt-6.1-sol/dev-9bcea677/minimal/deferred-nonstream-{model}-{run:02}")
+        }));
+    }
+    assert_eq!(cases.len(), 24);
+    for case in &cases {
+        let forwarded = issue_103_forwarded(case);
+        assert_eq!(forwarded.len(), 1, "{case}");
+        let (request, response) = &forwarded[0];
+        assert!(request.contains("\"tool_search_output\""), "{case}");
+        assert!(!request.contains("\"namespace\""), "{case}");
+        assert_eq!(issue_103_status(response), 200, "{case}");
+    }
+    // The same build still fails on GPT-5.4, so the difference is the model.
+    for mode in ["nonstream", "stream"] {
+        for run in 1..=2 {
+            let case = format!(
+                "{ISSUE_103_HEAD}/gpt-5.4-mini/dev-9bcea677/minimal/deferred-{mode}-{run:02}"
+            );
+            assert!(
+                issue_103_rejected(&issue_103_forwarded(&case)[0].1),
+                "{case}"
+            );
+        }
+    }
+}
+
+#[test]
+fn bifrost_103_release_v2_3_0_fails_earlier_for_a_fixed_reason() {
+    // On the latest release the deferred request never gets a tool_search
+    // (bifrost#8361, fixed on dev by #8503), so it fails on the first turn and
+    // the namespace question never comes up.
+    for mode in ["nonstream", "stream"] {
+        for run in 1..=5 {
+            let case = format!("capture/v2.3.0/minimal/deferred-{mode}-{run:02}");
+            let (request, response) = &issue_103_forwarded(&case)[0];
+            assert!(!request.contains("\"tool_search\""), "{case}");
+            assert!(
+                response.contains("Deferred tools require tools.tool_search"),
+                "{case}"
+            );
+            assert!(!response.contains(ISSUE_103_REJECTION), "{case}");
+            let eager = format!("capture/v2.3.0/minimal/eager-{mode}-{run:02}");
+            assert_eq!(issue_103_status(&issue_103_forwarded(&eager)[0].1), 200);
+        }
+    }
+}
+
+fn issue_103_rows(results: &str) -> Vec<Value> {
+    serde_json::from_str(&issue_103_capture(results)).expect("results.json")
+}
+
+fn issue_103_count(
+    rows: &[Value],
+    prefix: &str,
+    predicate: &dyn Fn(&Value) -> bool,
+) -> (usize, usize) {
+    let matching: Vec<&Value> = rows
+        .iter()
+        .filter(|row| {
+            row["case"]
+                .as_str()
+                .is_some_and(|case| case.starts_with(prefix))
+        })
+        .collect();
+    (
+        matching.iter().filter(|row| predicate(row)).count(),
+        matching.len(),
+    )
+}
+
+fn issue_103_row_rejected(row: &Value) -> bool {
+    row["namespace_rejection"] == true && row["client_status"] == 400
+}
+
+fn issue_103_row_answered(row: &Value) -> bool {
+    row["exit_code"] == 0 && row["canary_answer"] == true && row["tool_executions"] == 1
+}
+
+#[test]
+fn bifrost_103_matrix_matches_the_recorded_runs() {
+    let served = |row: &Value| row["canary_answer"] == true && row["client_status"] == 200;
+    let rows = issue_103_rows("capture/results.json");
+    let dev = |rest: &str| format!("{ISSUE_103_DEV}/{rest}");
+    for (prefix, expected) in [
+        (dev("minimal/deferred-nonstream-0"), (5, 5)),
+        (dev("minimal/deferred-stream-0"), (5, 5)),
+        (dev("minimal/hosted-nonstream-0"), (5, 5)),
+        (dev("minimal/deferred-nonstream-gpt-5.5-0"), (2, 2)),
+        (dev("responses/without-namespace-0"), (5, 5)),
+        (dev("direct/as-forwarded-0"), (5, 5)),
+    ] {
+        assert_eq!(
+            issue_103_count(&rows, &prefix, &issue_103_row_rejected),
+            expected,
+            "{prefix}"
+        );
+    }
+    for prefix in [
+        dev("minimal/eager-nonstream-0"),
+        dev("minimal/eager-stream-0"),
+        dev("responses/with-namespace-0"),
+        dev("direct/namespace-restored-0"),
+    ] {
+        assert_eq!(issue_103_count(&rows, &prefix, &served), (5, 5), "{prefix}");
+    }
+    let halted = |row: &Value| {
+        row["exit_code"] == 1
+            && row["namespace_rejection"] == true
+            && row["tool_executions"] == 1
+            && row["continue_namespace_rejection"] == true
+            && row["tool_executions_after_continue"] == 1
+    };
+    assert_eq!(
+        issue_103_count(&rows, &dev("claude/tool-search-on-"), &halted),
+        (5, 5)
+    );
+    assert_eq!(
+        issue_103_count(
+            &rows,
+            &dev("claude/tool-search-off-"),
+            &issue_103_row_answered
+        ),
+        (5, 5)
+    );
+}
+
+#[test]
+fn bifrost_103_gpt_6_matrix_matches_the_recorded_runs() {
+    let ok = |row: &Value| row["namespace_rejection"] == false && row["client_status"] == 200;
+    let head = "dev-9bcea677";
+    let sol = issue_103_rows(&format!("{ISSUE_103_HEAD}/gpt-6.1-sol/results.json"));
+    for prefix in ["minimal/deferred-nonstream-0", "minimal/deferred-stream-0"] {
+        assert_eq!(
+            issue_103_count(&sol, &format!("{head}/{prefix}"), &ok),
+            (3, 3),
+            "{prefix}"
+        );
+    }
+    assert_eq!(
+        issue_103_count(
+            &sol,
+            &format!("{head}/minimal/hosted-nonstream-0"),
+            &issue_103_row_rejected
+        ),
+        (3, 3)
+    );
+    for session in ["tool-search-on-", "tool-search-off-"] {
+        assert_eq!(
+            issue_103_count(
+                &sol,
+                &format!("{head}/claude/{session}"),
+                &issue_103_row_answered
+            ),
+            (3, 3),
+            "{session}"
+        );
+    }
+    for model in &ISSUE_103_GPT6[1..] {
+        let other = issue_103_rows(&format!("{ISSUE_103_HEAD}/{model}/results.json"));
+        for prefix in ["minimal/deferred-nonstream-0", "minimal/deferred-stream-0"] {
+            assert_eq!(
+                issue_103_count(&other, &format!("{head}/{prefix}"), &ok),
+                (2, 2),
+                "{model}"
+            );
+        }
+        assert_eq!(
+            issue_103_count(
+                &other,
+                &format!("{head}/minimal/hosted-nonstream-0"),
+                &issue_103_row_rejected
+            ),
+            (2, 2),
+            "{model}"
+        );
+    }
+    let control = issue_103_rows(&format!("{ISSUE_103_HEAD}/gpt-5.4-mini/results.json"));
+    for prefix in [
+        "minimal/deferred-nonstream-0",
+        "minimal/deferred-stream-0",
+        "minimal/hosted-nonstream-0",
+    ] {
+        assert_eq!(
+            issue_103_count(
+                &control,
+                &format!("{head}/{prefix}"),
+                &issue_103_row_rejected
+            ),
+            (2, 2),
+            "{prefix}"
+        );
+    }
+}
+
+// ---- bug 105: Bifrost drops message-level cache_control from Chat Completions ----
+//
+// opencode, through the `@ai-sdk/openai-compatible` provider Bifrost documents and
+// `bifrost run opencode` generates, marks its system and latest user messages with
+// `cache_control` on the message itself. Bifrost's ChatMessage has no such field,
+// so the marker is lost before any provider sees it: Anthropic and OpenRouter get
+// no breakpoint and never cache. The same markers on content blocks survive.
+// Captured with transcripts/105/rig (relays on every hop), Bifrost v2.3.0.
+
+fn issue_105_body(raw_http: &str) -> Value {
+    let body = raw_http
+        .split_once("\r\n\r\n")
+        .map(|(_, body)| body)
+        .expect("http body");
+    serde_json::from_str(body).expect("json body")
+}
+
+fn issue_105_raw(relative: &str) -> String {
+    fixture(&format!("transcripts/105/{relative}"))
+}
+
+/// The last `usage` object a buffered or streamed Chat Completions response carried.
+fn issue_105_usage(raw_http: &str) -> Value {
+    let body = raw_http
+        .split_once("\r\n\r\n")
+        .map(|(_, body)| body)
+        .expect("http body");
+    body.lines()
+        .filter_map(|line| line.strip_prefix("data: "))
+        .filter_map(|data| serde_json::from_str::<Value>(data).ok())
+        .filter_map(|frame| frame.get("usage").filter(|u| u.is_object()).cloned())
+        .next_back()
+        .unwrap_or_else(|| panic!("no usage in response"))
+}
+
+fn issue_105_cached_tokens(raw_http: &str) -> u64 {
+    issue_105_usage(raw_http)["prompt_tokens_details"]["cached_tokens"]
+        .as_u64()
+        .unwrap_or(0)
+}
+
+fn issue_105_rows() -> Vec<Value> {
+    serde_json::from_str::<Value>(&issue_105_raw("wire/results.json"))
+        .expect("results.json")
+        .as_array()
+        .expect("rows")
+        .clone()
+}
+
+fn issue_105_exchange(row: &Value, hop: &str) -> String {
+    let name = row["exchanges"][hop][0].as_str().expect("exchange name");
+    name.to_string()
+}
+
+#[test]
+fn bug105_message_level_cache_control_never_reaches_the_provider() {
+    let mut counts: BTreeMap<(String, bool), usize> = BTreeMap::new();
+    for row in issue_105_rows() {
+        let case = row["case"].as_str().expect("case");
+        let hop = if case.starts_with("anthropic-") {
+            "bifrost-to-anthropic"
+        } else if case.starts_with("openrouter-") {
+            "bifrost-to-openrouter"
+        } else {
+            continue;
+        };
+        let request = issue_105_exchange(&row, "client-to-bifrost");
+        let client = issue_105_raw(&format!("wire/client-to-bifrost/{request}"));
+        let forwarded_name = issue_105_exchange(&row, hop);
+        let forwarded = issue_105_raw(&format!("wire/{hop}/{forwarded_name}"));
+        let client_json = issue_105_body(&client);
+        let forwarded_json = issue_105_body(&forwarded);
+        let message_level = client_json["messages"]
+            .as_array()
+            .expect("messages")
+            .iter()
+            .any(|m| m.get("cache_control").is_some());
+        assert_eq!(
+            message_level,
+            case.contains("message-level"),
+            "{case} {request}"
+        );
+        let verdict = client_cache_breakpoints_reach_provider(
+            &client_json.to_string(),
+            &forwarded_json.to_string(),
+        );
+        if message_level {
+            assert!(
+                matches!(&verdict, Verdict::Violation(reason) if reason.contains("forwarded body carries 0")),
+                "{case} {forwarded_name}: {verdict:?}"
+            );
+        } else {
+            assert_eq!(verdict, Verdict::Conformant, "{case} {forwarded_name}");
+        }
+        *counts
+            .entry((case.to_string(), verdict.is_conformant()))
+            .or_default() += 1;
+    }
+    for (case, conformant) in [
+        ("anthropic-message-level", false),
+        ("openrouter-message-level", false),
+        ("anthropic-block-level-control", true),
+        ("openrouter-block-level-control", true),
+    ] {
+        assert_eq!(
+            counts.get(&(case.to_string(), conformant)),
+            Some(&10),
+            "{case}"
+        );
+    }
+}
+
+#[test]
+fn bug105_dropped_breakpoints_bill_every_turn_uncached() {
+    // Each trial sent the same turn twice with a fresh nonce; the second call can
+    // only read a cache the first one wrote.
+    let mut seen: BTreeMap<String, Vec<u64>> = BTreeMap::new();
+    for row in issue_105_rows() {
+        if row["call"].as_u64() != Some(2) {
+            continue;
+        }
+        let case = row["case"].as_str().expect("case").to_string();
+        let hop = match case.as_str() {
+            "openrouter-message-level" | "openrouter-block-level-control" => {
+                "bifrost-to-openrouter"
+            }
+            "direct-openrouter-message-level-control" => "client-to-openrouter-direct",
+            _ => continue,
+        };
+        let name = issue_105_exchange(&row, hop).replace("-request.http", "-response.http");
+        let response = issue_105_raw(&format!("wire/{hop}/{name}"));
+        assert!(response.starts_with("HTTP/1.1 200"), "{case} {name}");
+        seen.entry(case)
+            .or_default()
+            .push(issue_105_cached_tokens(&response));
+    }
+    assert_eq!(seen["openrouter-message-level"], vec![0; 5]);
+    for control in [
+        "openrouter-block-level-control",
+        "direct-openrouter-message-level-control",
+    ] {
+        let cached = &seen[control];
+        assert_eq!(cached.len(), 5, "{control}");
+        assert!(
+            cached.iter().all(|&tokens| tokens > 20_000),
+            "{control}: {cached:?}"
+        );
+    }
+}
+
+#[test]
+fn bug105_opencode_sessions_through_bifrost_never_cache() {
+    let dir = |hop: &str| {
+        let mut path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        path.push(format!("../../transcripts/105/opencode/capture/{hop}"));
+        let mut requests: Vec<String> = fs::read_dir(&path)
+            .unwrap_or_else(|e| panic!("read {}: {e}", path.display()))
+            .map(|entry| {
+                entry
+                    .expect("entry")
+                    .file_name()
+                    .to_string_lossy()
+                    .into_owned()
+            })
+            .filter(|name| name.ends_with("-request.http"))
+            .collect();
+        requests.sort();
+        requests
+    };
+    let read = |hop: &str, name: &str| issue_105_raw(&format!("opencode/capture/{hop}/{name}"));
+
+    let client = dir("client-to-bifrost");
+    let upstream = dir("bifrost-to-openrouter");
+    assert_eq!(client.len(), upstream.len());
+    let mut judged = 0;
+    for (sent, forwarded) in client.iter().zip(&upstream) {
+        let client_json = issue_105_body(&read("client-to-bifrost", sent));
+        let forwarded_raw = read("bifrost-to-openrouter", forwarded);
+        let response = read(
+            "bifrost-to-openrouter",
+            &forwarded.replace("-request.http", "-response.http"),
+        );
+        assert_eq!(issue_105_cached_tokens(&response), 0, "{forwarded}");
+        let marked = client_json["messages"]
+            .as_array()
+            .expect("messages")
+            .iter()
+            .any(|m| m.get("cache_control").is_some());
+        if !marked {
+            continue;
+        }
+        judged += 1;
+        assert!(
+            !client_cache_breakpoints_reach_provider(
+                &client_json.to_string(),
+                &issue_105_body(&forwarded_raw).to_string()
+            )
+            .is_conformant(),
+            "{sent} -> {forwarded}"
+        );
+    }
+    assert!(judged >= 25, "only {judged} marked opencode requests");
+
+    // The same opencode build sent straight to OpenRouter reads the cache on
+    // every step after the first of each of the five sessions.
+    let direct = dir("client-to-openrouter-direct");
+    let reads = direct
+        .iter()
+        .map(|name| {
+            issue_105_cached_tokens(&read(
+                "client-to-openrouter-direct",
+                &name.replace("-request.http", "-response.http"),
+            ))
+        })
+        .filter(|&tokens| tokens > 20_000)
+        .count();
+    assert!(reads >= 20, "direct cache reads: {reads}");
+}
+
+// ---- 106, withdrawn as a bug: Dynamo documents guided-decoding requests,
+// including tool calls under default structural tags, as not migrated ----
+
+/// Every run directory of one transcript group, as (cell, endpoint, SSE body,
+/// killed worker). The probe writes `HTTP <status>` on the first line and then
+/// the raw body bytes; `kill.json` records the worker it SIGKILLed mid-stream.
+fn issue_106_runs(group: &str) -> Vec<(String, &'static str, String, Option<u64>)> {
+    let mut root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    root.push("../../transcripts/106");
+    root.push(group);
+    let mut names: Vec<String> = fs::read_dir(&root)
+        .unwrap_or_else(|e| panic!("read {}: {e}", root.display()))
+        .map(|entry| entry.unwrap().file_name().into_string().unwrap())
+        .collect();
+    names.sort();
+    names
+        .into_iter()
+        .map(|name| {
+            let raw = fixture(&format!(
+                "transcripts/106/{group}/{name}/client-response.raw"
+            ));
+            let (status, body) = raw.split_once('\n').expect("status line");
+            assert_eq!(status, "HTTP 200", "{group}/{name}");
+            let endpoint = if name.contains("messages") {
+                "/v1/messages"
+            } else if name.contains("responses") {
+                "/v1/responses"
+            } else {
+                "/v1/chat/completions"
+            };
+            let killed = fs::read_to_string(root.join(&name).join("kill.json"))
+                .ok()
+                .map(|k| serde_json::from_str::<serde_json::Value>(&k).unwrap())
+                .and_then(|k| k.get("worker").and_then(serde_json::Value::as_u64));
+            (name, endpoint, body.to_owned(), killed)
+        })
+        .collect()
+}
+
+/// Documented behavior, kept as a measurement: on current Dynamo main the
+/// default structural tags make every tool request a guided-decoding request,
+/// which the migration docs exclude. SIGKILLing the serving worker 4 s into a
+/// tool-call stream reaches the client as a 503 error event, an Anthropic
+/// `overloaded_error`, or `response.failed`, 15/15, under `--migration-limit 3`.
+/// The checker's precondition (a request documented as migratable) does not
+/// hold here, so this records what clients see rather than a defect.
+#[test]
+fn dynamo_guided_tool_stream_worker_loss_reaches_client_as_documented() {
+    let runs = issue_106_runs("main-default-kill");
+    assert_eq!(runs.len(), 15);
+    for (name, endpoint, body, killed) in runs {
+        assert!(killed.is_some(), "{name}: no worker was killed");
+        assert!(
+            matches!(worker_loss_stays_invisible(endpoint, &body), Verdict::Violation(reason) if reason.contains("unavailable")),
+            "{name}: expected the worker loss to surface"
+        );
+    }
+}
+
+/// With guidance off (`DYN_ENABLE_STRUCTURAL_TAG=false` only) the same tool
+/// requests are not guided, so they are migratable: the same kill migrates
+/// every stream, and each delivered tool call parses, 15/15.
+#[test]
+fn dynamo_tool_stream_worker_loss_structural_tags_off_is_conformant() {
+    let runs = issue_106_runs("main-structural-tag-off-kill");
+    assert_eq!(runs.len(), 15);
+    for (name, endpoint, body, killed) in runs {
+        assert!(killed.is_some(), "{name}: no worker was killed");
+        assert_eq!(
+            worker_loss_stays_invisible(endpoint, &body),
+            Verdict::Conformant,
+            "{name}"
+        );
+    }
+}
+
+/// Version control: release 1.5.1, whose structural tags default to off,
+/// migrates the same tool-call streams, 6/6, plus its no-kill control.
+#[test]
+fn dynamo_release_1_5_1_tool_stream_worker_loss_is_conformant() {
+    let runs = issue_106_runs("release-1.5.1-kill");
+    assert_eq!(runs.len(), 7);
+    let killed = runs.iter().filter(|run| run.3.is_some()).count();
+    assert_eq!(killed, 6);
+    for (name, endpoint, body, _) in runs {
+        assert_eq!(
+            worker_loss_stays_invisible(endpoint, &body),
+            Verdict::Conformant,
+            "{name}"
+        );
+    }
+}
+
+/// Text-only streams on current main migrate through the same kill on every
+/// endpoint, and the unkilled tool and text requests finish normally.
+#[test]
+fn dynamo_text_stream_worker_loss_and_no_kill_controls_are_conformant() {
+    let text = issue_106_runs("main-text-kill-controls");
+    let streamed: Vec<_> = text
+        .iter()
+        .filter(|run| !run.0.contains("nonstream"))
+        .collect();
+    assert_eq!(streamed.len(), 4);
+    for (name, endpoint, body, killed) in streamed {
+        assert!(killed.is_some(), "{name}: no worker was killed");
+        assert_eq!(
+            worker_loss_stays_invisible(endpoint, body),
+            Verdict::Conformant,
+            "{name}"
+        );
+    }
+    let controls = issue_106_runs("main-no-kill-controls");
+    assert_eq!(controls.len(), 6);
+    for (name, endpoint, body, killed) in controls {
+        assert!(killed.is_none(), "{name}");
+        assert_eq!(
+            worker_loss_stays_invisible(endpoint, &body),
+            Verdict::Conformant,
+            "{name}"
+        );
+    }
+}
+
+// ---- 107: LiteLLM nests tool-result media in functionResponse.parts for every
+// Gemini model; Gemini 2.5 rejects that shape, so the turn after an image tool
+// result fails with HTTP 400 on every later turn of the session ----
+// Captured with transcripts/107/rig: LiteLLM v1.106.2, v1.88.2 (last release
+// before the nesting) and v1.106.2 with rig/fix.diff, each behind a recording
+// relay to the live Gemini API.
+
+fn issue_107_raw(relative: &str) -> String {
+    fixture(&format!("transcripts/107/{relative}"))
+}
+
+fn issue_107_split(raw_http: &str) -> (u16, String) {
+    let (head, body) = raw_http.split_once("\r\n\r\n").expect("http body");
+    let status = head
+        .split_whitespace()
+        .nth(1)
+        .and_then(|code| code.parse().ok())
+        .unwrap_or(0);
+    (status, body.to_string())
+}
+
+fn issue_107_rows(index: &str) -> Vec<Value> {
+    serde_json::from_str::<Value>(&issue_107_raw(index))
+        .expect("results.json")
+        .as_array()
+        .expect("rows")
+        .clone()
+}
+
+#[test]
+fn bug107_gemini_2_5_rejects_the_tool_result_media_litellm_forwards() {
+    let mut counts: BTreeMap<(String, String, bool), usize> = BTreeMap::new();
+    for row in issue_107_rows("wire/results.json") {
+        let cell = row["cell"].as_str().expect("cell");
+        let build = row["build"].as_str().expect("build");
+        let model = row["model"].as_str().expect("model");
+        let read = |name: &str| issue_107_raw(&format!("wire/{cell}/{name}"));
+        let (_, client) = issue_107_split(&read("client-request.http"));
+        let (_, forwarded) =
+            issue_107_split(&read(row["forwarded_request"].as_str().expect("fwd")));
+        let (status, provider) =
+            issue_107_split(&read(row["forwarded_response"].as_str().expect("fwd")));
+        let verdict = tool_result_images_reach_provider(&client, &forwarded, status, &provider);
+        let broken = build == "v1.106.2" && model.starts_with("gemini-2.5-");
+        if broken {
+            assert!(
+                matches!(&verdict, Verdict::Violation(reason)
+                    if reason.contains("HTTP 400: Multimodal function responses are not supported for this model.")),
+                "{cell}: {verdict:?}"
+            );
+            // The client sees the same refusal, not a reply.
+            let (client_status, _) = issue_107_split(&read("client-response.http"));
+            assert_eq!(client_status, 400, "{cell}");
+        } else {
+            assert_eq!(verdict, Verdict::Conformant, "{cell}");
+            assert_eq!(row["image_text_in_reply"], true, "{cell}");
+        }
+        *counts
+            .entry((
+                build.to_string(),
+                model.to_string(),
+                verdict.is_conformant(),
+            ))
+            .or_default() += 1;
+    }
+    for build in ["v1.106.2", "v1.88.2", "patched"] {
+        for model in [
+            "gemini-2.5-pro",
+            "gemini-2.5-flash-lite",
+            "gemini-3.8-flash",
+        ] {
+            let conformant = !(build == "v1.106.2" && model.starts_with("gemini-2.5-"));
+            assert_eq!(
+                counts.get(&(build.to_string(), model.to_string(), conformant)),
+                Some(&9),
+                "{build} {model}"
+            );
+        }
+    }
+}
+
+#[test]
+fn bug107_direct_gemini_takes_sibling_media_on_2_5_and_both_shapes_on_3() {
+    let mut judged = 0;
+    for row in issue_107_rows("direct/results.json") {
+        let cell = row["cell"].as_str().expect("cell");
+        let (_, request) = issue_107_split(&issue_107_raw(&format!("direct/{cell}/request.http")));
+        let (status, body) =
+            issue_107_split(&issue_107_raw(&format!("direct/{cell}/response.http")));
+        let request: Value = serde_json::from_str(&request).expect("request json");
+        let turn = request["contents"]
+            .as_array()
+            .expect("contents")
+            .last()
+            .expect("turn");
+        let parts = turn["parts"].as_array().expect("parts");
+        let nested = parts[0]["functionResponse"]["parts"].is_array();
+        assert_eq!(nested, row["shape"] == "nested", "{cell}");
+        assert_eq!(parts.len(), if nested { 1 } else { 2 }, "{cell}");
+        let rejected = nested
+            && row["model"]
+                .as_str()
+                .expect("model")
+                .starts_with("gemini-2.5-");
+        if rejected {
+            assert_eq!(status, 400, "{cell}");
+            assert!(
+                body.contains("Multimodal function responses are not supported for this model.")
+            );
+        } else {
+            assert_eq!(status, 200, "{cell}");
+            assert!(body.contains("ZEBRA-7342"), "{cell}");
+        }
+        judged += 1;
+    }
+    assert_eq!(judged, 18);
+}
+
+#[test]
+fn bug107_claude_code_session_cannot_continue_after_an_image_read() {
+    let base =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../transcripts/107/agents/claude-code");
+    let mut cells: Vec<String> = fs::read_dir(&base)
+        .expect("claude-code dir")
+        .filter_map(Result::ok)
+        .filter(|e| e.path().is_dir())
+        .map(|e| e.file_name().to_string_lossy().into_owned())
+        .collect();
+    cells.sort();
+    assert_eq!(cells.len(), 18);
+    for cell in cells {
+        let read = |name: &str| issue_107_raw(&format!("agents/claude-code/{cell}/{name}"));
+        // Every session really returned an image from the Read tool.
+        let image_results = read("session.jsonl")
+            .lines()
+            .filter_map(|line| serde_json::from_str::<Value>(line).ok())
+            .filter(|e| e["type"] == "user")
+            .flat_map(|e| {
+                e["message"]["content"]
+                    .as_array()
+                    .cloned()
+                    .unwrap_or_default()
+            })
+            .filter(|b| {
+                b["type"] == "tool_result"
+                    && b["content"]
+                        .as_array()
+                        .is_some_and(|c| c.iter().any(|x| x["type"] == "image"))
+            })
+            .count();
+        assert!(image_results >= 1, "{cell}");
+        let first: Value = serde_json::from_str(&read("out.json")).expect("out.json");
+        let follow_up: Value = serde_json::from_str(&read("out2.json")).expect("out2.json");
+        if cell.starts_with("g25") && cell.contains("-v1062-") {
+            // The image turn fails, and so does a text-only follow-up in the same
+            // session, because the tool result is replayed every turn.
+            for (turn, out) in [("image", &first), ("follow-up", &follow_up)] {
+                assert_eq!(out["is_error"], true, "{cell} {turn}");
+                assert!(
+                    out["result"].as_str().is_some_and(
+                        |r| r.contains("Multimodal function responses are not supported")
+                    ),
+                    "{cell} {turn}"
+                );
+            }
+        } else {
+            assert_eq!(first["is_error"], false, "{cell}");
+            assert_eq!(follow_up["is_error"], false, "{cell}");
+            assert_eq!(read("answer.txt").trim(), "ZEBRA-7342", "{cell}");
+            assert_eq!(read("ok.txt").trim(), "OK", "{cell}");
+        }
+    }
+}
+
+#[test]
+fn bug107_image_pasted_as_text_into_the_function_response_is_not_delivery() {
+    // The #23712 failure shape, recorded live: the v1.88.2 forwarded turn with its
+    // image part removed and the data URL pasted into functionResponse.response.
+    // Gemini 2.5 Pro accepts it with 200 and never sees the image, so a checker
+    // that matched bytes anywhere in the body would call it delivered.
+    let (_, client) = issue_107_split(&issue_107_raw(
+        "wire/messages-g25p-v1.88.2-r1/client-request.http",
+    ));
+    let mut judged = 0;
+    for run in 1..=3 {
+        let cell = format!("adversarial/text-data-url-gemini-2.5-pro-r{run}");
+        let (_, forwarded) = issue_107_split(&issue_107_raw(&format!("{cell}/request.http")));
+        let (status, provider) = issue_107_split(&issue_107_raw(&format!("{cell}/response.http")));
+        assert_eq!(status, 200, "{cell}");
+        assert!(!provider.contains("ZEBRA-7342"), "{cell}");
+        let image = issue_107_body_image(&client);
+        assert!(
+            forwarded.contains(&image),
+            "{cell} still carries the bytes as text"
+        );
+        assert!(
+            matches!(
+                tool_result_images_reach_provider(&client, &forwarded, status, &provider),
+                Verdict::Violation(reason) if reason.starts_with(TOOL_RESULT_IMAGE_DROPPED)
+            ),
+            "{cell}"
+        );
+        judged += 1;
+    }
+    assert_eq!(judged, 3);
+}
+
+/// The base64 image of the committed Anthropic-dialect client request.
+fn issue_107_body_image(client_body: &str) -> String {
+    let client: Value = serde_json::from_str(client_body).expect("client json");
+    client["messages"][2]["content"][0]["content"][0]["source"]["data"]
+        .as_str()
+        .expect("tool_result image")
+        .to_string()
+}
+
+// ---- bug 108: LiteLLM pass-through follows a cross-origin redirect with the
+// provider api-key ----
+
+#[test]
+fn litellm_passthrough_redirect_sink_keeps_provider_api_key() {
+    // The configured origin is allowed to hold the provider key. The redirect
+    // target is not, but the recorded sink request carries it in `api-key`.
+    let origin = upstream_omits_header_value(
+        &fixture("transcripts/108/trigger/run-01/origin.jsonl"),
+        "CANARY_PROVIDER_KEY",
+    );
+    assert!(
+        matches!(origin, Verdict::Violation(_)),
+        "the configured origin must receive the provider key: {origin:?}"
+    );
+    let sink = upstream_omits_header_value(
+        &fixture("transcripts/108/trigger/run-01/sink.jsonl"),
+        "CANARY_PROVIDER_KEY",
+    );
+    assert!(
+        matches!(&sink, Verdict::Violation(reason) if reason.contains("api-key")),
+        "a cross-origin 307 sink must be caught holding the provider api-key: {sink:?}"
+    );
+}
+
+#[test]
+fn litellm_passthrough_direct_origin_receives_key_but_sink_does_not() {
+    // Same request and proxy config as the trigger, except the configured
+    // origin answers 200. The key is expected at the origin and must not reach
+    // the unrelated sink.
+    let origin = upstream_omits_header_value(
+        &fixture("transcripts/108/control/run-01/origin.jsonl"),
+        "CANARY_PROVIDER_KEY",
+    );
+    assert!(
+        matches!(origin, Verdict::Violation(_)),
+        "the configured origin must receive the provider key: {origin:?}"
+    );
+    let sink = fixture("transcripts/108/control/run-01/sink.jsonl");
+    assert!(
+        sink.trim().is_empty(),
+        "the control must not send a request to the redirect sink: {sink:?}"
+    );
+}
+
+#[test]
+fn litellm_passthrough_redirect_leak_5_of_5() {
+    for run in 1..=5 {
+        let path = format!("transcripts/108/trigger/run-{run:02}/result.json");
+        let value: Value = serde_json::from_str(&fixture(&path)).expect("108 result");
+        assert_eq!(value["client_status"], 200, "trigger run {run}");
+        assert_eq!(value["origin_hits"], 1, "trigger run {run}");
+        assert_eq!(value["sink_hits"], 1, "trigger run {run}");
+        assert_eq!(value["sink_api_key"], true, "trigger run {run}");
+        assert_eq!(value["sink_authorization"], false, "trigger run {run}");
+    }
+    for run in 1..=5 {
+        let path = format!("transcripts/108/control/run-{run:02}/result.json");
+        let value: Value = serde_json::from_str(&fixture(&path)).expect("108 control result");
+        assert_eq!(value["client_status"], 200, "control run {run}");
+        assert_eq!(value["origin_hits"], 1, "control run {run}");
+        assert_eq!(value["sink_hits"], 0, "control run {run}");
+        assert_eq!(value["sink_api_key"], false, "control run {run}");
+    }
+}
+
+// ---- 110 (negative): LiteLLM /v1/messages stop_sequences on GPT-5 now fails with
+// UnsupportedParamsError instead of silently dropping the stop ----
+
+fn issue_110_raw(relative: &str) -> String {
+    fixture(&format!("transcripts/110/{relative}"))
+}
+
+fn issue_110_split(raw_http: &str) -> (u16, String) {
+    let (head, body) = raw_http.split_once("\r\n\r\n").expect("http body");
+    let status = head
+        .split_whitespace()
+        .nth(1)
+        .and_then(|code| code.parse().ok())
+        .unwrap_or(0);
+    (status, body.to_string())
+}
+
+fn issue_110_rows(index: &str) -> Vec<Value> {
+    serde_json::from_str::<Value>(&issue_110_raw(index))
+        .expect("results.json")
+        .as_array()
+        .expect("rows")
+        .clone()
+}
+
+fn issue_110_text(response: &str) -> String {
+    if let Ok(message) = serde_json::from_str::<Value>(response) {
+        return message["content"]
+            .as_array()
+            .map(|blocks| blocks.iter().filter_map(|b| b["text"].as_str()).collect())
+            .unwrap_or_default();
+    }
+    response
+        .lines()
+        .filter_map(|line| line.strip_prefix("data:"))
+        .filter_map(|data| serde_json::from_str::<Value>(data.trim()).ok())
+        .filter(|event| event["type"] == "content_block_delta")
+        .filter_map(|event| event["delta"]["text"].as_str().map(str::to_string))
+        .collect()
+}
+
+fn issue_110_forwarded(cell: &str) -> Vec<(String, Value)> {
+    let mut dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    dir.push(format!("../../transcripts/110/wire/{cell}/upstream"));
+    if !dir.exists() {
+        return Vec::new();
+    }
+    let mut names: Vec<String> = fs::read_dir(&dir)
+        .unwrap_or_else(|e| panic!("read {}: {e}", dir.display()))
+        .map(|entry| {
+            entry
+                .expect("entry")
+                .file_name()
+                .to_string_lossy()
+                .into_owned()
+        })
+        .filter(|name| name.ends_with("-request.http"))
+        .collect();
+    names.sort();
+    names
+        .iter()
+        .map(|name| {
+            let raw = issue_110_raw(&format!("wire/{cell}/upstream/{name}"));
+            let (head, body) = raw.split_once("\r\n\r\n").expect("forwarded body");
+            let path = head.split_whitespace().nth(1).expect("path").to_string();
+            (path, serde_json::from_str(body).expect("forwarded json"))
+        })
+        .collect()
+}
+
+#[test]
+fn bug110_gpt5_stop_sequences_fail_fast_on_main_and_are_silently_dropped_before() {
+    let mut counts: BTreeMap<(String, String, bool), usize> = BTreeMap::new();
+    for row in issue_110_rows("wire/results.json") {
+        let cell = row["cell"].as_str().expect("cell");
+        let build = row["build"].as_str().expect("build");
+        let model = row["model"].as_str().expect("model");
+        let stop_sent = row["stop_sequences_sent"].as_bool().expect("trigger");
+        let (_, request) =
+            issue_110_split(&issue_110_raw(&format!("wire/{cell}/client-request.http")));
+        let request: Value = serde_json::from_str(&request).expect("client json");
+        assert_eq!(request.get("stop_sequences").is_some(), stop_sent, "{cell}");
+        let (status, response) =
+            issue_110_split(&issue_110_raw(&format!("wire/{cell}/client-response.http")));
+        let forwarded = issue_110_forwarded(cell);
+        assert_eq!(
+            row["forwarded_requests"].as_u64(),
+            Some(forwarded.len() as u64),
+            "{cell}"
+        );
+        let reasoning_model = model.starts_with("gpt-5");
+        if !stop_sent {
+            assert_eq!(status, 200, "{cell}");
+            assert_eq!(forwarded.len(), 1, "{cell}");
+            assert_eq!(forwarded[0].0, "/v1/responses", "{cell}");
+        } else if reasoning_model && build == "main" {
+            assert_eq!(status, 400, "{cell}");
+            assert!(response.contains("UnsupportedParamsError"), "{cell}");
+            assert!(
+                forwarded.is_empty(),
+                "{cell}: refused before any upstream call"
+            );
+        } else if reasoning_model || build == "pre" {
+            assert_eq!(status, 200, "{cell}");
+            assert_eq!(forwarded.len(), 1, "{cell}");
+            assert_eq!(forwarded[0].0, "/v1/responses", "{cell}");
+            assert!(forwarded[0].1.get("stop").is_none(), "{cell}: stop dropped");
+            assert!(forwarded[0].1.get("stop_sequences").is_none(), "{cell}");
+            assert!(
+                issue_110_text(&response).contains("STOPHERE"),
+                "{cell}: stop never fired"
+            );
+        } else {
+            assert_eq!(status, 200, "{cell}");
+            assert_eq!(forwarded.len(), 1, "{cell}");
+            assert_eq!(forwarded[0].0, "/v1/chat/completions", "{cell}");
+            assert_eq!(
+                forwarded[0].1["stop"],
+                serde_json::json!(["STOPHERE"]),
+                "{cell}"
+            );
+            let text = issue_110_text(&response);
+            assert!(
+                text.starts_with("ALPHA") && !text.contains("STOPHERE"),
+                "{cell}"
+            );
+        }
+        *counts
+            .entry((model.to_string(), build.to_string(), stop_sent))
+            .or_default() += 1;
+    }
+    assert_eq!(counts.values().sum::<usize>(), 66);
+    for model in ["gpt-5.4-mini", "gpt-5.5", "gpt-4.1-mini"] {
+        for build in ["main", "pre", "fix"] {
+            assert_eq!(counts[&(model.to_string(), build.to_string(), true)], 6);
+        }
+    }
+}
+
+#[test]
+fn bug110_direct_openai_rejects_stop_on_gpt5_on_both_apis() {
+    let mut judged = 0;
+    for row in issue_110_rows("direct/results.json") {
+        let cell = row["cell"].as_str().expect("cell");
+        let (status, body) =
+            issue_110_split(&issue_110_raw(&format!("direct/{cell}/response.http")));
+        let (_, request) = issue_110_split(&issue_110_raw(&format!("direct/{cell}/request.http")));
+        let request: Value = serde_json::from_str(&request).expect("request json");
+        let stop_sent = request.get("stop").is_some();
+        let gpt5 = row["model"].as_str().expect("model").starts_with("gpt-5");
+        if stop_sent && gpt5 {
+            assert_eq!(status, 400, "{cell}");
+            assert!(body.contains("'stop'"), "{cell}");
+        } else {
+            assert_eq!(status, 200, "{cell}");
+        }
+        judged += 1;
+    }
+    assert_eq!(judged, 21);
+}
+
+#[test]
+fn bug110_dropping_stop_corrupts_the_react_agent_tool_input() {
+    let mut clean: BTreeMap<String, usize> = BTreeMap::new();
+    for row in issue_110_rows("agents/langchain-react/results.json") {
+        let cell = row["cell"].as_str().expect("cell");
+        let first = issue_110_raw(&format!(
+            "agents/langchain-react/{cell}/client/001-request.http"
+        ));
+        let (_, body) = first.split_once("\n\n").expect("tap body");
+        let request: Value = serde_json::from_str(body).expect("agent request json");
+        assert_eq!(
+            request["stop_sequences"],
+            serde_json::json!(["\nObservation"]),
+            "{cell}"
+        );
+        let executions: Vec<String> =
+            issue_110_raw(&format!("agents/langchain-react/{cell}/ledger.txt"))
+                .lines()
+                .filter(|line| !line.is_empty())
+                .map(|line| serde_json::from_str::<String>(line).expect("ledger json"))
+                .collect();
+        let key = format!(
+            "{}-{}",
+            row["model"].as_str().expect("model"),
+            row["build"].as_str().expect("build")
+        );
+        if key == "gpt-5.4-mini-main" {
+            assert!(executions.is_empty(), "{cell}: 400 before the tool runs");
+        } else if key == "gpt-4.1-mini-main" {
+            assert_eq!(executions, ["A-17"], "{cell}");
+        } else {
+            assert!(
+                executions.iter().any(|sku| sku != "A-17"),
+                "{cell}: {executions:?}"
+            );
+        }
+        *clean.entry(key).or_default() += usize::from(executions == ["A-17"]);
+    }
+    assert_eq!(clean["gpt-4.1-mini-main"], 3);
+    assert_eq!(clean["gpt-5.4-mini-pre"], 0);
+    assert_eq!(clean["gpt-5.4-mini-fix"], 0);
+}
 // ---- bug 098: image route model allowlist bypass ----
 
 const ISSUE_098_ALLOWED: &[&str] = &["allowed-model"];

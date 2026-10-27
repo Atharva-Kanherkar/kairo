@@ -1,0 +1,28 @@
+id = "gomodel-nobug-parallel-tool-flag"
+title = "Report: GoModel drops disable_parallel_tool_use (it maps it at this commit)"
+kind = "no-bug"
+env = "gomodel-abde73c"
+category = "request-field-drop"
+difficulty = "easy"
+finding = "043 (reported on 0.1.77; the mapping is present at this commit)"
+languages = ["go"]
+splits = ["negatives"]
+
+[repo]
+name = "ENTERPILOT/GoModel"
+url = "https://github.com/ENTERPILOT/GoModel"
+base_commit = "abde73ca50384317d28e333954f605fa05e9e6ab"
+base_ref = "main on 2026-08-16 (0.1.77)"
+
+[upstream]
+status = "fixed"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 1800
+pass_to_pass = [
+  "disable_parallel_maps_to_parallel_false",
+  "flag_absent_not_invented",
+  "tool_choice_mapping_intact",
+  "go_unit_tests_anthropicapi",
+]

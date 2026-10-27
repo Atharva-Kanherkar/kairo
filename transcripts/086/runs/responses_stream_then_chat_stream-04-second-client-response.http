@@ -1,0 +1,49 @@
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Thu, 24 Sep 2026 21:25:09 GMT
+Content-Type: text/event-stream
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID
+Access-Control-Max-Age: 86400
+Vary: Origin
+X-Request-Id: 2d1f007e-aee9-47e9-b55d-3b198c3d866c
+X-Bifrost-Trace-Id: 286c0e9952164c7ba6794ee0485b3490
+Cache-Control: no-cache
+Connection: keep-alive
+X-Bifrost-Request-Type: chat_completion_stream
+X-Bifrost-Upstream-Latency-Ms: 0.000
+Transfer-Encoding: chunked
+
+event: response.created
+data: {"type":"response.created","sequence_number":0,"response":{"id":"resp_086_024","object":"response","created_at":1790000000,"completed_at":null,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":null,"max_tool_calls":null,"metadata":null,"model":"gpt-4o-mini","output":[],"previous_response_id":null,"prompt_cache_key":null,"reasoning":null,"safety_identifier":null,"service_tier":null,"status":"in_progress","tools":null,"usage":{"input_tokens":12,"input_tokens_details":null,"output_tokens":8,"output_tokens_details":null,"total_tokens":20},"extra_fields":{"request_type":"","routing_info":{},"latency":0,"chunk_index":0}},"extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openai","model":"gpt-4o-mini","key":"kairo-synthetic"},"provider":"openai","original_model_requested":"gpt-4o-mini","resolved_model_used":"gpt-4o-mini","latency":0,"chunk_index":0}}
+
+event: response.in_progress
+data: {"type":"response.in_progress","sequence_number":1,"response":{"id":"resp_086_024","object":"response","created_at":1790000000,"completed_at":null,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":null,"max_tool_calls":null,"metadata":null,"model":"gpt-4o-mini","output":[],"previous_response_id":null,"prompt_cache_key":null,"reasoning":null,"safety_identifier":null,"service_tier":null,"status":"in_progress","tools":null,"usage":{"input_tokens":12,"input_tokens_details":null,"output_tokens":8,"output_tokens_details":null,"total_tokens":20},"extra_fields":{"request_type":"","routing_info":{},"latency":0,"chunk_index":0}},"extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openai","model":"gpt-4o-mini","key":"kairo-synthetic"},"provider":"openai","original_model_requested":"gpt-4o-mini","resolved_model_used":"gpt-4o-mini","latency":0,"chunk_index":1}}
+
+event: response.output_item.added
+data: {"type":"response.output_item.added","sequence_number":2,"output_index":0,"item":{"id":"msg_086_024","type":"message","status":"in_progress","role":"assistant","content":[]},"extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openai","model":"gpt-4o-mini","key":"kairo-synthetic"},"provider":"openai","original_model_requested":"gpt-4o-mini","resolved_model_used":"gpt-4o-mini","latency":0,"chunk_index":2}}
+
+event: response.content_part.added
+data: {"type":"response.content_part.added","sequence_number":3,"output_index":0,"content_index":0,"item_id":"msg_086_024","part":{"type":"output_text","text":"","annotations":[],"logprobs":null},"extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openai","model":"gpt-4o-mini","key":"kairo-synthetic"},"provider":"openai","original_model_requested":"gpt-4o-mini","resolved_model_used":"gpt-4o-mini","latency":0,"chunk_index":3}}
+
+event: response.output_text.delta
+data: {"type":"response.output_text.delta","sequence_number":4,"output_index":0,"content_index":0,"item_id":"msg_086_024","delta":"KAIRO_086_UPSTREAM_RESPONSES seq=024 cell=responses_stream_then_chat_stream run=04","extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openai","model":"gpt-4o-mini","key":"kairo-synthetic"},"provider":"openai","original_model_requested":"gpt-4o-mini","resolved_model_used":"gpt-4o-mini","latency":0,"chunk_index":4}}
+
+event: response.output_text.done
+data: {"type":"response.output_text.done","sequence_number":5,"output_index":0,"content_index":0,"item_id":"msg_086_024","text":"KAIRO_086_UPSTREAM_RESPONSES seq=024 cell=responses_stream_then_chat_stream run=04","extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openai","model":"gpt-4o-mini","key":"kairo-synthetic"},"provider":"openai","original_model_requested":"gpt-4o-mini","resolved_model_used":"gpt-4o-mini","latency":0,"chunk_index":5}}
+
+event: response.content_part.done
+data: {"type":"response.content_part.done","sequence_number":6,"output_index":0,"content_index":0,"item_id":"msg_086_024","part":{"type":"output_text","text":"KAIRO_086_UPSTREAM_RESPONSES seq=024 cell=responses_stream_then_chat_stream run=04","annotations":[],"logprobs":null},"extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openai","model":"gpt-4o-mini","key":"kairo-synthetic"},"provider":"openai","original_model_requested":"gpt-4o-mini","resolved_model_used":"gpt-4o-mini","latency":0,"chunk_index":6}}
+
+event: response.output_item.done
+data: {"type":"response.output_item.done","sequence_number":7,"output_index":0,"item":{"id":"msg_086_024","type":"message","status":"completed","role":"assistant","content":[{"type":"output_text","text":"KAIRO_086_UPSTREAM_RESPONSES seq=024 cell=responses_stream_then_chat_stream run=04","annotations":[],"logprobs":null}]},"extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openai","model":"gpt-4o-mini","key":"kairo-synthetic"},"provider":"openai","original_model_requested":"gpt-4o-mini","resolved_model_used":"gpt-4o-mini","latency":0,"chunk_index":7}}
+
+event: response.completed
+data: {"type":"response.completed","sequence_number":8,"response":{"id":"resp_086_024","object":"response","created_at":1790000000,"completed_at":null,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":null,"max_tool_calls":null,"metadata":null,"model":"gpt-4o-mini","output":[{"id":"msg_086_024","type":"message","status":"completed","role":"assistant","content":[{"type":"output_text","text":"KAIRO_086_UPSTREAM_RESPONSES seq=024 cell=responses_stream_then_chat_stream run=04","annotations":[],"logprobs":null}]}],"previous_response_id":null,"prompt_cache_key":null,"reasoning":null,"safety_identifier":null,"service_tier":null,"status":"completed","tools":null,"usage":{"input_tokens":12,"input_tokens_details":null,"output_tokens":8,"output_tokens_details":null,"total_tokens":20},"extra_fields":{"request_type":"","routing_info":{},"latency":0,"chunk_index":0}},"extra_fields":{"request_type":"chat_completion_stream","routing_info":{"provider":"openai","model":"gpt-4o-mini","key":"kairo-synthetic"},"provider":"openai","original_model_requested":"gpt-4o-mini","resolved_model_used":"gpt-4o-mini","latency":0,"upstream_latency":0,"chunk_index":8,"cache_debug":{"cache_hit":true,"cache_id":"24e49843-b8a7-5b4e-92ed-b6a71cb14fb4","hit_type":"direct","requested_provider":"openai","requested_model":"gpt-4o-mini","cache_hit_latency":0}}}
+

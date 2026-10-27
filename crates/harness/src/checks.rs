@@ -8,6 +8,7 @@
 //! Same checkers, both directions.
 
 use serde_json::Value;
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Verdict {
@@ -116,6 +117,172 @@ pub fn openai_stream_finish_reason(sse: &str) -> Verdict {
             "tool_calls delta present but finish_reason is {other:?}, expected \"tool_calls\""
         )),
     }
+}
+
+/// Invariant (bug 088): in an OpenAI Chat Completions SSE stream, a
+/// `tool_calls[]` entry never carries an explicit JSON `null` for `type`.
+///
+/// `type` is a discriminated-union tag, not an ordinary optional string.
+/// Streaming accumulators treat it as last-write-wins rather than
+/// merge-if-present, so a `null` in a continuation delta *erases* the
+/// `"function"` announced by the opening delta instead of being ignored. The
+/// openai-python accumulator asserts on the result and the agent loop never
+/// receives a completion.
+///
+/// The delta must either omit the key or repeat `"function"`. An absent key is
+/// not the same wire value as an explicit null, which is the whole defect.
+pub fn openai_stream_toolcall_type_never_null(sse: &str) -> Verdict {
+    let mut offenders = Vec::new();
+    for (i, chunk) in sse_data_json(sse).iter().enumerate() {
+        let Some(calls) = chunk
+            .pointer("/choices/0/delta/tool_calls")
+            .and_then(Value::as_array)
+        else {
+            continue;
+        };
+        for (j, call) in calls.iter().enumerate() {
+            if call.get("type").is_some_and(Value::is_null) {
+                offenders.push(format!("chunk {i} tool_calls[{j}]"));
+            }
+        }
+    }
+    if offenders.is_empty() {
+        return Verdict::Conformant;
+    }
+    Verdict::Violation(format!(
+        "tool_calls[].type is an explicit null at {} position(s): {}; \
+         a union tag must be absent or \"function\", never null",
+        offenders.len(),
+        offenders.join(", ")
+    ))
+}
+
+/// Invariant (bug 091): in an Anthropic Messages SSE stream, a content block
+/// index is opened exactly once, and one upstream tool call yields exactly one
+/// `tool_use` block.
+///
+/// Two rules, both required by the Messages streaming contract:
+///
+/// 1. `content_block_start` at a given `index` appears at most once. Clients
+///    key partial state by index, so a second start at a used index either
+///    overwrites the accumulated tool input or re-opens a closed block.
+/// 2. A tool call is not split across two blocks. If `tool_use` blocks `A` and
+///    `B` share an id, the arguments were streamed as two separate
+///    `input_json_delta` runs that a client concatenates into two objects
+///    instead of one, and the tool is invoked twice with a truncated argument
+///    each time.
+///
+/// Rule 2 is checked by tool-call id, not by position, so an unrelated tool
+/// call elsewhere in the stream cannot mask a split, and a stream that carries
+/// several distinct calls still conforms.
+pub fn anthropic_stream_block_lifecycle(sse: &str) -> Verdict {
+    let mut opened: BTreeMap<u64, String> = BTreeMap::new();
+    let mut closed: BTreeSet<u64> = BTreeSet::new();
+    // Tool-call id -> how many distinct `tool_use` blocks carried it.
+    let mut tool_blocks: BTreeMap<String, usize> = BTreeMap::new();
+    // Tool-call id -> concatenated partial_json, to report a split precisely.
+    let mut partials: BTreeMap<String, Vec<String>> = BTreeMap::new();
+    let mut offenders: Vec<String> = Vec::new();
+
+    for line in sse.lines() {
+        let Some(data) = line.strip_prefix("data: ") else {
+            continue;
+        };
+        if data == "[DONE]" {
+            continue;
+        }
+        let Ok(event) = serde_json::from_str::<Value>(data) else {
+            continue;
+        };
+        let kind = event
+            .get("type")
+            .and_then(Value::as_str)
+            .unwrap_or_default();
+        let Some(raw_index) = event.get("index").and_then(Value::as_u64) else {
+            continue;
+        };
+        match kind {
+            "content_block_start" => {
+                match opened.entry(raw_index) {
+                    std::collections::btree_map::Entry::Occupied(prior) => {
+                        offenders.push(format!(
+                            "index {raw_index} opened twice (first as {:?}, again as {:?})",
+                            prior.get(),
+                            block_label(&event)
+                        ));
+                    }
+                    std::collections::btree_map::Entry::Vacant(slot) => {
+                        if closed.contains(&raw_index) {
+                            offenders.push(format!(
+                                "index {raw_index} reopened after content_block_stop"
+                            ));
+                        } else {
+                            slot.insert(block_label(&event));
+                        }
+                    }
+                }
+                // Record every `tool_use` block, including a duplicate at a reused
+                // index, so the split rule below can also fire. Skipping it here
+                // would let one defect mask the other.
+                let block = event.get("content_block");
+                if block.and_then(|b| b.get("type")).and_then(Value::as_str) == Some("tool_use") {
+                    let id = block
+                        .and_then(|b| b.get("id"))
+                        .and_then(Value::as_str)
+                        .unwrap_or_default()
+                        .to_owned();
+                    *tool_blocks.entry(id.clone()).or_default() += 1;
+                    partials.entry(id).or_default();
+                }
+            }
+            "content_block_delta" => {
+                let id = opened.get(&raw_index).cloned().unwrap_or_default();
+                if let Some(delta) = event.get("delta") {
+                    if delta.get("type").and_then(Value::as_str) == Some("input_json_delta") {
+                        if let Some(partial) = delta.get("partial_json").and_then(Value::as_str) {
+                            if let Some(bucket) = partials.get_mut(&id) {
+                                bucket.push(partial.to_owned());
+                            }
+                        }
+                    }
+                }
+            }
+            "content_block_stop" => {
+                closed.insert(raw_index);
+            }
+            _ => {}
+        }
+    }
+
+    for (id, count) in &tool_blocks {
+        if *count > 1 {
+            let fragments = partials.get(id).map(|v| v.join("")).unwrap_or_default();
+            let runs = partials.get(id).map_or(0, Vec::len);
+            offenders.push(format!(
+                "tool call {id:?} was split across {count} tool_use blocks ({runs} separate \
+				 input_json_delta runs, concatenated length {}); one call must be one block",
+                fragments.len()
+            ));
+        }
+    }
+
+    if offenders.is_empty() {
+        return Verdict::Conformant;
+    }
+    Verdict::Violation(format!(
+        "{}: a block index is opened once and a tool call is one block",
+        offenders.join("; ")
+    ))
+}
+
+/// The `type` of a `content_block_start` payload, for a violation message.
+fn block_label(event: &Value) -> String {
+    event
+        .get("content_block")
+        .and_then(|b| b.get("type"))
+        .and_then(Value::as_str)
+        .unwrap_or("unknown")
+        .to_owned()
 }
 
 /// Invariant (bug 074): one client-visible Responses stream represents one
@@ -2003,6 +2170,1621 @@ pub fn executed_tool_results_preserved(executions_json: &str, client_exchange: &
     Verdict::Conformant
 }
 
+/// Invariant (bug 086): a successful response from an OpenAI-compatible
+/// endpoint carries that endpoint's own response family, whichever layer
+/// produced it (upstream, cache, or plugin). `/v1/chat/completions` returns a
+/// `chat.completion` object or a stream of `chat.completion.chunk` objects
+/// with a finish reason; `/v1/responses` returns a `response` object or a
+/// stream of `response.*` events that starts with `response.created` and
+/// ends in a terminal event. `client_exchange` is the complete raw HTTP
+/// response the client received.
+///
+/// The check reads only the public OpenAI discriminators (`object`, `type`),
+/// so it does not depend on how a gateway stores or replays entries. A
+/// non-2xx or unparseable capture is a violation, not a vacuous pass.
+pub fn endpoint_response_family_preserved(endpoint: &str, client_exchange: &str) -> Verdict {
+    let Some((head, body)) = client_exchange.split_once("\r\n\r\n") else {
+        return Verdict::Violation("capture has no HTTP header terminator".to_owned());
+    };
+    let status = head
+        .lines()
+        .next()
+        .and_then(|line| line.split_whitespace().nth(1))
+        .and_then(|code| code.parse::<u16>().ok());
+    match status {
+        Some(code) if (200..300).contains(&code) => {}
+        other => {
+            return Verdict::Violation(format!(
+                "not a successful response (status {other:?}); the family invariant needs a 2xx"
+            ))
+        }
+    }
+    let streamed = head.lines().any(|line| {
+        let lower = line.to_ascii_lowercase();
+        lower.starts_with("content-type:") && lower.contains("text/event-stream")
+    });
+    match (endpoint, streamed) {
+        ("/v1/chat/completions", false) => json_body_family(body, "chat.completion", "choices"),
+        ("/v1/responses", false) => json_body_family(body, "response", "output"),
+        ("/v1/chat/completions", true) => chat_stream_family(body),
+        ("/v1/responses", true) => responses_stream_family(body),
+        _ => Verdict::Violation(format!("no family rule for endpoint {endpoint:?}")),
+    }
+}
+
+/// A non-streamed body must be a JSON object whose `object` names the
+/// endpoint's family and that carries the family's result array.
+fn json_body_family(body: &str, object: &str, array_field: &str) -> Verdict {
+    match serde_json::from_str::<Value>(body.trim()) {
+        Ok(value)
+            if value.get("object").and_then(Value::as_str) == Some(object)
+                && value.get(array_field).is_some_and(Value::is_array) =>
+        {
+            Verdict::Conformant
+        }
+        Ok(value) => Verdict::Violation(format!(
+            "expected a {object} body, got: {}",
+            truncate_for_reason(&value.to_string())
+        )),
+        Err(error) => Verdict::Violation(format!("{object} body is not JSON: {error}")),
+    }
+}
+
+fn chat_stream_family(body: &str) -> Verdict {
+    let payloads = sse_data_json(body);
+    if payloads.is_empty() {
+        return Verdict::Violation("chat completions stream carried no JSON data".to_owned());
+    }
+    if let Some(foreign) = payloads.iter().find(|payload| {
+        payload.get("object").and_then(Value::as_str) != Some("chat.completion.chunk")
+    }) {
+        return Verdict::Violation(format!(
+            "chat completions stream carried a non chat.completion.chunk payload: {}",
+            truncate_for_reason(&foreign.to_string())
+        ));
+    }
+    let finished = payloads.iter().any(|payload| {
+        payload
+            .get("choices")
+            .and_then(Value::as_array)
+            .is_some_and(|choices| {
+                choices.iter().any(|choice| {
+                    choice
+                        .get("finish_reason")
+                        .and_then(Value::as_str)
+                        .is_some()
+                })
+            })
+    });
+    if finished {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation("chat completions stream never reported a finish_reason".to_owned())
+    }
+}
+
+fn responses_stream_family(body: &str) -> Verdict {
+    let payloads = sse_data_json(body);
+    let types: Vec<&str> = payloads
+        .iter()
+        .map(|payload| payload.get("type").and_then(Value::as_str).unwrap_or(""))
+        .collect();
+    if types.is_empty() {
+        return Verdict::Violation("responses stream carried no JSON data".to_owned());
+    }
+    if let Some(foreign) = types.iter().find(|kind| !kind.starts_with("response.")) {
+        return Verdict::Violation(format!(
+            "responses stream carried a non response.* payload (type {foreign:?})"
+        ));
+    }
+    if types.first() != Some(&"response.created") {
+        return Verdict::Violation(format!(
+            "responses stream did not start with response.created (first {:?})",
+            types.first()
+        ));
+    }
+    let terminal = [
+        "response.completed",
+        "response.failed",
+        "response.incomplete",
+    ];
+    if types.last().is_some_and(|kind| terminal.contains(kind)) {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation(format!(
+            "responses stream ended without a terminal event (last {:?})",
+            types.last()
+        ))
+    }
+}
+
+fn truncate_for_reason(text: &str) -> String {
+    text.chars().take(160).collect()
+}
+
+/// Invariant (bug 087): one client turn may execute a side-effecting MCP tool
+/// at most once. The ledger is JSON Lines written at the consumer boundary,
+/// with a positive, consecutive `seq` and a non-empty `entry` per execution.
+/// Empty or malformed evidence fails closed instead of passing vacuously.
+pub fn mcp_tool_executes_once(ledger_jsonl: &str) -> Verdict {
+    let mut count = 0_u64;
+    let mut previous = None;
+    for (index, line) in ledger_jsonl.lines().enumerate() {
+        if line.trim().is_empty() {
+            continue;
+        }
+        let Ok(record) = serde_json::from_str::<Value>(line) else {
+            return Verdict::Violation(format!("ledger line {} is not valid JSON", index + 1));
+        };
+        let Some(sequence) = record.get("seq").and_then(Value::as_u64) else {
+            return Verdict::Violation(format!(
+                "ledger line {} has no positive integer seq",
+                index + 1
+            ));
+        };
+        if sequence == 0 || previous.is_some_and(|value| sequence != value + 1) {
+            return Verdict::Violation(format!(
+                "ledger line {} has non-consecutive seq {sequence}",
+                index + 1
+            ));
+        }
+        if record
+            .get("entry")
+            .and_then(Value::as_str)
+            .is_none_or(str::is_empty)
+        {
+            return Verdict::Violation(format!("ledger line {} has no non-empty entry", index + 1));
+        }
+        previous = Some(sequence);
+        count += 1;
+    }
+    match count {
+        1 => Verdict::Conformant,
+        0 => Verdict::Violation("tool ledger is empty".to_owned()),
+        other => Verdict::Violation(format!(
+            "one client turn executed the MCP tool {other} times, expected once"
+        )),
+    }
+}
+
+/// A `"stop_sequence"` report must name a requested sequence that is absent
+/// from the returned text. With a known generation it must also be the first
+/// requested sequence to complete, beginning exactly where the text ends.
+fn reported_stop_sequence_fired(
+    requested: &[&str],
+    text: &str,
+    reported: Option<&str>,
+    generation: Option<&str>,
+) -> Result<(), String> {
+    let Some(seq) = reported else {
+        return Err("stop_reason is \"stop_sequence\" but stop_sequence is null".to_owned());
+    };
+    if !requested.contains(&seq) {
+        return Err(format!(
+            "reported stop_sequence {seq:?} was not requested ({requested:?})"
+        ));
+    }
+    if text.contains(seq) {
+        return Err(format!(
+            "matched stop_sequence {seq:?} is still inside the returned text"
+        ));
+    }
+    let Some(generation) = generation else {
+        return Ok(());
+    };
+    if !generation
+        .strip_prefix(text)
+        .is_some_and(|rest| rest.starts_with(seq))
+    {
+        return Err(format!(
+            "reported stop_sequence {seq:?} does not begin where the returned text ends in \
+             the generation"
+        ));
+    }
+    let boundary = text.len() + seq.len();
+    if let Some(first) = requested.iter().find(|s| {
+        generation
+            .find(*s)
+            .is_some_and(|at| at + s.len() < boundary)
+    }) {
+        return Err(format!(
+            "requested sequence {first:?} completes in the generation before the reported \
+             stop_sequence {seq:?}"
+        ));
+    }
+    Ok(())
+}
+
+/// Invariant (bug 094): when generation ends because a requested stop sequence
+/// was produced, an Anthropic Messages response MUST say so. `stop_reason` is
+/// `"stop_sequence"` and `stop_sequence` names the matched sequence, in both
+/// the unary body and the streamed `message_delta`. Clients that pass several
+/// delimiters (for example `"</function_calls>"` and `"\n\nHuman:"`) have no
+/// other way to learn which one fired, because the matched text is excluded
+/// from the content.
+///
+/// Each capture line is one exchange: `stop_sequences` (requested), `generation`
+/// (the text the backend actually emitted, or `null` when the upstream is a
+/// hosted provider), `text` (what the client received), `stop_reason`,
+/// `stop_sequence`, and optionally `max_tokens` (requested) and `output_tokens`
+/// (reported usage). `generation` must be observed output, never a planned
+/// continuation: a backend cut short by a length limit never emits the
+/// delimiter, so a plan would turn a valid length stop into a false hit.
+///
+/// - A reported `stop_sequence` stop must name a requested sequence that is not
+///   inside the returned text. When the generation is known, the sequence must
+///   begin exactly where the returned text ends, and no other requested
+///   sequence may complete before it.
+/// - Any other stop reason must leave `stop_sequence` null.
+/// - A `max_tokens` stop must have used the whole budget when both counts are
+///   recorded. It is otherwise accepted, because a length stop can end exactly
+///   where a delimiter would have begun.
+/// - Any other stop reason with a known generation must not be reported when the
+///   returned text reaches a requested sequence in that generation.
+pub fn anthropic_stop_sequence_reported(jsonl: &str) -> Verdict {
+    let mut checked = 0usize;
+    for (idx, line) in jsonl.lines().filter(|l| !l.trim().is_empty()).enumerate() {
+        let record: Value = match serde_json::from_str(line) {
+            Ok(v) => v,
+            Err(e) => return Verdict::Violation(format!("record {idx}: unparseable capture: {e}")),
+        };
+        let Some(requested) = record.get("stop_sequences").and_then(Value::as_array) else {
+            return Verdict::Violation(format!("record {idx}: missing stop_sequences list"));
+        };
+        let requested: Vec<&str> = requested
+            .iter()
+            .filter_map(Value::as_str)
+            .filter(|s| !s.is_empty())
+            .collect();
+        let Some(text) = record.get("text").and_then(Value::as_str) else {
+            return Verdict::Violation(format!("record {idx}: missing text"));
+        };
+        let Some(stop_reason) = record.get("stop_reason").and_then(Value::as_str) else {
+            return Verdict::Violation(format!("record {idx}: missing stop_reason"));
+        };
+        let reported = record.get("stop_sequence").and_then(Value::as_str);
+        let generation = record.get("generation").and_then(Value::as_str);
+
+        if stop_reason == "stop_sequence" {
+            if let Err(reason) =
+                reported_stop_sequence_fired(&requested, text, reported, generation)
+            {
+                return Verdict::Violation(format!("record {idx}: {reason}"));
+            }
+            checked += 1;
+            continue;
+        }
+
+        if let Some(seq) = reported {
+            return Verdict::Violation(format!(
+                "record {idx}: stop_sequence is {seq:?} but stop_reason is {stop_reason:?}"
+            ));
+        }
+        if stop_reason == "max_tokens" {
+            let budget = record.get("max_tokens").and_then(Value::as_u64);
+            let used = record.get("output_tokens").and_then(Value::as_u64);
+            if let (Some(budget), Some(used)) = (budget, used) {
+                if used < budget {
+                    return Verdict::Violation(format!(
+                        "record {idx}: stop_reason is \"max_tokens\" but only {used} of \
+                         {budget} tokens were used"
+                    ));
+                }
+            }
+            checked += 1;
+            continue;
+        }
+
+        let Some(generation) = generation else {
+            // Hosted upstream that did not report a stop sequence: nothing here
+            // proves one was generated.
+            continue;
+        };
+        // The returned text reached the start of a requested sequence that the
+        // backend emitted, so that sequence ended the turn, not a natural stop.
+        let hit = requested
+            .iter()
+            .filter_map(|s| generation.find(*s).map(|at| (at, *s)))
+            .filter(|(at, _)| *at <= text.len())
+            .min_by_key(|(at, s)| at + s.len());
+        if let Some((_, seq)) = hit {
+            return Verdict::Violation(format!(
+                "record {idx}: generation hit requested stop sequence {seq:?} and the text \
+                 reaches it, but the response reports stop_reason={stop_reason:?} \
+                 stop_sequence=None"
+            ));
+        }
+        checked += 1;
+    }
+    if checked == 0 {
+        return Verdict::Violation("capture holds no decidable exchange".to_owned());
+    }
+    Verdict::Conformant
+}
+
+/// Invariant (bug 097): a registration that the tool accepts and later hands
+/// back must also be resolvable by the transfer path.
+///
+/// Registration and lookup are two different code paths over the same
+/// descriptor list. A tool that normalizes a descriptor on the way in, and again
+/// on one lookup but not the other, produces a registration that deregistration
+/// can find and the transfer path can never resolve. The caller is left holding
+/// memory it can free but not use.
+///
+/// NIXL is the recorded case. `nixlSecDescList::normalizeSecDesc()` rewrites
+/// `len == 0` to `SIZE_MAX` for `BLK_SEG`, `OBJ_SEG` and `FILE_SEG`
+/// (`src/infra/mem_section.h:131`), and `normalizeQuery()` repeats it inside
+/// `getIndex()` (`mem_section.h:150`). `getCoveringIndex()` does not, and
+/// `nixlBasicDesc::covers()` evaluates `addr + len >= query.addr + query.len`,
+/// which wraps when `len == SIZE_MAX` and `addr != 0`.
+///
+/// The invariant is stated over the trial record, so the same checker scores any
+/// tool that registers memory in two stages. A cell is conformant unless it was
+/// accepted for registration, can be deregistered by the descriptor that created
+/// it, and yet cannot be resolved for a transfer the registration covers.
+///
+/// One JSON object per cell:
+///
+/// ```json
+/// {"register": 0, "deregister": 0, "createXferReq": -4, "covered": true}
+/// ```
+///
+/// `covered` is not an assertion by the caller. The harness computes it from the
+/// addresses the cell actually used, and records `offset`, `reg_end` and
+/// `xfer_end` alongside so the containment can be recomputed from the fixture. A
+/// cell where the transfer range is *not* covered is correctly refused, so it is
+/// conformant.
+pub fn registration_resolvable_by_both_paths(cell: &str) -> Verdict {
+    let value: Value = match serde_json::from_str(cell) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("cell record is not JSON: {e}")),
+    };
+    let Some(object) = value.as_object() else {
+        return Verdict::Violation("cell record is not a JSON object".to_owned());
+    };
+    let int = |key: &str| -> Option<i64> { object.get(key).and_then(Value::as_i64) };
+    let (Some(register), Some(deregister), Some(create), Some(covered)) = (
+        int("register"),
+        int("deregister"),
+        int("createXferReq"),
+        object.get("covered").and_then(Value::as_bool),
+    ) else {
+        return Verdict::Violation(
+            "cell record needs integer `register`, `deregister` and `createXferReq`, and boolean `covered`"
+                .to_owned(),
+        );
+    };
+
+    if register != 0 || !covered {
+        // Never registered, or the transfer asked for something outside the
+        // registration. Refusing either is correct and proves nothing.
+        return Verdict::Conformant;
+    }
+    if create == 0 {
+        return Verdict::Conformant;
+    }
+    if deregister == 0 {
+        return Verdict::Violation(format!(
+            "registration was accepted and can be deregistered by the descriptor that created it, \
+             but a transfer inside its range failed to resolve (status {create})"
+        ));
+    }
+    Verdict::Conformant
+}
+
+/// Return the JSON body of a raw HTTP request or response capture.
+fn http_json_body(raw: &str, label: &str) -> Result<Value, String> {
+    let Some((head, body)) = raw.split_once("\r\n\r\n") else {
+        return Err(format!("{label}: not a raw HTTP message"));
+    };
+    if head.lines().next().is_none_or(str::is_empty) {
+        return Err(format!("{label}: missing request or status line"));
+    }
+    if body.is_empty() {
+        return Err(format!("{label}: empty body"));
+    }
+    if head
+        .to_ascii_lowercase()
+        .contains("transfer-encoding: chunked")
+    {
+        return Err(format!(
+            "{label}: chunked body must be de-chunked before comparison"
+        ));
+    }
+    serde_json::from_str(body).map_err(|e| format!("{label}: body is not valid JSON: {e}"))
+}
+
+/// Compare two JSON numbers exactly. Integers are never compared through `f64`,
+/// because every integer in `[2^53, 2^54)` shares one `float64` with a
+/// neighbour, which is the rounding this invariant is written to catch.
+///
+/// A number beyond `u64::MAX` no longer fits a typed `serde_json` value, so it
+/// arrives here as `f64` and the comparison cannot be exact. Such a value is
+/// reported as equal to anything that rounds to the same `float64`, so this
+/// checker does not cover integers above 2^64.
+fn numbers_differ(client: &serde_json::Number, forwarded: &serde_json::Number) -> bool {
+    if let (Some(client), Some(forwarded)) = (client.as_i64(), forwarded.as_i64()) {
+        return client != forwarded;
+    }
+    if let (Some(client), Some(forwarded)) = (client.as_u64(), forwarded.as_u64()) {
+        return client != forwarded;
+    }
+    client.as_f64() != forwarded.as_f64()
+}
+
+/// Walk both bodies and record every value the forwarded leg changed.
+///
+/// `allowed_fields` names the top-level request fields a hop may add or rewrite.
+/// It applies only at the top level: a field the client sent inside a nested
+/// object is never exempt, so a rounded `max_tokens` or `stream` buried in a
+/// nested object is still reported.
+fn value_diff(
+    client: &Value,
+    forwarded: &Value,
+    path: &str,
+    allowed_fields: &[&str],
+    diffs: &mut Vec<String>,
+) {
+    match (client, forwarded) {
+        (Value::Object(client), Value::Object(forwarded)) => {
+            for (key, expected) in client {
+                if path.is_empty() && allowed_fields.contains(&key.as_str()) {
+                    continue;
+                }
+                match forwarded.get(key) {
+                    Some(actual) => value_diff(
+                        expected,
+                        actual,
+                        &format!("{path}/{key}"),
+                        allowed_fields,
+                        diffs,
+                    ),
+                    None => diffs.push(format!("{path}/{key} is absent from the forwarded body")),
+                }
+            }
+            for key in forwarded.keys() {
+                let declared = path.is_empty() && allowed_fields.contains(&key.as_str());
+                if !client.contains_key(key) && !declared {
+                    diffs.push(format!("{path}/{key} was added by the forwarded leg"));
+                }
+            }
+        }
+        (Value::Array(client), Value::Array(forwarded)) => {
+            if client.len() != forwarded.len() {
+                diffs.push(format!(
+                    "{path}: array of {} entries forwarded as {}",
+                    client.len(),
+                    forwarded.len()
+                ));
+            }
+            for (index, (expected, actual)) in client.iter().zip(forwarded.iter()).enumerate() {
+                value_diff(
+                    expected,
+                    actual,
+                    &format!("{path}/{index}"),
+                    allowed_fields,
+                    diffs,
+                );
+            }
+        }
+        (Value::Number(client), Value::Number(forwarded)) => {
+            if numbers_differ(client, forwarded) {
+                diffs.push(format!(
+                    "{path}: client sent {client}, forwarded {forwarded}"
+                ));
+            }
+        }
+        (client, forwarded) => {
+            if client != forwarded {
+                diffs.push(format!(
+                    "{path}: client sent {client}, forwarded {forwarded}"
+                ));
+            }
+        }
+    }
+}
+
+/// Invariant (bug 097): a gateway that decodes a request body into a generic
+/// map and re-marshals it for every hop must forward the mathematical value of
+/// every JSON number it does not intentionally change.
+///
+/// Go's `encoding/json` decodes a JSON number into `float64` unless the decoder
+/// opts into `UseNumber`, and a `float64` holds integers exactly only up to
+/// `2^53`. A record id of `9007199254740993` then leaves such a gateway as
+/// `9007199254740992`, so the engine is asked for a value the client's schema
+/// forbids and the client's own validator fails on a number the gateway chose.
+///
+/// The comparison is order-insensitive, because a re-marshaled Go map sorts its
+/// keys and that is not the defect. `allowed_fields` names the top-level
+/// orchestration fields a hop is allowed to add or rewrite, such as
+/// disaggregation transfer parameters and the prefill token budget, so intended
+/// edits are not reported while a change inside a nested object still is.
+/// The client body must carry a `response_format/json_schema/schema` object, so
+/// a capture that lost its schema fails instead of passing vacuously.
+pub fn forwarded_body_preserves_values(
+    client_http: &str,
+    forwarded_http: &str,
+    allowed_fields: &[&str],
+) -> Verdict {
+    let client = match http_json_body(client_http, "client request") {
+        Ok(body) => body,
+        Err(reason) => return Verdict::Violation(reason),
+    };
+    let forwarded = match http_json_body(forwarded_http, "forwarded request") {
+        Ok(body) => body,
+        Err(reason) => return Verdict::Violation(reason),
+    };
+    if client
+        .pointer("/response_format/json_schema/schema")
+        .is_none()
+    {
+        return Verdict::Violation(
+            "client request carries no response_format/json_schema/schema to compare".to_owned(),
+        );
+    }
+    if !client
+        .pointer("/response_format/json_schema/schema")
+        .is_some_and(Value::is_object)
+    {
+        return Verdict::Violation(
+            "client response_format/json_schema/schema is not a JSON object".to_owned(),
+        );
+    }
+    if forwarded
+        .pointer("/response_format/json_schema/schema")
+        .is_none()
+    {
+        return Verdict::Violation(
+            "forwarded request carries no response_format/json_schema/schema".to_owned(),
+        );
+    }
+    let mut diffs = Vec::new();
+    value_diff(&client, &forwarded, "", allowed_fields, &mut diffs);
+    match diffs.len() {
+        0 => Verdict::Conformant,
+        1 => Verdict::Violation(format!("1 value changed: {}", diffs[0])),
+        count => Verdict::Violation(format!("{count} values changed: {}", diffs.join("; "))),
+    }
+}
+
+/// Invariant (bug 100): an Anthropic server tool the client declares must reach
+/// an Anthropic Messages upstream as the same definition.
+///
+/// A server tool is a `tools[]` entry whose `type` names a provider-run tool,
+/// such as `web_search_20250305`, rather than `custom`. Anthropic runs it, so it
+/// carries no `input_schema`. A gateway that rebuilds the tool list as client
+/// functions forwards `{"name":"web_search","description":"","input_schema":{}}`
+/// instead, and Anthropic rejects that with `400 tools.0.custom.input_schema.type:
+/// Field required`. Claude Code's WebSearch tool then reports an API error and
+/// returns no results.
+///
+/// Every server tool in the client body must appear in the forwarded body with
+/// an equal JSON value; key order is ignored. Custom tools are not compared. The
+/// client body must declare at least one server tool, so a capture that lost the
+/// tool fails instead of passing vacuously.
+pub fn anthropic_server_tools_forwarded(client_http: &str, forwarded_http: &str) -> Verdict {
+    let client = match http_json_body(client_http, "client request") {
+        Ok(body) => body,
+        Err(reason) => return Verdict::Violation(reason),
+    };
+    let forwarded = match http_json_body(forwarded_http, "forwarded request") {
+        Ok(body) => body,
+        Err(reason) => return Verdict::Violation(reason),
+    };
+    let is_server_tool = |tool: &&Value| {
+        tool.get("type")
+            .and_then(Value::as_str)
+            .is_some_and(|kind| kind != "custom")
+    };
+    let declared: Vec<&Value> = client
+        .get("tools")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter(is_server_tool)
+        .collect();
+    if declared.is_empty() {
+        return Verdict::Violation("client request declares no Anthropic server tool".to_owned());
+    }
+    let forwarded_tools: Vec<&Value> = forwarded
+        .get("tools")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .collect();
+    let mut problems = Vec::new();
+    for tool in declared {
+        let name = tool.get("name").and_then(Value::as_str).unwrap_or_default();
+        let kind = tool.get("type").and_then(Value::as_str).unwrap_or_default();
+        match forwarded_tools
+            .iter()
+            .find(|candidate| candidate.get("name").and_then(Value::as_str) == Some(name))
+        {
+            None => problems.push(format!("server tool {name:?} ({kind}) was not forwarded")),
+            Some(sent) if *sent == tool => {}
+            Some(sent) => problems.push(format!(
+                "server tool {name:?} ({kind}) was forwarded as {sent}"
+            )),
+        }
+    }
+    if problems.is_empty() {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation(problems.join("; "))
+    }
+}
+
+/// Reason returned when a gateway answers a request successfully after removing
+/// a declared tool that its target cannot express. Tests match this string so
+/// an unrelated parse failure cannot pass as the 101 finding.
+pub const HOST_TOOL_SILENTLY_ERASED: &str =
+    "gateway returned success after erasing a declared host tool the target cannot express";
+
+/// Invariant (bug 101): a tool the caller declared is either carried to the
+/// target in some representation, or the request is refused. Returning HTTP 2xx
+/// after deleting a tool the target cannot express leaves the caller believing
+/// the model can use it while the model was never told, and nothing on the wire
+/// records the loss.
+///
+/// `client_status` is the status the gateway returned to the caller. A non-2xx
+/// status is conformant: failing closed is the correct behavior for a target
+/// that has no representation. Function and custom tools are excluded because
+/// every dialect can express them, so their survival says nothing about this
+/// invariant.
+pub fn host_tool_not_silently_erased(
+    client_status: u16,
+    client_body: &str,
+    forwarded_body: &str,
+) -> Verdict {
+    let Ok(client) = serde_json::from_str::<Value>(client_body) else {
+        return Verdict::Violation("client request body is not valid JSON".into());
+    };
+    let Ok(forwarded) = serde_json::from_str::<Value>(forwarded_body) else {
+        return Verdict::Violation("forwarded request body is not valid JSON".into());
+    };
+    if !client.is_object() {
+        return Verdict::Violation("client request body is not a JSON object".into());
+    }
+    if !forwarded.is_object() {
+        return Verdict::Violation("forwarded request body is not a JSON object".into());
+    }
+
+    // Each declared host tool, as the tokens that prove it reached the target.
+    let mut declared: Vec<(String, Vec<String>)> = Vec::new();
+    for tool in client
+        .get("tools")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+    {
+        let Some(kind) = tool.get("type").and_then(Value::as_str) else {
+            continue; // untyped tools are function tools in the Responses dialect
+        };
+        if matches!(kind, "function" | "custom") {
+            continue;
+        }
+        let tokens = ["server_label", "server_url", "name"]
+            .into_iter()
+            .filter_map(|field| tool.get(field).and_then(Value::as_str))
+            .map(str::to_owned)
+            .chain([kind.to_owned()])
+            .collect();
+        declared.push((kind.to_owned(), tokens));
+    }
+    if declared.is_empty() || !(200..300).contains(&client_status) {
+        return Verdict::Conformant;
+    }
+
+    // Every string anywhere in the forwarded tools array, in any dialect shape.
+    let forwarded_tools = forwarded.get("tools").cloned().unwrap_or(Value::Null);
+    let mut present = Vec::new();
+    collect_strings(&forwarded_tools, &mut present);
+
+    let erased: Vec<&str> = declared
+        .iter()
+        .filter(|(_, tokens)| !tokens.iter().all(|token| present.contains(token)))
+        .map(|(kind, _)| kind.as_str())
+        .collect();
+    if erased.is_empty() {
+        return Verdict::Conformant;
+    }
+    Verdict::Violation(format!(
+        "{HOST_TOOL_SILENTLY_ERASED}: {erased:?} absent from the forwarded tools array"
+    ))
+}
+
+/// Collect the tools a Responses request declared: the names offered at the top
+/// level with no namespace, and the `(namespace, name)` pairs offered inside
+/// `namespace` containers.
+fn declared_responses_tools(request: &Value) -> (HashSet<String>, Vec<(String, String)>) {
+    fn walk(
+        tool: &Value,
+        namespace: Option<&str>,
+        plain: &mut HashSet<String>,
+        namespaced: &mut Vec<(String, String)>,
+    ) {
+        let Some(tool) = tool.as_object() else { return };
+        match tool.get("type").and_then(Value::as_str) {
+            Some("namespace") => {
+                let container = tool
+                    .get("name")
+                    .and_then(Value::as_str)
+                    .filter(|name| !name.is_empty());
+                let Some(children) = tool.get("tools").and_then(Value::as_array) else {
+                    return;
+                };
+                for child in children {
+                    // A nested container keeps its own name; the innermost
+                    // namespace is the one that identifies the tool.
+                    match container {
+                        Some(container)
+                            if child.get("type").and_then(Value::as_str) != Some("namespace") =>
+                        {
+                            if let Some(name) = child.get("name").and_then(Value::as_str) {
+                                namespaced.push((container.to_string(), name.to_string()));
+                            }
+                        }
+                        _ => walk(child, container, plain, namespaced),
+                    }
+                }
+            }
+            _ => {
+                if let Some(namespace) = namespace {
+                    if let Some(name) = tool.get("name").and_then(Value::as_str) {
+                        namespaced.push((namespace.to_string(), name.to_string()));
+                    }
+                } else {
+                    let nested = tool
+                        .get("function")
+                        .and_then(Value::as_object)
+                        .and_then(|function| function.get("name"))
+                        .and_then(Value::as_str);
+                    if let Some(name) = tool
+                        .get("name")
+                        .and_then(Value::as_str)
+                        .or(nested)
+                        .filter(|name| !name.is_empty())
+                    {
+                        plain.insert(name.to_string());
+                    }
+                }
+            }
+        }
+    }
+
+    let mut plain = HashSet::new();
+    let mut namespaced = Vec::new();
+    if let Some(tools) = request.get("tools").and_then(Value::as_array) {
+        for tool in tools {
+            walk(tool, None, &mut plain, &mut namespaced);
+        }
+    }
+    (plain, namespaced)
+}
+
+/// Collect each distinct `function_call` a Responses response emitted, from a
+/// buffered body or from SSE frames. A streamed call appears on more than one
+/// frame, so results are deduplicated by call id.
+fn returned_function_calls(response_raw: &str) -> Vec<Value> {
+    fn walk(value: &Value, out: &mut Vec<Value>) {
+        match value {
+            Value::Array(items) => items.iter().for_each(|item| walk(item, out)),
+            Value::Object(map) => {
+                if matches!(
+                    map.get("type").and_then(Value::as_str),
+                    Some("function_call" | "response.function_call_arguments.done")
+                ) {
+                    out.push(Value::Object(map.clone()));
+                }
+                map.values().for_each(|value| walk(value, out));
+            }
+            _ => {}
+        }
+    }
+
+    let mut out = Vec::new();
+    let trimmed = response_raw.trim_start();
+    if trimmed.starts_with('{') || trimmed.starts_with('[') {
+        if let Ok(value) = serde_json::from_str::<Value>(response_raw) {
+            walk(&value, &mut out);
+        }
+    } else {
+        for payload in sse_data_json(response_raw) {
+            walk(&payload, &mut out);
+        }
+    }
+
+    let mut seen = HashSet::new();
+    out.retain(|call| {
+        let key = (
+            call.get("call_id")
+                .and_then(Value::as_str)
+                .unwrap_or_default()
+                .to_string(),
+            call.get("name")
+                .and_then(Value::as_str)
+                .unwrap_or_default()
+                .to_string(),
+            call.get("namespace")
+                .and_then(Value::as_str)
+                .unwrap_or_default()
+                .to_string(),
+        );
+        seen.insert(key)
+    });
+    out
+}
+
+/// Invariant (bug 102): a returned `function_call` must not be given a
+/// `namespace` the model did not choose. The client dispatches on the exact
+/// `(namespace, name)` pair, so a namespace added to a call the model made
+/// against a top-level tool sends it to a server the model never picked.
+///
+/// The returned call alone cannot tell a hijack from a valid restore: both are
+/// `{"name": "search", "namespace": "mcp__docs__"}`. Only the name the backend
+/// was recorded calling upstream separates them, so each record must carry
+/// `called_upstream_name`. When that name is the bare name of a tool the request
+/// also declared at the top level, the call is the top-level tool and any
+/// namespace on it is a hijack. Otherwise the namespace is a correct restore.
+///
+/// Reads the recorded client request, the recorded upstream call name and the
+/// recorded client response, so the checker names no gateway function.
+///
+/// Bounded: it assumes one call per record and that the gateway adds a namespace
+/// without also renaming the call. A gateway that renamed the call, or a
+/// response carrying several calls behind one recorded upstream name, needs
+/// evidence this shape does not carry.
+pub fn codex_namespace_only_applies_to_namespaced_tools(
+    capture_jsonl: &str,
+    expected_trials: usize,
+) -> Verdict {
+    if expected_trials == 0 {
+        return Verdict::Violation("namespace checker received an empty invariant".into());
+    }
+    let mut trials = 0usize;
+    let mut calls = 0usize;
+    let mut wrong: Vec<String> = Vec::new();
+    for line in capture_jsonl.lines().filter(|line| !line.trim().is_empty()) {
+        let record: Value = match serde_json::from_str(line) {
+            Ok(record) => record,
+            Err(error) => {
+                return Verdict::Violation(format!("capture is not valid JSONL: {error}"));
+            }
+        };
+        let (Some(request_raw), Some(response_raw)) = (
+            record
+                .get("client_request_body_raw")
+                .and_then(Value::as_str),
+            record
+                .get("client_response_body_raw")
+                .and_then(Value::as_str),
+        ) else {
+            return Verdict::Violation("capture is missing a client request or response".into());
+        };
+        let Some(called_upstream_name) = record
+            .get("called_upstream_name")
+            .and_then(Value::as_str)
+            .filter(|name| !name.is_empty())
+        else {
+            return Verdict::Violation(
+                "capture is missing the upstream name the backend called, so a hijack \
+                 cannot be told apart from a valid restore"
+                    .into(),
+            );
+        };
+        let request: Value = match serde_json::from_str(request_raw) {
+            Ok(request) => request,
+            Err(error) => {
+                return Verdict::Violation(format!(
+                    "captured client request is not valid JSON: {error}"
+                ));
+            }
+        };
+        let (plain, namespaced) = declared_responses_tools(&request);
+        trials += 1;
+        for call in returned_function_calls(response_raw) {
+            calls += 1;
+            let name = call.get("name").and_then(Value::as_str).unwrap_or_default();
+            let Some(namespace) = call.get("namespace").and_then(Value::as_str) else {
+                continue;
+            };
+            let declared = namespaced
+                .iter()
+                .any(|(declared, tool)| declared == namespace && tool == name);
+            if !declared {
+                wrong.push(format!(
+                    "came back as {namespace}/{name}, which the request never declared"
+                ));
+            } else if called_upstream_name == name && plain.contains(name) {
+                wrong.push(format!(
+                    "the backend called the bare top-level tool {name:?} and it came back \
+                     as namespace {namespace:?}"
+                ));
+            }
+        }
+    }
+    if trials != expected_trials {
+        return Verdict::Violation(format!("expected {expected_trials} trials, found {trials}"));
+    }
+    if let Some(first) = wrong.first() {
+        return Verdict::Violation(format!(
+            "{}/{} returned calls carry a namespace the model did not choose: {first}",
+            wrong.len(),
+            calls
+        ));
+    }
+    Verdict::Conformant
+}
+
+/// Message prefix for [`replayed_calls_keep_returned_namespace`].
+pub const REPLAYED_CALL_NAMESPACE_CHANGED: &str =
+    "a replayed function_call does not carry the namespace the provider returned";
+
+/// Collect `call_id -> namespace` for every `function_call` in OpenAI Responses
+/// bodies, buffered or SSE. A call seen with a namespace on any frame keeps it.
+fn returned_call_namespaces(bodies: &[&str]) -> BTreeMap<String, Option<String>> {
+    fn walk(value: &Value, out: &mut BTreeMap<String, Option<String>>) {
+        match value {
+            Value::Array(items) => items.iter().for_each(|item| walk(item, out)),
+            Value::Object(map) => {
+                if map.get("type").and_then(Value::as_str) == Some("function_call") {
+                    if let Some(call_id) = map.get("call_id").and_then(Value::as_str) {
+                        let namespace = map
+                            .get("namespace")
+                            .and_then(Value::as_str)
+                            .map(str::to_owned);
+                        let entry = out.entry(call_id.to_owned()).or_insert(None);
+                        if namespace.is_some() {
+                            *entry = namespace;
+                        }
+                    }
+                }
+                map.values().for_each(|value| walk(value, out));
+            }
+            _ => {}
+        }
+    }
+    let mut out = BTreeMap::new();
+    for body in bodies {
+        match serde_json::from_str::<Value>(body) {
+            Ok(value) => walk(&value, &mut out),
+            Err(_) => sse_data_json(body)
+                .iter()
+                .for_each(|value| walk(value, &mut out)),
+        }
+    }
+    out
+}
+
+/// Invariant (bug 103): when a gateway replays a model's `function_call` to an
+/// OpenAI Responses backend, the replayed item carries exactly the `namespace`
+/// the provider returned on that call. OpenAI sets a namespace on a call to a tool that
+/// tool search loaded on some models and paths, returns it to the client, and
+/// rejects a replay without it (`400 Missing namespace for function_call`). A
+/// gateway that rebuilds the history from a dialect with no namespace field,
+/// such as an Anthropic `tool_use`, has to restore it.
+///
+/// Reads the provider's earlier response bodies and the forwarded request body,
+/// so it names no gateway function and makes no assumption about which models
+/// assign a namespace. Calls are matched by `call_id`. A call the provider
+/// returned without a namespace is matched but not judged: OpenAI accepted its
+/// replay both with and without one. Evidence in which no replayed call matches
+/// a returned call does not exercise the invariant and is refused.
+pub fn replayed_calls_keep_returned_namespace(
+    provider_responses: &[&str],
+    forwarded_body: &str,
+) -> Verdict {
+    let Ok(request) = serde_json::from_str::<Value>(forwarded_body) else {
+        return Verdict::Violation("forwarded request body is not valid JSON".into());
+    };
+    let Some(input) = request.get("input").and_then(Value::as_array) else {
+        return Verdict::Violation("forwarded request has no input array".into());
+    };
+    let returned = returned_call_namespaces(provider_responses);
+
+    let mut judged = 0usize;
+    let mut changed = Vec::new();
+    for item in input {
+        if item.get("type").and_then(Value::as_str) != Some("function_call") {
+            continue;
+        }
+        let Some(call_id) = item.get("call_id").and_then(Value::as_str) else {
+            continue;
+        };
+        let Some(expected) = returned.get(call_id) else {
+            continue;
+        };
+        judged += 1;
+        let replayed = item.get("namespace").and_then(Value::as_str);
+        if expected.is_some() && replayed != expected.as_deref() {
+            let name = item.get("name").and_then(Value::as_str).unwrap_or_default();
+            changed.push(format!(
+                "{name} ({call_id}) returned with namespace {expected:?}, replayed with {replayed:?}"
+            ));
+        }
+    }
+    if judged == 0 {
+        return Verdict::Violation(
+            "no replayed function_call matches a call the provider returned".into(),
+        );
+    }
+    if let Some(first) = changed.first() {
+        return Verdict::Violation(format!(
+            "{REPLAYED_CALL_NAMESPACE_CHANGED}: {} of {judged} call(s), first: {first}",
+            changed.len()
+        ));
+    }
+    Verdict::Conformant
+}
+
+/// Message prefix for [`client_cache_breakpoints_reach_provider`].
+pub const CLIENT_CACHE_BREAKPOINT_DROPPED: &str =
+    "a prompt-cache breakpoint the client sent never reaches the provider";
+
+/// Anthropic accepts at most four `cache_control` breakpoints per request, and
+/// every dialect that carries one derives from that ceiling.
+const MAX_CACHE_BREAKPOINTS: usize = 4;
+
+fn is_marker(value: Option<&Value>) -> bool {
+    value.is_some_and(Value::is_object)
+}
+
+/// Breakpoints an OpenAI Chat Completions client asked for: one for a
+/// message-level `cache_control`, one for each content block that carries it,
+/// and one for each tool that carries it.
+fn client_cache_breakpoints(request: &Value) -> usize {
+    let messages = request
+        .get("messages")
+        .and_then(Value::as_array)
+        .map(Vec::as_slice)
+        .unwrap_or_default();
+    let in_messages: usize = messages
+        .iter()
+        .map(|message| {
+            usize::from(is_marker(message.get("cache_control")))
+                + message
+                    .get("content")
+                    .and_then(Value::as_array)
+                    .map_or(0, |blocks| {
+                        blocks
+                            .iter()
+                            .filter(|block| is_marker(block.get("cache_control")))
+                            .count()
+                    })
+        })
+        .sum();
+    let in_tools = request
+        .get("tools")
+        .and_then(Value::as_array)
+        .map_or(0, |tools| {
+            tools
+                .iter()
+                .filter(|tool| is_marker(tool.get("cache_control")))
+                .count()
+        });
+    in_messages + in_tools
+}
+
+/// Provider-native breakpoint keys: Anthropic and OpenAI-compatible
+/// `cache_control`, Bedrock `cachePoint`, OpenAI `prompt_cache_breakpoint`.
+const BREAKPOINT_KEYS: [&str; 3] = ["cache_control", "cachePoint", "prompt_cache_breakpoint"];
+
+fn own_breakpoints(item: &Value) -> usize {
+    BREAKPOINT_KEYS
+        .iter()
+        .filter(|key| is_marker(item.get(**key)))
+        .count()
+}
+
+/// Breakpoints on a list of content blocks, including blocks nested in a
+/// `tool_result` or Bedrock `toolResult` block.
+fn block_breakpoints(blocks: Option<&Value>) -> usize {
+    blocks.and_then(Value::as_array).map_or(0, |blocks| {
+        blocks
+            .iter()
+            .map(|block| {
+                own_breakpoints(block)
+                    + block_breakpoints(block.get("content"))
+                    + block_breakpoints(block.get("toolResult").and_then(|r| r.get("content")))
+            })
+            .sum()
+    })
+}
+
+/// Every breakpoint a forwarded request carries, read only where a provider
+/// dialect puts one: the request itself (Anthropic automatic caching), system
+/// blocks, a message or its content blocks (Anthropic Messages, OpenAI-compatible
+/// Chat, Bedrock Converse), Responses input items and their content, and tool
+/// definitions (`tools[]`, Bedrock `toolConfig.tools[]`). A field that only
+/// happens to be named `cache_control`, such as a tool parameter, is not a
+/// breakpoint.
+fn json_list(value: Option<&Value>) -> &[Value] {
+    value
+        .and_then(Value::as_array)
+        .map(Vec::as_slice)
+        .unwrap_or_default()
+}
+
+fn item_breakpoints(items: &[Value]) -> usize {
+    items
+        .iter()
+        .map(|item| own_breakpoints(item) + block_breakpoints(item.get("content")))
+        .sum()
+}
+
+fn forwarded_cache_breakpoints(request: &Value) -> usize {
+    own_breakpoints(request)
+        + block_breakpoints(request.get("system"))
+        + item_breakpoints(json_list(request.get("messages")))
+        + item_breakpoints(json_list(request.get("input")))
+        + json_list(request.get("tools"))
+            .iter()
+            .map(own_breakpoints)
+            .sum::<usize>()
+        + json_list(request.get("toolConfig").and_then(|c| c.get("tools")))
+            .iter()
+            .map(own_breakpoints)
+            .sum::<usize>()
+}
+
+/// Invariant (bug 105): a prompt-cache breakpoint the client sent reaches the
+/// provider. A Chat Completions client may mark a message with `cache_control`
+/// on the message itself or on one of its content blocks; either way the
+/// forwarded request has to carry at least as many provider-native breakpoints
+/// as the client asked for, up to the four Anthropic allows. Providers that
+/// cache only on explicit breakpoints (Anthropic, and Anthropic models behind
+/// OpenRouter or Bedrock) otherwise bill the whole prompt at the uncached rate
+/// on every turn.
+///
+/// Counts markers rather than matching positions, so it accepts any placement a
+/// gateway chooses (for example moving a message-level marker onto the
+/// message's last block) and names no gateway function. Every marked block
+/// counts on its own, so losing one of two markers in a message is caught, and
+/// only real breakpoint locations count on the forwarded side. A client request
+/// with no marker does not exercise the invariant and is refused.
+pub fn client_cache_breakpoints_reach_provider(client_body: &str, forwarded_body: &str) -> Verdict {
+    let Ok(client) = serde_json::from_str::<Value>(client_body) else {
+        return Verdict::Violation("client request body is not valid JSON".into());
+    };
+    let Ok(forwarded) = serde_json::from_str::<Value>(forwarded_body) else {
+        return Verdict::Violation("forwarded request body is not valid JSON".into());
+    };
+    let requested = client_cache_breakpoints(&client).min(MAX_CACHE_BREAKPOINTS);
+    if requested == 0 {
+        return Verdict::Violation(
+            "client request carries no cache_control breakpoint, so it does not exercise the invariant"
+                .into(),
+        );
+    }
+    let delivered = forwarded_cache_breakpoints(&forwarded);
+    if delivered < requested {
+        return Verdict::Violation(format!(
+            "{CLIENT_CACHE_BREAKPOINT_DROPPED}: client asked for {requested}, forwarded body carries {delivered}"
+        ));
+    }
+    Verdict::Conformant
+}
+
+pub const WORKER_LOSS_SURFACED: &str = "worker loss surfaced to the client";
+
+/// Invariant (106): when the worker serving a stream dies and the request is
+/// one the gateway documents as migratable, the loss stays invisible to the
+/// client. The stream carries no error event, ends in the endpoint's normal
+/// terminal state, and every tool call it starts finishes with arguments that
+/// parse as JSON.
+///
+/// The precondition matters. Dynamo documents guided-decoding requests,
+/// including tool calls under its default structural tags, as excluded from
+/// migration, so a loss on such a request reaching the client is documented
+/// behavior, not a violation of this invariant. The caller supplies a stream
+/// recorded while a worker was killed mid-stream; the checker judges only what
+/// the client received and names no gateway function. Malformed SSE data, a
+/// stream with no JSON data, or an endpoint without a rule fails closed.
+pub fn worker_loss_stays_invisible(endpoint: &str, sse_body: &str) -> Verdict {
+    let payloads = match strict_sse_payloads(sse_body) {
+        Ok(payloads) => payloads,
+        Err(bad) => return surfaced(&format!("malformed SSE data {bad}")),
+    };
+    if payloads.is_empty() {
+        return Verdict::Violation("stream carried no JSON data".into());
+    }
+    match endpoint {
+        "/v1/chat/completions" => chat_stream_survives(&payloads),
+        "/v1/messages" => messages_stream_survives(&payloads),
+        "/v1/responses" => responses_stream_survives(&payloads),
+        _ => Verdict::Violation(format!("no rule for endpoint {endpoint:?}")),
+    }
+}
+
+/// Every SSE event's `data` field as JSON, joining multi-line data per the SSE
+/// spec and skipping `[DONE]`. Unlike `sse_data_json`, a data field that is not
+/// JSON is an error rather than silently dropped, because a client SDK rejects it.
+fn strict_sse_payloads(body: &str) -> Result<Vec<Value>, String> {
+    let mut payloads = Vec::new();
+    let mut data: Vec<&str> = Vec::new();
+    let mut flush = |data: &mut Vec<&str>| -> Result<(), String> {
+        if data.is_empty() {
+            return Ok(());
+        }
+        let joined = data.join("\n");
+        data.clear();
+        if joined == "[DONE]" {
+            return Ok(());
+        }
+        serde_json::from_str::<Value>(&joined)
+            .map(|value| payloads.push(value))
+            .map_err(|_| truncate_for_reason(&joined))
+    };
+    for line in body.lines() {
+        if line.is_empty() {
+            flush(&mut data)?;
+        } else if let Some(rest) = line.strip_prefix("data:") {
+            data.push(rest.strip_prefix(' ').unwrap_or(rest));
+        }
+    }
+    flush(&mut data)?;
+    Ok(payloads)
+}
+
+fn surfaced(detail: &str) -> Verdict {
+    Verdict::Violation(format!(
+        "{WORKER_LOSS_SURFACED}: {}",
+        truncate_for_reason(detail)
+    ))
+}
+
+fn unparseable_arguments(arguments: &[String]) -> Option<Verdict> {
+    arguments.iter().find_map(|args| {
+        let args = if args.is_empty() { "{}" } else { args.as_str() };
+        serde_json::from_str::<Value>(args)
+            .err()
+            .map(|error| surfaced(&format!("tool call arguments are not JSON ({error})")))
+    })
+}
+
+fn kind(payload: &Value) -> &str {
+    payload.get("type").and_then(Value::as_str).unwrap_or("")
+}
+
+fn chat_stream_survives(payloads: &[Value]) -> Verdict {
+    if let Some(error) = payloads.iter().find_map(|p| p.get("error")) {
+        return surfaced(&format!("error event {error}"));
+    }
+    let mut arguments: BTreeMap<u64, String> = BTreeMap::new();
+    let mut finished = false;
+    for choice in payloads
+        .iter()
+        .filter_map(|p| p.get("choices").and_then(Value::as_array))
+        .flatten()
+    {
+        finished |= choice
+            .get("finish_reason")
+            .and_then(Value::as_str)
+            .is_some();
+        for call in choice
+            .pointer("/delta/tool_calls")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+        {
+            let index = call.get("index").and_then(Value::as_u64).unwrap_or(0);
+            let piece = call
+                .pointer("/function/arguments")
+                .and_then(Value::as_str)
+                .unwrap_or("");
+            arguments.entry(index).or_default().push_str(piece);
+        }
+    }
+    if !finished {
+        return surfaced("stream ended without a finish_reason");
+    }
+    let arguments: Vec<String> = arguments.into_values().collect();
+    unparseable_arguments(&arguments).unwrap_or(Verdict::Conformant)
+}
+
+fn messages_stream_survives(payloads: &[Value]) -> Verdict {
+    if let Some(error) = payloads.iter().find(|p| kind(p) == "error") {
+        return surfaced(&format!("error event {error}"));
+    }
+    let mut tool_blocks: BTreeMap<u64, String> = BTreeMap::new();
+    for payload in payloads {
+        let index = payload.get("index").and_then(Value::as_u64).unwrap_or(0);
+        match kind(payload) {
+            "content_block_start"
+                if payload
+                    .pointer("/content_block/type")
+                    .and_then(Value::as_str)
+                    == Some("tool_use") =>
+            {
+                tool_blocks.insert(index, String::new());
+            }
+            "content_block_delta" => {
+                if let (Some(buffer), Some(piece)) = (
+                    tool_blocks.get_mut(&index),
+                    payload
+                        .pointer("/delta/partial_json")
+                        .and_then(Value::as_str),
+                ) {
+                    buffer.push_str(piece);
+                }
+            }
+            _ => {}
+        }
+    }
+    let stopped = payloads.iter().any(|p| kind(p) == "message_stop");
+    let stop_reason = payloads
+        .iter()
+        .filter(|p| kind(p) == "message_delta")
+        .find_map(|p| p.pointer("/delta/stop_reason").and_then(Value::as_str));
+    if !stopped || stop_reason.is_none() {
+        return surfaced("stream ended without message_stop and a stop_reason");
+    }
+    let arguments: Vec<String> = tool_blocks.into_values().collect();
+    unparseable_arguments(&arguments).unwrap_or(Verdict::Conformant)
+}
+
+fn responses_stream_survives(payloads: &[Value]) -> Verdict {
+    if let Some(failure) = payloads
+        .iter()
+        .find(|p| matches!(kind(p), "error" | "response.failed"))
+    {
+        let detail = failure
+            .pointer("/response/error")
+            .unwrap_or(failure)
+            .to_string();
+        return surfaced(&format!("{} {detail}", kind(failure)));
+    }
+    let terminal = payloads
+        .iter()
+        .map(kind)
+        .filter(|k| matches!(*k, "response.completed" | "response.incomplete"))
+        .count();
+    if terminal != 1 {
+        return surfaced(&format!(
+            "expected one completed or incomplete terminal event, saw {terminal}"
+        ));
+    }
+    // Every function call the stream starts must finish with its arguments,
+    // from `function_call_arguments.done` or the finished output item.
+    let mut started: BTreeSet<u64> = BTreeSet::new();
+    let mut finished: BTreeMap<u64, String> = BTreeMap::new();
+    for payload in payloads {
+        let index = payload.get("output_index").and_then(Value::as_u64);
+        let is_call =
+            payload.pointer("/item/type").and_then(Value::as_str) == Some("function_call");
+        match (kind(payload), index) {
+            ("response.output_item.added", Some(i)) if is_call => {
+                started.insert(i);
+            }
+            ("response.function_call_arguments.done", Some(i)) => {
+                started.insert(i);
+                if let Some(args) = payload.get("arguments").and_then(Value::as_str) {
+                    finished.insert(i, args.to_owned());
+                }
+            }
+            ("response.output_item.done", Some(i)) if is_call => {
+                started.insert(i);
+                if let Some(args) = payload.pointer("/item/arguments").and_then(Value::as_str) {
+                    finished.entry(i).or_insert_with(|| args.to_owned());
+                }
+            }
+            _ => {}
+        }
+    }
+    if let Some(open) = started.iter().find(|i| !finished.contains_key(i)) {
+        return surfaced(&format!(
+            "function call at output_index {open} started but never finished"
+        ));
+    }
+    let arguments: Vec<String> = finished.into_values().collect();
+    unparseable_arguments(&arguments).unwrap_or(Verdict::Conformant)
+}
+
+pub const TOOL_RESULT_IMAGE_DROPPED: &str = "tool-result image dropped before the provider";
+pub const TOOL_RESULT_TURN_REJECTED: &str = "provider rejected the forwarded tool-result turn";
+
+/// Base64 payload of a data URL, or `None` for a remote URL.
+fn data_url_payload(url: &str) -> Option<&str> {
+    url.strip_prefix("data:")?
+        .split_once(',')
+        .map(|(_, data)| data)
+}
+
+/// Every base64 image a client returned inside a tool result, in the three
+/// request dialects: Chat Completions `tool` messages, Anthropic `tool_result`
+/// blocks, and Responses `function_call_output` items.
+fn client_tool_result_images(request: &Value) -> Vec<String> {
+    let mut images = Vec::new();
+    let mut push = |data: Option<&str>| {
+        if let Some(data) = data.filter(|d| !d.is_empty()) {
+            images.push(data.to_owned());
+        }
+    };
+    for message in request["messages"].as_array().into_iter().flatten() {
+        let blocks = message["content"].as_array().into_iter().flatten();
+        if message["role"] == "tool" {
+            for block in blocks.filter(|b| b["type"] == "image_url") {
+                let url = block["image_url"]["url"]
+                    .as_str()
+                    .or_else(|| block["image_url"].as_str());
+                push(url.and_then(data_url_payload));
+            }
+            continue;
+        }
+        for result in blocks.filter(|b| b["type"] == "tool_result") {
+            for block in result["content"].as_array().into_iter().flatten() {
+                if block["type"] == "image" && block["source"]["type"] == "base64" {
+                    push(block["source"]["data"].as_str());
+                }
+            }
+        }
+    }
+    for item in request["input"].as_array().into_iter().flatten() {
+        if item["type"] != "function_call_output" {
+            continue;
+        }
+        for block in item["output"].as_array().into_iter().flatten() {
+            if block["type"] == "input_image" {
+                push(block["image_url"].as_str().and_then(data_url_payload));
+            }
+        }
+    }
+    images
+}
+
+/// Base64 payload of one image part in any of the four request dialects the
+/// harness records: Gemini `inline_data` / `inlineData` with an image MIME type,
+/// Chat `image_url`, Anthropic `image` and Responses `input_image`, the last two
+/// as data URLs. Text, tool arguments and JSON function responses are never
+/// image parts, so a data URL pasted into them is not an image.
+fn image_part_payload(part: &Value) -> Option<&str> {
+    if let Some(blob) = part.get("inline_data").or_else(|| part.get("inlineData")) {
+        let mime = blob
+            .get("mime_type")
+            .or_else(|| blob.get("mimeType"))
+            .and_then(Value::as_str)
+            .unwrap_or_default();
+        return blob["data"].as_str().filter(|_| mime.starts_with("image/"));
+    }
+    match part["type"].as_str()? {
+        "image_url" => part["image_url"]["url"]
+            .as_str()
+            .or_else(|| part["image_url"].as_str())
+            .and_then(data_url_payload),
+        "input_image" => part["image_url"].as_str().and_then(data_url_payload),
+        "image" if part["source"]["type"] == "base64" => part["source"]["data"].as_str(),
+        _ => None,
+    }
+}
+
+/// The parts or content blocks of one forwarded turn.
+fn turn_parts(turn: &Value) -> impl Iterator<Item = &Value> {
+    ["parts", "content", "output"]
+        .into_iter()
+        .filter_map(|key| turn[key].as_array())
+        .flatten()
+}
+
+/// Whether a forwarded turn carries a tool result: a Chat `tool` message, a
+/// Responses `function_call_output` item, or a Gemini or Anthropic turn holding
+/// a function response or `tool_result` block.
+fn is_tool_result_turn(turn: &Value) -> bool {
+    turn["role"] == "tool"
+        || turn["type"] == "function_call_output"
+        || turn_parts(turn).any(|part| {
+            part.get("function_response").is_some()
+                || part.get("functionResponse").is_some()
+                || part["type"] == "tool_result"
+        })
+}
+
+/// Image payloads a forwarded turn carries as image parts, either directly or
+/// one level inside a Gemini function response's `parts` or an Anthropic
+/// `tool_result` block's `content`.
+fn turn_images<'a>(turn: &'a Value, out: &mut Vec<&'a str>) {
+    for part in turn_parts(turn) {
+        out.extend(image_part_payload(part));
+        let inner = part
+            .get("function_response")
+            .or_else(|| part.get("functionResponse"))
+            .map_or(&part["content"], |response| &response["parts"]);
+        out.extend(
+            inner
+                .as_array()
+                .into_iter()
+                .flatten()
+                .filter_map(image_part_payload),
+        );
+    }
+}
+
+/// Every image payload the forwarded body delivers with a tool result: image
+/// parts inside a tool-result turn, plus the user turn that immediately follows
+/// a run of tool-result turns, where a gateway may move media that its target's
+/// tool messages cannot carry. Images anywhere else in the history are not
+/// tool-result delivery.
+fn forwarded_tool_result_images(body: &Value) -> Vec<&str> {
+    let turns = ["contents", "messages", "input"]
+        .into_iter()
+        .find_map(|key| body[key].as_array())
+        .map_or(&[][..], Vec::as_slice);
+    let mut images = Vec::new();
+    let mut after_tool_result = false;
+    for turn in turns {
+        if is_tool_result_turn(turn) {
+            turn_images(turn, &mut images);
+            after_tool_result = true;
+        } else {
+            if after_tool_result && turn["role"] == "user" {
+                turn_images(turn, &mut images);
+            }
+            after_tool_result = false;
+        }
+    }
+    images
+}
+
+/// Invariant (107): an image a client returns in a tool result reaches the
+/// provider as an image with that tool result, and the provider accepts the
+/// turn that carries it. A screenshot or file an agent's tool produced is the
+/// context the next model turn needs; dropping it blinds the model, and a shape
+/// the provider refuses turns every later turn into the same error for as long
+/// as the client replays that tool result.
+///
+/// Placement-agnostic within the tool-result turn: the image may sit nested in
+/// a function response or `tool_result` block, beside it in the same turn, or
+/// in the user turn right after it, in any of the four recorded dialects. Only
+/// image parts count. A data URL pasted into text or a JSON function response
+/// (the #23712 shape, which a provider accepts with 200 and cannot see) and a
+/// matching image elsewhere in the history are not delivery, and a body in an
+/// unrecognized dialect has no tool-result turn and fails closed. The
+/// provider's own status code then judges whether the shape was acceptable, so
+/// the checker names no gateway function. A client request with no
+/// tool-result image does not exercise the invariant and is refused.
+pub fn tool_result_images_reach_provider(
+    client_body: &str,
+    forwarded_body: &str,
+    provider_status: u16,
+    provider_body: &str,
+) -> Verdict {
+    let Ok(client) = serde_json::from_str::<Value>(client_body) else {
+        return Verdict::Violation("client request body is not valid JSON".into());
+    };
+    let Ok(forwarded) = serde_json::from_str::<Value>(forwarded_body) else {
+        return Verdict::Violation("forwarded request body is not valid JSON".into());
+    };
+    let images = client_tool_result_images(&client);
+    if images.is_empty() {
+        return Verdict::Violation(
+            "client request carries no tool-result image, so it does not exercise the invariant"
+                .into(),
+        );
+    }
+    let delivered = forwarded_tool_result_images(&forwarded);
+    let mut wanted: BTreeMap<&str, usize> = BTreeMap::new();
+    for image in &images {
+        *wanted.entry(image.as_str()).or_default() += 1;
+    }
+    for (image, count) in wanted {
+        let found = delivered.iter().filter(|d| **d == image).count();
+        if found < count {
+            return Verdict::Violation(format!(
+                "{TOOL_RESULT_IMAGE_DROPPED}: client sent {count}, forwarded tool-result turns carry {found}"
+            ));
+        }
+    }
+    if !(200..300).contains(&provider_status) {
+        let reason = serde_json::from_str::<Value>(provider_body)
+            .ok()
+            .and_then(|v| v["error"]["message"].as_str().map(str::to_owned))
+            .unwrap_or_else(|| provider_body.chars().take(200).collect());
+        return Verdict::Violation(format!(
+            "{TOOL_RESULT_TURN_REJECTED}: HTTP {provider_status}: {reason}"
+        ));
+    }
+    Verdict::Conformant
+}
+
 /// Invariant (bug 098): a virtual key scoped to a set of models MUST NOT be
 /// served by a model outside that set, whichever request field names the
 /// model. The image handlers bind `model` from `?model=` or the
@@ -2160,6 +3942,204 @@ fn hex_value(byte: u8) -> Option<u8> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn worker_loss_checker_judges_every_endpoint_and_fails_closed() {
+        let chat = |tail: &str| {
+            format!(
+                "data: {{\"choices\":[{{\"index\":0,\"delta\":{{\"tool_calls\":[{{\"index\":0,\"function\":{{\"name\":\"w\",\"arguments\":\"{{\\\"a\\\": \"}}}}]}}}}]}}\n\n{tail}data: [DONE]\n\n"
+            )
+        };
+        let finished = chat("data: {\"choices\":[{\"index\":0,\"delta\":{\"tool_calls\":[{\"index\":0,\"function\":{\"arguments\":\"1}\"}}]},\"finish_reason\":\"tool_calls\"}]}\n\n");
+        assert_eq!(
+            worker_loss_stays_invisible("/v1/chat/completions", &finished),
+            Verdict::Conformant
+        );
+        // An error event, a stream that never finishes, and a cut tool call all fail.
+        for body in [
+            chat("data: {\"error\":{\"message\":\"Service temporarily unavailable\",\"code\":503}}\n\n"),
+            chat(""),
+            chat("data: {\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"tool_calls\"}]}\n\n"),
+        ] {
+            assert!(matches!(
+                worker_loss_stays_invisible("/v1/chat/completions", &body),
+                Verdict::Violation(reason) if reason.starts_with(WORKER_LOSS_SURFACED)
+            ));
+        }
+
+        let start = "data: {\"type\":\"message_start\",\"message\":{}}\n\n";
+        let tool = "data: {\"type\":\"content_block_start\",\"index\":0,\"content_block\":{\"type\":\"tool_use\",\"name\":\"w\",\"input\":{}}}\n\ndata: {\"type\":\"content_block_delta\",\"index\":0,\"delta\":{\"type\":\"input_json_delta\",\"partial_json\":\"{\\\"a\\\": 1}\"}}\n\ndata: {\"type\":\"content_block_stop\",\"index\":0}\n\n";
+        let end = "data: {\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"tool_use\"}}\n\ndata: {\"type\":\"message_stop\"}\n\n";
+        let overloaded = "data: {\"type\":\"error\",\"error\":{\"type\":\"overloaded_error\"}}\n\n";
+        assert_eq!(
+            worker_loss_stays_invisible("/v1/messages", &format!("{start}{tool}{end}")),
+            Verdict::Conformant
+        );
+        assert!(
+            !worker_loss_stays_invisible("/v1/messages", &format!("{start}{overloaded}"))
+                .is_conformant()
+        );
+        assert!(
+            !worker_loss_stays_invisible("/v1/messages", &format!("{start}{tool}")).is_conformant()
+        );
+
+        let created = "data: {\"type\":\"response.created\",\"response\":{}}\n\n";
+        let done = "data: {\"type\":\"response.function_call_arguments.done\",\"arguments\":\"{\\\"a\\\": 1}\"}\n\n";
+        let completed = "data: {\"type\":\"response.completed\",\"response\":{}}\n\n";
+        let failed = "data: {\"type\":\"response.failed\",\"response\":{\"error\":{\"code\":\"server_error\"}}}\n\n";
+        assert_eq!(
+            worker_loss_stays_invisible("/v1/responses", &format!("{created}{done}{completed}")),
+            Verdict::Conformant
+        );
+        assert!(
+            !worker_loss_stays_invisible("/v1/responses", &format!("{created}{failed}"))
+                .is_conformant()
+        );
+        assert!(!worker_loss_stays_invisible("/v1/responses", created).is_conformant());
+
+        // Review counterexamples: a started call whose arguments never finish,
+        // and malformed SSE data between valid chat frames, both fail.
+        let added = "data: {\"type\":\"response.output_item.added\",\"output_index\":0,\"item\":{\"type\":\"function_call\",\"arguments\":\"\"}}\n\n";
+        let partial = "data: {\"type\":\"response.function_call_arguments.delta\",\"output_index\":0,\"delta\":\"{\\\"a\\\": \"}\n\n";
+        assert!(matches!(
+            worker_loss_stays_invisible("/v1/responses", &format!("{created}{added}{partial}{completed}")),
+            Verdict::Violation(reason) if reason.contains("never finished")
+        ));
+        // Without the malformed frame this stream is conformant (see `finished`).
+        let garbled = finished.replacen(
+            "data: [DONE]",
+            "data: {\"choices\": [oops\n\ndata: [DONE]",
+            1,
+        );
+        assert!(matches!(
+            worker_loss_stays_invisible("/v1/chat/completions", &garbled),
+            Verdict::Violation(reason) if reason.contains("malformed SSE data")
+        ));
+
+        // Evidence that cannot exercise the invariant never passes.
+        assert!(!worker_loss_stays_invisible("/v1/chat/completions", "").is_conformant());
+        assert!(!worker_loss_stays_invisible("/v1/embeddings", &finished).is_conformant());
+    }
+
+    #[test]
+    fn replayed_namespace_checker_round_trips_what_the_provider_returned() {
+        let namespaced = r#"{"output":[{"type":"function_call","call_id":"c1","name":"lookup","namespace":"lookup","arguments":"{}"}]}"#;
+        let plain = r#"{"output":[{"type":"function_call","call_id":"c1","name":"lookup","arguments":"{}"}]}"#;
+        let streamed = "event: response.output_item.done\ndata: {\"type\":\"response.output_item.done\",\"item\":{\"type\":\"function_call\",\"call_id\":\"c1\",\"name\":\"lookup\",\"namespace\":\"lookup\"}}\n\n";
+        let replay = |namespace: &str| {
+            format!(
+                r#"{{"input":[{{"role":"user","content":"go"}},{{"type":"function_call","call_id":"c1","name":"lookup","arguments":"{{}}"{namespace}}},{{"type":"function_call_output","call_id":"c1","output":"ok"}}]}}"#
+            )
+        };
+        let bare = replay("");
+        let kept = replay(r#","namespace":"lookup""#);
+        let other = replay(r#","namespace":"other""#);
+
+        // The provider set a namespace: the replay must carry it.
+        assert!(matches!(
+            replayed_calls_keep_returned_namespace(&[namespaced], &bare),
+            Verdict::Violation(reason) if reason.starts_with(REPLAYED_CALL_NAMESPACE_CHANGED)
+        ));
+        assert!(!replayed_calls_keep_returned_namespace(&[streamed], &bare).is_conformant());
+        assert_eq!(
+            replayed_calls_keep_returned_namespace(&[namespaced], &kept),
+            Verdict::Conformant
+        );
+        assert!(!replayed_calls_keep_returned_namespace(&[namespaced], &other).is_conformant());
+        // The provider set none: either replay is accepted.
+        assert_eq!(
+            replayed_calls_keep_returned_namespace(&[plain], &bare),
+            Verdict::Conformant
+        );
+        assert_eq!(
+            replayed_calls_keep_returned_namespace(&[plain], &kept),
+            Verdict::Conformant
+        );
+
+        // Evidence that does not exercise the invariant never passes.
+        let unrelated = r#"{"output":[{"type":"function_call","call_id":"c9","name":"lookup"}]}"#;
+        for (responses, forwarded) in [
+            (vec![unrelated], bare.as_str()),
+            (vec![], bare.as_str()),
+            (vec![namespaced], ""),
+            (vec![namespaced], "not-json"),
+            (vec![namespaced], r#"{"messages":[]}"#),
+        ] {
+            assert!(
+                !replayed_calls_keep_returned_namespace(&responses, forwarded).is_conformant(),
+                "{forwarded:?} must not pass"
+            );
+        }
+    }
+
+    #[test]
+    fn host_tool_checker_flags_a_successful_emptying_and_accepts_a_refusal() {
+        let client =
+            r#"{"tools":[{"type":"mcp","server_label":"srv","server_url":"https://x/mcp"}]}"#;
+        let emptied = r#"{"messages":[{"role":"user","content":"go"}]}"#;
+        assert_eq!(
+            host_tool_not_silently_erased(200, client, emptied),
+            Verdict::Violation(
+                HOST_TOOL_SILENTLY_ERASED.to_string()
+                    + ": [\"mcp\"] absent from the forwarded tools array"
+            )
+        );
+        // Failing closed is conformant.
+        assert_eq!(
+            host_tool_not_silently_erased(400, client, emptied),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn host_tool_checker_accepts_a_preserved_tool_in_any_dialect_shape() {
+        let client =
+            r#"{"tools":[{"type":"mcp","server_label":"srv","server_url":"https://x/mcp"}]}"#;
+        // Forwarded verbatim on the Responses-dialect route.
+        assert_eq!(
+            host_tool_not_silently_erased(
+                200,
+                client,
+                r#"{"input":"go","tools":[{"type":"mcp","server_url":"https://x/mcp","server_label":"srv"}]}"#
+            ),
+            Verdict::Conformant
+        );
+        // Rewritten but faithful: every identifying coordinate is still there.
+        assert_eq!(
+            host_tool_not_silently_erased(
+                200,
+                client,
+                r#"{"messages":[],"tools":[{"type":"mcp","server_label":"srv","server_url":"https://x/mcp","extra":1}]}"#
+            ),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn host_tool_checker_ignores_representable_and_empty_requests() {
+        assert_eq!(
+            host_tool_not_silently_erased(
+                200,
+                r#"{"tools":[{"type":"function","name":"f","parameters":{}}]}"#,
+                r#"{"messages":[]}"#
+            ),
+            Verdict::Conformant
+        );
+        assert_eq!(
+            host_tool_not_silently_erased(200, r#"{"input":"go"}"#, r#"{"input":"go"}"#),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn host_tool_checker_rejects_unparseable_evidence() {
+        for bad in ["", "not json", "[]"] {
+            assert!(matches!(
+                host_tool_not_silently_erased(200, bad, bad),
+                Verdict::Violation(_)
+            ));
+        }
+    }
 
     #[test]
     fn ogx_adaptive_checker_is_non_vacuous_and_checks_trial_count() {
@@ -2997,6 +4977,72 @@ data: {"type":"response.output_text.delta","delta":"late"}
     }
 
     #[test]
+    fn allowlist_checker_is_nonvacuous_in_both_directions() {
+        let request = "POST /v1/images/generations?model=denied-model HTTP/1.1\r\n\
+                       Content-Type: application/json\r\n\r\n\
+                       {\"model\":\"allowed-model\"}";
+        let ok = "HTTP/1.1 200 OK\r\n\r\n{}";
+        let rejected = "HTTP/1.1 403 Forbidden\r\n\r\n{}";
+        let upstream = r#"{"path":"/v1/images/generations"}"#;
+
+        assert_eq!(
+            allowlist_bounds_served_model(request, rejected, "", &["allowed-model"]),
+            Verdict::Conformant,
+            "a disallowed URL model rejected before upstream is the correct outcome"
+        );
+        assert!(
+            matches!(
+                allowlist_bounds_served_model(request, ok, upstream, &["allowed-model"]),
+                Verdict::Violation(_)
+            ),
+            "a disallowed URL model served by upstream must be caught"
+        );
+        assert!(
+            matches!(
+                allowlist_bounds_served_model(request, rejected, upstream, &["allowed-model"]),
+                Verdict::Violation(_)
+            ),
+            "a rejected request that still reached upstream must be caught"
+        );
+        let allowed = "POST /v1/images/generations HTTP/1.1\r\n\
+                       Content-Type: application/json\r\n\r\n\
+                       {\"model\":\"allowed-model\"}";
+        assert_eq!(
+            allowlist_bounds_served_model(allowed, ok, upstream, &["allowed-model"]),
+            Verdict::Conformant
+        );
+        assert!(
+            matches!(
+                allowlist_bounds_served_model(allowed, rejected, "", &["allowed-model"]),
+                Verdict::Violation(_)
+            ),
+            "an allowed model rejected without upstream must be caught"
+        );
+    }
+
+    #[test]
+    fn allowlist_checker_rejects_malformed_evidence() {
+        for bad in [
+            "",
+            "POST /v1/images/generations HTTP/1.1",
+            "POST /v1/images/generations HTTP/1.1\r\n\r\n{}",
+        ] {
+            assert!(
+                matches!(
+                    allowlist_bounds_served_model(
+                        bad,
+                        "HTTP/1.1 200 OK\r\n\r\n{}",
+                        "",
+                        &["allowed-model"]
+                    ),
+                    Verdict::Violation(_)
+                ),
+                "{bad:?} must not pass as evidence"
+            );
+        }
+    }
+
+    #[test]
     fn responses_fallback_not_spliced_after_delivery_checker() {
         let added = |id: &str, index: u64| {
             format!(
@@ -3219,68 +5265,971 @@ data: [DONE]
     }
 
     #[test]
-    fn allowlist_checker_is_nonvacuous_in_both_directions() {
-        let request = "POST /v1/images/generations?model=denied-model HTTP/1.1\r\n\
-                       Content-Type: application/json\r\n\r\n\
-                       {\"model\":\"allowed-model\"}";
-        let ok = "HTTP/1.1 200 OK\r\n\r\n{}";
-        let rejected = "HTTP/1.1 403 Forbidden\r\n\r\n{}";
-        let upstream = r#"{"path":"/v1/images/generations"}"#;
-
+    fn endpoint_family_checker_rejects_vacuous_or_foreign_evidence() {
+        let json = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n";
+        let sse = "HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\n\r\n";
+        let chat = r#"{"object":"chat.completion","choices":[{"index":0,"message":{"role":"assistant","content":"x"},"finish_reason":"stop"}]}"#;
+        let response = r#"{"object":"response","output":[]}"#;
         assert_eq!(
-            allowlist_bounds_served_model(request, rejected, "", &["allowed-model"]),
-            Verdict::Conformant,
-            "a disallowed URL model rejected before upstream is the correct outcome"
-        );
-        assert!(
-            matches!(
-                allowlist_bounds_served_model(request, ok, upstream, &["allowed-model"]),
-                Verdict::Violation(_)
-            ),
-            "a disallowed URL model served by upstream must be caught"
-        );
-        assert!(
-            matches!(
-                allowlist_bounds_served_model(request, rejected, upstream, &["allowed-model"]),
-                Verdict::Violation(_)
-            ),
-            "a rejected request that still reached upstream must be caught"
-        );
-        let allowed = "POST /v1/images/generations HTTP/1.1\r\n\
-                       Content-Type: application/json\r\n\r\n\
-                       {\"model\":\"allowed-model\"}";
-        assert_eq!(
-            allowlist_bounds_served_model(allowed, ok, upstream, &["allowed-model"]),
+            endpoint_response_family_preserved("/v1/chat/completions", &format!("{json}{chat}")),
             Verdict::Conformant
         );
-        assert!(
-            matches!(
-                allowlist_bounds_served_model(allowed, rejected, "", &["allowed-model"]),
-                Verdict::Violation(_)
+        assert_eq!(
+            endpoint_response_family_preserved("/v1/responses", &format!("{json}{response}")),
+            Verdict::Conformant
+        );
+        let responses_stream =
+            "data: {\"type\":\"response.created\"}\n\ndata: {\"type\":\"response.completed\"}\n\n";
+        assert_eq!(
+            endpoint_response_family_preserved(
+                "/v1/responses",
+                &format!("{sse}{responses_stream}")
             ),
-            "an allowed model rejected without upstream must be caught"
+            Verdict::Conformant
+        );
+        let cases = [
+            ("/v1/responses", format!("{json}{chat}")),
+            ("/v1/chat/completions", format!("{json}{response}")),
+            ("/v1/responses", format!("{json}null")),
+            ("/v1/chat/completions", format!("{json}not-json")),
+            (
+                "/v1/chat/completions",
+                format!("HTTP/1.1 500 Internal Server Error\r\n\r\n{chat}"),
+            ),
+            ("/v1/chat/completions", chat.to_owned()),
+            ("/v1/embeddings", format!("{json}{chat}")),
+            (
+                "/v1/responses",
+                format!("{sse}data: {{\"type\":\"response.created\"}}\n\n"),
+            ),
+            ("/v1/chat/completions", format!("{sse}{responses_stream}")),
+            ("/v1/chat/completions", format!("{sse}data: [DONE]\n\n")),
+        ];
+        for (endpoint, capture) in cases {
+            assert!(
+                matches!(
+                    endpoint_response_family_preserved(endpoint, &capture),
+                    Verdict::Violation(_)
+                ),
+                "{endpoint} must reject {capture:?}"
+            );
+        }
+    }
+    fn stop_record(
+        stop: &[&str],
+        generation: Option<&str>,
+        text: &str,
+        reason: &str,
+        seq: Option<&str>,
+    ) -> String {
+        serde_json::json!({
+            "stop_sequences": stop,
+            "generation": generation,
+            "text": text,
+            "stop_reason": reason,
+            "stop_sequence": seq,
+        })
+        .to_string()
+    }
+
+    #[test]
+    fn anthropic_stop_sequence_dropped_is_caught() {
+        let line = stop_record(
+            &["</a>", "\n\nHuman:"],
+            Some("<a>x</a> tail"),
+            "<a>x",
+            "end_turn",
+            None,
+        );
+        let v = anthropic_stop_sequence_reported(&line);
+        assert!(
+            matches!(&v, Verdict::Violation(r) if r.contains("\"</a>\"")),
+            "{v:?}"
         );
     }
 
     #[test]
-    fn allowlist_checker_rejects_malformed_evidence() {
+    fn anthropic_stop_sequence_reported_is_conformant() {
+        let line = stop_record(
+            &["</a>", "\n\nHuman:"],
+            Some("<a>x</a> tail"),
+            "<a>x",
+            "stop_sequence",
+            Some("</a>"),
+        );
+        assert_eq!(anthropic_stop_sequence_reported(&line), Verdict::Conformant);
+    }
+
+    #[test]
+    fn anthropic_stop_sequence_hosted_report_is_validated() {
+        let ok = stop_record(&["</a>"], None, "<a>x", "stop_sequence", Some("</a>"));
+        assert_eq!(anthropic_stop_sequence_reported(&ok), Verdict::Conformant);
+        let unrequested = stop_record(&["</a>"], None, "<a>x", "stop_sequence", Some("</b>"));
+        assert!(!anthropic_stop_sequence_reported(&unrequested).is_conformant());
+        let invented = stop_record(
+            &["</a>"],
+            Some("<a>x tail"),
+            "<a>x",
+            "stop_sequence",
+            Some("</a>"),
+        );
+        assert!(!anthropic_stop_sequence_reported(&invented).is_conformant());
+        let null_seq = stop_record(&["</a>"], None, "<a>x", "stop_sequence", None);
+        assert!(!anthropic_stop_sequence_reported(&null_seq).is_conformant());
+        let leaked = stop_record(&["</a>"], None, "<a>x</a>", "stop_sequence", Some("</a>"));
+        assert!(!anthropic_stop_sequence_reported(&leaked).is_conformant());
+    }
+
+    #[test]
+    fn anthropic_natural_end_without_stop_sequences_is_conformant() {
+        let line = stop_record(
+            &[],
+            Some("<a>x</a> tail"),
+            "<a>x</a> tail",
+            "end_turn",
+            None,
+        );
+        assert_eq!(anthropic_stop_sequence_reported(&line), Verdict::Conformant);
+    }
+
+    fn with_budget(line: &str, max_tokens: u64, output_tokens: u64) -> String {
+        let mut record: Value = serde_json::from_str(line).unwrap();
+        record["max_tokens"] = max_tokens.into();
+        record["output_tokens"] = output_tokens.into();
+        record.to_string()
+    }
+
+    #[test]
+    fn anthropic_length_stop_before_sequence_is_conformant() {
+        let line = stop_record(&["</a>"], Some("<a>x"), "<a>x", "max_tokens", None);
+        assert_eq!(anthropic_stop_sequence_reported(&line), Verdict::Conformant);
+    }
+
+    #[test]
+    fn anthropic_length_stop_at_delimiter_boundary_is_conformant() {
+        // The budget runs out exactly where the delimiter would begin. Whether or
+        // not in-flight tokens after the cut were emitted, this is a length stop.
+        for generation in ["<a>x", "<a>x</a> tail"] {
+            let line = with_budget(
+                &stop_record(&["</a>"], Some(generation), "<a>x", "max_tokens", None),
+                3,
+                3,
+            );
+            assert_eq!(
+                anthropic_stop_sequence_reported(&line),
+                Verdict::Conformant,
+                "{generation:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn anthropic_max_tokens_with_unused_budget_is_rejected() {
+        let line = with_budget(
+            &stop_record(&["</a>"], Some("<a>x</a> tail"), "<a>x", "max_tokens", None),
+            200,
+            4,
+        );
+        assert!(!anthropic_stop_sequence_reported(&line).is_conformant());
+    }
+
+    #[test]
+    fn anthropic_stop_sequence_must_name_the_delimiter_that_fired() {
+        let stop = ["END", "STOP"];
+        let first = stop_record(
+            &stop,
+            Some("helloENDtailSTOP"),
+            "hello",
+            "stop_sequence",
+            Some("END"),
+        );
+        assert_eq!(
+            anthropic_stop_sequence_reported(&first),
+            Verdict::Conformant
+        );
+        let wrong = stop_record(
+            &stop,
+            Some("helloENDtailSTOP"),
+            "hello",
+            "stop_sequence",
+            Some("STOP"),
+        );
+        assert!(!anthropic_stop_sequence_reported(&wrong).is_conformant());
+        let later = stop_record(
+            &stop,
+            Some("aENDSTOP"),
+            "aEND",
+            "stop_sequence",
+            Some("STOP"),
+        );
+        assert!(!anthropic_stop_sequence_reported(&later).is_conformant());
+        let truncated = stop_record(
+            &["STOP"],
+            Some("hello world STOP"),
+            "hello",
+            "stop_sequence",
+            Some("STOP"),
+        );
+        assert!(!anthropic_stop_sequence_reported(&truncated).is_conformant());
+    }
+
+    #[test]
+    fn anthropic_sequence_on_other_stop_reason_is_rejected() {
+        let line = stop_record(&["</a>"], Some("<a>x"), "<a>x", "end_turn", Some("</a>"));
+        assert!(!anthropic_stop_sequence_reported(&line).is_conformant());
+    }
+
+    #[test]
+    fn anthropic_partial_delimiter_leak_with_end_turn_is_caught() {
+        // ai-dynamo 1.5.0 returns the delimiter minus its last character.
+        let line = stop_record(
+            &["</a>"],
+            Some("<a>x</a> tail"),
+            "<a>x</a",
+            "end_turn",
+            None,
+        );
+        assert!(!anthropic_stop_sequence_reported(&line).is_conformant());
+    }
+
+    #[test]
+    fn anthropic_stop_after_natural_text_end_is_not_a_hit() {
+        // A sequence emitted after the point the text stopped did not end the turn.
+        let line = stop_record(&["</a>"], Some("<a>x tail </a>"), "<a>x", "end_turn", None);
+        assert_eq!(anthropic_stop_sequence_reported(&line), Verdict::Conformant);
+    }
+
+    #[test]
+    fn anthropic_stop_sequence_malformed_or_empty_capture_is_rejected() {
+        assert!(!anthropic_stop_sequence_reported("not json").is_conformant());
+        assert!(!anthropic_stop_sequence_reported("{\"text\":\"x\"}").is_conformant());
+        assert!(!anthropic_stop_sequence_reported("").is_conformant());
+    }
+
+    #[test]
+    fn registration_checker_flags_a_registration_only_one_path_can_see() {
+        // Recorded from NIXL's POSIX backend: FILE_SEG registered with len == 0 at
+        // offset 4096. Register and deregister both succeed, the transfer fails.
+        let cell = r#"{"cell":"B","reg_len":0,"offset":4096,"register":0,
+            "createXferReq":-4,"covered":true,"deregister":0}"#;
+        let verdict = registration_resolvable_by_both_paths(cell);
+        assert!(
+            matches!(&verdict, Verdict::Violation(reason)
+                if reason.contains("accepted and can be deregistered")),
+            "{verdict:?}"
+        );
+    }
+
+    #[test]
+    fn registration_checker_accepts_both_controls() {
+        // len == 0 at offset 0 resolves, because the wrapped add cannot wrap at 0.
+        assert_eq!(
+            registration_resolvable_by_both_paths(
+                r#"{"cell":"A","register":0,"createXferReq":0,"covered":true,"deregister":0}"#
+            ),
+            Verdict::Conformant
+        );
+        // An explicit len at the same offset resolves.
+        assert_eq!(
+            registration_resolvable_by_both_paths(
+                r#"{"cell":"C","register":0,"createXferReq":0,"covered":true,"deregister":0}"#
+            ),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn registration_checker_does_not_flag_a_correct_refusal() {
+        // The transfer range is outside the registration. Refusing is right, and a
+        // registration the transfer path never claimed must not be scored.
+        assert_eq!(
+            registration_resolvable_by_both_paths(
+                r#"{"register":0,"createXferReq":-4,"covered":false,"deregister":0}"#
+            ),
+            Verdict::Conformant
+        );
+        // Nothing was registered at all.
+        assert_eq!(
+            registration_resolvable_by_both_paths(
+                r#"{"register":-3,"createXferReq":-4,"covered":true,"deregister":-4}"#
+            ),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn registration_checker_rejects_vacuous_and_malformed_evidence() {
         for bad in [
             "",
-            "POST /v1/images/generations HTTP/1.1",
-            "POST /v1/images/generations HTTP/1.1\r\n\r\n{}",
+            "not json",
+            "[]",
+            r#"{"register":0,"deregister":0}"#,
+            r#"{"register":0,"createXferReq":-4,"deregister":0}"#,
+            r#"{"register":"0","createXferReq":-4,"covered":true,"deregister":0}"#,
+            r#"{"register":0,"createXferReq":-4,"covered":"yes","deregister":0}"#,
         ] {
             assert!(
                 matches!(
-                    allowlist_bounds_served_model(
-                        bad,
-                        "HTTP/1.1 200 OK\r\n\r\n{}",
-                        "",
-                        &["allowed-model"]
-                    ),
+                    registration_resolvable_by_both_paths(bad),
                     Verdict::Violation(_)
                 ),
                 "{bad:?} must not pass as evidence"
             );
         }
+    }
+
+    /// A chat-completions request whose structured-output schema pins one
+    /// integer. The identifier is spliced as raw JSON text so a test can pin an
+    /// integer that no `f64` can represent.
+    fn schema_request(identifier: &str) -> String {
+        r#"{"model":"capture-model","messages":[{"role":"user","content":"Return the allowed record ID."}],"max_tokens":32,"response_format":{"type":"json_schema","json_schema":{"name":"record","strict":true,"schema":{"type":"object","properties":{"record_id":{"type":"integer","enum":[IDENT]}},"required":["record_id"],"additionalProperties":false}}}}"#.replace("IDENT", identifier)
+    }
+
+    fn http_request(body: &str) -> String {
+        format!(
+            "POST /v1/chat/completions HTTP/1.1\r\nHost: localhost:8443\r\nContent-Type: application/json\r\nContent-Length: {}\r\n\r\n{body}",
+            body.len()
+        )
+    }
+
+    #[test]
+    fn forwarded_body_checker_reports_a_rounded_integer() {
+        let client = http_request(&schema_request("9007199254740993"));
+        let forwarded = http_request(&schema_request("9007199254740992"));
+        assert!(
+            matches!(&forwarded_body_preserves_values(&client, &forwarded, &[]), Verdict::Violation(reason) if reason.contains("9007199254740993, forwarded 9007199254740992")),
+            "the rounding must be named with both values: {client:?} vs {forwarded:?}"
+        );
+    }
+
+    #[test]
+    fn forwarded_body_checker_accepts_the_same_large_integer() {
+        let request = http_request(&schema_request("9007199254740993"));
+        assert_eq!(
+            forwarded_body_preserves_values(&request, &request, &[]),
+            Verdict::Conformant
+        );
+        // 2^53 exactly is the last integer f64 holds without rounding, so the
+        // boundary value itself must not be reported.
+        let boundary = http_request(&schema_request("9007199254740992"));
+        assert_eq!(
+            forwarded_body_preserves_values(&boundary, &boundary, &[]),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn forwarded_body_checker_accepts_reordered_object_keys() {
+        // A re-marshaled Go map sorts keys at every depth. Same values, same
+        // key sets, different order: that is not the defect.
+        let client = http_request(&schema_request("9007199254740993"));
+        let reordered = r#"{"max_tokens":32,"messages":[{"content":"Return the allowed record ID.","role":"user"}],"model":"capture-model","response_format":{"json_schema":{"name":"record","schema":{"additionalProperties":false,"properties":{"record_id":{"enum":[9007199254740993],"type":"integer"}},"required":["record_id"],"type":"object"},"strict":true},"type":"json_schema"}}"#;
+        assert_eq!(
+            forwarded_body_preserves_values(&client, &http_request(reordered), &[]),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn forwarded_body_checker_allows_declared_orchestration_fields() {
+        let client = http_request(&schema_request("9007199254740993"));
+        // The prefill leg adds transfer metadata and caps the budget. Both are
+        // documented coordinator behaviour, so they must be declared, not
+        // reported.
+        let prefill = r#"{"kv_transfer_params":{"do_remote_decode":true,"do_remote_prefill":false},"max_completion_tokens":1,"max_tokens":1,"messages":[{"content":"Return the allowed record ID.","role":"user"}],"model":"capture-model","response_format":{"json_schema":{"name":"record","schema":{"additionalProperties":false,"properties":{"record_id":{"enum":[9007199254740993],"type":"integer"}},"required":["record_id"],"type":"object"},"strict":true},"type":"json_schema"},"stream":false}"#;
+        let allowed = [
+            "kv_transfer_params",
+            "max_completion_tokens",
+            "max_tokens",
+            "stream",
+        ];
+        assert_eq!(
+            forwarded_body_preserves_values(&client, &http_request(prefill), &allowed),
+            Verdict::Conformant
+        );
+        // Without the declaration the same additions are reported, so an
+        // undisclosed field change still fails.
+        assert!(matches!(
+            forwarded_body_preserves_values(&client, &http_request(prefill), &[]),
+            Verdict::Violation(reason) if reason.contains("was added")
+        ));
+    }
+
+    #[test]
+    fn forwarded_body_checker_exempts_declared_fields_only_at_the_top_level() {
+        // The allowlist names request fields, not key names: a rounded integer
+        // inside a nested object must still be reported even when the nested
+        // key happens to carry a declared name.
+        let large = 9_007_199_254_740_993_i64;
+        let client_body = serde_json::json!({
+            "model": "capture-model",
+            "messages": [],
+            "max_tokens": 32,
+            "nested": {"stream": large},
+            "response_format": {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "record",
+                    "strict": true,
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "record_id": {"type": "integer", "enum": [large]}
+                        },
+                        "required": ["record_id"],
+                        "additionalProperties": false
+                    }
+                }
+            }
+        });
+        let mut rounded = client_body.clone();
+        rounded["nested"]["stream"] = serde_json::json!(large - 1);
+        let mut capped = client_body.clone();
+        capped["max_tokens"] = serde_json::json!(1);
+        let client = http_request(&client_body.to_string());
+        let allowed = ["max_tokens", "stream"];
+        assert!(matches!(
+            forwarded_body_preserves_values(
+                &client,
+                &http_request(&rounded.to_string()),
+                &allowed
+            ),
+            Verdict::Violation(reason) if reason.contains("/nested/stream")
+        ));
+        // Both changes at once: the declared one is still exempt, the nested one
+        // is still reported.
+        let mut both = capped.clone();
+        both["nested"]["stream"] = serde_json::json!(large - 1);
+        assert!(matches!(
+            forwarded_body_preserves_values(&client, &http_request(&both.to_string()), &allowed),
+            Verdict::Violation(reason) if reason.contains("/nested/stream")
+        ));
+        // Only the declared top-level field changed: that is conformant.
+        assert_eq!(
+            forwarded_body_preserves_values(&client, &http_request(&capped.to_string()), &allowed),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn forwarded_body_checker_fails_closed_on_absent_or_malformed_evidence() {
+        let client = http_request(&schema_request("9007199254740993"));
+        let no_schema = http_request(r#"{"model":"capture-model","messages":[]}"#);
+        let malformed = http_request(r#"{"model":"capture-model","messages":"#);
+        let not_http = "no header terminator at all";
+        let no_client_schema = http_request(r#"{"model":"capture-model","messages":[]}"#);
+        assert!(matches!(
+            forwarded_body_preserves_values(&client, &no_schema, &[]),
+            Verdict::Violation(reason) if reason.contains("carries no response_format")
+        ));
+        assert!(matches!(
+            forwarded_body_preserves_values(&client, &malformed, &[]),
+            Verdict::Violation(reason) if reason.contains("not valid JSON")
+        ));
+        assert!(matches!(
+            forwarded_body_preserves_values(&client, not_http, &[]),
+            Verdict::Violation(reason) if reason.contains("not a raw HTTP message")
+        ));
+        assert!(matches!(
+            forwarded_body_preserves_values(&no_client_schema, &no_schema, &[]),
+            Verdict::Violation(reason) if reason.contains("carries no response_format")
+        ));
+    }
+
+    #[test]
+    fn forwarded_body_checker_reports_other_value_changes() {
+        let client = http_request(&schema_request("9007199254740993"));
+        let dropped_entry = http_request(
+            r#"{"model":"capture-model","messages":[],"max_tokens":32,"response_format":{"type":"json_schema","json_schema":{"name":"record","strict":true,"schema":{"type":"object","properties":{"record_id":{"type":"integer","enum":[]}},"required":["record_id"],"additionalProperties":false}}}}"#,
+        );
+        assert!(matches!(
+            forwarded_body_preserves_values(&client, &dropped_entry, &[]),
+            Verdict::Violation(reason) if reason.contains("/enum")
+        ));
+        let renamed_type = http_request(
+            r#"{"model":"capture-model","messages":[],"max_tokens":32,"response_format":{"type":"json_schema","json_schema":{"name":"record","strict":true,"schema":{"type":"object","properties":{"record_id":{"type":"string","enum":["9007199254740993"]}},"required":["record_id"],"additionalProperties":false}}}}"#,
+        );
+        assert!(matches!(
+            forwarded_body_preserves_values(&client, &renamed_type, &[]),
+            Verdict::Violation(reason) if reason.contains("client sent \"integer\"")
+        ));
+    }
+
+    #[test]
+    fn server_tool_checker_passes_an_unchanged_definition() {
+        let client = http_request(
+            r#"{"model":"m","messages":[],"tools":[{"type":"web_search_20250305","name":"web_search","max_uses":8},{"name":"Bash","input_schema":{"type":"object"}}]}"#,
+        );
+        let reordered = http_request(
+            r#"{"model":"target","messages":[],"tools":[{"name":"Bash","input_schema":{"type":"object"}},{"max_uses":8,"name":"web_search","type":"web_search_20250305"}]}"#,
+        );
+        assert_eq!(
+            anthropic_server_tools_forwarded(&client, &reordered),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn server_tool_checker_reports_a_rebuilt_or_missing_tool() {
+        let client = http_request(
+            r#"{"model":"m","messages":[],"tools":[{"type":"web_search_20250305","name":"web_search","max_uses":8}]}"#,
+        );
+        let rebuilt = http_request(
+            r#"{"model":"target","messages":[],"tools":[{"name":"web_search","description":"","input_schema":{}}]}"#,
+        );
+        assert!(matches!(
+            anthropic_server_tools_forwarded(&client, &rebuilt),
+            Verdict::Violation(reason) if reason.contains("web_search_20250305") && reason.contains("input_schema")
+        ));
+        let dropped = http_request(r#"{"model":"target","messages":[]}"#);
+        assert!(matches!(
+            anthropic_server_tools_forwarded(&client, &dropped),
+            Verdict::Violation(reason) if reason.contains("was not forwarded")
+        ));
+        let lost_option = http_request(
+            r#"{"model":"target","messages":[],"tools":[{"type":"web_search_20250305","name":"web_search"}]}"#,
+        );
+        assert!(matches!(
+            anthropic_server_tools_forwarded(&client, &lost_option),
+            Verdict::Violation(reason) if reason.contains("was forwarded as")
+        ));
+    }
+
+    #[test]
+    fn server_tool_checker_is_not_vacuous() {
+        let custom_only = http_request(
+            r#"{"model":"m","messages":[],"tools":[{"type":"custom","name":"Bash","input_schema":{"type":"object"}}]}"#,
+        );
+        assert!(matches!(
+            anthropic_server_tools_forwarded(&custom_only, &custom_only),
+            Verdict::Violation(reason) if reason.contains("declares no Anthropic server tool")
+        ));
+        assert!(matches!(
+            anthropic_server_tools_forwarded("not http", &custom_only),
+            Verdict::Violation(reason) if reason.contains("not a raw HTTP message")
+        ));
+    }
+
+    #[test]
+    fn codex_namespace_checker_uses_the_upstream_call_name_not_the_returned_bytes() {
+        let plain_and_nested = serde_json::json!({
+            "tools": [
+                {"type": "function", "name": "search", "parameters": {}},
+                {"type": "namespace", "name": "mcp__docs__", "tools": [
+                    {"type": "function", "name": "search", "parameters": {}}
+                ]}
+            ]
+        });
+        let response = serde_json::json!({
+            "output": [{"type": "function_call", "call_id": "c1", "name": "search",
+                        "namespace": "mcp__docs__"}]
+        });
+
+        // The model called the bare top-level tool. The namespace is a hijack.
+        let hijack = serde_json::json!({
+            "called_upstream_name": "search",
+            "client_request_body_raw": plain_and_nested.to_string(),
+            "client_response_body_raw": response.to_string(),
+        });
+        assert!(matches!(
+            codex_namespace_only_applies_to_namespaced_tools(&hijack.to_string(), 1),
+            Verdict::Violation(_)
+        ));
+
+        // The SAME response bytes, but the backend called the qualified name.
+        // Restoring the pair is correct, so this must pass. This is the case a
+        // request-and-response-only checker gets wrong.
+        let valid_restore = serde_json::json!({
+            "called_upstream_name": "mcp__docs____search",
+            "client_request_body_raw": plain_and_nested.to_string(),
+            "client_response_body_raw": response.to_string(),
+        });
+        assert_eq!(
+            codex_namespace_only_applies_to_namespaced_tools(&valid_restore.to_string(), 1),
+            Verdict::Conformant
+        );
+
+        // A pair the request never declared, whichever name was called.
+        let undeclared = serde_json::json!({
+            "called_upstream_name": "search",
+            "client_request_body_raw": serde_json::json!({"tools": [
+                {"type": "function", "name": "search", "parameters": {}}
+            ]}).to_string(),
+            "client_response_body_raw": response.to_string(),
+        });
+        assert!(matches!(
+            codex_namespace_only_applies_to_namespaced_tools(&undeclared.to_string(), 1),
+            Verdict::Violation(_)
+        ));
+
+        // No namespace on a top-level tool is conformant.
+        let plain_only = serde_json::json!({
+            "called_upstream_name": "search",
+            "client_request_body_raw": serde_json::json!({"tools": [
+                {"type": "function", "name": "search", "parameters": {}}
+            ]}).to_string(),
+            "client_response_body_raw": serde_json::json!({
+                "output": [{"type": "function_call", "call_id": "c1", "name": "search"}]
+            }).to_string(),
+        });
+        assert_eq!(
+            codex_namespace_only_applies_to_namespaced_tools(&plain_only.to_string(), 1),
+            Verdict::Conformant
+        );
+
+        // The streamed shape is judged the same way.
+        let stream = format!(
+            "data: {}\n\ndata: {}\n\n",
+            serde_json::json!({"type": "response.output_item.added", "item": {
+                "type": "function_call", "call_id": "c1", "name": "search",
+                "namespace": "mcp__docs__"}}),
+            serde_json::json!({"type": "response.output_item.done", "item": {
+                "type": "function_call", "call_id": "c1", "name": "search",
+                "namespace": "mcp__docs__"}}),
+        );
+        for (called, conformant) in [("search", false), ("mcp__docs____search", true)] {
+            let streamed = serde_json::json!({
+                "called_upstream_name": called,
+                "client_request_body_raw": plain_and_nested.to_string(),
+                "client_response_body_raw": stream,
+            });
+            let verdict =
+                codex_namespace_only_applies_to_namespaced_tools(&streamed.to_string(), 1);
+            if conformant {
+                assert_eq!(verdict, Verdict::Conformant, "called {called}");
+            } else {
+                assert!(matches!(verdict, Verdict::Violation(_)), "called {called}");
+            }
+        }
+    }
+
+    #[test]
+    fn codex_namespace_checker_refuses_evidence_it_cannot_judge() {
+        let request = serde_json::json!({"tools": [
+            {"type": "function", "name": "search", "parameters": {}},
+            {"type": "namespace", "name": "mcp__docs__", "tools": [
+                {"type": "function", "name": "search", "parameters": {}}
+            ]}
+        ]})
+        .to_string();
+        let response = serde_json::json!({
+            "output": [{"type": "function_call", "call_id": "c1", "name": "search",
+                        "namespace": "mcp__docs__"}]
+        })
+        .to_string();
+        let record = |called: Option<&str>| match called {
+            Some(name) => serde_json::json!({
+                "called_upstream_name": name,
+                "client_request_body_raw": request,
+                "client_response_body_raw": response,
+            })
+            .to_string(),
+            None => serde_json::json!({
+                "client_request_body_raw": request,
+                "client_response_body_raw": response,
+            })
+            .to_string(),
+        };
+        let hijack = record(Some("search"));
+        let valid = record(Some("mcp__docs____search"));
+
+        // Vacuous, foreign, and over-claimed trial counts never pass.
+        for evidence in ["", "not-json", r#"{"auth_scope":"attacker"}"#, &hijack] {
+            assert!(
+                matches!(
+                    codex_namespace_only_applies_to_namespaced_tools(evidence, 2),
+                    Verdict::Violation(_)
+                ),
+                "{evidence:?} must not pass as evidence"
+            );
+        }
+        assert!(matches!(
+            codex_namespace_only_applies_to_namespaced_tools(&hijack, 0),
+            Verdict::Violation(_)
+        ));
+        // Without the recorded upstream call the checker cannot tell a hijack
+        // from a valid restore, so it must refuse rather than guess.
+        assert!(matches!(
+            codex_namespace_only_applies_to_namespaced_tools(&record(None), 1),
+            Verdict::Violation(_)
+        ));
+        // The valid restore is still judged on its own merits.
+        assert_eq!(
+            codex_namespace_only_applies_to_namespaced_tools(&valid, 1),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn client_cache_breakpoints_must_reach_the_provider() {
+        let message_level = r#"{"messages":[{"role":"system","content":"sys","cache_control":{"type":"ephemeral"}},{"role":"user","content":"hi","cache_control":{"type":"ephemeral"}}]}"#;
+        let block_level = r#"{"messages":[{"role":"system","content":[{"type":"text","text":"sys","cache_control":{"type":"ephemeral"}}]},{"role":"user","content":[{"type":"text","text":"hi","cache_control":{"type":"ephemeral"}}]}]}"#;
+        let unmarked = r#"{"messages":[{"role":"user","content":"hi"}]}"#;
+        let anthropic_dropped = r#"{"system":"sys","messages":[{"role":"user","content":[{"type":"text","text":"hi"}]}]}"#;
+        let anthropic_kept = r#"{"system":[{"type":"text","text":"sys","cache_control":{"type":"ephemeral"}}],"messages":[{"role":"user","content":[{"type":"text","text":"hi","cache_control":{"type":"ephemeral"}}]}]}"#;
+        let anthropic_one = r#"{"system":[{"type":"text","text":"sys","cache_control":{"type":"ephemeral"}}],"messages":[{"role":"user","content":"hi"}]}"#;
+        let bedrock_kept = r#"{"system":[{"text":"sys"},{"cachePoint":{"type":"default"}}],"messages":[{"role":"user","content":[{"text":"hi"},{"cachePoint":{"type":"default"}}]}]}"#;
+
+        for client in [message_level, block_level] {
+            assert!(matches!(
+                client_cache_breakpoints_reach_provider(client, anthropic_dropped),
+                Verdict::Violation(reason) if reason.starts_with(CLIENT_CACHE_BREAKPOINT_DROPPED)
+            ));
+            assert!(
+                !client_cache_breakpoints_reach_provider(client, anthropic_one).is_conformant()
+            );
+            assert_eq!(
+                client_cache_breakpoints_reach_provider(client, anthropic_kept),
+                Verdict::Conformant
+            );
+            assert_eq!(
+                client_cache_breakpoints_reach_provider(client, bedrock_kept),
+                Verdict::Conformant
+            );
+        }
+        // A client that asked for nothing does not exercise the invariant.
+        assert!(!client_cache_breakpoints_reach_provider(unmarked, anthropic_kept).is_conformant());
+        // Markers beyond Anthropic's four are not required.
+        let six: Vec<String> = (0..6)
+            .map(|i| {
+                format!(
+                    r#"{{"role":"user","content":"m{i}","cache_control":{{"type":"ephemeral"}}}}"#
+                )
+            })
+            .collect();
+        let many = format!(r#"{{"messages":[{}]}}"#, six.join(","));
+        let four: Vec<String> = (0..4)
+            .map(|i| {
+                format!(r#"{{"type":"text","text":"m{i}","cache_control":{{"type":"ephemeral"}}}}"#)
+            })
+            .collect();
+        let clamped = format!(
+            r#"{{"messages":[{{"role":"user","content":[{}]}}]}}"#,
+            four.join(",")
+        );
+        assert_eq!(
+            client_cache_breakpoints_reach_provider(&many, &clamped),
+            Verdict::Conformant
+        );
+
+        // Two marked blocks in one message ask for two breakpoints.
+        let two_blocks = r#"{"messages":[{"role":"user","content":[{"type":"text","text":"a","cache_control":{"type":"ephemeral"}},{"type":"text","text":"b","cache_control":{"type":"ephemeral"}}]}]}"#;
+        let kept_one = r#"{"messages":[{"role":"user","content":[{"type":"text","text":"a","cache_control":{"type":"ephemeral"}},{"type":"text","text":"b"}]}]}"#;
+        let kept_two = r#"{"messages":[{"role":"user","content":[{"type":"text","text":"a","cache_control":{"type":"ephemeral"}},{"type":"text","text":"b","cache_control":{"type":"ephemeral"}}]}]}"#;
+        assert!(matches!(
+            client_cache_breakpoints_reach_provider(two_blocks, kept_one),
+            Verdict::Violation(reason) if reason.starts_with(CLIENT_CACHE_BREAKPOINT_DROPPED)
+        ));
+        assert_eq!(
+            client_cache_breakpoints_reach_provider(two_blocks, kept_two),
+            Verdict::Conformant
+        );
+
+        // A tool parameter that happens to be named cache_control is not a breakpoint.
+        let one_marker =
+            r#"{"messages":[{"role":"user","content":"hi","cache_control":{"type":"ephemeral"}}]}"#;
+        let schema_only = r#"{"messages":[{"role":"user","content":[{"type":"text","text":"hi"}]}],"tools":[{"type":"function","function":{"name":"f","parameters":{"type":"object","properties":{"cache_control":{"type":"object"}}}}}]}"#;
+        assert!(!client_cache_breakpoints_reach_provider(one_marker, schema_only).is_conformant());
+        let anthropic_schema_only = r#"{"messages":[{"role":"user","content":[{"type":"text","text":"hi"}]}],"tools":[{"name":"f","input_schema":{"type":"object","properties":{"cache_control":{"type":"object"}}}}]}"#;
+        assert!(
+            !client_cache_breakpoints_reach_provider(one_marker, anthropic_schema_only)
+                .is_conformant()
+        );
+        // A marker on a tool definition, or kept at message level for an
+        // OpenAI-compatible provider, is a breakpoint.
+        let tool_marker = r#"{"messages":[{"role":"user","content":"hi"}],"tools":[{"name":"f","input_schema":{},"cache_control":{"type":"ephemeral"}}]}"#;
+        assert_eq!(
+            client_cache_breakpoints_reach_provider(one_marker, tool_marker),
+            Verdict::Conformant
+        );
+        assert_eq!(
+            client_cache_breakpoints_reach_provider(one_marker, one_marker),
+            Verdict::Conformant
+        );
+    }
+
+    const IMG_107: &str = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk";
+    const CALL_107: &str = r#"{"role":"model","parts":[{"function_call":{"name":"f","args":{}}}]}"#;
+    const REJECTED_107: &str = r#"{"error":{"code":400,"message":"Multimodal function responses are not supported for this model.","status":"INVALID_ARGUMENT"}}"#;
+
+    fn png_107(data: &str) -> String {
+        format!("data:image/png;base64,{data}")
+    }
+
+    /// A Gemini body: the model's function call, then `tool_turn`, optionally
+    /// after an earlier user turn.
+    fn gemini_107(before: &str, tool_turn: &str) -> String {
+        format!(r#"{{"contents":[{before}{CALL_107},{tool_turn}]}}"#)
+    }
+
+    fn chat_client_107() -> String {
+        format!(
+            r#"{{"messages":[{{"role":"tool","tool_call_id":"c","content":[{{"type":"text","text":"t"}},{{"type":"image_url","image_url":{{"url":"{}"}}}}]}}]}}"#,
+            png_107(IMG_107)
+        )
+    }
+
+    /// The same tool-result image in the Chat, Anthropic and Responses dialects.
+    fn clients_107() -> [String; 3] {
+        [
+            chat_client_107(),
+            format!(
+                r#"{{"messages":[{{"role":"user","content":[{{"type":"tool_result","tool_use_id":"t","content":[{{"type":"image","source":{{"type":"base64","media_type":"image/png","data":"{IMG_107}"}}}}]}}]}}]}}"#
+            ),
+            format!(
+                r#"{{"input":[{{"type":"function_call_output","call_id":"c","output":[{{"type":"input_image","image_url":"{}"}}]}}]}}"#,
+                png_107(IMG_107)
+            ),
+        ]
+    }
+
+    fn nested_107() -> String {
+        gemini_107(
+            "",
+            &format!(
+                r#"{{"role":"user","parts":[{{"function_response":{{"name":"f","response":{{}},"parts":[{{"inline_data":{{"mime_type":"image/png","data":"{IMG_107}"}}}}]}}}}]}}"#
+            ),
+        )
+    }
+
+    fn sibling_107() -> String {
+        gemini_107(
+            "",
+            &format!(
+                r#"{{"role":"user","parts":[{{"function_response":{{"name":"f","response":{{}}}}}},{{"inline_data":{{"mime_type":"image/png","data":"{IMG_107}"}}}}]}}"#
+            ),
+        )
+    }
+
+    /// A Gemini tool turn whose function response carries `response` and no image part.
+    fn text_only_107(before: &str, response: &str) -> String {
+        gemini_107(
+            before,
+            &format!(
+                r#"{{"role":"user","parts":[{{"function_response":{{"name":"f","response":{response}}}}}]}}"#
+            ),
+        )
+    }
+
+    #[test]
+    fn tool_result_images_count_wherever_the_tool_result_turn_carries_them() {
+        let camel = gemini_107(
+            "",
+            &format!(
+                r#"{{"role":"user","parts":[{{"functionResponse":{{"name":"f","response":{{}},"parts":[{{"inlineData":{{"mimeType":"image/png","data":"{IMG_107}"}}}}]}}}}]}}"#
+            ),
+        );
+        // An OpenAI-compatible gateway may move the image into the user turn
+        // right after the tool message, because tool messages carry text only.
+        let chat_moved = format!(
+            r#"{{"messages":[{{"role":"tool","tool_call_id":"c","content":"t"}},{{"role":"user","content":[{{"type":"image_url","image_url":{{"url":"{}"}}}}]}}]}}"#,
+            png_107(IMG_107)
+        );
+        let clients = clients_107();
+        let mut forwarded = vec![nested_107(), sibling_107(), camel, chat_moved];
+        forwarded.extend(clients.iter().cloned());
+        for client in &clients {
+            for body in &forwarded {
+                assert_eq!(
+                    tool_result_images_reach_provider(client, body, 200, "{}"),
+                    Verdict::Conformant,
+                    "{body}"
+                );
+            }
+            assert!(matches!(
+                tool_result_images_reach_provider(client, &nested_107(), 400, REJECTED_107),
+                Verdict::Violation(reason) if reason.starts_with(TOOL_RESULT_TURN_REJECTED)
+                    && reason.contains("Multimodal function responses")
+            ));
+        }
+    }
+
+    #[test]
+    fn tool_result_images_not_delivered_as_image_parts_with_the_result_are_dropped() {
+        let earlier = format!(
+            r#"{{"role":"user","parts":[{{"text":"look"}},{{"inline_data":{{"mime_type":"image/png","data":"{IMG_107}"}}}}]}},"#
+        );
+        let image_url = format!(
+            r#"{{"type":"image_url","image_url":{{"url":"{}"}}}}"#,
+            png_107(IMG_107)
+        );
+        let lost = [
+            // dropped outright
+            text_only_107("", r#"{"content":"t"}"#),
+            // pasted as text into the function response: the #23712 shape,
+            // which Gemini accepts with 200 and cannot see
+            text_only_107("", &format!(r#"{{"content":"{}"}}"#, png_107(IMG_107))),
+            // dumped as JSON into the function response
+            text_only_107("", &format!(r#"{{"content":[{image_url}]}}"#)),
+            // kept only as an earlier user image
+            text_only_107(&earlier, r#"{"content":"t"}"#),
+            // carried with a non-image MIME type
+            sibling_107().replace("image/png", "text/plain"),
+            // forwarded outside any tool-result turn
+            format!(r#"{{"messages":[{{"role":"user","content":[{image_url}]}}]}}"#),
+            // in a user turn after an unrelated assistant turn
+            format!(
+                r#"{{"messages":[{{"role":"tool","tool_call_id":"c","content":"t"}},{{"role":"assistant","content":"ok"}},{{"role":"user","content":[{image_url}]}}]}}"#
+            ),
+        ];
+        for client in &clients_107() {
+            for body in &lost {
+                assert!(
+                    matches!(
+                        tool_result_images_reach_provider(client, body, 200, "{}"),
+                        Verdict::Violation(reason) if reason.starts_with(TOOL_RESULT_IMAGE_DROPPED)
+                    ),
+                    "{body}"
+                );
+            }
+        }
+        // Two tool-result images need two deliveries; an earlier user copy does
+        // not make up the second.
+        let chat = chat_client_107();
+        let two = chat.replace(r#"{"type":"text","text":"t"}"#, &image_url);
+        assert!(matches!(
+            tool_result_images_reach_provider(&two, &nested_107(), 200, "{}"),
+            Verdict::Violation(reason) if reason.contains("client sent 2, forwarded tool-result turns carry 1")
+        ));
+        let masked = sibling_107().replacen(
+            r#"{"contents":["#,
+            &format!(r#"{{"contents":[{earlier}"#),
+            1,
+        );
+        assert!(!tool_result_images_reach_provider(&two, &masked, 200, "{}").is_conformant());
+        assert_eq!(
+            tool_result_images_reach_provider(&chat, &masked, 200, "{}"),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn tool_result_image_checker_refuses_bad_and_unexercised_input() {
+        let chat = chat_client_107();
+        let nested = nested_107();
+        // An image outside any tool result does not exercise the invariant.
+        let outside = format!(
+            r#"{{"messages":[{{"role":"user","content":[{{"type":"image_url","image_url":{{"url":"{}"}}}}]}}]}}"#,
+            png_107(IMG_107)
+        );
+        assert!(!tool_result_images_reach_provider(&outside, &nested, 200, "{}").is_conformant());
+        // A remote image URL is not a payload the checker can follow.
+        let remote = r#"{"messages":[{"role":"tool","tool_call_id":"c","content":[{"type":"image_url","image_url":{"url":"https://example.com/a.png"}}]}]}"#;
+        assert!(!tool_result_images_reach_provider(remote, &nested, 200, "{}").is_conformant());
+        // A truncated payload is not the image.
+        let truncated = nested.replace(IMG_107, &IMG_107[..20]);
+        assert!(!tool_result_images_reach_provider(&chat, &truncated, 200, "{}").is_conformant());
+        // A non-JSON provider error still fails, with its text.
+        assert!(matches!(
+            tool_result_images_reach_provider(&chat, &nested, 502, "bad gateway"),
+            Verdict::Violation(reason) if reason.ends_with("HTTP 502: bad gateway")
+        ));
+        assert!(!tool_result_images_reach_provider("nope", &nested, 200, "{}").is_conformant());
+        assert!(!tool_result_images_reach_provider(&chat, "nope", 200, "{}").is_conformant());
+        // A body in an unrecognized dialect has no tool-result turn.
+        let bedrock = format!(
+            r#"{{"messages":[{{"role":"user","content":[{{"toolResult":{{"content":[{{"image":{{"source":{{"bytes":"{IMG_107}"}}}}}}]}}}}]}}]}}"#
+        );
+        assert!(!tool_result_images_reach_provider(&chat, &bedrock, 200, "{}").is_conformant());
     }
 }

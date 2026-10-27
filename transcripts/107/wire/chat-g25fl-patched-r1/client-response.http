@@ -1,0 +1,34 @@
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 03:30:01 GMT
+content-length: 626
+content-type: application/json
+x-litellm-call-id: 95e46bb2-95eb-40eb-b183-1b74009fbbda
+x-litellm-model-id: f5af34c3dc48c3215abbece6fb3906a607415509eb61abe50d45bfac99efd022
+x-litellm-model-name: gemini/gemini-2.5-flash-lite
+x-litellm-model-api-base: http://127.0.0.1:4097/v1beta
+x-litellm-version: 1.106.2
+x-litellm-response-cost: 3.79e-05
+x-litellm-response-cost-original: 3.79e-05
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-response-cost-input: 3.51e-05
+x-litellm-response-cost-output: 2.8e-06
+x-litellm-response-cost-tool-usage: 0.0
+x-litellm-key-spend: 3.79e-05
+x-litellm-response-duration-ms: 2533.73122215271
+x-litellm-overhead-duration-ms: 3.8142
+x-litellm-callback-duration-ms: 0.0
+x-litellm-model-group: g25fl
+x-ratelimit-remaining-tokens: 249642
+x-ratelimit-limit-tokens: 250000
+x-ratelimit-remaining-requests: 14
+x-ratelimit-limit-requests: 15
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin, Accept-Encoding
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+
+{"id":"OoPZasT6BJaivr0PpdfKuQ4","created":1792639801,"model":"g25fl","object":"chat.completion","choices":[{"finish_reason":"stop","index":0,"message":{"content":"ZEBRA-7342","role":"assistant","images":[],"thinking_blocks":[]},"provider_specific_fields":{"native_finish_reason":"STOP"}}],"usage":{"completion_tokens":7,"prompt_tokens":351,"total_tokens":358,"completion_tokens_details":{"text_tokens":7},"prompt_tokens_details":{"text_tokens":93,"image_tokens":258}},"vertex_ai_grounding_metadata":[],"vertex_ai_url_context_metadata":[],"vertex_ai_safety_results":[],"vertex_ai_citation_metadata":[],"service_tier":"default"}

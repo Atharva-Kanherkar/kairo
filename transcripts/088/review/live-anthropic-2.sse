@@ -1,0 +1,14 @@
+data: {"id":"msg_[REDACTED]","choices":[{"index":0,"delta":{"content":null,"tool_calls":[{"index":0,"id":"toolu_[REDACTED]","type":"function","function":{"name":"get_weather"}}],"role":"assistant"}}],"created":1790521576,"model":"claude-haiku-4-5-20251001","service_tier":"standard","system_fingerprint":null,"object":"chat.completion.chunk","usage":null}
+
+data: {"id":"msg_[REDACTED]","choices":[{"index":0,"delta":{"content":null,"tool_calls":[{"index":0,"id":null,"type":null,"function":{"arguments":"{\"city\""}}]}}],"created":1790521576,"model":"claude-haiku-4-5-20251001","service_tier":"standard","system_fingerprint":null,"object":"chat.completion.chunk","usage":null}
+
+data: {"id":"msg_[REDACTED]","choices":[{"index":0,"delta":{"content":null,"tool_calls":[{"index":0,"id":null,"type":null,"function":{"arguments":": \"San "}}]}}],"created":1790521576,"model":"claude-haiku-4-5-20251001","service_tier":"standard","system_fingerprint":null,"object":"chat.completion.chunk","usage":null}
+
+data: {"id":"msg_[REDACTED]","choices":[{"index":0,"delta":{"content":null,"tool_calls":[{"index":0,"id":null,"type":null,"function":{"arguments":"Francis"}}]}}],"created":1790521576,"model":"claude-haiku-4-5-20251001","service_tier":"standard","system_fingerprint":null,"object":"chat.completion.chunk","usage":null}
+
+data: {"id":"msg_[REDACTED]","choices":[{"index":0,"delta":{"content":null,"tool_calls":[{"index":0,"id":null,"type":null,"function":{"arguments":"co\"}"}}]}}],"created":1790521576,"model":"claude-haiku-4-5-20251001","service_tier":"standard","system_fingerprint":null,"object":"chat.completion.chunk","usage":null}
+
+data: {"id":"msg_[REDACTED]","choices":[{"index":0,"delta":{"content":null},"finish_reason":"tool_calls"}],"created":1790521576,"model":"claude-haiku-4-5-20251001","service_tier":"standard","system_fingerprint":null,"object":"chat.completion.chunk","usage":{"prompt_tokens":660,"completion_tokens":39,"total_tokens":699,"prompt_tokens_details":{"cached_tokens":0,"cache_write_tokens":0},"cache_read_input_tokens":0,"cache_creation_input_tokens":0}}
+
+data: [DONE]
+

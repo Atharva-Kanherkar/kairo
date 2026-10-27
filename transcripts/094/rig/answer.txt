@@ -1,0 +1,2 @@
+<answer>2 plus 3 is 5</answer>
+This text must never be generated.

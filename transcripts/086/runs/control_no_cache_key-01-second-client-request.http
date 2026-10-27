@@ -1,0 +1,6 @@
+POST /v1/responses HTTP/1.1
+Host: 127.0.0.1:57028
+Content-Type: application/json
+Content-Length: 117
+
+{"input":"KAIRO_086 cell=control_no_cache_key run=01 Reply with the capital of France.","model":"openai/gpt-4o-mini"}

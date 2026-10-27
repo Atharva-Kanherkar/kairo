@@ -1,0 +1,1381 @@
+{
+  "cells": {
+    "chat_stream_then_responses_stream": {
+      "runs": [
+        {
+          "first": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "chat.completion.chunk"
+            ],
+            "done_marker": true,
+            "family": "chat.completion.chunk",
+            "kind": "chat_stream",
+            "response_completed": false,
+            "sse_event_names": [],
+            "status": 200
+          },
+          "run": "01",
+          "second": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "chat.completion.chunk"
+            ],
+            "done_marker": true,
+            "family": "chat.completion.chunk",
+            "kind": "responses_stream",
+            "response_completed": false,
+            "sse_event_names": [],
+            "status": 200
+          },
+          "second_expected_family": "responses-events",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/chat/completions"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "chat.completion.chunk"
+            ],
+            "done_marker": true,
+            "family": "chat.completion.chunk",
+            "kind": "chat_stream",
+            "response_completed": false,
+            "sse_event_names": [],
+            "status": 200
+          },
+          "run": "02",
+          "second": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "chat.completion.chunk"
+            ],
+            "done_marker": true,
+            "family": "chat.completion.chunk",
+            "kind": "responses_stream",
+            "response_completed": false,
+            "sse_event_names": [],
+            "status": 200
+          },
+          "second_expected_family": "responses-events",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/chat/completions"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "chat.completion.chunk"
+            ],
+            "done_marker": true,
+            "family": "chat.completion.chunk",
+            "kind": "chat_stream",
+            "response_completed": false,
+            "sse_event_names": [],
+            "status": 200
+          },
+          "run": "03",
+          "second": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "chat.completion.chunk"
+            ],
+            "done_marker": true,
+            "family": "chat.completion.chunk",
+            "kind": "responses_stream",
+            "response_completed": false,
+            "sse_event_names": [],
+            "status": 200
+          },
+          "second_expected_family": "responses-events",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/chat/completions"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "chat.completion.chunk"
+            ],
+            "done_marker": true,
+            "family": "chat.completion.chunk",
+            "kind": "chat_stream",
+            "response_completed": false,
+            "sse_event_names": [],
+            "status": 200
+          },
+          "run": "04",
+          "second": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "chat.completion.chunk"
+            ],
+            "done_marker": true,
+            "family": "chat.completion.chunk",
+            "kind": "responses_stream",
+            "response_completed": false,
+            "sse_event_names": [],
+            "status": 200
+          },
+          "second_expected_family": "responses-events",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/chat/completions"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "chat.completion.chunk"
+            ],
+            "done_marker": true,
+            "family": "chat.completion.chunk",
+            "kind": "chat_stream",
+            "response_completed": false,
+            "sse_event_names": [],
+            "status": 200
+          },
+          "run": "05",
+          "second": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "chat.completion.chunk"
+            ],
+            "done_marker": true,
+            "family": "chat.completion.chunk",
+            "kind": "responses_stream",
+            "response_completed": false,
+            "sse_event_names": [],
+            "status": 200
+          },
+          "second_expected_family": "responses-events",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/chat/completions"
+          ]
+        }
+      ],
+      "second_wrong_family": 5,
+      "upstream_calls_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "chat_then_responses": {
+      "runs": [
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-006",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "01",
+          "second": {
+            "content_type": "application/json",
+            "family": "null",
+            "kind": "responses",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/chat/completions"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-007",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "02",
+          "second": {
+            "content_type": "application/json",
+            "family": "null",
+            "kind": "responses",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/chat/completions"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-008",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "03",
+          "second": {
+            "content_type": "application/json",
+            "family": "null",
+            "kind": "responses",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/chat/completions"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-009",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "04",
+          "second": {
+            "content_type": "application/json",
+            "family": "null",
+            "kind": "responses",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/chat/completions"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-010",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "05",
+          "second": {
+            "content_type": "application/json",
+            "family": "null",
+            "kind": "responses",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/chat/completions"
+          ]
+        }
+      ],
+      "second_wrong_family": 5,
+      "upstream_calls_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "control_chat_then_chat": {
+      "runs": [
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-026",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "01",
+          "second": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-026",
+            "kind": "chat",
+            "status": 200
+          },
+          "second_expected_family": "chat.completion",
+          "second_wrong_family": false,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/chat/completions"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-027",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "02",
+          "second": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-027",
+            "kind": "chat",
+            "status": 200
+          },
+          "second_expected_family": "chat.completion",
+          "second_wrong_family": false,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/chat/completions"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-028",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "03",
+          "second": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-028",
+            "kind": "chat",
+            "status": 200
+          },
+          "second_expected_family": "chat.completion",
+          "second_wrong_family": false,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/chat/completions"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-029",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "04",
+          "second": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-029",
+            "kind": "chat",
+            "status": 200
+          },
+          "second_expected_family": "chat.completion",
+          "second_wrong_family": false,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/chat/completions"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-030",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "05",
+          "second": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-030",
+            "kind": "chat",
+            "status": 200
+          },
+          "second_expected_family": "chat.completion",
+          "second_wrong_family": false,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/chat/completions"
+          ]
+        }
+      ],
+      "second_wrong_family": 0,
+      "upstream_calls_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "control_no_cache_key": {
+      "runs": [
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-036",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "01",
+          "second": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_037",
+            "kind": "responses",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": false,
+          "upstream_calls": 2,
+          "upstream_targets": [
+            "/v1/chat/completions",
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-038",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "02",
+          "second": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_039",
+            "kind": "responses",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": false,
+          "upstream_calls": 2,
+          "upstream_targets": [
+            "/v1/chat/completions",
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-040",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "03",
+          "second": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_041",
+            "kind": "responses",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": false,
+          "upstream_calls": 2,
+          "upstream_targets": [
+            "/v1/chat/completions",
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-042",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "04",
+          "second": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_043",
+            "kind": "responses",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": false,
+          "upstream_calls": 2,
+          "upstream_targets": [
+            "/v1/chat/completions",
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-044",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "05",
+          "second": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_045",
+            "kind": "responses",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": false,
+          "upstream_calls": 2,
+          "upstream_targets": [
+            "/v1/chat/completions",
+            "/v1/responses"
+          ]
+        }
+      ],
+      "second_wrong_family": 0,
+      "upstream_calls_per_run": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "control_responses_then_responses": {
+      "runs": [
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_031",
+            "kind": "responses",
+            "status": 200
+          },
+          "run": "01",
+          "second": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_031",
+            "kind": "responses",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": false,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_032",
+            "kind": "responses",
+            "status": 200
+          },
+          "run": "02",
+          "second": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_032",
+            "kind": "responses",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": false,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_033",
+            "kind": "responses",
+            "status": 200
+          },
+          "run": "03",
+          "second": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_033",
+            "kind": "responses",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": false,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_034",
+            "kind": "responses",
+            "status": 200
+          },
+          "run": "04",
+          "second": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_034",
+            "kind": "responses",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": false,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_035",
+            "kind": "responses",
+            "status": 200
+          },
+          "run": "05",
+          "second": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_035",
+            "kind": "responses",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": false,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/responses"
+          ]
+        }
+      ],
+      "second_wrong_family": 0,
+      "upstream_calls_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "control_typed_responses_item": {
+      "runs": [
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-046",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "01",
+          "second": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_047",
+            "kind": "responses_typed",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": false,
+          "upstream_calls": 2,
+          "upstream_targets": [
+            "/v1/chat/completions",
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-048",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "02",
+          "second": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_049",
+            "kind": "responses_typed",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": false,
+          "upstream_calls": 2,
+          "upstream_targets": [
+            "/v1/chat/completions",
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-050",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "03",
+          "second": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_051",
+            "kind": "responses_typed",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": false,
+          "upstream_calls": 2,
+          "upstream_targets": [
+            "/v1/chat/completions",
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-052",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "04",
+          "second": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_053",
+            "kind": "responses_typed",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": false,
+          "upstream_calls": 2,
+          "upstream_targets": [
+            "/v1/chat/completions",
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "chat.completion",
+            "id": "chatcmpl-086-054",
+            "kind": "chat",
+            "status": 200
+          },
+          "run": "05",
+          "second": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_055",
+            "kind": "responses_typed",
+            "status": 200
+          },
+          "second_expected_family": "response",
+          "second_wrong_family": false,
+          "upstream_calls": 2,
+          "upstream_targets": [
+            "/v1/chat/completions",
+            "/v1/responses"
+          ]
+        }
+      ],
+      "second_wrong_family": 0,
+      "upstream_calls_per_run": [
+        2,
+        2,
+        2,
+        2,
+        2
+      ]
+    },
+    "responses_stream_then_chat_stream": {
+      "runs": [
+        {
+          "first": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "done_marker": false,
+            "family": "responses-events",
+            "kind": "responses_stream",
+            "response_completed": true,
+            "sse_event_names": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "status": 200
+          },
+          "run": "01",
+          "second": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "done_marker": false,
+            "family": "responses-events",
+            "kind": "chat_stream",
+            "response_completed": true,
+            "sse_event_names": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "status": 200
+          },
+          "second_expected_family": "chat.completion.chunk",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "done_marker": false,
+            "family": "responses-events",
+            "kind": "responses_stream",
+            "response_completed": true,
+            "sse_event_names": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "status": 200
+          },
+          "run": "02",
+          "second": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "done_marker": false,
+            "family": "responses-events",
+            "kind": "chat_stream",
+            "response_completed": true,
+            "sse_event_names": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "status": 200
+          },
+          "second_expected_family": "chat.completion.chunk",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "done_marker": false,
+            "family": "responses-events",
+            "kind": "responses_stream",
+            "response_completed": true,
+            "sse_event_names": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "status": 200
+          },
+          "run": "03",
+          "second": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "done_marker": false,
+            "family": "responses-events",
+            "kind": "chat_stream",
+            "response_completed": true,
+            "sse_event_names": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "status": 200
+          },
+          "second_expected_family": "chat.completion.chunk",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "done_marker": false,
+            "family": "responses-events",
+            "kind": "responses_stream",
+            "response_completed": true,
+            "sse_event_names": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "status": 200
+          },
+          "run": "04",
+          "second": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "done_marker": false,
+            "family": "responses-events",
+            "kind": "chat_stream",
+            "response_completed": true,
+            "sse_event_names": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "status": 200
+          },
+          "second_expected_family": "chat.completion.chunk",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "done_marker": false,
+            "family": "responses-events",
+            "kind": "responses_stream",
+            "response_completed": true,
+            "sse_event_names": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "status": 200
+          },
+          "run": "05",
+          "second": {
+            "content_type": "text/event-stream",
+            "data_kinds": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "done_marker": false,
+            "family": "responses-events",
+            "kind": "chat_stream",
+            "response_completed": true,
+            "sse_event_names": [
+              "response.completed",
+              "response.content_part.added",
+              "response.content_part.done",
+              "response.created",
+              "response.in_progress",
+              "response.output_item.added",
+              "response.output_item.done",
+              "response.output_text.delta",
+              "response.output_text.done"
+            ],
+            "status": 200
+          },
+          "second_expected_family": "chat.completion.chunk",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/responses"
+          ]
+        }
+      ],
+      "second_wrong_family": 5,
+      "upstream_calls_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "responses_then_chat": {
+      "runs": [
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_011",
+            "kind": "responses",
+            "status": 200
+          },
+          "run": "01",
+          "second": {
+            "content_type": "application/json",
+            "family": "null",
+            "kind": "chat",
+            "status": 200
+          },
+          "second_expected_family": "chat.completion",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_012",
+            "kind": "responses",
+            "status": 200
+          },
+          "run": "02",
+          "second": {
+            "content_type": "application/json",
+            "family": "null",
+            "kind": "chat",
+            "status": 200
+          },
+          "second_expected_family": "chat.completion",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_013",
+            "kind": "responses",
+            "status": 200
+          },
+          "run": "03",
+          "second": {
+            "content_type": "application/json",
+            "family": "null",
+            "kind": "chat",
+            "status": 200
+          },
+          "second_expected_family": "chat.completion",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_014",
+            "kind": "responses",
+            "status": 200
+          },
+          "run": "04",
+          "second": {
+            "content_type": "application/json",
+            "family": "null",
+            "kind": "chat",
+            "status": 200
+          },
+          "second_expected_family": "chat.completion",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/responses"
+          ]
+        },
+        {
+          "first": {
+            "content_type": "application/json",
+            "family": "response",
+            "id": "resp_086_015",
+            "kind": "responses",
+            "status": 200
+          },
+          "run": "05",
+          "second": {
+            "content_type": "application/json",
+            "family": "null",
+            "kind": "chat",
+            "status": 200
+          },
+          "second_expected_family": "chat.completion",
+          "second_wrong_family": true,
+          "upstream_calls": 1,
+          "upstream_targets": [
+            "/v1/responses"
+          ]
+        }
+      ],
+      "second_wrong_family": 5,
+      "upstream_calls_per_run": [
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  },
+  "complete": true,
+  "failures": [],
+  "persistence": {
+    "repeats": 3,
+    "runs": [
+      {
+        "repeat_families": [
+          "null",
+          "null",
+          "null"
+        ],
+        "run": "01",
+        "upstream_calls": 1
+      },
+      {
+        "repeat_families": [
+          "null",
+          "null",
+          "null"
+        ],
+        "run": "02",
+        "upstream_calls": 1
+      },
+      {
+        "repeat_families": [
+          "null",
+          "null",
+          "null"
+        ],
+        "run": "03",
+        "upstream_calls": 1
+      },
+      {
+        "repeat_families": [
+          "null",
+          "null",
+          "null"
+        ],
+        "run": "04",
+        "upstream_calls": 1
+      },
+      {
+        "repeat_families": [
+          "null",
+          "null",
+          "null"
+        ],
+        "run": "05",
+        "upstream_calls": 1
+      }
+    ],
+    "runs_all_repeats_wrong": 5,
+    "upstream_calls_per_run": [
+      1,
+      1,
+      1,
+      1,
+      1
+    ]
+  },
+  "runs": 5,
+  "target": {
+    "binary_sha256": "72304ab13e02c5105ef6bda35cf8525dbf15d22810398e84eaf2ce71f79dd8aa",
+    "commit": "cefde78ba0e574f03da111e3fdcb9f4286e5ccc4",
+    "core_version_file": "1.10.3",
+    "label": "dev cefde78b",
+    "model": "openai/gpt-4o-mini",
+    "public_endpoints": [
+      "POST /v1/chat/completions",
+      "POST /v1/responses"
+    ],
+    "qdrant_version": "qdrant 1.19.1",
+    "runtime_version": "dev-cefde78b",
+    "semanticcache_version_file": "1.6.6",
+    "source": "https://github.com/maximhq/bifrost",
+    "vector_store": "qdrant"
+  },
+  "warmup": {
+    "attempts": 2,
+    "same_family_hit": true
+  }
+}

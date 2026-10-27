@@ -1,0 +1,34 @@
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 03:32:02 GMT
+content-length: 1566
+content-type: application/json
+x-litellm-call-id: b96bbfbf-ae98-4581-8896-44163d52ecc1
+x-litellm-model-id: f5af34c3dc48c3215abbece6fb3906a607415509eb61abe50d45bfac99efd022
+x-litellm-model-name: gemini/gemini-2.5-flash-lite
+x-litellm-model-api-base: http://127.0.0.1:4097/v1beta
+x-litellm-version: 1.106.2
+x-litellm-response-cost: 3.76e-05
+x-litellm-response-cost-original: 3.76e-05
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-response-cost-input: 3.48e-05
+x-litellm-response-cost-output: 2.8e-06
+x-litellm-response-cost-tool-usage: 0.0
+x-litellm-key-spend: 3.76e-05
+x-litellm-response-duration-ms: 2334.657907485962
+x-litellm-overhead-duration-ms: 6.1829
+x-litellm-callback-duration-ms: 0.5832
+x-litellm-model-group: g25fl
+x-ratelimit-remaining-tokens: 249645
+x-ratelimit-limit-tokens: 250000
+x-ratelimit-remaining-requests: 14
+x-ratelimit-limit-requests: 15
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin, Accept-Encoding
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+
+{"id":"resp_Jau_Gf8gxDzgVhPg9-KCLzasg-Ws64nXaIbw8ovTspm6yk5-7t5wkKcA9m78ACK_Dn5YxioguPs2sG9OKj1LUGzLBt1-x_xKNwxfQ9Z0Z7FqjTwxGsiVPwXcqw8i590VU6DxPW32YQ4o0LlJ0uAsTJDP6o8qktbrk8W6YZGkJtOmWLgUBoI3RQPQGlTXM_I9XyypITFAaMaokMmnQ9yYXuFKvr6t5d-cxunOEeKJJB7cyK1cj9IOZ2CZhX1peRci3XI2QhoGxEohTSZKTR6az39KG9Vo7YLluE3IWBFFUarZaX8tIA7G1VtThuMnWsR08sE1TLiQpRU-RWPq5I9z43HJZRUnqSYYE7gXHaViOpcD7-h7MwPJr2ckMfICFQgGLoZXG0wgI7_Gjj32I_WmPrXGF_eGdQ==","created_at":1792639923,"error":null,"incomplete_details":null,"instructions":null,"metadata":{},"model":"g25fl","object":"response","output":[{"type":"message","id":"msg_075f63e2-e95a-4f43-8c58-508f43b6dc80","status":"completed","role":"assistant","content":[{"type":"output_text","text":"ZEBRA-7342","annotations":[]}],"phase":null}],"parallel_tool_calls":false,"temperature":null,"tool_choice":"auto","tools":[{"name":"read_image","parameters":{"type":"object","properties":{"path":{"type":"string"}},"required":["path"]},"strict":null,"type":"function","allowed_callers":null,"defer_loading":null,"description":"Read an image file from disk","output_schema":null}],"top_p":null,"max_output_tokens":null,"previous_response_id":null,"reasoning":null,"status":"completed","text":{},"truncation":null,"usage":{"input_tokens":348,"input_tokens_details":{"audio_tokens":null,"cached_tokens":0,"cached_tokens_details":null,"image_tokens":258,"text_tokens":90,"video_tokens":null},"output_tokens":7,"output_tokens_details":{"audio_tokens":null,"reasoning_tokens":0,"text_tokens":7},"total_tokens":355,"cost":null},"user":null,"store":false}

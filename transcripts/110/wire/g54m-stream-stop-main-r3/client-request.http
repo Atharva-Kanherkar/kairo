@@ -1,0 +1,8 @@
+POST /v1/messages HTTP/1.1
+Host: localhost:4031
+Content-Type: application/json
+x-api-key: sk-test-master
+anthropic-version: 2023-06-01
+Content-Length: 230
+
+{"model": "g54m", "max_tokens": 1024, "messages": [{"role": "user", "content": "Output exactly these three words separated by single spaces and nothing else: ALPHA STOPHERE OMEGA"}], "stop_sequences": ["STOPHERE"], "stream": true}

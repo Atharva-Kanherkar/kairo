@@ -1,0 +1,15 @@
+llm-d Router coordinator, pin 567e35d752c841521fd7c450e8335e5dae108a7c
+POST /v1/chat/completions with response_format.json_schema.schema.properties.record_id
+pinning one integer enum entry. Value read back from the render leg's forwarded body.
+Script: transcripts/097/boundary_sweep.py
+
+             submitted ->              forwarded  outcome
+                    42 ->                     42  preserved
+      9007199254740992 ->       9007199254740992  preserved
+      9007199254740993 ->       9007199254740992  ROUNDED
+      9007199254740994 ->       9007199254740994  preserved
+      9007199254740995 ->       9007199254740996  ROUNDED
+     18014398509481984 ->      18014398509481984  preserved
+     18014398509481985 ->      18014398509481984  ROUNDED
+   9223372036854775807 ->    9223372036854776000  ROUNDED
+  18446744073709551615 ->   18446744073709552000  ROUNDED

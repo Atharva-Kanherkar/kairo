@@ -1,0 +1,92 @@
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Fri, 16 Oct 2026 06:26:17 GMT
+Content-Type: text/event-stream
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID, X-Bifrost-Setup-Token
+Access-Control-Max-Age: 86400
+Access-Control-Expose-Headers: x-bifrost-request-id, x-bifrost-trace-id, x-request-id, x-bifrost-provider, x-bifrost-original-model, x-bifrost-resolved-model, x-bifrost-fallback-index, x-bifrost-request-type, x-bifrost-upstream-latency-ms, x-bifrost-routing-info-provider, x-bifrost-routing-info-model, x-bifrost-routing-info-key, x-bifrost-routing-info-alias-model-id, x-bifrost-routing-info-alias-model-name, x-bifrost-routing-info-alias-model-family, x-bifrost-routing-info-is-fallback, x-bifrost-routing-info-primary-provider, x-bifrost-routing-info-primary-model, x-bifrost-routing-info-server-side-fallback-model, x-bifrost-routing-info-requested-provider, x-bifrost-routing-info-requested-model, x-bifrost-cache-hit, x-bifrost-cache-id, x-bifrost-cache-hit-type, x-bifrost-cache-hit-latency-ms, x-bifrost-cache-requested-provider, x-bifrost-cache-requested-model, x-bifrost-cache-similarity, x-bifrost-cache-threshold, x-bifrost-cache-provider-used, x-bifrost-cache-model-used, x-bifrost-cache-input-tokens, x-bifrost-latency-ms, x-bifrost-pricing-request-type, x-bifrost-converted-request-type, x-bifrost-dropped-compat-params, x-bifrost-dropped-unsupported-tools, x-bifrost-passthrough-path, x-bifrost-error-type, x-bifrost-retry-after-ms
+Vary: Origin
+X-Bifrost-Request-Id: f71a9c05-2996-4757-a8ea-66dea8a0f900
+X-Request-Id: [REDACTED: trace id]
+X-Bifrost-Trace-Id: f0acba4ff1fa4ac4838a4ea2ed4a94e3
+Openai-Organization: [REDACTED: tenant id]
+Openai-Project: [REDACTED: tenant id]
+Openai-Version: 2020-10-01
+X-Ratelimit-Limit-Requests: [REDACTED: rate limit]
+X-Ratelimit-Limit-Tokens: [REDACTED: rate limit]
+X-Ratelimit-Remaining-Requests: [REDACTED: rate limit]
+X-Ratelimit-Remaining-Tokens: [REDACTED: rate limit]
+X-Ratelimit-Reset-Requests: [REDACTED: rate limit]
+Cf-Ray: [REDACTED: trace id]
+Cf-Cache-Status: DYNAMIC
+Openai-Processing-Ms: [REDACTED: trace id]
+X-Ratelimit-Reset-Tokens: [REDACTED: rate limit]
+X-Bifrost-Provider: openai
+X-Bifrost-Original-Model: gpt-5.4-mini
+X-Bifrost-Resolved-Model: gpt-5.4-mini
+X-Bifrost-Request-Type: responses_stream
+X-Bifrost-Routing-Info-Provider: openai
+X-Bifrost-Routing-Info-Model: gpt-5.4-mini
+X-Bifrost-Routing-Info-Key: k1
+X-Bifrost-Routing-Info-Requested-Provider: openai
+X-Bifrost-Routing-Info-Requested-Model: gpt-5.4-mini
+X-Bifrost-Upstream-Latency-Ms: 2396.656
+Cache-Control: no-cache
+Connection: keep-alive
+Transfer-Encoding: chunked
+
+event: message_start
+data: {"type":"message_start","message":{"id":"resp_03dfbc335099e361006ad1c388310c87d092e93ce17b7ec6e3","type":"message","role":"assistant","content":[],"model":"gpt-5.4-mini-2026-03-17","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":0,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":0}}}
+
+event: content_block_start
+data: {"type":"content_block_start","index":0,"content_block":{"type":"redacted_thinking","data":"brid_rs_03dfbc335099e361006ad1c388ee7487d0ae1915d10f47fa09:gAAAAABq0cOIM5ZvFWHeu_OEBbnu23a3bmb7Bk-2S2mBgUHjFo0Likya16XFemOElQb4n0C8NsoqHwPJp9Qb3jDKKUVL8ybSEmElRU7mriGGDl-wiYKv7mvPi6m97jjyLREYyg0HB-UEXgCfCs3tkkwTzkdhlmpHpcR4FoobF_Gd10kmeYzND4glR7HcDmvJ7M-mSbOMjUZTv8lBkKDda69KP_Weqn6jgyiHLy7PYKP0dtlOaQ-0G6NCejVdR1QdIts5tmxrhfjE0znQP2N3QL6XR-fMqXWQfXdEBpSmf5ka1ln3dXB9hdYniUTVe-ShCvfCYm2pWqGY0H0rh2zo1lnuPhY7yggzOKO9q0fHhXhkHAKBrWQIblZE4rKRKcVNRwAvJyH8E3nZtv4sFrsN64qRYumI2t_NPldaIQuUEfCQiGe-jMXrvmJMdEGj-kaVGc71k9ggJYg78oNK_nnK56zoFrg6vyk897FPPpCuJV5IW_Vb91pHvjMd804l56_cVzluaMaurgRlsXqC2C1AE9p6CHYBmGbOW5pPLzEaC_E0csy43UzhUrHGGMAnIdEBasUzYChmTMwLQSYue4oS9mfPqJ5GfBl0ZdPeawR5LGptsxY3aYzGBU-diSOasIqgnFQTqHifihYaadNEJJRTRN9B3-q09xAHQxao1hjz-FMdLfugipgNoBkRDMOFhig-xqjUIDLRU40c23OKmjhLnyQ1AKDfbSJTbMNoOykM9XVQ-kdtFxnKmF8N2GNwlnS0D-EcTprEiBhleK3w8pNluA9E5Z6mlnUgTKXEceRvqR5OvMuJXiC2RrRPsaCkC2J2-J-f8iTSO9V3tRp6lymvUBHmiTZzVUE9ZcMXMLoXtLbgoMcPRRb6pZug6PMQwCTQV9uE6tv0aPtaBn9NytrxkOHFTcYMSiJWE7JmNHTSCIy2L4YKTtuU-HKkc-PYVt309fp8A_vs_FfRdASiegcTeNxZno_fMZPIxKIlLOpvepCDUNHLeHD0mooIJ9Yopgq77MFRSbSYPSFS6lzWWQBr3dREB5ShcJgt-L0F1HcB37izcXyHCc1O-JqRxsOPF20i_z5yAHfcJdU7FOQl3S6335HJvvWxTPogRpZ2R9wgf0PxS5eDeBsTt7wvhECbFM4eBu6bPSX3wcBY81qNaP-2-qkqELQXhPKhe_jjjKhV9sLWw33BXvEQEmev_8dvxnYiy3DpOiB_nuX0jMfaunHk3JEkG3CBYHgY5g=="}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":0}
+
+event: content_block_start
+data: {"type":"content_block_start","index":1,"content_block":{"type":"tool_use","id":"call_otjV1wcFmdcbMjUiKQ1PNpMP","name":"mcp__orders__lookup_order","input":{}}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"{\"","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"order","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"_id","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"\":\"","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"A","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"-","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"100","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"1","stop_sequence":null}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":1,"delta":{"type":"input_json_delta","partial_json":"\"}","stop_sequence":null}}
+
+event: content_block_stop
+data: {"type":"content_block_stop","index":1}
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"tool_use","stop_sequence":""},"usage":{"input_tokens":767,"cache_creation_input_tokens":0,"cache_read_input_tokens":8192,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":70,"output_tokens_details":{"thinking_tokens":36}}}
+
+event: message_stop
+data: {"type":"message_stop"}
+

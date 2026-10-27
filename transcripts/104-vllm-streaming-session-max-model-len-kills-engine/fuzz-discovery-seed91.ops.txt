@@ -1,0 +1,154 @@
+add r0 prefix=11 total=40
+add r1 prefix=80 total=125
+add r2 prefix=63 total=88
+add r3 prefix=11 total=22
+add r4 prefix=80 total=116
+add r5 prefix=93 total=107
+add r6 prefix=80 total=110
+session-update r4 new_tokens=112
+add r8 prefix=80 total=121
+add r9 prefix=93 total=130
+add r10 prefix=11 total=53
+add r11 prefix=11 total=58
+session-update r4 new_tokens=30
+add r13 prefix=11 total=37
+add r14 prefix=80 total=106
+add r15 prefix=11 total=47
+add r16 prefix=48 total=51
+add r17 prefix=80 total=96
+add r18 prefix=48 total=59
+add r19 prefix=80 total=113
+session-update r4 new_tokens=98
+add r21 prefix=88 total=100
+abort r15
+add r22 prefix=93 total=98
+add r23 prefix=88 total=117
+add r24 prefix=11 total=20
+add r25 prefix=93 total=111
+add r26 prefix=11 total=27
+add r27 prefix=80 total=108
+add r28 prefix=80 total=127
+add r29 prefix=93 total=115
+session-update r27 new_tokens=5
+add r31 prefix=11 total=26
+add r32 prefix=80 total=120
+abort r31
+add r33 prefix=11 total=52
+add r34 prefix=11 total=50
+add r35 prefix=80 total=123
+session-update r8 new_tokens=9
+add r37 prefix=48 total=67
+session-update r37 new_tokens=26
+add r39 prefix=48 total=56
+add r40 prefix=93 total=115
+add r41 prefix=88 total=94
+add r42 prefix=80 total=81
+abort r24
+add r43 prefix=11 total=22
+session-update r4 new_tokens=25
+add r45 prefix=80 total=106
+add r46 prefix=88 total=99
+add r47 prefix=80 total=118
+add r48 prefix=80 total=128
+add r49 prefix=63 total=78
+abort r43
+add r50 prefix=88 total=110
+session-update r39 new_tokens=24
+session-update r8 new_tokens=104
+abort r29
+add r53 prefix=80 total=108
+add r54 prefix=80 total=123
+add r55 prefix=80 total=81
+abort r34
+abort r53
+session-update r37 new_tokens=42
+add r57 prefix=88 total=104
+add r58 prefix=93 total=140
+add r59 prefix=93 total=137
+abort r37
+abort r6
+session-update r27 new_tokens=14
+session-update r4 new_tokens=5
+abort r40
+add r62 prefix=80 total=107
+add r63 prefix=88 total=123
+session-update r39 new_tokens=75
+session-update r39 new_tokens=109
+session-update r4 new_tokens=37
+abort r16
+session-update r42 new_tokens=103
+session-update r42 new_tokens=32
+session-update r8 new_tokens=18
+abort r32
+add r70 prefix=63 total=97
+abort r63
+add r71 prefix=93 total=110
+abort r45
+add r72 prefix=63 total=82
+add r73 prefix=88 total=109
+add r74 prefix=80 total=117
+session-update r8 new_tokens=29
+session-update r70 new_tokens=1
+session-update r42 new_tokens=32
+session-update r42 new_tokens=29
+session-update r42 new_tokens=13
+abort r71
+session-update r27 new_tokens=7
+add r81 prefix=11 total=29
+reset running=False ok=False
+abort r46
+add r82 prefix=11 total=40
+add r83 prefix=80 total=102
+session-update r4 new_tokens=21
+session-update r70 new_tokens=15
+abort r4
+session-update r70 new_tokens=16
+session-update r8 new_tokens=32
+reset running=False ok=False
+abort r25
+add r88 prefix=11 total=59
+add r89 prefix=48 total=81
+reset running=False ok=False
+abort r82
+abort r19
+add r90 prefix=63 total=69
+session-update r8 new_tokens=114
+session-update r39 new_tokens=45
+abort r72
+session-update r42 new_tokens=10
+add r94 prefix=80 total=122
+add r95 prefix=80 total=88
+add r96 prefix=88 total=115
+abort r89
+session-update r42 new_tokens=40
+reset running=False ok=False
+session-update r73 new_tokens=120
+abort r95
+add r99 prefix=80 total=84
+add r100 prefix=48 total=68
+abort r0
+session-update r70 new_tokens=11
+abort r18
+add r102 prefix=88 total=90
+add r103 prefix=11 total=50
+abort r73
+abort r102
+add r104 prefix=11 total=46
+add r105 prefix=63 total=100
+add r106 prefix=48 total=70
+session-update r8 new_tokens=96
+session-update r8 new_tokens=114
+abort r58
+abort r8
+session-update r39 new_tokens=103
+session-update r39 new_tokens=18
+abort r70
+session-update r42 new_tokens=30
+add r112 prefix=63 total=81
+add r113 prefix=88 total=96
+abort r62
+session-update r113 new_tokens=30
+add r115 prefix=11 total=46
+add r116 prefix=63 total=86
+drain
+drain-abort-sessions 1

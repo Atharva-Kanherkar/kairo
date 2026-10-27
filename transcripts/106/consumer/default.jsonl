@@ -1,0 +1,6 @@
+{"outcome": "sdk_exception", "type": "openai.APIError", "message": "Service temporarily unavailable", "sdk": "openai", "kill_secs": 4.0, "killed": [1, 57087], "secs": 4.09}
+{"outcome": "sdk_exception", "type": "openai.APIError", "message": "Service temporarily unavailable", "sdk": "openai", "kill_secs": 4.0, "killed": [2, 57598], "secs": 4.1}
+{"outcome": "sdk_exception", "type": "openai.APIError", "message": "Service temporarily unavailable", "sdk": "openai", "kill_secs": 4.0, "killed": [1, 58125], "secs": 4.1}
+{"outcome": "sdk_exception", "type": "anthropic.APIStatusError", "message": "{'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Service temporarily unavailable'}}", "sdk": "anthropic", "kill_secs": 4.0, "killed": [2, 58619], "secs": 4.11}
+{"outcome": "sdk_exception", "type": "anthropic.APIStatusError", "message": "{'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Service temporarily unavailable'}}", "sdk": "anthropic", "kill_secs": 4.0, "killed": [1, 59130], "secs": 4.09}
+{"outcome": "sdk_exception", "type": "anthropic.APIStatusError", "message": "{'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'Service temporarily unavailable'}}", "sdk": "anthropic", "kill_secs": 4.0, "killed": [2, 59619], "secs": 4.1}

@@ -1,0 +1,37 @@
+HTTP/1.1 400 Bad Request
+Server: fasthttp
+Date: Mon, 19 Oct 2026 03:19:23 GMT
+Content-Type: application/json
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: default-src 'none'; frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID, X-Bifrost-Setup-Token
+Access-Control-Max-Age: 86400
+Vary: Accept-Encoding
+X-Bifrost-Request-Id: 7d7eeadd-8109-4eb7-9ccc-b4b41003a2a1
+X-Request-Id: <redacted>
+X-Bifrost-Trace-Id: d1da2f5bfb63418ea8f9219e44acd546
+Anthropic-Workspace-Id: <redacted>
+Cf-Cache-Status: DYNAMIC
+X-Robots-Tag: none
+X-Should-Retry: false
+Request-Id: <redacted>
+Anthropic-Organization-Id: <redacted>
+Cf-Ray: <redacted>
+Traceresponse: <redacted>
+X-Bifrost-Provider: anthropic
+X-Bifrost-Original-Model: claude-haiku-4-5
+X-Bifrost-Resolved-Model: claude-haiku-4-5
+X-Bifrost-Request-Type: chat_completion
+X-Bifrost-Routing-Info-Provider: anthropic
+X-Bifrost-Routing-Info-Model: claude-haiku-4-5
+X-Bifrost-Routing-Info-Key: an
+X-Bifrost-Routing-Info-Requested-Provider: anthropic
+X-Bifrost-Routing-Info-Requested-Model: claude-haiku-4-5
+X-Bifrost-Upstream-Latency-Ms: 343.736
+
+{"is_bifrost_error":false,"status_code":400,"error":{"type":"invalid_request_error","message":"Your credit balance is too low to access the Anthropic API. Please go to Plans \u0026 Billing to upgrade or purchase credits."},"extra_fields":{"routing_info":{"provider":"anthropic","model":"claude-haiku-4-5","key":"an","requested_provider":"anthropic","requested_model":"claude-haiku-4-5"},"provider":"anthropic","original_model_requested":"claude-haiku-4-5","resolved_model_used":"claude-haiku-4-5","request_type":"chat_completion","latency":343}}

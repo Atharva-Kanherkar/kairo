@@ -1,0 +1,54 @@
+HTTP/1.1 200
+X-Gemini-Service-Tier: standard
+Content-Type: application/json; charset=UTF-8
+Vary: X-Origin
+Vary: Referer
+Date: Thu, 22 Oct 2026 03:17:23 GMT
+Server: scaffolding on HTTPServer2
+X-XSS-Protection: 0
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Server-Timing: gfet4t7; dur=5056
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Accept-Ranges: none
+Vary: Origin,Accept-Encoding
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "ZEBRA-7342\n"
+          },
+          {
+            "text": "ZEBRA-7342",
+            "thoughtSignature": "CsoJAWkUfRNN50B6Wij5Vi3dtGZiZgNIFCObEgpRKcph1t1964woG5DyoaBHaJ6AwNgnPOy6sqDdFWuOvmbBdh5M+ZL8nRBgi8ULpUiPc7gc66YvaJs7AVBDeT4nm2qpMQZdDWguSm2a5rgG1dunUm6pivoeFDdX7YHMmeoKKc99+ZyyD/fc78IS8ptxcid1yI4ID8ngBHB3+tZ+BPGvRJHXwMHNPx6TonU5PwXPgAFdulSN0AMht7cYXwPm4EAovMM/1Y6lE0kjkbRDgT+EgKx40He//uNL97ZWp5LJ+J7i59FTSWygDOUG+TQ3MYJktY6qY1jOEDzNqNIQWZbSgCceXneau01JM7UwrnZGrmTHqQ+gBCpCBs2VylBNFiPK5L0so3tEBlm7t/w9mHHH/iW6T7Z408Y7ONNuzLpHI62zLQnXoGsFVzf4cTBlH6Qc31nNHCCJvhZAQGmXN6SMxcYazAeTrOBkWprEcw6xe9VVncu+wmf7y8rb4K1yDeBXQjrzr6Jfr3JJgsotHXREKGfC1H72YMYYE+qlwVyHmyfZmkeUojOICSao/rq9nTAQiIo9sIlmDzie7tZZdq0bxV1CDf62OVjGHC9n5A2ENiSQ0Kwd09nxNkVar5AynWftsVWX9YHxAK3Q3mP32N3Kvj4OMf1huxe6+NyiN1U74uJLDLSy8vy7kuJHsxSw7V9WVSzb5DOi8ES78C4HC4k6iYaL4L8Qac8yTOGWPSKOPdSLxkDejDIAM+jqDw7DXpDAsyt6AIUrnDjMa4vBeKEVxs647JnIkcBlMEfSYxEfQTNvmatNu8Ew/NhLw97AbzfYCNrex/n2MfQDi2ZZhgfwi4S/B66UIEMuVA/XXU5xjp17RA06dSGkUZeNZ13ztaXGOkF7Sy4g1ZYQ5bVGHlg0NTq8kpWOyPEC2IBWOGTxhEEnK/0Rl7DNvoB6J3pQZbvMPmPRxHLP0dLnk5Xl/LdKUeLUbiulWaw5yqSOz8O1QaW8wkBrx+CyYzlMC2lhOT51/77KlK5jdS0uQ9IjpyyfGMEGV50KnK/ii7+AAJE0wLgr8KvfJKb0rEuYEjtkuhWxKoyyd9fVWivD3xkdzfv/O4CJrEGpSK2k5x7qAHPrEYmcpPVOnu5XFtKUtp1zTTSVhh/tuGq+PMaPL8H2VwreViljgaYRi7FvTjxYIG4TZbiQRfeszWokCwNvWzNAtKFDLLR7Q//C/2VTCIkPZQl/fRZ/0zMPhRwI2UKeHntGmrjJ0e0NhjtTZlSIA8cvN7pkDwL1Dj1hNBmw1+Ifgj+eMfxqwSm+OZorK6Kc0Vjv0Tp+1vGoRCzyQsfYTQ8ZO56DoeriaFlOcYqwq43Rup5ISyFYX+xkMPYLgSxbDAjmtU6G2j5ryyJoljmiC2hlFvTvrdo3XRwa8GnAFzz5rgVNenUZrwfoIEec4P5PljDduVLoMI8s8Exlan+5wUtahQE1G4FGCfWpk50e4kXld+HDhfKPU+WChl5y0Ctn8k6ZT5msaADJ4n2WhqmM5k8tij4u9WFaT09HNgoLe9mRqzGeGPyj5TWaelLs2K1xmSQKqDM3YQ7A7SdrgrBv1kPFyonbRNFjlUYwUFfT4eayispReAIPzLUIYGnKkQqt5V0="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 351,
+    "candidatesTokenCount": 16,
+    "totalTokenCount": 656,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 93
+      },
+      {
+        "modality": "IMAGE",
+        "tokenCount": 258
+      }
+    ],
+    "thoughtsTokenCount": 289,
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-2.5-pro",
+  "responseId": "PoDZaofwLcParfcPnsSF0A4"
+}

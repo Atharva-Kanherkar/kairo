@@ -1,0 +1,54 @@
+HTTP/1.1 200
+X-Gemini-Service-Tier: standard
+Content-Type: application/json; charset=UTF-8
+Vary: X-Origin
+Vary: Referer
+Date: Thu, 22 Oct 2026 03:18:12 GMT
+Server: scaffolding on HTTPServer2
+X-XSS-Protection: 0
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Server-Timing: gfet4t7; dur=5120
+Alt-Svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+Accept-Ranges: none
+Vary: Origin,Accept-Encoding
+
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "ZEBRA-7342\n"
+          },
+          {
+            "text": "ZEBRA-7342",
+            "thoughtSignature": "CtsFAWkUfRP7/Z2evljTeGcRuKYyjDV0D9gBZ42Lg1MM5THh3m42jPm060h9UAA9uB0bnSgwMCN5YTsd5ipC8t4Y8+jxbGWHeSfCo2tdy6EhV78ZYOO/paPCdVpX6PYLzOnr2dEawEjIrlAOuSwOYE8APR2Pb+WWtwwzyKDChmdtBjiBiemfKy3xWic6Bpv5cTKIgERx+/0beeD1IaEvYOhNVxeQF7xKTeKnE+rp1QKjDZFfypkpsGp6OGqRpOsHBaExISKzC57i4uI26XvmoJdy9L/p/D5CT2QQQ3R/HWg93TizJwSKUUhbCAjGY2d41hfvNk0qb2gT6t4EoYEos6fvIvLs5HA+LG6Sjmo+M7RZZvHnxsHqW/61W/9b2LVEFbJVu+KCyWxLIRpV/uWz5gaeN1jd2kN8x175JmCvc2cSkFg67FZ52+Jnh4T+1yeiaO20Pmv8zPZ0R0V0+uINXFWnJHhABaJMvwj0HdDYXCoskP6ewnIhmmAbo4R1BVrJ/hJPl+WdleJ0oTjJkO6TdK+n0Pq2xnph0peWapB7WSbbw0yF8e6HxAmmoi2goGgc2G0IhpZc1og+LgbhbthJKfiBtfVrGjyxcCKYlbJwUdfQxZE6iRnwpJoRjOPFJZkZZlYfhaMwkpiD83KSKGsUFRZGJ5245hW6WpCYtciMJ3p0gFpPI5zm4jfdRissdI+fNwAMlhFQQ4RWNf6ZBNRyOiCr5t8iVfqwSf8KxPzDdnrvZvPJ99YlSUiUCzJpdJSmWcdSQwSxnaIzQesvPVFV+TXChkmm00rHY2geXsTxw/kqfximdF0nESupJ4qG+9138a8CmeFns+HVPvKjsmPkXSjMINgFROROXx82a72h5QvWb1QyCiZduEPG9jdEzSJ/wDmGCDtQOdseRJWzg2dSevqxlk0kgMsW8BLHCapenHYzpoMkYaYkP1sj067VDT+bUqzLlNn4Q07h7/mM8Yk="
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 351,
+    "candidatesTokenCount": 16,
+    "totalTokenCount": 540,
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 93
+      },
+      {
+        "modality": "IMAGE",
+        "tokenCount": 258
+      }
+    ],
+    "thoughtsTokenCount": 173,
+    "serviceTier": "standard"
+  },
+  "modelVersion": "gemini-2.5-pro",
+  "responseId": "b4DZapO7MLWr9tMPtceJuAg"
+}

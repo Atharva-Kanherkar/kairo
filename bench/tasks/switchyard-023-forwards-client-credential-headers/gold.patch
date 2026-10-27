@@ -1,0 +1,15 @@
+diff --git a/crates/libsy-llm-client/src/client.rs b/crates/libsy-llm-client/src/client.rs
+index 61a2bf0..0120962 100644
+--- a/crates/libsy-llm-client/src/client.rs
++++ b/crates/libsy-llm-client/src/client.rs
+@@ -42,6 +42,10 @@ const RESERVED_HEADERS: &[&str] = &[
+     "cookie",
+     "set-cookie",
+     "x-api-key",
++    // Azure/OpenAI credentials and tenant selectors are backend-owned too.
++    "api-key",
++    "openai-organization",
++    "openai-project",
+     "anthropic-beta",
+     "anthropic-version",
+     "content-type",

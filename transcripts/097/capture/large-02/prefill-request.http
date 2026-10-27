@@ -1,0 +1,11 @@
+POST /v1/chat/completions HTTP/1.1
+Host: 127.0.0.1:62575
+User-Agent: Go-http-client/1.1
+Content-Length: 465
+Content-Type: application/json
+X-Llm-D-Epp-Profile: prefill
+X-Llm-D-Revision-Decision-Id: 94d637f6-cc0d-4e37-80bb-2653aefe5514
+X-Request-Id: large-02
+Accept-Encoding: gzip
+
+{"kv_transfer_params":{"do_remote_decode":true,"do_remote_prefill":false},"max_completion_tokens":1,"max_tokens":1,"messages":[{"content":"Return the allowed record ID.","role":"user"}],"model":"capture-model","response_format":{"json_schema":{"name":"record","schema":{"additionalProperties":false,"properties":{"record_id":{"enum":[9007199254740992],"type":"integer"}},"required":["record_id"],"type":"object"},"strict":true},"type":"json_schema"},"stream":false}

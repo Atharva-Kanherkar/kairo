@@ -1,0 +1,10 @@
+POST /v1/responses HTTP/1.1
+User-Agent: fasthttp
+Host: 127.0.0.1:57027
+Content-Type: application/json
+Content-Length: 165
+Accept: text/event-stream
+Cache-Control: no-cache
+Authorization: Bearer <SYNTHETIC_PROVIDER_KEY>
+
+{"model":"gpt-4o-mini","stream":true,"input":[{"role":"user","content":"KAIRO_086 cell=responses_stream_then_chat_stream run=05 Reply with the capital of France."}]}

@@ -1,0 +1,23 @@
+id = "bifrost-nobug-tool-result-is-error"
+title = "Report: Bifrost drops tool_result is_error on the Anthropic route (it maps it)"
+kind = "no-bug"
+env = "bifrost-98af761"
+category = "request-field-drop"
+difficulty = "easy"
+finding = "Bifrost honest negatives, 2026-08-16 sweep"
+languages = ["go"]
+splits = ["negatives"]
+
+[repo]
+name = "maximhq/bifrost"
+url = "https://github.com/maximhq/bifrost"
+base_commit = "98af761c0adab5dee4c91c7c5121034a73c10488"
+base_ref = "dev on 2026-09-07"
+
+[upstream]
+status = "documented-behavior"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 1800
+pass_to_pass = ["is_error_mapped_to_incomplete_status", "successful_tool_result_completed", "tool_output_text_forwarded", "go_unit_tests_anthropic_provider"]

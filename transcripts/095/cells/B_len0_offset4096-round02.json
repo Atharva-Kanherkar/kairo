@@ -1,0 +1,1 @@
+{"cell": "B_len0_offset4096", "reg_len": 0, "offset": 4096, "reg_end": "SIZE_MAX", "xfer_end": 8192, "covered": true, "register": 0, "createXferReq": -4, "bytes_verified": false, "deregister": 0}

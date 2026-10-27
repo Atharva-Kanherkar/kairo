@@ -1,0 +1,19 @@
+POST /v1/messages HTTP/1.1
+Host: localhost:18001
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Accept: application/json
+Content-Type: application/json
+User-Agent: Anthropic/Python 0.16.0
+X-Stainless-Lang: python
+X-Stainless-Package-Version: 0.16.0
+X-Stainless-OS: MacOS
+X-Stainless-Arch: arm64
+X-Stainless-Runtime: CPython
+X-Stainless-Runtime-Version: 3.11.9
+X-Api-Key: [REDACTED]
+X-Stainless-Async: false
+anthropic-version: 2023-06-01
+Content-Length: 1590
+
+{"max_tokens": 2000, "messages": [{"role": "user", "content": "SCRIPT:xmltool What is 2 plus 3?"}, {"role": "assistant", "content": "I will add them.\n<function_calls>\n<invoke>\n<tool_name>perform_addition</tool_name>\n<parameters>\n<a>2</a>\n<b>3</b>\n</parameters>\n</invoke>\n\n\n<function_results>\n<system>\nNo valid <function_calls></function_calls> tags present in your query.\n</system>\n</function_results>I will add them.\n<function_calls>\n<invoke>\n<tool_name>perform_addition</tool_name>\n<parameters>\n<a>2</a>\n<b>3</b>\n</parameters>\n</invoke>\n\n\n<function_results>\n<system>\nNo valid <function_calls></function_calls> tags present in your query.\n</system>\n</function_results>"}], "model": "Qwen/Qwen3-0.6B", "stop_sequences": ["</function_calls>", "\n\nHuman:"], "system": "In this environment you have access to a set of tools you can use to answer the user's question.\n\nYou may call them like this:\n<function_calls>\n<invoke>\n<tool_name>$TOOL_NAME</tool_name>\n<parameters>\n<$PARAMETER_NAME>$PARAMETER_VALUE</$PARAMETER_NAME>\n...\n</parameters>\n</invoke>\n</function_calls>\n\nHere are the tools available:\n<tools>\n<tool_description>\n<tool_name>perform_addition</tool_name>\n<description>\nAdd one number (a) to another (b), returning a+b.\n</description>\n<parameters>\n<parameter>\n<name>a</name>\n<type>float</type>\n<description>The first number.</description>\n</parameter>\n<parameter>\n<name>b</name>\n<type>float</type>\n<description>The second number.</description>\n</parameter>\n</parameters>\n</tool_description>\n</tools>", "temperature": 1}

@@ -1,0 +1,216 @@
+{
+  "identity": {
+    "switchyard_commit": "336196f6fbfc97ddc71c1700f6092e564e9f23c2",
+    "switchyard_tree_clean": true,
+    "switchyard_version": "switchyard-server 0.3.0"
+  },
+  "summary": {
+    "direct_server_tool_ok": 5,
+    "direct_reencoded_tool_400": 5,
+    "plan_forwarded_custom_tool_400": 5,
+    "pass_forwarded_server_tool_ok": 5,
+    "runs_per_case": 5
+  },
+  "runs": [
+    {
+      "case": "direct/server-tool",
+      "run": 1,
+      "status": 200,
+      "searched": true
+    },
+    {
+      "case": "direct/server-tool",
+      "run": 2,
+      "status": 200,
+      "searched": true
+    },
+    {
+      "case": "direct/server-tool",
+      "run": 3,
+      "status": 200,
+      "searched": true
+    },
+    {
+      "case": "direct/server-tool",
+      "run": 4,
+      "status": 200,
+      "searched": true
+    },
+    {
+      "case": "direct/server-tool",
+      "run": 5,
+      "status": 200,
+      "searched": true
+    },
+    {
+      "case": "direct/reencoded-tool",
+      "run": 1,
+      "status": 400,
+      "searched": false
+    },
+    {
+      "case": "direct/reencoded-tool",
+      "run": 2,
+      "status": 400,
+      "searched": false
+    },
+    {
+      "case": "direct/reencoded-tool",
+      "run": 3,
+      "status": 400,
+      "searched": false
+    },
+    {
+      "case": "direct/reencoded-tool",
+      "run": 4,
+      "status": 400,
+      "searched": false
+    },
+    {
+      "case": "direct/reencoded-tool",
+      "run": 5,
+      "status": 400,
+      "searched": false
+    },
+    {
+      "case": "minimal/sy-plan",
+      "run": 1,
+      "client_status": 400,
+      "upstream_status": 400,
+      "forwarded_web_search": [
+        {
+          "name": "web_search",
+          "description": "",
+          "input_schema": {}
+        }
+      ],
+      "forwarded_as_server_tool": false
+    },
+    {
+      "case": "minimal/sy-plan",
+      "run": 2,
+      "client_status": 400,
+      "upstream_status": 400,
+      "forwarded_web_search": [
+        {
+          "name": "web_search",
+          "description": "",
+          "input_schema": {}
+        }
+      ],
+      "forwarded_as_server_tool": false
+    },
+    {
+      "case": "minimal/sy-plan",
+      "run": 3,
+      "client_status": 400,
+      "upstream_status": 400,
+      "forwarded_web_search": [
+        {
+          "name": "web_search",
+          "description": "",
+          "input_schema": {}
+        }
+      ],
+      "forwarded_as_server_tool": false
+    },
+    {
+      "case": "minimal/sy-plan",
+      "run": 4,
+      "client_status": 400,
+      "upstream_status": 400,
+      "forwarded_web_search": [
+        {
+          "name": "web_search",
+          "description": "",
+          "input_schema": {}
+        }
+      ],
+      "forwarded_as_server_tool": false
+    },
+    {
+      "case": "minimal/sy-plan",
+      "run": 5,
+      "client_status": 400,
+      "upstream_status": 400,
+      "forwarded_web_search": [
+        {
+          "name": "web_search",
+          "description": "",
+          "input_schema": {}
+        }
+      ],
+      "forwarded_as_server_tool": false
+    },
+    {
+      "case": "minimal/sy-pass",
+      "run": 1,
+      "client_status": 200,
+      "upstream_status": 200,
+      "forwarded_web_search": [
+        {
+          "type": "web_search_20250305",
+          "name": "web_search",
+          "max_uses": 1
+        }
+      ],
+      "forwarded_as_server_tool": true
+    },
+    {
+      "case": "minimal/sy-pass",
+      "run": 2,
+      "client_status": 200,
+      "upstream_status": 200,
+      "forwarded_web_search": [
+        {
+          "type": "web_search_20250305",
+          "name": "web_search",
+          "max_uses": 1
+        }
+      ],
+      "forwarded_as_server_tool": true
+    },
+    {
+      "case": "minimal/sy-pass",
+      "run": 3,
+      "client_status": 200,
+      "upstream_status": 200,
+      "forwarded_web_search": [
+        {
+          "type": "web_search_20250305",
+          "name": "web_search",
+          "max_uses": 1
+        }
+      ],
+      "forwarded_as_server_tool": true
+    },
+    {
+      "case": "minimal/sy-pass",
+      "run": 4,
+      "client_status": 200,
+      "upstream_status": 200,
+      "forwarded_web_search": [
+        {
+          "type": "web_search_20250305",
+          "name": "web_search",
+          "max_uses": 1
+        }
+      ],
+      "forwarded_as_server_tool": true
+    },
+    {
+      "case": "minimal/sy-pass",
+      "run": 5,
+      "client_status": 200,
+      "upstream_status": 200,
+      "forwarded_web_search": [
+        {
+          "type": "web_search_20250305",
+          "name": "web_search",
+          "max_uses": 1
+        }
+      ],
+      "forwarded_as_server_tool": true
+    }
+  ]
+}

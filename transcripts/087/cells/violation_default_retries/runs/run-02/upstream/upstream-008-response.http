@@ -1,0 +1,4 @@
+HTTP/1.1 500
+content-type: application/json
+
+{"error":{"code":"500","message":"kairo087 injected upstream error","type":"server_error"}}

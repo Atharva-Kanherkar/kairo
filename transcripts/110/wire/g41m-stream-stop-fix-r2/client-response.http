@@ -1,0 +1,54 @@
+HTTP/1.1 200 OK
+date: Tue, 27 Oct 2026 10:08:16 GMT
+x-litellm-call-id: d7443027-165b-4faf-b409-91268375ea41
+x-litellm-model-id: f72a25bf364cd55f48e5c1edcd6d524afd52dad50acd62340b54e500fb3ddaea
+x-litellm-model-name: openai/gpt-4.1-mini
+x-litellm-model-api-base: http://127.0.0.1:4133/v1
+x-litellm-version: 1.108.0
+x-litellm-response-cost-original: 0.0
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-response-cost-input: 0.0
+x-litellm-response-cost-output: 0.0
+x-litellm-response-cost-tool-usage: 0.0
+x-litellm-key-spend: 0.0
+x-litellm-response-duration-ms: 921.4189052581787
+x-litellm-overhead-duration-ms: 4.3061
+x-litellm-callback-duration-ms: 0.0
+x-litellm-model-group: g41m
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+cache-control: no-cache
+x-accel-buffering: no
+content-type: text/event-stream; charset=utf-8
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+Transfer-Encoding: chunked
+
+event: message_start
+data: {"type":"message_start","message":{"id":"msg_c5299e4f-79c6-46de-86ba-6d18f0f9439f","type":"message","role":"assistant","content":[],"model":"g41m","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":0,"output_tokens":0,"cache_creation_input_tokens":0,"cache_read_input_tokens":0}}}
+
+event: content_block_start
+data: {"type": "content_block_start", "index": 0, "content_block": {"type": "text", "text": ""}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": "AL"}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": "PHA"}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 0, "delta": {"type": "text_delta", "text": " "}}
+
+event: content_block_stop
+data: {"type": "content_block_stop", "index": 0}
+
+event: message_delta
+data: {"type": "message_delta", "delta": {"stop_reason": "end_turn"}, "usage": {"input_tokens": 27, "output_tokens": 4}}
+
+event: message_stop
+data: {"type": "message_stop"}
+

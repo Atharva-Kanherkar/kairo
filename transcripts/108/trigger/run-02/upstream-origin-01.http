@@ -1,0 +1,12 @@
+POST /v1/chat/completions HTTP/1.1
+host: 127.0.0.1:52537
+accept: */*
+accept-encoding: gzip, deflate
+connection: keep-alive
+user-agent: litellm/1.106.2
+authorization: Bearer [CANARY_PROVIDER_KEY]
+api-key: [CANARY_PROVIDER_KEY]
+content-length: 63
+content-type: application/json
+
+{"model":"mock","messages":[{"role":"user","content":"hello"}]}

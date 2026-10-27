@@ -1,0 +1,398 @@
+{
+  "identity": {
+    "switchyard_commit": "ab7d26443899239632e97d9d9d8aedaa58c96b99",
+    "switchyard_tree_clean": true,
+    "switchyard_version": "switchyard-server 0.3.0"
+  },
+  "summary": {
+    "direct_server_tool_ok": 5,
+    "direct_reencoded_tool_400": 5,
+    "plan_forwarded_custom_tool_400": 5,
+    "pass_forwarded_server_tool_ok": 5,
+    "runs_per_case": 5,
+    "claude_plan_websearch_failed": 5,
+    "claude_pass_websearch_ok": 5
+  },
+  "runs": [
+    {
+      "case": "direct/server-tool",
+      "run": 1,
+      "status": 200,
+      "searched": true
+    },
+    {
+      "case": "direct/server-tool",
+      "run": 2,
+      "status": 200,
+      "searched": true
+    },
+    {
+      "case": "direct/server-tool",
+      "run": 3,
+      "status": 200,
+      "searched": true
+    },
+    {
+      "case": "direct/server-tool",
+      "run": 4,
+      "status": 200,
+      "searched": true
+    },
+    {
+      "case": "direct/server-tool",
+      "run": 5,
+      "status": 200,
+      "searched": true
+    },
+    {
+      "case": "direct/reencoded-tool",
+      "run": 1,
+      "status": 400,
+      "searched": false
+    },
+    {
+      "case": "direct/reencoded-tool",
+      "run": 2,
+      "status": 400,
+      "searched": false
+    },
+    {
+      "case": "direct/reencoded-tool",
+      "run": 3,
+      "status": 400,
+      "searched": false
+    },
+    {
+      "case": "direct/reencoded-tool",
+      "run": 4,
+      "status": 400,
+      "searched": false
+    },
+    {
+      "case": "direct/reencoded-tool",
+      "run": 5,
+      "status": 400,
+      "searched": false
+    },
+    {
+      "case": "minimal/sy-plan",
+      "run": 1,
+      "client_status": 400,
+      "upstream_status": 400,
+      "forwarded_web_search": [
+        {
+          "name": "web_search",
+          "description": "",
+          "input_schema": {}
+        }
+      ],
+      "forwarded_as_server_tool": false
+    },
+    {
+      "case": "minimal/sy-plan",
+      "run": 2,
+      "client_status": 400,
+      "upstream_status": 400,
+      "forwarded_web_search": [
+        {
+          "name": "web_search",
+          "description": "",
+          "input_schema": {}
+        }
+      ],
+      "forwarded_as_server_tool": false
+    },
+    {
+      "case": "minimal/sy-plan",
+      "run": 3,
+      "client_status": 400,
+      "upstream_status": 400,
+      "forwarded_web_search": [
+        {
+          "name": "web_search",
+          "description": "",
+          "input_schema": {}
+        }
+      ],
+      "forwarded_as_server_tool": false
+    },
+    {
+      "case": "minimal/sy-plan",
+      "run": 4,
+      "client_status": 400,
+      "upstream_status": 400,
+      "forwarded_web_search": [
+        {
+          "name": "web_search",
+          "description": "",
+          "input_schema": {}
+        }
+      ],
+      "forwarded_as_server_tool": false
+    },
+    {
+      "case": "minimal/sy-plan",
+      "run": 5,
+      "client_status": 400,
+      "upstream_status": 400,
+      "forwarded_web_search": [
+        {
+          "name": "web_search",
+          "description": "",
+          "input_schema": {}
+        }
+      ],
+      "forwarded_as_server_tool": false
+    },
+    {
+      "case": "minimal/sy-pass",
+      "run": 1,
+      "client_status": 200,
+      "upstream_status": 200,
+      "forwarded_web_search": [
+        {
+          "type": "web_search_20250305",
+          "name": "web_search",
+          "max_uses": 1
+        }
+      ],
+      "forwarded_as_server_tool": true
+    },
+    {
+      "case": "minimal/sy-pass",
+      "run": 2,
+      "client_status": 200,
+      "upstream_status": 200,
+      "forwarded_web_search": [
+        {
+          "type": "web_search_20250305",
+          "name": "web_search",
+          "max_uses": 1
+        }
+      ],
+      "forwarded_as_server_tool": true
+    },
+    {
+      "case": "minimal/sy-pass",
+      "run": 3,
+      "client_status": 200,
+      "upstream_status": 200,
+      "forwarded_web_search": [
+        {
+          "type": "web_search_20250305",
+          "name": "web_search",
+          "max_uses": 1
+        }
+      ],
+      "forwarded_as_server_tool": true
+    },
+    {
+      "case": "minimal/sy-pass",
+      "run": 4,
+      "client_status": 200,
+      "upstream_status": 200,
+      "forwarded_web_search": [
+        {
+          "type": "web_search_20250305",
+          "name": "web_search",
+          "max_uses": 1
+        }
+      ],
+      "forwarded_as_server_tool": true
+    },
+    {
+      "case": "minimal/sy-pass",
+      "run": 5,
+      "client_status": 200,
+      "upstream_status": 200,
+      "forwarded_web_search": [
+        {
+          "type": "web_search_20250305",
+          "name": "web_search",
+          "max_uses": 1
+        }
+      ],
+      "forwarded_as_server_tool": true
+    },
+    {
+      "case": "claude/sy-plan",
+      "run": 1,
+      "claude_exit": 0,
+      "claude_is_error": false,
+      "result": "The WebSearch call failed with an API error (`400 tools.0.custom.input_schema.type: Field required`), so I have no search result to cite and can't say what the latest stable Rust release is.",
+      "websearch_subrequests": 1,
+      "upstream_status": 400,
+      "forwarded_web_search": [
+        {
+          "name": "web_search",
+          "description": "",
+          "input_schema": {}
+        }
+      ],
+      "forwarded_as_server_tool": false,
+      "search_results_returned": false
+    },
+    {
+      "case": "claude/sy-plan",
+      "run": 2,
+      "claude_exit": 0,
+      "claude_is_error": false,
+      "result": "The WebSearch call failed with an API error (`400 tools.0.custom.input_schema.type: Field required`), so I have no search results to cite and can't give you the latest stable Rust version from a search.",
+      "websearch_subrequests": 1,
+      "upstream_status": 400,
+      "forwarded_web_search": [
+        {
+          "name": "web_search",
+          "description": "",
+          "input_schema": {}
+        }
+      ],
+      "forwarded_as_server_tool": false,
+      "search_results_returned": false
+    },
+    {
+      "case": "claude/sy-plan",
+      "run": 3,
+      "claude_exit": 0,
+      "claude_is_error": false,
+      "result": "I couldn't answer this: the WebSearch call failed with `API Error: 400 tools.0.custom.input_schema.type: Field required`. The search never ran, so I have nothing to cite, and I'd rather not guess a Rust version from memory.",
+      "websearch_subrequests": 1,
+      "upstream_status": 400,
+      "forwarded_web_search": [
+        {
+          "name": "web_search",
+          "description": "",
+          "input_schema": {}
+        }
+      ],
+      "forwarded_as_server_tool": false,
+      "search_results_returned": false
+    },
+    {
+      "case": "claude/sy-plan",
+      "run": 4,
+      "claude_exit": 0,
+      "claude_is_error": false,
+      "result": "The search failed, so I can't tell you the latest stable Rust version. WebSearch returned \"API Error: 400 tools.0.custom.input_schema.type: Field required\" and no results. I'd rather not guess from memory, since the answer depends on today's date.",
+      "websearch_subrequests": 1,
+      "upstream_status": 400,
+      "forwarded_web_search": [
+        {
+          "name": "web_search",
+          "description": "",
+          "input_schema": {}
+        }
+      ],
+      "forwarded_as_server_tool": false,
+      "search_results_returned": false
+    },
+    {
+      "case": "claude/sy-plan",
+      "run": 5,
+      "claude_exit": 0,
+      "claude_is_error": false,
+      "result": "I couldn't answer this: the WebSearch call failed with `API Error: 400 tools.0.custom.input_schema.type: Field required`, so I have no search results to cite for the latest stable Rust version.\n\nI haven't retried. Tell me if you want me to try the search again.",
+      "websearch_subrequests": 1,
+      "upstream_status": 400,
+      "forwarded_web_search": [
+        {
+          "name": "web_search",
+          "description": "",
+          "input_schema": {}
+        }
+      ],
+      "forwarded_as_server_tool": false,
+      "search_results_returned": false
+    },
+    {
+      "case": "claude/sy-pass",
+      "run": 1,
+      "claude_exit": 0,
+      "claude_is_error": false,
+      "result": "The search returned Rust 1.99.0 as the latest stable release (per releases.rs and Wikipedia, dated October 1, 2026), though releases.rs also lists a 1.99.1 entry that I couldn't confirm has shipped.\n\nSources:\n- [Rust Versions (releases.rs)](https://releases.rs/)\n- [Rust (programming language) \u2013 Wikipedia](https://en.wikipedia.org/wiki/Rust_(programming_language))",
+      "websearch_subrequests": 1,
+      "upstream_status": 200,
+      "forwarded_web_search": [
+        {
+          "type": "web_search_20250305",
+          "name": "web_search",
+          "max_uses": 8
+        }
+      ],
+      "forwarded_as_server_tool": true,
+      "search_results_returned": true
+    },
+    {
+      "case": "claude/sy-pass",
+      "run": 2,
+      "claude_exit": 0,
+      "claude_is_error": false,
+      "result": "The search returned Rust 1.99.0 as the latest stable release: [releases.rs](https://releases.rs/) lists it as Stable (with 1.100.0 in beta), and [Wikipedia](https://en.wikipedia.org/wiki/Rust_(programming_language)) gives its release date as October 1, 2026, though the results also show a 1.99.1 entry that they don't confirm as a point release.\n\nSources:\n- [Rust Versions](https://releases.rs/)\n- [Rust (programming language)](https://en.wikipedia.org/wiki/Rust_(programming_language))",
+      "websearch_subrequests": 1,
+      "upstream_status": 200,
+      "forwarded_web_search": [
+        {
+          "type": "web_search_20250305",
+          "name": "web_search",
+          "max_uses": 8
+        }
+      ],
+      "forwarded_as_server_tool": true,
+      "search_results_returned": true
+    },
+    {
+      "case": "claude/sy-pass",
+      "run": 3,
+      "claude_exit": 0,
+      "claude_is_error": false,
+      "result": "The search returned Rust 1.99.0 as the latest stable release, with [releases.rs](https://releases.rs/) listing it as Stable (Beta 1.100.0, due 12 November 2026) and [Wikipedia](https://en.wikipedia.org/wiki/Rust_(programming_language)) giving its release date as October 1, 2026, though releases.rs also shows a 1.99.1 entry that the results don't confirm as released.\n\nSources:\n- [Rust Versions (releases.rs)](https://releases.rs/)\n- [Rust (programming language), Wikipedia](https://en.wikipedia.org/wiki/Rust_(programming_language))",
+      "websearch_subrequests": 1,
+      "upstream_status": 200,
+      "forwarded_web_search": [
+        {
+          "type": "web_search_20250305",
+          "name": "web_search",
+          "max_uses": 8
+        }
+      ],
+      "forwarded_as_server_tool": true,
+      "search_results_returned": true
+    },
+    {
+      "case": "claude/sy-pass",
+      "run": 4,
+      "claude_exit": 0,
+      "claude_is_error": false,
+      "result": "The search returned 1.99.0 as the latest stable Rust release, per [releases.rs](https://releases.rs/) (also noting a 1.99.1 entry I couldn't confirm) and [Wikipedia's release date of October 1, 2026](https://en.wikipedia.org/wiki/Rust_(programming_language)). The release-announcement links it returned only went up to 1.88.0, so those don't confirm it.\n\nSources:\n- [Rust Versions](https://releases.rs/)\n- [Rust (programming language)](https://en.wikipedia.org/wiki/Rust_(programming_language))",
+      "websearch_subrequests": 1,
+      "upstream_status": 200,
+      "forwarded_web_search": [
+        {
+          "type": "web_search_20250305",
+          "name": "web_search",
+          "max_uses": 8
+        }
+      ],
+      "forwarded_as_server_tool": true,
+      "search_results_returned": true
+    },
+    {
+      "case": "claude/sy-pass",
+      "run": 5,
+      "claude_exit": 0,
+      "claude_is_error": false,
+      "result": "The search returned Rust 1.99.0 (released October 1, 2026) as the latest stable version, citing Wikipedia's [Rust (programming language)](https://en.wikipedia.org/wiki/Rust_(programming_language)) page, with 1.100.0-beta.5 listed as the next release on the [Rust Release Notes](https://doc.rust-lang.org/beta/releases.html) page. The results didn't include an official 1.99.0 announcement on blog.rust-lang.org, so I'd confirm it with `rustc --version` after running `rustup update stable`.\n\nSources:\n- [Rust (programming language) \u2013 Wikipedia](https://en.wikipedia.org/wiki/Rust_(programming_language))\n- [Rust Release Notes](https://doc.rust-lang.org/beta/releases.html)",
+      "websearch_subrequests": 1,
+      "upstream_status": 200,
+      "forwarded_web_search": [
+        {
+          "type": "web_search_20250305",
+          "name": "web_search",
+          "max_uses": 8
+        }
+      ],
+      "forwarded_as_server_tool": true,
+      "search_results_returned": true
+    }
+  ]
+}

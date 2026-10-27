@@ -1,0 +1,39 @@
+id = "switchyard-017-parallel-tool-flag-dropped"
+title = "Anthropic disable_parallel_tool_use never reaches the OpenAI backend"
+kind = "bug"
+env = "switchyard-e9767d6"
+category = "request-field-drop"
+difficulty = "easy"
+finding = "017 and 070"
+languages = ["rust"]
+splits = ["kairo-30"]
+
+[repo]
+name = "NVIDIA-NeMo/Switchyard"
+url = "https://github.com/NVIDIA-NeMo/Switchyard"
+base_commit = "e9767d642461af63e7f11dc74a85f1e9f56c1e78"
+base_ref = "main on 2026-08-13"
+
+[upstream]
+fix = "https://github.com/NVIDIA-NeMo/Switchyard/pull/779"
+status = "fixed"
+
+[gold]
+# PR #779 backported to this base: the decode hunk's anchor (the provider-extension
+# key list) differs here; the change itself is the same.
+source = "upstream-merged"
+url = "https://github.com/NVIDIA-NeMo/Switchyard/pull/779"
+
+[verifier]
+command = "python3 verify.py"
+timeout_sec = 2400
+fail_to_pass = [
+  "disable_parallel_auto_forwarded",
+  "disable_parallel_named_tool_forwarded",
+]
+pass_to_pass = [
+  "parallel_flag_not_invented",
+  "tool_choice_mapping_preserved",
+  "openai_route_keeps_parallel_false",
+  "cargo_tests_translation",
+]

@@ -1,0 +1,28 @@
+HTTP/1.1 200 OK
+date: Thu, 22 Oct 2026 03:18:16 GMT
+server: uvicorn
+content-length: 903
+content-type: application/json
+x-litellm-call-id: 4a2d581c-de39-46e6-a9da-f093e5ff2fd2
+x-litellm-model-id: 1da18fc2d05d3a59e0fa8c4d13373a336279e4cd10666e916574ae5359b627ad
+x-litellm-model-api-base: http://127.0.0.1:4099/v1beta
+x-litellm-version: 1.88.2
+x-litellm-response-cost: 0.0010035
+x-litellm-response-cost-original: 0.0010035
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-key-spend: 0.0010035
+x-litellm-response-duration-ms: 2974.4570000000003
+x-litellm-overhead-duration-ms: 0.814
+x-litellm-callback-duration-ms: 0.0
+x-litellm-model-group: g38f
+x-ratelimit-remaining-tokens: 798790
+x-ratelimit-limit-tokens: 800000
+x-ratelimit-remaining-requests: 1999
+x-ratelimit-limit-requests: 2000
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin
+
+{"id":"eYDZatf1OpaM1e8Pj4nv6Q8","created":1792639097,"model":"g38f","object":"chat.completion","choices":[{"finish_reason":"stop","index":0,"message":{"content":"ZEBRA-7342","role":"assistant","images":[],"thinking_blocks":[],"provider_specific_fields":{"thought_signatures":["ErsBCrgBAWkUfROlsthVq6ICBLfp02e4beD1pxlSYIPyeP2x3zMYOx81xMHwblrhTCBGpCiWzvNTpF5zElki90bclE8FMek38lGp/oUaN1otfaRqBaFuPpbphEh7WlzMrUaM75KYsU88ZKMQHvbgIo2V8aBnwJiypfctXO2Wv986xC3CYee7dGkQbrVS3wd4WddHal2Em5EQMidgv8dvMUth+fL5miyDctWncWlb2jndBNi/TrcFoUMCUMDJ6w=="]}}}],"usage":{"completion_tokens":32,"prompt_tokens":1178,"total_tokens":1210,"completion_tokens_details":{"reasoning_tokens":25,"text_tokens":7},"prompt_tokens_details":{"text_tokens":98,"image_tokens":1080}},"vertex_ai_grounding_metadata":[],"vertex_ai_url_context_metadata":[],"vertex_ai_safety_results":[],"vertex_ai_citation_metadata":[],"service_tier":"default"}

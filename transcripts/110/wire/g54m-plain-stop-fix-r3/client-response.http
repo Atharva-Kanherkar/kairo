@@ -1,0 +1,28 @@
+HTTP/1.1 200 OK
+date: Tue, 27 Oct 2026 10:08:25 GMT
+content-length: 472
+content-type: application/json
+x-litellm-call-id: 5114d721-d6f7-4120-9785-821bb7f7d26b
+x-litellm-model-id: 29162b5294cafca3bcc1f257753ef78b815c0a57098eb141bbbf61d3a94b9739
+x-litellm-model-name: openai/gpt-5.4-mini
+x-litellm-version: 1.108.0
+x-litellm-response-cost: 6.9e-05
+x-litellm-response-cost-original: 6.9e-05
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-response-cost-input: 1.95e-05
+x-litellm-response-cost-output: 4.9500000000000004e-05
+x-litellm-response-cost-tool-usage: 0.0
+x-litellm-key-spend: 6.9e-05
+x-litellm-response-duration-ms: 1094.628095626831
+x-litellm-overhead-duration-ms: 8.3442
+x-litellm-model-group: g54m
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+
+{"id":"resp_bGl0ZWxsbTpjdXN0b21fbGxtX3Byb3ZpZGVyOm9wZW5haTttb2RlbF9pZDoyOTE2MmI1Mjk0Y2FmY2EzYmNjMWYyNTc3NTNlZjc4YjgxNWMwYTU3MDk4ZWIxNDFiYmJmNjFkM2E5NGI5NzM5O3Jlc3BvbnNlX2lkOnJlc3BfMDcwYjIzMjYyOWQwYWY4OTAwNmFlMDc4MTk1NGY4ODdkMGFmOWNjYTcwMjFiYWU5MzI=","type":"message","role":"assistant","model":"g54m","stop_sequence":null,"usage":{"input_tokens":26,"output_tokens":11},"content":[{"type":"text","text":"ALPHA STOPHERE OMEGA"}],"stop_reason":"end_turn","stop_details":null}

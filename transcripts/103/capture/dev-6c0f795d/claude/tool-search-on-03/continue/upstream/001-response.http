@@ -1,0 +1,29 @@
+HTTP/1.1 400 Bad Request
+Date: Fri, 16 Oct 2026 06:26:03 GMT
+Content-Type: application/json
+Content-Length: 313
+Connection: keep-alive
+CF-Ray: [REDACTED: trace id]
+CF-Cache-Status: DYNAMIC
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+access-control-expose-headers: X-Request-ID
+access-control-expose-headers: CF-Ray
+Access-Control-Expose-Headers: CF-Ray
+openai-organization: [REDACTED: tenant id]
+openai-processing-ms: [REDACTED: trace id]
+openai-project: [REDACTED: tenant id]
+openai-version: 2020-10-01
+x-request-id: [REDACTED: trace id]
+set-cookie: [REDACTED: credential]
+alt-svc: h3=":443"; ma=86400
+
+{
+  "error": {
+    "message": "Missing namespace for function_call 'mcp__orders__lookup_order'. It does not exist in the default namespace. Round-trip the model's function_call item with its namespace field included.",
+    "type": "invalid_request_error",
+    "param": "input[8].namespace",
+    "code": null
+  }
+}

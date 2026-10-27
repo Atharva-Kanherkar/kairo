@@ -1,0 +1,43 @@
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Fri, 16 Oct 2026 06:25:30 GMT
+Content-Type: application/json
+Content-Length: 2868
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID, X-Bifrost-Setup-Token
+Access-Control-Max-Age: 86400
+Access-Control-Expose-Headers: x-bifrost-request-id, x-bifrost-trace-id, x-request-id, x-bifrost-provider, x-bifrost-original-model, x-bifrost-resolved-model, x-bifrost-fallback-index, x-bifrost-request-type, x-bifrost-upstream-latency-ms, x-bifrost-routing-info-provider, x-bifrost-routing-info-model, x-bifrost-routing-info-key, x-bifrost-routing-info-alias-model-id, x-bifrost-routing-info-alias-model-name, x-bifrost-routing-info-alias-model-family, x-bifrost-routing-info-is-fallback, x-bifrost-routing-info-primary-provider, x-bifrost-routing-info-primary-model, x-bifrost-routing-info-server-side-fallback-model, x-bifrost-routing-info-requested-provider, x-bifrost-routing-info-requested-model, x-bifrost-cache-hit, x-bifrost-cache-id, x-bifrost-cache-hit-type, x-bifrost-cache-hit-latency-ms, x-bifrost-cache-requested-provider, x-bifrost-cache-requested-model, x-bifrost-cache-similarity, x-bifrost-cache-threshold, x-bifrost-cache-provider-used, x-bifrost-cache-model-used, x-bifrost-cache-input-tokens, x-bifrost-latency-ms, x-bifrost-pricing-request-type, x-bifrost-converted-request-type, x-bifrost-dropped-compat-params, x-bifrost-dropped-unsupported-tools, x-bifrost-passthrough-path, x-bifrost-error-type, x-bifrost-retry-after-ms
+Vary: Origin
+X-Bifrost-Request-Id: 073156d1-64a9-4f82-ad41-6e328cc0b414
+X-Request-Id: [REDACTED: trace id]
+X-Bifrost-Trace-Id: 9d6d0384b3f342c0806202b2d741214a
+X-Ratelimit-Remaining-Tokens: [REDACTED: rate limit]
+Cf-Ray: [REDACTED: trace id]
+Openai-Organization: [REDACTED: tenant id]
+X-Ratelimit-Limit-Tokens: [REDACTED: rate limit]
+X-Ratelimit-Remaining-Requests: [REDACTED: rate limit]
+X-Ratelimit-Reset-Requests: [REDACTED: rate limit]
+X-Ratelimit-Reset-Tokens: [REDACTED: rate limit]
+Cf-Cache-Status: DYNAMIC
+Openai-Processing-Ms: [REDACTED: trace id]
+Openai-Project: [REDACTED: tenant id]
+Openai-Version: 2020-10-01
+X-Ratelimit-Limit-Requests: [REDACTED: rate limit]
+X-Bifrost-Provider: openai
+X-Bifrost-Original-Model: gpt-5.4-mini
+X-Bifrost-Resolved-Model: gpt-5.4-mini
+X-Bifrost-Request-Type: responses
+X-Bifrost-Routing-Info-Provider: openai
+X-Bifrost-Routing-Info-Model: gpt-5.4-mini
+X-Bifrost-Routing-Info-Key: k1
+X-Bifrost-Routing-Info-Requested-Provider: openai
+X-Bifrost-Routing-Info-Requested-Model: gpt-5.4-mini
+X-Bifrost-Upstream-Latency-Ms: 907.834
+
+{"id":"resp_01417bf3edb3ffbc006ad1c359cde087d0941a1d085b4fac24","object":"response","background":false,"created_at":1792131929,"completed_at":1792131930,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":null,"max_tool_calls":null,"metadata":{},"model":"gpt-5.4-mini-2026-03-17","output":[{"id":"msg_01417bf3edb3ffbc006ad1c35a37a087d0a8916fe45a9a357e","type":"message","status":"completed","phase":"final_answer","role":"assistant","content":[{"type":"output_text","text":"Order A-1001 has shipping status: **SHIPPED-CANARY-7731**.","annotations":[],"logprobs":[]}]}],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":"24h","presence_penalty":0,"frequency_penalty":0,"reasoning":{"context":"current_turn","effort":"none","mode":"standard","summary":null},"safety_identifier":null,"service_tier":"default","status":"completed","store":true,"temperature":1,"text":{"format":{"type":"text"},"verbosity":"medium"},"top_logprobs":0,"top_p":0.98,"tool_choice":"auto","tools":[{"type":"tool_search","description":"Search for deferred tools and load them.","execution":"client","parameters":{"type":"object","properties":{"query":{"type":"string"},"max_results":{"type":"number"}},"required":["query"]}},{"type":"namespace","name":"mcp__orders__lookup_order","description":"Look up the shipping status of a customer order by its order id.","tools":[{"type":"function","name":"mcp__orders__lookup_order","description":"Look up the shipping status of a customer order by its order id.","parameters":{"type":"object","properties":{"order_id":{"type":"string"}},"required":["order_id"]},"strict":false}]}],"truncation":"disabled","usage":{"input_tokens":333,"input_tokens_details":{"cached_read_tokens":0,"cached_write_tokens":0,"cached_tokens":0,"cache_write_tokens":0},"output_tokens":25,"output_tokens_details":{"reasoning_tokens":0},"total_tokens":358},"tool_usage":{"web_search":{"num_requests":0}},"extra_fields":{"request_type":"responses","routing_info":{"provider":"openai","model":"gpt-5.4-mini","key":"k1","requested_provider":"openai","requested_model":"gpt-5.4-mini"},"provider":"openai","original_model_requested":"gpt-5.4-mini","resolved_model_used":"gpt-5.4-mini","latency":907,"upstream_latency":907,"chunk_index":0,"provider_response_headers":{"Openai-Version":"2020-10-01","X-Ratelimit-Limit-Requests":"[REDACTED: rate limit]","X-Ratelimit-Remaining-Tokens":"[REDACTED: rate limit]","X-Request-Id":"[REDACTED: trace id]","Cf-Ray":"[REDACTED: trace id]","X-Content-Type-Options":"nosniff","Openai-Organization":"[REDACTED: tenant id]","X-Ratelimit-Limit-Tokens":"[REDACTED: rate limit]","X-Ratelimit-Remaining-Requests":"[REDACTED: rate limit]","X-Ratelimit-Reset-Requests":"[REDACTED: rate limit]","X-Ratelimit-Reset-Tokens":"[REDACTED: rate limit]","Cf-Cache-Status":"DYNAMIC","Openai-Processing-Ms":"[REDACTED: trace id]","Openai-Project":"[REDACTED: tenant id]"}}}

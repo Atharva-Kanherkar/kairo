@@ -1,0 +1,42 @@
+{
+  "method": "POST",
+  "path": "/v1/messages",
+  "header_names": [
+    "accept",
+    "anthropic-version",
+    "content-length",
+    "content-type",
+    "host",
+    "user-agent"
+  ],
+  "body": {
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "text",
+            "text": "hi"
+          }
+        ]
+      }
+    ],
+    "model": "captured-model",
+    "max_tokens": 64,
+    "stream": true,
+    "tools": [
+      {
+        "name": "get_weather",
+        "description": "w",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

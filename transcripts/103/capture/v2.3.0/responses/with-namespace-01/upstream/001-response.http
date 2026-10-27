@@ -1,0 +1,167 @@
+HTTP/1.1 200 OK
+Date: Fri, 16 Oct 2026 06:27:17 GMT
+Content-Type: application/json
+Content-Length: 3212
+Connection: keep-alive
+CF-Ray: [REDACTED: trace id]
+CF-Cache-Status: DYNAMIC
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+access-control-expose-headers: X-Request-ID
+access-control-expose-headers: CF-Ray
+Access-Control-Expose-Headers: CF-Ray
+openai-organization: [REDACTED: tenant id]
+openai-processing-ms: [REDACTED: trace id]
+openai-project: [REDACTED: tenant id]
+openai-version: 2020-10-01
+x-ratelimit-limit-requests: [REDACTED: rate limit]
+x-ratelimit-limit-tokens: [REDACTED: rate limit]
+x-ratelimit-remaining-requests: [REDACTED: rate limit]
+x-ratelimit-remaining-tokens: [REDACTED: rate limit]
+x-ratelimit-reset-requests: [REDACTED: rate limit]
+x-ratelimit-reset-tokens: [REDACTED: rate limit]
+x-request-id: [REDACTED: trace id]
+set-cookie: [REDACTED: credential]
+alt-svc: h3=":443"; ma=86400
+
+{
+  "id": "resp_0b72895977dfee5a006ad1c3c4bebc87d0b6892e967df2233e",
+  "object": "response",
+  "created_at": 1792132036,
+  "status": "completed",
+  "access_programs": null,
+  "background": false,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1792132037,
+  "error": null,
+  "frequency_penalty": 0.0,
+  "incomplete_details": null,
+  "instructions": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "model": "gpt-5.4-mini-2026-03-17",
+  "moderation": null,
+  "output": [
+    {
+      "id": "msg_0b72895977dfee5a006ad1c3c57b0c87d09f1ef04df2748088",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Order A-1001 is **SHIPPED-CANARY-7731**."
+        }
+      ],
+      "phase": "final_answer",
+      "role": "assistant"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "presence_penalty": 0.0,
+  "previous_response_id": null,
+  "prompt_cache_key": null,
+  "prompt_cache_retention": "24h",
+  "reasoning": {
+    "context": "current_turn",
+    "effort": "none",
+    "mode": "standard",
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "store": true,
+  "temperature": 1.0,
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "tool_choice": "auto",
+  "tool_usage": {
+    "image_gen": {
+      "input_tokens": 0,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      },
+      "output_tokens": 0,
+      "output_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      },
+      "total_tokens": 0
+    },
+    "web_search": {
+      "num_requests": 0
+    }
+  },
+  "tools": [
+    {
+      "type": "tool_search",
+      "description": "Search for deferred tools and load them.",
+      "execution": "client",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "max_results": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "type": "namespace",
+      "description": "Look up the shipping status of a customer order by its order id.",
+      "name": "mcp__orders__lookup_order",
+      "tools": [
+        {
+          "type": "function",
+          "description": "Look up the shipping status of a customer order by its order id.",
+          "name": "mcp__orders__lookup_order",
+          "output_schema": null,
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "order_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "order_id"
+            ]
+          },
+          "strict": false
+        }
+      ]
+    }
+  ],
+  "top_logprobs": 0,
+  "top_p": 0.98,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 333,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "output_tokens": 22,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 355
+  },
+  "user": null,
+  "metadata": {}
+}

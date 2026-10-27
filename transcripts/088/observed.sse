@@ -1,0 +1,10 @@
+data: {"id":"msg_1","choices":[{"index":0,"delta":{"content":null,"tool_calls":[{"index":0,"id":"toolu_01","type":"function","function":{"name":"get_weather"}}],"role":"assistant"}}],"created":1790518943,"model":"captured-model","service_tier":null,"system_fingerprint":null,"object":"chat.completion.chunk","usage":null}
+
+data: {"id":"msg_1","choices":[{"index":0,"delta":{"content":null,"tool_calls":[{"index":0,"id":null,"type":null,"function":{"arguments":"{\"ci"}}]}}],"created":1790518943,"model":"captured-model","service_tier":null,"system_fingerprint":null,"object":"chat.completion.chunk","usage":null}
+
+data: {"id":"msg_1","choices":[{"index":0,"delta":{"content":null,"tool_calls":[{"index":0,"id":null,"type":null,"function":{"arguments":"ty\":\"sf\"}"}}]}}],"created":1790518943,"model":"captured-model","service_tier":null,"system_fingerprint":null,"object":"chat.completion.chunk","usage":null}
+
+data: {"id":"msg_1","choices":[{"index":0,"delta":{"content":null},"finish_reason":"tool_calls"}],"created":1790518943,"model":"captured-model","service_tier":null,"system_fingerprint":null,"object":"chat.completion.chunk","usage":{"prompt_tokens":0,"completion_tokens":5,"total_tokens":5}}
+
+data: [DONE]
+

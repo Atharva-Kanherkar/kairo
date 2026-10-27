@@ -1,3 +1,4 @@
 # Preserve literal HTTP framing instead of normalizing captured wire bytes.
 transcripts/071/**/*.http -text whitespace=cr-at-eol
 transcripts/077/*.http -text whitespace=-trailing-space,cr-at-eol
+transcripts/108/**/*.http -text whitespace=cr-at-eol

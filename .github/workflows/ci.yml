@@ -32,6 +32,18 @@ jobs:
       - name: README Status matches the issue and test counters
         run: python3 tools/update-readme-counts.py --check
 
+  bench:
+    name: Kairo-30 harness
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Task catalog and harness unit tests (no Docker, no keys)
+        run: python -m unittest discover -s bench/tests -v
+
   fmt:
     name: Format
     runs-on: ubuntu-latest

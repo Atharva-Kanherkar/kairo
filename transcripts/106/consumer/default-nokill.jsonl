@@ -1,0 +1,2 @@
+{"outcome": "tool_executed", "executed": [{"tool": "write_file", "path": "nums.txt", "n": 200, "ok": true}], "sdk": "openai", "kill_secs": 0.0, "killed": null, "secs": 12.31}
+{"outcome": "tool_executed", "executed": [{"tool": "write_file", "path": "nums.txt", "n": 200, "ok": true}], "sdk": "anthropic", "kill_secs": 0.0, "killed": null, "secs": 12.74}

@@ -1,0 +1,5 @@
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 318
+
+{"choices":[{"finish_reason":"stop","index":0,"message":{"content":"KAIRO_086_UPSTREAM_CHAT seq=007 cell=chat_then_responses run=02","role":"assistant"}}],"created":1790000000,"id":"chatcmpl-086-007","model":"gpt-4o-mini","object":"chat.completion","usage":{"completion_tokens":8,"prompt_tokens":12,"total_tokens":20}}
