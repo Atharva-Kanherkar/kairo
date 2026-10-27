@@ -1,7 +1,7 @@
 # 098, A virtual key scoped to one model is served any model named in the image route URL, because auth and the handler parse the request differently
 
 - **Upstream**: [BerriAI/litellm#41810](https://github.com/BerriAI/litellm/issues/41810) (open) reports the same class on `/v1/chat/completions?model=`; [BerriAI/litellm#41852](https://github.com/BerriAI/litellm/pull/41852) (open, unmerged) fixes chat/completions, completions and embeddings only. No upstream issue or pull request covers the image routes. State at 2026-10-27, details in Gate 3.
-- **Tool under test**: `BerriAI/litellm` commit [`cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a`](https://github.com/BerriAI/litellm/commit/cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a), `pyproject.toml` version 1.108.0 (2026-10-26). This commit was `main` HEAD by `git ls-remote` on 2026-10-27.
+- **Tool under test**: `BerriAI/litellm` commit [`cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a`](https://github.com/BerriAI/litellm/commit/cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a), `pyproject.toml` version 1.108.0 (2026-10-26). This commit was `main` HEAD by `git ls-remote` on 2026-10-27. On 2026-10-28 `main` had advanced one unrelated commit (`1419343`); the auth, parsing, image handler, and common request processing files cited here are unchanged.
 - **Reproduced**: 2026-10-27T17:16Z, macOS arm64, real LiteLLM proxy with a PostgreSQL-backed virtual key, one uvicorn worker, two deterministic loopback OpenAI-compatible upstreams, default settings plus `drop_params: true`. No provider credentials are used.
 
 ## What breaks
@@ -245,10 +245,13 @@ from auth while the handler still routes on it.
   bound which model the request is served by" and makes the URL-bound model
   part of the check. No example, test, or UI in the tree says image routes are
   exempt.
-- **Have maintainers already ruled on it?** They have ruled that URL-bound
-  models are part of the allowlist contract (#41852), but their route tables
-  cover only the text routes. Nothing rules the image handlers exempt; the
-  omission is the defect.
+- **Have maintainers already ruled on it?** Yes. They shipped a security fix
+  for the Azure deployment path in #8888 (merged 2025-02-28, closing #8780),
+  which adds a URL-model check only when the body has no model. They have also
+  ruled that URL-bound models are part of the allowlist contract for text
+  routes (#41852). Nothing rules the image handlers exempt, and #8888's
+  body-first order is the partial safety net this finding bypasses. The omission
+  is the defect.
 - **Is the trigger supported usage?** Yes. Documented image endpoints, the
   documented Azure-compatible deployment path, a normal virtual key, default
   auth, and valid request bodies.
@@ -270,14 +273,19 @@ from auth while the handler still routes on it.
 - Upstream commit checked: `cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a`, which
   `git ls-remote https://github.com/BerriAI/litellm.git refs/heads/main`
   returned on 2026-10-27. The tree at that commit contains every cited line.
+  On 2026-10-28 `main` was `14193435b8672ed974ecc666038b336f03ab53a6`, one
+  unrelated commit ahead. The GitHub compare API shows no change to
+  `http_parsing_utils.py`, `auth_utils.py`, `user_api_key_auth.py`,
+  `image_endpoints/endpoints.py`, or `common_request_processing.py` between the
+  two commits.
 - Search terms: `model allowlist bypass`, `images generations model allowlist`,
   `images edits query model`, `key_model_access_denied images`,
   `resolve_inference_model`, `?model= allowlist`,
-  `openai/deployments images model`, `image route model scope`, plus issue and
-  pull request search for each.
+  `openai/deployments images model`, `image route model scope`, `model in url`,
+  plus issue and pull request search for each.
 - Issues and pull requests searched: all open and closed results for the terms
-  above, plus direct reads of #41810, #41852, #41295, #41467, #39998 and
-  #40957.
+  above, plus direct reads of #8780, #8888, #9913, #41810, #41852, #41295,
+  #41467, #39998 and #40957.
 - Releases, changelog, documentation and commits searched: the repository
   changelog, the image endpoint docs and examples, and the commits touching
   `image_endpoints/endpoints.py`, `http_parsing_utils.py` and `auth_utils.py`.
@@ -286,6 +294,9 @@ What exists upstream:
 
 | Artifact | State | Relation to this claim |
 |---|---|---|
+| [litellm#8780](https://github.com/BerriAI/litellm/issues/8780) "Model Access Restrictions Not Enforced via URL Model Name" | closed 2025-02-28 by #8888 | earlier report of the same class on the Azure deployment path; establishes that URL models are in scope |
+| [litellm#8888](https://github.com/BerriAI/litellm/pull/8888) "(security fix) - Enforce model access restrictions on Azure OpenAI route" | merged 2025-02-28 | adds `get_model_from_request`, which reads the URL model only when `request_data.get("model")` is `None`; this is the partial safety net a disagreeing body model bypasses |
+| [litellm#9913](https://github.com/BerriAI/litellm/issues/9913) "model restriction doesn't work with model in url" | closed stale 2025-08-20 | earlier report of the same class; no fix merged |
 | [litellm#41810](https://github.com/BerriAI/litellm/issues/41810) "Virtual-key model allowlist bypass on /v1/chat/completions via the `?model=` query string" | open since 2026-09-18 | same class, text route only; its repro and fix language match this defect |
 | [litellm#41852](https://github.com/BerriAI/litellm/pull/41852) "fix(proxy): enforce key model allowlist on ?model= / {model} for chat, completions and embeddings" | open, unmerged, non-draft, last updated 2026-10-13, 2 files changed | adds URL-bound candidates for text routes only; its `_LLM_HANDLER_QUERY_MODEL_ROUTES` and `_LLM_HANDLER_PATH_MODEL_TEMPLATES` sets exclude every image route, so it does not fix this |
 | [litellm#41295](https://github.com/BerriAI/litellm/issues/41295) "Virtual-key model allowlist bypass on the Azure pass-through route" | open | same class on a different route family; supports that URL-bound models are in scope, not an image fix |
@@ -328,9 +339,12 @@ handlers before it can be called complete.
   a real upstream ledger to a 403 control and an empty ledger to a 200 control,
   so the checker cannot pass by ignoring either half.
 - Why the checker tests the invariant rather than one fixture: it computes the
-  effective model from the request the way the handlers do, and it checks both
-  directions plus the upstream ledger. The same checker would pass a fixed
-  gateway and fail any gateway that lets the URL model escape the allowlist.
+  effective model from the request target and body, the two sources this finding
+  exercises, and it checks both directions plus the upstream ledger. It does not
+  model a configured `image_generation_model` or `completion_model`, which can
+  outrank the URL for some kinds; the recorded config sets neither. The same
+  checker would pass a fixed gateway and fail any gateway that lets the URL
+  model escape the allowlist.
 
 ## Validation
 
@@ -364,5 +378,39 @@ handlers before it can be called complete.
 
 ## Independent review
 
-Pending. The reviewer protocol is
+Verdict: **ACCEPT**, recorded 2026-10-28, using
 `.github/agents/kairo-reproduction-reviewer.agent.md`.
+
+- Correctness: PASS. The reviewer copied `transcripts/098` to a fresh temporary
+  directory so the committed `runs/` could not be deleted, then reran the real
+  pinned proxy on new free ports (proxy 59887, allowed 59888, denied 59889). The
+  result was 55/55. The four bypass cases returned 200 with
+  `x-litellm-model-api-base` pointing at the denied upstream; the 403 controls
+  left the upstream ledgers empty. A structural comparison against the committed
+  `runs/run-01` matched all 11 cases after normalizing ports, dates, UUIDs,
+  durations, and multipart boundaries. The reviewer also mutated the harness
+  fixtures in a temporary repo copy and confirmed the conformance tests fail for
+  a bypass recorded as 403, a denied body recorded as 200, and an allowed case
+  with an empty upstream ledger.
+- Usefulness: PASS. The reviewer independently confirmed the 200 and the
+  denied-upstream call per bypass case, and accepted the spend impact as
+  measured for routing and inferred for billing.
+- Upstream status: PASS, `novel`. The reviewer checked current `main`
+  `14193435b8672ed974ecc666038b336f03ab53a6` and found the cited files
+  unchanged, confirmed #41810 is open and text-only, and counted zero `images`
+  occurrences in #41852's diff.
+- Repository checks: PASS. `cargo fmt --all -- --check`,
+  `cargo clippy --workspace --all-targets -- -D warnings`,
+  `cargo test --workspace` (178 conformance, 42 unit), and
+  `python3 tools/update-readme-counts.py --check` all passed.
+- Blocking findings: none.
+
+Non-blocking observations from the review, and how they are handled here: the
+writeup now records the current-main advance and the earlier #8780/#8888/#9913
+reports; the checker note above states that it does not model a configured image
+or completion model, which the recorded config does not set. The reviewer also
+noted that the edit route lacks body-silent controls symmetric with generation
+and that the allowed case asserts an upstream call rather than the allowed
+deployment identity. The generation body-silent controls and the source path
+establish the mechanism, and the allowed upstream ledger is empty in every
+bypass case, so neither gap changes the verdict.
