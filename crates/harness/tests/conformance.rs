@@ -6962,6 +6962,9 @@ fn issue_110_text(response: &str) -> String {
 fn issue_110_forwarded(cell: &str) -> Vec<(String, Value)> {
     let mut dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     dir.push(format!("../../transcripts/110/wire/{cell}/upstream"));
+    if !dir.exists() {
+        return Vec::new();
+    }
     let mut names: Vec<String> = fs::read_dir(&dir)
         .unwrap_or_else(|e| panic!("read {}: {e}", dir.display()))
         .map(|entry| {
@@ -7000,6 +7003,11 @@ fn bug110_gpt5_stop_sequences_fail_fast_on_main_and_are_silently_dropped_before(
         let (status, response) =
             issue_110_split(&issue_110_raw(&format!("wire/{cell}/client-response.http")));
         let forwarded = issue_110_forwarded(cell);
+        assert_eq!(
+            row["forwarded_requests"].as_u64(),
+            Some(forwarded.len() as u64),
+            "{cell}"
+        );
         let reasoning_model = model.starts_with("gpt-5");
         if !stop_sent {
             assert_eq!(status, 200, "{cell}");
