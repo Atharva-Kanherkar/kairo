@@ -1,0 +1,21 @@
+POST /v1/chat/completions HTTP/1.1
+Host: 127.0.0.1:4190
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Authorization: [REDACTED]
+Accept: application/json
+Content-Type: application/json
+User-Agent: AsyncOpenAI/Python 3.39.0
+x-stainless-lang: python
+x-stainless-package-version: 3.39.0
+x-stainless-os: MacOS
+x-stainless-arch: arm64
+x-stainless-runtime: CPython
+x-stainless-runtime-version: 3.12.13
+x-stainless-async: async:asyncio
+x-stainless-raw-response: true
+x-stainless-retry-count: 0
+x-stainless-read-timeout: 600.0
+Content-Length: 70
+
+{"model":"cheap-upstream","messages":[{"role":"user","content":"hi"}]}

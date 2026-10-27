@@ -1,0 +1,3 @@
+HTTP/1.1 200
+
+{"candidates":[{"content":{"parts":[{"text":"served-by-upstream-model=cheap-upstream"}],"role":"model"},"finishReason":"STOP","index":0,"safetyRatings":[]}],"usageMetadata":{"promptTokenCount":1000,"candidatesTokenCount":1000,"totalTokenCount":2000}}

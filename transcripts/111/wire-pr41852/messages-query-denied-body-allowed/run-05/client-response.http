@@ -1,0 +1,3 @@
+HTTP/1.1 200
+
+{"id":"resp_bGl0ZWxsbTpjdXN0b21fbGxtX3Byb3ZpZGVyOm9wZW5haTttb2RlbF9pZDozMDU1NTg4ZTg1ZWZiYmFhYTNjYzE4MjgxMjZjZWFjODJlZjg2MmJlNjVhNWRjNWEzYjBmM2FmYzAzYjgyNjQyO3Jlc3BvbnNlX2lkOnJlc3AtZmFrZTI3","type":"message","role":"assistant","model":"cheap-model","stop_sequence":null,"usage":{"input_tokens":1000,"output_tokens":1000},"content":[{"type":"text","text":"served-by-upstream-model=cheap-upstream"}],"stop_reason":"end_turn","stop_details":null}

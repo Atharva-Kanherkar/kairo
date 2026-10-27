@@ -1,0 +1,4 @@
+HTTP/1.1 200 OK
+content-type: application/json
+
+{"id": "chatcmpl-fake5", "object": "chat.completion", "created": 1793121156, "model": "premium-upstream", "choices": [{"index": 0, "message": {"role": "assistant", "content": "served-by-upstream-model=premium-upstream"}, "finish_reason": "stop"}], "usage": {"prompt_tokens": 1000, "completion_tokens": 1000, "total_tokens": 2000}}

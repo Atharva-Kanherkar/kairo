@@ -1,0 +1,5 @@
+POST /v1beta/models/premium-model:generateContent HTTP/1.1
+x-goog-api-key: [REDACTED]
+content-type: application/json
+
+{"model": "cheap-model", "contents": [{"role": "user", "parts": [{"text": "hi"}]}]}

@@ -1,0 +1,361 @@
+{
+  "build": "main",
+  "n": 5,
+  "cells": [
+    {
+      "cell": "chat-body-denied",
+      "description": "chat, body=denied (documented 403 control)",
+      "route": "/v1/chat/completions",
+      "allowlist": [
+        "cheap-model"
+      ],
+      "n": 5,
+      "status": 403,
+      "status_consistent": true,
+      "forwarded_model": [
+        null
+      ],
+      "runs": [
+        {
+          "run": 1,
+          "status": 403,
+          "forwarded_model": null
+        },
+        {
+          "run": 2,
+          "status": 403,
+          "forwarded_model": null
+        },
+        {
+          "run": 3,
+          "status": 403,
+          "forwarded_model": null
+        },
+        {
+          "run": 4,
+          "status": 403,
+          "forwarded_model": null
+        },
+        {
+          "run": 5,
+          "status": 403,
+          "forwarded_model": null
+        }
+      ]
+    },
+    {
+      "cell": "chat-query-denied-body-allowed",
+      "description": "chat ?model=denied body=allowed (sibling, PR #41852 covers this)",
+      "route": "/v1/chat/completions?model=premium-model",
+      "allowlist": [
+        "cheap-model"
+      ],
+      "n": 5,
+      "status": 200,
+      "status_consistent": true,
+      "forwarded_model": "premium-upstream",
+      "runs": [
+        {
+          "run": 1,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 2,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 3,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 4,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 5,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        }
+      ]
+    },
+    {
+      "cell": "deployments-chat-path-denied-body-allowed",
+      "description": "deployments chat path=denied body=allowed (sibling, PR #41852 covers this)",
+      "route": "/openai/deployments/premium-model/chat/completions",
+      "allowlist": [
+        "cheap-model"
+      ],
+      "n": 5,
+      "status": 200,
+      "status_consistent": true,
+      "forwarded_model": "premium-upstream",
+      "runs": [
+        {
+          "run": 1,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 2,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 3,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 4,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 5,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        }
+      ]
+    },
+    {
+      "cell": "gc-path-denied-body-allowed",
+      "description": "generateContent, path=denied body=allowed (TRIGGER)",
+      "route": "/v1beta/models/premium-model:generateContent",
+      "allowlist": [
+        "cheap-model"
+      ],
+      "n": 5,
+      "status": 200,
+      "status_consistent": true,
+      "forwarded_model": "premium-upstream",
+      "runs": [
+        {
+          "run": 1,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 2,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 3,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 4,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 5,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        }
+      ]
+    },
+    {
+      "cell": "gcstream-path-denied-body-allowed",
+      "description": "streamGenerateContent, path=denied body=allowed (TRIGGER)",
+      "route": "/v1beta/models/premium-model:streamGenerateContent",
+      "allowlist": [
+        "cheap-model"
+      ],
+      "n": 5,
+      "status": 200,
+      "status_consistent": true,
+      "forwarded_model": "premium-upstream",
+      "runs": [
+        {
+          "run": 1,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 2,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 3,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 4,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 5,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        }
+      ]
+    },
+    {
+      "cell": "images-path-denied-body-allowed",
+      "description": "images deployment, path=denied body=allowed (TRIGGER)",
+      "route": "/openai/deployments/premium-model/images/generations",
+      "allowlist": [
+        "cheap-model"
+      ],
+      "n": 5,
+      "status": 200,
+      "status_consistent": true,
+      "forwarded_model": "premium-upstream",
+      "runs": [
+        {
+          "run": 1,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 2,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 3,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 4,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        },
+        {
+          "run": 5,
+          "status": 200,
+          "forwarded_model": "premium-upstream"
+        }
+      ]
+    },
+    {
+      "cell": "gc-trigger-removed",
+      "description": "generateContent, path=allowed body=allowed (trigger removed)",
+      "route": "/v1beta/models/cheap-model:generateContent",
+      "allowlist": [
+        "cheap-model"
+      ],
+      "n": 5,
+      "status": 200,
+      "status_consistent": true,
+      "forwarded_model": "cheap-upstream",
+      "runs": [
+        {
+          "run": 1,
+          "status": 200,
+          "forwarded_model": "cheap-upstream"
+        },
+        {
+          "run": 2,
+          "status": 200,
+          "forwarded_model": "cheap-upstream"
+        },
+        {
+          "run": 3,
+          "status": 200,
+          "forwarded_model": "cheap-upstream"
+        },
+        {
+          "run": 4,
+          "status": 200,
+          "forwarded_model": "cheap-upstream"
+        },
+        {
+          "run": 5,
+          "status": 200,
+          "forwarded_model": "cheap-upstream"
+        }
+      ]
+    },
+    {
+      "cell": "messages-query-denied-body-allowed",
+      "description": "messages ?model=denied body=allowed (negative control)",
+      "route": "/v1/messages?model=premium-model",
+      "allowlist": [
+        "cheap-model"
+      ],
+      "n": 5,
+      "status": 200,
+      "status_consistent": true,
+      "forwarded_model": "cheap-upstream",
+      "runs": [
+        {
+          "run": 1,
+          "status": 200,
+          "forwarded_model": "cheap-upstream"
+        },
+        {
+          "run": 2,
+          "status": 200,
+          "forwarded_model": "cheap-upstream"
+        },
+        {
+          "run": 3,
+          "status": 200,
+          "forwarded_model": "cheap-upstream"
+        },
+        {
+          "run": 4,
+          "status": 200,
+          "forwarded_model": "cheap-upstream"
+        },
+        {
+          "run": 5,
+          "status": 200,
+          "forwarded_model": "cheap-upstream"
+        }
+      ]
+    },
+    {
+      "cell": "messages-body-denied",
+      "description": "messages body=denied (negative control, 403)",
+      "route": "/v1/messages",
+      "allowlist": [
+        "cheap-model"
+      ],
+      "n": 5,
+      "status": 403,
+      "status_consistent": true,
+      "forwarded_model": [
+        null
+      ],
+      "runs": [
+        {
+          "run": 1,
+          "status": 403,
+          "forwarded_model": null
+        },
+        {
+          "run": 2,
+          "status": 403,
+          "forwarded_model": null
+        },
+        {
+          "run": 3,
+          "status": 403,
+          "forwarded_model": null
+        },
+        {
+          "run": 4,
+          "status": 403,
+          "forwarded_model": null
+        },
+        {
+          "run": 5,
+          "status": 403,
+          "forwarded_model": null
+        }
+      ]
+    }
+  ]
+}

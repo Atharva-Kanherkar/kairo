@@ -1,0 +1,15 @@
+proxy=200
+generated cheap-only key sk-Vnf...
+chat-body-denied                           status=403 forwarded=[None] (5/5)
+chat-query-denied-body-allowed             status=200 forwarded=premium-upstream (5/5)
+deployments-chat-path-denied-body-allowed  status=200 forwarded=premium-upstream (5/5)
+gc-path-denied-body-allowed                status=200 forwarded=premium-upstream (5/5)
+gcstream-path-denied-body-allowed          status=200 forwarded=premium-upstream (5/5)
+images-path-denied-body-allowed            status=200 forwarded=premium-upstream (5/5)
+gc-trigger-removed                         status=200 forwarded=cheap-upstream (5/5)
+messages-query-denied-body-allowed         status=200 forwarded=cheap-upstream (5/5)
+messages-body-denied                       status=403 forwarded=[None] (5/5)
+
+wrote /Users/atharva/kairo-111/transcripts/111/wire/results.json
+--- spend log ---
+psycopg2 not available; skipping spend dump
