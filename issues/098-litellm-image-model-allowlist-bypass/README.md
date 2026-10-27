@@ -1,7 +1,7 @@
 # 098, A virtual key scoped to one model is served any model named in the image route URL, because auth and the handler parse the request differently
 
 - **Upstream**: [BerriAI/litellm#41810](https://github.com/BerriAI/litellm/issues/41810) (open) reports the same class on `/v1/chat/completions?model=`; [BerriAI/litellm#41852](https://github.com/BerriAI/litellm/pull/41852) (open, unmerged) fixes chat/completions, completions and embeddings only. No upstream issue or pull request covers the image routes. State at 2026-10-27, details in Gate 3.
-- **Tool under test**: `BerriAI/litellm` commit [`cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a`](https://github.com/BerriAI/litellm/commit/cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a), `pyproject.toml` version 1.108.0 (2026-10-26). This commit was `main` HEAD by `git ls-remote` on 2026-10-27. On 2026-10-28 `main` had advanced one unrelated commit (`1419343`); the auth, parsing, image handler, and common request processing files cited here are unchanged.
+- **Tool under test**: `BerriAI/litellm` commit [`cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a`](https://github.com/BerriAI/litellm/commit/cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a), `pyproject.toml` version 1.108.0 (2026-10-26). This commit was `main` HEAD by `git ls-remote` on 2026-10-27. On 2026-10-28 `main` had advanced to `1419343`, then `0657ed46` by the reviewer's final check; the auth, parsing, image handler, and common request processing files cited here are unchanged across those commits.
 - **Reproduced**: 2026-10-27T17:16Z, macOS arm64, real LiteLLM proxy with a PostgreSQL-backed virtual key, one uvicorn worker, two deterministic loopback OpenAI-compatible upstreams, default settings plus `drop_params: true`. No provider credentials are used.
 
 ## What breaks
@@ -404,6 +404,14 @@ Verdict: **ACCEPT**, recorded 2026-10-28, using
   `cargo test --workspace` (253 conformance, 81 unit after merging current
   `main`), and `python3 tools/update-readme-counts.py --check` all passed.
 - Blocking findings: none.
+- Post-merge re-verification, 2026-10-28: after `origin/main` advanced to
+  `c1cad8f`, the reviewer confirmed the merge is an ancestor, the PR diff is
+  limited to this issue, its transcripts, the 098 checker and tests, the
+  SCOREBOARD row, and the README counts, and the 098 checker, helpers, and all
+  nine tests are byte-identical to the reviewed revision. The focused tests pass
+  9/9 and 2/2, the full suite passes 344/344 (253 conformance, 81 unit, 10
+  adversarial), and formatting, lint, and the count check pass. The prior ACCEPT
+  stands.
 
 Non-blocking observations from the review, and how they are handled here: the
 writeup now records the current-main advance and the earlier #8780/#8888/#9913
