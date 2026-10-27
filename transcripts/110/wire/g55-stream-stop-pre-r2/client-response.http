@@ -1,0 +1,70 @@
+HTTP/1.1 200 OK
+date: Tue, 27 Oct 2026 10:08:08 GMT
+x-litellm-call-id: 1bd47de5-88ab-423e-8b9a-1f7882dac104
+x-litellm-model-id: 15e04f5449b8d85c517b25d1a4179d6e216f510f5b789ee0d532d414315836fa
+x-litellm-model-name: openai/gpt-5.5
+x-litellm-version: 1.108.0
+x-litellm-response-cost-original: 0.0
+x-litellm-response-cost-discount-amount: 0.0
+x-litellm-response-cost-margin-amount: 0.0
+x-litellm-response-cost-margin-percent: 0.0
+x-litellm-response-cost-input: 0.0
+x-litellm-response-cost-output: 0.0
+x-litellm-response-cost-tool-usage: 0.0
+x-litellm-key-spend: 0.0
+x-litellm-response-duration-ms: 1963.4430408477783
+x-litellm-overhead-duration-ms: 7.02
+x-litellm-model-group: g55
+x-litellm-attempted-retries: 0
+x-litellm-attempted-fallbacks: 0
+cache-control: no-cache
+x-accel-buffering: no
+content-type: text/event-stream; charset=utf-8
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+Transfer-Encoding: chunked
+
+event: message_start
+data: {"type":"message_start","message":{"id":"msg_3c008349-29a4-4498-97f3-6fb031db8804","type":"message","role":"assistant","content":[],"model":"g55","stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":0,"output_tokens":0,"cache_creation_input_tokens":0,"cache_read_input_tokens":0}}}
+
+event: content_block_start
+data: {"type": "content_block_start", "index": 0, "content_block": {"type": "redacted_thinking", "data": "litellm_encrypted_reasoning:gAAAAABq4HgK65bcsrkSZEmXgEb3imKlsTJtkqfgQGSbwdAvbDJN78W37anYYks28qINJ5aysbgpAHXZpYzd6CReVaUk3O8PCchrlaSBDDQt6sYPuY7LT9wl-SRmHrJHl0auR-idgeVKoc0fAEl_8O9BYb-YOKhF1UiccIGgGZBwgnZQC0sO4C5cZyPGvZYiJ9BVAHu4J5wTm7-_MgOUyRoEBvdjWxMEhbsPxl1WUo8h5Vo1fe74eM-_CvnfJoFIJrOwNZT9dYpnqmk-IYfBAYajTmbggvlBc2IgeG2bIA24g8Z4V_uxiFvCPb5YbZDa9NFpVTdqwop6lR_EofFNUUBbwtjp2SRiRTtogtpqV-84PBUOsI33syqJFeqxA0E1WgFXRpy4V_Fh9dk662eYYAvg04QDoGPR7jtLeCMhOMQ0eCAYgz7lKLOVOGIl9caYi7h1dfZ3gzK-CO5cVrDGNec9sF3bvwvM5RZz-zUSzaMOnIzEqsYAo7HamhbBzJPcr7lYgnNO3Xi75yY-NiyDkVPbM8P5vgjdK4dR9QgjOjkAZWxkhuv8MstJFMclAQpUgYeU1blEiq7ui5NT5zpqW4Z6tYDmJZW05fJF3dYNp_yBjlOotHHa-eRpCjU6Pl_Wylg4X3RC85vCxoSFjOM6sJfCSYtpj14oF_ZvkmlEOxHMBZVdr35_Cdu-HtxlQiEdz_1h0ni_FwUx6HRwWamSphcrifV4GSU-43uD5bIKGOqt62W5oudFLYR_h9PaBQRoitGjaZU3BjQGidNL8bPYNf_dhzfTgMjk_sOTsCkytsEKYMEjGb6k5gMzU1bA40YPQOVzhBHqtwl4w0kzpUiF7h66YirLiic7bc8QwHjcO189C2fDzm81He5_E4EAJwOHOcO_L_bTjEuVhfBUT2DY6BA-kFJz9GWuwGD_f5PRs8tHZj5B_WSxxkDoBdKIBK_a9WzlERV1K0qm516O3ap0zwMbJsDajXXmSSzTs8qFtb4Cy-QFc_81XHroPdng8tmGDawWP-64GwbDSAH9BXoylPh6gyyT5oynURPHo4KOTqrcshsmFU6xc3niKRari4XdZaraTd_HatB8NTbQkcBLEE6I6q_8UZePd8JqafA1ugyDZ0txsLOVQQgdLngl69z0U0-Mfeq8yAO4US1ftd9WwQj8fgjKzoJ_TP2bor9ffssBarUVs8DLp-5pOJ1zmIQIevqg5doglpjcYGmUwvYtP28agby35whBh7GnBcrpunSiYn7xWrCKlCYOqbehF86hNQDYHogIwC109NzJZvQzCgvz11vHb1wF5tVcyTn_vfIDIwt5PdnSd7CeyceKaeAkRgjdrLBagCcoa5Y9CcS-4OuXjn7zJoHltXU3lug_n9xt__UQq3n1kc0gN8T-AZSxyfsrGVqk2A1DbGbHYjKYLqbj5E9poF6BecnEji6ViEtgLMAt9WcI_t0mzKEOhOIIoqakKa6jDy-3KAS3F8kIb9ONIvPWp65COw0WnmLgcZ3shYSAPMeMfNjD_7Q40RU_C2MPw8LBGTpifsEk8DMmdJ192qmnt2Px0g=="}}
+
+event: content_block_stop
+data: {"type": "content_block_stop", "index": 0}
+
+event: content_block_start
+data: {"type": "content_block_start", "index": 1, "content_block": {"type": "text", "text": ""}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 1, "delta": {"type": "text_delta", "text": "AL"}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 1, "delta": {"type": "text_delta", "text": "PHA"}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 1, "delta": {"type": "text_delta", "text": " STOP"}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 1, "delta": {"type": "text_delta", "text": "HERE"}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 1, "delta": {"type": "text_delta", "text": " O"}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 1, "delta": {"type": "text_delta", "text": "ME"}}
+
+event: content_block_delta
+data: {"type": "content_block_delta", "index": 1, "delta": {"type": "text_delta", "text": "GA"}}
+
+event: content_block_stop
+data: {"type": "content_block_stop", "index": 1}
+
+event: message_delta
+data: {"type": "message_delta", "delta": {"stop_reason": "end_turn", "stop_sequence": null}, "usage": {"input_tokens": 26, "output_tokens": 24}}
+
+event: message_stop
+data: {"type": "message_stop"}
+

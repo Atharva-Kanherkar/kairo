@@ -1,0 +1,29 @@
+HTTP/1.1 400 Bad Request
+Date: Tue, 27 Oct 2026 10:09:06 GMT
+Content-Type: application/json
+Content-Length: 155
+Connection: keep-alive
+CF-Ray: [REDACTED]
+CF-Cache-Status: DYNAMIC
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+access-control-expose-headers: X-Request-ID, Server-Timing-Total
+access-control-expose-headers: CF-Ray
+Access-Control-Expose-Headers: CF-Ray
+openai-organization: [REDACTED]
+openai-processing-ms: 11
+openai-project: [REDACTED]
+openai-version: 2020-10-01
+x-request-id: req_19bc792b4e664a34af635f87289b4b50
+set-cookie: [REDACTED]
+alt-svc: h3=":443"; ma=86400
+
+{
+  "error": {
+    "message": "Unknown parameter: 'stop'.",
+    "type": "invalid_request_error",
+    "param": "stop",
+    "code": "unknown_parameter"
+  }
+}

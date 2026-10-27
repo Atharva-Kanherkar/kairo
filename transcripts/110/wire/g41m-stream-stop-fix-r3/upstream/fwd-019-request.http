@@ -1,0 +1,21 @@
+POST /v1/chat/completions HTTP/1.1
+host: 127.0.0.1:4133
+accept-encoding: gzip, deflate
+connection: keep-alive
+authorization: [REDACTED]
+accept: application/json
+content-type: application/json
+user-agent: AsyncOpenAI/Python 3.39.0
+x-stainless-lang: python
+x-stainless-package-version: 3.39.0
+x-stainless-os: MacOS
+x-stainless-arch: arm64
+x-stainless-runtime: CPython
+x-stainless-runtime-version: 3.12.13
+x-stainless-async: async:asyncio
+x-stainless-raw-response: true
+x-stainless-retry-count: 0
+x-stainless-read-timeout: 600.0
+content-length: 256
+
+{"model":"gpt-4.1-mini","messages":[{"role":"user","content":"Output exactly these three words separated by single spaces and nothing else: ALPHA STOPHERE OMEGA"}],"stop":["STOPHERE"],"max_tokens":1024,"stream":true,"stream_options":{"include_usage":true}}

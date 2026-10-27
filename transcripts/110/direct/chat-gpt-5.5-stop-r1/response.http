@@ -1,0 +1,36 @@
+HTTP/1.1 400 Bad Request
+Date: Tue, 27 Oct 2026 10:09:00 GMT
+Content-Type: application/json
+Content-Length: 196
+Connection: keep-alive
+CF-Ray: [REDACTED]
+CF-Cache-Status: DYNAMIC
+Server: cloudflare
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+access-control-expose-headers: X-Request-ID
+access-control-expose-headers: CF-Ray
+Access-Control-Expose-Headers: CF-Ray
+openai-organization: [REDACTED]
+openai-processing-ms: 16
+openai-project: [REDACTED]
+openai-version: 2020-10-01
+x-openai-proxy-wasm: v0.1
+x-ratelimit-limit-requests: [REDACTED]
+x-ratelimit-limit-tokens: [REDACTED]
+x-ratelimit-remaining-requests: [REDACTED]
+x-ratelimit-remaining-tokens: [REDACTED]
+x-ratelimit-reset-requests: [REDACTED]
+x-ratelimit-reset-tokens: [REDACTED]
+x-request-id: req_5939f72d90d24cecac753470b4b067f2
+set-cookie: [REDACTED]
+alt-svc: h3=":443"; ma=86400
+
+{
+  "error": {
+    "message": "Unsupported parameter: 'stop' is not supported with this model.",
+    "type": "invalid_request_error",
+    "param": "stop",
+    "code": "unsupported_parameter"
+  }
+}

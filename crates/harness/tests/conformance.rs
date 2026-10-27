@@ -6917,3 +6917,207 @@ fn litellm_passthrough_redirect_leak_5_of_5() {
         assert_eq!(value["sink_api_key"], false, "control run {run}");
     }
 }
+
+// ---- 110 (negative): LiteLLM /v1/messages stop_sequences on GPT-5 now fails with
+// UnsupportedParamsError instead of silently dropping the stop ----
+
+fn issue_110_raw(relative: &str) -> String {
+    fixture(&format!("transcripts/110/{relative}"))
+}
+
+fn issue_110_split(raw_http: &str) -> (u16, String) {
+    let (head, body) = raw_http.split_once("\r\n\r\n").expect("http body");
+    let status = head
+        .split_whitespace()
+        .nth(1)
+        .and_then(|code| code.parse().ok())
+        .unwrap_or(0);
+    (status, body.to_string())
+}
+
+fn issue_110_rows(index: &str) -> Vec<Value> {
+    serde_json::from_str::<Value>(&issue_110_raw(index))
+        .expect("results.json")
+        .as_array()
+        .expect("rows")
+        .clone()
+}
+
+fn issue_110_text(response: &str) -> String {
+    if let Ok(message) = serde_json::from_str::<Value>(response) {
+        return message["content"]
+            .as_array()
+            .map(|blocks| blocks.iter().filter_map(|b| b["text"].as_str()).collect())
+            .unwrap_or_default();
+    }
+    response
+        .lines()
+        .filter_map(|line| line.strip_prefix("data:"))
+        .filter_map(|data| serde_json::from_str::<Value>(data.trim()).ok())
+        .filter(|event| event["type"] == "content_block_delta")
+        .filter_map(|event| event["delta"]["text"].as_str().map(str::to_string))
+        .collect()
+}
+
+fn issue_110_forwarded(cell: &str) -> Vec<(String, Value)> {
+    let mut dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    dir.push(format!("../../transcripts/110/wire/{cell}/upstream"));
+    if !dir.exists() {
+        return Vec::new();
+    }
+    let mut names: Vec<String> = fs::read_dir(&dir)
+        .unwrap_or_else(|e| panic!("read {}: {e}", dir.display()))
+        .map(|entry| {
+            entry
+                .expect("entry")
+                .file_name()
+                .to_string_lossy()
+                .into_owned()
+        })
+        .filter(|name| name.ends_with("-request.http"))
+        .collect();
+    names.sort();
+    names
+        .iter()
+        .map(|name| {
+            let raw = issue_110_raw(&format!("wire/{cell}/upstream/{name}"));
+            let (head, body) = raw.split_once("\r\n\r\n").expect("forwarded body");
+            let path = head.split_whitespace().nth(1).expect("path").to_string();
+            (path, serde_json::from_str(body).expect("forwarded json"))
+        })
+        .collect()
+}
+
+#[test]
+fn bug110_gpt5_stop_sequences_fail_fast_on_main_and_are_silently_dropped_before() {
+    let mut counts: BTreeMap<(String, String, bool), usize> = BTreeMap::new();
+    for row in issue_110_rows("wire/results.json") {
+        let cell = row["cell"].as_str().expect("cell");
+        let build = row["build"].as_str().expect("build");
+        let model = row["model"].as_str().expect("model");
+        let stop_sent = row["stop_sequences_sent"].as_bool().expect("trigger");
+        let (_, request) =
+            issue_110_split(&issue_110_raw(&format!("wire/{cell}/client-request.http")));
+        let request: Value = serde_json::from_str(&request).expect("client json");
+        assert_eq!(request.get("stop_sequences").is_some(), stop_sent, "{cell}");
+        let (status, response) =
+            issue_110_split(&issue_110_raw(&format!("wire/{cell}/client-response.http")));
+        let forwarded = issue_110_forwarded(cell);
+        assert_eq!(
+            row["forwarded_requests"].as_u64(),
+            Some(forwarded.len() as u64),
+            "{cell}"
+        );
+        let reasoning_model = model.starts_with("gpt-5");
+        if !stop_sent {
+            assert_eq!(status, 200, "{cell}");
+            assert_eq!(forwarded.len(), 1, "{cell}");
+            assert_eq!(forwarded[0].0, "/v1/responses", "{cell}");
+        } else if reasoning_model && build == "main" {
+            assert_eq!(status, 400, "{cell}");
+            assert!(response.contains("UnsupportedParamsError"), "{cell}");
+            assert!(
+                forwarded.is_empty(),
+                "{cell}: refused before any upstream call"
+            );
+        } else if reasoning_model || build == "pre" {
+            assert_eq!(status, 200, "{cell}");
+            assert_eq!(forwarded.len(), 1, "{cell}");
+            assert_eq!(forwarded[0].0, "/v1/responses", "{cell}");
+            assert!(forwarded[0].1.get("stop").is_none(), "{cell}: stop dropped");
+            assert!(forwarded[0].1.get("stop_sequences").is_none(), "{cell}");
+            assert!(
+                issue_110_text(&response).contains("STOPHERE"),
+                "{cell}: stop never fired"
+            );
+        } else {
+            assert_eq!(status, 200, "{cell}");
+            assert_eq!(forwarded.len(), 1, "{cell}");
+            assert_eq!(forwarded[0].0, "/v1/chat/completions", "{cell}");
+            assert_eq!(
+                forwarded[0].1["stop"],
+                serde_json::json!(["STOPHERE"]),
+                "{cell}"
+            );
+            let text = issue_110_text(&response);
+            assert!(
+                text.starts_with("ALPHA") && !text.contains("STOPHERE"),
+                "{cell}"
+            );
+        }
+        *counts
+            .entry((model.to_string(), build.to_string(), stop_sent))
+            .or_default() += 1;
+    }
+    assert_eq!(counts.values().sum::<usize>(), 66);
+    for model in ["gpt-5.4-mini", "gpt-5.5", "gpt-4.1-mini"] {
+        for build in ["main", "pre", "fix"] {
+            assert_eq!(counts[&(model.to_string(), build.to_string(), true)], 6);
+        }
+    }
+}
+
+#[test]
+fn bug110_direct_openai_rejects_stop_on_gpt5_on_both_apis() {
+    let mut judged = 0;
+    for row in issue_110_rows("direct/results.json") {
+        let cell = row["cell"].as_str().expect("cell");
+        let (status, body) =
+            issue_110_split(&issue_110_raw(&format!("direct/{cell}/response.http")));
+        let (_, request) = issue_110_split(&issue_110_raw(&format!("direct/{cell}/request.http")));
+        let request: Value = serde_json::from_str(&request).expect("request json");
+        let stop_sent = request.get("stop").is_some();
+        let gpt5 = row["model"].as_str().expect("model").starts_with("gpt-5");
+        if stop_sent && gpt5 {
+            assert_eq!(status, 400, "{cell}");
+            assert!(body.contains("'stop'"), "{cell}");
+        } else {
+            assert_eq!(status, 200, "{cell}");
+        }
+        judged += 1;
+    }
+    assert_eq!(judged, 21);
+}
+
+#[test]
+fn bug110_dropping_stop_corrupts_the_react_agent_tool_input() {
+    let mut clean: BTreeMap<String, usize> = BTreeMap::new();
+    for row in issue_110_rows("agents/langchain-react/results.json") {
+        let cell = row["cell"].as_str().expect("cell");
+        let first = issue_110_raw(&format!(
+            "agents/langchain-react/{cell}/client/001-request.http"
+        ));
+        let (_, body) = first.split_once("\n\n").expect("tap body");
+        let request: Value = serde_json::from_str(body).expect("agent request json");
+        assert_eq!(
+            request["stop_sequences"],
+            serde_json::json!(["\nObservation"]),
+            "{cell}"
+        );
+        let executions: Vec<String> =
+            issue_110_raw(&format!("agents/langchain-react/{cell}/ledger.txt"))
+                .lines()
+                .filter(|line| !line.is_empty())
+                .map(|line| serde_json::from_str::<String>(line).expect("ledger json"))
+                .collect();
+        let key = format!(
+            "{}-{}",
+            row["model"].as_str().expect("model"),
+            row["build"].as_str().expect("build")
+        );
+        if key == "gpt-5.4-mini-main" {
+            assert!(executions.is_empty(), "{cell}: 400 before the tool runs");
+        } else if key == "gpt-4.1-mini-main" {
+            assert_eq!(executions, ["A-17"], "{cell}");
+        } else {
+            assert!(
+                executions.iter().any(|sku| sku != "A-17"),
+                "{cell}: {executions:?}"
+            );
+        }
+        *clean.entry(key).or_default() += usize::from(executions == ["A-17"]);
+    }
+    assert_eq!(clean["gpt-4.1-mini-main"], 3);
+    assert_eq!(clean["gpt-5.4-mini-pre"], 0);
+    assert_eq!(clean["gpt-5.4-mini-fix"], 0);
+}
