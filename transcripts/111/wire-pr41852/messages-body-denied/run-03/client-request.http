@@ -1,0 +1,5 @@
+POST /v1/messages HTTP/1.1
+Authorization: [REDACTED]
+content-type: application/json
+
+{"model": "premium-model", "max_tokens": 16, "messages": [{"role": "user", "content": "hi"}]}

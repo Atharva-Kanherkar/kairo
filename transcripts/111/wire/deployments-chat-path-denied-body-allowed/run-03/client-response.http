@@ -1,0 +1,3 @@
+HTTP/1.1 200
+
+{"id":"chatcmpl-fake10","created":1793172076,"model":"cheap-model","object":"chat.completion","choices":[{"finish_reason":"stop","index":0,"message":{"content":"served-by-upstream-model=premium-upstream","role":"assistant"},"provider_specific_fields":{}}],"usage":{"completion_tokens":1000,"prompt_tokens":1000,"total_tokens":2000}}

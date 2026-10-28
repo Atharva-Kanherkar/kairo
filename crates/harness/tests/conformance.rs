@@ -27,12 +27,13 @@ use kairo::checks::{
     response_conversation_preserves_history, response_omits_secret,
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
-    responses_single_lifecycle, stop_sequence_forwarded, thinking_not_leaked_as_visible_text,
-    thinking_text_forwarded, tool_result_images_reach_provider, tool_strict_forwarded,
-    toolcall_id_restored_upstream, truncation_preserved, upstream_bearer_is,
-    upstream_omits_header_value, worker_loss_stays_invisible, FunctionToolFormat, Verdict,
-    EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
-    REPLAYED_CALL_NAMESPACE_CHANGED, TOOL_RESULT_IMAGE_DROPPED,
+    responses_single_lifecycle, served_model_within_key_allowlist, stop_sequence_forwarded,
+    thinking_not_leaked_as_visible_text, thinking_text_forwarded,
+    tool_result_images_reach_provider, tool_strict_forwarded, toolcall_id_restored_upstream,
+    truncation_preserved, upstream_bearer_is, upstream_omits_header_value,
+    worker_loss_stays_invisible, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
+    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT, REPLAYED_CALL_NAMESPACE_CHANGED,
+    TOOL_RESULT_IMAGE_DROPPED,
 };
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -7121,6 +7122,124 @@ fn bug110_dropping_stop_corrupts_the_react_agent_tool_input() {
     assert_eq!(clean["gpt-5.4-mini-pre"], 0);
     assert_eq!(clean["gpt-5.4-mini-fix"], 0);
 }
+
+// ---- 111: LiteLLM serves a key a model outside its allowlist when the denied
+//      model is named in the URL path (generateContent / streamGenerateContent
+//      and the image deployment routes) while the allowed model sits in the body.
+//      Auth reads the body model; the handler routes on the path model.
+//
+// Captured with transcripts/111/rig against litellm main cfe0100e. `wire` is
+// stock main; `wire-pr41852` has the open upstream fix PR #41852 applied, which
+// closes the sibling chat routes but not these. A key scoped models=[cheap-model]
+// is served premium-model on every trigger cell. See transcripts/111/wire/spend.json
+// for the premium spend billed to that key.
+fn issue_111_raw(relative: &str) -> String {
+    fixture(&format!("transcripts/111/{relative}"))
+}
+
+fn issue_111_status(raw_http: &str) -> u16 {
+    raw_http
+        .lines()
+        .next()
+        .and_then(|line| line.split_whitespace().nth(1))
+        .and_then(|code| code.parse().ok())
+        .expect("status line")
+}
+
+// The two rig deployments: an upstream model id maps to its LiteLLM model group.
+// This is the rig's config knowledge; the invariant check itself is group-generic.
+fn issue_111_group_of(upstream_model_id: &str) -> &'static str {
+    match upstream_model_id {
+        "cheap-upstream" => "cheap-model",
+        "premium-upstream" => "premium-model",
+        other => panic!("unexpected upstream model {other}"),
+    }
+}
+
+// The model group a cell actually dispatched to, read from the forwarded upstream
+// request bytes, or None when nothing was forwarded (the request was rejected).
+fn issue_111_served_group(build: &str, cell: &str) -> Option<&'static str> {
+    let path = format!("transcripts/111/{build}/{cell}/run-01/upstream/fwd-request.http");
+    let mut p = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    p.push("../../");
+    p.push(&path);
+    let raw = fs::read_to_string(&p).ok()?;
+    let body = raw.split("\n\n").nth(1)?;
+    let model = serde_json::from_str::<Value>(body).ok()?;
+    let id = model.get("model")?.as_str()?.to_string();
+    Some(issue_111_group_of(&id))
+}
+
+#[test]
+fn bug111_litellm_serves_a_model_outside_the_key_allowlist_via_the_url_path() {
+    let allowlist = ["cheap-model"];
+    // Trigger cells (denied model in the URL path, allowed model in the body) and
+    // whether the open fix PR #41852 covers that route.
+    let triggers = [
+        ("chat-query-denied-body-allowed", true),
+        ("deployments-chat-path-denied-body-allowed", true),
+        ("gc-path-denied-body-allowed", false),
+        ("gcstream-path-denied-body-allowed", false),
+        ("images-path-denied-body-allowed", false),
+    ];
+    // Controls that must stay conformant on every build.
+    let controls = [
+        "chat-body-denied",
+        "messages-body-denied",
+        "gc-trigger-removed",
+        "messages-query-denied-body-allowed",
+    ];
+
+    for build in ["wire", "wire-pr41852"] {
+        let rows: BTreeMap<String, Value> =
+            serde_json::from_str::<Value>(&issue_111_raw(&format!("{build}/results.json")))
+                .expect("results.json")["cells"]
+                .as_array()
+                .expect("cells")
+                .iter()
+                .map(|c| (c["cell"].as_str().expect("cell").to_string(), c.clone()))
+                .collect();
+
+        let verdict_of = |cell: &str| {
+            let row = &rows[cell];
+            // All five runs agree; the frozen bytes are run-01.
+            assert!(
+                row["status_consistent"].as_bool().unwrap_or(false),
+                "{build}/{cell}"
+            );
+            let status = issue_111_status(&issue_111_raw(&format!(
+                "{build}/{cell}/run-01/client-response.http"
+            )));
+            let served = issue_111_served_group(build, cell);
+            served_model_within_key_allowlist(&allowlist, status, served)
+        };
+
+        for &cell in &controls {
+            assert_eq!(verdict_of(cell), Verdict::Conformant, "{build}/{cell}");
+        }
+
+        for (cell, fixed_by_pr) in triggers {
+            let verdict = verdict_of(cell);
+            if build == "wire-pr41852" && fixed_by_pr {
+                // The sibling chat routes are closed by the pending fix: now 403.
+                assert_eq!(
+                    verdict,
+                    Verdict::Conformant,
+                    "{build}/{cell} should be fixed"
+                );
+            } else {
+                // Stock main on every route, and the fix build on the generateContent
+                // and image routes: a 200 serves premium-model, outside the allowlist.
+                assert!(
+                    matches!(&verdict, Verdict::Violation(reason)
+                        if reason.contains("premium-model") && reason.contains("cheap-model")),
+                    "{build}/{cell}: {verdict:?}"
+                );
+            }
+        }
+    }
+}
+
 // ---- bug 098: image route model allowlist bypass ----
 
 const ISSUE_098_ALLOWED: &[&str] = &["allowed-model"];

@@ -6233,3 +6233,79 @@ data: [DONE]
         assert!(!tool_result_images_reach_provider(&chat, &bedrock, 200, "{}").is_conformant());
     }
 }
+
+/// Invariant (bug 111): under a virtual key scoped to a model allowlist, a `200`
+/// response MUST have been dispatched to a model group inside that allowlist.
+///
+/// A proxy that reads the requested model from one place for the access check
+/// and from another for routing can serve a model the key was never granted.
+/// LiteLLM's auth reads the request body `model`, while the Google
+/// `:generateContent` / `:streamGenerateContent` and
+/// `/openai/deployments/{model}/images/...` handlers route on the URL path
+/// model, so a key scoped to a cheap model is served a denied premium model
+/// whenever the allowed model sits in the body and the denied model in the URL.
+///
+/// `served_model_group` is the LiteLLM model group the forwarded upstream call
+/// resolved to, or `None` when nothing was dispatched (the request was rejected
+/// before routing). A non-200 never serves a model, so it is conformant here;
+/// the defect is a `200` served a group outside the key's allowlist. The check
+/// states the invariant, not the bug: it holds for any route and flips the day
+/// the dispatched model is bounded by the same allowlist the key is checked
+/// against.
+pub fn served_model_within_key_allowlist(
+    allowlist: &[&str],
+    status: u16,
+    served_model_group: Option<&str>,
+) -> Verdict {
+    if status != 200 {
+        return Verdict::Conformant;
+    }
+    match served_model_group {
+        None => Verdict::Conformant,
+        Some(group) if allowlist.contains(&group) => Verdict::Conformant,
+        Some(group) => Verdict::Violation(format!(
+            "200 response served model group {group:?}, outside the calling key's allowlist {allowlist:?}"
+        )),
+    }
+}
+
+#[cfg(test)]
+mod served_model_within_key_allowlist_tests {
+    use super::{served_model_within_key_allowlist, Verdict};
+
+    #[test]
+    fn a_rejection_serves_nothing() {
+        // The body-model 403 control: denied before routing, nothing served.
+        assert_eq!(
+            served_model_within_key_allowlist(&["cheap-model"], 403, None),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn a_200_inside_the_allowlist_is_conformant() {
+        assert_eq!(
+            served_model_within_key_allowlist(&["cheap-model"], 200, Some("cheap-model")),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn a_200_outside_the_allowlist_is_a_violation() {
+        let verdict =
+            served_model_within_key_allowlist(&["cheap-model"], 200, Some("premium-model"));
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(reason)
+                if reason.contains("premium-model") && reason.contains("cheap-model")
+        ));
+    }
+
+    #[test]
+    fn a_multi_model_allowlist_admits_any_listed_group() {
+        assert_eq!(
+            served_model_within_key_allowlist(&["a", "premium-model"], 200, Some("premium-model")),
+            Verdict::Conformant
+        );
+    }
+}

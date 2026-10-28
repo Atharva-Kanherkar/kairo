@@ -1,0 +1,419 @@
+{
+  "columns": [
+    "model",
+    "model_group",
+    "api_key",
+    "status",
+    "spend",
+    "total_tokens",
+    "startTime"
+  ],
+  "note": "api_key is LiteLLM's token hash, not a secret",
+  "rows": [
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:45.628000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:45.834000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:46.042000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:46.251000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:46.459000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:46.668000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:46.874000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:47.078000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:47.284000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:47.491000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:47.699000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:47.903000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:48.109000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:48.315000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:48.525000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.2",
+      "2000",
+      "2026-10-28 07:22:48.915000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.2",
+      "2000",
+      "2026-10-28 07:22:49.160000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.2",
+      "2000",
+      "2026-10-28 07:22:49.371000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.2",
+      "2000",
+      "2026-10-28 07:22:49.587000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.2",
+      "2000",
+      "2026-10-28 07:22:49.802000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.2",
+      "2000",
+      "2026-10-28 07:22:50.017000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.2",
+      "2000",
+      "2026-10-28 07:22:50.284000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.2",
+      "2000",
+      "2026-10-28 07:22:50.498000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.2",
+      "2000",
+      "2026-10-28 07:22:50.716000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.2",
+      "2000",
+      "2026-10-28 07:22:50.933000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.0",
+      "2000",
+      "2026-10-28 07:22:51.151000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.0",
+      "2000",
+      "2026-10-28 07:22:51.367000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.0",
+      "2000",
+      "2026-10-28 07:22:51.580000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.0",
+      "2000",
+      "2026-10-28 07:22:51.806000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.0",
+      "2000",
+      "2026-10-28 07:22:52.015000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.0002",
+      "2000",
+      "2026-10-28 07:22:52.228000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.0002",
+      "2000",
+      "2026-10-28 07:22:52.442000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.0002",
+      "2000",
+      "2026-10-28 07:22:52.662000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.0002",
+      "2000",
+      "2026-10-28 07:22:52.885000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.0002",
+      "2000",
+      "2026-10-28 07:22:53.106000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.0002",
+      "2000",
+      "2026-10-28 07:22:53.326000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.0002",
+      "2000",
+      "2026-10-28 07:22:53.547000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.0002",
+      "2000",
+      "2026-10-28 07:22:53.756000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.0002",
+      "2000",
+      "2026-10-28 07:22:53.969000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "success",
+      "0.0002",
+      "2000",
+      "2026-10-28 07:22:54.180000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:54.391000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:54.604000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:54.814000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:55.023000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "b40b23f97af899ca05d6db199d813f1cdddf0e7bf8ac2e5ff044c918fc59f958",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:22:55.227000"
+    ]
+  ]
+}

@@ -1,0 +1,17 @@
+proxy=200
+generated cheap-only key sk-u5V...
+chat-body-denied                           status=403 forwarded=[None] (5/5)
+chat-query-denied-body-allowed             status=403 forwarded=[None] (5/5)
+deployments-chat-path-denied-body-allowed  status=403 forwarded=[None] (5/5)
+gc-path-denied-body-allowed                status=200 forwarded=premium-upstream (5/5)
+gcstream-path-denied-body-allowed          status=200 forwarded=premium-upstream (5/5)
+images-path-denied-body-allowed            status=200 forwarded=premium-upstream (5/5)
+gc-trigger-removed                         status=200 forwarded=cheap-upstream (5/5)
+messages-query-denied-body-allowed         status=200 forwarded=cheap-upstream (5/5)
+messages-body-denied                       status=403 forwarded=[None] (5/5)
+
+wrote /Users/atharva/kairo-111/transcripts/111/wire-pr41852/results.json
+--- waiting for spend log flush ---
+--- spend log ---
+wrote /Users/atharva/kairo-111/transcripts/111/wire-pr41852/spend.json rows: 45
+rig/run.sh: line 24: 86295 Terminated: 15          ( cd "$SRC" && PATH="$VENV:$PATH" "$VENV/litellm" --config "$CFG" --port "$PROXY_PORT" ) > "$OUT/proxy.out.txt" 2>&1

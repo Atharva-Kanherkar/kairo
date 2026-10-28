@@ -1,0 +1,5 @@
+POST /openai/deployments/premium-model/chat/completions HTTP/1.1
+Authorization: [REDACTED]
+content-type: application/json
+
+{"model": "cheap-model", "messages": [{"role": "user", "content": "hi"}]}

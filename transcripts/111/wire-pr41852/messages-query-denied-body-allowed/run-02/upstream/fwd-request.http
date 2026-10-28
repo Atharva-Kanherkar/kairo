@@ -1,0 +1,11 @@
+POST /v1/responses HTTP/1.1
+Host: 127.0.0.1:4190
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+User-Agent: litellm/1.108.0
+Content-Type: application/json
+Authorization: [REDACTED]
+Content-Length: 180
+
+{"model":"cheap-upstream","input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"hi"}]}],"include":["reasoning.encrypted_content"],"max_output_tokens":16}

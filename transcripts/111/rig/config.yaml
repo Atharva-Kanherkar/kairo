@@ -1,0 +1,23 @@
+# LiteLLM proxy config for finding 111.
+# Two models point at the same local fake upstream, distinguished only by the
+# upstream model id and price, so a served model is identifiable in the bytes
+# and in the spend log. api_base is injected by run.sh (PORT) to keep this file
+# port-agnostic.
+model_list:
+  - model_name: cheap-model
+    litellm_params:
+      model: openai/cheap-upstream
+      api_base: UPSTREAM_BASE
+      api_key: fake-upstream-key
+      input_cost_per_token: 0.0000001
+      output_cost_per_token: 0.0000001
+  - model_name: premium-model
+    litellm_params:
+      model: openai/premium-upstream
+      api_base: UPSTREAM_BASE
+      api_key: fake-upstream-key
+      input_cost_per_token: 0.0001
+      output_cost_per_token: 0.0001
+general_settings:
+  master_key: os.environ/KR111_MASTER_KEY
+  database_url: os.environ/KR111_DATABASE_URL

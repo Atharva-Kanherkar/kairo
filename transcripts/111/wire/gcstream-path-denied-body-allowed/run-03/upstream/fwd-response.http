@@ -1,0 +1,9 @@
+HTTP/1.1 200 OK
+content-type: text/event-stream
+
+data: {"id": "chatcmpl-fake20", "object": "chat.completion.chunk", "model": "premium-upstream", "choices": [{"index": 0, "delta": {"role": "assistant", "content": "served-by-upstream-model=premium-upstream"}, "finish_reason": null}]}
+
+data: {"id": "chatcmpl-fake20", "object": "chat.completion.chunk", "model": "premium-upstream", "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}], "usage": {"prompt_tokens": 1000, "completion_tokens": 1000, "total_tokens": 2000}}
+
+data: [DONE]
+

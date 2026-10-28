@@ -1,0 +1,68 @@
+{
+  "columns": [
+    "model",
+    "model_group",
+    "api_key",
+    "status",
+    "spend",
+    "total_tokens",
+    "startTime"
+  ],
+  "key_alias": "cheap-only-budget1",
+  "rows": [
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "6caac4b3d22f336c84eb1b07081c16e99bf35147165463940a4209363842c141",
+      "success",
+      "0.2",
+      "2000",
+      "2026-10-28 07:21:23.768000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "6caac4b3d22f336c84eb1b07081c16e99bf35147165463940a4209363842c141",
+      "success",
+      "0.2",
+      "2000",
+      "2026-10-28 07:21:24.788000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "6caac4b3d22f336c84eb1b07081c16e99bf35147165463940a4209363842c141",
+      "success",
+      "0.2",
+      "2000",
+      "2026-10-28 07:21:25.810000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "6caac4b3d22f336c84eb1b07081c16e99bf35147165463940a4209363842c141",
+      "success",
+      "0.2",
+      "2000",
+      "2026-10-28 07:21:26.841000"
+    ],
+    [
+      "openai/premium-upstream",
+      "premium-model",
+      "6caac4b3d22f336c84eb1b07081c16e99bf35147165463940a4209363842c141",
+      "success",
+      "0.2",
+      "2000",
+      "2026-10-28 07:21:27.868000"
+    ],
+    [
+      "openai/cheap-upstream",
+      "cheap-model",
+      "6caac4b3d22f336c84eb1b07081c16e99bf35147165463940a4209363842c141",
+      "failure",
+      "0.0",
+      "0",
+      "2026-10-28 07:21:28.893000"
+    ]
+  ]
+}
