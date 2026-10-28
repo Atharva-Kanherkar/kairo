@@ -73,11 +73,12 @@ Every reproduced cell must be N of N. Target N = 5.
 ## Bug or not (must all be yes)
 
 - Spec: key `models` allowlist is a documented access control; the body-model
-  path already enforces it (403). Confirmed by the 403 on body and by upstream
-  issue #41810 + PR #41852 treating the same class as a bug.
-- Maintainer ruling: maintainers accept the class as a bug (issue #41810
-  confirmed, PR #41852 open). No comment, test, or denylist marks generateContent
-  or image routes as exempt.
+  path already enforces it (403). The same class is reported and being fixed
+  upstream (open issue #41810, open community PR #41852).
+- Maintainer ruling: no maintainer ruling found, for or against. #41810 is an open
+  bug report (the `[Bug]:` prefix is the issue template title, not a maintainer
+  label; labels are `proxy`, `llm translation`); #41852 is a community PR with no
+  maintainer review. Neither exempts generateContent or image routes.
 - Supported usage: default proxy, master key, a documented Gemini-compatible
   route, a registered model. Not operator misuse.
 - Real boundary: key allowlist scope, crossed.

@@ -1,12 +1,13 @@
 # 111, LiteLLM serves a virtual key a model outside its allowlist when the denied model is named in the `generateContent` or image-deployment URL path
 
 - **Upstream**: [BerriAI/litellm](https://github.com/BerriAI/litellm). The same
-  class on the plain chat routes is a known open bug:
+  class on the plain chat routes has an open bug report
   [#41810](https://github.com/BerriAI/litellm/issues/41810) ("Virtual-key model
-  allowlist bypass on `/v1/chat/completions` via the `?model=` query string"),
-  with open fix PR [#41852](https://github.com/BerriAI/litellm/pull/41852)
+  allowlist bypass on `/v1/chat/completions` via the `?model=` query string"; the
+  `[Bug]:` prefix is the issue template title, not a maintainer label) and an open
+  community fix PR [#41852](https://github.com/BerriAI/litellm/pull/41852)
   ("enforce key model allowlist on `?model=` / `{model}` for chat, completions and
-  embeddings"). Older, closed:
+  embeddings"; no maintainer review). Older, closed:
   [#8780](https://github.com/BerriAI/litellm/issues/8780). Neither #41810's report
   nor #41852's route lists cover the Google `:generateContent` /
   `:streamGenerateContent` routes or the `/openai/deployments/{model}/images/...`
@@ -42,9 +43,14 @@ in the request body (`403 key_model_access_denied`). But on
 `POST /v1beta/models/premium-model:generateContent` (and
 `:streamGenerateContent`, and `POST /openai/deployments/premium-model/images/generations`)
 with `premium-model` in the URL path and the allowed `cheap-model` in the body,
-the proxy returns `200` and the request is served by, and billed as,
-`premium-model`. The model dispatched is not bounded by the key's allowlist on
-these routes.
+the proxy returns `200` and the request is served by `premium-model`. The model
+dispatched is not bounded by the key's allowlist on these routes.
+
+On the `generateContent` and `streamGenerateContent` routes the served
+`premium-model` call is also billed to the key at the premium rate (spend rows
+below). On the image deployment route the request is served by `premium-model`
+but this rig prices it at `$0` (`cost_calculation_error`), so billing is not
+demonstrated for the image route; the dispatch bypass is.
 
 Root cause: the access check and the router read the requested model from
 different places.
@@ -70,22 +76,31 @@ The image deployment handlers resolve the same way
 ## What breaks
 
 A proxy operator hands an external user a virtual key limited to one cheap or
-local model. The user reaches an expensive model through the Gemini-compatible
-`generateContent` route (or the image route) and the operator is billed, capped
-only by the key's overall budget.
+local model. The key holder reaches an expensive model through the
+Gemini-compatible `generateContent` route and the operator is billed for it,
+capped only by the key's overall budget.
 
 1. The operator creates a key with `POST /key/generate` and body
    `{"models": ["cheap-model"]}`.
-2. The user sends `POST /v1beta/models/premium-model:generateContent` with
+2. The key holder sends `POST /v1beta/models/premium-model:generateContent` with
    `x-goog-api-key: <key>` and body `{"model": "cheap-model", "contents": [...]}`.
 3. The proxy returns `200`, answered by `premium-model`.
-4. The spend log records the call under `premium-model` against that key.
+4. The spend log records the call under `premium-model` against that key at the
+   premium rate.
 
-Measured here: with a `$1` budget on the key, five premium calls through the
-bypass exhaust the budget (`budget_exceeded` on the sixth), because each premium
-call bills `$0.2` against a key the operator scoped to a `$0.0002` model. The key
-`models` list, the product's documented per-key model scope, does not bound the
-model served.
+This is a scoped key holder deliberately bypassing scope, not an accidental hit.
+The trigger requires a hand-written body `model` on a `generateContent` call:
+the Google GenAI SDKs put the model only in the URL and send no body `model`, and
+with no body `model` auth falls back to the URL model and returns `403` (the
+`gc-path-denied-body-allowed` versus a body-silent request). The bypass is
+available to anyone holding a scoped key who shapes the request by hand.
+
+Measured here: with a `$1` budget on a fresh `cheap-model`-scoped key, five
+`generateContent` bypass calls exhaust the budget and the sixth returns
+`422 budget_exceeded` (`transcripts/111/wire/budget/`), because each served
+`premium-model` call bills `$0.2` against a key the operator scoped to a
+`$0.0002` model. The key `models` list, the product's documented per-key model
+scope, does not bound the model served.
 
 ## Wire evidence
 
@@ -148,10 +163,29 @@ builds. The two negative controls behave correctly: removing the trigger serves
 `cheap`, and `/v1/messages` ignores the query model and serves the body model
 (as #41810 already notes for Anthropic and Responses).
 
-Spend log for the `main` run,
-[`wire/spend.json`](../../transcripts/111/wire/spend.json): all spend is on key
-alias `cheap-only-111`; `premium-model` is billed across the bypass cells while
-the key is scoped to `cheap-model`.
+Spend log for the `main` run, raw `LiteLLM_SpendLogs` rows with the key token
+hash and status, [`wire/spend.json`](../../transcripts/111/wire/spend.json): every
+row carries the single `cheap-only-111` key hash. Grouped by model group, spend
+and status:
+
+| model group | spend | status | rows | cells |
+|---|---|---|---|---|
+| cheap-model | $0.0002 | success | 10 | the two cheap controls |
+| premium-model | $0.2 | success | 20 | gc, gc-stream, chat-query, deployments-chat |
+| premium-model | $0 | success | 5 | images (`cost_calculation_error`, served but not priced) |
+| premium-model | $0 | failure | 10 | the two body-denied 403 controls |
+
+So `premium-model` is billed `$0.2` per call on the `generateContent`,
+`streamGenerateContent` and chat sibling routes while the key is scoped to
+`cheap-model`; the image route is served `premium-model` but logged at `$0` in
+this rig, so its billing is not demonstrated.
+
+Budget drain, [`wire/budget/`](../../transcripts/111/wire/budget): a fresh key
+scoped `models: ["cheap-model"]` with `max_budget: 1.0` makes six
+`generateContent` bypass calls. `resp-1..5` return `200` served `premium-model`
+and bill `$0.2` each; `resp-6` returns `422 budget_exceeded`
+(`Current cost: 1.0, Max budget: 1.0`). The six raw spend rows are in
+[`wire/budget/spend.json`](../../transcripts/111/wire/budget/spend.json).
 
 ## Root cause
 
@@ -174,25 +208,34 @@ request is dispatched to a model the access check never authorized.
 
 Measured at the spend log and budget, the closest practical consumer of a key
 model scope. The `cheap-only-111` key, scoped `models: ["cheap-model"]`, is billed
-for `premium-model` on every `generateContent`, `streamGenerateContent` and image
-bypass call (`wire/spend.json`), and a `$1` budget on such a key is drained by
-five premium calls that the key should never have been able to make. Not measured:
-a live Gemini or OpenAI provider (not needed; the defect is which model the
-gateway dispatches under the allowlist, which the forwarded bytes show directly).
-Inferred, not separately run: `/images/edits` and the unprefixed
+`$0.2` per call for `premium-model` on every `generateContent` and
+`streamGenerateContent` bypass call (`wire/spend.json`), and a `$1` budget on a
+fresh such key is drained by five `generateContent` calls, with the sixth
+returning `422 budget_exceeded` (`wire/budget/`), models the key should never
+have been able to call. The image route is served `premium-model` but logged at
+`$0` in this rig (`cost_calculation_error`), so its billing is not demonstrated;
+its dispatch bypass is. Not measured: a live Gemini or OpenAI provider (not
+needed; the defect is which model the gateway dispatches under the allowlist,
+which the forwarded bytes show directly). Inferred, not separately run:
+`/images/edits` and the unprefixed
 `/models/{model}:generateContent` route share the same resolution path and are
 expected to behave identically; `generations` and the `/v1beta/...` route were run.
 
 ## Bug or not
 
 - **Spec**: a key's `models` allowlist is a documented per-key access control, and
-  the body-model path enforces it (`403` above). The same class is treated as a
-  bug by maintainers: issue #41810 is labeled a bug and PR #41852 is an open fix
-  for it.
-- **Maintainer ruling**: none exempts these routes. #41852 deliberately lists the
-  chat, completions and embeddings route templates and leaves the Google and image
-  routes out; no comment, test or denylist marks them as intended to ignore the
-  allowlist. The fix-control run confirms they are still open after that PR.
+  the body-model path enforces it (`403` above). The same class is reported and
+  being fixed upstream: issue #41810 (open) reports the chat variant and community
+  PR #41852 (open, no maintainer review) extends the allowlist check to the URL
+  model for the chat routes.
+- **Maintainer ruling**: no maintainer ruling found, for or against. #41810 is an
+  open bug report whose `[Bug]:` prefix is the issue-template title, not a
+  maintainer `bug` label (its labels are `proxy` and `llm translation`); #41852 is
+  a community PR with no maintainer review. Neither exempts these routes: #41852
+  lists only the chat, completions and embeddings route templates and leaves the
+  Google and image routes out, and no comment, test or denylist marks them as
+  intended to ignore the allowlist. The fix-control run confirms they are still
+  open after that PR.
 - **Supported usage**: a default proxy with a master key, a documented
   Gemini-compatible route, and registered models. Not operator misuse.
 - **Boundary crossed**: the key `models` allowlist scope. A key scoped to

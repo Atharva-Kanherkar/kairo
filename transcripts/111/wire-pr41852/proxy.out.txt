@@ -1,10 +1,10 @@
-2026-10-28 02:12:23,588 - litellm_proxy_extras - INFO - Preparing the Prisma CLI toolchain (timeout 600.0s)
-2026-10-28 02:12:25,497 - litellm_proxy_extras - INFO - Prisma CLI toolchain ready
-2026-10-28 02:12:25,497 - litellm_proxy_extras - INFO - Using v2 migration resolver (--use_v2_migration_resolver)
-2026-10-28 02:12:25,540 - litellm_proxy_extras - INFO - Found 222 migrations at /Users/atharva/litellm-main/litellm-proxy-extras/litellm_proxy_extras
-2026-10-28 02:12:25,558 - litellm_proxy_extras - INFO - Waiting for the Prisma migration lock (up to 600.0s)
-2026-10-28 02:12:25,559 - litellm_proxy_extras - INFO - Acquired the Prisma migration lock
-2026-10-28 02:12:28,710 - litellm_proxy_extras - INFO - prisma migrate deploy stdout: Prisma schema loaded from schema.prisma
+2026-10-28 16:22:37,632 - litellm_proxy_extras - INFO - Preparing the Prisma CLI toolchain (timeout 600.0s)
+2026-10-28 16:22:39,516 - litellm_proxy_extras - INFO - Prisma CLI toolchain ready
+2026-10-28 16:22:39,516 - litellm_proxy_extras - INFO - Using v2 migration resolver (--use_v2_migration_resolver)
+2026-10-28 16:22:39,596 - litellm_proxy_extras - INFO - Found 222 migrations at /Users/atharva/litellm-main/litellm-proxy-extras/litellm_proxy_extras
+2026-10-28 16:22:39,620 - litellm_proxy_extras - INFO - Waiting for the Prisma migration lock (up to 600.0s)
+2026-10-28 16:22:39,621 - litellm_proxy_extras - INFO - Acquired the Prisma migration lock
+2026-10-28 16:22:42,789 - litellm_proxy_extras - INFO - prisma migrate deploy stdout: Prisma schema loaded from schema.prisma
 Datasource "client": PostgreSQL database "kr111fix", schema "public" at "127.0.0.1:5440"
 
 222 migrations found in prisma/migrations
@@ -682,9 +682,8 @@ migrations/
       
 All migrations have been successfully applied.
 
-INFO:     Started server process [7823]
+INFO:     Started server process [86297]
 INFO:     Waiting for application startup.
-2026-10-28 02:12:28,748 - litellm_proxy_extras - INFO - Building index LiteLLM_SpendLogs_api_key_startTime_idx on LiteLLM_SpendLogs concurrently
 LiteLLM Proxy: Postgres connection budget per pod = 1 worker(s) x writer connection_limit 10 = up to 10 connections; keep pods x that figure under max_connections minus superuser_reserved_connections
 
    ██╗     ██╗████████╗███████╗██╗     ██╗     ███╗   ███╗
@@ -694,18 +693,19 @@ LiteLLM Proxy: Postgres connection budget per pod = 1 worker(s) x writer connect
    ███████╗██║   ██║   ███████╗███████╗███████╗██║ ╚═╝ ██║
    ╚══════╝╚═╝   ╚═╝   ╚══════╝╚══════╝╚══════╝╚═╝     ╚═╝
 
-02:12:28 - LiteLLM Proxy:WARNING: login_throttle.py:126 - trusted_proxy_ranges is not set or not a valid list of ranges, so failed Admin UI sign-in attempts are limited per source address and username only. Set it to the address ranges of the proxies in front of LiteLLM, or to an empty list when clients connect directly, to also limit each source address across usernames.
-02:12:28 - LiteLLM:WARNING: utils.py:3790 - register_model: model=openai/cheap-upstream has custom pricing but not in built-in cost map and no prefix/region variant matched; cache_creation_input_token_cost and cache_read_input_token_cost will default to 0 for this model (input/output cost tracking is unaffected). To track cache cost, add them to model_info
-02:12:28 - LiteLLM:WARNING: utils.py:3790 - register_model: model=openai/premium-upstream has custom pricing but not in built-in cost map and no prefix/region variant matched; cache_creation_input_token_cost and cache_read_input_token_cost will default to 0 for this model (input/output cost tracking is unaffected). To track cache cost, add them to model_info
+16:22:42 - LiteLLM Proxy:WARNING: login_throttle.py:126 - trusted_proxy_ranges is not set or not a valid list of ranges, so failed Admin UI sign-in attempts are limited per source address and username only. Set it to the address ranges of the proxies in front of LiteLLM, or to an empty list when clients connect directly, to also limit each source address across usernames.
+2026-10-28 16:22:42,826 - litellm_proxy_extras - INFO - Building index LiteLLM_SpendLogs_api_key_startTime_idx on LiteLLM_SpendLogs concurrently
+16:22:42 - LiteLLM:WARNING: utils.py:3790 - register_model: model=openai/cheap-upstream has custom pricing but not in built-in cost map and no prefix/region variant matched; cache_creation_input_token_cost and cache_read_input_token_cost will default to 0 for this model (input/output cost tracking is unaffected). To track cache cost, add them to model_info
+16:22:42 - LiteLLM:WARNING: utils.py:3790 - register_model: model=openai/premium-upstream has custom pricing but not in built-in cost map and no prefix/region variant matched; cache_creation_input_token_cost and cache_read_input_token_cost will default to 0 for this model (input/output cost tracking is unaffected). To track cache cost, add them to model_info
 query-engine ac9d7041ed77bcc8a8dbd2ab6616b39013829574
-02:12:29 - LiteLLM Proxy:WARNING: proxy_server.py:1816 - gc.freeze pinned 1381720 startup objects
+16:22:43 - LiteLLM Proxy:WARNING: proxy_server.py:1816 - gc.freeze pinned 1382036 startup objects
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:4028 (Press CTRL+C to quit)
-2026-10-28 02:12:30,770 - litellm_proxy_extras - INFO - Building index LiteLLM_SpendLogs_litellm_call_id_idx on LiteLLM_SpendLogs concurrently
+2026-10-28 16:22:44,847 - litellm_proxy_extras - INFO - Building index LiteLLM_SpendLogs_litellm_call_id_idx on LiteLLM_SpendLogs concurrently
 
 [1;37m#------------------------------------------------------------#[0m
 [1;37m#                                                            #[0m
-[1;37m#              'I don't like how this works...'               #[0m
+[1;37m#            'This product would be better if...'             #[0m
 [1;37m#        https://github.com/BerriAI/litellm/issues/new        #[0m
 [1;37m#                                                            #[0m
 [1;37m#------------------------------------------------------------#[0m
@@ -720,72 +720,72 @@ INFO:     Uvicorn running on http://0.0.0.0:4028 (Press CTRL+C to quit)
 [32mLiteLLM: Proxy initialized with Config, Set models:[0m
 [32m    cheap-model[0m
 [32m    premium-model[0m
-INFO:     127.0.0.1:57211 - "GET /health/readiness HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57213 - "GET /health/readiness HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57215 - "POST /key/generate HTTP/1.1" 200 OK
-02:12:32 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+INFO:     127.0.0.1:59110 - "GET /health/readiness HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59112 - "GET /health/readiness HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59114 - "POST /key/generate HTTP/1.1" 200 OK
+16:22:45 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:32 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57217 - "POST /v1/chat/completions HTTP/1.1" 403 Forbidden
-02:12:32 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:45 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59116 - "POST /v1/chat/completions HTTP/1.1" 403 Forbidden
+16:22:45 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:32 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57219 - "POST /v1/chat/completions HTTP/1.1" 403 Forbidden
-02:12:32 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:45 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59118 - "POST /v1/chat/completions HTTP/1.1" 403 Forbidden
+16:22:46 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:32 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57221 - "POST /v1/chat/completions HTTP/1.1" 403 Forbidden
-2026-10-28 02:12:32,780 - litellm_proxy_extras - INFO - Request-log indexes are all in place
-02:12:32 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:46 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59120 - "POST /v1/chat/completions HTTP/1.1" 403 Forbidden
+16:22:46 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:32 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57223 - "POST /v1/chat/completions HTTP/1.1" 403 Forbidden
-02:12:33 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:46 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59122 - "POST /v1/chat/completions HTTP/1.1" 403 Forbidden
+16:22:46 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:33 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57227 - "POST /v1/chat/completions HTTP/1.1" 403 Forbidden
-02:12:33 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:46 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59124 - "POST /v1/chat/completions HTTP/1.1" 403 Forbidden
+16:22:46 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:33 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57229 - "POST /v1/chat/completions?model=premium-model HTTP/1.1" 403 Forbidden
-02:12:33 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:46 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59126 - "POST /v1/chat/completions?model=premium-model HTTP/1.1" 403 Forbidden
+2026-10-28 16:22:46,860 - litellm_proxy_extras - INFO - Request-log indexes are all in place
+16:22:46 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:33 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57231 - "POST /v1/chat/completions?model=premium-model HTTP/1.1" 403 Forbidden
-02:12:33 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:46 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59128 - "POST /v1/chat/completions?model=premium-model HTTP/1.1" 403 Forbidden
+16:22:47 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:33 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57233 - "POST /v1/chat/completions?model=premium-model HTTP/1.1" 403 Forbidden
-02:12:33 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:47 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59130 - "POST /v1/chat/completions?model=premium-model HTTP/1.1" 403 Forbidden
+16:22:47 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:33 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57235 - "POST /v1/chat/completions?model=premium-model HTTP/1.1" 403 Forbidden
-02:12:34 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:47 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59132 - "POST /v1/chat/completions?model=premium-model HTTP/1.1" 403 Forbidden
+16:22:47 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:34 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57237 - "POST /v1/chat/completions?model=premium-model HTTP/1.1" 403 Forbidden
-02:12:34 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:47 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59134 - "POST /v1/chat/completions?model=premium-model HTTP/1.1" 403 Forbidden
+16:22:47 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:34 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57239 - "POST /openai/deployments/premium-model/chat/completions HTTP/1.1" 403 Forbidden
-02:12:34 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:47 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59136 - "POST /openai/deployments/premium-model/chat/completions HTTP/1.1" 403 Forbidden
+16:22:47 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:34 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57241 - "POST /openai/deployments/premium-model/chat/completions HTTP/1.1" 403 Forbidden
-02:12:34 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:47 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59138 - "POST /openai/deployments/premium-model/chat/completions HTTP/1.1" 403 Forbidden
+16:22:48 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:34 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57243 - "POST /openai/deployments/premium-model/chat/completions HTTP/1.1" 403 Forbidden
-02:12:34 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:48 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59142 - "POST /openai/deployments/premium-model/chat/completions HTTP/1.1" 403 Forbidden
+16:22:48 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:34 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57245 - "POST /openai/deployments/premium-model/chat/completions HTTP/1.1" 403 Forbidden
-02:12:35 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:48 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59146 - "POST /openai/deployments/premium-model/chat/completions HTTP/1.1" 403 Forbidden
+16:22:48 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:35 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57247 - "POST /openai/deployments/premium-model/chat/completions HTTP/1.1" 403 Forbidden
-INFO:     127.0.0.1:57249 - "POST /v1beta/models/premium-model%3AgenerateContent HTTP/1.1" 200 OK
-02:12:35 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
+16:22:48 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59148 - "POST /openai/deployments/premium-model/chat/completions HTTP/1.1" 403 Forbidden
+INFO:     127.0.0.1:59150 - "POST /v1beta/models/premium-model%3AgenerateContent HTTP/1.1" 200 OK
+16:22:48 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
 Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2937, in _prepare_success_logging
     result = self._handle_non_streaming_google_genai_generate_content_response_logging(result=result)
@@ -814,8 +814,8 @@ Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2985, in _prepare_success_logging
     raise Exception(f"[Non-Blocking] LiteLLM.Success_Call Error: {e}")
 Exception: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
-INFO:     127.0.0.1:57252 - "POST /v1beta/models/premium-model%3AgenerateContent HTTP/1.1" 200 OK
-02:12:35 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
+INFO:     127.0.0.1:59161 - "POST /v1beta/models/premium-model%3AgenerateContent HTTP/1.1" 200 OK
+16:22:49 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
 Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2937, in _prepare_success_logging
     result = self._handle_non_streaming_google_genai_generate_content_response_logging(result=result)
@@ -844,8 +844,8 @@ Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2985, in _prepare_success_logging
     raise Exception(f"[Non-Blocking] LiteLLM.Success_Call Error: {e}")
 Exception: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
-INFO:     127.0.0.1:57254 - "POST /v1beta/models/premium-model%3AgenerateContent HTTP/1.1" 200 OK
-02:12:36 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
+INFO:     127.0.0.1:59168 - "POST /v1beta/models/premium-model%3AgenerateContent HTTP/1.1" 200 OK
+16:22:49 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
 Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2937, in _prepare_success_logging
     result = self._handle_non_streaming_google_genai_generate_content_response_logging(result=result)
@@ -874,8 +874,8 @@ Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2985, in _prepare_success_logging
     raise Exception(f"[Non-Blocking] LiteLLM.Success_Call Error: {e}")
 Exception: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
-INFO:     127.0.0.1:57256 - "POST /v1beta/models/premium-model%3AgenerateContent HTTP/1.1" 200 OK
-02:12:36 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
+INFO:     127.0.0.1:59171 - "POST /v1beta/models/premium-model%3AgenerateContent HTTP/1.1" 200 OK
+16:22:49 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
 Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2937, in _prepare_success_logging
     result = self._handle_non_streaming_google_genai_generate_content_response_logging(result=result)
@@ -904,8 +904,8 @@ Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2985, in _prepare_success_logging
     raise Exception(f"[Non-Blocking] LiteLLM.Success_Call Error: {e}")
 Exception: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
-INFO:     127.0.0.1:57258 - "POST /v1beta/models/premium-model%3AgenerateContent HTTP/1.1" 200 OK
-02:12:36 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
+INFO:     127.0.0.1:59173 - "POST /v1beta/models/premium-model%3AgenerateContent HTTP/1.1" 200 OK
+16:22:49 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
 Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2937, in _prepare_success_logging
     result = self._handle_non_streaming_google_genai_generate_content_response_logging(result=result)
@@ -934,23 +934,23 @@ Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2985, in _prepare_success_logging
     raise Exception(f"[Non-Blocking] LiteLLM.Success_Call Error: {e}")
 Exception: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
-INFO:     127.0.0.1:57260 - "POST /v1beta/models/premium-model%3AstreamGenerateContent HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57263 - "POST /v1beta/models/premium-model%3AstreamGenerateContent HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57265 - "POST /v1beta/models/premium-model%3AstreamGenerateContent HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57268 - "POST /v1beta/models/premium-model%3AstreamGenerateContent HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57270 - "POST /v1beta/models/premium-model%3AstreamGenerateContent HTTP/1.1" 200 OK
-02:12:38 - LiteLLM:WARNING: litellm_logging.py:2233 - Billable request priced at $0 and logged as such (model_group=premium-model model=openai/premium-upstream provider=openai prompt_tokens=1000 completion_tokens=1000): cost calculation raised for pricing entry '50734531e26a243d1c62579fef15a8a6fb9bfc605f3b39e7ef27e57c7078a89a', see response_cost_failure_debug_information. Counted in litellm_zero_cost_requests_total{reason="cost_calculation_error"}
-INFO:     127.0.0.1:57272 - "POST /openai/deployments/premium-model/images/generations HTTP/1.1" 200 OK
-02:12:38 - LiteLLM:WARNING: litellm_logging.py:2233 - Billable request priced at $0 and logged as such (model_group=premium-model model=openai/premium-upstream provider=openai prompt_tokens=1000 completion_tokens=1000): cost calculation raised for pricing entry '50734531e26a243d1c62579fef15a8a6fb9bfc605f3b39e7ef27e57c7078a89a', see response_cost_failure_debug_information. Counted in litellm_zero_cost_requests_total{reason="cost_calculation_error"}
-INFO:     127.0.0.1:57275 - "POST /openai/deployments/premium-model/images/generations HTTP/1.1" 200 OK
-02:12:38 - LiteLLM:WARNING: litellm_logging.py:2233 - Billable request priced at $0 and logged as such (model_group=premium-model model=openai/premium-upstream provider=openai prompt_tokens=1000 completion_tokens=1000): cost calculation raised for pricing entry '50734531e26a243d1c62579fef15a8a6fb9bfc605f3b39e7ef27e57c7078a89a', see response_cost_failure_debug_information. Counted in litellm_zero_cost_requests_total{reason="cost_calculation_error"}
-INFO:     127.0.0.1:57277 - "POST /openai/deployments/premium-model/images/generations HTTP/1.1" 200 OK
-02:12:38 - LiteLLM:WARNING: litellm_logging.py:2233 - Billable request priced at $0 and logged as such (model_group=premium-model model=openai/premium-upstream provider=openai prompt_tokens=1000 completion_tokens=1000): cost calculation raised for pricing entry '50734531e26a243d1c62579fef15a8a6fb9bfc605f3b39e7ef27e57c7078a89a', see response_cost_failure_debug_information. Counted in litellm_zero_cost_requests_total{reason="cost_calculation_error"}
-INFO:     127.0.0.1:57279 - "POST /openai/deployments/premium-model/images/generations HTTP/1.1" 200 OK
-02:12:38 - LiteLLM:WARNING: litellm_logging.py:2233 - Billable request priced at $0 and logged as such (model_group=premium-model model=openai/premium-upstream provider=openai prompt_tokens=1000 completion_tokens=1000): cost calculation raised for pricing entry '50734531e26a243d1c62579fef15a8a6fb9bfc605f3b39e7ef27e57c7078a89a', see response_cost_failure_debug_information. Counted in litellm_zero_cost_requests_total{reason="cost_calculation_error"}
-INFO:     127.0.0.1:57281 - "POST /openai/deployments/premium-model/images/generations HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57283 - "POST /v1beta/models/cheap-model%3AgenerateContent HTTP/1.1" 200 OK
-02:12:39 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
+INFO:     127.0.0.1:59175 - "POST /v1beta/models/premium-model%3AstreamGenerateContent HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59179 - "POST /v1beta/models/premium-model%3AstreamGenerateContent HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59181 - "POST /v1beta/models/premium-model%3AstreamGenerateContent HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59183 - "POST /v1beta/models/premium-model%3AstreamGenerateContent HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59185 - "POST /v1beta/models/premium-model%3AstreamGenerateContent HTTP/1.1" 200 OK
+16:22:51 - LiteLLM:WARNING: litellm_logging.py:2233 - Billable request priced at $0 and logged as such (model_group=premium-model model=openai/premium-upstream provider=openai prompt_tokens=1000 completion_tokens=1000): cost calculation raised for pricing entry '50734531e26a243d1c62579fef15a8a6fb9bfc605f3b39e7ef27e57c7078a89a', see response_cost_failure_debug_information. Counted in litellm_zero_cost_requests_total{reason="cost_calculation_error"}
+INFO:     127.0.0.1:59195 - "POST /openai/deployments/premium-model/images/generations HTTP/1.1" 200 OK
+16:22:51 - LiteLLM:WARNING: litellm_logging.py:2233 - Billable request priced at $0 and logged as such (model_group=premium-model model=openai/premium-upstream provider=openai prompt_tokens=1000 completion_tokens=1000): cost calculation raised for pricing entry '50734531e26a243d1c62579fef15a8a6fb9bfc605f3b39e7ef27e57c7078a89a', see response_cost_failure_debug_information. Counted in litellm_zero_cost_requests_total{reason="cost_calculation_error"}
+INFO:     127.0.0.1:59199 - "POST /openai/deployments/premium-model/images/generations HTTP/1.1" 200 OK
+16:22:51 - LiteLLM:WARNING: litellm_logging.py:2233 - Billable request priced at $0 and logged as such (model_group=premium-model model=openai/premium-upstream provider=openai prompt_tokens=1000 completion_tokens=1000): cost calculation raised for pricing entry '50734531e26a243d1c62579fef15a8a6fb9bfc605f3b39e7ef27e57c7078a89a', see response_cost_failure_debug_information. Counted in litellm_zero_cost_requests_total{reason="cost_calculation_error"}
+INFO:     127.0.0.1:59202 - "POST /openai/deployments/premium-model/images/generations HTTP/1.1" 200 OK
+16:22:51 - LiteLLM:WARNING: litellm_logging.py:2233 - Billable request priced at $0 and logged as such (model_group=premium-model model=openai/premium-upstream provider=openai prompt_tokens=1000 completion_tokens=1000): cost calculation raised for pricing entry '50734531e26a243d1c62579fef15a8a6fb9bfc605f3b39e7ef27e57c7078a89a', see response_cost_failure_debug_information. Counted in litellm_zero_cost_requests_total{reason="cost_calculation_error"}
+INFO:     127.0.0.1:59204 - "POST /openai/deployments/premium-model/images/generations HTTP/1.1" 200 OK
+16:22:52 - LiteLLM:WARNING: litellm_logging.py:2233 - Billable request priced at $0 and logged as such (model_group=premium-model model=openai/premium-upstream provider=openai prompt_tokens=1000 completion_tokens=1000): cost calculation raised for pricing entry '50734531e26a243d1c62579fef15a8a6fb9bfc605f3b39e7ef27e57c7078a89a', see response_cost_failure_debug_information. Counted in litellm_zero_cost_requests_total{reason="cost_calculation_error"}
+INFO:     127.0.0.1:59206 - "POST /openai/deployments/premium-model/images/generations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59208 - "POST /v1beta/models/cheap-model%3AgenerateContent HTTP/1.1" 200 OK
+16:22:52 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
 Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2937, in _prepare_success_logging
     result = self._handle_non_streaming_google_genai_generate_content_response_logging(result=result)
@@ -979,8 +979,8 @@ Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2985, in _prepare_success_logging
     raise Exception(f"[Non-Blocking] LiteLLM.Success_Call Error: {e}")
 Exception: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
-INFO:     127.0.0.1:57285 - "POST /v1beta/models/cheap-model%3AgenerateContent HTTP/1.1" 200 OK
-02:12:39 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
+INFO:     127.0.0.1:59210 - "POST /v1beta/models/cheap-model%3AgenerateContent HTTP/1.1" 200 OK
+16:22:52 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
 Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2937, in _prepare_success_logging
     result = self._handle_non_streaming_google_genai_generate_content_response_logging(result=result)
@@ -1009,8 +1009,8 @@ Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2985, in _prepare_success_logging
     raise Exception(f"[Non-Blocking] LiteLLM.Success_Call Error: {e}")
 Exception: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
-INFO:     127.0.0.1:57287 - "POST /v1beta/models/cheap-model%3AgenerateContent HTTP/1.1" 200 OK
-02:12:39 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
+INFO:     127.0.0.1:59212 - "POST /v1beta/models/cheap-model%3AgenerateContent HTTP/1.1" 200 OK
+16:22:52 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
 Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2937, in _prepare_success_logging
     result = self._handle_non_streaming_google_genai_generate_content_response_logging(result=result)
@@ -1039,8 +1039,8 @@ Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2985, in _prepare_success_logging
     raise Exception(f"[Non-Blocking] LiteLLM.Success_Call Error: {e}")
 Exception: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
-INFO:     127.0.0.1:57289 - "POST /v1beta/models/cheap-model%3AgenerateContent HTTP/1.1" 200 OK
-02:12:39 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
+INFO:     127.0.0.1:59214 - "POST /v1beta/models/cheap-model%3AgenerateContent HTTP/1.1" 200 OK
+16:22:52 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
 Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2937, in _prepare_success_logging
     result = self._handle_non_streaming_google_genai_generate_content_response_logging(result=result)
@@ -1069,8 +1069,8 @@ Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2985, in _prepare_success_logging
     raise Exception(f"[Non-Blocking] LiteLLM.Success_Call Error: {e}")
 Exception: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
-INFO:     127.0.0.1:57297 - "POST /v1beta/models/cheap-model%3AgenerateContent HTTP/1.1" 200 OK
-02:12:40 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
+INFO:     127.0.0.1:59216 - "POST /v1beta/models/cheap-model%3AgenerateContent HTTP/1.1" 200 OK
+16:22:53 - LiteLLM:ERROR: logging_worker.py:205 - LoggingWorker error: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
 Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2937, in _prepare_success_logging
     result = self._handle_non_streaming_google_genai_generate_content_response_logging(result=result)
@@ -1099,32 +1099,32 @@ Traceback (most recent call last):
   File "/Users/atharva/litellm-main/litellm/litellm_core_utils/litellm_logging.py", line 2985, in _prepare_success_logging
     raise Exception(f"[Non-Blocking] LiteLLM.Success_Call Error: {e}")
 Exception: [Non-Blocking] LiteLLM.Success_Call Error: Google GenAI Generate Content: httpx_response is None
-INFO:     127.0.0.1:57302 - "POST /v1/messages?model=premium-model HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57316 - "POST /v1/messages?model=premium-model HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57318 - "POST /v1/messages?model=premium-model HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57322 - "POST /v1/messages?model=premium-model HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57324 - "POST /v1/messages?model=premium-model HTTP/1.1" 200 OK
-02:12:41 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+INFO:     127.0.0.1:59218 - "POST /v1/messages?model=premium-model HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59221 - "POST /v1/messages?model=premium-model HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59223 - "POST /v1/messages?model=premium-model HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59225 - "POST /v1/messages?model=premium-model HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59227 - "POST /v1/messages?model=premium-model HTTP/1.1" 200 OK
+16:22:54 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:41 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57327 - "POST /v1/messages HTTP/1.1" 403 Forbidden
-02:12:41 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:54 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59229 - "POST /v1/messages HTTP/1.1" 403 Forbidden
+16:22:54 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:41 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57329 - "POST /v1/messages HTTP/1.1" 403 Forbidden
-02:12:42 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:54 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59231 - "POST /v1/messages HTTP/1.1" 403 Forbidden
+16:22:54 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:42 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57331 - "POST /v1/messages HTTP/1.1" 403 Forbidden
-02:12:42 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:54 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59233 - "POST /v1/messages HTTP/1.1" 403 Forbidden
+16:22:55 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:42 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57333 - "POST /v1/messages HTTP/1.1" 403 Forbidden
-02:12:42 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
+16:22:55 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59235 - "POST /v1/messages HTTP/1.1" 403 Forbidden
+16:22:55 - LiteLLM Proxy:ERROR: auth_exception_handler.py:209 - litellm.proxy.proxy_server.user_api_key_auth(): Exception occured - The requested model 'premium-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.
 Requester IP Address:127.0.0.1
-02:12:42 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
-INFO:     127.0.0.1:57335 - "POST /v1/messages HTTP/1.1" 403 Forbidden
+16:22:55 - LiteLLM Proxy:WARNING: auth_utils.py:74 - key not allowed to access model. This key can only access models=['cheap-model']. Tried to access premium-model
+INFO:     127.0.0.1:59239 - "POST /v1/messages HTTP/1.1" 403 Forbidden
 INFO:     Shutting down
 INFO:     Waiting for application shutdown.
 INFO:     Application shutdown complete.
-INFO:     Finished server process [7823]
+INFO:     Finished server process [86297]

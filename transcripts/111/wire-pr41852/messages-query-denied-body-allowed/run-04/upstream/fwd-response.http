@@ -1,4 +1,4 @@
 HTTP/1.1 200 OK
 content-type: application/json
 
-{"id": "resp-fake26", "object": "response", "created_at": 1793121161, "model": "cheap-upstream", "status": "completed", "output": [{"type": "message", "role": "assistant", "id": "msg-26", "content": [{"type": "output_text", "text": "served-by-upstream-model=cheap-upstream"}]}], "usage": {"input_tokens": 1000, "output_tokens": 1000, "total_tokens": 2000}}
+{"id": "resp-fake26", "object": "response", "created_at": 1793172173, "model": "cheap-upstream", "status": "completed", "output": [{"type": "message", "role": "assistant", "id": "msg-26", "content": [{"type": "output_text", "text": "served-by-upstream-model=cheap-upstream"}]}], "usage": {"input_tokens": 1000, "output_tokens": 1000, "total_tokens": 2000}}

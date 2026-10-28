@@ -1,4 +1,4 @@
 HTTP/1.1 200 OK
 content-type: application/json
 
-{"created": 1793121158, "data": [{"b64_json": "", "revised_prompt": "served-by-upstream-model=premium-upstream"}], "usage": {"total_tokens": 2000, "input_tokens": 1000, "output_tokens": 1000}}
+{"created": 1793172171, "data": [{"b64_json": "", "revised_prompt": "served-by-upstream-model=premium-upstream"}], "usage": {"total_tokens": 2000, "input_tokens": 1000, "output_tokens": 1000}}
