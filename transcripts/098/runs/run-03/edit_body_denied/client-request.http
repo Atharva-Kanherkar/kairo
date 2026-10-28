@@ -1,0 +1,22 @@
+POST /v1/images/edits HTTP/1.1
+Host: 127.0.0.1:58167
+Authorization: Bearer <VIRTUAL_KEY>
+Content-Type: multipart/form-data; boundary=----kairo098boundary
+Content-Length: 387
+Accept: application/json
+Connection: close
+
+------kairo098boundary
+Content-Disposition: form-data; name="model"
+
+denied-model
+------kairo098boundary
+Content-Disposition: form-data; name="prompt"
+
+make it blue
+------kairo098boundary
+Content-Disposition: form-data; name="image"; filename="tiny.png"
+Content-Type: image/png
+
+<TINY_PNG 68 bytes>
+------kairo098boundary--

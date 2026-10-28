@@ -1,0 +1,14 @@
+{
+  "case": "edit_deploy_denied",
+  "path": "/openai/deployments/denied-model/images/edits",
+  "body_model": "allowed-model",
+  "expected_status": 200,
+  "http_status": 200,
+  "expected_served": "DENIED",
+  "served": "DENIED",
+  "expected_upstream": "denied",
+  "upstream_calls": [
+    "denied"
+  ],
+  "pass": true
+}

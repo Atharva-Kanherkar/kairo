@@ -1,0 +1,12 @@
+{
+  "case": "gen_body_denied",
+  "path": "/v1/images/generations",
+  "body_model": "denied-model",
+  "expected_status": 403,
+  "http_status": 403,
+  "expected_served": null,
+  "served": null,
+  "expected_upstream": null,
+  "upstream_calls": [],
+  "pass": true
+}
