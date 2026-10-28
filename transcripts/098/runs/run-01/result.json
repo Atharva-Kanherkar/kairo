@@ -1,0 +1,148 @@
+[
+  {
+    "case": "gen_body_denied",
+    "path": "/v1/images/generations",
+    "body_model": "denied-model",
+    "expected_status": 403,
+    "http_status": 403,
+    "expected_served": null,
+    "served": null,
+    "expected_upstream": null,
+    "upstream_calls": [],
+    "pass": true
+  },
+  {
+    "case": "gen_query_denied",
+    "path": "/v1/images/generations?model=denied-model",
+    "body_model": "allowed-model",
+    "expected_status": 200,
+    "http_status": 200,
+    "expected_served": "DENIED",
+    "served": "DENIED",
+    "expected_upstream": "denied",
+    "upstream_calls": [
+      "denied"
+    ],
+    "pass": true
+  },
+  {
+    "case": "gen_deploy_denied",
+    "path": "/openai/deployments/denied-model/images/generations",
+    "body_model": "allowed-model",
+    "expected_status": 200,
+    "http_status": 200,
+    "expected_served": "DENIED",
+    "served": "DENIED",
+    "expected_upstream": "denied",
+    "upstream_calls": [
+      "denied"
+    ],
+    "pass": true
+  },
+  {
+    "case": "gen_query_denied_nobody",
+    "path": "/v1/images/generations?model=denied-model",
+    "body_model": null,
+    "expected_status": 403,
+    "http_status": 403,
+    "expected_served": null,
+    "served": null,
+    "expected_upstream": null,
+    "upstream_calls": [],
+    "pass": true
+  },
+  {
+    "case": "gen_deploy_denied_nobody",
+    "path": "/openai/deployments/denied-model/images/generations",
+    "body_model": null,
+    "expected_status": 403,
+    "http_status": 403,
+    "expected_served": null,
+    "served": null,
+    "expected_upstream": null,
+    "upstream_calls": [],
+    "pass": true
+  },
+  {
+    "case": "gen_query_allowed",
+    "path": "/v1/images/generations?model=allowed-model",
+    "body_model": "allowed-model",
+    "expected_status": 200,
+    "http_status": 200,
+    "expected_served": "ALLOWED",
+    "served": "ALLOWED",
+    "expected_upstream": "allowed",
+    "upstream_calls": [
+      "allowed"
+    ],
+    "pass": true
+  },
+  {
+    "case": "gen_no_query",
+    "path": "/v1/images/generations",
+    "body_model": "allowed-model",
+    "expected_status": 200,
+    "http_status": 200,
+    "expected_served": "ALLOWED",
+    "served": "ALLOWED",
+    "expected_upstream": "allowed",
+    "upstream_calls": [
+      "allowed"
+    ],
+    "pass": true
+  },
+  {
+    "case": "edit_body_denied",
+    "path": "/v1/images/edits",
+    "body_model": "denied-model",
+    "expected_status": 403,
+    "http_status": 403,
+    "expected_served": null,
+    "served": null,
+    "expected_upstream": null,
+    "upstream_calls": [],
+    "pass": true
+  },
+  {
+    "case": "edit_query_denied",
+    "path": "/v1/images/edits?model=denied-model",
+    "body_model": "allowed-model",
+    "expected_status": 200,
+    "http_status": 200,
+    "expected_served": "DENIED",
+    "served": "DENIED",
+    "expected_upstream": "denied",
+    "upstream_calls": [
+      "denied"
+    ],
+    "pass": true
+  },
+  {
+    "case": "edit_deploy_denied",
+    "path": "/openai/deployments/denied-model/images/edits",
+    "body_model": "allowed-model",
+    "expected_status": 200,
+    "http_status": 200,
+    "expected_served": "DENIED",
+    "served": "DENIED",
+    "expected_upstream": "denied",
+    "upstream_calls": [
+      "denied"
+    ],
+    "pass": true
+  },
+  {
+    "case": "edit_no_query",
+    "path": "/v1/images/edits",
+    "body_model": "allowed-model",
+    "expected_status": 200,
+    "http_status": 200,
+    "expected_served": "ALLOWED",
+    "served": "ALLOWED",
+    "expected_upstream": "allowed",
+    "upstream_calls": [
+      "allowed"
+    ],
+    "pass": true
+  }
+]

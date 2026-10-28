@@ -1,0 +1,15 @@
+model_list:
+  - model_name: allowed-model
+    litellm_params:
+      model: openai/fake-model
+      api_base: http://127.0.0.1:58168/v1
+      api_key: sk-dummy-upstream
+  - model_name: denied-model
+    litellm_params:
+      model: openai/fake-model
+      api_base: http://127.0.0.1:58169/v1
+      api_key: sk-dummy-upstream
+litellm_settings:
+  drop_params: true
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY

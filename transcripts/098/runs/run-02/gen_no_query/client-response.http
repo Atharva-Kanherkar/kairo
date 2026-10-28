@@ -1,0 +1,18 @@
+HTTP/1.1 200 OK
+date: Tue, 27 Oct 2026 17:16:41 GMT
+content-length: 354
+content-type: application/json
+x-litellm-call-id: f55f9afa-34ad-4c20-9c11-ab2e27a4f28c
+x-litellm-model-id: a6c3b410a14944196d3ae5f323ebda2de90fa03e7cceada5920d0c369fa3f4c6
+x-litellm-model-api-base: http://127.0.0.1:58168/v1
+x-litellm-version: 1.104.0
+x-litellm-key-spend: 0.0
+x-litellm-response-duration-ms: 7.7381134033203125
+x-litellm-callback-duration-ms: 0.0
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+Connection: close
+
+{"created":1700000000,"background":null,"data":[{"b64_json":null,"revised_prompt":"SERVED_BY_ALLOWED_IMAGE","url":"https://example.invalid/ALLOWED.png","provider_specific_fields":null}],"output_format":null,"quality":null,"size":null,"usage":{"total_tokens":0,"input_tokens":0,"input_tokens_details":{"image_tokens":0,"text_tokens":0},"output_tokens":0}}

@@ -1,0 +1,9 @@
+POST /openai/deployments/denied-model/images/generations HTTP/1.1
+Host: 127.0.0.1:58167
+Authorization: Bearer <VIRTUAL_KEY>
+Content-Type: application/json
+Content-Length: 47
+Accept: application/json
+Connection: close
+
+{"model":"allowed-model","prompt":"a red cube"}

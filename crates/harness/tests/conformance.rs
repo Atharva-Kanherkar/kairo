@@ -6,20 +6,20 @@
 //! violating the invariant, this test flips and tells us.
 
 use kairo::checks::{
-    anthropic_response_toolcall_stop_reason, anthropic_server_tools_forwarded,
-    anthropic_stop_sequence_reported, anthropic_stream_block_lifecycle,
-    anthropic_stream_safety_stop_reason, anthropic_tool_choice_any_mapped_to_required,
-    anthropic_toolcall_stop_reason, capture_records, client_cache_breakpoints_reach_provider,
-    codex_namespace_only_applies_to_namespaced_tools, content_filter_preserved,
-    document_body_forwarded, endpoint_response_family_preserved, executed_tool_results_preserved,
-    forwarded_body_preserves_values, gemini_inline_media_preserved_in_chat_response,
-    gemini_inline_media_preserved_in_chat_stream, id_conforms, image_url_cache_key_case_sensitive,
-    instruction_messages_preserved, invalid_credential_rejected_before_upstream,
-    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
-    mcp_tool_executes_once, model_info_capture_identity, model_info_envelope_body,
-    model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
-    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
-    ogx_adaptive_thinking_loss, openai_stream_finish_reason,
+    allowlist_bounds_served_model, anthropic_response_toolcall_stop_reason,
+    anthropic_server_tools_forwarded, anthropic_stop_sequence_reported,
+    anthropic_stream_block_lifecycle, anthropic_stream_safety_stop_reason,
+    anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
+    client_cache_breakpoints_reach_provider, codex_namespace_only_applies_to_namespaced_tools,
+    content_filter_preserved, document_body_forwarded, endpoint_response_family_preserved,
+    executed_tool_results_preserved, forwarded_body_preserves_values,
+    gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
+    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
+    invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
+    json_schema_property_forwarded, mcp_tool_executes_once, model_info_capture_identity,
+    model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
+    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
+    non_text_block_not_json_dumped, ogx_adaptive_thinking_loss, openai_stream_finish_reason,
     openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
     outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
     reasoning_text_order_preserved, refusal_text_preserved, registration_resolvable_by_both_paths,
@@ -7238,4 +7238,150 @@ fn bug111_litellm_serves_a_model_outside_the_key_allowlist_via_the_url_path() {
             }
         }
     }
+}
+
+// ---- bug 098: image route model allowlist bypass ----
+
+const ISSUE_098_ALLOWED: &[&str] = &["allowed-model"];
+
+fn issue_098(case: &str, file: &str) -> String {
+    fixture(&format!("transcripts/098/runs/run-01/{case}/{file}"))
+}
+
+fn issue_098_verdict(case: &str, ledger: &str) -> Verdict {
+    allowlist_bounds_served_model(
+        &issue_098(case, "client-request.http"),
+        &issue_098(case, "client-response.http"),
+        &issue_098(case, ledger),
+        ISSUE_098_ALLOWED,
+    )
+}
+
+#[test]
+fn litellm_098_generation_query_model_bypasses_key_allowlist() {
+    let request = issue_098("gen_query_denied", "client-request.http");
+    assert!(
+        request.starts_with("POST /v1/images/generations?model=denied-model HTTP/1.1"),
+        "fixture must bind the denied model in the query string"
+    );
+    assert!(
+        request.contains(r#""model":"allowed-model""#),
+        "fixture must name the allowed model in the body, or auth would reject it"
+    );
+    let verdict = issue_098_verdict("gen_query_denied", "upstream-denied.jsonl");
+    assert!(
+        matches!(verdict, Verdict::Violation(_)),
+        "the denied upstream served the request: {verdict:?}"
+    );
+}
+
+#[test]
+fn litellm_098_generation_deployment_model_bypasses_key_allowlist() {
+    let request = issue_098("gen_deploy_denied", "client-request.http");
+    assert!(
+        request.starts_with("POST /openai/deployments/denied-model/images/generations HTTP/1.1"),
+        "fixture must bind the denied model in the deployment path"
+    );
+    let verdict = issue_098_verdict("gen_deploy_denied", "upstream-denied.jsonl");
+    assert!(
+        matches!(verdict, Verdict::Violation(_)),
+        "the denied upstream served the request: {verdict:?}"
+    );
+}
+
+#[test]
+fn litellm_098_edit_query_model_bypasses_key_allowlist() {
+    let request = issue_098("edit_query_denied", "client-request.http");
+    assert!(
+        request.starts_with("POST /v1/images/edits?model=denied-model HTTP/1.1"),
+        "fixture must bind the denied model in the query string"
+    );
+    assert!(
+        request.contains("name=\"model\"\r\n\r\nallowed-model"),
+        "fixture must name the allowed model in the multipart body"
+    );
+    let verdict = issue_098_verdict("edit_query_denied", "upstream-denied.jsonl");
+    assert!(
+        matches!(verdict, Verdict::Violation(_)),
+        "the denied upstream served the edit: {verdict:?}"
+    );
+}
+
+#[test]
+fn litellm_098_edit_deployment_model_bypasses_key_allowlist() {
+    let request = issue_098("edit_deploy_denied", "client-request.http");
+    assert!(
+        request.starts_with("POST /openai/deployments/denied-model/images/edits HTTP/1.1"),
+        "fixture must bind the denied model in the deployment path"
+    );
+    let verdict = issue_098_verdict("edit_deploy_denied", "upstream-denied.jsonl");
+    assert!(
+        matches!(verdict, Verdict::Violation(_)),
+        "the denied upstream served the edit: {verdict:?}"
+    );
+}
+
+#[test]
+fn litellm_098_body_model_denied_is_rejected_before_upstream() {
+    let verdict = issue_098_verdict("gen_body_denied", "upstream-denied.jsonl");
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "a body-only denied model is the control that must still return 403"
+    );
+}
+
+#[test]
+fn litellm_098_allowed_model_is_served() {
+    assert_eq!(
+        issue_098_verdict("gen_no_query", "upstream-allowed.jsonl"),
+        Verdict::Conformant,
+        "an allowed model with no URL override must be served"
+    );
+    assert_eq!(
+        issue_098_verdict("gen_query_allowed", "upstream-allowed.jsonl"),
+        Verdict::Conformant,
+        "an allowed model in the query string must be served"
+    );
+}
+
+#[test]
+fn litellm_098_edit_allowed_model_is_served() {
+    assert_eq!(
+        issue_098_verdict("edit_no_query", "upstream-allowed.jsonl"),
+        Verdict::Conformant,
+        "an allowed model with no URL override must be served"
+    );
+}
+
+#[test]
+fn litellm_098_checker_rejects_a_rejection_that_reached_upstream() {
+    // The body-denied control has a 403 and an empty ledger. Attach the denied
+    // call from a bypass case: only a checker that reads the ledger turns this
+    // into a Violation, so the upstream half cannot silently pass.
+    let verdict = allowlist_bounds_served_model(
+        &issue_098("gen_body_denied", "client-request.http"),
+        &issue_098("gen_body_denied", "client-response.http"),
+        &issue_098("gen_query_denied", "upstream-denied.jsonl"),
+        ISSUE_098_ALLOWED,
+    );
+    assert!(
+        matches!(verdict, Verdict::Violation(_)),
+        "a rejected request that still reached upstream must be caught: {verdict:?}"
+    );
+}
+
+#[test]
+fn litellm_098_checker_rejects_an_allowed_model_that_was_not_served() {
+    // A 200 for an allowed model with no upstream call is not a served request.
+    let verdict = allowlist_bounds_served_model(
+        &issue_098("gen_no_query", "client-request.http"),
+        &issue_098("gen_no_query", "client-response.http"),
+        &issue_098("gen_body_denied", "upstream-allowed.jsonl"),
+        ISSUE_098_ALLOWED,
+    );
+    assert!(
+        matches!(verdict, Verdict::Violation(_)),
+        "an allowed model with no upstream call must be caught: {verdict:?}"
+    );
 }

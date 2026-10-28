@@ -1,0 +1,11 @@
+HTTP/1.1 403 Forbidden
+date: Tue, 27 Oct 2026 17:16:43 GMT
+content-length: 234
+content-type: application/json
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+Connection: close
+
+{"error":{"message":"The requested model 'denied-model' is not available for this API key, or the model name is invalid. Check the models available to you and try again.","type":"key_model_access_denied","param":"model","code":"403"}}
