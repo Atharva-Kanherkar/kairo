@@ -6309,3 +6309,121 @@ mod served_model_within_key_allowlist_tests {
         );
     }
 }
+
+/// Invariant (bug 114): when a proxy operator creates or updates a team with
+/// `max_parallel_requests`, the proxy must preserve and return that concurrency
+/// limit rather than silently dropping it to null.
+pub fn team_preserves_max_parallel_requests(request_json: &str, response_json: &str) -> Verdict {
+    let req: Value = match serde_json::from_str(request_json) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("invalid request JSON: {e}")),
+    };
+    let resp: Value = match serde_json::from_str(response_json) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("invalid response JSON: {e}")),
+    };
+
+    let Some(expected) = req.get("max_parallel_requests") else {
+        return Verdict::Conformant;
+    };
+    if expected.is_null() {
+        return Verdict::Conformant;
+    }
+
+    let actual = resp
+        .get("max_parallel_requests")
+        .or_else(|| resp.pointer("/data/max_parallel_requests"))
+        .or_else(|| resp.pointer("/team_info/max_parallel_requests"));
+
+    match actual {
+        Some(val) if val == expected => Verdict::Conformant,
+        Some(val) if val.is_null() => Verdict::Violation(format!(
+            "team request specified max_parallel_requests={expected}, but proxy response returned null"
+        )),
+        Some(val) => Verdict::Violation(format!(
+            "team request specified max_parallel_requests={expected}, but proxy response returned {val}"
+        )),
+        None => Verdict::Violation(format!(
+            "team request specified max_parallel_requests={expected}, but proxy response omitted the field"
+        )),
+    }
+}
+
+#[cfg(test)]
+mod team_preserves_max_parallel_requests_tests {
+    use super::{team_preserves_max_parallel_requests, Verdict};
+
+    #[test]
+    fn team_without_limit_request_is_conformant() {
+        let req = r#"{"team_alias":"test"}"#;
+        let resp = r#"{"team_alias":"test","max_parallel_requests":null}"#;
+        assert_eq!(
+            team_preserves_max_parallel_requests(req, resp),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn team_with_preserved_limit_is_conformant() {
+        let req = r#"{"team_alias":"test","max_parallel_requests":1}"#;
+        let resp = r#"{"team_alias":"test","max_parallel_requests":1}"#;
+        assert_eq!(
+            team_preserves_max_parallel_requests(req, resp),
+            Verdict::Conformant
+        );
+
+        let update_resp = r#"{"data":{"team_alias":"test","max_parallel_requests":1}}"#;
+        assert_eq!(
+            team_preserves_max_parallel_requests(req, update_resp),
+            Verdict::Conformant
+        );
+
+        let info_resp = r#"{"team_info":{"team_alias":"test","max_parallel_requests":1}}"#;
+        assert_eq!(
+            team_preserves_max_parallel_requests(req, info_resp),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn team_with_dropped_null_limit_is_violation() {
+        let req = r#"{"team_alias":"test","max_parallel_requests":1}"#;
+        let resp = r#"{"team_alias":"test","max_parallel_requests":null}"#;
+        assert!(matches!(
+            team_preserves_max_parallel_requests(req, resp),
+            Verdict::Violation(msg) if msg.contains("null")
+        ));
+    }
+
+    #[test]
+    fn team_with_omitted_limit_is_violation() {
+        let req = r#"{"team_alias":"test","max_parallel_requests":2}"#;
+        let resp = r#"{"team_alias":"test"}"#;
+        assert!(matches!(
+            team_preserves_max_parallel_requests(req, resp),
+            Verdict::Violation(msg) if msg.contains("omitted")
+        ));
+    }
+
+    #[test]
+    fn team_with_mismatched_limit_is_violation() {
+        let req = r#"{"team_alias":"test","max_parallel_requests":2}"#;
+        let resp = r#"{"team_alias":"test","max_parallel_requests":1}"#;
+        assert!(matches!(
+            team_preserves_max_parallel_requests(req, resp),
+            Verdict::Violation(msg) if msg.contains("returned 1")
+        ));
+    }
+
+    #[test]
+    fn invalid_json_is_violation() {
+        assert!(matches!(
+            team_preserves_max_parallel_requests("bad", "{}"),
+            Verdict::Violation(_)
+        ));
+        assert!(matches!(
+            team_preserves_max_parallel_requests("{}", "bad"),
+            Verdict::Violation(_)
+        ));
+    }
+}

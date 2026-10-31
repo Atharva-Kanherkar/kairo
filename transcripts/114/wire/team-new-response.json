@@ -1,0 +1,41 @@
+{
+  "team_alias": "Kairo Team 114",
+  "team_id": "team-kairo-114-1793441501",
+  "organization_id": null,
+  "admins": [],
+  "members": [],
+  "members_with_roles": [
+    {
+      "user_id": "default_user_id",
+      "user_email": null,
+      "role": "admin"
+    }
+  ],
+  "team_member_permissions": [],
+  "metadata": {},
+  "tpm_limit": null,
+  "rpm_limit": null,
+  "tpd_limit": null,
+  "max_budget": null,
+  "soft_budget": null,
+  "budget_duration": null,
+  "budget_limits": null,
+  "models": [],
+  "blocked": false,
+  "router_settings": {},
+  "access_group_ids": [],
+  "default_team_member_models": [],
+  "spend": 0.0,
+  "max_parallel_requests": null,
+  "budget_reset_at": null,
+  "model_id": null,
+  "model_spend": {},
+  "model_max_budget": {},
+  "policies": [],
+  "allow_team_guardrail_config": false,
+  "litellm_model_table": null,
+  "object_permission": null,
+  "object_permission_id": null,
+  "updated_at": "2026-10-31T10:11:42.103000Z",
+  "created_at": "2026-10-31T10:11:42.103000Z"
+}
