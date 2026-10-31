@@ -6,20 +6,21 @@
 //! violating the invariant, this test flips and tells us.
 
 use kairo::checks::{
-    allowlist_bounds_served_model, anthropic_response_toolcall_stop_reason,
-    anthropic_server_tools_forwarded, anthropic_stop_sequence_reported,
-    anthropic_stream_block_lifecycle, anthropic_stream_safety_stop_reason,
-    anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
-    client_cache_breakpoints_reach_provider, codex_namespace_only_applies_to_namespaced_tools,
-    content_filter_preserved, document_body_forwarded, endpoint_response_family_preserved,
-    executed_tool_results_preserved, forwarded_body_preserves_values,
-    gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
-    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
-    invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
-    json_schema_property_forwarded, mcp_tool_executes_once, model_info_capture_identity,
-    model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
-    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
-    non_text_block_not_json_dumped, ogx_adaptive_thinking_loss, openai_stream_finish_reason,
+    access_group_bounds_model_access, allowlist_bounds_served_model,
+    anthropic_response_toolcall_stop_reason, anthropic_server_tools_forwarded,
+    anthropic_stop_sequence_reported, anthropic_stream_block_lifecycle,
+    anthropic_stream_safety_stop_reason, anthropic_tool_choice_any_mapped_to_required,
+    anthropic_toolcall_stop_reason, capture_records, client_cache_breakpoints_reach_provider,
+    codex_namespace_only_applies_to_namespaced_tools, content_filter_preserved,
+    document_body_forwarded, endpoint_response_family_preserved, executed_tool_results_preserved,
+    forwarded_body_preserves_values, gemini_inline_media_preserved_in_chat_response,
+    gemini_inline_media_preserved_in_chat_stream, id_conforms, image_url_cache_key_case_sensitive,
+    instruction_messages_preserved, invalid_credential_rejected_before_upstream,
+    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
+    mcp_tool_executes_once, model_info_capture_identity, model_info_envelope_body,
+    model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
+    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
+    ogx_adaptive_thinking_loss, openai_stream_finish_reason,
     openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
     outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
     reasoning_text_order_preserved, refusal_text_preserved, registration_resolvable_by_both_paths,
@@ -7383,5 +7384,49 @@ fn litellm_098_checker_rejects_an_allowed_model_that_was_not_served() {
     assert!(
         matches!(verdict, Verdict::Violation(_)),
         "an allowed model with no upstream call must be caught: {verdict:?}"
+    );
+}
+
+// ---- 115: LiteLLM key with empty models bypasses access group restrictions ----
+//
+// Captured with transcripts/115/rig against litellm main cfe0100e. A key assigned
+// to an access group with access_model_names: ["allowed-model"] and native
+// models: [] bypasses all access-group model restrictions. The proxy evaluates
+// models: [] first, treats empty models as unrestricted (all_model_access = true),
+// and never enters the access_group fallback check.
+
+#[test]
+fn litellm_access_group_empty_models_forbidden_model_bypassed_violation() {
+    let req = fixture("transcripts/115/wire/trigger-key-forbidden-request.json");
+    let resp = fixture("transcripts/115/wire/trigger-key-forbidden-response.json");
+    let req_val: Value = serde_json::from_str(&req).expect("parse request");
+    let requested_model = req_val["model"].as_str().expect("model");
+    let verdict = access_group_bounds_model_access(requested_model, &["allowed-model"], 200, &resp);
+    assert!(
+        matches!(verdict, Verdict::Violation(_)),
+        "a key in an access group restricted to allowed-model serving forbidden-model with 200 must be a violation: {verdict:?}"
+    );
+}
+
+#[test]
+fn litellm_access_group_control_key_rejected() {
+    let resp = fixture("transcripts/115/wire/control-key-forbidden-response.json");
+    let verdict =
+        access_group_bounds_model_access("forbidden-model", &["allowed-model"], 403, &resp);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "control key returning 403 for forbidden-model is conformant"
+    );
+}
+
+#[test]
+fn litellm_access_group_allowed_model_served() {
+    let resp = fixture("transcripts/115/wire/trigger-key-allowed-response.json");
+    let verdict = access_group_bounds_model_access("allowed-model", &["allowed-model"], 200, &resp);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "allowed model served with 200 is conformant"
     );
 }

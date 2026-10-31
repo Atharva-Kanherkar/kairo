@@ -6309,3 +6309,103 @@ mod served_model_within_key_allowlist_tests {
         );
     }
 }
+
+/// Invariant (bug 115): a request for a model outside the key's assigned access
+/// group must be rejected (HTTP 403), never served (HTTP 200).
+pub fn access_group_bounds_model_access(
+    requested_model: &str,
+    access_group_allowed_models: &[&str],
+    status: u16,
+    response_json: &str,
+) -> Verdict {
+    let is_allowed = access_group_allowed_models.contains(&requested_model);
+    if is_allowed {
+        if status == 200 {
+            return Verdict::Conformant;
+        }
+        return Verdict::Violation(format!(
+            "requested model {requested_model:?} is inside the access group allowlist {access_group_allowed_models:?}, but was rejected with status {status}"
+        ));
+    }
+
+    // Disallowed model:
+    if status == 200 {
+        let resp: Value = match serde_json::from_str(response_json) {
+            Ok(v) => v,
+            Err(e) => return Verdict::Violation(format!("invalid response JSON: {e}")),
+        };
+        let served_model = resp
+            .get("model")
+            .and_then(Value::as_str)
+            .unwrap_or(requested_model);
+        return Verdict::Violation(format!(
+            "200 OK response served model {served_model:?}, which is outside the access group allowlist {access_group_allowed_models:?}"
+        ));
+    }
+
+    if status == 403 {
+        return Verdict::Conformant;
+    }
+
+    if response_json.contains("key_model_access_denied")
+        || response_json.contains("not available for this API key")
+    {
+        return Verdict::Conformant;
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod access_group_bounds_model_access_tests {
+    use super::{access_group_bounds_model_access, Verdict};
+
+    #[test]
+    fn allowed_model_with_200_is_conformant() {
+        let resp = r#"{"model":"allowed-model","choices":[]}"#;
+        assert_eq!(
+            access_group_bounds_model_access("allowed-model", &["allowed-model"], 200, resp),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn allowed_model_rejected_is_violation() {
+        let resp = r#"{"error":"rejected"}"#;
+        assert!(matches!(
+            access_group_bounds_model_access("allowed-model", &["allowed-model"], 403, resp),
+            Verdict::Violation(msg) if msg.contains("rejected with status 403")
+        ));
+    }
+
+    #[test]
+    fn forbidden_model_with_403_is_conformant() {
+        let resp = r#"{"error":{"message":"key_model_access_denied"}}"#;
+        assert_eq!(
+            access_group_bounds_model_access("forbidden-model", &["allowed-model"], 403, resp),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn forbidden_model_served_with_200_is_violation() {
+        let resp = r#"{"model":"forbidden-model","choices":[]}"#;
+        assert!(matches!(
+            access_group_bounds_model_access("forbidden-model", &["allowed-model"], 200, resp),
+            Verdict::Violation(msg) if msg.contains("outside the access group allowlist")
+        ));
+    }
+
+    #[test]
+    fn invalid_json_on_200_violation_is_handled() {
+        assert!(matches!(
+            access_group_bounds_model_access(
+                "forbidden-model",
+                &["allowed-model"],
+                200,
+                "not json"
+            ),
+            Verdict::Violation(_)
+        ));
+    }
+}
