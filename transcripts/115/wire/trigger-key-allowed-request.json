@@ -1,0 +1,9 @@
+{
+  "model": "allowed-model",
+  "messages": [
+    {
+      "role": "user",
+      "content": "hello from trigger"
+    }
+  ]
+}

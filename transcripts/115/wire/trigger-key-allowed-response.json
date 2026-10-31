@@ -1,0 +1,22 @@
+{
+  "id": "chatcmpl-mock-115-8faf3e",
+  "created": 1793443187,
+  "model": "allowed-model",
+  "object": "chat.completion",
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "Mock response successfully served for allowed-model",
+        "role": "assistant"
+      },
+      "provider_specific_fields": {}
+    }
+  ],
+  "usage": {
+    "completion_tokens": 8,
+    "prompt_tokens": 8,
+    "total_tokens": 16
+  }
+}
