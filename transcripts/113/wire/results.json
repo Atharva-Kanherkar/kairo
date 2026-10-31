@@ -1,0 +1,227 @@
+{
+  "label": "main",
+  "cells": [
+    {
+      "cell": "gemini-v1-path-denied",
+      "description": "gemini passthrough v1 GA route with denied premium-model (TRIGGER)",
+      "route": "/gemini/v1/models/premium-model:generateContent",
+      "runs": [
+        {
+          "run": 1,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        },
+        {
+          "run": 2,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        },
+        {
+          "run": 3,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        },
+        {
+          "run": 4,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        },
+        {
+          "run": 5,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        }
+      ],
+      "expected_status": 200,
+      "status_consistent": true,
+      "model_consistent": true,
+      "final_status": 200,
+      "final_forwarded_model": "premium-model"
+    },
+    {
+      "cell": "gemini-v1-stream-path-denied",
+      "description": "gemini passthrough v1 stream route with denied premium-model (TRIGGER)",
+      "route": "/gemini/v1/models/premium-model:streamGenerateContent",
+      "runs": [
+        {
+          "run": 1,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        },
+        {
+          "run": 2,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        },
+        {
+          "run": 3,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        },
+        {
+          "run": 4,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        },
+        {
+          "run": 5,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        }
+      ],
+      "expected_status": 200,
+      "status_consistent": true,
+      "model_consistent": true,
+      "final_status": 200,
+      "final_forwarded_model": "premium-model"
+    },
+    {
+      "cell": "gemini-v1alpha-path-denied",
+      "description": "gemini passthrough v1alpha route with denied premium-model (TRIGGER)",
+      "route": "/gemini/v1alpha/models/premium-model:generateContent",
+      "runs": [
+        {
+          "run": 1,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        },
+        {
+          "run": 2,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        },
+        {
+          "run": 3,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        },
+        {
+          "run": 4,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        },
+        {
+          "run": 5,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        }
+      ],
+      "expected_status": 200,
+      "status_consistent": true,
+      "model_consistent": true,
+      "final_status": 200,
+      "final_forwarded_model": "premium-model"
+    },
+    {
+      "cell": "gemini-models-path-denied",
+      "description": "gemini passthrough /models/ prefix with denied premium-model (TRIGGER)",
+      "route": "/gemini/models/premium-model:generateContent",
+      "runs": [
+        {
+          "run": 1,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        },
+        {
+          "run": 2,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        },
+        {
+          "run": 3,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        },
+        {
+          "run": 4,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        },
+        {
+          "run": 5,
+          "status": 200,
+          "forwarded_model": "premium-model"
+        }
+      ],
+      "expected_status": 200,
+      "status_consistent": true,
+      "model_consistent": true,
+      "final_status": 200,
+      "final_forwarded_model": "premium-model"
+    },
+    {
+      "cell": "gemini-v1beta-control",
+      "description": "gemini passthrough v1beta route with denied premium-model (CONTROL, 403)",
+      "route": "/gemini/v1beta/models/premium-model:generateContent",
+      "runs": [
+        {
+          "run": 1,
+          "status": 403,
+          "forwarded_model": null
+        },
+        {
+          "run": 2,
+          "status": 403,
+          "forwarded_model": null
+        },
+        {
+          "run": 3,
+          "status": 403,
+          "forwarded_model": null
+        },
+        {
+          "run": 4,
+          "status": 403,
+          "forwarded_model": null
+        },
+        {
+          "run": 5,
+          "status": 403,
+          "forwarded_model": null
+        }
+      ],
+      "expected_status": 200,
+      "status_consistent": true,
+      "model_consistent": true,
+      "final_status": 403,
+      "final_forwarded_model": null
+    },
+    {
+      "cell": "gemini-v1-cheap-control",
+      "description": "gemini passthrough v1 route with allowed cheap-model (CONTROL, 200)",
+      "route": "/gemini/v1/models/cheap-model:generateContent",
+      "runs": [
+        {
+          "run": 1,
+          "status": 200,
+          "forwarded_model": "cheap-model"
+        },
+        {
+          "run": 2,
+          "status": 200,
+          "forwarded_model": "cheap-model"
+        },
+        {
+          "run": 3,
+          "status": 200,
+          "forwarded_model": "cheap-model"
+        },
+        {
+          "run": 4,
+          "status": 200,
+          "forwarded_model": "cheap-model"
+        },
+        {
+          "run": 5,
+          "status": 200,
+          "forwarded_model": "cheap-model"
+        }
+      ],
+      "expected_status": 200,
+      "status_consistent": true,
+      "model_consistent": true,
+      "final_status": 200,
+      "final_forwarded_model": "cheap-model"
+    }
+  ]
+}

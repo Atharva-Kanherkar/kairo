@@ -1,0 +1,15 @@
+# LiteLLM proxy config for finding 113.
+# Two models registered, cheap-model and premium-model.
+# Master key and database url come from the environment; no secret is committed.
+model_list:
+  - model_name: cheap-model
+    litellm_params:
+      model: gemini/cheap-model
+      api_key: fake-gemini-key
+  - model_name: premium-model
+    litellm_params:
+      model: gemini/premium-model
+      api_key: fake-gemini-key
+general_settings:
+  master_key: os.environ/KR113_MASTER_KEY
+  database_url: os.environ/KR113_DATABASE_URL
