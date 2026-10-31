@@ -1,0 +1,13 @@
+HTTP/1.1 200
+alt-svc: h3=":443"; ma=86400
+cf-ai-neurons: 5.77
+cf-ai-req-id: bf0ab52f-ad3c-4f91-9ad5-aca6b484f4ee
+cf-ray: a5306a722a1757c0-NRT
+content-length: 1124
+content-type: application/json
+date: Sat, 31 Oct 2026 05:56:23 GMT
+nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=n%2BwFSV7joUe0Hs9WIBDyk2XmGdBrrLyf29fF%2FoXOWHKCu7bRKFHUGxOLaxpNYXKHEd6nC7icsZLBnjELH57yZgCSCFTrhLUtQy4wJah27MkS7awbuyyqiVxSzcHC9CMFYIxhaoBT2GXWAsJNQbVJmzS3%2B57xwaI%3D"}]}
+server: cloudflare
+
+{"id":"c2b39ed695f44cb1b227ae1f534cc0b2","object":"chat.completion","created":1793426179,"model":"@cf/google/gemma-4-26b-a4b-it-external","choices":[{"index":0,"message":{"role":"assistant","content":null,"reasoning_content":"The user wants to get the weather for two cities: Paris and Tokyo.\nThe user explicitly requests to call the `get_weather` tool once per city and to do so in parallel in a single turn.\n\n1.  **Identify the tool**: `get_weather`.\n2.  **Identify the arguments**:\n    *   For Paris: `city=\"Paris\"`\n    *   For Tokyo: `city=\"Tokyo\"`\n3.  **Formulate the tool calls**:\n    *   `get_weather(city=\"Paris\")`\n    *   `get_weather(city=\"Tokyo\")`\n4.  **Execute in parallel**: The model should output both tool calls in a single response.","tool_calls":[{"id":"call_ec85951665f8451e8904ddab","type":"function","function":{"name":"get_weather","arguments":"{\"city\": \"Paris\"}{\"city\": \"Tokyo\"}"}}]},"finish_reason":"tool_calls","logprobs":null}],"usage":{"prompt_tokens":86,"completion_tokens":183,"total_tokens":269,"prompt_tokens_details":{"cached_tokens":0},"neurons":5.772727012634277}}

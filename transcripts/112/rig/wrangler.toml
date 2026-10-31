@@ -1,0 +1,9 @@
+# Local dev Worker for finding 112. The AI binding always runs remotely, so
+# every call below reaches the real Workers AI service on the logged-in account.
+name = "kairo-112-rig"
+main = "src/index.js"
+compatibility_date = "2026-09-15"
+compatibility_flags = ["nodejs_compat"]
+
+[ai]
+binding = "AI"

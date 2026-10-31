@@ -1,0 +1,20 @@
+HTTP/1.1 200
+Access-Control-Allow-Origin: *
+CF-RAY: a5306cf1fbf9fd47-NRT
+Connection: close
+Content-Type: application/json
+Date: Sat, 31 Oct 2026 05:58:03 GMT
+Permissions-Policy: payment=(self "https://checkout.stripe.com" "https://connect-js.stripe.com" "https://js.stripe.com" "https://*.js.stripe.com" "https://hooks.stripe.com")
+Referrer-Policy: no-referrer, strict-origin-when-cross-origin
+Server: cloudflare
+Server-Timing: cfEdge;dur=3,cfOrigin;dur=0,cfWorker;dur=2166
+Transfer-Encoding: chunked
+X-Content-Type-Options: nosniff
+X-Generation-Id: gen-1793426281-H77ZJVoqVRgiCD7NBQJr
+access-control-expose-headers: X-Generation-Id,X-Provider-Name,request-id,cf-ray
+alt-svc: h3=":443"; ma=86400
+set-cookie: [REDACTED:set-cookie]
+
+
+         
+{"id":"gen-1793426281-H77ZJVoqVRgiCD7NBQJr","object":"chat.completion","created":1793426281,"model":"google/gemma-4-26b-a4b-it","provider":"PrimeIntellect","system_fingerprint":null,"service_tier":null,"choices":[{"index":0,"logprobs":null,"finish_reason":"tool_calls","native_finish_reason":"tool_calls","message":{"role":"assistant","content":null,"refusal":null,"reasoning":null,"tool_calls":[{"type":"function","index":0,"id":"call_d119ff1cc85c4c1a81787dd056ce3645","function":{"name":"get_weather","arguments":"{\"city\":\"Paris\"}"}},{"type":"function","index":1,"id":"call_080a3f1e142041078980bad7968fbd06","function":{"name":"get_weather","arguments":"{\"city\":\"Tokyo\"}"}}]}}],"usage":{"prompt_tokens":142,"completion_tokens":29,"total_tokens":171,"cost":0.00000227,"is_byok":false,"prompt_tokens_details":{"cached_tokens":4,"cache_write_tokens":0,"audio_tokens":0,"video_tokens":0},"cost_details":{"upstream_inference_cost":0.00000227,"upstream_inference_prompt_cost":0.0000014,"upstream_inference_completions_cost":8.7e-7},"completion_tokens_details":{"reasoning_tokens":0,"image_tokens":0,"audio_tokens":0}}}

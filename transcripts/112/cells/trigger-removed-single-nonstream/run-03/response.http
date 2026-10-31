@@ -1,0 +1,13 @@
+HTTP/1.1 200
+alt-svc: h3=":443"; ma=86400
+cf-ai-neurons: 2.31
+cf-ai-req-id: 73a8a5fb-3541-467e-a0f3-71dc2b7ec08d
+cf-ray: a5306c8bff3657c0-NRT
+content-length: 732
+content-type: application/json
+date: Sat, 31 Oct 2026 05:57:46 GMT
+nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=6n2Qe0F1oef16SQ0c%2FvK4W0FwpOTLshFW5xIGeQ7Yw6LBsKMyrX2L20NTC5ZH6l3j4tduIWPN%2B%2BbSs76fTuChmfAYEh7XX6BthCNp%2FFCY19qvZrGhpQUfvplecWKuNKP1nMHkJLQwyOzjMgf8PH%2BwnR2QaXpM1c%3D"}]}
+server: cloudflare
+
+{"id":"a113294aaaea43e6a42fc5bfd9817b23","object":"chat.completion","created":1793426265,"model":"@cf/google/gemma-4-26b-a4b-it-external","choices":[{"index":0,"message":{"role":"assistant","content":null,"reasoning_content":"The user is asking for the weather in Paris and explicitly instructs to use the `get_weather` tool. I should call the `get_weather` tool with the argument `city='Paris'`.","tool_calls":[{"id":"call_ca7c57618d214a74bc3442d7","type":"function","function":{"name":"get_weather","arguments":"{\"city\": \"Paris\"}"}}]},"finish_reason":"tool_calls","logprobs":null}],"usage":{"prompt_tokens":74,"completion_tokens":60,"total_tokens":134,"prompt_tokens_details":{"cached_tokens":0},"neurons":2.3090908527374268}}

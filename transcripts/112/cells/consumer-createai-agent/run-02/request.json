@@ -1,0 +1,10 @@
+{
+  "model": "@cf/google/gemma-4-26b-a4b-it",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Get the weather for Paris and for Tokyo. Call the get_weather tool once per city, in parallel, in this single turn. Then tell me which city is warmer."
+    }
+  ],
+  "maxSteps": 5
+}

@@ -1,0 +1,38 @@
+{
+  "entry_point": "env.AI.run (Workers binding, no gateway)",
+  "model": "@cf/google/gemma-4-26b-a4b-it",
+  "inputs": {
+    "messages": [
+      {
+        "role": "user",
+        "content": "Get the weather for Paris and for Tokyo. Call the get_weather tool once per city, in parallel, in this single turn."
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_weather",
+          "description": "Get current weather for a city",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "city": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "city"
+            ]
+          }
+        }
+      }
+    ],
+    "max_tokens": 400,
+    "temperature": 0,
+    "stream": true
+  },
+  "options": {
+    "returnRawResponse": true
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "utc_start": "2026-10-31T05:58:23Z",
+  "utc_end": "2026-10-31T05:58:46Z",
+  "served_model_per_step": [
+    "@cf/google/gemma-4-26b-a4b-it-external",
+    "@cf/google/gemma-4-26b-a4b-it-external",
+    "@cf/google/gemma-4-26b-a4b-it-external",
+    "@cf/google/gemma-4-26b-a4b-it-external",
+    "@cf/google/gemma-4-26b-a4b-it-external"
+  ],
+  "steps": 5,
+  "invalid_tool_calls": 3,
+  "tool_executions": [
+    "Paris",
+    "Tokyo"
+  ],
+  "final_text_empty": true,
+  "final_text": ""
+}
