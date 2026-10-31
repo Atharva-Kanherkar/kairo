@@ -20,7 +20,8 @@ use kairo::checks::{
     model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
     no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
     non_text_block_not_json_dumped, ogx_adaptive_thinking_loss, openai_stream_finish_reason,
-    openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
+    openai_stream_toolcall_index_per_call, openai_stream_toolcall_type_never_null,
+    openai_toolcall_arguments_single_object, openai_toolcall_id_charset,
     outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
     reasoning_text_order_preserved, refusal_text_preserved, registration_resolvable_by_both_paths,
     replayed_calls_keep_returned_namespace, response_content_not_empty,
@@ -7384,4 +7385,144 @@ fn litellm_098_checker_rejects_an_allowed_model_that_was_not_served() {
         matches!(verdict, Verdict::Violation(_)),
         "an allowed model with no upstream call must be caught: {verdict:?}"
     );
+}
+
+// ---- bug 112: Workers AI Gemma 4 `-external` backend merges parallel tool calls ----
+//
+// Workers AI serves @cf/google/gemma-4-26b-a4b-it from two backends; the
+// response `model` names which one answered. On the `-external` backend a turn
+// with two parallel tool calls comes back as ONE call whose arguments are two
+// concatenated objects (non-streaming), or as two calls that both use
+// `index: 0` (streaming). The native backend, OpenRouter serving the same
+// weights, and a single tool call on either backend are all correct. Every run
+// in each recorded cell is checked, grouped by the backend that served it.
+
+fn issue_112_runs(cell: &str) -> Vec<(String, String)> {
+    let mut dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    dir.push("../../transcripts/112/cells");
+    dir.push(cell);
+    let mut runs: Vec<_> = fs::read_dir(&dir)
+        .unwrap_or_else(|e| panic!("read {}: {e}", dir.display()))
+        .map(|entry| entry.expect("dir entry").path())
+        .collect();
+    runs.sort();
+    runs.into_iter()
+        .map(|run| {
+            let http = fs::read_to_string(run.join("response.http"))
+                .unwrap_or_else(|e| panic!("read {}: {e}", run.display()));
+            let body = http
+                .split_once("\n\n")
+                .map(|(_, body)| body.to_string())
+                .expect("response.http has a header block");
+            (run.display().to_string(), body)
+        })
+        .collect()
+}
+
+/// The `model` the response says served it: the JSON body's, or the first
+/// SSE chunk's.
+fn issue_112_served(body: &str) -> String {
+    let from = |v: &Value| v.get("model").and_then(Value::as_str).map(str::to_string);
+    if let Ok(v) = serde_json::from_str::<Value>(body) {
+        if let Some(m) = from(&v) {
+            return m;
+        }
+    }
+    body.lines()
+        .filter_map(|l| l.strip_prefix("data: "))
+        .filter_map(|d| serde_json::from_str::<Value>(d).ok())
+        .find_map(|v| from(&v))
+        .unwrap_or_default()
+}
+
+fn issue_112_external(body: &str) -> bool {
+    issue_112_served(body).ends_with("-external")
+}
+
+/// The checker for the cell's response shape: a JSON body or an SSE stream.
+fn issue_112_check(cell: &str, body: &str) -> Verdict {
+    if cell.ends_with("-nonstream") {
+        openai_toolcall_arguments_single_object(body)
+    } else {
+        openai_stream_toolcall_index_per_call(body)
+    }
+}
+
+#[test]
+fn workers_ai_gemma4_external_backend_merges_parallel_calls_into_one() {
+    let runs = issue_112_runs("plain-parallel-nonstream");
+    let external: Vec<_> = runs.iter().filter(|(_, b)| issue_112_external(b)).collect();
+    assert!(
+        !external.is_empty(),
+        "no run in the cell was served by the external backend"
+    );
+    for (run, body) in external {
+        let v = openai_toolcall_arguments_single_object(body);
+        assert!(
+            matches!(&v, Verdict::Violation(reason) if reason.contains("not one JSON value")),
+            "{run}: expected concatenated arguments, got {v:?}"
+        );
+    }
+}
+
+#[test]
+fn workers_ai_gemma4_external_backend_streams_parallel_calls_on_one_index() {
+    let runs = issue_112_runs("plain-parallel-stream");
+    let external: Vec<_> = runs.iter().filter(|(_, b)| issue_112_external(b)).collect();
+    assert!(
+        !external.is_empty(),
+        "no run in the cell was served by the external backend"
+    );
+    for (run, body) in external {
+        let v = openai_stream_toolcall_index_per_call(body);
+        assert!(
+            matches!(&v, Verdict::Violation(reason) if reason.contains("index 0")),
+            "{run}: expected two calls on index 0, got {v:?}"
+        );
+    }
+}
+
+#[test]
+fn workers_ai_gemma4_native_backend_keeps_parallel_calls_separate() {
+    // Same model id, same input, same account: only the serving backend differs.
+    let mut native = 0;
+    for cell in ["plain-parallel-nonstream", "plain-parallel-stream"] {
+        for (run, body) in issue_112_runs(cell) {
+            if issue_112_external(&body) {
+                continue;
+            }
+            native += 1;
+            assert_eq!(issue_112_check(cell, &body), Verdict::Conformant, "{run}");
+        }
+    }
+    assert!(
+        native > 0,
+        "no run in either cell was served by the native backend"
+    );
+}
+
+#[test]
+fn workers_ai_gemma4_single_tool_call_is_conformant_on_both_backends() {
+    // Trigger removed: one call per turn never collides, on either backend.
+    for cell in [
+        "trigger-removed-single-nonstream",
+        "trigger-removed-single-stream",
+    ] {
+        for (run, body) in issue_112_runs(cell) {
+            assert_eq!(issue_112_check(cell, &body), Verdict::Conformant, "{run}");
+        }
+    }
+}
+
+#[test]
+fn gemma4_same_weights_on_openrouter_keep_parallel_calls_separate() {
+    // Direct-provider rung: the same model and prompt on another host.
+    for cell in [
+        "direct-openrouter-parallel-nonstream",
+        "direct-openrouter-parallel-stream",
+    ] {
+        for (run, body) in issue_112_runs(cell) {
+            assert_eq!(issue_112_check(cell, &body), Verdict::Conformant, "{run}");
+        }
+    }
 }

@@ -1,0 +1,202 @@
+{
+  "result": {
+    "text": "The weather in Paris is 14\u00b0C with clear skies, and in Tokyo, it is 22\u00b0C with clear skies. Tokyo is warmer.",
+    "finishReason": "stop",
+    "steps": [
+      {
+        "toolCalls": [
+          {
+            "toolCallId": "chatcmpl-tool-b863bcd1ad77b5b3",
+            "input": {
+              "city": "Paris"
+            },
+            "invalid": false
+          },
+          {
+            "toolCallId": "chatcmpl-tool-ad4516c3ce8e320e",
+            "input": {
+              "city": "Tokyo"
+            },
+            "invalid": false
+          }
+        ],
+        "toolErrors": [],
+        "toolResults": 2,
+        "finishReason": "tool-calls"
+      },
+      {
+        "toolCalls": [],
+        "toolErrors": [],
+        "toolResults": 0,
+        "finishReason": "stop"
+      }
+    ]
+  },
+  "executions": [
+    "Paris",
+    "Tokyo"
+  ],
+  "calls": [
+    {
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "inputs": {
+        "messages": [
+          {
+            "content": "Get the weather for Paris and for Tokyo. Call the get_weather tool once per city, in parallel, in this single turn. Then tell me which city is warmer.",
+            "role": "user"
+          }
+        ],
+        "max_tokens": 400,
+        "temperature": 0,
+        "tools": [
+          {
+            "function": {
+              "description": "Get current weather for a city",
+              "name": "get_weather",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "city": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "city"
+                ]
+              }
+            },
+            "type": "function"
+          }
+        ],
+        "tool_choice": "auto"
+      },
+      "opts": {
+        "extraHeaders": {
+          "user-agent": "ai/7.0.159"
+        },
+        "gateway": {
+          "id": "default"
+        },
+        "returnRawResponse": true
+      },
+      "status": 200,
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-ai-neurons": "5.57",
+        "cf-ai-req-id": "7d9beb34-dd6a-4f36-965c-8bd4e054914f",
+        "cf-aig-cache-status": "MISS",
+        "cf-aig-event-id": "[REDACTED:cf-aig-event-id]",
+        "cf-aig-log-id": "[REDACTED:cf-aig-log-id]",
+        "cf-aig-request-id": "[REDACTED:cf-aig-request-id]",
+        "cf-aig-step": "0",
+        "cf-aig-trace-id": "[REDACTED:cf-aig-trace-id]",
+        "cf-ray": "a5306efc997417a5-NRT",
+        "content-type": "application/json",
+        "date": "Sat, 31 Oct 2026 05:59:26 GMT",
+        "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=NYAwXgvBP1zVGKpw2SM1%2FH%2BvmhzhBg55s7TwyD1CKgtdcrxNNDN7ZMOLER7Cj5tl9%2FCmr2KqhTcJJl61EsN6VJJJd3T39gT87Kf9gIIXt2zW%2B0cLymEarAWKpa3aM6ZcXIyJWpSreKWusJFZi2svbXg%2BtKlOHYA%3D\"}]}",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      },
+      "body": "{\"id\":\"chatcmpl-7d9beb34-dd6a-4f36-965c-8bd4e054914f\",\"object\":\"chat.completion\",\"created\":1793426365,\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":null,\"refusal\":null,\"annotations\":null,\"audio\":null,\"function_call\":null,\"tool_calls\":[{\"id\":\"chatcmpl-tool-b863bcd1ad77b5b3\",\"type\":\"function\",\"function\":{\"name\":\"get_weather\",\"arguments\":\"{\\\"city\\\": \\\"Paris\\\"}\"}},{\"id\":\"chatcmpl-tool-ad4516c3ce8e320e\",\"type\":\"function\",\"function\":{\"name\":\"get_weather\",\"arguments\":\"{\\\"city\\\": \\\"Tokyo\\\"}\"}}],\"reasoning\":\"The user wants to get the weather for two cities: Paris and Tokyo.\\nI need to call the `get_weather` tool for each city.\\nThe user explicitly requested to call the tool once per city, in parallel, in this single turn.\\nAfter getting the weather data, I need to compare the temperatures and tell the user which city is warmer.\\n\\nPlan:\\n1. Call `get_weather(city=\\\"Paris\\\")`.\\n2. Call `get_weather(city=\\\"Tokyo\\\")`.\\n3. Wait for the tool outputs.\\n4. Compare the temperatures from the outputs.\\n5. Respond with the weather for both and state which one is warmer.\"},\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"stop_reason\":50,\"token_ids\":null,\"routed_experts\":null}],\"service_tier\":null,\"usage\":{\"prompt_tokens\":94,\"completion_tokens\":173,\"total_tokens\":267,\"prompt_tokens_details\":{\"cached_tokens\":0},\"neurons\":5.572727203369141},\"prompt_logprobs\":null,\"prompt_token_ids\":null,\"prompt_text\":null,\"kv_transfer_params\":null,\"ec_transfer_params\":null,\"metrics\":null}"
+    },
+    {
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "inputs": {
+        "messages": [
+          {
+            "content": "Get the weather for Paris and for Tokyo. Call the get_weather tool once per city, in parallel, in this single turn. Then tell me which city is warmer.",
+            "role": "user"
+          },
+          {
+            "content": "",
+            "reasoning_content": "The user wants to get the weather for two cities: Paris and Tokyo.\nI need to call the `get_weather` tool for each city.\nThe user explicitly requested to call the tool once per city, in parallel, in this single turn.\nAfter getting the weather data, I need to compare the temperatures and tell the user which city is warmer.\n\nPlan:\n1. Call `get_weather(city=\"Paris\")`.\n2. Call `get_weather(city=\"Tokyo\")`.\n3. Wait for the tool outputs.\n4. Compare the temperatures from the outputs.\n5. Respond with the weather for both and state which one is warmer.",
+            "tool_calls": [
+              {
+                "function": {
+                  "arguments": "{\"city\":\"Paris\"}",
+                  "name": "get_weather"
+                },
+                "id": "chatcmpl-tool-b863bcd1ad77b5b3",
+                "type": "function"
+              },
+              {
+                "function": {
+                  "arguments": "{\"city\":\"Tokyo\"}",
+                  "name": "get_weather"
+                },
+                "id": "chatcmpl-tool-ad4516c3ce8e320e",
+                "type": "function"
+              }
+            ],
+            "role": "assistant"
+          },
+          {
+            "content": "{\"city\":\"Paris\",\"temp_c\":14,\"sky\":\"clear\"}",
+            "name": "get_weather",
+            "role": "tool",
+            "tool_call_id": "chatcmpl-tool-b863bcd1ad77b5b3"
+          },
+          {
+            "content": "{\"city\":\"Tokyo\",\"temp_c\":22,\"sky\":\"clear\"}",
+            "name": "get_weather",
+            "role": "tool",
+            "tool_call_id": "chatcmpl-tool-ad4516c3ce8e320e"
+          }
+        ],
+        "max_tokens": 400,
+        "temperature": 0,
+        "tools": [
+          {
+            "function": {
+              "description": "Get current weather for a city",
+              "name": "get_weather",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "city": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "city"
+                ]
+              }
+            },
+            "type": "function"
+          }
+        ],
+        "tool_choice": "auto"
+      },
+      "opts": {
+        "extraHeaders": {
+          "user-agent": "ai/7.0.159"
+        },
+        "gateway": {
+          "id": "default"
+        },
+        "returnRawResponse": true
+      },
+      "status": 200,
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-ai-neurons": "5.55",
+        "cf-ai-req-id": "b932e17f-abb9-42cd-8a7f-7da58491a94f",
+        "cf-aig-cache-status": "MISS",
+        "cf-aig-event-id": "[REDACTED:cf-aig-event-id]",
+        "cf-aig-log-id": "[REDACTED:cf-aig-log-id]",
+        "cf-aig-request-id": "[REDACTED:cf-aig-request-id]",
+        "cf-aig-step": "0",
+        "cf-aig-trace-id": "[REDACTED:cf-aig-trace-id]",
+        "cf-ray": "a5306f08789d17a5-NRT",
+        "content-type": "application/json",
+        "date": "Sat, 31 Oct 2026 05:59:27 GMT",
+        "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=TyO7JOf74U1yKeIJenVePhClU7xIzUZk5pNSZghXFajB%2BYENnM5lhcq6K4AvVNLyCaxVMPAvnzYcP%2BbJcWR2uHCUxuw3IZbIdO9ZyZnF7nss9Q1PuYi%2BXjHpSpvtwa6nVTVBlpz4JpoJPin1kQ0X2vjuwSZ8QmY%3D\"}]}",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      },
+      "body": "{\"id\":\"chatcmpl-b932e17f-abb9-42cd-8a7f-7da58491a94f\",\"object\":\"chat.completion\",\"created\":1793426366,\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The weather in Paris is 14\u00b0C with clear skies, and in Tokyo, it is 22\u00b0C with clear skies. Tokyo is warmer.\",\"refusal\":null,\"annotations\":null,\"audio\":null,\"function_call\":null,\"reasoning\":\"The weather for Paris is 14\u00b0C and the weather for Tokyo is 22\u00b0C.\\nComparing the two, 22\u00b0C is greater than 14\u00b0C.\\nTherefore, Tokyo is warmer.\\nI will now provide the final answer.\"},\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":106,\"token_ids\":null,\"routed_experts\":null}],\"service_tier\":null,\"usage\":{\"prompt_tokens\":325,\"completion_tokens\":95,\"total_tokens\":420,\"prompt_tokens_details\":{\"cached_tokens\":0},\"neurons\":5.545454025268555},\"prompt_logprobs\":null,\"prompt_token_ids\":null,\"prompt_text\":null,\"kv_transfer_params\":null,\"ec_transfer_params\":null,\"metrics\":null}"
+    }
+  ]
+}

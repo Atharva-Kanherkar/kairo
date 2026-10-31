@@ -1,0 +1,321 @@
+{
+  "result": {
+    "text": "The weather in Paris is 14\u00b0C with clear skies, and in Tokyo, it is 22\u00b0C with clear skies. Tokyo is warmer.",
+    "finishReason": "stop",
+    "steps": [
+      {
+        "toolCalls": [
+          {
+            "toolCallId": "call_bb491516c34748cab76e159e",
+            "input": "{\"city\": \"Paris\"}{\"city\": \"Tokyo\"}",
+            "invalid": true
+          }
+        ],
+        "toolErrors": [
+          "AI_InvalidToolInputError: Invalid input for tool get_weather: AI_JSONParseError: JSON parsing failed: Text: {\"city\": \"Paris\"}{\"city\": \"Tokyo\"}.\nError message: SyntaxError: Unexpected non-whitespace character after JSON at position 17 (line 1 column 18)"
+        ],
+        "toolResults": 0,
+        "finishReason": "tool-calls"
+      },
+      {
+        "toolCalls": [
+          {
+            "toolCallId": "chatcmpl-tool-b3e1e3616fd324c8",
+            "input": {
+              "city": "Paris"
+            },
+            "invalid": false
+          },
+          {
+            "toolCallId": "chatcmpl-tool-bea5d04e1a64bda7",
+            "input": {
+              "city": "Tokyo"
+            },
+            "invalid": false
+          }
+        ],
+        "toolErrors": [],
+        "toolResults": 2,
+        "finishReason": "tool-calls"
+      },
+      {
+        "toolCalls": [],
+        "toolErrors": [],
+        "toolResults": 0,
+        "finishReason": "stop"
+      }
+    ]
+  },
+  "executions": [
+    "Paris",
+    "Tokyo"
+  ],
+  "calls": [
+    {
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "inputs": {
+        "messages": [
+          {
+            "content": "Get the weather for Paris and for Tokyo. Call the get_weather tool once per city, in parallel, in this single turn. Then tell me which city is warmer.",
+            "role": "user"
+          }
+        ],
+        "max_tokens": 400,
+        "temperature": 0,
+        "tools": [
+          {
+            "function": {
+              "description": "Get current weather for a city",
+              "name": "get_weather",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "city": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "city"
+                ]
+              }
+            },
+            "type": "function"
+          }
+        ],
+        "tool_choice": "auto"
+      },
+      "opts": {
+        "extraHeaders": {
+          "user-agent": "ai/7.0.159"
+        },
+        "gateway": {
+          "id": "default"
+        },
+        "returnRawResponse": true
+      },
+      "status": 200,
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-ai-neurons": "5.23",
+        "cf-ai-req-id": "f2f6f835-c998-4b30-9a80-b6670e6e5faf",
+        "cf-aig-cache-status": "MISS",
+        "cf-aig-event-id": "[REDACTED:cf-aig-event-id]",
+        "cf-aig-log-id": "[REDACTED:cf-aig-log-id]",
+        "cf-aig-request-id": "[REDACTED:cf-aig-request-id]",
+        "cf-aig-step": "0",
+        "cf-aig-trace-id": "[REDACTED:cf-aig-trace-id]",
+        "cf-ray": "a5306e0b49b917a5-NRT",
+        "content-type": "application/json",
+        "date": "Sat, 31 Oct 2026 05:58:50 GMT",
+        "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=DpMvZErfnsxXVNJdvl235fuzbqlGB07SXaMS%2F9CS6cT%2FxMqCRGMfEyZCwXyU87QRsHcKcC9BBVJ%2FNik%2FWZQ5TesN9S923WQfVjCea%2BEYBtu6WMvKQ%2FATxFsAXZ8q2O%2Fj5MnLL8Y63tUekdTTZTdx2HIFN5QXfhE%3D\"}]}",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      },
+      "body": "{\"id\":\"a9c1fd22328e4dd5887017838153c0f5\",\"object\":\"chat.completion\",\"created\":1793426326,\"model\":\"@cf/google/gemma-4-26b-a4b-it-external\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":null,\"reasoning_content\":\"The user wants to get the weather for two cities: Paris and Tokyo.\\nI need to call the `get_weather` tool for each city.\\nThe user explicitly requested to call the tool once per city, in parallel, in a single turn.\\nAfter receiving the weather data, I need to compare the temperatures and determine which city is warmer.\\n\\nPlan:\\n1. Call `get_weather(city=\\\"Paris\\\")`.\\n2. Call `get_weather(city=\\\"Tokyo\\\")`.\\n3. Wait for the tool outputs.\\n4. Compare the temperatures from the outputs.\\n5. Respond with the weather for both and state which one is warmer.\",\"tool_calls\":[{\"id\":\"call_bb491516c34748cab76e159e\",\"type\":\"function\",\"function\":{\"name\":\"get_weather\",\"arguments\":\"{\\\"city\\\": \\\"Paris\\\"}{\\\"city\\\": \\\"Tokyo\\\"}\"}}]},\"finish_reason\":\"tool_calls\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":94,\"completion_tokens\":171,\"total_tokens\":265,\"prompt_tokens_details\":{\"cached_tokens\":64},\"neurons\":5.227272033691406}}"
+    },
+    {
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "inputs": {
+        "messages": [
+          {
+            "content": "Get the weather for Paris and for Tokyo. Call the get_weather tool once per city, in parallel, in this single turn. Then tell me which city is warmer.",
+            "role": "user"
+          },
+          {
+            "content": "",
+            "reasoning_content": "The user wants to get the weather for two cities: Paris and Tokyo.\nI need to call the `get_weather` tool for each city.\nThe user explicitly requested to call the tool once per city, in parallel, in a single turn.\nAfter receiving the weather data, I need to compare the temperatures and determine which city is warmer.\n\nPlan:\n1. Call `get_weather(city=\"Paris\")`.\n2. Call `get_weather(city=\"Tokyo\")`.\n3. Wait for the tool outputs.\n4. Compare the temperatures from the outputs.\n5. Respond with the weather for both and state which one is warmer.",
+            "tool_calls": [
+              {
+                "function": {
+                  "arguments": "{}",
+                  "name": "get_weather"
+                },
+                "id": "call_bb491516c34748cab76e159e",
+                "type": "function"
+              }
+            ],
+            "role": "assistant"
+          },
+          {
+            "content": "AI_InvalidToolInputError: Invalid input for tool get_weather: AI_JSONParseError: JSON parsing failed: Text: {\"city\": \"Paris\"}{\"city\": \"Tokyo\"}.\nError message: SyntaxError: Unexpected non-whitespace character after JSON at position 17 (line 1 column 18)",
+            "name": "get_weather",
+            "role": "tool",
+            "tool_call_id": "call_bb491516c34748cab76e159e"
+          }
+        ],
+        "max_tokens": 400,
+        "temperature": 0,
+        "tools": [
+          {
+            "function": {
+              "description": "Get current weather for a city",
+              "name": "get_weather",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "city": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "city"
+                ]
+              }
+            },
+            "type": "function"
+          }
+        ],
+        "tool_choice": "auto"
+      },
+      "opts": {
+        "extraHeaders": {
+          "user-agent": "ai/7.0.159"
+        },
+        "gateway": {
+          "id": "default"
+        },
+        "returnRawResponse": true
+      },
+      "status": 200,
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-ai-neurons": "9.03",
+        "cf-ai-req-id": "050f92f7-32bd-42ce-8c67-37d7f3f7cc04",
+        "cf-aig-cache-status": "MISS",
+        "cf-aig-event-id": "[REDACTED:cf-aig-event-id]",
+        "cf-aig-log-id": "[REDACTED:cf-aig-log-id]",
+        "cf-aig-request-id": "[REDACTED:cf-aig-request-id]",
+        "cf-aig-step": "0",
+        "cf-aig-trace-id": "[REDACTED:cf-aig-trace-id]",
+        "cf-ray": "a5306e277b7317a5-NRT",
+        "content-type": "application/json",
+        "date": "Sat, 31 Oct 2026 05:58:53 GMT",
+        "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=qjuU6hg9Q2pWP%2BkPBo6wX7bEuc3meO584yQ4jTgGs%2FSX1PImFRq4bV9GNglilrHya4u3mO58x6LEa50C40tUYrALJKbY5ffqzXSTWGjlefbkfaKwy%2B7qjyacka7ZlgGLnVMR0uieFEfUNx3M5oBBDZyQANYvzGc%3D\"}]}",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      },
+      "body": "{\"id\":\"chatcmpl-050f92f7-32bd-42ce-8c67-37d7f3f7cc04\",\"object\":\"chat.completion\",\"created\":1793426330,\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":null,\"refusal\":null,\"annotations\":null,\"audio\":null,\"function_call\":null,\"tool_calls\":[{\"id\":\"chatcmpl-tool-b3e1e3616fd324c8\",\"type\":\"function\",\"function\":{\"name\":\"get_weather\",\"arguments\":\"{\\\"city\\\": \\\"Paris\\\"}\"}},{\"id\":\"chatcmpl-tool-bea5d04e1a64bda7\",\"type\":\"function\",\"function\":{\"name\":\"get_weather\",\"arguments\":\"{\\\"city\\\": \\\"Tokyo\\\"}\"}}],\"reasoning\":\"The previous attempt failed because I tried to call the tool twice in a single block but the model/system interpreted it as a single malformed JSON object. I need to provide two separate tool calls in the same turn. The error message `{\\\"city\\\": \\\"Paris\\\"}{\\\"city\\\": \\\"Tokyo\\\"}` indicates that the tool call structure was incorrect for parallel execution in the way I formatted it.\\n\\nActually, the standard way to do parallel tool calls is to provide a list of tool calls. Let me try again, ensuring I format the tool calls correctly as a list of calls.\\n\\nWait, looking at the error: `{\\\"city\\\": \\\"Paris\\\"}{\\\"city\\\": \\\"Tokyo\\\"}`. This looks like I sent two JSON objects back-to-back without being in a list or a proper structure that the system expects for parallel calls.\\n\\nLet's try to call them as separate tool calls in the same response.\"},\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"stop_reason\":50,\"token_ids\":null,\"routed_experts\":null}],\"service_tier\":null,\"usage\":{\"prompt_tokens\":327,\"completion_tokens\":222,\"total_tokens\":549,\"prompt_tokens_details\":{\"cached_tokens\":0},\"neurons\":9.02727222442627},\"prompt_logprobs\":null,\"prompt_token_ids\":null,\"prompt_text\":null,\"kv_transfer_params\":null,\"ec_transfer_params\":null,\"metrics\":null}"
+    },
+    {
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "inputs": {
+        "messages": [
+          {
+            "content": "Get the weather for Paris and for Tokyo. Call the get_weather tool once per city, in parallel, in this single turn. Then tell me which city is warmer.",
+            "role": "user"
+          },
+          {
+            "content": "",
+            "reasoning_content": "The user wants to get the weather for two cities: Paris and Tokyo.\nI need to call the `get_weather` tool for each city.\nThe user explicitly requested to call the tool once per city, in parallel, in a single turn.\nAfter receiving the weather data, I need to compare the temperatures and determine which city is warmer.\n\nPlan:\n1. Call `get_weather(city=\"Paris\")`.\n2. Call `get_weather(city=\"Tokyo\")`.\n3. Wait for the tool outputs.\n4. Compare the temperatures from the outputs.\n5. Respond with the weather for both and state which one is warmer.",
+            "tool_calls": [
+              {
+                "function": {
+                  "arguments": "{}",
+                  "name": "get_weather"
+                },
+                "id": "call_bb491516c34748cab76e159e",
+                "type": "function"
+              }
+            ],
+            "role": "assistant"
+          },
+          {
+            "content": "AI_InvalidToolInputError: Invalid input for tool get_weather: AI_JSONParseError: JSON parsing failed: Text: {\"city\": \"Paris\"}{\"city\": \"Tokyo\"}.\nError message: SyntaxError: Unexpected non-whitespace character after JSON at position 17 (line 1 column 18)",
+            "name": "get_weather",
+            "role": "tool",
+            "tool_call_id": "call_bb491516c34748cab76e159e"
+          },
+          {
+            "content": "",
+            "reasoning_content": "The previous attempt failed because I tried to call the tool twice in a single block but the model/system interpreted it as a single malformed JSON object. I need to provide two separate tool calls in the same turn. The error message `{\"city\": \"Paris\"}{\"city\": \"Tokyo\"}` indicates that the tool call structure was incorrect for parallel execution in the way I formatted it.\n\nActually, the standard way to do parallel tool calls is to provide a list of tool calls. Let me try again, ensuring I format the tool calls correctly as a list of calls.\n\nWait, looking at the error: `{\"city\": \"Paris\"}{\"city\": \"Tokyo\"}`. This looks like I sent two JSON objects back-to-back without being in a list or a proper structure that the system expects for parallel calls.\n\nLet's try to call them as separate tool calls in the same response.",
+            "tool_calls": [
+              {
+                "function": {
+                  "arguments": "{\"city\":\"Paris\"}",
+                  "name": "get_weather"
+                },
+                "id": "chatcmpl-tool-b3e1e3616fd324c8",
+                "type": "function"
+              },
+              {
+                "function": {
+                  "arguments": "{\"city\":\"Tokyo\"}",
+                  "name": "get_weather"
+                },
+                "id": "chatcmpl-tool-bea5d04e1a64bda7",
+                "type": "function"
+              }
+            ],
+            "role": "assistant"
+          },
+          {
+            "content": "{\"city\":\"Paris\",\"temp_c\":14,\"sky\":\"clear\"}",
+            "name": "get_weather",
+            "role": "tool",
+            "tool_call_id": "chatcmpl-tool-b3e1e3616fd324c8"
+          },
+          {
+            "content": "{\"city\":\"Tokyo\",\"temp_c\":22,\"sky\":\"clear\"}",
+            "name": "get_weather",
+            "role": "tool",
+            "tool_call_id": "chatcmpl-tool-bea5d04e1a64bda7"
+          }
+        ],
+        "max_tokens": 400,
+        "temperature": 0,
+        "tools": [
+          {
+            "function": {
+              "description": "Get current weather for a city",
+              "name": "get_weather",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "city": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "city"
+                ]
+              }
+            },
+            "type": "function"
+          }
+        ],
+        "tool_choice": "auto"
+      },
+      "opts": {
+        "extraHeaders": {
+          "user-agent": "ai/7.0.159"
+        },
+        "gateway": {
+          "id": "default"
+        },
+        "returnRawResponse": true
+      },
+      "status": 200,
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-ai-neurons": "7.73",
+        "cf-ai-req-id": "5167cdb5-3c42-4327-985f-2d15bc0ff96a",
+        "cf-aig-cache-status": "MISS",
+        "cf-aig-event-id": "[REDACTED:cf-aig-event-id]",
+        "cf-aig-log-id": "[REDACTED:cf-aig-log-id]",
+        "cf-aig-request-id": "[REDACTED:cf-aig-request-id]",
+        "cf-aig-step": "0",
+        "cf-aig-trace-id": "[REDACTED:cf-aig-trace-id]",
+        "cf-ray": "a5306e380c1f17a5-NRT",
+        "content-type": "application/json",
+        "date": "Sat, 31 Oct 2026 05:58:55 GMT",
+        "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=MI03OrGRViduT0RiNLfVTgISJWRxYg%2Bjk3TZabkIEvI3vFfQ8E2MDFHzjvhtiYMbmwvUHcL71iQj8foIvzSe6E%2FaqcYydNwfZNN2L09gNYYscJJSlS6oAA3f9XAHyoGfFGNKSb%2BXiZAxpnqauHkxLGqEj9yzS2U%3D\"}]}",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      },
+      "body": "{\"id\":\"chatcmpl-5167cdb5-3c42-4327-985f-2d15bc0ff96a\",\"object\":\"chat.completion\",\"created\":1793426333,\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The weather in Paris is 14\u00b0C with clear skies, and in Tokyo, it is 22\u00b0C with clear skies. Tokyo is warmer.\",\"refusal\":null,\"annotations\":null,\"audio\":null,\"function_call\":null,\"reasoning\":\"The weather for Paris is 14\u00b0C and the weather for Tokyo is 22\u00b0C.\\nComparing the two: 22 > 14.\\nTherefore, Tokyo is warmer.\"},\"logprobs\":null,\"finish_reason\":\"stop\",\"stop_reason\":106,\"token_ids\":null,\"routed_experts\":null}],\"service_tier\":null,\"usage\":{\"prompt_tokens\":607,\"completion_tokens\":81,\"total_tokens\":688,\"prompt_tokens_details\":{\"cached_tokens\":0},\"neurons\":7.727272987365723},\"prompt_logprobs\":null,\"prompt_token_ids\":null,\"prompt_text\":null,\"kv_transfer_params\":null,\"ec_transfer_params\":null,\"metrics\":null}"
+    }
+  ]
+}

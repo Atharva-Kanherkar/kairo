@@ -1,0 +1,15 @@
+{
+  "utc_start": "2026-10-31T05:58:01Z",
+  "utc_end": "2026-10-31T05:58:03Z",
+  "status": 200,
+  "served_model": "google/gemma-4-26b-a4b-it",
+  "tool_calls_seen_by_client": 2,
+  "arguments": [
+    "{\"city\":\"Paris\"}",
+    "{\"city\":\"Tokyo\"}"
+  ],
+  "all_arguments_single_json_object": true,
+  "index_reused_by_distinct_ids": {},
+  "verdict": "ok",
+  "openrouter_provider": "PrimeIntellect"
+}

@@ -41,6 +41,7 @@ GATEWAYS = (
     ("agentgateway", "agentgateway"),
     ("llm-d", "llm-d Router"),
     ("vllm", "vLLM"),
+    ("workers-ai", "Cloudflare Workers AI"),
 )
 
 TEST_RE = re.compile(r"^\s*#\[test\]", re.MULTILINE)

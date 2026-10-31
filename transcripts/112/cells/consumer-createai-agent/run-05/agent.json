@@ -1,0 +1,461 @@
+{
+  "result": {
+    "text": "The weather in Paris is 14\u00b0C with clear skies, and in Tokyo, it is 22\u00b0C with clear skies. Tokyo is warmer.",
+    "finishReason": "stop",
+    "steps": [
+      {
+        "toolCalls": [
+          {
+            "toolCallId": "call_2fdbc6580ef54b909885b13f",
+            "input": "{\"city\": \"Paris\"}{\"city\": \"Tokyo\"}",
+            "invalid": true
+          }
+        ],
+        "toolErrors": [
+          "AI_InvalidToolInputError: Invalid input for tool get_weather: AI_JSONParseError: JSON parsing failed: Text: {\"city\": \"Paris\"}{\"city\": \"Tokyo\"}.\nError message: SyntaxError: Unexpected non-whitespace character after JSON at position 17 (line 1 column 18)"
+        ],
+        "toolResults": 0,
+        "finishReason": "tool-calls"
+      },
+      {
+        "toolCalls": [
+          {
+            "toolCallId": "call_3cb9379ca87e43f5ae72bff4",
+            "input": "{\"city\": \"Paris\"}{\"city\": \"Tokyo\"}",
+            "invalid": true
+          }
+        ],
+        "toolErrors": [
+          "AI_InvalidToolInputError: Invalid input for tool get_weather: AI_JSONParseError: JSON parsing failed: Text: {\"city\": \"Paris\"}{\"city\": \"Tokyo\"}.\nError message: SyntaxError: Unexpected non-whitespace character after JSON at position 17 (line 1 column 18)"
+        ],
+        "toolResults": 0,
+        "finishReason": "tool-calls"
+      },
+      {
+        "toolCalls": [
+          {
+            "toolCallId": "chatcmpl-tool-bf0c7e1ba29f3a4b",
+            "input": {
+              "city": "Paris"
+            },
+            "invalid": false
+          },
+          {
+            "toolCallId": "chatcmpl-tool-b26c67accc7e9215",
+            "input": {
+              "city": "Tokyo"
+            },
+            "invalid": false
+          }
+        ],
+        "toolErrors": [],
+        "toolResults": 2,
+        "finishReason": "tool-calls"
+      },
+      {
+        "toolCalls": [],
+        "toolErrors": [],
+        "toolResults": 0,
+        "finishReason": "stop"
+      }
+    ]
+  },
+  "executions": [
+    "Paris",
+    "Tokyo"
+  ],
+  "calls": [
+    {
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "inputs": {
+        "messages": [
+          {
+            "content": "Get the weather for Paris and for Tokyo. Call the get_weather tool once per city, in parallel, in this single turn. Then tell me which city is warmer.",
+            "role": "user"
+          }
+        ],
+        "max_tokens": 400,
+        "temperature": 0,
+        "tools": [
+          {
+            "function": {
+              "description": "Get current weather for a city",
+              "name": "get_weather",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "city": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "city"
+                ]
+              }
+            },
+            "type": "function"
+          }
+        ],
+        "tool_choice": "auto"
+      },
+      "opts": {
+        "extraHeaders": {
+          "user-agent": "ai/7.0.159"
+        },
+        "gateway": {
+          "id": "default"
+        },
+        "returnRawResponse": true
+      },
+      "status": 200,
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-ai-neurons": "5.52",
+        "cf-ai-req-id": "d105324f-5578-4ee2-bd16-03b718fd6d70",
+        "cf-aig-cache-status": "MISS",
+        "cf-aig-event-id": "[REDACTED:cf-aig-event-id]",
+        "cf-aig-log-id": "[REDACTED:cf-aig-log-id]",
+        "cf-aig-request-id": "[REDACTED:cf-aig-request-id]",
+        "cf-aig-step": "0",
+        "cf-aig-trace-id": "[REDACTED:cf-aig-trace-id]",
+        "cf-ray": "a5306eb31f8f17a5-NRT",
+        "content-type": "application/json",
+        "date": "Sat, 31 Oct 2026 05:59:16 GMT",
+        "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=Ixipd%2BaDMGt4l11O%2FZgfht8%2FbiY0RudBcs1HyPNAPXF1tFKmiryXg3K%2BfOu9FSsU7IMUl5MzTWlPTWkItcJgqRjqMMrL94j0utSOc2kUgif%2Bt%2BnXL2xupFVrDmLJB6AEyFNKDM7a7YHEl3iGAkfSfJd6Q684eNY%3D\"}]}",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      },
+      "body": "{\"id\":\"033c9c7a188043408bdd5fe77eb8a588\",\"object\":\"chat.completion\",\"created\":1793426353,\"model\":\"@cf/google/gemma-4-26b-a4b-it-external\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":null,\"reasoning_content\":\"The user wants to get the weather for two cities: Paris and Tokyo.\\nI need to call the `get_weather` tool for each city.\\nThe user explicitly requested to call the tool once per city, in parallel, in this single turn.\\nAfter receiving the weather data, I need to compare the temperatures and determine which city is warmer.\\n\\nPlan:\\n1. Call `get_weather(city=\\\"Paris\\\")`.\\n2. Call `get_weather(city=\\\"Tokyo\\\")`.\\n3. Wait for the tool outputs.\\n4. Compare the temperatures from the outputs.\\n5. Respond with the weather for both and state which one is warmer.\",\"tool_calls\":[{\"id\":\"call_2fdbc6580ef54b909885b13f\",\"type\":\"function\",\"function\":{\"name\":\"get_weather\",\"arguments\":\"{\\\"city\\\": \\\"Paris\\\"}{\\\"city\\\": \\\"Tokyo\\\"}\"}}]},\"finish_reason\":\"tool_calls\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":94,\"completion_tokens\":171,\"total_tokens\":265,\"prompt_tokens_details\":{\"cached_tokens\":0},\"neurons\":5.518181800842285}}"
+    },
+    {
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "inputs": {
+        "messages": [
+          {
+            "content": "Get the weather for Paris and for Tokyo. Call the get_weather tool once per city, in parallel, in this single turn. Then tell me which city is warmer.",
+            "role": "user"
+          },
+          {
+            "content": "",
+            "reasoning_content": "The user wants to get the weather for two cities: Paris and Tokyo.\nI need to call the `get_weather` tool for each city.\nThe user explicitly requested to call the tool once per city, in parallel, in this single turn.\nAfter receiving the weather data, I need to compare the temperatures and determine which city is warmer.\n\nPlan:\n1. Call `get_weather(city=\"Paris\")`.\n2. Call `get_weather(city=\"Tokyo\")`.\n3. Wait for the tool outputs.\n4. Compare the temperatures from the outputs.\n5. Respond with the weather for both and state which one is warmer.",
+            "tool_calls": [
+              {
+                "function": {
+                  "arguments": "{}",
+                  "name": "get_weather"
+                },
+                "id": "call_2fdbc6580ef54b909885b13f",
+                "type": "function"
+              }
+            ],
+            "role": "assistant"
+          },
+          {
+            "content": "AI_InvalidToolInputError: Invalid input for tool get_weather: AI_JSONParseError: JSON parsing failed: Text: {\"city\": \"Paris\"}{\"city\": \"Tokyo\"}.\nError message: SyntaxError: Unexpected non-whitespace character after JSON at position 17 (line 1 column 18)",
+            "name": "get_weather",
+            "role": "tool",
+            "tool_call_id": "call_2fdbc6580ef54b909885b13f"
+          }
+        ],
+        "max_tokens": 400,
+        "temperature": 0,
+        "tools": [
+          {
+            "function": {
+              "description": "Get current weather for a city",
+              "name": "get_weather",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "city": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "city"
+                ]
+              }
+            },
+            "type": "function"
+          }
+        ],
+        "tool_choice": "auto"
+      },
+      "opts": {
+        "extraHeaders": {
+          "user-agent": "ai/7.0.159"
+        },
+        "gateway": {
+          "id": "default"
+        },
+        "returnRawResponse": true
+      },
+      "status": 200,
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-ai-neurons": "10.36",
+        "cf-ai-req-id": "b860bfdb-ea4f-4f10-9492-71fe09512c74",
+        "cf-aig-cache-status": "MISS",
+        "cf-aig-event-id": "[REDACTED:cf-aig-event-id]",
+        "cf-aig-log-id": "[REDACTED:cf-aig-log-id]",
+        "cf-aig-request-id": "[REDACTED:cf-aig-request-id]",
+        "cf-aig-step": "0",
+        "cf-aig-trace-id": "[REDACTED:cf-aig-trace-id]",
+        "cf-ray": "a5306ec86b0117a5-NRT",
+        "content-type": "application/json",
+        "date": "Sat, 31 Oct 2026 05:59:20 GMT",
+        "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=CqmmxoXpdCtO1D12F1dIz4SxtOALW36nt1iS9sJGtswbvRyU1jk6CY8%2FHYbXkdplZbNSnm2FQhqCXh1vuz%2BgkM4BZIgAoWxPtpyeWFGPmQf8lQsoCq%2FSqKd75q6vDl%2BGXguZMZvu1OV2ISaLH7AfxFGaIj3BDHg%3D\"}]}",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      },
+      "body": "{\"id\":\"f67a47ec96e74b8da470b3dfbd678e1a\",\"object\":\"chat.completion\",\"created\":1793426356,\"model\":\"@cf/google/gemma-4-26b-a4b-it-external\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":null,\"reasoning_content\":\"The previous attempt failed because I tried to call the tool twice in a single block but the model/system interpreted it as a single malformed JSON object. I need to provide two separate tool calls in the same turn. The error message `{\\\"city\\\": \\\"Paris\\\"}{\\\"city\\\": \\\"Tokyo\\\"}` indicates that the tool calls were concatenated incorrectly or the system expected a list of calls.\\n\\nActually, looking at the error, it seems I sent two JSON objects back-to-back without a list structure or proper separation that the tool executor expected. Most tool-calling frameworks expect a list of tool calls.\\n\\nLet's try to format the tool calls correctly as a list of calls if the system supports it, or simply call them one by one if I can't do them in parallel. However, the user *specifically* asked for parallel calls in a single turn.\\n\\nWait, the error `{\\\"city\\\": \\\"Paris\\\"}{\\\"city\\\": \\\"Tokyo\\\"}` suggests the model outputted two JSON objects. I should check if I can output a list of tool calls.\\n\\nLet's try to output them as separate tool calls in the same response.\",\"tool_calls\":[{\"id\":\"call_3cb9379ca87e43f5ae72bff4\",\"type\":\"function\",\"function\":{\"name\":\"get_weather\",\"arguments\":\"{\\\"city\\\": \\\"Paris\\\"}{\\\"city\\\": \\\"Tokyo\\\"}\"}}]},\"finish_reason\":\"tool_calls\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":327,\"completion_tokens\":271,\"total_tokens\":598,\"prompt_tokens_details\":{\"cached_tokens\":0},\"neurons\":10.363636016845703}}"
+    },
+    {
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "inputs": {
+        "messages": [
+          {
+            "content": "Get the weather for Paris and for Tokyo. Call the get_weather tool once per city, in parallel, in this single turn. Then tell me which city is warmer.",
+            "role": "user"
+          },
+          {
+            "content": "",
+            "reasoning_content": "The user wants to get the weather for two cities: Paris and Tokyo.\nI need to call the `get_weather` tool for each city.\nThe user explicitly requested to call the tool once per city, in parallel, in this single turn.\nAfter receiving the weather data, I need to compare the temperatures and determine which city is warmer.\n\nPlan:\n1. Call `get_weather(city=\"Paris\")`.\n2. Call `get_weather(city=\"Tokyo\")`.\n3. Wait for the tool outputs.\n4. Compare the temperatures from the outputs.\n5. Respond with the weather for both and state which one is warmer.",
+            "tool_calls": [
+              {
+                "function": {
+                  "arguments": "{}",
+                  "name": "get_weather"
+                },
+                "id": "call_2fdbc6580ef54b909885b13f",
+                "type": "function"
+              }
+            ],
+            "role": "assistant"
+          },
+          {
+            "content": "AI_InvalidToolInputError: Invalid input for tool get_weather: AI_JSONParseError: JSON parsing failed: Text: {\"city\": \"Paris\"}{\"city\": \"Tokyo\"}.\nError message: SyntaxError: Unexpected non-whitespace character after JSON at position 17 (line 1 column 18)",
+            "name": "get_weather",
+            "role": "tool",
+            "tool_call_id": "call_2fdbc6580ef54b909885b13f"
+          },
+          {
+            "content": "",
+            "reasoning_content": "The previous attempt failed because I tried to call the tool twice in a single block but the model/system interpreted it as a single malformed JSON object. I need to provide two separate tool calls in the same turn. The error message `{\"city\": \"Paris\"}{\"city\": \"Tokyo\"}` indicates that the tool calls were concatenated incorrectly or the system expected a list of calls.\n\nActually, looking at the error, it seems I sent two JSON objects back-to-back without a list structure or proper separation that the tool executor expected. Most tool-calling frameworks expect a list of tool calls.\n\nLet's try to format the tool calls correctly as a list of calls if the system supports it, or simply call them one by one if I can't do them in parallel. However, the user *specifically* asked for parallel calls in a single turn.\n\nWait, the error `{\"city\": \"Paris\"}{\"city\": \"Tokyo\"}` suggests the model outputted two JSON objects. I should check if I can output a list of tool calls.\n\nLet's try to output them as separate tool calls in the same response.",
+            "tool_calls": [
+              {
+                "function": {
+                  "arguments": "{}",
+                  "name": "get_weather"
+                },
+                "id": "call_3cb9379ca87e43f5ae72bff4",
+                "type": "function"
+              }
+            ],
+            "role": "assistant"
+          },
+          {
+            "content": "AI_InvalidToolInputError: Invalid input for tool get_weather: AI_JSONParseError: JSON parsing failed: Text: {\"city\": \"Paris\"}{\"city\": \"Tokyo\"}.\nError message: SyntaxError: Unexpected non-whitespace character after JSON at position 17 (line 1 column 18)",
+            "name": "get_weather",
+            "role": "tool",
+            "tool_call_id": "call_3cb9379ca87e43f5ae72bff4"
+          }
+        ],
+        "max_tokens": 400,
+        "temperature": 0,
+        "tools": [
+          {
+            "function": {
+              "description": "Get current weather for a city",
+              "name": "get_weather",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "city": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "city"
+                ]
+              }
+            },
+            "type": "function"
+          }
+        ],
+        "tool_choice": "auto"
+      },
+      "opts": {
+        "extraHeaders": {
+          "user-agent": "ai/7.0.159"
+        },
+        "gateway": {
+          "id": "default"
+        },
+        "returnRawResponse": true
+      },
+      "status": 200,
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-ai-neurons": "12.74",
+        "cf-ai-req-id": "370b6697-17b3-4ee0-8fa8-14f741da445a",
+        "cf-aig-cache-status": "MISS",
+        "cf-aig-event-id": "[REDACTED:cf-aig-event-id]",
+        "cf-aig-log-id": "[REDACTED:cf-aig-log-id]",
+        "cf-aig-request-id": "[REDACTED:cf-aig-request-id]",
+        "cf-aig-step": "0",
+        "cf-aig-trace-id": "[REDACTED:cf-aig-trace-id]",
+        "cf-ray": "a5306ee3fca417a5-NRT",
+        "content-type": "application/json",
+        "date": "Sat, 31 Oct 2026 05:59:22 GMT",
+        "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=wrchAMCRdhuu7ct0KPvLAGmorveAVDJPGjVhsiYO7DTeE41ExlJbQxKzorneRBtaMM9pLVUITKolTnaJ2OBtqZ%2FPTKCGSDyP34oH1mf8rYB2t8J3sdyE4RFMJK9QGdLjmk2SJZ4fsIuyf9BvR%2BwfLppE3d%2BA3WA%3D\"}]}",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      },
+      "body": "{\"id\":\"chatcmpl-370b6697-17b3-4ee0-8fa8-14f741da445a\",\"object\":\"chat.completion\",\"created\":1793426361,\"model\":\"@cf/google/gemma-4-26b-a4b-it\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":null,\"refusal\":null,\"annotations\":null,\"audio\":null,\"function_call\":null,\"tool_calls\":[{\"id\":\"chatcmpl-tool-bf0c7e1ba29f3a4b\",\"type\":\"function\",\"function\":{\"name\":\"get_weather\",\"arguments\":\"{\\\"city\\\": \\\"Paris\\\"}\"}},{\"id\":\"chatcmpl-tool-b26c67accc7e9215\",\"type\":\"function\",\"function\":{\"name\":\"get_weather\",\"arguments\":\"{\\\"city\\\": \\\"Tokyo\\\"}\"}}],\"reasoning\":\"It seems the system is having trouble with multiple tool calls in one turn if they are not formatted in a way it understands. The error message shows that the tool executor received `{\\\"city\\\": \\\"Paris\\\"}{\\\"city\\\": \\\"Tokyo\\\"}`. This means I need to provide them in a way that the system can parse. Usually, this is done by providing a list of tool calls.\\n\\nLet's try to call them one by one if parallel execution is failing due to formatting, but the user's prompt is a constraint. If I can't do it in parallel, I'll do them sequentially. But first, I'll try to format it as a list of tool calls if that's the standard.\\n\\nWait, I am the model. I generate the tool calls. The error happened because I generated `{\\\"city\\\": \\\"Paris\\\"}{\\\"city\\\": \\\"Tokyo\\\"}`. I should have generated a list of tool calls.\\n\\nLet's try again, providing them as separate tool calls in the same turn.\"},\"logprobs\":null,\"finish_reason\":\"tool_calls\",\"stop_reason\":50,\"token_ids\":null,\"routed_experts\":null}],\"service_tier\":null,\"usage\":{\"prompt_tokens\":660,\"completion_tokens\":247,\"total_tokens\":907,\"prompt_tokens_details\":{\"cached_tokens\":0},\"neurons\":12.736364364624023},\"prompt_logprobs\":null,\"prompt_token_ids\":null,\"prompt_text\":null,\"kv_transfer_params\":null,\"ec_transfer_params\":null,\"metrics\":null}"
+    },
+    {
+      "model": "@cf/google/gemma-4-26b-a4b-it",
+      "inputs": {
+        "messages": [
+          {
+            "content": "Get the weather for Paris and for Tokyo. Call the get_weather tool once per city, in parallel, in this single turn. Then tell me which city is warmer.",
+            "role": "user"
+          },
+          {
+            "content": "",
+            "reasoning_content": "The user wants to get the weather for two cities: Paris and Tokyo.\nI need to call the `get_weather` tool for each city.\nThe user explicitly requested to call the tool once per city, in parallel, in this single turn.\nAfter receiving the weather data, I need to compare the temperatures and determine which city is warmer.\n\nPlan:\n1. Call `get_weather(city=\"Paris\")`.\n2. Call `get_weather(city=\"Tokyo\")`.\n3. Wait for the tool outputs.\n4. Compare the temperatures from the outputs.\n5. Respond with the weather for both and state which one is warmer.",
+            "tool_calls": [
+              {
+                "function": {
+                  "arguments": "{}",
+                  "name": "get_weather"
+                },
+                "id": "call_2fdbc6580ef54b909885b13f",
+                "type": "function"
+              }
+            ],
+            "role": "assistant"
+          },
+          {
+            "content": "AI_InvalidToolInputError: Invalid input for tool get_weather: AI_JSONParseError: JSON parsing failed: Text: {\"city\": \"Paris\"}{\"city\": \"Tokyo\"}.\nError message: SyntaxError: Unexpected non-whitespace character after JSON at position 17 (line 1 column 18)",
+            "name": "get_weather",
+            "role": "tool",
+            "tool_call_id": "call_2fdbc6580ef54b909885b13f"
+          },
+          {
+            "content": "",
+            "reasoning_content": "The previous attempt failed because I tried to call the tool twice in a single block but the model/system interpreted it as a single malformed JSON object. I need to provide two separate tool calls in the same turn. The error message `{\"city\": \"Paris\"}{\"city\": \"Tokyo\"}` indicates that the tool calls were concatenated incorrectly or the system expected a list of calls.\n\nActually, looking at the error, it seems I sent two JSON objects back-to-back without a list structure or proper separation that the tool executor expected. Most tool-calling frameworks expect a list of tool calls.\n\nLet's try to format the tool calls correctly as a list of calls if the system supports it, or simply call them one by one if I can't do them in parallel. However, the user *specifically* asked for parallel calls in a single turn.\n\nWait, the error `{\"city\": \"Paris\"}{\"city\": \"Tokyo\"}` suggests the model outputted two JSON objects. I should check if I can output a list of tool calls.\n\nLet's try to output them as separate tool calls in the same response.",
+            "tool_calls": [
+              {
+                "function": {
+                  "arguments": "{}",
+                  "name": "get_weather"
+                },
+                "id": "call_3cb9379ca87e43f5ae72bff4",
+                "type": "function"
+              }
+            ],
+            "role": "assistant"
+          },
+          {
+            "content": "AI_InvalidToolInputError: Invalid input for tool get_weather: AI_JSONParseError: JSON parsing failed: Text: {\"city\": \"Paris\"}{\"city\": \"Tokyo\"}.\nError message: SyntaxError: Unexpected non-whitespace character after JSON at position 17 (line 1 column 18)",
+            "name": "get_weather",
+            "role": "tool",
+            "tool_call_id": "call_3cb9379ca87e43f5ae72bff4"
+          },
+          {
+            "content": "",
+            "reasoning_content": "It seems the system is having trouble with multiple tool calls in one turn if they are not formatted in a way it understands. The error message shows that the tool executor received `{\"city\": \"Paris\"}{\"city\": \"Tokyo\"}`. This means I need to provide them in a way that the system can parse. Usually, this is done by providing a list of tool calls.\n\nLet's try to call them one by one if parallel execution is failing due to formatting, but the user's prompt is a constraint. If I can't do it in parallel, I'll do them sequentially. But first, I'll try to format it as a list of tool calls if that's the standard.\n\nWait, I am the model. I generate the tool calls. The error happened because I generated `{\"city\": \"Paris\"}{\"city\": \"Tokyo\"}`. I should have generated a list of tool calls.\n\nLet's try again, providing them as separate tool calls in the same turn.",
+            "tool_calls": [
+              {
+                "function": {
+                  "arguments": "{\"city\":\"Paris\"}",
+                  "name": "get_weather"
+                },
+                "id": "chatcmpl-tool-bf0c7e1ba29f3a4b",
+                "type": "function"
+              },
+              {
+                "function": {
+                  "arguments": "{\"city\":\"Tokyo\"}",
+                  "name": "get_weather"
+                },
+                "id": "chatcmpl-tool-b26c67accc7e9215",
+                "type": "function"
+              }
+            ],
+            "role": "assistant"
+          },
+          {
+            "content": "{\"city\":\"Paris\",\"temp_c\":14,\"sky\":\"clear\"}",
+            "name": "get_weather",
+            "role": "tool",
+            "tool_call_id": "chatcmpl-tool-bf0c7e1ba29f3a4b"
+          },
+          {
+            "content": "{\"city\":\"Tokyo\",\"temp_c\":22,\"sky\":\"clear\"}",
+            "name": "get_weather",
+            "role": "tool",
+            "tool_call_id": "chatcmpl-tool-b26c67accc7e9215"
+          }
+        ],
+        "max_tokens": 400,
+        "temperature": 0,
+        "tools": [
+          {
+            "function": {
+              "description": "Get current weather for a city",
+              "name": "get_weather",
+              "parameters": {
+                "type": "object",
+                "properties": {
+                  "city": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "city"
+                ]
+              }
+            },
+            "type": "function"
+          }
+        ],
+        "tool_choice": "auto"
+      },
+      "opts": {
+        "extraHeaders": {
+          "user-agent": "ai/7.0.159"
+        },
+        "gateway": {
+          "id": "default"
+        },
+        "returnRawResponse": true
+      },
+      "status": 200,
+      "headers": {
+        "alt-svc": "h3=\":443\"; ma=86400",
+        "cf-ai-neurons": "11.15",
+        "cf-ai-req-id": "ca18ea9c-ee0f-4910-9d70-52c082e4dddc",
+        "cf-aig-cache-status": "MISS",
+        "cf-aig-event-id": "[REDACTED:cf-aig-event-id]",
+        "cf-aig-log-id": "[REDACTED:cf-aig-log-id]",
+        "cf-aig-request-id": "[REDACTED:cf-aig-request-id]",
+        "cf-aig-step": "0",
+        "cf-aig-trace-id": "[REDACTED:cf-aig-trace-id]",
+        "cf-ray": "a5306eefffc817a5-NRT",
+        "content-type": "application/json",
+        "date": "Sat, 31 Oct 2026 05:59:24 GMT",
+        "nel": "{\"report_to\":\"cf-nel\",\"success_fraction\":0.0,\"max_age\":604800}",
+        "report-to": "{\"group\":\"cf-nel\",\"max_age\":604800,\"endpoints\":[{\"url\":\"https://a.nel.cloudflare.com/report/v4?s=OgilQhbzWl6nMsavBMxh3z6THPwEdfira7AQbMPkh6n7sDzyb%2F8VCmEdV9kpvVdqN%2Bn3Tyb%2BhI4miDU7mkq4vPnGIdAD0LRXdd8DJwGshKOIKCGckrqWQj%2Bxr4QilqvOfjHiOdqfZPBY2J7G9j%2FSHv3Krc5BUYM%3D\"}]}",
+        "server": "cloudflare",
+        "transfer-encoding": "chunked"
+      },
+      "body": "{\"id\":\"21748d46d9fc43a790aee8dc3ca8ff1a\",\"object\":\"chat.completion\",\"created\":1793426363,\"model\":\"@cf/google/gemma-4-26b-a4b-it-external\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"The weather in Paris is 14\u00b0C with clear skies, and in Tokyo, it is 22\u00b0C with clear skies. Tokyo is warmer.\",\"reasoning_content\":\"The tool calls were successful this time.\\nParis: 14\u00b0C, clear sky.\\nTokyo: 22\u00b0C, clear sky.\\n\\nComparing the temperatures: 22\u00b0C (Tokyo) > 14\u00b0C (Paris).\\nTokyo is warmer.\\n\"},\"finish_reason\":\"stop\",\"logprobs\":null}],\"usage\":{\"prompt_tokens\":964,\"completion_tokens\":98,\"total_tokens\":1062,\"prompt_tokens_details\":{\"cached_tokens\":64},\"neurons\":11.145454406738281}}"
+    }
+  ]
+}

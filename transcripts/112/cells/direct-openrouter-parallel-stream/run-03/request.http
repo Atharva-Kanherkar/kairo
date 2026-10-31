@@ -1,0 +1,36 @@
+POST https://openrouter.ai/api/v1/chat/completions
+authorization: Bearer [REDACTED:OPENROUTER_API_KEY]
+content-type: application/json
+
+{
+  "model": "google/gemma-4-26b-a4b-it",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Get the weather for Paris and for Tokyo. Call the get_weather tool once per city, in parallel, in this single turn."
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "get_weather",
+        "description": "Get current weather for a city",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "city": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "city"
+          ]
+        }
+      }
+    }
+  ],
+  "max_tokens": 400,
+  "temperature": 0,
+  "stream": true
+}

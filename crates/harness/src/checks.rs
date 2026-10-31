@@ -6309,3 +6309,154 @@ mod served_model_within_key_allowlist_tests {
         );
     }
 }
+
+/// Invariant (bug 112): in an OpenAI Chat Completions SSE stream, each tool
+/// call owns its own `tool_calls[].index`.
+///
+/// The index is the only key a streaming client has for joining argument
+/// fragments: openai-python, openai-node and the AI SDK all accumulate by it.
+/// A delta that carries a new, non-empty `id` opens a call. If a second id
+/// opens on an index an earlier id already holds, every client concatenates
+/// both calls' arguments into one string (`{"city": "Paris"}{"city": "Tokyo"}`)
+/// and the second call is lost. Repeating the same id on later fragments of
+/// one call is fine; only a different id on a used index is a violation.
+pub fn openai_stream_toolcall_index_per_call(sse: &str) -> Verdict {
+    let mut owner: BTreeMap<i64, String> = BTreeMap::new();
+    let mut offenders = Vec::new();
+    for (i, chunk) in sse_data_json(sse).iter().enumerate() {
+        let Some(calls) = chunk
+            .pointer("/choices/0/delta/tool_calls")
+            .and_then(Value::as_array)
+        else {
+            continue;
+        };
+        for call in calls {
+            let Some(id) = call.get("id").and_then(Value::as_str) else {
+                continue;
+            };
+            if id.is_empty() {
+                continue;
+            }
+            let index = call.get("index").and_then(Value::as_i64).unwrap_or(0);
+            match owner.get(&index) {
+                None => {
+                    owner.insert(index, id.to_string());
+                }
+                Some(first) if first != id => {
+                    offenders.push(format!("chunk {i}: index {index} reopened by a second id"));
+                }
+                Some(_) => {}
+            }
+        }
+    }
+    if offenders.is_empty() {
+        return Verdict::Conformant;
+    }
+    Verdict::Violation(format!(
+        "distinct tool calls share a tool_calls index, so a client merges their \
+         arguments: {}",
+        offenders.join(", ")
+    ))
+}
+
+/// Invariant (bug 112): every `tool_calls[].function.arguments` in a
+/// non-streaming Chat Completions response is exactly one JSON object.
+///
+/// `arguments` is a JSON-encoded object. Two parallel calls folded into one
+/// entry produce `{"city": "Paris"}{"city": "Tokyo"}`, which no client can
+/// parse, so the tool never runs and the second call is gone. A response with
+/// no tool calls has nothing to check.
+pub fn openai_toolcall_arguments_single_object(response_json: &str) -> Verdict {
+    let v: Value = match serde_json::from_str(response_json) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("unparseable response: {e}")),
+    };
+    let Some(calls) = v
+        .pointer("/choices/0/message/tool_calls")
+        .and_then(Value::as_array)
+    else {
+        return Verdict::Conformant;
+    };
+    let mut offenders = Vec::new();
+    for (j, call) in calls.iter().enumerate() {
+        let args = call.pointer("/function/arguments").and_then(Value::as_str);
+        let parsed = args.map(serde_json::from_str::<Value>);
+        match parsed {
+            Some(Ok(Value::Object(_))) => {}
+            Some(Ok(other)) => offenders.push(format!(
+                "tool_calls[{j}] arguments decode to a JSON {}, not an object",
+                json_kind(&other)
+            )),
+            Some(Err(e)) => offenders.push(format!(
+                "tool_calls[{j}] arguments are not one JSON value: {e}"
+            )),
+            None => offenders.push(format!("tool_calls[{j}] has no string arguments")),
+        }
+    }
+    if offenders.is_empty() {
+        return Verdict::Conformant;
+    }
+    Verdict::Violation(offenders.join("; "))
+}
+
+fn json_kind(v: &Value) -> &'static str {
+    match v {
+        Value::Null => "null",
+        Value::Bool(_) => "boolean",
+        Value::Number(_) => "number",
+        Value::String(_) => "string",
+        Value::Array(_) => "array",
+        Value::Object(_) => "object",
+    }
+}
+
+#[cfg(test)]
+mod toolcall_parallel_separation_tests {
+    use super::{
+        openai_stream_toolcall_index_per_call, openai_toolcall_arguments_single_object, Verdict,
+    };
+
+    #[test]
+    fn a_repeated_id_on_one_index_is_one_call() {
+        // Some servers resend the call id on every fragment of the same call.
+        let sse = concat!(
+            "data: {\"choices\":[{\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"a\",\"function\":{\"name\":\"f\",\"arguments\":\"\"}}]}}]}\n\n",
+            "data: {\"choices\":[{\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"a\",\"function\":{\"arguments\":\"{}\"}}]}}]}\n\n",
+        );
+        assert_eq!(
+            openai_stream_toolcall_index_per_call(sse),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn a_second_id_on_a_used_index_is_a_violation() {
+        let sse = concat!(
+            "data: {\"choices\":[{\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"a\",\"function\":{\"name\":\"f\"}}]}}]}\n\n",
+            "data: {\"choices\":[{\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"b\",\"function\":{\"name\":\"f\"}}]}}]}\n\n",
+        );
+        assert!(matches!(
+            openai_stream_toolcall_index_per_call(sse),
+            Verdict::Violation(reason) if reason.contains("index 0")
+        ));
+    }
+
+    #[test]
+    fn a_string_that_decodes_to_a_string_is_a_violation() {
+        // Double-encoded arguments parse once but still are not an object.
+        let body = r#"{"choices":[{"message":{"tool_calls":[{"function":{"name":"f","arguments":"\"{\\\"a\\\":1}\""}}]}}]}"#;
+        assert!(matches!(
+            openai_toolcall_arguments_single_object(body),
+            Verdict::Violation(reason) if reason.contains("string")
+        ));
+    }
+
+    #[test]
+    fn a_response_without_tool_calls_is_conformant() {
+        let body = r#"{"choices":[{"message":{"role":"assistant","content":"hi"}}]}"#;
+        assert_eq!(
+            openai_toolcall_arguments_single_object(body),
+            Verdict::Conformant
+        );
+    }
+}

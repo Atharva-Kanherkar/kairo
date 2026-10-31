@@ -1,0 +1,12 @@
+{
+  "name": "kairo-112-rig",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "agents": "0.32.0",
+    "ai": "7.0.159"
+  },
+  "devDependencies": {
+    "wrangler": "4.139.0"
+  }
+}
