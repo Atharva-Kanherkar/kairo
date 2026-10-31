@@ -7240,6 +7240,89 @@ fn bug111_litellm_serves_a_model_outside_the_key_allowlist_via_the_url_path() {
     }
 }
 
+// ---- 113: LiteLLM serves a key a model outside its allowlist via Google GenAI
+//      GA (/v1/) and Alpha (/v1alpha/) pass-through routes.
+//      Auth's get_model_from_request uses re.search(r"/(?:v1beta|beta)/models/([^:]+):")
+//      which only matches v1beta/beta, omitting /v1/, /v1alpha/, and /gemini/models/.
+//
+// Captured with transcripts/113/rig against litellm 1.108.0 and main cfe0100e.
+// A virtual key scoped models=[cheap-model] is served premium-model on every trigger cell.
+fn issue_113_raw(relative: &str) -> String {
+    fixture(&format!("transcripts/113/{relative}"))
+}
+
+fn issue_113_status(raw_http: &str) -> u16 {
+    raw_http
+        .lines()
+        .next()
+        .and_then(|line| line.split_whitespace().nth(1))
+        .and_then(|code| code.parse().ok())
+        .expect("status line")
+}
+
+fn issue_113_served_group(cell: &str) -> Option<&'static str> {
+    let path = format!("transcripts/113/wire/{cell}/run-01/upstream/fwd-request.http");
+    let mut p = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    p.push("../../");
+    p.push(&path);
+    let raw = fs::read_to_string(&p).ok()?;
+    let first_line = raw.lines().next()?;
+    if first_line.contains("/models/premium-model:") {
+        Some("premium-model")
+    } else if first_line.contains("/models/cheap-model:") {
+        Some("cheap-model")
+    } else {
+        None
+    }
+}
+
+#[test]
+fn bug113_litellm_gemini_v1_path_bypasses_key_allowlist() {
+    let allowlist = ["cheap-model"];
+    let triggers = [
+        "gemini-v1-path-denied",
+        "gemini-v1-stream-path-denied",
+        "gemini-v1alpha-path-denied",
+        "gemini-models-path-denied",
+    ];
+    let controls = ["gemini-v1beta-control", "gemini-v1-cheap-control"];
+
+    let rows: BTreeMap<String, Value> =
+        serde_json::from_str::<Value>(&issue_113_raw("wire/results.json")).expect("results.json")
+            ["cells"]
+            .as_array()
+            .expect("cells")
+            .iter()
+            .map(|c| (c["cell"].as_str().expect("cell").to_string(), c.clone()))
+            .collect();
+
+    let verdict_of = |cell: &str| {
+        let row = &rows[cell];
+        assert!(
+            row["status_consistent"].as_bool().unwrap_or(false),
+            "{cell}"
+        );
+        let status = issue_113_status(&issue_113_raw(&format!(
+            "wire/{cell}/run-01/client-response.http"
+        )));
+        let served = issue_113_served_group(cell);
+        served_model_within_key_allowlist(&allowlist, status, served)
+    };
+
+    for &cell in &controls {
+        assert_eq!(verdict_of(cell), Verdict::Conformant, "{cell}");
+    }
+
+    for &cell in &triggers {
+        let verdict = verdict_of(cell);
+        assert!(
+            matches!(&verdict, Verdict::Violation(reason)
+                if reason.contains("premium-model") && reason.contains("cheap-model")),
+            "{cell}: {verdict:?}"
+        );
+    }
+}
+
 // ---- bug 098: image route model allowlist bypass ----
 
 const ISSUE_098_ALLOWED: &[&str] = &["allowed-model"];

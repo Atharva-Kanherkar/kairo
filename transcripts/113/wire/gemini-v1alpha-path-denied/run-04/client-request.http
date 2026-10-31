@@ -1,0 +1,4 @@
+POST /gemini/v1alpha/models/premium-model:generateContent?key=[REDACTED] HTTP/1.1
+content-type: application/json
+
+{"contents": [{"role": "user", "parts": [{"text": "hi"}]}]}
