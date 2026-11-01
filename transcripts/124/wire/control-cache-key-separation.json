@@ -1,0 +1,12 @@
+{
+  "description": "Cache keys generated when destination connection params are included in key material",
+  "backend_a_keyed": {
+    "api_base": "https://cluster-alpha.internal.net/v1",
+    "distinct_cache_key": "ca63fccb32f53640744fc1fe7f4a2bda93e9118e78e10fbc2e62492a5bc539f1"
+  },
+  "backend_b_keyed": {
+    "api_base": "https://cluster-beta.internal.net/v1",
+    "distinct_cache_key": "e33f81e0ee157a36f2d09dd1f880b03fb679733c6908d5b13f3561d588877e59"
+  },
+  "keys_separated": true
+}

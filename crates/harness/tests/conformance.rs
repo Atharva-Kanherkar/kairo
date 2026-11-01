@@ -31,7 +31,8 @@ use kairo::checks::{
     parallel_tool_disable_preserved, passthrough_request_preserves_jsonrpc_id,
     provider_request_id_preserved, reasoning_text_order_preserved, refusal_text_preserved,
     registration_resolvable_by_both_paths, replayed_calls_keep_returned_namespace,
-    response_content_not_empty, response_conversation_preserves_history, response_omits_secret,
+    response_cache_keys_differentiate_destinations, response_content_not_empty,
+    response_conversation_preserves_history, response_omits_secret,
     responses_comparison_response_id_authorized_and_unwrapped,
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
@@ -8310,6 +8311,194 @@ fn litellm_chatgpt_messages_results_matrix_5_runs_reproduce_consistently() {
             run["bug_inbound_stripped"].as_bool(),
             Some(true),
             "run {run_num}: bug inbound reasoning must be stripped (defect)"
+        );
+    }
+}
+
+// ---- bug 124: LiteLLM response cache ignores api_base and api_key connection params ----
+
+#[test]
+fn litellm_cache_key_collision_ignores_destination_connection_params() {
+    let wire_str = fixture("transcripts/124/wire/bug-cache-key-collision.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse cache key capture");
+
+    let base_a = capture["backend_a"]["api_base"].as_str().unwrap();
+    let base_b = capture["backend_b"]["api_base"].as_str().unwrap();
+    let key_a = capture["backend_a"]["cache_key"].as_str().unwrap();
+    let key_b = capture["backend_b"]["cache_key"].as_str().unwrap();
+
+    assert_ne!(base_a, base_b, "destinations must be distinct");
+    assert_eq!(
+        key_a, key_b,
+        "cache keys for distinct api_base destinations collide"
+    );
+
+    let tenant_key_1 = capture["tenant_alpha"]["cache_key"].as_str().unwrap();
+    let tenant_key_2 = capture["tenant_beta"]["cache_key"].as_str().unwrap();
+    assert_eq!(
+        tenant_key_1, tenant_key_2,
+        "cache keys for distinct tenant api_keys collide"
+    );
+
+    let verdict = response_cache_keys_differentiate_destinations(
+        base_a,
+        base_b,
+        key_a,
+        key_b,
+        "Cluster Alpha Status",
+        "Cluster Beta Status",
+        true,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("cache key collision between distinct destinations")
+    ));
+}
+
+#[test]
+fn litellm_cache_cross_backend_response_pollution_detected() {
+    let wire_str = fixture("transcripts/124/wire/bug-cross-backend-cache-pollution.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse pollution capture");
+
+    let step2 = &capture["step_2_polluted_backend_b"];
+    assert_eq!(
+        step2["leak_detected"].as_bool(),
+        Some(true),
+        "leak detected: backend B received cached response from backend A"
+    );
+    assert_eq!(
+        step2["cache_hit"].as_bool(),
+        Some(true),
+        "polluted call was served as a cache hit"
+    );
+
+    let served_content = step2["returned_content"].as_str().unwrap();
+    let verdict = response_cache_keys_differentiate_destinations(
+        "https://cluster-alpha.internal.net/v1",
+        "https://cluster-beta.internal.net/v1",
+        "a77d5dcdb8985f7c1ac2f4b463aa7dc9d58c79de93f2f7ce1bd2fc3ce28ffb26",
+        "a77d5dcdb8985f7c1ac2f4b463aa7dc9d58c79de93f2f7ce1bd2fc3ce28ffb26",
+        served_content,
+        "Cluster Beta Status: DEGRADED. Private cluster-b IP: 10.200.2.9",
+        true,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("cache key collision between distinct destinations")
+    ));
+}
+
+#[test]
+fn litellm_cache_key_separation_control_wire() {
+    let wire_str = fixture("transcripts/124/wire/control-cache-key-separation.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse control separation");
+
+    assert_eq!(
+        capture["keys_separated"].as_bool(),
+        Some(true),
+        "control keyed connection parameters must separate cache keys"
+    );
+
+    let base_a = capture["backend_a_keyed"]["api_base"].as_str().unwrap();
+    let base_b = capture["backend_b_keyed"]["api_base"].as_str().unwrap();
+    let key_a = capture["backend_a_keyed"]["distinct_cache_key"]
+        .as_str()
+        .unwrap();
+    let key_b = capture["backend_b_keyed"]["distinct_cache_key"]
+        .as_str()
+        .unwrap();
+
+    assert_ne!(
+        key_a, key_b,
+        "keyed connection params produce distinct keys"
+    );
+
+    let verdict = response_cache_keys_differentiate_destinations(
+        base_a,
+        base_b,
+        key_a,
+        key_b,
+        "Cluster Beta Status",
+        "Cluster Beta Status",
+        false,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_cache_uncached_isolation_control_wire() {
+    let wire_str = fixture("transcripts/124/wire/control-un-cached-isolation.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse control uncached");
+
+    assert_eq!(
+        capture["isolated"].as_bool(),
+        Some(true),
+        "un-cached calls must isolate distinct backend responses"
+    );
+
+    let base_a = capture["backend_a_direct"]["api_base"].as_str().unwrap();
+    let base_b = capture["backend_b_direct"]["api_base"].as_str().unwrap();
+    let content_b = capture["backend_b_direct"]["content"].as_str().unwrap();
+
+    let verdict = response_cache_keys_differentiate_destinations(
+        base_a, base_b, "key-a", "key-b", content_b, content_b, false,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_cache_same_endpoint_cache_hit_control_wire() {
+    let wire_str = fixture("transcripts/124/wire/control-same-endpoint-cache-hit.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse control hit");
+
+    assert_eq!(
+        capture["cache_hit"].as_bool(),
+        Some(true),
+        "repeated call to same endpoint must hit cache"
+    );
+
+    let target = capture["target_api_base"].as_str().unwrap();
+    let cached = capture["cached_content"].as_str().unwrap();
+
+    let verdict = response_cache_keys_differentiate_destinations(
+        target, target, "key-a", "key-a", cached, cached, true,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_cache_destination_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/124/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_keys_collide"].as_bool(),
+            Some(true),
+            "run {run_num}: bug keys must collide across distinct api_base destinations"
+        );
+        assert_eq!(
+            run["bug_cross_backend_pollution"].as_bool(),
+            Some(true),
+            "run {run_num}: backend B must receive cached response from backend A (defect)"
+        );
+        assert_eq!(
+            run["ctrl_same_endpoint_hit"].as_bool(),
+            Some(true),
+            "run {run_num}: control same-endpoint repeat must hit cache"
+        );
+        assert_eq!(
+            run["ctrl_keys_separated"].as_bool(),
+            Some(true),
+            "run {run_num}: control keys must be separated when connection params are keyed"
+        );
+        assert_eq!(
+            run["ctrl_direct_isolated"].as_bool(),
+            Some(true),
+            "run {run_num}: control direct un-cached calls must be isolated"
         );
     }
 }

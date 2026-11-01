@@ -1,0 +1,12 @@
+{
+  "description": "Direct un-cached calls reach respective backends without cache pollution",
+  "backend_a_direct": {
+    "api_base": "https://cluster-alpha.internal.net/v1",
+    "content": "Cluster Alpha Status: OPERATIONAL. Private cluster-a IP: 10.100.1.5"
+  },
+  "backend_b_direct": {
+    "api_base": "https://cluster-beta.internal.net/v1",
+    "content": "Cluster Beta Status: DEGRADED. Private cluster-b IP: 10.200.2.9"
+  },
+  "isolated": true
+}
