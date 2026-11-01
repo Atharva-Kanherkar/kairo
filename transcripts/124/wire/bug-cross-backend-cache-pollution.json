@@ -1,0 +1,15 @@
+{
+  "step_1_populate_backend_a": {
+    "target_api_base": "https://cluster-alpha.internal.net/v1",
+    "caching": true,
+    "returned_content": "Cluster Alpha Status: OPERATIONAL. Private cluster-a IP: 10.100.1.5",
+    "cache_hit": null
+  },
+  "step_2_polluted_backend_b": {
+    "target_api_base": "https://cluster-beta.internal.net/v1",
+    "caching": true,
+    "returned_content": "Cluster Alpha Status: OPERATIONAL. Private cluster-a IP: 10.100.1.5",
+    "cache_hit": true,
+    "leak_detected": true
+  }
+}

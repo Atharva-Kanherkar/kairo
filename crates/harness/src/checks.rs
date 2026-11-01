@@ -7491,3 +7491,124 @@ mod anthropic_responses_bridge_reasoning_tests {
         ));
     }
 }
+
+/// Invariant: When an AI gateway provides response caching across multiple backend deployments:
+/// 1. Cache key generation must incorporate destination connection routing parameters (including `api_base`
+///    and `api_key` tenant credentials) so that requests routed to different backends or tenants do not collide.
+/// 2. Two requests differing in target destination or tenant credential must never produce identical cache keys.
+/// 3. Cached responses from one backend deployment must never be served as a cache hit to a request targeting
+///    a different backend deployment.
+#[must_use]
+pub fn response_cache_keys_differentiate_destinations(
+    destination_a: &str,
+    destination_b: &str,
+    cache_key_a: &str,
+    cache_key_b: &str,
+    served_response_content: &str,
+    expected_destination_content: &str,
+    is_cache_hit: bool,
+) -> Verdict {
+    let destinations_differ = destination_a != destination_b;
+    let keys_collide = cache_key_a == cache_key_b;
+
+    if destinations_differ && keys_collide {
+        return Verdict::Violation(format!(
+            "cache key collision between distinct destinations '{destination_a}' and '{destination_b}': shared key '{cache_key_a}' omits destination connection parameters"
+        ));
+    }
+
+    if destinations_differ
+        && is_cache_hit
+        && served_response_content != expected_destination_content
+    {
+        return Verdict::Violation(format!(
+            "cross-destination cache pollution: request to '{destination_b}' was served cached response from '{destination_a}'"
+        ));
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod response_cache_destination_tests {
+    use super::{response_cache_keys_differentiate_destinations, Verdict};
+
+    #[test]
+    fn distinct_destinations_with_separated_keys_is_conformant() {
+        let verdict = response_cache_keys_differentiate_destinations(
+            "https://backend-a.example.com",
+            "https://backend-b.example.com",
+            "key-a-1111",
+            "key-b-2222",
+            "Backend B response",
+            "Backend B response",
+            false,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn same_destination_cache_hit_is_conformant() {
+        let verdict = response_cache_keys_differentiate_destinations(
+            "https://backend-a.example.com",
+            "https://backend-a.example.com",
+            "key-a-1111",
+            "key-a-1111",
+            "Backend A response",
+            "Backend A response",
+            true,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn distinct_destinations_with_colliding_keys_is_violation() {
+        let verdict = response_cache_keys_differentiate_destinations(
+            "https://backend-a.example.com",
+            "https://backend-b.example.com",
+            "shared-key-1111",
+            "shared-key-1111",
+            "Backend A response",
+            "Backend B response",
+            true,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("cache key collision between distinct destinations")
+        ));
+    }
+
+    #[test]
+    fn distinct_tenants_with_colliding_keys_is_violation() {
+        let verdict = response_cache_keys_differentiate_destinations(
+            "tenant-alpha-token-1111",
+            "tenant-beta-token-2222",
+            "shared-key-1111",
+            "shared-key-1111",
+            "Tenant Alpha sensitive data",
+            "Tenant Beta sensitive data",
+            true,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("cache key collision between distinct destinations")
+        ));
+    }
+
+    #[test]
+    fn cross_destination_cache_pollution_is_violation() {
+        let verdict = response_cache_keys_differentiate_destinations(
+            "https://backend-a.example.com",
+            "https://backend-b.example.com",
+            "key-a",
+            "key-b",
+            "Backend A response",
+            "Backend B response",
+            true,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("cross-destination cache pollution")
+        ));
+    }
+}

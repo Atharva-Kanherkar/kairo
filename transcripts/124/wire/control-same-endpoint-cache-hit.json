@@ -1,0 +1,6 @@
+{
+  "description": "Repeated call to the same endpoint correctly hits cached response",
+  "target_api_base": "https://cluster-alpha.internal.net/v1",
+  "cached_content": "Cluster Alpha Status: OPERATIONAL. Private cluster-a IP: 10.100.1.5",
+  "cache_hit": true
+}
