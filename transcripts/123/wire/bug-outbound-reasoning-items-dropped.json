@@ -1,0 +1,23 @@
+{
+  "id": "resp_091186a8_1",
+  "type": "message",
+  "role": "assistant",
+  "model": "chatgpt/gpt-6.1-sol",
+  "stop_sequence": null,
+  "usage": {
+    "input_tokens": 15,
+    "output_tokens": 30
+  },
+  "content": [
+    {
+      "type": "tool_use",
+      "id": "call_44a2f3c095ab",
+      "name": "get_weather",
+      "input": {
+        "city": "Oslo"
+      }
+    }
+  ],
+  "stop_reason": "tool_use",
+  "stop_details": null
+}

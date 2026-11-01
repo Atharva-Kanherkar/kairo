@@ -1,0 +1,27 @@
+{
+  "id": "resp_091186a8_1",
+  "type": "message",
+  "role": "assistant",
+  "model": "gpt-6.1-sol",
+  "stop_sequence": null,
+  "usage": {
+    "input_tokens": 15,
+    "output_tokens": 30
+  },
+  "content": [
+    {
+      "type": "redacted_thinking",
+      "data": "litellm_encrypted_reasoning:gAAAAABn1234567890abcdef_secret_reasoning_payload"
+    },
+    {
+      "type": "tool_use",
+      "id": "call_44a2f3c095ab",
+      "name": "get_weather",
+      "input": {
+        "city": "Oslo"
+      }
+    }
+  ],
+  "stop_reason": "tool_use",
+  "stop_details": null
+}
