@@ -1,0 +1,11 @@
+{
+  "model": "claude-3-5-sonnet",
+  "messages": [
+    {
+      "role": "user",
+      "content": "run 1 mode_whole"
+    }
+  ],
+  "stream": true,
+  "max_tokens": 100
+}
