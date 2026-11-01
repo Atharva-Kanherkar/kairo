@@ -1,0 +1,7 @@
+{
+  "call_type": "anthropic_messages",
+  "transaction_key": "user-corp-1_2026-11-02_sk-user-key_claude-sonnet-4-5_anthropic_",
+  "endpoint": null,
+  "has_endpoint": false,
+  "ends_with_endpoint": false
+}

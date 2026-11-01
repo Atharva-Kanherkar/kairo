@@ -1,0 +1,42 @@
+{
+  "iterations": 5,
+  "success_rate": "5/5",
+  "all_passed": true,
+  "runs": [
+    {
+      "run": 1,
+      "defect_anthropic_messages_missing_endpoint": true,
+      "control_acompletion_has_endpoint": true,
+      "control_fixed_anthropic_has_endpoint": true,
+      "control_aresponses_has_endpoint": true
+    },
+    {
+      "run": 2,
+      "defect_anthropic_messages_missing_endpoint": true,
+      "control_acompletion_has_endpoint": true,
+      "control_fixed_anthropic_has_endpoint": true,
+      "control_aresponses_has_endpoint": true
+    },
+    {
+      "run": 3,
+      "defect_anthropic_messages_missing_endpoint": true,
+      "control_acompletion_has_endpoint": true,
+      "control_fixed_anthropic_has_endpoint": true,
+      "control_aresponses_has_endpoint": true
+    },
+    {
+      "run": 4,
+      "defect_anthropic_messages_missing_endpoint": true,
+      "control_acompletion_has_endpoint": true,
+      "control_fixed_anthropic_has_endpoint": true,
+      "control_aresponses_has_endpoint": true
+    },
+    {
+      "run": 5,
+      "defect_anthropic_messages_missing_endpoint": true,
+      "control_acompletion_has_endpoint": true,
+      "control_fixed_anthropic_has_endpoint": true,
+      "control_aresponses_has_endpoint": true
+    }
+  ]
+}

@@ -8445,3 +8445,90 @@ mod async_stream_ttft_and_hidden_usage_tests {
         assert_eq!(verdict, Verdict::Conformant);
     }
 }
+
+/// Invariant: In an AI gateway routing requests across heterogeneous LLM endpoints:
+/// 1. Every routed call type must map to its canonical endpoint path (e.g. `anthropic_messages` -> `"/messages"`).
+/// 2. Aggregated spend records, daily user/team/tag spend queues, and database rows must carry the resolved endpoint string rather than `null`.
+/// 3. When an endpoint is omitted from `ROUTE_ENDPOINT_MAPPING`, spend rows lose endpoint attribution, preventing operators from tracking per-endpoint activity and billing for `/v1/messages` calls.
+pub fn daily_spend_endpoint_attributed(
+    call_type: &str,
+    endpoint: Option<&str>,
+    transaction_key: &str,
+) -> Verdict {
+    if call_type == "anthropic_messages" {
+        match endpoint {
+            Some("/messages") => {
+                if transaction_key.ends_with("_/messages") {
+                    Verdict::Conformant
+                } else {
+                    Verdict::Violation(
+                        "transaction key did not append canonical endpoint '/messages'".to_string(),
+                    )
+                }
+            }
+            Some(other) => Verdict::Violation(
+                format!("anthropic_messages mapped to unexpected endpoint '{other}' instead of '/messages'"),
+            ),
+            None => Verdict::Violation(
+                "anthropic_messages call type missing from endpoint mapping, leaving spend row endpoint as null".to_string(),
+            ),
+        }
+    } else if endpoint.is_none() {
+        Verdict::Violation(format!("call type '{call_type}' has null endpoint"))
+    } else {
+        Verdict::Conformant
+    }
+}
+
+#[cfg(test)]
+mod daily_spend_endpoint_tests {
+    use super::*;
+
+    #[test]
+    fn anthropic_messages_attributed_is_conformant() {
+        let verdict = daily_spend_endpoint_attributed(
+            "anthropic_messages",
+            Some("/messages"),
+            "user_date_key_claude_anthropic_/messages",
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn anthropic_messages_missing_endpoint_is_violation() {
+        let verdict = daily_spend_endpoint_attributed(
+            "anthropic_messages",
+            None,
+            "user_date_key_claude_anthropic_",
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("missing from endpoint mapping")
+        ));
+    }
+
+    #[test]
+    fn anthropic_messages_wrong_endpoint_is_violation() {
+        let verdict = daily_spend_endpoint_attributed(
+            "anthropic_messages",
+            Some("/chat/completions"),
+            "user_date_key_claude_anthropic_/chat/completions",
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("unexpected endpoint")
+        ));
+    }
+
+    #[test]
+    fn chat_completions_attributed_is_conformant() {
+        let verdict = daily_spend_endpoint_attributed(
+            "acompletion",
+            Some("/chat/completions"),
+            "user_date_key_gpt4o_openai_/chat/completions",
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}
