@@ -10,14 +10,14 @@ use kairo::checks::{
     anthropic_response_toolcall_stop_reason, anthropic_server_tools_forwarded,
     anthropic_stop_sequence_reported, anthropic_stream_block_lifecycle,
     anthropic_stream_safety_stop_reason, anthropic_tool_choice_any_mapped_to_required,
-    anthropic_toolcall_stop_reason, capture_records, client_cache_breakpoints_reach_provider,
-    codex_namespace_only_applies_to_namespaced_tools, content_filter_preserved,
-    document_body_forwarded, endpoint_response_family_preserved, executed_tool_results_preserved,
-    forwarded_body_preserves_values, gemini_inline_media_preserved_in_chat_response,
-    gemini_inline_media_preserved_in_chat_stream, id_conforms, image_url_cache_key_case_sensitive,
-    instruction_messages_preserved, invalid_credential_rejected_before_upstream,
-    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
-    jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
+    anthropic_tool_result_preserves_is_error, anthropic_toolcall_stop_reason, capture_records,
+    client_cache_breakpoints_reach_provider, codex_namespace_only_applies_to_namespaced_tools,
+    content_filter_preserved, document_body_forwarded, endpoint_response_family_preserved,
+    executed_tool_results_preserved, forwarded_body_preserves_values,
+    gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
+    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
+    invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
+    json_schema_property_forwarded, jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
     mcp_unauthorized_token_must_not_mask_as_empty_tools, model_info_capture_identity,
     model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
     no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
@@ -7716,6 +7716,59 @@ fn litellm_passthrough_results_matrix_5_runs_reproduce_consistently() {
             run["control_non_colliding_key_preserved"].as_bool(),
             Some(true),
             "run {run_num}: non-colliding key must be preserved"
+        );
+    }
+}
+
+#[test]
+fn litellm_anthropic_mcp_tool_result_drops_is_error_is_violation() {
+    let turn2_req = fixture("transcripts/119/wire/anthropic-turn2-forwarded-request.json");
+    let verdict = anthropic_tool_result_preserves_is_error(&turn2_req);
+    assert!(
+        matches!(verdict, Verdict::Violation(msg) if msg.contains("is_error: true was dropped")),
+        "dropping is_error: true on tool failure must be a violation"
+    );
+}
+
+#[test]
+fn litellm_anthropic_mcp_control_preserves_is_error_is_conformant() {
+    let control_req = fixture("transcripts/119/wire/control-direct-anthropic-request.json");
+    let verdict = anthropic_tool_result_preserves_is_error(&control_req);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "Anthropic request with is_error: true must be conformant"
+    );
+}
+
+#[test]
+fn litellm_anthropic_mcp_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/119/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["results"].as_array().expect("results array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["proxy_status"].as_u64(),
+            Some(200),
+            "run {run_num}: proxy status must be 200"
+        );
+        assert_eq!(
+            run["turn2_forwarded_has_tool_result"].as_bool(),
+            Some(true),
+            "run {run_num}: Turn 2 must have tool_result"
+        );
+        assert_eq!(
+            run["turn2_forwarded_is_error_present"].as_bool(),
+            Some(false),
+            "run {run_num}: LiteLLM must drop is_error (defect)"
+        );
+        assert_eq!(
+            run["control_direct_is_error_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: direct control must preserve is_error"
         );
     }
 }

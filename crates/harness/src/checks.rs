@@ -6890,3 +6890,124 @@ mod passthrough_jsonrpc_id_tests {
         );
     }
 }
+
+/// Invariant: In an Anthropic Messages API request containing a tool execution failure,
+/// the `tool_result` content block must carry `is_error: true`.
+///
+/// When an MCP tool call fails during execution, omitting `is_error: true` misrepresents
+/// the execution error string as successful tool return data to Anthropic Claude,
+/// preventing error recovery and tool retries.
+pub fn anthropic_tool_result_preserves_is_error(forwarded_body: &str) -> Verdict {
+    let body: Value = match serde_json::from_str(forwarded_body) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("invalid JSON body: {e}")),
+    };
+    let Some(messages) = body.get("messages").and_then(Value::as_array) else {
+        return Verdict::Violation("missing messages array".into());
+    };
+
+    let mut found_error_tool_result = false;
+    let mut has_is_error_true = false;
+
+    for msg in messages {
+        let Some(content) = msg.get("content").and_then(Value::as_array) else {
+            continue;
+        };
+        for block in content {
+            if block.get("type").and_then(Value::as_str) == Some("tool_result") {
+                let content_str = block.get("content").and_then(Value::as_str).unwrap_or("");
+                if content_str.contains("Error")
+                    || content_str.contains("error")
+                    || content_str.contains("failed")
+                    || content_str.contains("Exception")
+                {
+                    found_error_tool_result = true;
+                    if block.get("is_error").and_then(Value::as_bool) == Some(true) {
+                        has_is_error_true = true;
+                    }
+                }
+            }
+        }
+    }
+
+    if found_error_tool_result && !has_is_error_true {
+        return Verdict::Violation(
+            "tool_result contains tool execution failure text but is_error: true was dropped"
+                .into(),
+        );
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod anthropic_mcp_tool_result_tests {
+    use super::{anthropic_tool_result_preserves_is_error, Verdict};
+
+    #[test]
+    fn tool_result_with_is_error_true_is_conformant() {
+        let body = r#"{
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": "toolu_1",
+                            "content": "Database error: connection refused",
+                            "is_error": true
+                        }
+                    ]
+                }
+            ]
+        }"#;
+        assert_eq!(
+            anthropic_tool_result_preserves_is_error(body),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn tool_result_missing_is_error_on_failure_is_violation() {
+        let body = r#"{
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": "toolu_1",
+                            "content": "Error executing tool: Connection refused"
+                        }
+                    ]
+                }
+            ]
+        }"#;
+        assert!(matches!(
+            anthropic_tool_result_preserves_is_error(body),
+            Verdict::Violation(msg) if msg.contains("is_error: true was dropped")
+        ));
+    }
+
+    #[test]
+    fn successful_tool_result_without_is_error_is_conformant() {
+        let body = r#"{
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": "toolu_1",
+                            "content": "SELECT output: 42 rows"
+                        }
+                    ]
+                }
+            ]
+        }"#;
+        assert_eq!(
+            anthropic_tool_result_preserves_is_error(body),
+            Verdict::Conformant
+        );
+    }
+}
