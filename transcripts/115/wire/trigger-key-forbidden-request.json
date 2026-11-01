@@ -1,0 +1,9 @@
+{
+  "model": "forbidden-model",
+  "messages": [
+    {
+      "role": "user",
+      "content": "hello from control"
+    }
+  ]
+}

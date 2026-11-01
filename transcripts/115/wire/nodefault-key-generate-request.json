@@ -1,0 +1,9 @@
+{
+  "key_alias": "nodefault-key-run1-fead46",
+  "models": [
+    "no-default-models"
+  ],
+  "access_group_ids": [
+    "fa5cbfd9-1034-4308-bcc5-6f4a10f68508"
+  ]
+}
