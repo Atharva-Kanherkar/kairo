@@ -24,7 +24,8 @@ use kairo::checks::{
     mcp_unauthorized_token_must_not_mask_as_empty_tools, model_info_capture_identity,
     model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
     no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
-    non_text_block_not_json_dumped, ogx_adaptive_thinking_loss, openai_stream_finish_reason,
+    non_text_block_not_json_dumped, ogx_adaptive_thinking_loss,
+    openai_compatible_unmapped_model_tools_preserved, openai_stream_finish_reason,
     openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
     openrouter_stream_forwards_all_reasoning_details,
     openrouter_stream_preserves_reasoning_details, outbound_request_omits_secret,
@@ -8781,6 +8782,210 @@ fn litellm_o_series_system_prompt_results_matrix_5_runs_reproduce_consistently()
             run["ctrl_fixed_preserved"].as_bool(),
             Some(true),
             "run {run_num}: fixed configuration system prompt must be preserved"
+        );
+    }
+}
+
+// ---- bug 127: LiteLLM JSON-defined openai-like providers lose tools by default on unmapped models ----
+
+#[test]
+fn litellm_json_provider_unmapped_model_unsupported_params_error_wire() {
+    let wire_str = fixture("transcripts/127/wire/bug-unsupported-params-error.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse error bug wire");
+
+    assert_eq!(
+        capture["error_raised"].as_bool(),
+        Some(true),
+        "unmapped model must raise error when drop_params is false"
+    );
+
+    let unsupp: Vec<&str> = capture["error_details"]["unsupported_parameters"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|p| p.as_str().unwrap())
+        .collect();
+    assert!(unsupp.contains(&"tools"));
+
+    let verdict = openai_compatible_unmapped_model_tools_preserved(
+        "nano-gpt",
+        "z-ai/glm-5.3-flash",
+        true,
+        true,
+        &unsupp,
+        false,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("rejected valid tool parameters for unmapped model")
+    ));
+}
+
+#[test]
+fn litellm_json_provider_unmapped_model_tools_stripped_wire() {
+    let wire_str = fixture("transcripts/127/wire/bug-outbound-tools-stripped.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse stripped tools bug wire");
+
+    assert_eq!(
+        capture["tools_in_outbound"].as_bool(),
+        Some(false),
+        "outbound request must have tools stripped when drop_params is true"
+    );
+    assert_eq!(
+        capture["tool_choice_in_outbound"].as_bool(),
+        Some(false),
+        "outbound request must have tool_choice stripped"
+    );
+
+    let body_keys: Vec<&str> = capture["forwarded_body_keys"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|k| k.as_str().unwrap())
+        .collect();
+    assert!(!body_keys.contains(&"tools"));
+    assert!(!body_keys.contains(&"tool_choice"));
+
+    let verdict = openai_compatible_unmapped_model_tools_preserved(
+        "nano-gpt",
+        "z-ai/glm-5.3-flash",
+        true,
+        false,
+        &[],
+        false,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("silently stripped tool parameters from outbound request")
+    ));
+}
+
+#[test]
+fn litellm_json_provider_openai_route_tools_preserved_control_wire() {
+    let wire_str =
+        fixture("transcripts/127/wire/control-outbound-openai-route-tools-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse openai route control wire");
+
+    assert_eq!(
+        capture["tools_in_outbound"].as_bool(),
+        Some(true),
+        "openai route control must preserve tools in outbound"
+    );
+    assert_eq!(
+        capture["tool_choice_in_outbound"].as_bool(),
+        Some(true),
+        "openai route control must preserve tool_choice in outbound"
+    );
+
+    let body_keys: Vec<&str> = capture["forwarded_body_keys"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|k| k.as_str().unwrap())
+        .collect();
+    assert!(body_keys.contains(&"tools"));
+    assert!(body_keys.contains(&"tool_choice"));
+
+    let verdict = openai_compatible_unmapped_model_tools_preserved(
+        "openai",
+        "z-ai/glm-5.3-flash",
+        true,
+        false,
+        &[],
+        true,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_json_provider_mapped_model_tools_preserved_control_wire() {
+    let wire_str =
+        fixture("transcripts/127/wire/control-outbound-mapped-model-tools-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse mapped model control wire");
+
+    assert_eq!(
+        capture["tools_in_outbound"].as_bool(),
+        Some(true),
+        "mapped model control must preserve tools in outbound"
+    );
+    assert_eq!(
+        capture["tool_choice_in_outbound"].as_bool(),
+        Some(true),
+        "mapped model control must preserve tool_choice in outbound"
+    );
+
+    let verdict = openai_compatible_unmapped_model_tools_preserved(
+        "nano-gpt",
+        "nano-gpt/mapped-glm-model",
+        true,
+        false,
+        &[],
+        true,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_json_provider_dynamic_config_fixed_tools_preserved_control_wire() {
+    let wire_str =
+        fixture("transcripts/127/wire/control-dynamic-config-fixed-tools-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse dynamic config fixed wire");
+
+    assert_eq!(
+        capture["resolved_supports_function_calling"].as_bool(),
+        Some(true),
+        "fixed dynamic config must resolve supports_function_calling to true for unmapped model"
+    );
+    assert_eq!(
+        capture["tools_preserved"].as_bool(),
+        Some(true),
+        "fixed dynamic config must preserve tools"
+    );
+
+    let verdict = openai_compatible_unmapped_model_tools_preserved(
+        "nano-gpt",
+        "z-ai/glm-5.3-flash",
+        true,
+        false,
+        &[],
+        true,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_json_provider_unmapped_model_tools_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/127/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_error_raised"].as_bool(),
+            Some(true),
+            "run {run_num}: error must be raised when drop_params is false"
+        );
+        assert_eq!(
+            run["bug_tools_stripped"].as_bool(),
+            Some(true),
+            "run {run_num}: tools must be stripped when drop_params is true"
+        );
+        assert_eq!(
+            run["ctrl_openai_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: openai route must preserve tools"
+        );
+        assert_eq!(
+            run["ctrl_mapped_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: mapped model must preserve tools"
+        );
+        assert_eq!(
+            run["ctrl_fixed_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed configuration must preserve tools"
         );
     }
 }

@@ -1,0 +1,17 @@
+{
+  "test_case": "bug_unsupported_params_error",
+  "model": "nano-gpt/z-ai/glm-5.3-flash",
+  "drop_params": false,
+  "tools_passed": true,
+  "error_raised": true,
+  "error_details": {
+    "exception_type": "UnsupportedParamsError",
+    "model": "z-ai/glm-5.3-flash",
+    "provider": "nano-gpt",
+    "error_message": "litellm.UnsupportedParamsError: nano-gpt does not support parameters: ['tools', 'tool_choice'], for model=z-ai/glm-5.3-flash. To drop these, set `litellm.drop_params=True` or for proxy:\n\n`litellm_settings:\n drop_params: true`\n. \n If you want to use these params dynamically send allowed_openai_params=['tools', 'tool_choice'] in your request.",
+    "unsupported_parameters": [
+      "tools",
+      "tool_choice"
+    ]
+  }
+}

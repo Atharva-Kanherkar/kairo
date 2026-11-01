@@ -7765,3 +7765,102 @@ mod reasoning_system_prompt_tests {
         ));
     }
 }
+
+/// Invariant: When an AI gateway routes chat completion requests with function tools to an OpenAI-compatible provider:
+/// 1. Tool parameters (`tools`, `tool_choice`, etc.) must not be rejected or silently stripped
+///    merely because the requested model is not pre-registered in the gateway's pricing/context catalog.
+/// 2. If the client passes `tools` and `tool_choice`, and function calling is not explicitly disabled by the provider or model,
+///    the outbound request must preserve the tool parameters.
+pub fn openai_compatible_unmapped_model_tools_preserved(
+    provider: &str,
+    model: &str,
+    tools_passed: bool,
+    error_raised: bool,
+    unsupported_params: &[&str],
+    outbound_has_tools: bool,
+) -> Verdict {
+    if !tools_passed {
+        return Verdict::Conformant;
+    }
+
+    if error_raised
+        && unsupported_params
+            .iter()
+            .any(|&p| p == "tools" || p == "tool_choice")
+    {
+        return Verdict::Violation(format!(
+            "gateway rejected valid tool parameters for unmapped model '{model}' on provider '{provider}': {unsupported_params:?}"
+        ));
+    }
+
+    if !outbound_has_tools {
+        return Verdict::Violation(format!(
+            "gateway silently stripped tool parameters from outbound request for unmapped model '{model}' on provider '{provider}'"
+        ));
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod openai_compatible_unmapped_model_tools_tests {
+    use super::*;
+
+    #[test]
+    fn tools_preserved_in_outbound_is_conformant() {
+        let verdict = openai_compatible_unmapped_model_tools_preserved(
+            "nano-gpt",
+            "z-ai/glm-5.3-flash",
+            true,
+            false,
+            &[],
+            true,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_tools_passed_is_conformant() {
+        let verdict = openai_compatible_unmapped_model_tools_preserved(
+            "nano-gpt",
+            "z-ai/glm-5.3-flash",
+            false,
+            false,
+            &[],
+            false,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn error_raised_for_tools_is_violation() {
+        let verdict = openai_compatible_unmapped_model_tools_preserved(
+            "nano-gpt",
+            "z-ai/glm-5.3-flash",
+            true,
+            true,
+            &["tools", "tool_choice"],
+            false,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("rejected valid tool parameters for unmapped model")
+        ));
+    }
+
+    #[test]
+    fn outbound_missing_tools_is_violation() {
+        let verdict = openai_compatible_unmapped_model_tools_preserved(
+            "nano-gpt",
+            "z-ai/glm-5.3-flash",
+            true,
+            false,
+            &[],
+            false,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("silently stripped tool parameters from outbound request")
+        ));
+    }
+}
