@@ -7011,3 +7011,94 @@ mod anthropic_mcp_tool_result_tests {
         );
     }
 }
+
+/// Invariant: When an AI gateway applies content moderation or guardrails to an SSE stream,
+/// the guardrail evaluation must scan all text content across transport chunk boundaries.
+///
+/// If an SSE event (e.g. `content_block_delta` with `text_delta`) is fragmented across
+/// transport read chunks, a conforming gateway must reassemble the complete SSE event
+/// before evaluation. Fragmented transport chunks must not cause prohibited content
+/// to be skipped or silently delivered to the client.
+pub fn anthropic_stream_guardrail_evaluates_all_text(
+    stream_chunks: &[&str],
+    blocked_patterns: &[&str],
+    gateway_allowed_stream: bool,
+) -> Verdict {
+    // Correct SSE frame reassembly: join chunks and split by double newline
+    let reassembled_bytes = stream_chunks.join("");
+    let events = reassembled_bytes.split("\n\n");
+
+    let mut full_text = String::new();
+    for event in events {
+        for line in event.lines() {
+            let line = line.trim();
+            if let Some(data_str) = line.strip_prefix("data:") {
+                let data_str = data_str.trim();
+                if let Ok(val) = serde_json::from_str::<Value>(data_str) {
+                    if val.get("type").and_then(Value::as_str) == Some("content_block_delta") {
+                        if let Some(delta) = val.get("delta") {
+                            if delta.get("type").and_then(Value::as_str) == Some("text_delta") {
+                                if let Some(txt) = delta.get("text").and_then(Value::as_str) {
+                                    full_text.push_str(txt);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    let mut contains_blocked = false;
+    for pattern in blocked_patterns {
+        if full_text.contains(pattern) {
+            contains_blocked = true;
+            break;
+        }
+    }
+
+    if contains_blocked && gateway_allowed_stream {
+        return Verdict::Violation(
+            "stream contains prohibited content that bypassed guardrail due to fragmented SSE chunking"
+                .into(),
+        );
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod anthropic_streaming_guardrail_tests {
+    use super::{anthropic_stream_guardrail_evaluates_all_text, Verdict};
+
+    #[test]
+    fn unfragmented_stream_with_blocked_pattern_blocked_by_gateway_is_conformant() {
+        let chunk = "event: content_block_delta\ndata: {\"type\": \"content_block_delta\", \"index\": 0, \"delta\": {\"type\": \"text_delta\", \"text\": \"Secret: BLOCKED_TOKEN\"}}\n\n";
+        let verdict =
+            anthropic_stream_guardrail_evaluates_all_text(&[chunk], &["BLOCKED_TOKEN"], false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn fragmented_chunks_bypassing_guardrail_is_violation() {
+        let chunk1 = "event: content_block_delta\ndata: {\"type\": \"content_block_delta\", \"index\": 0, \"delta\": {\"type\": \"text_delta\", \"text\": \"Secret: BLO";
+        let chunk2 = "CKED_TOKEN\"}}\n\n";
+        let verdict = anthropic_stream_guardrail_evaluates_all_text(
+            &[chunk1, chunk2],
+            &["BLOCKED_TOKEN"],
+            true,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("bypassed guardrail due to fragmented SSE chunking")
+        ));
+    }
+
+    #[test]
+    fn clean_stream_allowed_by_gateway_is_conformant() {
+        let chunk1 = "event: content_block_delta\ndata: {\"type\": \"content_block_delta\", \"index\": 0, \"delta\": {\"type\": \"text_delta\", \"text\": \"Hello world\"}}\n\n";
+        let verdict =
+            anthropic_stream_guardrail_evaluates_all_text(&[chunk1], &["BLOCKED_TOKEN"], true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}

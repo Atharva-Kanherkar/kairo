@@ -1,0 +1,4 @@
+data: {"error": {"message": "Content blocked: blocked_secret pattern detected", "type": "invalid_request_error", "param": null, "code": "400", "provider_specific_fields": {"error": "Content blocked: blocked_secret pattern detected", "pattern": "blocked_secret", "guardrail_name": "test_content_filter", "guardrail_mode": "post_call"}}}
+
+data: [DONE]
+

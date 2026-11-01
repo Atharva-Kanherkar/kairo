@@ -9,15 +9,16 @@ use kairo::checks::{
     access_group_bounds_model_access, allowlist_bounds_served_model,
     anthropic_response_toolcall_stop_reason, anthropic_server_tools_forwarded,
     anthropic_stop_sequence_reported, anthropic_stream_block_lifecycle,
-    anthropic_stream_safety_stop_reason, anthropic_tool_choice_any_mapped_to_required,
-    anthropic_tool_result_preserves_is_error, anthropic_toolcall_stop_reason, capture_records,
-    client_cache_breakpoints_reach_provider, codex_namespace_only_applies_to_namespaced_tools,
-    content_filter_preserved, document_body_forwarded, endpoint_response_family_preserved,
-    executed_tool_results_preserved, forwarded_body_preserves_values,
-    gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
-    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
-    invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
-    json_schema_property_forwarded, jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
+    anthropic_stream_guardrail_evaluates_all_text, anthropic_stream_safety_stop_reason,
+    anthropic_tool_choice_any_mapped_to_required, anthropic_tool_result_preserves_is_error,
+    anthropic_toolcall_stop_reason, capture_records, client_cache_breakpoints_reach_provider,
+    codex_namespace_only_applies_to_namespaced_tools, content_filter_preserved,
+    document_body_forwarded, endpoint_response_family_preserved, executed_tool_results_preserved,
+    forwarded_body_preserves_values, gemini_inline_media_preserved_in_chat_response,
+    gemini_inline_media_preserved_in_chat_stream, id_conforms, image_url_cache_key_case_sensitive,
+    instruction_messages_preserved, invalid_credential_rejected_before_upstream,
+    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
+    jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
     mcp_unauthorized_token_must_not_mask_as_empty_tools, model_info_capture_identity,
     model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
     no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
@@ -7769,6 +7770,71 @@ fn litellm_anthropic_mcp_results_matrix_5_runs_reproduce_consistently() {
             run["control_direct_is_error_preserved"].as_bool(),
             Some(true),
             "run {run_num}: direct control must preserve is_error"
+        );
+    }
+}
+
+#[test]
+fn litellm_anthropic_streaming_guardrail_fragmented_stream_bypasses_filter_is_violation() {
+    let raw_stream = fixture("transcripts/120/wire/upstream-sse-stream.txt");
+    let blocked_token = "BLOCKED_SECRET_TOKEN_49449";
+    // Simulate transport fragmentation splitting the text_delta SSE event
+    let idx = raw_stream.find(blocked_token).expect("find blocked token") + 6;
+    let chunk1 = &raw_stream[..idx];
+    let chunk2 = &raw_stream[idx..];
+
+    // In the defect case, LiteLLM allowed the stream (gateway_allowed_stream = true)
+    let verdict =
+        anthropic_stream_guardrail_evaluates_all_text(&[chunk1, chunk2], &[blocked_token], true);
+    assert!(
+        matches!(verdict, Verdict::Violation(msg) if msg.contains("bypassed guardrail due to fragmented SSE chunking")),
+        "prohibited stream permitted by gateway due to SSE chunk fragmentation must be a violation"
+    );
+}
+
+#[test]
+fn litellm_anthropic_streaming_guardrail_whole_stream_blocked_is_conformant() {
+    let raw_stream = fixture("transcripts/120/wire/upstream-sse-stream.txt");
+    let blocked_token = "BLOCKED_SECRET_TOKEN_49449";
+
+    // In the control case, LiteLLM blocked the stream (gateway_allowed_stream = false)
+    let verdict =
+        anthropic_stream_guardrail_evaluates_all_text(&[&raw_stream], &[blocked_token], false);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "gateway blocking prohibited stream is conformant"
+    );
+}
+
+#[test]
+fn litellm_anthropic_streaming_guardrail_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/120/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["results"].as_array().expect("results array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["control_proxy_status"].as_u64(),
+            Some(400),
+            "run {run_num}: control proxy status must be 400"
+        );
+        assert_eq!(
+            run["control_blocked_guardrail"].as_bool(),
+            Some(true),
+            "run {run_num}: control must block with guardrail"
+        );
+        assert_eq!(
+            run["bug_proxy_status"].as_u64(),
+            Some(200),
+            "run {run_num}: bug proxy status must be 200"
+        );
+        assert_eq!(
+            run["bug_bypassed_guardrail"].as_bool(),
+            Some(true),
+            "run {run_num}: bug must bypass guardrail (defect)"
         );
     }
 }
