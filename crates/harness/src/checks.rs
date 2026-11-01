@@ -7342,3 +7342,76 @@ mod tool_policy_guardrail_tests {
         assert_eq!(sources, vec!["web_search".to_string()]);
     }
 }
+
+/// Invariant: When an AI gateway manages encrypted response IDs for session continuity and tenant isolation
+/// on OpenAI Responses API endpoints (/v1/responses):
+/// 1. The proxy must enforce tenant ownership on all referenced response IDs, including
+///    `prompt_cache_options.comparison_response_id`, blocking cross-tenant references with HTTP 403.
+/// 2. The proxy must unwrap and decrypt proxy-encrypted response IDs before forwarding requests to the
+///    upstream provider, ensuring `comparison_response_id` satisfies the provider's 64-character length limit.
+pub fn responses_comparison_response_id_authorized_and_unwrapped(
+    caller_owns_response_id: bool,
+    gateway_blocked_cross_tenant: bool,
+    forwarded_id_length: usize,
+    provider_max_id_length: usize,
+) -> Verdict {
+    if !caller_owns_response_id && !gateway_blocked_cross_tenant {
+        return Verdict::Violation(
+            "cross-tenant response ID access in comparison_response_id bypassed proxy ownership check"
+                .into(),
+        );
+    }
+
+    if forwarded_id_length > provider_max_id_length {
+        return Verdict::Violation(format!(
+            "comparison_response_id length {forwarded_id_length} exceeds provider maximum length {provider_max_id_length} due to unstripped proxy encryption"
+        ));
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod responses_comparison_id_tests {
+    use super::{responses_comparison_response_id_authorized_and_unwrapped, Verdict};
+
+    #[test]
+    fn cross_tenant_access_blocked_and_unwrapped_is_conformant() {
+        let verdict = responses_comparison_response_id_authorized_and_unwrapped(
+            false, true, // blocked with 403
+            55, 64,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn cross_tenant_access_allowed_is_violation() {
+        let verdict = responses_comparison_response_id_authorized_and_unwrapped(
+            false, false, // bypassed 403
+            55, 64,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("bypassed proxy ownership check")
+        ));
+    }
+
+    #[test]
+    fn legitimate_owner_with_unwrapped_id_is_conformant() {
+        let verdict =
+            responses_comparison_response_id_authorized_and_unwrapped(true, false, 55, 64);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn legitimate_owner_with_bloated_encrypted_id_is_violation() {
+        let verdict = responses_comparison_response_id_authorized_and_unwrapped(
+            true, false, 225, // encrypted proxy string
+            64,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("exceeds provider maximum length 64")
+        ));
+    }
+}

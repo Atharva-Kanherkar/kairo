@@ -1,0 +1,14 @@
+{
+  "status_code": 200,
+  "body": {
+    "id": "resp_026535357502fdae016ae2fd0978c881919aa0b258d3b1bdbd",
+    "object": "response",
+    "created_at": 1730450005,
+    "model": "gpt-4o",
+    "status": "completed",
+    "prompt_cache_diagnostics": {
+      "type": "cache_hit",
+      "cached_tokens": 128
+    }
+  }
+}
