@@ -1,0 +1,37 @@
+{
+  "iterations": 5,
+  "success_rate": "5/5",
+  "all_passed": true,
+  "runs": [
+    {
+      "bug_logprobs_dropped": true,
+      "ctrl_sync_logprobs_preserved": true,
+      "ctrl_fixed_logprobs_preserved": true,
+      "ctrl_no_logprobs_null": true
+    },
+    {
+      "bug_logprobs_dropped": true,
+      "ctrl_sync_logprobs_preserved": true,
+      "ctrl_fixed_logprobs_preserved": true,
+      "ctrl_no_logprobs_null": true
+    },
+    {
+      "bug_logprobs_dropped": true,
+      "ctrl_sync_logprobs_preserved": true,
+      "ctrl_fixed_logprobs_preserved": true,
+      "ctrl_no_logprobs_null": true
+    },
+    {
+      "bug_logprobs_dropped": true,
+      "ctrl_sync_logprobs_preserved": true,
+      "ctrl_fixed_logprobs_preserved": true,
+      "ctrl_no_logprobs_null": true
+    },
+    {
+      "bug_logprobs_dropped": true,
+      "ctrl_sync_logprobs_preserved": true,
+      "ctrl_fixed_logprobs_preserved": true,
+      "ctrl_no_logprobs_null": true
+    }
+  ]
+}

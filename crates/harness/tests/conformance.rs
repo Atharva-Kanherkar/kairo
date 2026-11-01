@@ -16,11 +16,12 @@ use kairo::checks::{
     codex_namespace_only_applies_to_namespaced_tools, content_filter_preserved,
     document_body_forwarded, endpoint_response_family_preserved, executed_tool_results_preserved,
     extract_anthropic_request_tool_names, extract_anthropic_untrusted_sources,
-    extract_responses_api_untrusted_sources, forwarded_body_preserves_values,
-    gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
-    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
-    invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
-    json_schema_property_forwarded, jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
+    extract_responses_api_untrusted_sources, fake_stream_preserves_provider_logprobs,
+    forwarded_body_preserves_values, gemini_inline_media_preserved_in_chat_response,
+    gemini_inline_media_preserved_in_chat_stream, id_conforms, image_url_cache_key_case_sensitive,
+    instruction_messages_preserved, invalid_credential_rejected_before_upstream,
+    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
+    jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
     mcp_unauthorized_token_must_not_mask_as_empty_tools, model_info_capture_identity,
     model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
     no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
@@ -8986,6 +8987,125 @@ fn litellm_json_provider_unmapped_model_tools_matrix_5_runs_reproduce_consistent
             run["ctrl_fixed_preserved"].as_bool(),
             Some(true),
             "run {run_num}: fixed configuration must preserve tools"
+        );
+    }
+}
+
+// ---- bug 128: LiteLLM provider fake streams drop requested logprobs ----
+
+#[test]
+fn litellm_fake_stream_drops_logprobs_wire() {
+    let wire_str = fixture("transcripts/128/wire/bug-streaming-logprobs-dropped.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire");
+
+    assert_eq!(
+        capture["upstream_returned_logprobs"].as_bool(),
+        Some(true),
+        "upstream provider returned logprobs"
+    );
+    assert!(
+        capture["chunk_choice_logprobs"].is_null(),
+        "first streaming chunk choice must drop logprobs"
+    );
+
+    let verdict = fake_stream_preserves_provider_logprobs(
+        "groq",
+        "llama3-8b-8192",
+        true,
+        true,
+        !capture["chunk_choice_logprobs"].is_null(),
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("dropped requested token log probabilities in fake stream chunks")
+    ));
+}
+
+#[test]
+fn litellm_fake_stream_sync_control_wire() {
+    let wire_str = fixture("transcripts/128/wire/control-sync-logprobs-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse sync control wire");
+
+    assert!(
+        !capture["response_choice_logprobs"].is_null(),
+        "sync response must preserve logprobs"
+    );
+    let first_token = capture["response_choice_logprobs"]["content"][0]["token"]
+        .as_str()
+        .expect("token string");
+    assert_eq!(first_token, "Paris");
+
+    let verdict =
+        fake_stream_preserves_provider_logprobs("groq", "llama3-8b-8192", true, true, true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_fake_stream_fixed_control_wire() {
+    let wire_str =
+        fixture("transcripts/128/wire/control-fixed-fake-stream-logprobs-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed control wire");
+
+    assert_eq!(
+        capture["matches_sync_response"].as_bool(),
+        Some(true),
+        "fixed stream chunk logprobs must match sync response"
+    );
+    assert!(
+        !capture["chunk_choice_logprobs"].is_null(),
+        "fixed stream chunk choice must contain logprobs"
+    );
+
+    let verdict =
+        fake_stream_preserves_provider_logprobs("groq", "llama3-8b-8192", true, true, true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_fake_stream_logprobs_false_control_wire() {
+    let wire_str = fixture("transcripts/128/wire/control-streaming-logprobs-false-null.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse logprobs false control wire");
+
+    assert!(
+        capture["chunk_choice_logprobs"].is_null(),
+        "when logprobs=false, logprobs must be null"
+    );
+
+    let verdict =
+        fake_stream_preserves_provider_logprobs("groq", "llama3-8b-8192", false, false, false);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_fake_stream_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/128/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_logprobs_dropped"].as_bool(),
+            Some(true),
+            "run {run_num}: fake stream must drop logprobs"
+        );
+        assert_eq!(
+            run["ctrl_sync_logprobs_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: sync response must preserve logprobs"
+        );
+        assert_eq!(
+            run["ctrl_fixed_logprobs_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed stream conversion must preserve logprobs"
+        );
+        assert_eq!(
+            run["ctrl_no_logprobs_null"].as_bool(),
+            Some(true),
+            "run {run_num}: logprobs=false must be null"
         );
     }
 }
