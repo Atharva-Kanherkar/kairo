@@ -7102,3 +7102,243 @@ mod anthropic_streaming_guardrail_tests {
         assert_eq!(verdict, Verdict::Conformant);
     }
 }
+
+/// Invariant: When an AI gateway enforces tool policies (input_policy="trusted" | "blocked" | "untrusted"
+/// and output_policy="untrusted" | "trusted"):
+/// 1. Any request or response specifying a tool with input_policy="blocked" must be rejected,
+///    even when mixed with other valid custom tools or when formatted as provider-native tools.
+/// 2. Any response invoking a tool with input_policy="trusted" must be rejected if the conversation
+///    contains outputs from tools with output_policy="untrusted", regardless of request dialect
+///    (OpenAI Chat Completions, Anthropic Messages, or OpenAI Responses API).
+pub fn tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+    request_tools: &[&str],
+    prior_untrusted_sources: &[&str],
+    response_invoked_tools: &[&str],
+    blocked_tool_set: &[&str],
+    trusted_tool_set: &[&str],
+    gateway_blocked: bool,
+) -> Verdict {
+    let blocked_set: HashSet<&str> = blocked_tool_set.iter().copied().collect();
+    let trusted_set: HashSet<&str> = trusted_tool_set.iter().copied().collect();
+
+    // Stage 1 check: request contains blocked tool
+    for tool in request_tools {
+        if blocked_set.contains(tool) && !gateway_blocked {
+            return Verdict::Violation(format!(
+                "request tool '{tool}' has input_policy='blocked' but was allowed past Stage 1 guardrail"
+            ));
+        }
+    }
+
+    // Stage 1/2 check: response invokes blocked tool
+    for tool in response_invoked_tools {
+        if blocked_set.contains(tool) && !gateway_blocked {
+            return Verdict::Violation(format!(
+                "response invoked tool '{tool}' has input_policy='blocked' but was allowed past guardrail"
+            ));
+        }
+    }
+
+    // Stage 2 check: response invokes trusted tool following untrusted tool output
+    if !prior_untrusted_sources.is_empty() {
+        for tool in response_invoked_tools {
+            if trusted_set.contains(tool) && !gateway_blocked {
+                return Verdict::Violation(format!(
+                    "tool '{tool}' requires trusted input but conversation contains untrusted output from [{sources}], violating trust chain",
+                    sources = prior_untrusted_sources.join(", ")
+                ));
+            }
+        }
+    }
+
+    Verdict::Conformant
+}
+
+/// Helper to extract tool names from Anthropic request JSON
+pub fn extract_anthropic_request_tool_names(val: &Value) -> Vec<String> {
+    let mut names = Vec::new();
+    if let Some(tools) = val.get("tools").and_then(Value::as_array) {
+        for tool in tools {
+            if let Some(name) = tool.get("name").and_then(Value::as_str) {
+                names.push(name.to_string());
+            }
+        }
+    }
+    names
+}
+
+/// Helper to extract untrusted tool sources from an Anthropic message sequence given untrusted tool registry names
+pub fn extract_anthropic_untrusted_sources(
+    messages: &[Value],
+    untrusted_tools: &[&str],
+) -> Vec<String> {
+    let untrusted_set: HashSet<&str> = untrusted_tools.iter().copied().collect();
+    let mut tool_use_to_name: BTreeMap<String, String> = BTreeMap::new();
+    let mut untrusted_sources: Vec<String> = Vec::new();
+
+    for msg in messages {
+        let role = msg.get("role").and_then(Value::as_str).unwrap_or("");
+        if let Some(content) = msg.get("content").and_then(Value::as_array) {
+            for block in content {
+                let block_type = block.get("type").and_then(Value::as_str).unwrap_or("");
+                if role == "assistant" && block_type == "tool_use" {
+                    if let (Some(id), Some(name)) = (
+                        block.get("id").and_then(Value::as_str),
+                        block.get("name").and_then(Value::as_str),
+                    ) {
+                        tool_use_to_name.insert(id.to_string(), name.to_string());
+                    }
+                } else if role == "user" && block_type == "tool_result" {
+                    if let Some(tool_use_id) = block.get("tool_use_id").and_then(Value::as_str) {
+                        if let Some(name) = tool_use_to_name.get(tool_use_id) {
+                            if untrusted_set.contains(name.as_str())
+                                && !untrusted_sources.contains(name)
+                            {
+                                untrusted_sources.push(name.clone());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    untrusted_sources
+}
+
+/// Helper to extract untrusted tool sources from an OpenAI Responses API input array
+pub fn extract_responses_api_untrusted_sources(
+    input: &[Value],
+    untrusted_tools: &[&str],
+) -> Vec<String> {
+    let untrusted_set: HashSet<&str> = untrusted_tools.iter().copied().collect();
+    let mut call_to_name: BTreeMap<String, String> = BTreeMap::new();
+    let mut untrusted_sources: Vec<String> = Vec::new();
+
+    for item in input {
+        let item_type = item.get("type").and_then(Value::as_str).unwrap_or("");
+        if item_type == "function_call" {
+            if let (Some(call_id), Some(name)) = (
+                item.get("call_id").and_then(Value::as_str),
+                item.get("name").and_then(Value::as_str),
+            ) {
+                call_to_name.insert(call_id.to_string(), name.to_string());
+            }
+        } else if item_type == "function_call_output" {
+            if let Some(call_id) = item.get("call_id").and_then(Value::as_str) {
+                if let Some(name) = call_to_name.get(call_id) {
+                    if untrusted_set.contains(name.as_str()) && !untrusted_sources.contains(name) {
+                        untrusted_sources.push(name.clone());
+                    }
+                }
+            }
+        }
+    }
+    untrusted_sources
+}
+
+#[cfg(test)]
+mod tool_policy_guardrail_tests {
+    use super::{
+        extract_anthropic_request_tool_names, extract_anthropic_untrusted_sources,
+        extract_responses_api_untrusted_sources,
+        tool_policy_guardrail_enforces_trust_chain_and_blocked_tools, Verdict,
+    };
+    use serde_json::json;
+
+    #[test]
+    fn blocked_tool_allowed_is_violation() {
+        let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+            &["bash"],
+            &[],
+            &[],
+            &["bash"],
+            &["database_exec"],
+            false,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("request tool 'bash' has input_policy='blocked'")
+        ));
+    }
+
+    #[test]
+    fn blocked_tool_rejected_is_conformant() {
+        let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+            &["bash"],
+            &[],
+            &[],
+            &["bash"],
+            &["database_exec"],
+            true,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn trusted_tool_after_untrusted_source_allowed_is_violation() {
+        let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+            &[],
+            &["web_search"],
+            &["database_exec"],
+            &["bash"],
+            &["database_exec"],
+            false,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("violating trust chain")
+        ));
+    }
+
+    #[test]
+    fn trusted_tool_after_untrusted_source_blocked_is_conformant() {
+        let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+            &[],
+            &["web_search"],
+            &["database_exec"],
+            &["bash"],
+            &["database_exec"],
+            true,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn anthropic_helpers_extract_tool_names_and_untrusted_sources() {
+        let req = json!({
+            "tools": [
+                {"type": "bash_20250124", "name": "bash"},
+                {"name": "ping", "input_schema": {"type": "object"}}
+            ],
+            "messages": [
+                {
+                    "role": "assistant",
+                    "content": [{"type": "tool_use", "id": "tu_1", "name": "web_search"}]
+                },
+                {
+                    "role": "user",
+                    "content": [{"type": "tool_result", "tool_use_id": "tu_1", "content": "data"}]
+                }
+            ]
+        });
+
+        let names = extract_anthropic_request_tool_names(&req);
+        assert_eq!(names, vec!["bash".to_string(), "ping".to_string()]);
+
+        let msgs = req["messages"].as_array().unwrap();
+        let sources = extract_anthropic_untrusted_sources(msgs, &["web_search"]);
+        assert_eq!(sources, vec!["web_search".to_string()]);
+    }
+
+    #[test]
+    fn responses_api_helper_extracts_untrusted_sources() {
+        let input = json!([
+            {"type": "function_call", "call_id": "fc_1", "name": "web_search"},
+            {"type": "function_call_output", "call_id": "fc_1", "output": "tainted"}
+        ]);
+
+        let items = input.as_array().unwrap();
+        let sources = extract_responses_api_untrusted_sources(items, &["web_search"]);
+        assert_eq!(sources, vec!["web_search".to_string()]);
+    }
+}

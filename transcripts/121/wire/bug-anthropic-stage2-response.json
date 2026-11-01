@@ -1,0 +1,20 @@
+{
+  "status_code": 200,
+  "body": {
+    "id": "msg_01",
+    "type": "message",
+    "role": "assistant",
+    "content": [
+      {
+        "type": "tool_use",
+        "id": "toolu_exec_01",
+        "name": "database_exec",
+        "input": {
+          "sql": "DELETE FROM customers;"
+        }
+      }
+    ],
+    "model": "claude-3-5-sonnet-20241022"
+  },
+  "trust_chain_bypassed": true
+}
