@@ -7612,3 +7612,88 @@ mod response_cache_destination_tests {
         ));
     }
 }
+
+/// Invariant: When an AI gateway client or SDK integrates with a provider supporting a custom base URL
+/// configured through the environment (e.g. `VOYAGE_API_BASE`):
+/// 1. Outbound requests without an explicit `api_base` kwarg must route to the configured environment base URL
+///    rather than falling back to public default vendor endpoints.
+/// 2. Outbound embedding, contextual embedding, and multimodal embedding URLs must resolve to the configured gateway host.
+/// 3. Outbound requests must never bypass the configured gateway and leak sensitive payloads to public endpoints.
+#[must_use]
+pub fn voyage_embeddings_honor_environment_api_base(
+    configured_env_base: Option<&str>,
+    resolved_target_url: &str,
+    requests_received_by_gateway: usize,
+    expected_requests: usize,
+) -> Verdict {
+    if let Some(env_base) = configured_env_base {
+        if !resolved_target_url.starts_with(env_base) {
+            return Verdict::Violation(format!(
+                "outbound embedding URL '{resolved_target_url}' bypassed configured environment base '{env_base}', routing to public vendor host"
+            ));
+        }
+
+        if requests_received_by_gateway < expected_requests {
+            return Verdict::Violation(format!(
+                "configured gateway at '{env_base}' received {requests_received_by_gateway} of {expected_requests} expected requests; outbound request bypassed gateway"
+            ));
+        }
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod voyage_embeddings_env_api_base_tests {
+    use super::{voyage_embeddings_honor_environment_api_base, Verdict};
+
+    #[test]
+    fn env_base_honored_and_gateway_reached_is_conformant() {
+        let verdict = voyage_embeddings_honor_environment_api_base(
+            Some("http://127.0.0.1:9988/v1"),
+            "http://127.0.0.1:9988/v1/embeddings",
+            1,
+            1,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_env_base_configured_is_conformant() {
+        let verdict = voyage_embeddings_honor_environment_api_base(
+            None,
+            "https://api.voyageai.com/v1/embeddings",
+            0,
+            0,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn env_base_configured_but_url_points_to_public_host_is_violation() {
+        let verdict = voyage_embeddings_honor_environment_api_base(
+            Some("http://127.0.0.1:9988/v1"),
+            "https://api.voyageai.com/v1/embeddings",
+            0,
+            1,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("bypassed configured environment base")
+        ));
+    }
+
+    #[test]
+    fn env_base_url_matches_but_zero_requests_reached_gateway_is_violation() {
+        let verdict = voyage_embeddings_honor_environment_api_base(
+            Some("http://127.0.0.1:9988/v1"),
+            "http://127.0.0.1:9988/v1/embeddings",
+            0,
+            1,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("received 0 of 1 expected requests")
+        ));
+    }
+}

@@ -1,0 +1,45 @@
+{
+  "request_with_explicit_api_base": {
+    "model": "voyage/voyage-3.5",
+    "api_base": "http://127.0.0.1:9988/v1"
+  },
+  "gateway_received_request": {
+    "path": "/v1/embeddings",
+    "headers": {
+      "Host": "127.0.0.1:9988",
+      "Accept": "*/*",
+      "Accept-Encoding": "gzip, deflate",
+      "Connection": "keep-alive",
+      "User-Agent": "litellm/1.108.0",
+      "Content-Length": "72"
+    },
+    "body": {
+      "input": [
+        "Internal enterprise document query"
+      ],
+      "model": "voyage-3.5"
+    }
+  },
+  "returned_embedding_sample": {
+    "object": "list",
+    "data": [
+      {
+        "index": 0,
+        "embedding": [
+          0.0123,
+          -0.0456,
+          0.0789
+        ]
+      }
+    ],
+    "model": "voyage-3.5",
+    "usage": {
+      "completion_tokens": 0,
+      "prompt_tokens": 4,
+      "total_tokens": 4,
+      "completion_tokens_details": null,
+      "prompt_tokens_details": null
+    }
+  },
+  "success": true
+}
