@@ -7864,3 +7864,64 @@ mod openai_compatible_unmapped_model_tools_tests {
         ));
     }
 }
+
+/// Invariant: When an AI gateway replays an upstream provider completion as a stream (fake stream):
+/// 1. If the client requested token probabilities (`logprobs: true`), and the upstream provider returned
+///    complete `logprobs` metadata on choices, the replayed streaming chunks must preserve the token probabilities.
+/// 2. The gateway must not silently drop `logprobs` or set choice `logprobs` to `null` during stream conversion.
+pub fn fake_stream_preserves_provider_logprobs(
+    provider: &str,
+    model: &str,
+    requested_logprobs: bool,
+    provider_had_logprobs: bool,
+    chunk_has_logprobs: bool,
+) -> Verdict {
+    if !requested_logprobs {
+        return Verdict::Conformant;
+    }
+
+    if provider_had_logprobs && !chunk_has_logprobs {
+        return Verdict::Violation(format!(
+            "gateway dropped requested token log probabilities in fake stream chunks for model '{model}' on provider '{provider}'"
+        ));
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod fake_stream_logprobs_tests {
+    use super::*;
+
+    #[test]
+    fn chunk_with_logprobs_is_conformant() {
+        let verdict =
+            fake_stream_preserves_provider_logprobs("groq", "llama3-8b-8192", true, true, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn logprobs_not_requested_is_conformant() {
+        let verdict =
+            fake_stream_preserves_provider_logprobs("groq", "llama3-8b-8192", false, false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn chunk_missing_logprobs_when_provider_had_logprobs_is_violation() {
+        let verdict =
+            fake_stream_preserves_provider_logprobs("groq", "llama3-8b-8192", true, true, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("dropped requested token log probabilities in fake stream chunks")
+        ));
+    }
+
+    #[test]
+    fn provider_had_no_logprobs_missing_in_chunk_is_conformant() {
+        let verdict =
+            fake_stream_preserves_provider_logprobs("groq", "llama3-8b-8192", true, false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}
