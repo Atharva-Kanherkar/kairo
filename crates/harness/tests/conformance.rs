@@ -39,7 +39,7 @@ use kairo::checks::{
     replayed_calls_keep_returned_namespace, response_cache_keys_differentiate_destinations,
     response_cache_tenant_isolation, response_content_not_empty,
     response_conversation_preserves_history, response_omits_secret,
-    responses_api_web_search_user_location_flat,
+    responses_api_web_search_user_location_flat, responses_bridge_logprobs_preserved,
     responses_comparison_response_id_authorized_and_unwrapped,
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
@@ -10342,6 +10342,160 @@ fn litellm_unpriced_response_cost_matrix_5_runs_reproduce_consistently() {
             run["control_fixed_unpriced_omits_header"].as_bool(),
             Some(true),
             "run {run_num}: fixed unpriced model must omit cost header"
+        );
+    }
+}
+
+// ---- bug 139: LiteLLM responses bridge drops logprobs across chat completions bridge ----
+
+#[test]
+fn litellm_responses_bridge_logprobs_dropped_reproduction() {
+    let wire_str = fixture("transcripts/139/wire/bug-responses-bridge-logprobs-dropped.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    let req_top = capture["request_top_logprobs"].as_u64();
+    let bridged_top = capture["bridged_chat_top_logprobs"].as_u64();
+    let bridged_lp = capture["bridged_chat_logprobs"].as_bool();
+    let provider_ret = capture["provider_returned_logprobs"]
+        .as_bool()
+        .unwrap_or(false);
+    let resp_lp = capture["response_has_logprobs"].as_bool().unwrap_or(true);
+
+    assert_eq!(req_top, Some(2));
+    assert!(provider_ret);
+    assert!(!resp_lp);
+    assert!(capture["output_text"]["logprobs"].is_null());
+
+    let verdict = responses_bridge_logprobs_preserved(
+        req_top,
+        bridged_top,
+        bridged_lp,
+        provider_ret,
+        resp_lp,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("dropped chat completion choice logprobs")
+    ));
+}
+
+#[test]
+fn litellm_fixed_responses_bridge_logprobs_preserved_control() {
+    let wire_str =
+        fixture("transcripts/139/wire/control-fixed-responses-bridge-logprobs-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse control fixed wire capture");
+
+    let req_top = capture["request_top_logprobs"].as_u64();
+    let bridged_top = capture["bridged_chat_top_logprobs"].as_u64();
+    let bridged_lp = capture["bridged_chat_logprobs"].as_bool();
+    let provider_ret = capture["provider_returned_logprobs"]
+        .as_bool()
+        .unwrap_or(false);
+    let resp_lp = capture["response_has_logprobs"].as_bool().unwrap_or(false);
+
+    assert_eq!(req_top, Some(2));
+    assert_eq!(bridged_top, Some(2));
+    assert_eq!(bridged_lp, Some(true));
+    assert!(provider_ret);
+    assert!(resp_lp);
+    assert!(capture["output_text"]["logprobs"].is_array());
+
+    let verdict = responses_bridge_logprobs_preserved(
+        req_top,
+        bridged_top,
+        bridged_lp,
+        provider_ret,
+        resp_lp,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_responses_without_logprobs_control() {
+    let wire_str = fixture("transcripts/139/wire/control-responses-without-logprobs.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse normal responses capture");
+
+    let req_top = capture["request_top_logprobs"].as_u64();
+    let bridged_top = capture["bridged_chat_top_logprobs"].as_u64();
+    let bridged_lp = capture["bridged_chat_logprobs"].as_bool();
+    let provider_ret = capture["provider_returned_logprobs"]
+        .as_bool()
+        .unwrap_or(false);
+    let resp_lp = capture["response_has_logprobs"].as_bool().unwrap_or(false);
+
+    assert!(req_top.is_none());
+    assert!(bridged_top.is_none());
+    assert!(bridged_lp.is_none());
+    assert!(!provider_ret);
+    assert!(!resp_lp);
+
+    let verdict = responses_bridge_logprobs_preserved(
+        req_top,
+        bridged_top,
+        bridged_lp,
+        provider_ret,
+        resp_lp,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_provider_validation_top_logprobs_requires_logprobs_control() {
+    let wire_str = fixture(
+        "transcripts/139/wire/control-provider-validation-top-logprobs-requires-logprobs.json",
+    );
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse provider validation capture");
+
+    assert_eq!(capture["status_code"].as_u64(), Some(400));
+    assert_eq!(
+        capture["error_type"].as_str(),
+        Some("invalid_request_error")
+    );
+    assert!(capture["error_message"]
+        .as_str()
+        .unwrap_or("")
+        .contains("'top_logprobs' is only allowed when 'logprobs' is enabled"));
+
+    let top_lp = capture["rejected_outbound_params"]["top_logprobs"].as_u64();
+    let lp = capture["rejected_outbound_params"]["logprobs"].as_bool();
+    let verdict = responses_bridge_logprobs_preserved(top_lp, top_lp, lp, false, false);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("forwarded top_logprobs without setting logprobs: true")
+    ));
+}
+
+#[test]
+fn litellm_responses_bridge_logprobs_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/139/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["defect_unpatched_bridge_drops_logprobs"].as_bool(),
+            Some(true),
+            "run {run_num}: defect must drop logprobs"
+        );
+        assert_eq!(
+            run["control_fixed_bridge_preserves_logprobs"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed bridge must preserve logprobs"
+        );
+        assert_eq!(
+            run["control_responses_without_logprobs"].as_bool(),
+            Some(true),
+            "run {run_num}: unrequested logprobs must be omitted"
+        );
+        assert_eq!(
+            run["control_provider_validation_rule"].as_bool(),
+            Some(true),
+            "run {run_num}: provider validation rule must reject top_logprobs without logprobs"
         );
     }
 }

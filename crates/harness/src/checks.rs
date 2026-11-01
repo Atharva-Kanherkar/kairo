@@ -8664,3 +8664,83 @@ mod unpriced_response_cost_header_tests {
         ));
     }
 }
+
+/// Invariant: In an AI gateway bridging `/v1/responses` to Chat Completions:
+/// 1. When a client requests `top_logprobs`, the gateway must bridge `top_logprobs` and
+///    set `logprobs: true` on the outbound chat completions request.
+/// 2. Outbound requests forwarding `top_logprobs` without `logprobs: true` cause HTTP 400
+///    rejections at upstream providers like OpenAI and Vertex Gemini.
+/// 3. When the provider returns token logprobs in `choices[0].logprobs`, the bridge must
+///    map them into `output_text.logprobs` in the responses API output.
+/// 4. Dropping token logprobs on return translation or omitting `logprobs: true` is a violation.
+pub fn responses_bridge_logprobs_preserved(
+    requested_top_logprobs: Option<u64>,
+    bridged_top_logprobs: Option<u64>,
+    bridged_logprobs: Option<bool>,
+    provider_returned_logprobs: bool,
+    response_has_logprobs: bool,
+) -> Verdict {
+    if requested_top_logprobs.is_some() {
+        if provider_returned_logprobs && !response_has_logprobs {
+            return Verdict::Violation(
+                "LiteLLM responses bridge dropped chat completion choice logprobs from output_text"
+                    .to_string(),
+            );
+        }
+        if bridged_top_logprobs.is_some() && bridged_logprobs != Some(true) {
+            return Verdict::Violation(
+                "LiteLLM responses bridge forwarded top_logprobs without setting logprobs: true"
+                    .to_string(),
+            );
+        }
+        if bridged_top_logprobs.is_none() && bridged_logprobs.is_none() && !response_has_logprobs {
+            return Verdict::Violation(
+                "LiteLLM responses bridge dropped top_logprobs and choice logprobs on chat bridge"
+                    .to_string(),
+            );
+        }
+    } else if provider_returned_logprobs && !response_has_logprobs {
+        return Verdict::Violation(
+            "LiteLLM responses bridge dropped chat completion choice logprobs from output_text"
+                .to_string(),
+        );
+    }
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod responses_bridge_logprobs_tests {
+    use super::*;
+
+    #[test]
+    fn dropped_logprobs_on_response_is_violation() {
+        let verdict = responses_bridge_logprobs_preserved(Some(2), None, None, true, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("dropped chat completion choice logprobs")
+        ));
+    }
+
+    #[test]
+    fn fixed_preserved_logprobs_is_conformant() {
+        let verdict = responses_bridge_logprobs_preserved(Some(2), Some(2), Some(true), true, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn unrequested_logprobs_omitted_is_conformant() {
+        let verdict = responses_bridge_logprobs_preserved(None, None, None, false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn top_logprobs_without_logprobs_is_violation() {
+        let verdict = responses_bridge_logprobs_preserved(Some(2), Some(2), None, false, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("forwarded top_logprobs without setting logprobs: true")
+        ));
+    }
+}
