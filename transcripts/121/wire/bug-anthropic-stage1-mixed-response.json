@@ -1,0 +1,44 @@
+{
+  "status_code": 200,
+  "body": {
+    "model": "claude-3-5-sonnet-20241022",
+    "tools": [
+      {
+        "type": "bash_20250124",
+        "name": "bash"
+      },
+      {
+        "name": "ping",
+        "input_schema": {
+          "type": "object",
+          "properties": {}
+        },
+        "type": "custom",
+        "description": "health check"
+      }
+    ],
+    "messages": [
+      {
+        "role": "user",
+        "content": "execute command"
+      }
+    ],
+    "user_api_key_request_route": "/v1/messages",
+    "metadata": {
+      "standard_logging_guardrail_information": [
+        {
+          "guardrail_name": null,
+          "guardrail_provider": null,
+          "guardrail_mode": null,
+          "guardrail_response": "allow",
+          "guardrail_status": "success",
+          "start_time": 1793520876.019784,
+          "end_time": 1793520876.01983,
+          "duration": 4.7e-05,
+          "masked_entity_count": null
+        }
+      ]
+    }
+  },
+  "blocked_tool_bypassed": true
+}

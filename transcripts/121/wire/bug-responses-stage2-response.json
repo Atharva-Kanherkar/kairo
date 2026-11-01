@@ -1,0 +1,17 @@
+{
+  "status_code": 200,
+  "body": {
+    "id": "resp_01",
+    "object": "response",
+    "output": [
+      {
+        "type": "function_call",
+        "call_id": "fc_exec_01",
+        "name": "database_exec",
+        "arguments": "{\"sql\": \"DELETE FROM customers;\"}"
+      }
+    ],
+    "model": "gpt-4o"
+  },
+  "trust_chain_bypassed": true
+}

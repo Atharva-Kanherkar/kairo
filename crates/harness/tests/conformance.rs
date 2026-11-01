@@ -14,11 +14,12 @@ use kairo::checks::{
     anthropic_toolcall_stop_reason, capture_records, client_cache_breakpoints_reach_provider,
     codex_namespace_only_applies_to_namespaced_tools, content_filter_preserved,
     document_body_forwarded, endpoint_response_family_preserved, executed_tool_results_preserved,
-    forwarded_body_preserves_values, gemini_inline_media_preserved_in_chat_response,
-    gemini_inline_media_preserved_in_chat_stream, id_conforms, image_url_cache_key_case_sensitive,
-    instruction_messages_preserved, invalid_credential_rejected_before_upstream,
-    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
-    jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
+    extract_anthropic_request_tool_names, extract_anthropic_untrusted_sources,
+    extract_responses_api_untrusted_sources, forwarded_body_preserves_values,
+    gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
+    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
+    invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
+    json_schema_property_forwarded, jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
     mcp_unauthorized_token_must_not_mask_as_empty_tools, model_info_capture_identity,
     model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
     no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
@@ -34,6 +35,7 @@ use kairo::checks::{
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
     responses_single_lifecycle, served_model_within_key_allowlist, stop_sequence_forwarded,
     thinking_not_leaked_as_visible_text, thinking_text_forwarded,
+    tool_policy_guardrail_enforces_trust_chain_and_blocked_tools,
     tool_result_images_reach_provider, tool_strict_forwarded, toolcall_id_restored_upstream,
     truncation_preserved, upstream_bearer_is, upstream_omits_header_value,
     worker_loss_stays_invisible, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
@@ -7835,6 +7837,182 @@ fn litellm_anthropic_streaming_guardrail_results_matrix_5_runs_reproduce_consist
             run["bug_bypassed_guardrail"].as_bool(),
             Some(true),
             "run {run_num}: bug must bypass guardrail (defect)"
+        );
+    }
+}
+
+#[test]
+fn litellm_tool_policy_guardrail_openai_chat_control_is_conformant() {
+    let req_str = fixture("transcripts/121/wire/control-openai-chat-request.json");
+    let resp_str = fixture("transcripts/121/wire/control-openai-chat-response.json");
+    let _req: Value = serde_json::from_str(&req_str).expect("parse request");
+    let resp: Value = serde_json::from_str(&resp_str).expect("parse response");
+
+    let status_code = resp["status_code"].as_u64().expect("status_code");
+    assert_eq!(status_code, 400, "control must reject with 400");
+
+    let gateway_blocked = status_code == 400;
+    let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+        &[],
+        &["web_search"],
+        &["database_exec"],
+        &["bash"],
+        &["database_exec"],
+        gateway_blocked,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_tool_policy_guardrail_anthropic_stage2_trust_chain_bypass_is_violation() {
+    let req_str = fixture("transcripts/121/wire/bug-anthropic-stage2-request.json");
+    let resp_str = fixture("transcripts/121/wire/bug-anthropic-stage2-response.json");
+    let req: Value = serde_json::from_str(&req_str).expect("parse request");
+    let resp: Value = serde_json::from_str(&resp_str).expect("parse response");
+
+    let msgs = req["messages"].as_array().expect("messages");
+    let untrusted_sources = extract_anthropic_untrusted_sources(msgs, &["web_search"]);
+    assert_eq!(untrusted_sources, vec!["web_search".to_string()]);
+
+    let status_code = resp["status_code"].as_u64().expect("status_code");
+    assert_eq!(status_code, 200, "bug allows request with 200");
+
+    let gateway_blocked = status_code == 400;
+    let untrusted_sources_refs: Vec<&str> = untrusted_sources.iter().map(String::as_str).collect();
+
+    let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+        &[],
+        &untrusted_sources_refs,
+        &["database_exec"],
+        &["bash"],
+        &["database_exec"],
+        gateway_blocked,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("violating trust chain")
+    ));
+}
+
+#[test]
+fn litellm_tool_policy_guardrail_responses_api_stage2_trust_chain_bypass_is_violation() {
+    let req_str = fixture("transcripts/121/wire/bug-responses-stage2-request.json");
+    let resp_str = fixture("transcripts/121/wire/bug-responses-stage2-response.json");
+    let req: Value = serde_json::from_str(&req_str).expect("parse request");
+    let resp: Value = serde_json::from_str(&resp_str).expect("parse response");
+
+    let input = req["input"].as_array().expect("input");
+    let untrusted_sources = extract_responses_api_untrusted_sources(input, &["web_search"]);
+    assert_eq!(untrusted_sources, vec!["web_search".to_string()]);
+
+    let status_code = resp["status_code"].as_u64().expect("status_code");
+    assert_eq!(status_code, 200, "bug allows request with 200");
+
+    let gateway_blocked = status_code == 400;
+    let untrusted_sources_refs: Vec<&str> = untrusted_sources.iter().map(String::as_str).collect();
+
+    let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+        &[],
+        &untrusted_sources_refs,
+        &["database_exec"],
+        &["bash"],
+        &["database_exec"],
+        gateway_blocked,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("violating trust chain")
+    ));
+}
+
+#[test]
+fn litellm_tool_policy_guardrail_anthropic_stage1_control_is_conformant() {
+    let req_str = fixture("transcripts/121/wire/control-anthropic-stage1-request.json");
+    let resp_str = fixture("transcripts/121/wire/control-anthropic-stage1-response.json");
+    let req: Value = serde_json::from_str(&req_str).expect("parse request");
+    let resp: Value = serde_json::from_str(&resp_str).expect("parse response");
+
+    let tool_names = extract_anthropic_request_tool_names(&req);
+    assert_eq!(tool_names, vec!["bash".to_string()]);
+
+    let status_code = resp["status_code"].as_u64().expect("status_code");
+    assert_eq!(status_code, 400, "control blocks with 400");
+
+    let gateway_blocked = status_code == 400;
+    let tool_refs: Vec<&str> = tool_names.iter().map(String::as_str).collect();
+    let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+        &tool_refs,
+        &[],
+        &[],
+        &["bash"],
+        &["database_exec"],
+        gateway_blocked,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_tool_policy_guardrail_anthropic_stage1_mixed_blocked_tool_bypass_is_violation() {
+    let req_str = fixture("transcripts/121/wire/bug-anthropic-stage1-mixed-request.json");
+    let resp_str = fixture("transcripts/121/wire/bug-anthropic-stage1-mixed-response.json");
+    let req: Value = serde_json::from_str(&req_str).expect("parse request");
+    let resp: Value = serde_json::from_str(&resp_str).expect("parse response");
+
+    let tool_names = extract_anthropic_request_tool_names(&req);
+    assert_eq!(tool_names, vec!["bash".to_string(), "ping".to_string()]);
+
+    let status_code = resp["status_code"].as_u64().expect("status_code");
+    assert_eq!(status_code, 200, "bug allows request with 200");
+
+    let gateway_blocked = status_code == 400;
+    let tool_refs: Vec<&str> = tool_names.iter().map(String::as_str).collect();
+    let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+        &tool_refs,
+        &[],
+        &[],
+        &["bash"],
+        &["database_exec"],
+        gateway_blocked,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("request tool 'bash' has input_policy='blocked'")
+    ));
+}
+
+#[test]
+fn litellm_tool_policy_guardrail_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/121/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["results"].as_array().expect("results array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["openai_control_blocked"].as_bool(),
+            Some(true),
+            "run {run_num}: openai control must be blocked"
+        );
+        assert_eq!(
+            run["anthropic_stage2_allowed"].as_bool(),
+            Some(true),
+            "run {run_num}: anthropic stage 2 must be allowed (defect)"
+        );
+        assert_eq!(
+            run["responses_stage2_allowed"].as_bool(),
+            Some(true),
+            "run {run_num}: responses api stage 2 must be allowed (defect)"
+        );
+        assert_eq!(
+            run["stage1_control_blocked"].as_bool(),
+            Some(true),
+            "run {run_num}: stage 1 control must be blocked"
+        );
+        assert_eq!(
+            run["stage1_mixed_allowed"].as_bool(),
+            Some(true),
+            "run {run_num}: stage 1 mixed must be allowed (defect)"
         );
     }
 }
