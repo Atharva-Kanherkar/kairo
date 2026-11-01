@@ -11,15 +11,16 @@ use kairo::checks::{
     anthropic_response_toolcall_stop_reason, anthropic_server_tools_forwarded,
     anthropic_stop_sequence_reported, anthropic_stream_block_lifecycle,
     anthropic_stream_guardrail_evaluates_all_text, anthropic_stream_safety_stop_reason,
-    anthropic_tool_choice_any_mapped_to_required, anthropic_tool_result_preserves_is_error,
-    anthropic_toolcall_stop_reason, capture_records, client_cache_breakpoints_reach_provider,
-    codex_namespace_only_applies_to_namespaced_tools, content_filter_preserved,
-    document_body_forwarded, endpoint_response_family_preserved, executed_tool_results_preserved,
-    extract_anthropic_request_tool_names, extract_anthropic_untrusted_sources,
-    extract_responses_api_untrusted_sources, fake_stream_preserves_provider_logprobs,
-    forwarded_body_preserves_values, gemini_inline_media_preserved_in_chat_response,
-    gemini_inline_media_preserved_in_chat_stream, google_genai_model_turn_tool_results_preserved,
-    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
+    anthropic_structured_output_config_format, anthropic_tool_choice_any_mapped_to_required,
+    anthropic_tool_result_preserves_is_error, anthropic_toolcall_stop_reason, capture_records,
+    client_cache_breakpoints_reach_provider, codex_namespace_only_applies_to_namespaced_tools,
+    content_filter_preserved, document_body_forwarded, endpoint_response_family_preserved,
+    executed_tool_results_preserved, extract_anthropic_request_tool_names,
+    extract_anthropic_untrusted_sources, extract_responses_api_untrusted_sources,
+    fake_stream_preserves_provider_logprobs, forwarded_body_preserves_values,
+    gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
+    google_genai_model_turn_tool_results_preserved, id_conforms,
+    image_url_cache_key_case_sensitive, instruction_messages_preserved,
     invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
     json_schema_property_forwarded, jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
     mcp_unauthorized_token_must_not_mask_as_empty_tools, minimax_reasoning_effort_preserved,
@@ -9416,6 +9417,135 @@ fn litellm_minimax_matrix_5_runs_reproduce_consistently() {
             run["control_high_effort_preserved"].as_bool(),
             Some(true),
             "run {run_num}: high effort must be preserved"
+        );
+    }
+}
+
+#[test]
+fn litellm_anthropic_structured_output_top_level_format_wire_reproduction() {
+    let wire_str = fixture("transcripts/131/wire/bug-anthropic-top-level-output-format.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    assert_eq!(
+        capture["has_top_level_output_format"].as_bool(),
+        Some(true),
+        "structured output must be emitted as top-level output_format"
+    );
+    assert_eq!(
+        capture["has_output_config"].as_bool(),
+        Some(false),
+        "output_config must not be present"
+    );
+
+    let verdict = anthropic_structured_output_config_format("claude-haiku-4-5", true, true, false);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("emitted structured output as top-level 'output_format' instead of 'output_config.format'")
+    ));
+}
+
+#[test]
+fn litellm_anthropic_fixed_output_config_format_preserved_control() {
+    let wire_str =
+        fixture("transcripts/131/wire/control-fixed-anthropic-output-config-format.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed control wire capture");
+
+    assert_eq!(
+        capture["has_top_level_output_format"].as_bool(),
+        Some(false),
+        "fixed config must not have top-level output_format"
+    );
+    assert_eq!(
+        capture["has_output_config"].as_bool(),
+        Some(true),
+        "fixed config must have output_config"
+    );
+    assert_eq!(
+        capture["output_config"]["format"]["type"].as_str(),
+        Some("json_schema"),
+        "output_config.format must have type json_schema"
+    );
+
+    let verdict = anthropic_structured_output_config_format("claude-haiku-4-5", true, false, true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_anthropic_output_config_beside_effort_control() {
+    let wire_str = fixture("transcripts/131/wire/control-output-config-beside-effort.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse effort control wire capture");
+
+    assert_eq!(
+        capture["has_top_level_output_format"].as_bool(),
+        Some(false),
+        "must not have top-level output_format"
+    );
+    assert_eq!(
+        capture["output_config"]["effort"].as_str(),
+        Some("low"),
+        "effort must be preserved in output_config"
+    );
+    assert_eq!(
+        capture["output_config"]["format"]["type"].as_str(),
+        Some("json_schema"),
+        "format must be nested under output_config"
+    );
+
+    let verdict = anthropic_structured_output_config_format("claude-haiku-4-5", true, false, true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_anthropic_no_structured_output_control() {
+    let wire_str = fixture("transcripts/131/wire/control-no-structured-output.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse plain wire capture");
+
+    assert_eq!(
+        capture["has_top_level_output_format"].as_bool(),
+        Some(false),
+        "plain request must not have top-level output_format"
+    );
+    assert_eq!(
+        capture["has_output_config"].as_bool(),
+        Some(false),
+        "plain request must not have output_config"
+    );
+
+    let verdict =
+        anthropic_structured_output_config_format("claude-haiku-4-5", false, false, false);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_anthropic_structured_output_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/131/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_output_format_top_level"].as_bool(),
+            Some(true),
+            "run {run_num}: output_format must be at top level"
+        );
+        assert_eq!(
+            run["control_fixed_output_config_format"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed config must have output_config.format"
+        );
+        assert_eq!(
+            run["control_beside_effort_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: effort must be preserved beside format"
+        );
+        assert_eq!(
+            run["control_plain_no_format"].as_bool(),
+            Some(true),
+            "run {run_num}: plain request must have no format"
         );
     }
 }

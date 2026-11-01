@@ -8106,3 +8106,76 @@ mod minimax_reasoning_effort_tests {
         ));
     }
 }
+
+/// Invariant: When an AI gateway transforms chat completion requests with structured output
+/// (`response_format` JSON schema) for Anthropic Claude models:
+/// 1. The gateway must place the schema format under `output_config.format` rather than emitting
+///    it as a deprecated top-level `output_format` parameter.
+/// 2. Anthropic-compatible backends (Bedrock, Vertex AI, Anthropic-compatible proxies) ignore
+///    top-level `output_format` without error, causing silent loss of schema enforcement and returning
+///    unconstrained text instead of validated JSON.
+pub fn anthropic_structured_output_config_format(
+    model: &str,
+    has_structured_output: bool,
+    has_top_level_output_format: bool,
+    has_output_config_format: bool,
+) -> Verdict {
+    if !has_structured_output {
+        return Verdict::Conformant;
+    }
+
+    if has_top_level_output_format && !has_output_config_format {
+        return Verdict::Violation(format!(
+            "gateway emitted structured output as top-level 'output_format' instead of 'output_config.format' for model '{model}'"
+        ));
+    }
+
+    if !has_output_config_format {
+        return Verdict::Violation(format!(
+            "gateway omitted structured output format from 'output_config.format' for model '{model}'"
+        ));
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod anthropic_structured_output_tests {
+    use super::*;
+
+    #[test]
+    fn output_config_format_is_conformant() {
+        let verdict =
+            anthropic_structured_output_config_format("claude-haiku-4-5", true, false, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_structured_output_is_conformant() {
+        let verdict =
+            anthropic_structured_output_config_format("claude-haiku-4-5", false, false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn top_level_output_format_is_violation() {
+        let verdict =
+            anthropic_structured_output_config_format("claude-haiku-4-5", true, true, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("emitted structured output as top-level 'output_format'")
+        ));
+    }
+
+    #[test]
+    fn omitted_output_config_format_is_violation() {
+        let verdict =
+            anthropic_structured_output_config_format("claude-haiku-4-5", true, false, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("omitted structured output format from 'output_config.format'")
+        ));
+    }
+}
