@@ -1,0 +1,45 @@
+{
+  "test_case": "control_outbound_mapped_model_tools_preserved",
+  "model": "nano-gpt/mapped-glm-model",
+  "catalog_supports_function_calling": true,
+  "drop_params": true,
+  "tools_passed": true,
+  "tools_in_outbound": true,
+  "tool_choice_in_outbound": true,
+  "forwarded_body_keys": [
+    "model",
+    "messages",
+    "tools",
+    "tool_choice"
+  ],
+  "forwarded_outbound_body": {
+    "model": "mapped-glm-model",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the weather in Tokyo?"
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_weather",
+          "description": "Get current weather for a specified location",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "location": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "location"
+            ]
+          }
+        }
+      }
+    ],
+    "tool_choice": "auto"
+  }
+}

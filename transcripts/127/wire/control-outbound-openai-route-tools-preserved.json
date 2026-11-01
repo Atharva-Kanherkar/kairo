@@ -1,0 +1,44 @@
+{
+  "test_case": "control_outbound_openai_route_tools_preserved",
+  "model": "openai/z-ai/glm-5.3-flash",
+  "drop_params": true,
+  "tools_passed": true,
+  "tools_in_outbound": true,
+  "tool_choice_in_outbound": true,
+  "forwarded_body_keys": [
+    "model",
+    "messages",
+    "tools",
+    "tool_choice"
+  ],
+  "forwarded_outbound_body": {
+    "model": "z-ai/glm-5.3-flash",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the weather in Tokyo?"
+      }
+    ],
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "get_weather",
+          "description": "Get current weather for a specified location",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "location": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "location"
+            ]
+          }
+        }
+      }
+    ],
+    "tool_choice": "auto"
+  }
+}
