@@ -1,0 +1,22 @@
+{
+  "stream_mode": "async",
+  "underlying_iterator": "fixed_sync_non_iterable",
+  "has_completion_start_time": true,
+  "completion_start_time": "2026-11-02 02:25:33.540343",
+  "has_hidden_usage": true,
+  "hidden_usage": {
+    "completion_tokens": 5,
+    "prompt_tokens": 10,
+    "total_tokens": 15,
+    "completion_tokens_details": null,
+    "prompt_tokens_details": null
+  },
+  "top_level_usage": {
+    "completion_tokens": 5,
+    "prompt_tokens": 10,
+    "total_tokens": 15,
+    "completion_tokens_details": null,
+    "prompt_tokens_details": null
+  },
+  "finish_reason": "stop"
+}

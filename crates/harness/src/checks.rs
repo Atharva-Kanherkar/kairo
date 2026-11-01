@@ -8375,3 +8375,73 @@ mod sync_stream_mcp_metadata_tests {
         assert_eq!(verdict, Verdict::Conformant);
     }
 }
+
+/// Invariant: When an AI gateway wraps streaming chat completions in an asynchronous iterator:
+/// 1. The stream handler must record `completion_start_time` on the first chunk so that
+///    time-to-first-token (TTFT) metrics accurately reflect first-token latency rather than
+///    degrading to full stream duration.
+/// 2. When the provider returns token usage on the final chunk without `stream_options.include_usage`,
+///    the stream handler must record usage into hidden parameters (`_hidden_params["usage"]`)
+///    for downstream spend tracking and telemetry.
+/// 3. Parity must be preserved regardless of whether the underlying stream is an async-iterable
+///    or a synchronous iterator (e.g. AWS Bedrock boto3 stream).
+pub fn async_stream_ttft_and_hidden_usage_preserved(
+    stream_mode: &str,
+    has_completion_start_time: bool,
+    has_hidden_usage: bool,
+) -> Verdict {
+    if stream_mode != "async" {
+        return Verdict::Conformant;
+    }
+
+    if !has_completion_start_time {
+        return Verdict::Violation(
+            "async stream failed to record completion_start_time on first chunk, corrupting TTFT metric".to_string(),
+        );
+    }
+
+    if !has_hidden_usage {
+        return Verdict::Violation(
+            "async stream failed to populate hidden-params usage on final chunk, losing spend tracking data".to_string(),
+        );
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod async_stream_ttft_and_hidden_usage_tests {
+    use super::*;
+
+    #[test]
+    fn ttft_and_usage_preserved_is_conformant() {
+        let verdict = async_stream_ttft_and_hidden_usage_preserved("async", true, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn missing_ttft_is_violation() {
+        let verdict = async_stream_ttft_and_hidden_usage_preserved("async", false, true);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("corrupting TTFT metric")
+        ));
+    }
+
+    #[test]
+    fn missing_hidden_usage_is_violation() {
+        let verdict = async_stream_ttft_and_hidden_usage_preserved("async", true, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("losing spend tracking data")
+        ));
+    }
+
+    #[test]
+    fn non_async_mode_is_conformant() {
+        let verdict = async_stream_ttft_and_hidden_usage_preserved("sync", false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}
