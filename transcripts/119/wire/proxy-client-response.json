@@ -1,0 +1,18 @@
+{
+  "id": "msg_turn2",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-3-7-sonnet",
+  "stop_reason": "end_turn",
+  "content": [
+    {
+      "type": "text",
+      "text": "The database query failed due to connection refused."
+    }
+  ],
+  "usage": {
+    "input_tokens": 45,
+    "output_tokens": 12
+  },
+  "stop_sequence": null
+}
