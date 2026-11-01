@@ -32,10 +32,11 @@ use kairo::checks::{
     openai_compatible_unmapped_model_tools_preserved, openai_stream_finish_reason,
     openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
     openrouter_stream_forwards_all_reasoning_details,
-    openrouter_stream_preserves_reasoning_details, outbound_request_omits_secret,
-    parallel_tool_disable_preserved, passthrough_request_preserves_jsonrpc_id,
-    provider_request_id_preserved, reasoning_model_system_prompt_preserved,
-    reasoning_text_order_preserved, refusal_text_preserved, registration_resolvable_by_both_paths,
+    openrouter_stream_preserves_reasoning_details, openrouter_stream_served_model_preserved,
+    outbound_request_omits_secret, parallel_tool_disable_preserved,
+    passthrough_request_preserves_jsonrpc_id, provider_request_id_preserved,
+    reasoning_model_system_prompt_preserved, reasoning_text_order_preserved,
+    refusal_text_preserved, registration_resolvable_by_both_paths,
     replayed_calls_keep_returned_namespace, response_cache_keys_differentiate_destinations,
     response_cache_tenant_isolation, response_content_not_empty,
     response_conversation_preserves_history, response_omits_secret,
@@ -10496,6 +10497,144 @@ fn litellm_responses_bridge_logprobs_matrix_5_runs_reproduce_consistently() {
             run["control_provider_validation_rule"].as_bool(),
             Some(true),
             "run {run_num}: provider validation rule must reject top_logprobs without logprobs"
+        );
+    }
+}
+
+#[test]
+fn litellm_openrouter_stream_served_model_dropped_reproduction() {
+    let wire_str = fixture("transcripts/140/wire/bug-stream-served-model-lost.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse stream served model capture");
+
+    assert_eq!(capture["served_model_lost"].as_bool(), Some(true));
+    assert_eq!(capture["requested_model"].as_str(), Some("openrouter/auto"));
+    assert_eq!(
+        capture["provider_served_model"].as_str(),
+        Some("openai/gpt-4o-mini")
+    );
+    assert_eq!(capture["assembled_response_model"].as_str(), Some("auto"));
+
+    let chunk_models: Vec<String> = capture["emitted_chunk_models"]
+        .as_array()
+        .expect("chunk models")
+        .iter()
+        .map(|v| v.as_str().unwrap().to_string())
+        .collect();
+
+    let verdict = openrouter_stream_served_model_preserved(
+        capture["requested_model"].as_str().unwrap(),
+        capture["provider_served_model"].as_str().unwrap(),
+        &chunk_models,
+        capture["assembled_response_model"].as_str(),
+    );
+
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("overwrote provider served model with requested router alias")
+    ));
+}
+
+#[test]
+fn litellm_fixed_openrouter_stream_served_model_preserved_control() {
+    let wire_str = fixture("transcripts/140/wire/control-fixed-stream-served-model-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed capture");
+
+    assert_eq!(capture["served_model_preserved"].as_bool(), Some(true));
+    assert_eq!(
+        capture["assembled_response_model"].as_str(),
+        Some("openai/gpt-4o-mini")
+    );
+
+    let chunk_models: Vec<String> = capture["emitted_chunk_models"]
+        .as_array()
+        .expect("chunk models")
+        .iter()
+        .map(|v| v.as_str().unwrap().to_string())
+        .collect();
+
+    let verdict = openrouter_stream_served_model_preserved(
+        capture["requested_model"].as_str().unwrap(),
+        capture["provider_served_model"].as_str().unwrap(),
+        &chunk_models,
+        capture["assembled_response_model"].as_str(),
+    );
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_openrouter_direct_stream_model_control() {
+    let wire_str = fixture("transcripts/140/wire/control-direct-stream-model.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse direct capture");
+
+    assert_eq!(capture["direct_model_preserved"].as_bool(), Some(true));
+    assert_eq!(
+        capture["assembled_response_model"].as_str(),
+        Some("openai/gpt-4o-mini")
+    );
+
+    let chunk_models: Vec<String> = capture["emitted_chunk_models"]
+        .as_array()
+        .expect("chunk models")
+        .iter()
+        .map(|v| v.as_str().unwrap().to_string())
+        .collect();
+
+    let verdict = openrouter_stream_served_model_preserved(
+        capture["requested_model"].as_str().unwrap(),
+        capture["provider_served_model"].as_str().unwrap(),
+        &chunk_models,
+        capture["assembled_response_model"].as_str(),
+    );
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_openrouter_nonstreaming_served_model_preserved_control() {
+    let wire_str = fixture("transcripts/140/wire/control-nonstreaming-served-model-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse nonstreaming capture");
+
+    assert_eq!(
+        capture["nonstreaming_served_model_preserved"].as_bool(),
+        Some(true)
+    );
+    assert_eq!(
+        capture["response_model"].as_str(),
+        Some("openai/gpt-4o-mini")
+    );
+}
+
+#[test]
+fn litellm_openrouter_stream_served_model_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/140/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["defect_unpatched_stream_loses_served_model"].as_bool(),
+            Some(true),
+            "run {run_num}: unpatched stream must lose served model"
+        );
+        assert_eq!(
+            run["control_fixed_stream_preserves_served_model"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed stream must preserve served model"
+        );
+        assert_eq!(
+            run["control_direct_stream_preserves_model"].as_bool(),
+            Some(true),
+            "run {run_num}: direct stream must preserve model"
+        );
+        assert_eq!(
+            run["control_nonstreaming_preserves_served_model"].as_bool(),
+            Some(true),
+            "run {run_num}: nonstreaming completion must preserve served model"
         );
     }
 }

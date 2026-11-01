@@ -8744,3 +8744,128 @@ mod responses_bridge_logprobs_tests {
         ));
     }
 }
+
+/// Check that when streaming an OpenRouter router model (e.g. `openrouter/auto`),
+/// the stream wrapper preserves the actual provider-served model identity
+/// reported by OpenRouter across stream chunks and the assembled response.
+pub fn openrouter_stream_served_model_preserved(
+    requested_model: &str,
+    provider_served_model: &str,
+    emitted_chunk_models: &[String],
+    assembled_response_model: Option<&str>,
+) -> Verdict {
+    let requested_bare = requested_model
+        .strip_prefix("openrouter/")
+        .unwrap_or(requested_model);
+
+    if requested_bare == provider_served_model {
+        // Direct model case
+        if assembled_response_model != Some(provider_served_model)
+            && assembled_response_model != Some(requested_model)
+        {
+            return Verdict::Violation(format!(
+                "LiteLLM OpenRouter direct stream assembled model '{assembled_response_model:?}' does not match requested model '{requested_model}'",
+            ));
+        }
+    } else {
+        // Router model case (e.g. openrouter/auto resolving to openai/gpt-4o-mini)
+        if assembled_response_model == Some(requested_bare)
+            || assembled_response_model == Some(requested_model)
+        {
+            return Verdict::Violation(
+                "LiteLLM CustomStreamWrapper overwrote provider served model with requested router alias on assembled response"
+                    .to_string(),
+            );
+        }
+
+        let any_served = emitted_chunk_models
+            .iter()
+            .any(|m| m == provider_served_model);
+        let all_requested = emitted_chunk_models
+            .iter()
+            .all(|m| m == requested_bare || m == requested_model);
+
+        if all_requested && !any_served {
+            return Verdict::Violation(
+                "LiteLLM CustomStreamWrapper overwrote provider served model with requested router alias across all stream chunks"
+                    .to_string(),
+            );
+        }
+
+        if assembled_response_model != Some(provider_served_model) {
+            return Verdict::Violation(format!(
+                "LiteLLM OpenRouter stream assembled response model '{assembled_response_model:?}' does not match provider served model '{provider_served_model}'",
+            ));
+        }
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod openrouter_stream_served_model_tests {
+    use super::*;
+
+    #[test]
+    fn overwritten_auto_model_is_violation() {
+        let chunk_models = vec!["auto".to_string(), "auto".to_string()];
+        let verdict = openrouter_stream_served_model_preserved(
+            "openrouter/auto",
+            "openai/gpt-4o-mini",
+            &chunk_models,
+            Some("auto"),
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("overwrote provider served model with requested router alias")
+        ));
+    }
+
+    #[test]
+    fn preserved_served_model_is_conformant() {
+        let chunk_models = vec![
+            "auto".to_string(),
+            "openai/gpt-4o-mini".to_string(),
+            "openai/gpt-4o-mini".to_string(),
+        ];
+        let verdict = openrouter_stream_served_model_preserved(
+            "openrouter/auto",
+            "openai/gpt-4o-mini",
+            &chunk_models,
+            Some("openai/gpt-4o-mini"),
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn direct_model_is_conformant() {
+        let chunk_models = vec![
+            "openai/gpt-4o-mini".to_string(),
+            "openai/gpt-4o-mini".to_string(),
+        ];
+        let verdict = openrouter_stream_served_model_preserved(
+            "openrouter/openai/gpt-4o-mini",
+            "openai/gpt-4o-mini",
+            &chunk_models,
+            Some("openai/gpt-4o-mini"),
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn mismatched_assembled_model_is_violation() {
+        let chunk_models = vec!["openai/gpt-4o-mini".to_string()];
+        let verdict = openrouter_stream_served_model_preserved(
+            "openrouter/auto",
+            "openai/gpt-4o-mini",
+            &chunk_models,
+            Some("anthropic/claude-3-haiku"),
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("does not match provider served model")
+        ));
+    }
+}
