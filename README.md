@@ -26,12 +26,12 @@ offline with no provider keys.
 <!-- kairo-counts:start -->
 | Metric | Value |
 |---|---|
-| Reproduced issue folders | 97 |
+| Reproduced issue folders | 98 |
 | Gateways under test | LiteLLM, NVIDIA Switchyard, Bifrost, GoModel, AxonHub, any-llm, Dynamo, NIXL, OGX, agentgateway, llm-d Router, and vLLM |
-| Harness tests | 473 (323 conformance checks against recorded transcripts, 150 unit) |
+| Harness tests | 482 (328 conformance checks against recorded transcripts, 154 unit) |
 <!-- kairo-counts:end -->
 
-The 97 folders cover reproduced findings, multi-defect reports, and honest
+The 98 folders cover reproduced findings, multi-defect reports, and honest
 negative results. Versions and reproduction outcomes are recorded per finding
 in [`issues/SCOREBOARD.md`](issues/SCOREBOARD.md), including cited bugs that did
 not reproduce.

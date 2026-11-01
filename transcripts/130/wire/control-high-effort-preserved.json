@@ -1,0 +1,10 @@
+{
+  "model": "minimax/MiniMax-M3.1-Flash",
+  "input_non_default_params": {
+    "reasoning_effort": "high"
+  },
+  "mapped_outbound_params": {
+    "reasoning_effort": "high"
+  },
+  "reasoning_effort_preserved": true
+}

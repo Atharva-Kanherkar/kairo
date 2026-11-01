@@ -8025,3 +8025,84 @@ mod google_genai_model_turn_tool_results_tests {
         ));
     }
 }
+
+/// Invariant: When an AI gateway maps OpenAI chat completion parameters for MiniMax models
+/// (such as `minimax/MiniMax-M3.1-Flash`):
+/// 1. If the client specifies a reasoning effort level (`reasoning_effort: "low"`, `"medium"`, `"high"`, `"max"`),
+///    the gateway must forward `reasoning_effort` in the outbound request parameters.
+/// 2. The gateway must not silently drop `reasoning_effort` from the outbound request when mapping parameters.
+pub fn minimax_reasoning_effort_preserved(
+    provider: &str,
+    model: &str,
+    requested_effort: Option<&str>,
+    outbound_has_effort: bool,
+) -> Verdict {
+    let Some(effort) = requested_effort else {
+        return Verdict::Conformant;
+    };
+
+    if !outbound_has_effort {
+        return Verdict::Violation(format!(
+            "provider '{provider}' dropped requested reasoning_effort '{effort}' from outbound request for model '{model}'"
+        ));
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod minimax_reasoning_effort_tests {
+    use super::*;
+
+    #[test]
+    fn reasoning_effort_preserved_is_conformant() {
+        let verdict = minimax_reasoning_effort_preserved(
+            "minimax",
+            "minimax/MiniMax-M3.1-Flash",
+            Some("low"),
+            true,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_reasoning_effort_requested_is_conformant() {
+        let verdict = minimax_reasoning_effort_preserved(
+            "minimax",
+            "minimax/MiniMax-M3.1-Flash",
+            None,
+            false,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn reasoning_effort_dropped_is_violation() {
+        let verdict = minimax_reasoning_effort_preserved(
+            "minimax",
+            "minimax/MiniMax-M3.1-Flash",
+            Some("low"),
+            false,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("dropped requested reasoning_effort 'low'")
+        ));
+    }
+
+    #[test]
+    fn high_reasoning_effort_dropped_is_violation() {
+        let verdict = minimax_reasoning_effort_preserved(
+            "minimax",
+            "minimax/MiniMax-M3.1-Flash",
+            Some("high"),
+            false,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("dropped requested reasoning_effort 'high'")
+        ));
+    }
+}
