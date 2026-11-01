@@ -6433,3 +6433,184 @@ mod access_group_bounds_model_access_tests {
         ));
     }
 }
+
+/// Invariant (bug 116): on a single-server MCP gateway route, when an upstream
+/// MCP server rejects a bearer token with HTTP 401 Unauthorized, the gateway
+/// must return HTTP 401 with a `WWW-Authenticate` header rather than returning
+/// HTTP 200 OK with an empty tool list (`"tools": []`) and an internal `_meta` outcome.
+///
+/// An HTTP 200 with empty tools misrepresents an upstream authentication failure
+/// as a successful connection to a zero-tool server. This violates RFC 6750
+/// and prevents MCP clients from triggering their OAuth token refresh flow.
+pub fn mcp_unauthorized_token_must_not_mask_as_empty_tools(
+    status: u16,
+    headers: &[(&str, &str)],
+    body_json: &str,
+) -> Verdict {
+    let body: Value = match serde_json::from_str(body_json) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("invalid JSON-RPC body: {e}")),
+    };
+
+    if status == 401 {
+        let has_www_authenticate = headers
+            .iter()
+            .any(|(k, v)| k.eq_ignore_ascii_case("www-authenticate") && !v.trim().is_empty());
+        if has_www_authenticate {
+            return Verdict::Conformant;
+        }
+        return Verdict::Violation(
+            "HTTP 401 response is missing a non-empty WWW-Authenticate challenge header"
+                .to_string(),
+        );
+    }
+
+    if status == 200 {
+        let empty_tools = body
+            .pointer("/result/tools")
+            .and_then(Value::as_array)
+            .is_some_and(Vec::is_empty);
+
+        let has_auth_required_outcome = body
+            .get("result")
+            .and_then(|r| r.get("_meta"))
+            .and_then(|m| m.get("litellm.ai/server_outcomes"))
+            .and_then(Value::as_object)
+            .is_some_and(|outcomes| {
+                outcomes.values().any(|o| {
+                    o.get("status").and_then(Value::as_str) == Some("auth_required")
+                        || o.get("http_status").and_then(Value::as_i64) == Some(401)
+                })
+            });
+
+        if empty_tools && has_auth_required_outcome {
+            return Verdict::Violation(
+                "gateway returned HTTP 200 OK with empty tools: [] masking an upstream 401 auth_required outcome; must return HTTP 401 with WWW-Authenticate"
+                    .to_string(),
+            );
+        }
+
+        if !empty_tools && body.pointer("/result/tools").is_some() {
+            return Verdict::Conformant;
+        }
+
+        if empty_tools && !has_auth_required_outcome {
+            return Verdict::Conformant;
+        }
+    }
+
+    Verdict::Violation(format!(
+        "unexpected status {status} for MCP response: {body_json}"
+    ))
+}
+
+#[cfg(test)]
+mod mcp_unauthorized_token_tests {
+    use super::{mcp_unauthorized_token_must_not_mask_as_empty_tools, Verdict};
+
+    #[test]
+    fn direct_upstream_401_challenge_is_conformant() {
+        let headers = [(
+            "WWW-Authenticate",
+            "Bearer error=\"invalid_token\", error_description=\"The access token expired\"",
+        )];
+        let body = r#"{"jsonrpc":"2.0","id":1,"error":{"code":-32000,"message":"Token expired"}}"#;
+        assert_eq!(
+            mcp_unauthorized_token_must_not_mask_as_empty_tools(401, &headers, body),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn upstream_401_without_challenge_header_is_violation() {
+        let body = r#"{"jsonrpc":"2.0","id":1,"error":{"code":-32000,"message":"Token expired"}}"#;
+        assert!(matches!(
+            mcp_unauthorized_token_must_not_mask_as_empty_tools(401, &[], body),
+            Verdict::Violation(msg) if msg.contains("missing a non-empty WWW-Authenticate")
+        ));
+    }
+
+    #[test]
+    fn masked_upstream_401_as_200_empty_tools_is_violation() {
+        let body = r#"{
+            "jsonrpc": "2.0",
+            "id": 1,
+            "result": {
+                "_meta": {
+                    "litellm.ai/server_outcomes": {
+                        "test_server": {
+                            "status": "auth_required",
+                            "http_status": 401
+                        }
+                    }
+                },
+                "tools": []
+            }
+        }"#;
+        assert!(matches!(
+            mcp_unauthorized_token_must_not_mask_as_empty_tools(200, &[], body),
+            Verdict::Violation(msg) if msg.contains("masking an upstream 401 auth_required outcome")
+        ));
+    }
+
+    #[test]
+    fn valid_token_200_with_tools_is_conformant() {
+        let body = r#"{
+            "jsonrpc": "2.0",
+            "id": 1,
+            "result": {
+                "_meta": {
+                    "litellm.ai/server_outcomes": {
+                        "test_server": {
+                            "status": "ok",
+                            "tool_count": 1
+                        }
+                    }
+                },
+                "tools": [
+                    {
+                        "name": "calculator",
+                        "description": "Performs math",
+                        "inputSchema": {"type": "object"}
+                    }
+                ]
+            }
+        }"#;
+        assert_eq!(
+            mcp_unauthorized_token_must_not_mask_as_empty_tools(200, &[], body),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn legit_empty_tools_without_auth_failure_is_conformant() {
+        let body = r#"{
+            "jsonrpc": "2.0",
+            "id": 1,
+            "result": {
+                "tools": []
+            }
+        }"#;
+        assert_eq!(
+            mcp_unauthorized_token_must_not_mask_as_empty_tools(200, &[], body),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn invalid_json_is_violation() {
+        assert!(matches!(
+            mcp_unauthorized_token_must_not_mask_as_empty_tools(200, &[], "not json"),
+            Verdict::Violation(msg) if msg.contains("invalid JSON-RPC body")
+        ));
+    }
+
+    #[test]
+    fn unexpected_status_is_violation() {
+        let body = r#"{"jsonrpc":"2.0","id":1,"error":{"code":-32603,"message":"Internal error"}}"#;
+        assert!(matches!(
+            mcp_unauthorized_token_must_not_mask_as_empty_tools(500, &[], body),
+            Verdict::Violation(msg) if msg.contains("unexpected status 500")
+        ));
+    }
+}
