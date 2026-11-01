@@ -1,0 +1,8 @@
+{
+  "stream_mode": "async",
+  "underlying_iterator": "sync_with_include_usage",
+  "finish_chunk_has_usage": false,
+  "usage_chunk_has_usage": true,
+  "usage_chunk_total_tokens": 15,
+  "finish_reason": "stop"
+}

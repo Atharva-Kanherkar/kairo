@@ -12,7 +12,8 @@ use kairo::checks::{
     anthropic_stop_sequence_reported, anthropic_stream_block_lifecycle,
     anthropic_stream_guardrail_evaluates_all_text, anthropic_stream_safety_stop_reason,
     anthropic_structured_output_config_format, anthropic_tool_choice_any_mapped_to_required,
-    anthropic_tool_result_preserves_is_error, anthropic_toolcall_stop_reason, capture_records,
+    anthropic_tool_result_preserves_is_error, anthropic_toolcall_stop_reason,
+    async_stream_ttft_and_hidden_usage_preserved, capture_records,
     client_cache_breakpoints_reach_provider, codex_namespace_only_applies_to_namespaced_tools,
     content_filter_preserved, document_body_forwarded, endpoint_response_family_preserved,
     executed_tool_results_preserved, extract_anthropic_request_tool_names,
@@ -9886,6 +9887,137 @@ fn litellm_sync_stream_mcp_matrix_5_runs_reproduce_consistently() {
             run["control_plain_sync_preserved"].as_bool(),
             Some(true),
             "run {run_num}: plain sync stream must preserve metadata"
+        );
+    }
+}
+
+#[test]
+fn litellm_sync_iterator_under_anext_ttft_and_usage_lost_reproduction() {
+    let wire_str =
+        fixture("transcripts/135/wire/bug-sync-iterator-under-anext-ttft-and-usage-lost.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    let stream_mode = capture["stream_mode"].as_str().unwrap_or("");
+    let has_ttft = capture["has_completion_start_time"]
+        .as_bool()
+        .unwrap_or(false);
+    let has_hidden_usage = capture["has_hidden_usage"].as_bool().unwrap_or(false);
+
+    assert!(
+        !has_ttft,
+        "unpatched sync iterator must skip completion_start_time"
+    );
+    assert!(
+        !has_hidden_usage,
+        "unpatched sync iterator must skip hidden-params usage"
+    );
+
+    let verdict =
+        async_stream_ttft_and_hidden_usage_preserved(stream_mode, has_ttft, has_hidden_usage);
+    assert!(matches!(verdict, Verdict::Violation(_)));
+}
+
+#[test]
+fn litellm_async_iterator_under_anext_ttft_and_usage_preserved_control() {
+    let wire_str = fixture(
+        "transcripts/135/wire/control-async-iterator-under-anext-ttft-and-usage-preserved.json",
+    );
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse async control capture");
+
+    let stream_mode = capture["stream_mode"].as_str().unwrap_or("");
+    let has_ttft = capture["has_completion_start_time"]
+        .as_bool()
+        .unwrap_or(false);
+    let has_hidden_usage = capture["has_hidden_usage"].as_bool().unwrap_or(false);
+
+    assert!(has_ttft, "async iterator must record completion_start_time");
+    assert!(
+        has_hidden_usage,
+        "async iterator must populate hidden-params usage"
+    );
+
+    let verdict =
+        async_stream_ttft_and_hidden_usage_preserved(stream_mode, has_ttft, has_hidden_usage);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_fixed_sync_iterator_under_anext_preserved_control() {
+    let wire_str =
+        fixture("transcripts/135/wire/control-fixed-sync-iterator-under-anext-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed control capture");
+
+    let stream_mode = capture["stream_mode"].as_str().unwrap_or("");
+    let has_ttft = capture["has_completion_start_time"]
+        .as_bool()
+        .unwrap_or(false);
+    let has_hidden_usage = capture["has_hidden_usage"].as_bool().unwrap_or(false);
+
+    assert!(
+        has_ttft,
+        "fixed sync iterator must record completion_start_time"
+    );
+    assert!(
+        has_hidden_usage,
+        "fixed sync iterator must populate hidden-params usage"
+    );
+
+    let verdict =
+        async_stream_ttft_and_hidden_usage_preserved(stream_mode, has_ttft, has_hidden_usage);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_sync_iterator_include_usage_delivered_control() {
+    let wire_str =
+        fixture("transcripts/135/wire/control-sync-iterator-include-usage-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse include_usage capture");
+
+    assert_eq!(
+        capture["finish_chunk_has_usage"].as_bool(),
+        Some(false),
+        "finish chunk must not carry top-level usage when include_usage was requested"
+    );
+    assert_eq!(
+        capture["usage_chunk_has_usage"].as_bool(),
+        Some(true),
+        "usage chunk must carry usage"
+    );
+    assert_eq!(
+        capture["usage_chunk_total_tokens"].as_i64(),
+        Some(15),
+        "usage chunk total tokens must equal 15"
+    );
+}
+
+#[test]
+fn litellm_async_noniterable_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/135/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["defect_sync_under_anext_missing_ttft_and_usage"].as_bool(),
+            Some(true),
+            "run {run_num}: defect must reproduce missing TTFT and usage"
+        );
+        assert_eq!(
+            run["control_async_iterable_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: control async iterable must preserve TTFT and usage"
+        );
+        assert_eq!(
+            run["control_fixed_sync_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: control fixed sync must preserve TTFT and usage"
+        );
+        assert_eq!(
+            run["control_include_usage_delivered"].as_bool(),
+            Some(true),
+            "run {run_num}: control include usage must deliver usage chunk"
         );
     }
 }

@@ -1,0 +1,42 @@
+{
+  "iterations": 5,
+  "success_rate": "5/5",
+  "all_passed": true,
+  "runs": [
+    {
+      "run": 1,
+      "defect_sync_under_anext_missing_ttft_and_usage": true,
+      "control_async_iterable_preserved": true,
+      "control_fixed_sync_preserved": true,
+      "control_include_usage_delivered": true
+    },
+    {
+      "run": 2,
+      "defect_sync_under_anext_missing_ttft_and_usage": true,
+      "control_async_iterable_preserved": true,
+      "control_fixed_sync_preserved": true,
+      "control_include_usage_delivered": true
+    },
+    {
+      "run": 3,
+      "defect_sync_under_anext_missing_ttft_and_usage": true,
+      "control_async_iterable_preserved": true,
+      "control_fixed_sync_preserved": true,
+      "control_include_usage_delivered": true
+    },
+    {
+      "run": 4,
+      "defect_sync_under_anext_missing_ttft_and_usage": true,
+      "control_async_iterable_preserved": true,
+      "control_fixed_sync_preserved": true,
+      "control_include_usage_delivered": true
+    },
+    {
+      "run": 5,
+      "defect_sync_under_anext_missing_ttft_and_usage": true,
+      "control_async_iterable_preserved": true,
+      "control_fixed_sync_preserved": true,
+      "control_include_usage_delivered": true
+    }
+  ]
+}
