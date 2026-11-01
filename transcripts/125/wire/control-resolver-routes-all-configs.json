@@ -1,0 +1,7 @@
+{
+  "description": "Resolved URLs when VOYAGE_API_BASE is honored by get_voyage_api_base",
+  "standard_embedding_url": "http://127.0.0.1:9988/v1/embeddings",
+  "contextual_embedding_url": "http://127.0.0.1:9988/v1/contextualizedembeddings",
+  "multimodal_embedding_url": "http://127.0.0.1:9988/v1/multimodalembeddings",
+  "all_target_internal_gateway": true
+}

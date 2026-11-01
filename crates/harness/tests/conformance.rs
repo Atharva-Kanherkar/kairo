@@ -41,9 +41,9 @@ use kairo::checks::{
     tool_policy_guardrail_enforces_trust_chain_and_blocked_tools,
     tool_result_images_reach_provider, tool_strict_forwarded, toolcall_id_restored_upstream,
     truncation_preserved, upstream_bearer_is, upstream_omits_header_value,
-    worker_loss_stays_invisible, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
-    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT, REPLAYED_CALL_NAMESPACE_CHANGED,
-    TOOL_RESULT_IMAGE_DROPPED,
+    voyage_embeddings_honor_environment_api_base, worker_loss_stays_invisible, FunctionToolFormat,
+    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    REPLAYED_CALL_NAMESPACE_CHANGED, TOOL_RESULT_IMAGE_DROPPED,
 };
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -8499,6 +8499,125 @@ fn litellm_cache_destination_results_matrix_5_runs_reproduce_consistently() {
             run["ctrl_direct_isolated"].as_bool(),
             Some(true),
             "run {run_num}: control direct un-cached calls must be isolated"
+        );
+    }
+}
+
+// ---- bug 125: LiteLLM voyage/ embeddings ignore VOYAGE_API_BASE ----
+
+#[test]
+fn litellm_voyage_embeddings_ignore_env_api_base_wire() {
+    let wire_str = fixture("transcripts/125/wire/bug-outbound-bypasses-gateway.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire");
+
+    let env_base = capture["configured_env"]["VOYAGE_API_BASE"]
+        .as_str()
+        .unwrap();
+    let requests_received =
+        usize::try_from(capture["gateway_requests_received"].as_u64().unwrap()).unwrap();
+    let standard_url = capture["resolved_urls_without_explicit_kwarg"]["standard_embedding"]
+        .as_str()
+        .unwrap();
+
+    assert_eq!(requests_received, 0, "gateway received 0 requests");
+    assert!(
+        standard_url.contains("api.voyageai.com"),
+        "URL bypassed gateway to public voyageai.com"
+    );
+
+    let verdict = voyage_embeddings_honor_environment_api_base(Some(env_base), standard_url, 0, 1);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("bypassed configured environment base")
+    ));
+}
+
+#[test]
+fn litellm_voyage_embeddings_explicit_api_base_control_wire() {
+    let wire_str = fixture("transcripts/125/wire/control-explicit-api-base-reaches-gateway.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse control explicit api_base");
+
+    assert_eq!(
+        capture["success"].as_bool(),
+        Some(true),
+        "explicit api_base call must succeed"
+    );
+
+    let path = capture["gateway_received_request"]["path"]
+        .as_str()
+        .unwrap();
+    assert_eq!(
+        path, "/v1/embeddings",
+        "gateway received embeddings request"
+    );
+
+    let verdict = voyage_embeddings_honor_environment_api_base(
+        Some("http://127.0.0.1:9988/v1"),
+        "http://127.0.0.1:9988/v1/embeddings",
+        1,
+        1,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_voyage_embeddings_resolver_routes_all_configs_control_wire() {
+    let wire_str = fixture("transcripts/125/wire/control-resolver-routes-all-configs.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse control resolver wire");
+
+    assert_eq!(
+        capture["all_target_internal_gateway"].as_bool(),
+        Some(true),
+        "all configs must route to internal gateway"
+    );
+
+    let std_url = capture["standard_embedding_url"].as_str().unwrap();
+    let ctx_url = capture["contextual_embedding_url"].as_str().unwrap();
+    let multi_url = capture["multimodal_embedding_url"].as_str().unwrap();
+
+    let env_base = "http://127.0.0.1:9988/v1";
+    assert_eq!(
+        voyage_embeddings_honor_environment_api_base(Some(env_base), std_url, 1, 1),
+        Verdict::Conformant
+    );
+    assert_eq!(
+        voyage_embeddings_honor_environment_api_base(Some(env_base), ctx_url, 1, 1),
+        Verdict::Conformant
+    );
+    assert_eq!(
+        voyage_embeddings_honor_environment_api_base(Some(env_base), multi_url, 1, 1),
+        Verdict::Conformant
+    );
+}
+
+#[test]
+fn litellm_voyage_embeddings_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/125/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_resolvers_ignore_env"].as_bool(),
+            Some(true),
+            "run {run_num}: bug resolvers must ignore VOYAGE_API_BASE"
+        );
+        assert_eq!(
+            run["bug_gateway_bypassed"].as_bool(),
+            Some(true),
+            "run {run_num}: bug gateway must be bypassed (0 requests)"
+        );
+        assert_eq!(
+            run["ctrl_gateway_reached"].as_bool(),
+            Some(true),
+            "run {run_num}: control request with explicit api_base must reach gateway"
+        );
+        assert_eq!(
+            run["ctrl_resolvers_route_to_gateway"].as_bool(),
+            Some(true),
+            "run {run_num}: control resolver must route all 3 configs to gateway"
         );
     }
 }

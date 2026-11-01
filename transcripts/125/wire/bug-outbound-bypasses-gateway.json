@@ -1,0 +1,16 @@
+{
+  "configured_env": {
+    "VOYAGE_API_BASE": "http://127.0.0.1:9988/v1",
+    "VOYAGE_API_KEY": "pa-internal-enterprise-test-token"
+  },
+  "target_model": "voyage/voyage-3.5",
+  "resolved_urls_without_explicit_kwarg": {
+    "standard_embedding": "https://api.voyageai.com/v1/embeddings",
+    "contextual_embedding": "https://api.voyageai.com/v1/contextualizedembeddings",
+    "multimodal_embedding": "https://api.voyageai.com/v1/multimodalembeddings"
+  },
+  "gateway_requests_received": 0,
+  "public_voyage_auth_error_encountered": true,
+  "error_summary": "AuthenticationError: litellm.AuthenticationError: VoyageException - {\"detail\":\"Provided API key is invalid.\"}",
+  "defect": "Request bypassed internal gateway and was routed to public api.voyageai.com"
+}
