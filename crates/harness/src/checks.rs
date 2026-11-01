@@ -7925,3 +7925,103 @@ mod fake_stream_logprobs_tests {
         assert_eq!(verdict, Verdict::Conformant);
     }
 }
+
+/// Invariant: When an AI gateway translates Google GenAI `generateContent` multi-turn conversation
+/// contents to OpenAI/Claude chat completion messages:
+/// 1. If a turn (whether `role: "user"` or `role: "model"`) contains a tool execution response
+///    (`functionResponse` or `function_response`), the gateway must emit a corresponding `role: "tool"`
+///    message with the matching `tool_call_id` and serialized response content.
+/// 2. The gateway must not drop the tool response or replace the turn with an empty assistant message
+///    (`role: "assistant", content: null`), which leaves the preceding tool call unanswered and causes
+///    downstream providers (such as Claude or OpenAI) to reject subsequent requests with HTTP 400.
+pub fn google_genai_model_turn_tool_results_preserved(
+    adapter: &str,
+    target_model: &str,
+    turn_role: &str,
+    has_tool_response: bool,
+    emitted_tool_message: bool,
+    emitted_empty_assistant: bool,
+) -> Verdict {
+    if !has_tool_response {
+        return Verdict::Conformant;
+    }
+
+    if !emitted_tool_message && emitted_empty_assistant {
+        return Verdict::Violation(format!(
+            "adapter '{adapter}' dropped tool response in '{turn_role}' turn and emitted empty assistant message for target model '{target_model}'"
+        ));
+    }
+
+    if !emitted_tool_message {
+        return Verdict::Violation(format!(
+            "adapter '{adapter}' omitted tool message for functionResponse in '{turn_role}' turn for target model '{target_model}'"
+        ));
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod google_genai_model_turn_tool_results_tests {
+    use super::*;
+
+    #[test]
+    fn tool_message_emitted_is_conformant() {
+        let verdict = google_genai_model_turn_tool_results_preserved(
+            "google_genai",
+            "gpt-4.1",
+            "model",
+            true,
+            true,
+            false,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_tool_response_is_conformant() {
+        let verdict = google_genai_model_turn_tool_results_preserved(
+            "google_genai",
+            "gpt-4.1",
+            "model",
+            false,
+            false,
+            false,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn model_turn_dropped_tool_response_empty_assistant_is_violation() {
+        let verdict = google_genai_model_turn_tool_results_preserved(
+            "google_genai",
+            "gpt-4.1",
+            "model",
+            true,
+            false,
+            true,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("dropped tool response in 'model' turn and emitted empty assistant message")
+        ));
+    }
+
+    #[test]
+    fn tool_message_omitted_without_empty_assistant_is_violation() {
+        let verdict = google_genai_model_turn_tool_results_preserved(
+            "google_genai",
+            "gpt-4.1",
+            "model",
+            true,
+            false,
+            false,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("omitted tool message for functionResponse in 'model' turn")
+        ));
+    }
+}
