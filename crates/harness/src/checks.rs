@@ -8594,3 +8594,73 @@ mod github_copilot_system_message_tests {
         assert_eq!(verdict, Verdict::Conformant);
     }
 }
+
+/// Invariant: In an AI gateway proxy:
+/// 1. For unpriced models or deployments where pricing is unknown or unconfigured (`price_known == false`),
+///    the gateway must omit response cost headers (`x-litellm-response-cost`), rather than emitting
+///    `x-litellm-response-cost: 0.0`.
+/// 2. Emitting zero cost on unpriced deployments falsely advertises that the request was free of charge,
+///    misleading billing scrapers, client SDKs, and tenant accounting systems.
+/// 3. For priced models (`price_known == true` and `cost > 0`), the cost header must be present.
+/// 4. For explicitly free models (`price_known == true` and `cost == 0`), emitting zero cost is conformant.
+pub fn unpriced_response_cost_header_omitted(
+    price_known: bool,
+    cost_header_present: bool,
+) -> Verdict {
+    if !price_known {
+        if cost_header_present {
+            Verdict::Violation(
+                "unpriced deployment emitted cost header instead of omitting it, falsely claiming request was free".to_string(),
+            )
+        } else {
+            Verdict::Conformant
+        }
+    } else if !cost_header_present {
+        Verdict::Violation("priced deployment omitted response cost header".to_string())
+    } else {
+        Verdict::Conformant
+    }
+}
+
+#[cfg(test)]
+mod unpriced_response_cost_header_tests {
+    use super::*;
+
+    #[test]
+    fn unpriced_with_header_is_violation() {
+        let verdict = unpriced_response_cost_header_omitted(false, true);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("falsely claiming request was free")
+        ));
+    }
+
+    #[test]
+    fn unpriced_omitted_header_is_conformant() {
+        let verdict = unpriced_response_cost_header_omitted(false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn priced_with_header_is_conformant() {
+        let verdict = unpriced_response_cost_header_omitted(true, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn explicitly_free_with_header_is_conformant() {
+        let verdict = unpriced_response_cost_header_omitted(true, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn priced_missing_header_is_violation() {
+        let verdict = unpriced_response_cost_header_omitted(true, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("priced deployment omitted response cost header")
+        ));
+    }
+}

@@ -1,0 +1,10 @@
+{
+  "model": "custom-priced-model",
+  "price_known": true,
+  "calculated_cost": 0.015,
+  "response_cost_header": "0.015",
+  "cost_header_present": true,
+  "headers": {
+    "x-litellm-response-cost": "0.015"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "model": "custom-unpriced-model",
+  "price_known": false,
+  "calculated_cost": 0.0,
+  "response_cost_header": null,
+  "cost_header_present": false,
+  "headers": {}
+}
