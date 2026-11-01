@@ -6614,3 +6614,173 @@ mod mcp_unauthorized_token_tests {
         ));
     }
 }
+
+/// Invariant: In an OpenRouter Chat Completions SSE stream containing reasoning blocks,
+/// chunks carrying `reasoning_details` thought signatures must not be dropped.
+///
+/// When streaming from reasoning models (e.g. Claude 3.7 / Sonnet 4.5, OpenAI o-series),
+/// the provider transmits thinking deltas followed by a closing chunk containing the
+/// cryptographic thought signature in `delta.reasoning_details`. Dropping signature-only
+/// chunks corrupts the assistant message history and causes subsequent turns to fail with
+/// HTTP 400 Bad Request.
+pub fn openrouter_stream_preserves_reasoning_details(sse_body: &str) -> Verdict {
+    let payloads = match strict_sse_payloads(sse_body) {
+        Ok(payloads) => payloads,
+        Err(bad) => return Verdict::Violation(format!("malformed SSE data: {bad}")),
+    };
+    if payloads.is_empty() {
+        return Verdict::Violation("stream carried no JSON data".into());
+    }
+
+    let mut has_reasoning = false;
+    let mut has_signature = false;
+
+    for payload in &payloads {
+        let Some(choices) = payload.get("choices").and_then(Value::as_array) else {
+            continue;
+        };
+        for choice in choices {
+            let Some(delta) = choice.get("delta").and_then(Value::as_object) else {
+                continue;
+            };
+
+            if delta.contains_key("reasoning")
+                || delta.contains_key("reasoning_content")
+                || delta.contains_key("reasoning_details")
+            {
+                has_reasoning = true;
+            }
+
+            if let Some(details) = delta.get("reasoning_details").and_then(Value::as_array) {
+                for item in details {
+                    if let Some(sig) = item.get("signature").and_then(Value::as_str) {
+                        if !sig.trim().is_empty() {
+                            has_signature = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if has_reasoning && !has_signature {
+        return Verdict::Violation(
+            "stream contains reasoning blocks but dropped the reasoning_details thought signature chunk"
+                .into(),
+        );
+    }
+
+    Verdict::Conformant
+}
+
+/// Invariant: A gateway forwarding an OpenRouter Chat Completions stream must forward all
+/// `reasoning_details` entries (including cryptographic signatures) emitted by the upstream provider.
+pub fn openrouter_stream_forwards_all_reasoning_details(
+    upstream_sse: &str,
+    client_sse: &str,
+) -> Verdict {
+    let upstream_payloads = match strict_sse_payloads(upstream_sse) {
+        Ok(p) => p,
+        Err(bad) => return Verdict::Violation(format!("malformed upstream SSE data: {bad}")),
+    };
+    let client_payloads = match strict_sse_payloads(client_sse) {
+        Ok(p) => p,
+        Err(bad) => return Verdict::Violation(format!("malformed client SSE data: {bad}")),
+    };
+
+    let extract_signatures = |payloads: &[Value]| -> Vec<String> {
+        let mut signatures = Vec::new();
+        for payload in payloads {
+            let Some(choices) = payload.get("choices").and_then(Value::as_array) else {
+                continue;
+            };
+            for choice in choices {
+                let Some(details) = choice
+                    .pointer("/delta/reasoning_details")
+                    .and_then(Value::as_array)
+                else {
+                    continue;
+                };
+                for item in details {
+                    if let Some(sig) = item.get("signature").and_then(Value::as_str) {
+                        if !sig.trim().is_empty() {
+                            signatures.push(sig.to_string());
+                        }
+                    }
+                }
+            }
+        }
+        signatures
+    };
+
+    let upstream_sigs = extract_signatures(&upstream_payloads);
+    let client_sigs = extract_signatures(&client_payloads);
+
+    for sig in &upstream_sigs {
+        if !client_sigs.contains(sig) {
+            return Verdict::Violation(format!(
+                "gateway dropped reasoning_details signature: {sig}"
+            ));
+        }
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod openrouter_reasoning_details_tests {
+    use super::{
+        openrouter_stream_forwards_all_reasoning_details,
+        openrouter_stream_preserves_reasoning_details, Verdict,
+    };
+
+    #[test]
+    fn stream_with_signature_is_conformant() {
+        let sse = "\
+data: {\"choices\":[{\"delta\":{\"reasoning\":\"thinking\",\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"thinking\"}]}}]}\n\n\
+data: {\"choices\":[{\"delta\":{\"reasoning_details\":[{\"type\":\"reasoning.text\",\"signature\":\"sig_123\"}]}}]}\n\n\
+data: {\"choices\":[{\"delta\":{\"content\":\"hello\"}}]}\n\n\
+data: [DONE]\n\n";
+        assert_eq!(
+            openrouter_stream_preserves_reasoning_details(sse),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn stream_missing_signature_is_violation() {
+        let sse = "\
+data: {\"choices\":[{\"delta\":{\"reasoning\":\"thinking\",\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"thinking\"}]}}]}\n\n\
+data: {\"choices\":[{\"delta\":{\"content\":\"hello\"}}]}\n\n\
+data: [DONE]\n\n";
+        assert!(matches!(
+            openrouter_stream_preserves_reasoning_details(sse),
+            Verdict::Violation(msg) if msg.contains("dropped the reasoning_details thought signature")
+        ));
+    }
+
+    #[test]
+    fn plain_stream_without_reasoning_is_conformant() {
+        let sse = "\
+data: {\"choices\":[{\"delta\":{\"content\":\"hello world\"}}]}\n\n\
+data: [DONE]\n\n";
+        assert_eq!(
+            openrouter_stream_preserves_reasoning_details(sse),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn differential_forwarding_detects_dropped_signature() {
+        let upstream = "\
+data: {\"choices\":[{\"delta\":{\"reasoning_details\":[{\"type\":\"reasoning.text\",\"signature\":\"sig_xyz\"}]}}]}\n\n\
+data: [DONE]\n\n";
+        let client = "\
+data: {\"choices\":[{\"delta\":{\"content\":\"done\"}}]}\n\n\
+data: [DONE]\n\n";
+        assert!(matches!(
+            openrouter_stream_forwards_all_reasoning_details(upstream, client),
+            Verdict::Violation(msg) if msg.contains("gateway dropped reasoning_details signature: sig_xyz")
+        ));
+    }
+}

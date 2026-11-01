@@ -1,0 +1,28 @@
+{
+  "model": "claude-sonnet-4.5",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Calculate 42"
+    },
+    {
+      "role": "assistant",
+      "content": "The answer is 42.",
+      "reasoning": "Let me solve this step by step.",
+      "reasoning_details": [
+        {
+          "type": "reasoning.text",
+          "text": "Let me solve this step by step."
+        },
+        {
+          "type": "reasoning.text",
+          "signature": "SIG-claude-thought-signature-12345"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Are you sure?"
+    }
+  ]
+}
