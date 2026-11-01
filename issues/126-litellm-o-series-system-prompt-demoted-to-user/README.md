@@ -61,6 +61,6 @@ Coupled with `litellm/model_prices_and_context_window.json` lacking `"supports_s
   * `litellm_o3_system_prompt_demoted_to_user_wire`
   * `litellm_o4mini_system_prompt_demoted_to_user_wire`
   * `litellm_o3mini_system_prompt_demoted_to_user_wire`
-  * `litellm_o1_system_prompt_preserved_control_wire`
-  * `litellm_fixed_catalog_system_prompt_preserved_control_wire`
-  * `litellm_o_series_system_prompt_matrix_5_runs_reproduce_consistently`
+  * `litellm_o1_system_prompt_control_preserved_wire`
+  * `litellm_o_series_fixed_system_prompt_control_wire`
+  * `litellm_o_series_system_prompt_results_matrix_5_runs_reproduce_consistently`
