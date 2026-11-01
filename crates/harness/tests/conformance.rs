@@ -15,8 +15,8 @@ use kairo::checks::{
     anthropic_tool_result_preserves_is_error, anthropic_toolcall_stop_reason,
     async_stream_ttft_and_hidden_usage_preserved, capture_records,
     client_cache_breakpoints_reach_provider, codex_namespace_only_applies_to_namespaced_tools,
-    content_filter_preserved, daily_spend_endpoint_attributed, document_body_forwarded,
-    endpoint_response_family_preserved, executed_tool_results_preserved,
+    cohere_v2_finish_reason_mapped, content_filter_preserved, daily_spend_endpoint_attributed,
+    document_body_forwarded, endpoint_response_family_preserved, executed_tool_results_preserved,
     extract_anthropic_request_tool_names, extract_anthropic_untrusted_sources,
     extract_responses_api_untrusted_sources, fake_stream_preserves_provider_logprobs,
     forwarded_body_preserves_values, gemini_inline_media_preserved_in_chat_response,
@@ -10635,6 +10635,158 @@ fn litellm_openrouter_stream_served_model_matrix_5_runs_reproduce_consistently()
             run["control_nonstreaming_preserves_served_model"].as_bool(),
             Some(true),
             "run {run_num}: nonstreaming completion must preserve served model"
+        );
+    }
+}
+
+#[test]
+fn litellm_cohere_v2_tool_call_finish_reason_stop_reproduction() {
+    let wire_str = fixture("transcripts/141/wire/bug-cohere-v2-tool-call-finish-reason-stop.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse tool call capture");
+
+    assert_eq!(
+        capture["provider_finish_reason"].as_str(),
+        Some("TOOL_CALL")
+    );
+    assert_eq!(capture["has_tool_calls"].as_bool(), Some(true));
+    assert_eq!(capture["response_finish_reason"].as_str(), Some("stop"));
+
+    let verdict = cohere_v2_finish_reason_mapped(
+        capture["provider_finish_reason"].as_str().unwrap(),
+        capture["has_tool_calls"].as_bool().unwrap(),
+        capture["response_finish_reason"].as_str(),
+    );
+
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("returned finish_reason 'stop' instead of 'tool_calls'")
+    ));
+}
+
+#[test]
+fn litellm_cohere_v2_max_tokens_finish_reason_stop_reproduction() {
+    let wire_str = fixture("transcripts/141/wire/bug-cohere-v2-max-tokens-finish-reason-stop.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse max tokens capture");
+
+    assert_eq!(
+        capture["provider_finish_reason"].as_str(),
+        Some("MAX_TOKENS")
+    );
+    assert_eq!(capture["response_finish_reason"].as_str(), Some("stop"));
+
+    let verdict = cohere_v2_finish_reason_mapped(
+        capture["provider_finish_reason"].as_str().unwrap(),
+        capture["has_tool_calls"].as_bool().unwrap(),
+        capture["response_finish_reason"].as_str(),
+    );
+
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("returned finish_reason 'stop' instead of 'length'")
+    ));
+}
+
+#[test]
+fn litellm_fixed_cohere_v2_tool_calls_control() {
+    let wire_str = fixture("transcripts/141/wire/control-fixed-cohere-v2-tool-calls.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed tool call capture");
+
+    assert_eq!(
+        capture["provider_finish_reason"].as_str(),
+        Some("TOOL_CALL")
+    );
+    assert_eq!(capture["has_tool_calls"].as_bool(), Some(true));
+    assert_eq!(
+        capture["response_finish_reason"].as_str(),
+        Some("tool_calls")
+    );
+
+    let verdict = cohere_v2_finish_reason_mapped(
+        capture["provider_finish_reason"].as_str().unwrap(),
+        capture["has_tool_calls"].as_bool().unwrap(),
+        capture["response_finish_reason"].as_str(),
+    );
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_fixed_cohere_v2_max_tokens_control() {
+    let wire_str = fixture("transcripts/141/wire/control-fixed-cohere-v2-max-tokens.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed max tokens capture");
+
+    assert_eq!(
+        capture["provider_finish_reason"].as_str(),
+        Some("MAX_TOKENS")
+    );
+    assert_eq!(capture["response_finish_reason"].as_str(), Some("length"));
+
+    let verdict = cohere_v2_finish_reason_mapped(
+        capture["provider_finish_reason"].as_str().unwrap(),
+        capture["has_tool_calls"].as_bool().unwrap(),
+        capture["response_finish_reason"].as_str(),
+    );
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_cohere_v2_complete_control() {
+    let wire_str = fixture("transcripts/141/wire/control-cohere-v2-complete.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse complete capture");
+
+    assert_eq!(capture["provider_finish_reason"].as_str(), Some("COMPLETE"));
+    assert_eq!(capture["response_finish_reason"].as_str(), Some("stop"));
+
+    let verdict = cohere_v2_finish_reason_mapped(
+        capture["provider_finish_reason"].as_str().unwrap(),
+        capture["has_tool_calls"].as_bool().unwrap(),
+        capture["response_finish_reason"].as_str(),
+    );
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_cohere_v2_finish_reason_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/141/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["defect_unpatched_tool_call_reports_stop"].as_bool(),
+            Some(true),
+            "run {run_num}: defect TOOL_CALL must report stop"
+        );
+        assert_eq!(
+            run["defect_unpatched_max_tokens_reports_stop"].as_bool(),
+            Some(true),
+            "run {run_num}: defect MAX_TOKENS must report stop"
+        );
+        assert_eq!(
+            run["control_fixed_tool_call_reports_tool_calls"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed TOOL_CALL must report tool_calls"
+        );
+        assert_eq!(
+            run["control_fixed_max_tokens_reports_length"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed MAX_TOKENS must report length"
+        );
+        assert_eq!(
+            run["control_complete_reports_stop"].as_bool(),
+            Some(true),
+            "run {run_num}: COMPLETE must report stop"
+        );
+        assert_eq!(
+            run["control_stop_sequence_reports_stop"].as_bool(),
+            Some(true),
+            "run {run_num}: STOP_SEQUENCE must report stop"
         );
     }
 }

@@ -1,0 +1,31 @@
+{
+  "description": "Fixed Cohere v2 response mapping finish_reason MAX_TOKENS to length (PR #49529)",
+  "target": "LiteLLM with PR #49529 fix",
+  "cohere_raw_response": {
+    "id": "c14c80c3-18eb-4519-9460-6c92edd8cfb5",
+    "finish_reason": "MAX_TOKENS",
+    "message": {
+      "role": "assistant",
+      "content": [
+        {
+          "type": "text",
+          "text": "This response was truncated before finishing."
+        }
+      ]
+    },
+    "usage": {
+      "billed_units": {
+        "input_tokens": 15,
+        "output_tokens": 50
+      },
+      "tokens": {
+        "input_tokens": 150,
+        "output_tokens": 50
+      }
+    }
+  },
+  "provider_finish_reason": "MAX_TOKENS",
+  "response_finish_reason": "length",
+  "has_tool_calls": false,
+  "tool_calls_count": 0
+}
