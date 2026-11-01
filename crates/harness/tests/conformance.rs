@@ -15,13 +15,13 @@ use kairo::checks::{
     anthropic_tool_result_preserves_is_error, anthropic_toolcall_stop_reason,
     async_stream_ttft_and_hidden_usage_preserved, capture_records,
     client_cache_breakpoints_reach_provider, codex_namespace_only_applies_to_namespaced_tools,
-    content_filter_preserved, document_body_forwarded, endpoint_response_family_preserved,
-    executed_tool_results_preserved, extract_anthropic_request_tool_names,
-    extract_anthropic_untrusted_sources, extract_responses_api_untrusted_sources,
-    fake_stream_preserves_provider_logprobs, forwarded_body_preserves_values,
-    gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
-    google_genai_model_turn_tool_results_preserved, id_conforms,
-    image_url_cache_key_case_sensitive, instruction_messages_preserved,
+    content_filter_preserved, daily_spend_endpoint_attributed, document_body_forwarded,
+    endpoint_response_family_preserved, executed_tool_results_preserved,
+    extract_anthropic_request_tool_names, extract_anthropic_untrusted_sources,
+    extract_responses_api_untrusted_sources, fake_stream_preserves_provider_logprobs,
+    forwarded_body_preserves_values, gemini_inline_media_preserved_in_chat_response,
+    gemini_inline_media_preserved_in_chat_stream, google_genai_model_turn_tool_results_preserved,
+    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
     invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
     json_schema_property_forwarded, jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
     mcp_unauthorized_token_must_not_mask_as_empty_tools, minimax_reasoning_effort_preserved,
@@ -10018,6 +10018,106 @@ fn litellm_async_noniterable_matrix_5_runs_reproduce_consistently() {
             run["control_include_usage_delivered"].as_bool(),
             Some(true),
             "run {run_num}: control include usage must deliver usage chunk"
+        );
+    }
+}
+
+#[test]
+fn litellm_anthropic_messages_missing_endpoint_spend_row_reproduction() {
+    let wire_str =
+        fixture("transcripts/136/wire/bug-anthropic-messages-spend-row-missing-endpoint.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    let call_type = capture["call_type"].as_str().unwrap_or("");
+    let endpoint = capture["endpoint"].as_str();
+    let transaction_key = capture["transaction_key"].as_str().unwrap_or("");
+
+    assert_eq!(capture["has_endpoint"].as_bool(), Some(false));
+    assert!(endpoint.is_none());
+
+    let verdict = daily_spend_endpoint_attributed(call_type, endpoint, transaction_key);
+    assert!(matches!(verdict, Verdict::Violation(_)));
+}
+
+#[test]
+fn litellm_acompletion_chat_endpoint_spend_row_control() {
+    let wire_str = fixture("transcripts/136/wire/control-acompletion-spend-row-chat-endpoint.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse chat control capture");
+
+    let call_type = capture["call_type"].as_str().unwrap_or("");
+    let endpoint = capture["endpoint"].as_str();
+    let transaction_key = capture["transaction_key"].as_str().unwrap_or("");
+
+    assert_eq!(endpoint, Some("/chat/completions"));
+    assert_eq!(capture["ends_with_endpoint"].as_bool(), Some(true));
+
+    let verdict = daily_spend_endpoint_attributed(call_type, endpoint, transaction_key);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_fixed_anthropic_messages_messages_endpoint_control() {
+    let wire_str = fixture(
+        "transcripts/136/wire/control-fixed-anthropic-messages-spend-row-messages-endpoint.json",
+    );
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed control capture");
+
+    let call_type = capture["call_type"].as_str().unwrap_or("");
+    let endpoint = capture["endpoint"].as_str();
+    let transaction_key = capture["transaction_key"].as_str().unwrap_or("");
+
+    assert_eq!(endpoint, Some("/messages"));
+    assert_eq!(capture["ends_with_endpoint"].as_bool(), Some(true));
+
+    let verdict = daily_spend_endpoint_attributed(call_type, endpoint, transaction_key);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_aresponses_responses_endpoint_spend_row_control() {
+    let wire_str =
+        fixture("transcripts/136/wire/control-aresponses-spend-row-responses-endpoint.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse responses control capture");
+
+    let call_type = capture["call_type"].as_str().unwrap_or("");
+    let endpoint = capture["endpoint"].as_str();
+    let transaction_key = capture["transaction_key"].as_str().unwrap_or("");
+
+    assert_eq!(endpoint, Some("/responses"));
+    assert_eq!(capture["ends_with_endpoint"].as_bool(), Some(true));
+
+    let verdict = daily_spend_endpoint_attributed(call_type, endpoint, transaction_key);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_anthropic_messages_endpoint_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/136/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["defect_anthropic_messages_missing_endpoint"].as_bool(),
+            Some(true),
+            "run {run_num}: defect must reproduce missing endpoint"
+        );
+        assert_eq!(
+            run["control_acompletion_has_endpoint"].as_bool(),
+            Some(true),
+            "run {run_num}: control acompletion must have endpoint"
+        );
+        assert_eq!(
+            run["control_fixed_anthropic_has_endpoint"].as_bool(),
+            Some(true),
+            "run {run_num}: control fixed anthropic must have endpoint"
+        );
+        assert_eq!(
+            run["control_aresponses_has_endpoint"].as_bool(),
+            Some(true),
+            "run {run_num}: control aresponses must have endpoint"
         );
     }
 }
