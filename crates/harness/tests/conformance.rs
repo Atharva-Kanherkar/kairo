@@ -42,8 +42,8 @@ use kairo::checks::{
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
     responses_single_lifecycle, served_model_within_key_allowlist, stop_sequence_forwarded,
-    thinking_not_leaked_as_visible_text, thinking_text_forwarded,
-    tool_policy_guardrail_enforces_trust_chain_and_blocked_tools,
+    sync_stream_mcp_metadata_preserved, thinking_not_leaked_as_visible_text,
+    thinking_text_forwarded, tool_policy_guardrail_enforces_trust_chain_and_blocked_tools,
     tool_result_images_reach_provider, tool_strict_forwarded, toolcall_id_restored_upstream,
     truncation_preserved, upstream_bearer_is, upstream_omits_header_value,
     voyage_embeddings_honor_environment_api_base, worker_loss_stays_invisible, FunctionToolFormat,
@@ -9781,6 +9781,111 @@ fn litellm_responses_user_location_matrix_5_runs_reproduce_consistently() {
             run["control_plain_no_web_search"].as_bool(),
             Some(true),
             "run {run_num}: plain request control must be conformant"
+        );
+    }
+}
+
+#[test]
+fn litellm_sync_stream_mcp_metadata_dropped_wire_reproduction() {
+    let wire_str = fixture("transcripts/134/wire/bug-sync-stream-mcp-metadata-dropped.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    assert_eq!(
+        capture["finish_chunk_has_provider_specific_fields"].as_bool(),
+        Some(false),
+        "finish chunk must not have provider_specific_fields in unpatched sync stream"
+    );
+    assert!(
+        capture["provider_specific_fields"].is_null(),
+        "provider_specific_fields must be null"
+    );
+
+    let verdict = sync_stream_mcp_metadata_preserved(true, true, false);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("stream suppressed MCP metadata")
+    ));
+}
+
+#[test]
+fn litellm_async_stream_mcp_metadata_preserved_control() {
+    let wire_str = fixture("transcripts/134/wire/control-async-stream-mcp-metadata-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse async wire capture");
+
+    assert_eq!(
+        capture["finish_chunk_has_provider_specific_fields"].as_bool(),
+        Some(true),
+        "finish chunk must preserve provider_specific_fields in async stream"
+    );
+    assert!(
+        capture["provider_specific_fields"]["mcp_tool_calls"].is_array(),
+        "mcp_tool_calls must be present"
+    );
+
+    let verdict = sync_stream_mcp_metadata_preserved(true, true, true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_fixed_sync_stream_mcp_metadata_preserved_control() {
+    let wire_str =
+        fixture("transcripts/134/wire/control-fixed-sync-stream-mcp-metadata-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed sync capture");
+
+    assert_eq!(
+        capture["finish_chunk_has_provider_specific_fields"].as_bool(),
+        Some(true),
+        "fixed sync stream must preserve provider_specific_fields"
+    );
+
+    let verdict = sync_stream_mcp_metadata_preserved(true, true, true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_sync_stream_no_options_preserved_control() {
+    let wire_str = fixture("transcripts/134/wire/control-sync-stream-no-options-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse plain sync capture");
+
+    assert_eq!(
+        capture["finish_chunk_has_provider_specific_fields"].as_bool(),
+        Some(true),
+        "plain sync stream must preserve provider_specific_fields"
+    );
+
+    let verdict = sync_stream_mcp_metadata_preserved(true, true, true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_sync_stream_mcp_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/134/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_sync_dropped_metadata"].as_bool(),
+            Some(true),
+            "run {run_num}: sync dropped metadata must reproduce"
+        );
+        assert_eq!(
+            run["control_async_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: async stream must preserve metadata"
+        );
+        assert_eq!(
+            run["control_fixed_sync_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed sync stream must preserve metadata"
+        );
+        assert_eq!(
+            run["control_plain_sync_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: plain sync stream must preserve metadata"
         );
     }
 }
