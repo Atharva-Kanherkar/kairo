@@ -29,10 +29,10 @@ use kairo::checks::{
     openrouter_stream_forwards_all_reasoning_details,
     openrouter_stream_preserves_reasoning_details, outbound_request_omits_secret,
     parallel_tool_disable_preserved, passthrough_request_preserves_jsonrpc_id,
-    provider_request_id_preserved, reasoning_text_order_preserved, refusal_text_preserved,
-    registration_resolvable_by_both_paths, replayed_calls_keep_returned_namespace,
-    response_cache_keys_differentiate_destinations, response_content_not_empty,
-    response_conversation_preserves_history, response_omits_secret,
+    provider_request_id_preserved, reasoning_model_system_prompt_preserved,
+    reasoning_text_order_preserved, refusal_text_preserved, registration_resolvable_by_both_paths,
+    replayed_calls_keep_returned_namespace, response_cache_keys_differentiate_destinations,
+    response_content_not_empty, response_conversation_preserves_history, response_omits_secret,
     responses_comparison_response_id_authorized_and_unwrapped,
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
@@ -8618,6 +8618,169 @@ fn litellm_voyage_embeddings_results_matrix_5_runs_reproduce_consistently() {
             run["ctrl_resolvers_route_to_gateway"].as_bool(),
             Some(true),
             "run {run_num}: control resolver must route all 3 configs to gateway"
+        );
+    }
+}
+
+// ---- bug 126: LiteLLM o-series system prompt demoted to user on o3, o4-mini, o3-mini ----
+
+#[test]
+fn litellm_o3_system_prompt_demoted_to_user_wire() {
+    let wire_str = fixture("transcripts/126/wire/bug-outbound-o3-system-demoted.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse o3 bug wire");
+
+    assert_eq!(
+        capture["system_prompt_demoted_to_user"].as_bool(),
+        Some(true),
+        "o3 must demote system prompt to user"
+    );
+
+    let roles: Vec<&str> = capture["forwarded_roles"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|r| r.as_str().unwrap())
+        .collect();
+    assert_eq!(roles, vec!["user", "user"], "both roles forwarded as user");
+
+    let verdict = reasoning_model_system_prompt_preserved("o3", true, false, &roles);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("silently demoted system prompt to user message")
+    ));
+}
+
+#[test]
+fn litellm_o4mini_system_prompt_demoted_to_user_wire() {
+    let wire_str = fixture("transcripts/126/wire/bug-outbound-o4mini-system-demoted.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse o4-mini bug wire");
+
+    assert_eq!(
+        capture["system_prompt_demoted_to_user"].as_bool(),
+        Some(true),
+        "o4-mini must demote system prompt to user"
+    );
+
+    let roles: Vec<&str> = capture["forwarded_roles"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|r| r.as_str().unwrap())
+        .collect();
+    assert_eq!(roles, vec!["user", "user"]);
+
+    let verdict = reasoning_model_system_prompt_preserved("o4-mini", true, false, &roles);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("silently demoted system prompt to user message")
+    ));
+}
+
+#[test]
+fn litellm_o3mini_system_prompt_demoted_to_user_wire() {
+    let wire_str = fixture("transcripts/126/wire/bug-outbound-o3mini-system-demoted.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse o3-mini bug wire");
+
+    assert_eq!(
+        capture["system_prompt_demoted_to_user"].as_bool(),
+        Some(true),
+        "o3-mini must demote system prompt to user"
+    );
+
+    let roles: Vec<&str> = capture["forwarded_roles"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|r| r.as_str().unwrap())
+        .collect();
+    assert_eq!(roles, vec!["user", "user"]);
+
+    let verdict = reasoning_model_system_prompt_preserved("o3-mini", true, false, &roles);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("silently demoted system prompt to user message")
+    ));
+}
+
+#[test]
+fn litellm_o1_system_prompt_control_preserved_wire() {
+    let wire_str = fixture("transcripts/126/wire/control-outbound-o1-system-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse o1 control wire");
+
+    assert_eq!(
+        capture["system_prompt_preserved"].as_bool(),
+        Some(true),
+        "o1 must preserve system prompt"
+    );
+
+    let roles: Vec<&str> = capture["forwarded_roles"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|r| r.as_str().unwrap())
+        .collect();
+    assert_eq!(roles, vec!["system", "user"]);
+
+    let verdict = reasoning_model_system_prompt_preserved("o1", true, true, &roles);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_o_series_fixed_system_prompt_control_wire() {
+    let wire_str = fixture("transcripts/126/wire/control-outbound-fixed-system-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed control wire");
+
+    assert_eq!(
+        capture["system_prompt_preserved"].as_bool(),
+        Some(true),
+        "fixed model configuration must preserve system prompt"
+    );
+
+    let roles: Vec<&str> = capture["forwarded_roles"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|r| r.as_str().unwrap())
+        .collect();
+    assert_eq!(roles, vec!["system", "user"]);
+
+    let verdict = reasoning_model_system_prompt_preserved("openai/o3-fixed", true, true, &roles);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_o_series_system_prompt_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/126/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_o3_demoted"].as_bool(),
+            Some(true),
+            "run {run_num}: o3 system prompt must be demoted"
+        );
+        assert_eq!(
+            run["bug_o4mini_demoted"].as_bool(),
+            Some(true),
+            "run {run_num}: o4-mini system prompt must be demoted"
+        );
+        assert_eq!(
+            run["bug_o3mini_demoted"].as_bool(),
+            Some(true),
+            "run {run_num}: o3-mini system prompt must be demoted"
+        );
+        assert_eq!(
+            run["ctrl_o1_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: o1 system prompt must be preserved"
+        );
+        assert_eq!(
+            run["ctrl_fixed_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed configuration system prompt must be preserved"
         );
     }
 }
