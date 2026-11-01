@@ -47,10 +47,11 @@ use kairo::checks::{
     sync_stream_mcp_metadata_preserved, thinking_not_leaked_as_visible_text,
     thinking_text_forwarded, tool_policy_guardrail_enforces_trust_chain_and_blocked_tools,
     tool_result_images_reach_provider, tool_strict_forwarded, toolcall_id_restored_upstream,
-    truncation_preserved, upstream_bearer_is, upstream_omits_header_value,
-    voyage_embeddings_honor_environment_api_base, worker_loss_stays_invisible, FunctionToolFormat,
-    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
-    REPLAYED_CALL_NAMESPACE_CHANGED, TOOL_RESULT_IMAGE_DROPPED,
+    truncation_preserved, unpriced_response_cost_header_omitted, upstream_bearer_is,
+    upstream_omits_header_value, voyage_embeddings_honor_environment_api_base,
+    worker_loss_stays_invisible, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
+    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT, REPLAYED_CALL_NAMESPACE_CHANGED,
+    TOOL_RESULT_IMAGE_DROPPED,
 };
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -10228,6 +10229,119 @@ fn litellm_github_copilot_system_matrix_5_runs_reproduce_consistently() {
             run["control_promotes_cache_control"].as_bool(),
             Some(true),
             "run {run_num}: fixed transformation must promote cache control"
+        );
+    }
+}
+
+#[test]
+fn litellm_unpriced_response_cost_header_present_reproduction() {
+    let wire_str = fixture("transcripts/138/wire/bug-unpriced-response-cost-header-present.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    let price_known = capture["price_known"].as_bool().unwrap_or(true);
+    let cost_header_present = capture["cost_header_present"].as_bool().unwrap_or(false);
+
+    assert!(!price_known);
+    assert!(cost_header_present);
+    assert_eq!(
+        capture["response_cost_header"].as_str(),
+        Some("0.0"),
+        "unpatched unpriced response must emit 0.0 cost header"
+    );
+
+    let verdict = unpriced_response_cost_header_omitted(price_known, cost_header_present);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("falsely claiming request was free")
+    ));
+}
+
+#[test]
+fn litellm_unpriced_fixed_response_cost_header_omitted_control() {
+    let wire_str =
+        fixture("transcripts/138/wire/control-fixed-unpriced-response-cost-header-omitted.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed wire capture");
+
+    let price_known = capture["price_known"].as_bool().unwrap_or(true);
+    let cost_header_present = capture["cost_header_present"].as_bool().unwrap_or(true);
+
+    assert!(!price_known);
+    assert!(!cost_header_present);
+    assert!(capture["response_cost_header"].is_null());
+
+    let verdict = unpriced_response_cost_header_omitted(price_known, cost_header_present);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_priced_model_response_cost_header_control() {
+    let wire_str = fixture("transcripts/138/wire/control-priced-model-response-cost-header.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse priced wire capture");
+
+    let price_known = capture["price_known"].as_bool().unwrap_or(false);
+    let cost_header_present = capture["cost_header_present"].as_bool().unwrap_or(false);
+
+    assert!(price_known);
+    assert!(cost_header_present);
+    assert_eq!(
+        capture["response_cost_header"].as_str(),
+        Some("0.015"),
+        "priced model response must report positive cost header"
+    );
+
+    let verdict = unpriced_response_cost_header_omitted(price_known, cost_header_present);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_free_model_response_cost_header_control() {
+    let wire_str = fixture("transcripts/138/wire/control-free-model-response-cost-header.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse free wire capture");
+
+    let price_known = capture["price_known"].as_bool().unwrap_or(false);
+    let cost_header_present = capture["cost_header_present"].as_bool().unwrap_or(false);
+
+    assert!(price_known);
+    assert!(cost_header_present);
+    assert_eq!(
+        capture["response_cost_header"].as_str(),
+        Some("0.0"),
+        "explicitly free model legitimately reports 0.0 cost header"
+    );
+
+    let verdict = unpriced_response_cost_header_omitted(price_known, cost_header_present);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_unpriced_response_cost_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/138/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["defect_unpriced_emits_zero_header"].as_bool(),
+            Some(true),
+            "run {run_num}: unpriced defect must emit zero cost header"
+        );
+        assert_eq!(
+            run["control_priced_emits_positive_header"].as_bool(),
+            Some(true),
+            "run {run_num}: priced model must emit positive cost header"
+        );
+        assert_eq!(
+            run["control_free_emits_zero_header"].as_bool(),
+            Some(true),
+            "run {run_num}: free model must emit zero cost header"
+        );
+        assert_eq!(
+            run["control_fixed_unpriced_omits_header"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed unpriced model must omit cost header"
         );
     }
 }

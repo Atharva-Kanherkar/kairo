@@ -1,0 +1,42 @@
+{
+  "iterations": 5,
+  "success_rate": "5/5",
+  "all_passed": true,
+  "runs": [
+    {
+      "run": 1,
+      "defect_unpriced_emits_zero_header": true,
+      "control_priced_emits_positive_header": true,
+      "control_free_emits_zero_header": true,
+      "control_fixed_unpriced_omits_header": true
+    },
+    {
+      "run": 2,
+      "defect_unpriced_emits_zero_header": true,
+      "control_priced_emits_positive_header": true,
+      "control_free_emits_zero_header": true,
+      "control_fixed_unpriced_omits_header": true
+    },
+    {
+      "run": 3,
+      "defect_unpriced_emits_zero_header": true,
+      "control_priced_emits_positive_header": true,
+      "control_free_emits_zero_header": true,
+      "control_fixed_unpriced_omits_header": true
+    },
+    {
+      "run": 4,
+      "defect_unpriced_emits_zero_header": true,
+      "control_priced_emits_positive_header": true,
+      "control_free_emits_zero_header": true,
+      "control_fixed_unpriced_omits_header": true
+    },
+    {
+      "run": 5,
+      "defect_unpriced_emits_zero_header": true,
+      "control_priced_emits_positive_header": true,
+      "control_free_emits_zero_header": true,
+      "control_fixed_unpriced_omits_header": true
+    }
+  ]
+}
