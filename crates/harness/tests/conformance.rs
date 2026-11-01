@@ -35,7 +35,8 @@ use kairo::checks::{
     provider_request_id_preserved, reasoning_model_system_prompt_preserved,
     reasoning_text_order_preserved, refusal_text_preserved, registration_resolvable_by_both_paths,
     replayed_calls_keep_returned_namespace, response_cache_keys_differentiate_destinations,
-    response_content_not_empty, response_conversation_preserves_history, response_omits_secret,
+    response_cache_tenant_isolation, response_content_not_empty,
+    response_conversation_preserves_history, response_omits_secret,
     responses_comparison_response_id_authorized_and_unwrapped,
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
@@ -9546,6 +9547,128 @@ fn litellm_anthropic_structured_output_matrix_5_runs_reproduce_consistently() {
             run["control_plain_no_format"].as_bool(),
             Some(true),
             "run {run_num}: plain request must have no format"
+        );
+    }
+}
+
+#[test]
+fn litellm_exact_cache_cross_tenant_leak_wire_reproduction() {
+    let wire_str = fixture("transcripts/132/wire/bug-cross-tenant-cache-leak.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    assert_eq!(
+        capture["leak_detected"].as_bool(),
+        Some(true),
+        "leak must be detected"
+    );
+    assert_eq!(
+        capture["keys_identical_across_tenants"].as_bool(),
+        Some(true),
+        "cache keys must be identical across distinct tenants"
+    );
+    assert!(
+        capture["tenant_b_received_payload"].is_object(),
+        "tenant B must have received tenant A's cached response"
+    );
+
+    let key_a = capture["tenant_a_cache_key"].as_str().unwrap();
+    let key_b = capture["tenant_b_cache_key"].as_str().unwrap();
+    let verdict = response_cache_tenant_isolation(key_a, key_b, true);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("cache keys are identical across distinct tenants")
+    ));
+}
+
+#[test]
+fn litellm_exact_cache_fixed_tenant_isolation_control() {
+    let wire_str = fixture("transcripts/132/wire/control-fixed-tenant-cache-isolation.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed control wire capture");
+
+    assert_eq!(
+        capture["isolation_verified"].as_bool(),
+        Some(true),
+        "isolation must be verified"
+    );
+    assert_eq!(
+        capture["keys_identical_across_tenants"].as_bool(),
+        Some(false),
+        "scoped keys must not match across tenants"
+    );
+    assert!(
+        capture["tenant_b_received_payload"].is_null(),
+        "tenant B must receive null from cache"
+    );
+
+    let key_a = capture["tenant_a_scoped_key"].as_str().unwrap();
+    let key_b = capture["tenant_b_scoped_key"].as_str().unwrap();
+    let verdict = response_cache_tenant_isolation(key_a, key_b, false);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_exact_cache_forged_custom_key_isolated_control() {
+    let wire_str = fixture("transcripts/132/wire/control-forged-custom-cache-key-isolated.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse forged control wire capture");
+
+    let key_a = capture["custom_key_scoped_tenant_a"].as_str().unwrap();
+    let key_b = capture["custom_key_scoped_tenant_b"].as_str().unwrap();
+    assert_ne!(
+        key_a, key_b,
+        "custom keys must be scoped with distinct tenant digests"
+    );
+
+    let verdict = response_cache_tenant_isolation(key_a, key_b, false);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_exact_cache_bare_sdk_key_preserved_control() {
+    let wire_str = fixture("transcripts/132/wire/control-bare-sdk-key-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bare wire capture");
+
+    assert_eq!(
+        capture["bare_key_matches"].as_bool(),
+        Some(true),
+        "bare sdk key must match unpatched key exactly"
+    );
+    assert_eq!(
+        capture["has_tenant_prefix"].as_bool(),
+        Some(false),
+        "bare sdk key must not have tenant prefix"
+    );
+}
+
+#[test]
+fn litellm_exact_cache_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/132/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_cross_tenant_leak"].as_bool(),
+            Some(true),
+            "run {run_num}: bug cross tenant leak must reproduce"
+        );
+        assert_eq!(
+            run["control_fixed_tenant_isolated"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed tenant cache must be isolated"
+        );
+        assert_eq!(
+            run["control_forged_key_isolated"].as_bool(),
+            Some(true),
+            "run {run_num}: forged custom key must be isolated"
+        );
+        assert_eq!(
+            run["control_bare_sdk_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: bare sdk key must be preserved"
         );
     }
 }

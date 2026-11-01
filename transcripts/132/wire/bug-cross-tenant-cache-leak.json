@@ -1,0 +1,17 @@
+{
+  "model": "gpt-4o-mini",
+  "leak_detected": true,
+  "keys_identical_across_tenants": true,
+  "tenant_a_cache_key": "4c49545ace70b535bb2aa15df3b563203f9e453cd0dd0378c70f9a5f699c2301",
+  "tenant_b_cache_key": "4c49545ace70b535bb2aa15df3b563203f9e453cd0dd0378c70f9a5f699c2301",
+  "tenant_b_received_payload": {
+    "choices": [
+      {
+        "message": {
+          "role": "assistant",
+          "content": "Confidential Q3 Executive Payroll"
+        }
+      }
+    ]
+  }
+}

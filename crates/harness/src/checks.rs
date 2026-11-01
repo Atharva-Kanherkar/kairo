@@ -8179,3 +8179,67 @@ mod anthropic_structured_output_tests {
         ));
     }
 }
+
+/// Invariant: When an AI gateway caches exact-match completion responses:
+/// 1. Cache entries must be isolated per tenant (virtual key, team, organization).
+/// 2. Requests from distinct tenants with distinct credentials must never share identical cache keys
+///    or retrieve completions cached for another tenant.
+/// 3. Cross-tenant cache hits constitute a critical data leakage vulnerability.
+pub fn response_cache_tenant_isolation(
+    primary_tenant_key: &str,
+    querying_tenant_key: &str,
+    tenant_b_received_cached_response: bool,
+) -> Verdict {
+    if primary_tenant_key == querying_tenant_key {
+        return Verdict::Violation(format!(
+            "cache keys are identical across distinct tenants ('{primary_tenant_key}'), enabling cross-tenant cache sharing"
+        ));
+    }
+
+    if tenant_b_received_cached_response {
+        return Verdict::Violation(
+            "tenant B retrieved cached response generated for tenant A, leaking private cross-tenant data".to_string(),
+        );
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod response_cache_tenant_isolation_tests {
+    use super::*;
+
+    #[test]
+    fn distinct_keys_no_leak_is_conformant() {
+        let verdict =
+            response_cache_tenant_isolation("tenant-a:key-123", "tenant-b:key-123", false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn identical_keys_is_violation() {
+        let verdict = response_cache_tenant_isolation("unscoped-key-123", "unscoped-key-123", true);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("cache keys are identical across distinct tenants")
+        ));
+    }
+
+    #[test]
+    fn cross_tenant_leak_is_violation() {
+        let verdict = response_cache_tenant_isolation("tenant-a:key-123", "tenant-b:key-123", true);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("tenant B retrieved cached response generated for tenant A")
+        ));
+    }
+
+    #[test]
+    fn custom_scoped_keys_isolated_is_conformant() {
+        let verdict =
+            response_cache_tenant_isolation("tenant-a:custom-key", "tenant-b:custom-key", false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}
