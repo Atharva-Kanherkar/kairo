@@ -1,0 +1,29 @@
+{
+  "description": "Control: non-streaming OpenRouter completion correctly preserves served model",
+  "target": "LiteLLM v1.109.0",
+  "raw_upstream_response": {
+    "id": "gen-openrouter-nonstream-001",
+    "created": 1730000000,
+    "model": "openai/gpt-4o-mini",
+    "choices": [
+      {
+        "index": 0,
+        "message": {
+          "role": "assistant",
+          "content": "Hello world!"
+        },
+        "finish_reason": "stop"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 5,
+      "completion_tokens": 3,
+      "total_tokens": 8
+    }
+  },
+  "requested_model": "openrouter/auto",
+  "provider_served_model": "openai/gpt-4o-mini",
+  "response_model": "openai/gpt-4o-mini",
+  "response_content": "Hello world!",
+  "nonstreaming_served_model_preserved": true
+}
