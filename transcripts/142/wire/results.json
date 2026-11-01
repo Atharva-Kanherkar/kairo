@@ -1,0 +1,52 @@
+{
+  "upstream_target": "LiteLLM v1.109.0 (commit cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a)",
+  "upstream_pr": "BerriAI/litellm#49514",
+  "total_runs": 5,
+  "runs": [
+    {
+      "run": 1,
+      "defect_chat_top_logprobs_rejected": true,
+      "defect_top_logprobs_missing_response_logprobs": true,
+      "control_chat_top_logprobs_patched_success": true,
+      "control_top_logprobs_sets_response_logprobs": true,
+      "control_baseline_no_logprobs_clean": true,
+      "control_logprobs_only_clean": true
+    },
+    {
+      "run": 2,
+      "defect_chat_top_logprobs_rejected": true,
+      "defect_top_logprobs_missing_response_logprobs": true,
+      "control_chat_top_logprobs_patched_success": true,
+      "control_top_logprobs_sets_response_logprobs": true,
+      "control_baseline_no_logprobs_clean": true,
+      "control_logprobs_only_clean": true
+    },
+    {
+      "run": 3,
+      "defect_chat_top_logprobs_rejected": true,
+      "defect_top_logprobs_missing_response_logprobs": true,
+      "control_chat_top_logprobs_patched_success": true,
+      "control_top_logprobs_sets_response_logprobs": true,
+      "control_baseline_no_logprobs_clean": true,
+      "control_logprobs_only_clean": true
+    },
+    {
+      "run": 4,
+      "defect_chat_top_logprobs_rejected": true,
+      "defect_top_logprobs_missing_response_logprobs": true,
+      "control_chat_top_logprobs_patched_success": true,
+      "control_top_logprobs_sets_response_logprobs": true,
+      "control_baseline_no_logprobs_clean": true,
+      "control_logprobs_only_clean": true
+    },
+    {
+      "run": 5,
+      "defect_chat_top_logprobs_rejected": true,
+      "defect_top_logprobs_missing_response_logprobs": true,
+      "control_chat_top_logprobs_patched_success": true,
+      "control_top_logprobs_sets_response_logprobs": true,
+      "control_baseline_no_logprobs_clean": true,
+      "control_logprobs_only_clean": true
+    }
+  ]
+}

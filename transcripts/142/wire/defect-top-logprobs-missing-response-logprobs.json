@@ -1,0 +1,44 @@
+{
+  "scenario": "defect_top_logprobs_without_response_logprobs",
+  "client_request": {
+    "method": "POST",
+    "url": "https://gateway.local/v1/responses",
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "model": "gemini/gemini-2.5-flash",
+      "input": "Return token alternatives",
+      "top_logprobs": 3
+    }
+  },
+  "gateway_forwarded_to_provider": {
+    "method": "POST",
+    "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "contents": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "Return token alternatives"
+            }
+          ]
+        }
+      ],
+      "generationConfig": {
+        "logprobs": 3
+      }
+    }
+  },
+  "provider_response": {
+    "status_code": 400,
+    "error": "logprobs is not supported without setting response_logprobs to be true"
+  },
+  "has_response_logprobs": false,
+  "logprobs_count": 3,
+  "is_defect": true
+}

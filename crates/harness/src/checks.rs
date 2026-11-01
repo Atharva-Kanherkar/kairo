@@ -8943,3 +8943,82 @@ mod cohere_v2_finish_reason_tests {
         assert_eq!(verdict, Verdict::Conformant);
     }
 }
+
+pub fn gemini_logprobs_params_mapped(
+    client_requested_top_logprobs: bool,
+    is_google_ai_studio_route: bool,
+    gateway_supports_top_logprobs: bool,
+    forwarded_logprobs_count: Option<i64>,
+    forwarded_response_logprobs: Option<bool>,
+) -> Verdict {
+    if client_requested_top_logprobs && is_google_ai_studio_route && !gateway_supports_top_logprobs
+    {
+        return Verdict::Violation(
+            "LiteLLM Google AI Studio config omitted 'top_logprobs' from supported params, rejecting valid client request"
+                .to_string(),
+        );
+    }
+
+    if let Some(count) = forwarded_logprobs_count {
+        if count > 0 && forwarded_response_logprobs != Some(true) {
+            return Verdict::Violation(format!(
+                "LiteLLM Gemini request forwarded generationConfig.logprobs={count} without responseLogprobs=true, violating Google GenAI spec"
+            ));
+        }
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod gemini_logprobs_tests {
+    use super::*;
+
+    #[test]
+    fn unsupported_top_logprobs_is_violation() {
+        let verdict = gemini_logprobs_params_mapped(true, true, false, None, None);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("omitted 'top_logprobs' from supported params")
+        ));
+    }
+
+    #[test]
+    fn logprobs_without_response_logprobs_is_violation() {
+        let verdict = gemini_logprobs_params_mapped(true, false, true, Some(3), None);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("without responseLogprobs=true")
+        ));
+    }
+
+    #[test]
+    fn logprobs_with_false_response_logprobs_is_violation() {
+        let verdict = gemini_logprobs_params_mapped(true, false, true, Some(3), Some(false));
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("without responseLogprobs=true")
+        ));
+    }
+
+    #[test]
+    fn fully_mapped_logprobs_is_conformant() {
+        let verdict = gemini_logprobs_params_mapped(true, true, true, Some(3), Some(true));
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn baseline_no_logprobs_is_conformant() {
+        let verdict = gemini_logprobs_params_mapped(false, true, true, None, None);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn logprobs_only_without_count_is_conformant() {
+        let verdict = gemini_logprobs_params_mapped(false, true, true, None, Some(true));
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}

@@ -20,9 +20,9 @@ use kairo::checks::{
     extract_anthropic_request_tool_names, extract_anthropic_untrusted_sources,
     extract_responses_api_untrusted_sources, fake_stream_preserves_provider_logprobs,
     forwarded_body_preserves_values, gemini_inline_media_preserved_in_chat_response,
-    gemini_inline_media_preserved_in_chat_stream, github_copilot_system_message_flattened,
-    google_genai_model_turn_tool_results_preserved, id_conforms,
-    image_url_cache_key_case_sensitive, instruction_messages_preserved,
+    gemini_inline_media_preserved_in_chat_stream, gemini_logprobs_params_mapped,
+    github_copilot_system_message_flattened, google_genai_model_turn_tool_results_preserved,
+    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
     invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
     json_schema_property_forwarded, jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
     mcp_unauthorized_token_must_not_mask_as_empty_tools, minimax_reasoning_effort_preserved,
@@ -10787,6 +10787,168 @@ fn litellm_cohere_v2_finish_reason_matrix_5_runs_reproduce_consistently() {
             run["control_stop_sequence_reports_stop"].as_bool(),
             Some(true),
             "run {run_num}: STOP_SEQUENCE must report stop"
+        );
+    }
+}
+
+// ---- bug 142: LiteLLM Gemini top_logprobs translation defects ----
+
+#[test]
+fn litellm_gemini_chat_top_logprobs_unsupported_reproduction() {
+    let wire_str = fixture("transcripts/142/wire/defect-chat-top-logprobs-unsupported.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse capture");
+
+    let model = capture["client_request"]["body"]["model"].as_str().unwrap();
+    let is_google_ai_studio = model.starts_with("gemini/");
+    let has_top_logprobs = capture["client_request"]["body"]["top_logprobs"].is_number();
+    let gateway_supported = false; // unpatched GoogleAIStudioGeminiConfig omits top_logprobs
+
+    let verdict = gemini_logprobs_params_mapped(
+        has_top_logprobs,
+        is_google_ai_studio,
+        gateway_supported,
+        None,
+        None,
+    );
+
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("omitted 'top_logprobs' from supported params")
+    ));
+}
+
+#[test]
+fn litellm_gemini_top_logprobs_missing_response_logprobs_reproduction() {
+    let wire_str =
+        fixture("transcripts/142/wire/defect-top-logprobs-missing-response-logprobs.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse capture");
+
+    let has_response_logprobs = capture["has_response_logprobs"].as_bool().unwrap();
+    let logprobs_count = capture["logprobs_count"].as_i64();
+
+    let verdict = gemini_logprobs_params_mapped(
+        true,
+        true,
+        true,
+        logprobs_count,
+        Some(has_response_logprobs),
+    );
+
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("without responseLogprobs=true")
+    ));
+}
+
+#[test]
+fn litellm_gemini_chat_top_logprobs_patched_control() {
+    let wire_str = fixture("transcripts/142/wire/control-chat-top-logprobs-patched.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse capture");
+
+    let has_response_logprobs = capture["has_response_logprobs"].as_bool().unwrap();
+    let logprobs_count = capture["logprobs_count"].as_i64();
+
+    let verdict = gemini_logprobs_params_mapped(
+        true,
+        true,
+        true,
+        logprobs_count,
+        Some(has_response_logprobs),
+    );
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_gemini_top_logprobs_sets_response_logprobs_control() {
+    let wire_str = fixture("transcripts/142/wire/control-top-logprobs-sets-response-logprobs.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse capture");
+
+    let has_response_logprobs = capture["has_response_logprobs"].as_bool().unwrap();
+    let logprobs_count = capture["logprobs_count"].as_i64();
+
+    let verdict = gemini_logprobs_params_mapped(
+        true,
+        true,
+        true,
+        logprobs_count,
+        Some(has_response_logprobs),
+    );
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_gemini_baseline_no_logprobs_control() {
+    let wire_str = fixture("transcripts/142/wire/control-baseline-no-logprobs.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse capture");
+
+    let logprobs_count = capture["logprobs_count"].as_i64();
+
+    let verdict = gemini_logprobs_params_mapped(false, true, true, logprobs_count, None);
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_gemini_logprobs_only_control() {
+    let wire_str = fixture("transcripts/142/wire/control-logprobs-only.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse capture");
+
+    let has_response_logprobs = capture["has_response_logprobs"].as_bool().unwrap();
+    let logprobs_count = capture["logprobs_count"].as_i64();
+
+    let verdict = gemini_logprobs_params_mapped(
+        false,
+        true,
+        true,
+        logprobs_count,
+        Some(has_response_logprobs),
+    );
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_gemini_logprobs_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/142/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["defect_chat_top_logprobs_rejected"].as_bool(),
+            Some(true),
+            "run {run_num}: defect chat top_logprobs must be rejected"
+        );
+        assert_eq!(
+            run["defect_top_logprobs_missing_response_logprobs"].as_bool(),
+            Some(true),
+            "run {run_num}: defect top_logprobs must omit responseLogprobs"
+        );
+        assert_eq!(
+            run["control_chat_top_logprobs_patched_success"].as_bool(),
+            Some(true),
+            "run {run_num}: control chat top_logprobs patched must succeed"
+        );
+        assert_eq!(
+            run["control_top_logprobs_sets_response_logprobs"].as_bool(),
+            Some(true),
+            "run {run_num}: control top_logprobs must set responseLogprobs"
+        );
+        assert_eq!(
+            run["control_baseline_no_logprobs_clean"].as_bool(),
+            Some(true),
+            "run {run_num}: baseline request must be clean"
+        );
+        assert_eq!(
+            run["control_logprobs_only_clean"].as_bool(),
+            Some(true),
+            "run {run_num}: logprobs only request must be clean"
         );
     }
 }
