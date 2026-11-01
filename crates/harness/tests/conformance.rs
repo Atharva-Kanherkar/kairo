@@ -17,17 +17,18 @@ use kairo::checks::{
     gemini_inline_media_preserved_in_chat_stream, id_conforms, image_url_cache_key_case_sensitive,
     instruction_messages_preserved, invalid_credential_rejected_before_upstream,
     is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
-    mcp_tool_executes_once, mcp_unauthorized_token_must_not_mask_as_empty_tools,
-    model_info_capture_identity, model_info_envelope_body, model_info_omits_api_base_secret,
-    no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
-    no_phantom_null_output_text, non_text_block_not_json_dumped, ogx_adaptive_thinking_loss,
-    openai_stream_finish_reason, openai_stream_toolcall_type_never_null,
-    openai_toolcall_id_charset, openrouter_stream_forwards_all_reasoning_details,
+    jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
+    mcp_unauthorized_token_must_not_mask_as_empty_tools, model_info_capture_identity,
+    model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
+    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
+    non_text_block_not_json_dumped, ogx_adaptive_thinking_loss, openai_stream_finish_reason,
+    openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
+    openrouter_stream_forwards_all_reasoning_details,
     openrouter_stream_preserves_reasoning_details, outbound_request_omits_secret,
-    parallel_tool_disable_preserved, provider_request_id_preserved, reasoning_text_order_preserved,
-    refusal_text_preserved, registration_resolvable_by_both_paths,
-    replayed_calls_keep_returned_namespace, response_content_not_empty,
-    response_conversation_preserves_history, response_omits_secret,
+    parallel_tool_disable_preserved, passthrough_request_preserves_jsonrpc_id,
+    provider_request_id_preserved, reasoning_text_order_preserved, refusal_text_preserved,
+    registration_resolvable_by_both_paths, replayed_calls_keep_returned_namespace,
+    response_content_not_empty, response_conversation_preserves_history, response_omits_secret,
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
     responses_single_lifecycle, served_model_within_key_allowlist, stop_sequence_forwarded,
@@ -7635,6 +7636,86 @@ fn litellm_openrouter_results_matrix_5_runs_reproduce_consistently() {
             run["next_turn_missing_signature_status"].as_u64(),
             Some(400),
             "run {run_num}: next turn missing signature must fail with 400"
+        );
+    }
+}
+
+#[test]
+fn litellm_passthrough_jsonrpc_id_stripped_is_violation() {
+    let client_req = fixture("transcripts/118/wire/client-proxy-request.json");
+    let forwarded_req = fixture("transcripts/118/wire/upstream-received-from-proxy.json");
+
+    let verdict = passthrough_request_preserves_jsonrpc_id(&client_req, &forwarded_req);
+    assert!(
+        matches!(verdict, Verdict::Violation(msg) if msg.contains("gateway stripped JSON-RPC id")),
+        "stripping JSON-RPC id on pass-through route must be a violation"
+    );
+
+    let single_verdict = jsonrpc_forwarded_request_has_id(&forwarded_req);
+    assert!(
+        matches!(single_verdict, Verdict::Violation(msg) if msg.contains("missing required id member")),
+        "forwarded request missing id must be a violation"
+    );
+}
+
+#[test]
+fn litellm_passthrough_direct_upstream_preserves_id_is_conformant() {
+    let client_req = fixture("transcripts/118/wire/client-proxy-request.json");
+    let direct_req = fixture("transcripts/118/wire/direct-upstream-request.json");
+
+    let verdict = passthrough_request_preserves_jsonrpc_id(&client_req, &direct_req);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "direct upstream preserving id must be conformant"
+    );
+
+    let single_verdict = jsonrpc_forwarded_request_has_id(&direct_req);
+    assert_eq!(
+        single_verdict,
+        Verdict::Conformant,
+        "direct request with id must be conformant"
+    );
+}
+
+#[test]
+fn litellm_passthrough_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/118/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["results"].as_array().expect("results array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["direct_upstream_status"].as_u64(),
+            Some(200),
+            "run {run_num}: direct upstream status must be 200"
+        );
+        assert_eq!(
+            run["direct_upstream_received_has_id"].as_bool(),
+            Some(true),
+            "run {run_num}: direct upstream must receive id"
+        );
+        assert_eq!(
+            run["direct_upstream_response_matched_id"].as_bool(),
+            Some(true),
+            "run {run_num}: direct upstream must echo matching id"
+        );
+        assert_eq!(
+            run["proxy_forwarded_to_upstream_has_id"].as_bool(),
+            Some(false),
+            "run {run_num}: LiteLLM proxy must drop id (defect)"
+        );
+        assert_eq!(
+            run["proxy_response_status"].as_u64(),
+            Some(204),
+            "run {run_num}: proxy response status must be 204 No Content notification"
+        );
+        assert_eq!(
+            run["control_non_colliding_key_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: non-colliding key must be preserved"
         );
     }
 }

@@ -6784,3 +6784,109 @@ data: [DONE]\n\n";
         ));
     }
 }
+
+/// Invariant: A gateway forwarding a JSON-RPC 2.0 request must preserve the client's `id`
+/// member in the forwarded request body. Stripping `id` turns the RPC call into a
+/// JSON-RPC 2.0 notification, preventing the server from returning a response.
+pub fn passthrough_request_preserves_jsonrpc_id(
+    client_body: &str,
+    forwarded_body: &str,
+) -> Verdict {
+    let client: Value = match serde_json::from_str(client_body) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("invalid client JSON: {e}")),
+    };
+    let forwarded: Value = match serde_json::from_str(forwarded_body) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("invalid forwarded JSON: {e}")),
+    };
+
+    let client_is_jsonrpc = client
+        .get("jsonrpc")
+        .and_then(Value::as_str)
+        .is_some_and(|v| v == "2.0");
+
+    if !client_is_jsonrpc {
+        return Verdict::Conformant;
+    }
+
+    if let Some(client_id) = client.get("id") {
+        let Some(forwarded_id) = forwarded.get("id") else {
+            return Verdict::Violation(format!(
+                "gateway stripped JSON-RPC id {client_id} from forwarded request, converting call to a notification"
+            ));
+        };
+        if client_id != forwarded_id {
+            return Verdict::Violation(format!(
+                "gateway altered JSON-RPC id from {client_id} to {forwarded_id}"
+            ));
+        }
+    }
+
+    Verdict::Conformant
+}
+
+/// Invariant: A forwarded JSON-RPC 2.0 method call must contain the `id` member.
+pub fn jsonrpc_forwarded_request_has_id(forwarded_body: &str) -> Verdict {
+    let body: Value = match serde_json::from_str(forwarded_body) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("invalid JSON: {e}")),
+    };
+    let is_jsonrpc = body
+        .get("jsonrpc")
+        .and_then(Value::as_str)
+        .is_some_and(|v| v == "2.0");
+    let has_method = body.get("method").and_then(Value::as_str).is_some();
+
+    if is_jsonrpc && has_method && body.get("id").is_none() {
+        return Verdict::Violation(
+            "forwarded JSON-RPC request is missing required id member".into(),
+        );
+    }
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod passthrough_jsonrpc_id_tests {
+    use super::{
+        jsonrpc_forwarded_request_has_id, passthrough_request_preserves_jsonrpc_id, Verdict,
+    };
+
+    #[test]
+    fn intact_id_is_conformant() {
+        let client = r#"{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}"#;
+        let forwarded = r#"{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}"#;
+        assert_eq!(
+            passthrough_request_preserves_jsonrpc_id(client, forwarded),
+            Verdict::Conformant
+        );
+        assert_eq!(
+            jsonrpc_forwarded_request_has_id(forwarded),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn stripped_id_is_violation() {
+        let client = r#"{"jsonrpc":"2.0","id":100,"method":"tools/list","params":{}}"#;
+        let forwarded = r#"{"jsonrpc":"2.0","method":"tools/list","params":{}}"#;
+        assert!(matches!(
+            passthrough_request_preserves_jsonrpc_id(client, forwarded),
+            Verdict::Violation(msg) if msg.contains("stripped JSON-RPC id 100")
+        ));
+        assert!(matches!(
+            jsonrpc_forwarded_request_has_id(forwarded),
+            Verdict::Violation(msg) if msg.contains("missing required id member")
+        ));
+    }
+
+    #[test]
+    fn non_jsonrpc_request_is_conformant() {
+        let client = r#"{"prompt":"hello"}"#;
+        let forwarded = r#"{"prompt":"hello"}"#;
+        assert_eq!(
+            passthrough_request_preserves_jsonrpc_id(client, forwarded),
+            Verdict::Conformant
+        );
+    }
+}
