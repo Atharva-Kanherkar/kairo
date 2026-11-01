@@ -31,6 +31,7 @@ use kairo::checks::{
     provider_request_id_preserved, reasoning_text_order_preserved, refusal_text_preserved,
     registration_resolvable_by_both_paths, replayed_calls_keep_returned_namespace,
     response_content_not_empty, response_conversation_preserves_history, response_omits_secret,
+    responses_comparison_response_id_authorized_and_unwrapped,
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
     responses_single_lifecycle, served_model_within_key_allowlist, stop_sequence_forwarded,
@@ -8013,6 +8014,152 @@ fn litellm_tool_policy_guardrail_results_matrix_5_runs_reproduce_consistently() 
             run["stage1_mixed_allowed"].as_bool(),
             Some(true),
             "run {run_num}: stage 1 mixed must be allowed (defect)"
+        );
+    }
+}
+
+#[test]
+fn litellm_responses_cross_user_previous_id_blocked_is_conformant() {
+    let req_str = fixture("transcripts/122/wire/control-cross-user-previous-id-request.json");
+    let resp_str = fixture("transcripts/122/wire/control-cross-user-previous-id-response.json");
+    let _req: Value = serde_json::from_str(&req_str).expect("parse request");
+    let resp: Value = serde_json::from_str(&resp_str).expect("parse response");
+
+    let status_code = resp["status_code"].as_u64().expect("status_code");
+    assert_eq!(
+        status_code, 403,
+        "cross-tenant access must be blocked with 403"
+    );
+
+    let gateway_blocked = status_code == 403;
+    let verdict = responses_comparison_response_id_authorized_and_unwrapped(
+        false, // caller does not own response
+        gateway_blocked,
+        55,
+        64,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_responses_cross_user_comparison_id_bypass_is_violation() {
+    let req_str = fixture("transcripts/122/wire/bug-cross-user-comparison-id-bypass-request.json");
+    let resp_str =
+        fixture("transcripts/122/wire/bug-cross-user-comparison-id-bypass-response.json");
+    let _req: Value = serde_json::from_str(&req_str).expect("parse request");
+    let resp: Value = serde_json::from_str(&resp_str).expect("parse response");
+
+    let status_code = resp["status_code"].as_u64().expect("status_code");
+    assert_eq!(
+        status_code, 200,
+        "cross-tenant comparison id bypassed 403 check"
+    );
+
+    let gateway_blocked = status_code == 403;
+    let verdict = responses_comparison_response_id_authorized_and_unwrapped(
+        false, // caller does not own response
+        gateway_blocked,
+        55,
+        64,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("bypassed proxy ownership check")
+    ));
+}
+
+#[test]
+fn litellm_responses_legitimate_previous_id_unwrapped_is_conformant() {
+    let req_str = fixture("transcripts/122/wire/control-legitimate-previous-id-request.json");
+    let req: Value = serde_json::from_str(&req_str).expect("parse request");
+
+    let prev_id = req["previous_response_id"]
+        .as_str()
+        .expect("previous_response_id");
+    let prev_len = prev_id.len();
+    assert_eq!(
+        prev_len, 55,
+        "legitimate previous_response_id must be unwrapped to 55 chars"
+    );
+
+    let verdict = responses_comparison_response_id_authorized_and_unwrapped(
+        true, // caller owns response
+        false, prev_len, 64,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_responses_bloated_comparison_id_forwarded_is_violation() {
+    let req_str = fixture("transcripts/122/wire/bug-forwarded-comparison-id-bloated-request.json");
+    let resp_str =
+        fixture("transcripts/122/wire/bug-forwarded-comparison-id-bloated-response.json");
+    let req: Value = serde_json::from_str(&req_str).expect("parse request");
+    let resp: Value = serde_json::from_str(&resp_str).expect("parse response");
+
+    let comp_id = req["prompt_cache_options"]["comparison_response_id"]
+        .as_str()
+        .expect("comparison_response_id");
+    let comp_len = comp_id.len();
+    assert!(
+        comp_len > 64,
+        "comparison_response_id was not unwrapped and exceeds 64 chars"
+    );
+
+    let status_code = resp["status_code"].as_u64().expect("status_code");
+    assert_eq!(
+        status_code, 400,
+        "upstream rejected bloated comparison_response_id with 400"
+    );
+
+    let verdict = responses_comparison_response_id_authorized_and_unwrapped(
+        true, // caller owns response
+        false, comp_len, 64,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("exceeds provider maximum length 64")
+    ));
+}
+
+#[test]
+fn litellm_responses_comparison_id_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/122/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["results"].as_array().expect("results array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["ctrl1_blocked_403"].as_bool(),
+            Some(true),
+            "run {run_num}: control 1 must be blocked with 403"
+        );
+        assert_eq!(
+            run["bug1_allowed"].as_bool(),
+            Some(true),
+            "run {run_num}: bug 1 must allow cross-tenant comparison id (defect)"
+        );
+        assert_eq!(
+            run["ctrl2_decrypted"].as_bool(),
+            Some(true),
+            "run {run_num}: control 2 must be decrypted"
+        );
+        assert_eq!(
+            run["ctrl2_unwrapped_len"].as_u64(),
+            Some(55),
+            "run {run_num}: control 2 length must be 55"
+        );
+        assert_eq!(
+            run["bug2_still_encrypted"].as_bool(),
+            Some(true),
+            "run {run_num}: bug 2 must still be encrypted (defect)"
+        );
+        assert_eq!(
+            run["openai_would_reject_length"].as_bool(),
+            Some(true),
+            "run {run_num}: bug 2 length exceeds 64 chars"
         );
     }
 }
