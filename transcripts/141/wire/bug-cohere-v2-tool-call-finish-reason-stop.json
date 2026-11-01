@@ -1,0 +1,36 @@
+{
+  "description": "LiteLLM Cohere v2 returns stop for tool call response instead of tool_calls",
+  "target": "LiteLLM v1.109.0",
+  "cohere_raw_response": {
+    "id": "c14c80c3-18eb-4519-9460-6c92edd8cfb4",
+    "finish_reason": "TOOL_CALL",
+    "message": {
+      "role": "assistant",
+      "tool_plan": "I will look up the weather in New York.",
+      "tool_calls": [
+        {
+          "id": "get_weather_k9q2xw1n",
+          "type": "function",
+          "function": {
+            "name": "get_weather",
+            "arguments": "{\"location\":\"New York, NY\"}"
+          }
+        }
+      ]
+    },
+    "usage": {
+      "billed_units": {
+        "input_tokens": 17,
+        "output_tokens": 9
+      },
+      "tokens": {
+        "input_tokens": 211,
+        "output_tokens": 9
+      }
+    }
+  },
+  "provider_finish_reason": "TOOL_CALL",
+  "response_finish_reason": "stop",
+  "has_tool_calls": true,
+  "tool_calls_count": 1
+}

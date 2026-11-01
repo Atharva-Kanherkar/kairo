@@ -8869,3 +8869,77 @@ mod openrouter_stream_served_model_tests {
         ));
     }
 }
+
+/// Check that LiteLLM maps Cohere v2 non-streaming finish_reason to the standard
+/// OpenAI Chat Completions dialect rather than hardcoding "stop".
+pub fn cohere_v2_finish_reason_mapped(
+    provider_finish_reason: &str,
+    has_tool_calls: bool,
+    response_finish_reason: Option<&str>,
+) -> Verdict {
+    let expected = match provider_finish_reason {
+        "TOOL_CALL" => "tool_calls",
+        "MAX_TOKENS" => "length",
+        "COMPLETE" | "STOP_SEQUENCE" => "stop",
+        other => other,
+    };
+
+    match response_finish_reason {
+        Some(actual) if actual == expected => Verdict::Conformant,
+        Some("stop") if provider_finish_reason == "TOOL_CALL" && has_tool_calls => {
+            Verdict::Violation(
+                "LiteLLM Cohere v2 non-streaming response returned finish_reason 'stop' instead of 'tool_calls' on tool call"
+                    .to_string(),
+            )
+        }
+        Some("stop") if provider_finish_reason == "MAX_TOKENS" => {
+            Verdict::Violation(
+                "LiteLLM Cohere v2 non-streaming response returned finish_reason 'stop' instead of 'length' on MAX_TOKENS truncation"
+                    .to_string(),
+            )
+        }
+        Some(actual) => Verdict::Violation(format!(
+            "LiteLLM Cohere v2 non-streaming response returned finish_reason '{actual}' but expected '{expected}' for provider finish_reason '{provider_finish_reason}'"
+        )),
+        None => Verdict::Violation(
+            "LiteLLM Cohere v2 non-streaming response omitted finish_reason".to_string(),
+        ),
+    }
+}
+
+#[cfg(test)]
+mod cohere_v2_finish_reason_tests {
+    use super::*;
+
+    #[test]
+    fn tool_call_mapped_to_stop_is_violation() {
+        let verdict = cohere_v2_finish_reason_mapped("TOOL_CALL", true, Some("stop"));
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("returned finish_reason 'stop' instead of 'tool_calls'")
+        ));
+    }
+
+    #[test]
+    fn max_tokens_mapped_to_stop_is_violation() {
+        let verdict = cohere_v2_finish_reason_mapped("MAX_TOKENS", false, Some("stop"));
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("returned finish_reason 'stop' instead of 'length'")
+        ));
+    }
+
+    #[test]
+    fn tool_call_mapped_to_tool_calls_is_conformant() {
+        let verdict = cohere_v2_finish_reason_mapped("TOOL_CALL", true, Some("tool_calls"));
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn complete_mapped_to_stop_is_conformant() {
+        let verdict = cohere_v2_finish_reason_mapped("COMPLETE", false, Some("stop"));
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}
