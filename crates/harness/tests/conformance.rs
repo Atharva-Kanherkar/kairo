@@ -22,10 +22,12 @@ use kairo::checks::{
     no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
     no_phantom_null_output_text, non_text_block_not_json_dumped, ogx_adaptive_thinking_loss,
     openai_stream_finish_reason, openai_stream_toolcall_type_never_null,
-    openai_toolcall_id_charset, outbound_request_omits_secret, parallel_tool_disable_preserved,
-    provider_request_id_preserved, reasoning_text_order_preserved, refusal_text_preserved,
-    registration_resolvable_by_both_paths, replayed_calls_keep_returned_namespace,
-    response_content_not_empty, response_conversation_preserves_history, response_omits_secret,
+    openai_toolcall_id_charset, openrouter_stream_forwards_all_reasoning_details,
+    openrouter_stream_preserves_reasoning_details, outbound_request_omits_secret,
+    parallel_tool_disable_preserved, provider_request_id_preserved, reasoning_text_order_preserved,
+    refusal_text_preserved, registration_resolvable_by_both_paths,
+    replayed_calls_keep_returned_namespace, response_content_not_empty,
+    response_conversation_preserves_history, response_omits_secret,
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
     responses_single_lifecycle, served_model_within_key_allowlist, stop_sequence_forwarded,
@@ -7562,6 +7564,77 @@ fn litellm_mcp_results_matrix_5_runs_reproduce_consistently() {
             run["litellm_expired_server_outcome"]["status"].as_str(),
             Some("auth_required"),
             "run {run_num}: LiteLLM server outcome must report auth_required"
+        );
+    }
+}
+
+#[test]
+fn litellm_openrouter_streaming_signature_dropped_is_violation() {
+    let proxy_stream = fixture("transcripts/117/wire/litellm-proxy-stream-response.txt");
+    let verdict = openrouter_stream_preserves_reasoning_details(&proxy_stream);
+    assert!(
+        matches!(verdict, Verdict::Violation(msg) if msg.contains("dropped the reasoning_details thought signature")),
+        "LiteLLM proxy stream dropping thought signature must be a violation"
+    );
+
+    let upstream_stream = fixture("transcripts/117/wire/direct-upstream-stream-response.txt");
+    let fwd_verdict =
+        openrouter_stream_forwards_all_reasoning_details(&upstream_stream, &proxy_stream);
+    assert!(
+        matches!(fwd_verdict, Verdict::Violation(msg) if msg.contains("gateway dropped reasoning_details signature")),
+        "differential comparison between upstream and proxy must flag dropped signature"
+    );
+}
+
+#[test]
+fn litellm_openrouter_direct_upstream_preserves_signature_is_conformant() {
+    let upstream_stream = fixture("transcripts/117/wire/direct-upstream-stream-response.txt");
+    let verdict = openrouter_stream_preserves_reasoning_details(&upstream_stream);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "direct upstream stream preserving thought signature must be conformant"
+    );
+}
+
+#[test]
+fn litellm_openrouter_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/117/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["results"].as_array().expect("results array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["direct_upstream_status"].as_u64(),
+            Some(200),
+            "run {run_num}: direct upstream status must be 200"
+        );
+        assert_eq!(
+            run["direct_upstream_has_signature"].as_bool(),
+            Some(true),
+            "run {run_num}: direct upstream must have signature"
+        );
+        assert_eq!(
+            run["litellm_proxy_status"].as_u64(),
+            Some(200),
+            "run {run_num}: LiteLLM proxy status must be 200"
+        );
+        assert_eq!(
+            run["litellm_proxy_has_signature"].as_bool(),
+            Some(false),
+            "run {run_num}: LiteLLM proxy must drop signature (defect)"
+        );
+        assert_eq!(
+            run["next_turn_with_signature_status"].as_u64(),
+            Some(200),
+            "run {run_num}: next turn with signature must succeed with 200"
+        );
+        assert_eq!(
+            run["next_turn_missing_signature_status"].as_u64(),
+            Some(400),
+            "run {run_num}: next turn missing signature must fail with 400"
         );
     }
 }

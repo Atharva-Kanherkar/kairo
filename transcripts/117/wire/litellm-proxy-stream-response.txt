@@ -1,0 +1,8 @@
+data: {"id":"gen-test-117","created":1793517300,"model":"claude-sonnet-4.5","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"reasoning_content":"Let me solve this step by step.","reasoning":"Let me solve this step by step.","reasoning_details":[{"type":"reasoning.text","text":"Let me solve this step by step."}],"role":"assistant"}}]}
+
+data: {"id":"gen-test-117","object":"chat.completion.chunk","created":1793517300,"model":"claude-sonnet-4.5","choices":[{"index":0,"delta":{"content":"The answer is 42."}}]}
+
+data: {"id":"gen-test-117","object":"chat.completion.chunk","created":1793517300,"model":"claude-sonnet-4.5","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+
+data: [DONE]
+

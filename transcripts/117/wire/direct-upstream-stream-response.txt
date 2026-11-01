@@ -1,0 +1,8 @@
+data: {"id": "gen-test-117", "object": "chat.completion.chunk", "created": 1730000000, "model": "anthropic/claude-sonnet-4.5", "choices": [{"index": 0, "delta": {"role": "assistant", "reasoning": "Let me solve this step by step.", "reasoning_details": [{"type": "reasoning.text", "text": "Let me solve this step by step."}]}}]}
+
+data: {"id": "gen-test-117", "object": "chat.completion.chunk", "created": 1730000000, "model": "anthropic/claude-sonnet-4.5", "choices": [{"index": 0, "delta": {"reasoning_details": [{"type": "reasoning.text", "signature": "SIG-claude-thought-signature-12345"}]}}]}
+
+data: {"id": "gen-test-117", "object": "chat.completion.chunk", "created": 1730000000, "model": "anthropic/claude-sonnet-4.5", "choices": [{"index": 0, "delta": {"content": "The answer is 42."}, "finish_reason": "stop"}]}
+
+data: [DONE]
+
