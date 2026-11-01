@@ -1,0 +1,37 @@
+{
+  "iterations": 5,
+  "success_rate": "5/5",
+  "all_passed": true,
+  "runs": [
+    {
+      "bug_model_turn_drops_tool_response": true,
+      "control_user_turn_preserves_tool_response": true,
+      "control_fixed_model_turn_preserves_tool_response": true,
+      "control_model_turn_call_preserved": true
+    },
+    {
+      "bug_model_turn_drops_tool_response": true,
+      "control_user_turn_preserves_tool_response": true,
+      "control_fixed_model_turn_preserves_tool_response": true,
+      "control_model_turn_call_preserved": true
+    },
+    {
+      "bug_model_turn_drops_tool_response": true,
+      "control_user_turn_preserves_tool_response": true,
+      "control_fixed_model_turn_preserves_tool_response": true,
+      "control_model_turn_call_preserved": true
+    },
+    {
+      "bug_model_turn_drops_tool_response": true,
+      "control_user_turn_preserves_tool_response": true,
+      "control_fixed_model_turn_preserves_tool_response": true,
+      "control_model_turn_call_preserved": true
+    },
+    {
+      "bug_model_turn_drops_tool_response": true,
+      "control_user_turn_preserves_tool_response": true,
+      "control_fixed_model_turn_preserves_tool_response": true,
+      "control_model_turn_call_preserved": true
+    }
+  ]
+}

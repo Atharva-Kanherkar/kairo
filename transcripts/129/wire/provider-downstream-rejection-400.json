@@ -1,0 +1,8 @@
+{
+  "status_code": 400,
+  "error": {
+    "type": "invalid_request_error",
+    "message": "messages.1: `tool_use` ids were found without `tool_result` blocks immediately after: call_view_file. Each `tool_use` block must have a corresponding `tool_result` block in the next message.",
+    "request_id": "req_vrtx_011CgbMzfxSshMjzE7gKy5nz"
+  }
+}

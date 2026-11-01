@@ -18,10 +18,10 @@ use kairo::checks::{
     extract_anthropic_request_tool_names, extract_anthropic_untrusted_sources,
     extract_responses_api_untrusted_sources, fake_stream_preserves_provider_logprobs,
     forwarded_body_preserves_values, gemini_inline_media_preserved_in_chat_response,
-    gemini_inline_media_preserved_in_chat_stream, id_conforms, image_url_cache_key_case_sensitive,
-    instruction_messages_preserved, invalid_credential_rejected_before_upstream,
-    is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
-    jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
+    gemini_inline_media_preserved_in_chat_stream, google_genai_model_turn_tool_results_preserved,
+    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
+    invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
+    json_schema_property_forwarded, jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
     mcp_unauthorized_token_must_not_mask_as_empty_tools, model_info_capture_identity,
     model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
     no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
@@ -9106,6 +9106,177 @@ fn litellm_fake_stream_matrix_5_runs_reproduce_consistently() {
             run["ctrl_no_logprobs_null"].as_bool(),
             Some(true),
             "run {run_num}: logprobs=false must be null"
+        );
+    }
+}
+
+#[test]
+fn litellm_google_genai_model_turn_tool_result_dropped_reproduction() {
+    let wire_str = fixture("transcripts/129/wire/bug-model-turn-tool-response-dropped.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    assert_eq!(
+        capture["tool_response_dropped"].as_bool(),
+        Some(true),
+        "tool response in model turn must be dropped"
+    );
+    assert_eq!(
+        capture["turn_2_role"].as_str(),
+        Some("assistant"),
+        "dropped tool response must be converted to assistant message"
+    );
+    assert!(
+        capture["turn_2_content"].is_null(),
+        "empty assistant turn must have null content"
+    );
+
+    let msgs = capture["translated_messages"]
+        .as_array()
+        .expect("translated messages array");
+    let has_tool = msgs.iter().any(|m| m["role"].as_str() == Some("tool"));
+    assert!(
+        !has_tool,
+        "translated messages must not contain tool message"
+    );
+
+    let verdict = google_genai_model_turn_tool_results_preserved(
+        "google_genai",
+        "gpt-4.1",
+        "model",
+        true,
+        false,
+        true,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("dropped tool response in 'model' turn and emitted empty assistant message")
+    ));
+}
+
+#[test]
+fn litellm_google_genai_user_turn_tool_result_preserved_control() {
+    let wire_str = fixture("transcripts/129/wire/control-user-turn-tool-response-preserved.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse user turn control wire capture");
+
+    assert_eq!(
+        capture["tool_response_preserved"].as_bool(),
+        Some(true),
+        "user turn tool response must be preserved"
+    );
+    assert_eq!(
+        capture["turn_2_role"].as_str(),
+        Some("tool"),
+        "user turn tool response must produce role=tool"
+    );
+    assert_eq!(
+        capture["turn_2_tool_call_id"].as_str(),
+        Some("call_view_file"),
+        "tool_call_id must match called function"
+    );
+
+    let verdict = google_genai_model_turn_tool_results_preserved(
+        "google_genai",
+        "gpt-4.1",
+        "user",
+        true,
+        true,
+        false,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_google_genai_fixed_model_turn_tool_result_preserved_control() {
+    let wire_str =
+        fixture("transcripts/129/wire/control-fixed-model-turn-tool-response-preserved.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse fixed model turn control wire capture");
+
+    assert_eq!(
+        capture["tool_response_preserved"].as_bool(),
+        Some(true),
+        "fixed model turn tool response must be preserved"
+    );
+    assert_eq!(
+        capture["turn_2_role"].as_str(),
+        Some("tool"),
+        "fixed model turn must produce role=tool"
+    );
+    assert_eq!(
+        capture["turn_2_tool_call_id"].as_str(),
+        Some("call_view_file"),
+        "fixed model turn tool_call_id must match"
+    );
+
+    let verdict = google_genai_model_turn_tool_results_preserved(
+        "google_genai",
+        "gpt-4.1",
+        "model",
+        true,
+        true,
+        false,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_google_genai_model_turn_tool_call_preserved_control() {
+    let wire_str = fixture("transcripts/129/wire/control-model-turn-tool-call-preserved.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse model turn tool call control wire capture");
+
+    assert_eq!(
+        capture["turn_1_role"].as_str(),
+        Some("assistant"),
+        "model turn tool call must produce role=assistant"
+    );
+    assert_eq!(
+        capture["turn_1_tool_calls"][0]["function"]["name"].as_str(),
+        Some("view_file"),
+        "tool call name must be preserved"
+    );
+
+    let verdict = google_genai_model_turn_tool_results_preserved(
+        "google_genai",
+        "gpt-4.1",
+        "model",
+        false,
+        false,
+        false,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_google_genai_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/129/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_model_turn_drops_tool_response"].as_bool(),
+            Some(true),
+            "run {run_num}: model turn must drop tool response"
+        );
+        assert_eq!(
+            run["control_user_turn_preserves_tool_response"].as_bool(),
+            Some(true),
+            "run {run_num}: user turn must preserve tool response"
+        );
+        assert_eq!(
+            run["control_fixed_model_turn_preserves_tool_response"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed model turn must preserve tool response"
+        );
+        assert_eq!(
+            run["control_model_turn_call_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: model turn tool call must be preserved"
         );
     }
 }

@@ -1,0 +1,68 @@
+{
+  "input_contents": [
+    {
+      "role": "user",
+      "parts": [
+        {
+          "text": "Read /tmp/a.py and summarize it."
+        }
+      ]
+    },
+    {
+      "role": "model",
+      "parts": [
+        {
+          "functionCall": {
+            "id": "call_view_file",
+            "name": "view_file",
+            "args": {
+              "path": "/tmp/a.py"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "parts": [
+        {
+          "functionResponse": {
+            "id": "call_view_file",
+            "name": "view_file",
+            "response": {
+              "output": "1: def a():\n2:     return 1\n"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "translated_messages": [
+    {
+      "role": "user",
+      "content": "Read /tmp/a.py and summarize it."
+    },
+    {
+      "role": "assistant",
+      "content": null,
+      "tool_calls": [
+        {
+          "id": "call_view_file",
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"/tmp/a.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "tool_call_id": "call_view_file",
+      "content": "{\"output\": \"1: def a():\\n2:     return 1\\n\"}"
+    }
+  ],
+  "tool_response_preserved": true,
+  "turn_2_role": "tool",
+  "turn_2_tool_call_id": "call_view_file"
+}
