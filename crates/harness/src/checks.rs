@@ -8243,3 +8243,78 @@ mod response_cache_tenant_isolation_tests {
         assert_eq!(verdict, Verdict::Conformant);
     }
 }
+
+/// Invariant: When an AI gateway bridges Chat Completions requests with `web_search_options`
+/// containing `user_location` to the OpenAI Responses API (`/v1/responses`):
+/// 1. The gateway must flatten `user_location` into `{"type": "approximate", "country": "...", "city": "..."}`.
+/// 2. It must not forward the nested `approximate` object from Chat Completions (`tools[...].user_location.approximate`).
+/// 3. Backends reject nested `approximate` with HTTP 400 Bad Request (`Unknown parameter: 'tools[0].user_location.approximate'`).
+#[allow(clippy::fn_params_excessive_bools)]
+pub fn responses_api_web_search_user_location_flat(
+    has_web_search_tool: bool,
+    has_user_location: bool,
+    has_nested_approximate: bool,
+    has_flat_country_or_city: bool,
+) -> Verdict {
+    if !has_web_search_tool || !has_user_location {
+        return Verdict::Conformant;
+    }
+
+    if has_nested_approximate {
+        return Verdict::Violation(
+            "gateway forwarded nested 'user_location.approximate' object to Responses API instead of flattening location fields, causing HTTP 400 rejection".to_string(),
+        );
+    }
+
+    if !has_flat_country_or_city {
+        return Verdict::Violation(
+            "gateway omitted location fields from flattened Responses API 'user_location'"
+                .to_string(),
+        );
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod responses_api_web_search_user_location_tests {
+    use super::*;
+
+    #[test]
+    fn flat_user_location_is_conformant() {
+        let verdict = responses_api_web_search_user_location_flat(true, true, false, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn nested_approximate_is_violation() {
+        let verdict = responses_api_web_search_user_location_flat(true, true, true, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("forwarded nested 'user_location.approximate' object")
+        ));
+    }
+
+    #[test]
+    fn missing_flat_fields_is_violation() {
+        let verdict = responses_api_web_search_user_location_flat(true, true, false, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("omitted location fields from flattened Responses API")
+        ));
+    }
+
+    #[test]
+    fn no_web_search_is_conformant() {
+        let verdict = responses_api_web_search_user_location_flat(false, false, false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_user_location_is_conformant() {
+        let verdict = responses_api_web_search_user_location_flat(true, false, false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}

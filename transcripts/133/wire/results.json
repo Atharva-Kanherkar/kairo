@@ -1,0 +1,37 @@
+{
+  "iterations": 5,
+  "success_rate": "5/5",
+  "all_passed": true,
+  "runs": [
+    {
+      "bug_nested_location": true,
+      "control_flat_location": true,
+      "control_no_location": true,
+      "control_plain_no_web_search": true
+    },
+    {
+      "bug_nested_location": true,
+      "control_flat_location": true,
+      "control_no_location": true,
+      "control_plain_no_web_search": true
+    },
+    {
+      "bug_nested_location": true,
+      "control_flat_location": true,
+      "control_no_location": true,
+      "control_plain_no_web_search": true
+    },
+    {
+      "bug_nested_location": true,
+      "control_flat_location": true,
+      "control_no_location": true,
+      "control_plain_no_web_search": true
+    },
+    {
+      "bug_nested_location": true,
+      "control_flat_location": true,
+      "control_no_location": true,
+      "control_plain_no_web_search": true
+    }
+  ]
+}

@@ -37,6 +37,7 @@ use kairo::checks::{
     replayed_calls_keep_returned_namespace, response_cache_keys_differentiate_destinations,
     response_cache_tenant_isolation, response_content_not_empty,
     response_conversation_preserves_history, response_omits_secret,
+    responses_api_web_search_user_location_flat,
     responses_comparison_response_id_authorized_and_unwrapped,
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
@@ -9669,6 +9670,117 @@ fn litellm_exact_cache_matrix_5_runs_reproduce_consistently() {
             run["control_bare_sdk_preserved"].as_bool(),
             Some(true),
             "run {run_num}: bare sdk key must be preserved"
+        );
+    }
+}
+
+#[test]
+fn litellm_responses_nested_user_location_wire_reproduction() {
+    let wire_str = fixture("transcripts/133/wire/bug-responses-nested-user-location.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    assert_eq!(
+        capture["has_web_search_tool"].as_bool(),
+        Some(true),
+        "must have web search tool"
+    );
+    assert_eq!(
+        capture["has_nested_approximate"].as_bool(),
+        Some(true),
+        "must have nested approximate object"
+    );
+    assert_eq!(
+        capture["user_location_is_flat"].as_bool(),
+        Some(false),
+        "user_location must not be flat"
+    );
+
+    let verdict = responses_api_web_search_user_location_flat(true, true, true, false);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("forwarded nested 'user_location.approximate' object")
+    ));
+}
+
+#[test]
+fn litellm_responses_fixed_flat_user_location_control() {
+    let wire_str = fixture("transcripts/133/wire/control-fixed-responses-flat-user-location.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed wire capture");
+
+    assert_eq!(
+        capture["has_web_search_tool"].as_bool(),
+        Some(true),
+        "must have web search tool"
+    );
+    assert_eq!(
+        capture["has_nested_approximate"].as_bool(),
+        Some(false),
+        "must not have nested approximate object"
+    );
+    assert_eq!(
+        capture["user_location_is_flat"].as_bool(),
+        Some(true),
+        "user_location must be flat"
+    );
+
+    let verdict = responses_api_web_search_user_location_flat(true, true, false, true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_responses_web_search_no_location_control() {
+    let wire_str = fixture("transcripts/133/wire/control-web-search-no-location.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse no location capture");
+
+    let tools = capture["tools"].as_array().expect("tools array");
+    assert_eq!(tools.len(), 1, "must have 1 tool");
+    assert_eq!(tools[0]["type"].as_str(), Some("web_search"));
+    assert!(tools[0]["user_location"].is_null());
+
+    let verdict = responses_api_web_search_user_location_flat(true, false, false, false);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_responses_plain_no_web_search_control() {
+    let wire_str = fixture("transcripts/133/wire/control-plain-request-no-web-search.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse plain capture");
+
+    assert_eq!(capture["has_tools"].as_bool(), Some(false));
+
+    let verdict = responses_api_web_search_user_location_flat(false, false, false, false);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_responses_user_location_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/133/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_nested_location"].as_bool(),
+            Some(true),
+            "run {run_num}: nested location defect must reproduce"
+        );
+        assert_eq!(
+            run["control_flat_location"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed flat location must be conformant"
+        );
+        assert_eq!(
+            run["control_no_location"].as_bool(),
+            Some(true),
+            "run {run_num}: no location control must be conformant"
+        );
+        assert_eq!(
+            run["control_plain_no_web_search"].as_bool(),
+            Some(true),
+            "run {run_num}: plain request control must be conformant"
         );
     }
 }
