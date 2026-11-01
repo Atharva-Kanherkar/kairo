@@ -1,0 +1,82 @@
+{
+  "target_commit": "cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a",
+  "target_version": "1.108.0-dev / v1.106.6",
+  "runs_completed": 5,
+  "results": [
+    {
+      "run": 1,
+      "direct_upstream_valid_status": 200,
+      "direct_upstream_expired_status": 401,
+      "direct_upstream_expired_www_authenticate": "Bearer error=\"invalid_token\", error_description=\"The access token expired\"",
+      "litellm_valid_status": 200,
+      "litellm_valid_tool_count": 1,
+      "litellm_expired_status": 200,
+      "litellm_expired_www_authenticate": null,
+      "litellm_expired_tool_count": 0,
+      "litellm_expired_server_outcome": {
+        "status": "auth_required",
+        "http_status": 401
+      }
+    },
+    {
+      "run": 2,
+      "direct_upstream_valid_status": 200,
+      "direct_upstream_expired_status": 401,
+      "direct_upstream_expired_www_authenticate": "Bearer error=\"invalid_token\", error_description=\"The access token expired\"",
+      "litellm_valid_status": 200,
+      "litellm_valid_tool_count": 1,
+      "litellm_expired_status": 200,
+      "litellm_expired_www_authenticate": null,
+      "litellm_expired_tool_count": 0,
+      "litellm_expired_server_outcome": {
+        "status": "auth_required",
+        "http_status": 401
+      }
+    },
+    {
+      "run": 3,
+      "direct_upstream_valid_status": 200,
+      "direct_upstream_expired_status": 401,
+      "direct_upstream_expired_www_authenticate": "Bearer error=\"invalid_token\", error_description=\"The access token expired\"",
+      "litellm_valid_status": 200,
+      "litellm_valid_tool_count": 1,
+      "litellm_expired_status": 200,
+      "litellm_expired_www_authenticate": null,
+      "litellm_expired_tool_count": 0,
+      "litellm_expired_server_outcome": {
+        "status": "auth_required",
+        "http_status": 401
+      }
+    },
+    {
+      "run": 4,
+      "direct_upstream_valid_status": 200,
+      "direct_upstream_expired_status": 401,
+      "direct_upstream_expired_www_authenticate": "Bearer error=\"invalid_token\", error_description=\"The access token expired\"",
+      "litellm_valid_status": 200,
+      "litellm_valid_tool_count": 1,
+      "litellm_expired_status": 200,
+      "litellm_expired_www_authenticate": null,
+      "litellm_expired_tool_count": 0,
+      "litellm_expired_server_outcome": {
+        "status": "auth_required",
+        "http_status": 401
+      }
+    },
+    {
+      "run": 5,
+      "direct_upstream_valid_status": 200,
+      "direct_upstream_expired_status": 401,
+      "direct_upstream_expired_www_authenticate": "Bearer error=\"invalid_token\", error_description=\"The access token expired\"",
+      "litellm_valid_status": 200,
+      "litellm_valid_tool_count": 1,
+      "litellm_expired_status": 200,
+      "litellm_expired_www_authenticate": null,
+      "litellm_expired_tool_count": 0,
+      "litellm_expired_server_outcome": {
+        "status": "auth_required",
+        "http_status": 401
+      }
+    }
+  ]
+}

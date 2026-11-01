@@ -17,15 +17,15 @@ use kairo::checks::{
     gemini_inline_media_preserved_in_chat_stream, id_conforms, image_url_cache_key_case_sensitive,
     instruction_messages_preserved, invalid_credential_rejected_before_upstream,
     is_error_forwarded, json_schema_forwarded, json_schema_property_forwarded,
-    mcp_tool_executes_once, model_info_capture_identity, model_info_envelope_body,
-    model_info_omits_api_base_secret, no_empty_text_alongside_tool_use, no_indexerror_leak,
-    no_invented_cache_control, no_phantom_null_output_text, non_text_block_not_json_dumped,
-    ogx_adaptive_thinking_loss, openai_stream_finish_reason,
-    openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
-    outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
-    reasoning_text_order_preserved, refusal_text_preserved, registration_resolvable_by_both_paths,
-    replayed_calls_keep_returned_namespace, response_content_not_empty,
-    response_conversation_preserves_history, response_omits_secret,
+    mcp_tool_executes_once, mcp_unauthorized_token_must_not_mask_as_empty_tools,
+    model_info_capture_identity, model_info_envelope_body, model_info_omits_api_base_secret,
+    no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
+    no_phantom_null_output_text, non_text_block_not_json_dumped, ogx_adaptive_thinking_loss,
+    openai_stream_finish_reason, openai_stream_toolcall_type_never_null,
+    openai_toolcall_id_charset, outbound_request_omits_secret, parallel_tool_disable_preserved,
+    provider_request_id_preserved, reasoning_text_order_preserved, refusal_text_preserved,
+    registration_resolvable_by_both_paths, replayed_calls_keep_returned_namespace,
+    response_content_not_empty, response_conversation_preserves_history, response_omits_secret,
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
     responses_single_lifecycle, served_model_within_key_allowlist, stop_sequence_forwarded,
@@ -7468,4 +7468,100 @@ fn litellm_access_group_allowed_model_served() {
         Verdict::Conformant,
         "allowed model served with 200 is conformant"
     );
+}
+
+// --- Finding 116: LiteLLM MCP true_passthrough expired OAuth token 401 masked as 200 empty tools ---
+// When an MCP server is configured with auth_type: "true_passthrough", an expired
+// or invalid bearer token rejected by the upstream with HTTP 401 is swallowed
+// by the gateway into HTTP 200 OK with empty tools: [], preventing standard MCP
+// clients from triggering OAuth token refresh.
+
+#[test]
+fn litellm_mcp_passthrough_expired_token_masked_as_empty_tools_is_violation() {
+    let resp = fixture("transcripts/116/wire/litellm-expired-response.json");
+    let verdict = mcp_unauthorized_token_must_not_mask_as_empty_tools(200, &[], &resp);
+    assert!(
+        matches!(verdict, Verdict::Violation(_)),
+        "LiteLLM returning 200 with empty tools: [] and auth_required server outcome must be a violation: {verdict:?}"
+    );
+}
+
+#[test]
+fn litellm_mcp_direct_upstream_401_challenge_is_conformant() {
+    let resp = fixture("transcripts/116/wire/direct-upstream-expired-response.json");
+    let headers = [(
+        "WWW-Authenticate",
+        "Bearer error=\"invalid_token\", error_description=\"The access token expired\"",
+    )];
+    let verdict = mcp_unauthorized_token_must_not_mask_as_empty_tools(401, &headers, &resp);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "direct upstream returning 401 with WWW-Authenticate header is conformant"
+    );
+}
+
+#[test]
+fn litellm_mcp_valid_token_tools_is_conformant() {
+    let resp = fixture("transcripts/116/wire/litellm-valid-response.json");
+    let verdict = mcp_unauthorized_token_must_not_mask_as_empty_tools(200, &[], &resp);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "LiteLLM returning 200 with available tools is conformant"
+    );
+}
+
+#[test]
+fn litellm_mcp_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/116/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["results"].as_array().expect("results array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["direct_upstream_valid_status"].as_u64(),
+            Some(200),
+            "run {run_num}: direct upstream valid status must be 200"
+        );
+        assert_eq!(
+            run["direct_upstream_expired_status"].as_u64(),
+            Some(401),
+            "run {run_num}: direct upstream expired status must be 401"
+        );
+        assert!(
+            run["direct_upstream_expired_www_authenticate"]
+                .as_str()
+                .unwrap_or("")
+                .contains("invalid_token"),
+            "run {run_num}: direct upstream expired must return WWW-Authenticate challenge"
+        );
+        assert_eq!(
+            run["litellm_valid_status"].as_u64(),
+            Some(200),
+            "run {run_num}: LiteLLM valid status must be 200"
+        );
+        assert_eq!(
+            run["litellm_valid_tool_count"].as_u64(),
+            Some(1),
+            "run {run_num}: LiteLLM valid tool count must be 1"
+        );
+        assert_eq!(
+            run["litellm_expired_status"].as_u64(),
+            Some(200),
+            "run {run_num}: LiteLLM expired status must be 200 (defect)"
+        );
+        assert_eq!(
+            run["litellm_expired_tool_count"].as_u64(),
+            Some(0),
+            "run {run_num}: LiteLLM expired tool count must be 0 (defect)"
+        );
+        assert_eq!(
+            run["litellm_expired_server_outcome"]["status"].as_str(),
+            Some("auth_required"),
+            "run {run_num}: LiteLLM server outcome must report auth_required"
+        );
+    }
 }
