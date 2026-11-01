@@ -1,0 +1,37 @@
+{
+  "iterations": 5,
+  "success_rate": "5/5",
+  "all_passed": true,
+  "runs": [
+    {
+      "bug_output_format_top_level": true,
+      "control_fixed_output_config_format": true,
+      "control_beside_effort_preserved": true,
+      "control_plain_no_format": true
+    },
+    {
+      "bug_output_format_top_level": true,
+      "control_fixed_output_config_format": true,
+      "control_beside_effort_preserved": true,
+      "control_plain_no_format": true
+    },
+    {
+      "bug_output_format_top_level": true,
+      "control_fixed_output_config_format": true,
+      "control_beside_effort_preserved": true,
+      "control_plain_no_format": true
+    },
+    {
+      "bug_output_format_top_level": true,
+      "control_fixed_output_config_format": true,
+      "control_beside_effort_preserved": true,
+      "control_plain_no_format": true
+    },
+    {
+      "bug_output_format_top_level": true,
+      "control_fixed_output_config_format": true,
+      "control_beside_effort_preserved": true,
+      "control_plain_no_format": true
+    }
+  ]
+}
