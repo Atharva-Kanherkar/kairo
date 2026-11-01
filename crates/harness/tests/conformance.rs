@@ -22,10 +22,10 @@ use kairo::checks::{
     id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
     invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
     json_schema_property_forwarded, jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
-    mcp_unauthorized_token_must_not_mask_as_empty_tools, model_info_capture_identity,
-    model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
-    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
-    non_text_block_not_json_dumped, ogx_adaptive_thinking_loss,
+    mcp_unauthorized_token_must_not_mask_as_empty_tools, minimax_reasoning_effort_preserved,
+    model_info_capture_identity, model_info_envelope_body, model_info_omits_api_base_secret,
+    no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
+    no_phantom_null_output_text, non_text_block_not_json_dumped, ogx_adaptive_thinking_loss,
     openai_compatible_unmapped_model_tools_preserved, openai_stream_finish_reason,
     openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
     openrouter_stream_forwards_all_reasoning_details,
@@ -9277,6 +9277,145 @@ fn litellm_google_genai_matrix_5_runs_reproduce_consistently() {
             run["control_model_turn_call_preserved"].as_bool(),
             Some(true),
             "run {run_num}: model turn tool call must be preserved"
+        );
+    }
+}
+
+#[test]
+fn litellm_minimax_drops_reasoning_effort_wire_reproduction() {
+    let wire_str = fixture("transcripts/130/wire/bug-minimax-reasoning-effort-dropped.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    assert_eq!(
+        capture["reasoning_effort_dropped"].as_bool(),
+        Some(true),
+        "reasoning_effort must be dropped from mapped params"
+    );
+    assert_eq!(
+        capture["supported_params_contains_reasoning_effort"].as_bool(),
+        Some(false),
+        "minimax supported_params must omit reasoning_effort"
+    );
+    assert!(
+        capture["mapped_outbound_params"]["reasoning_effort"].is_null(),
+        "outbound params must not contain reasoning_effort"
+    );
+
+    let verdict = minimax_reasoning_effort_preserved(
+        "minimax",
+        "minimax/MiniMax-M3.1-Flash",
+        Some("low"),
+        false,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("dropped requested reasoning_effort 'low'")
+    ));
+}
+
+#[test]
+fn litellm_minimax_fixed_reasoning_effort_preserved_control() {
+    let wire_str =
+        fixture("transcripts/130/wire/control-fixed-minimax-reasoning-effort-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed control wire capture");
+
+    assert_eq!(
+        capture["reasoning_effort_preserved"].as_bool(),
+        Some(true),
+        "fixed config must preserve reasoning_effort"
+    );
+    assert_eq!(
+        capture["mapped_outbound_params"]["reasoning_effort"].as_str(),
+        Some("low"),
+        "mapped reasoning_effort must be low"
+    );
+
+    let verdict = minimax_reasoning_effort_preserved(
+        "minimax",
+        "minimax/MiniMax-M3.1-Flash",
+        Some("low"),
+        true,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_minimax_oseries_route_reasoning_effort_control() {
+    let wire_str =
+        fixture("transcripts/130/wire/control-openai-route-reasoning-effort-preserved.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse openai route control wire capture");
+
+    assert_eq!(
+        capture["reasoning_effort_preserved"].as_bool(),
+        Some(true),
+        "o-series config must preserve reasoning_effort"
+    );
+    assert_eq!(
+        capture["mapped_outbound_params"]["reasoning_effort"].as_str(),
+        Some("low"),
+        "mapped reasoning_effort must be low"
+    );
+
+    let verdict = minimax_reasoning_effort_preserved("openai", "o1", Some("low"), true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_minimax_high_effort_preserved_control() {
+    let wire_str = fixture("transcripts/130/wire/control-high-effort-preserved.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse high effort control wire capture");
+
+    assert_eq!(
+        capture["reasoning_effort_preserved"].as_bool(),
+        Some(true),
+        "fixed config must preserve high reasoning_effort"
+    );
+    assert_eq!(
+        capture["mapped_outbound_params"]["reasoning_effort"].as_str(),
+        Some("high"),
+        "mapped reasoning_effort must be high"
+    );
+
+    let verdict = minimax_reasoning_effort_preserved(
+        "minimax",
+        "minimax/MiniMax-M3.1-Flash",
+        Some("high"),
+        true,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_minimax_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/130/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_reasoning_effort_dropped"].as_bool(),
+            Some(true),
+            "run {run_num}: reasoning_effort must be dropped"
+        );
+        assert_eq!(
+            run["control_fixed_reasoning_effort_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed config must preserve reasoning_effort"
+        );
+        assert_eq!(
+            run["control_oseries_route_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: o-series config must preserve reasoning_effort"
+        );
+        assert_eq!(
+            run["control_high_effort_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: high effort must be preserved"
         );
     }
 }
