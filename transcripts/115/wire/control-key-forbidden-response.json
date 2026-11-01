@@ -4,5 +4,6 @@
     "type": "key_model_access_denied",
     "param": "model",
     "code": "403"
-  }
+  },
+  "status_code": 403
 }

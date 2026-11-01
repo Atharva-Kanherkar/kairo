@@ -6344,16 +6344,24 @@ pub fn access_group_bounds_model_access(
     }
 
     if status == 403 {
-        return Verdict::Conformant;
+        let resp: Value = match serde_json::from_str(response_json) {
+            Ok(v) => v,
+            Err(e) => return Verdict::Violation(format!("invalid response JSON: {e}")),
+        };
+        if resp.get("error").is_some()
+            || response_json.contains("key_model_access_denied")
+            || response_json.contains("not available for this API key")
+        {
+            return Verdict::Conformant;
+        }
+        return Verdict::Violation(format!(
+            "403 response missing error object: {response_json}"
+        ));
     }
 
-    if response_json.contains("key_model_access_denied")
-        || response_json.contains("not available for this API key")
-    {
-        return Verdict::Conformant;
-    }
-
-    Verdict::Conformant
+    Verdict::Violation(format!(
+        "unexpected status {status} for disallowed model {requested_model:?}; authorization rejection must be HTTP 403"
+    ))
 }
 
 #[cfg(test)]
@@ -6394,6 +6402,22 @@ mod access_group_bounds_model_access_tests {
             access_group_bounds_model_access("forbidden-model", &["allowed-model"], 200, resp),
             Verdict::Violation(msg) if msg.contains("outside the access group allowlist")
         ));
+    }
+
+    #[test]
+    fn forbidden_model_with_unexpected_non_403_is_violation() {
+        for bad_status in [201, 202, 500] {
+            let resp = r#"{"error":"internal failure"}"#;
+            assert!(matches!(
+                access_group_bounds_model_access(
+                    "forbidden-model",
+                    &["allowed-model"],
+                    bad_status,
+                    resp
+                ),
+                Verdict::Violation(msg) if msg.contains("authorization rejection must be HTTP 403")
+            ));
+        }
     }
 
     #[test]

@@ -3,7 +3,7 @@
   "messages": [
     {
       "role": "user",
-      "content": "hello from trigger"
+      "content": "hello from sentinel"
     }
   ]
 }

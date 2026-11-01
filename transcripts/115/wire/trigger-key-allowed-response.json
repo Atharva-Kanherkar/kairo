@@ -1,6 +1,6 @@
 {
-  "id": "chatcmpl-mock-115-8faf3e",
-  "created": 1793443187,
+  "id": "chatcmpl-mock-115-93e5f7",
+  "created": 1793515213,
   "model": "allowed-model",
   "object": "chat.completion",
   "choices": [
@@ -18,5 +18,6 @@
     "completion_tokens": 8,
     "prompt_tokens": 8,
     "total_tokens": 16
-  }
+  },
+  "status_code": 200
 }

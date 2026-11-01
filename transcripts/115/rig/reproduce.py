@@ -159,12 +159,11 @@ async def run_reproduction(iterations: int = 5):
                 with open(
                     os.path.join(WIRE_DIR, "key-generate-response.json"), "w"
                 ) as f:
-                    # Sanitize token
                     sanitized_key_data = dict(key_data)
                     sanitized_key_data["key"] = "sk-litellm-trigger-key-redacted"
                     json.dump(sanitized_key_data, f, indent=2)
 
-            # Step 3: Generate Control Key with native models: ["allowed-model"]
+            # Step 3: Generate Native Model Control Key with models: ["allowed-model"]
             ctrl_payload = {
                 "key_alias": f"control-key-{run_uid}",
                 "models": ["allowed-model"],
@@ -174,6 +173,30 @@ async def run_reproduction(iterations: int = 5):
             )
             assert resp_ctrl.status_code == 200
             ctrl_key = resp_ctrl.json()["key"]
+
+            # Step 3b: Generate Sentinel Control Key with models: ["no-default-models"]
+            nodefault_payload = {
+                "key_alias": f"nodefault-key-{run_uid}",
+                "models": ["no-default-models"],
+                "access_group_ids": [ag_id],
+            }
+            resp_nd = await client.post(
+                "/key/generate", headers=admin_headers, json=nodefault_payload
+            )
+            assert resp_nd.status_code == 200
+            nd_key = resp_nd.json()["key"]
+
+            if run_idx == 1:
+                with open(
+                    os.path.join(WIRE_DIR, "nodefault-key-generate-request.json"), "w"
+                ) as f:
+                    json.dump(nodefault_payload, f, indent=2)
+                with open(
+                    os.path.join(WIRE_DIR, "nodefault-key-generate-response.json"), "w"
+                ) as f:
+                    sanitized_nd_data = dict(resp_nd.json())
+                    sanitized_nd_data["key"] = "sk-litellm-nodefault-key-redacted"
+                    json.dump(sanitized_nd_data, f, indent=2)
 
             # Step 4: Control Key calls forbidden-model (Expected 403 Forbidden)
             forbidden_chat_payload = {
@@ -188,15 +211,59 @@ async def run_reproduction(iterations: int = 5):
             ctrl_status = ctrl_resp.status_code
 
             if run_idx == 1:
+                ctrl_body = ctrl_resp.json()
+                ctrl_body["status_code"] = ctrl_status
                 with open(
                     os.path.join(
                         WIRE_DIR, "control-key-forbidden-response.json"
                     ),
                     "w",
                 ) as f:
-                    json.dump(ctrl_resp.json(), f, indent=2)
+                    json.dump(ctrl_body, f, indent=2)
 
-            # Step 5: Trigger Key calls forbidden-model (Expected 403 by spec, Observed 200 OK bypass)
+            # Step 5: Sentinel Key calls forbidden-model (Expected 403 Forbidden)
+            nd_forbidden_resp = await client.post(
+                "/chat/completions",
+                headers={"Authorization": f"Bearer {nd_key}"},
+                json=forbidden_chat_payload,
+            )
+            nd_forbidden_status = nd_forbidden_resp.status_code
+
+            if run_idx == 1:
+                nd_forbid_body = nd_forbidden_resp.json()
+                nd_forbid_body["status_code"] = nd_forbidden_status
+                with open(
+                    os.path.join(
+                        WIRE_DIR, "nodefault-key-forbidden-response.json"
+                    ),
+                    "w",
+                ) as f:
+                    json.dump(nd_forbid_body, f, indent=2)
+
+            # Step 6: Sentinel Key calls allowed-model (Expected 200 OK)
+            allowed_chat_payload = {
+                "model": "allowed-model",
+                "messages": [{"role": "user", "content": "hello from sentinel"}],
+            }
+            nd_allowed_resp = await client.post(
+                "/chat/completions",
+                headers={"Authorization": f"Bearer {nd_key}"},
+                json=allowed_chat_payload,
+            )
+            nd_allowed_status = nd_allowed_resp.status_code
+
+            if run_idx == 1:
+                nd_allow_body = nd_allowed_resp.json()
+                nd_allow_body["status_code"] = nd_allowed_status
+                with open(
+                    os.path.join(
+                        WIRE_DIR, "nodefault-key-allowed-response.json"
+                    ),
+                    "w",
+                ) as f:
+                    json.dump(nd_allow_body, f, indent=2)
+
+            # Step 7: Trigger Key calls forbidden-model (Observed 200 OK because models: [] allows everything)
             trigger_forbidden_resp = await client.post(
                 "/chat/completions",
                 headers={"Authorization": f"Bearer {trigger_key}"},
@@ -210,17 +277,15 @@ async def run_reproduction(iterations: int = 5):
                     "w",
                 ) as f:
                     json.dump(forbidden_chat_payload, f, indent=2)
+                trig_forbid_body = trigger_forbidden_resp.json()
+                trig_forbid_body["status_code"] = trigger_forbidden_status
                 with open(
                     os.path.join(WIRE_DIR, "trigger-key-forbidden-response.json"),
                     "w",
                 ) as f:
-                    json.dump(trigger_forbidden_resp.json(), f, indent=2)
+                    json.dump(trig_forbid_body, f, indent=2)
 
-            # Step 6: Trigger Key calls allowed-model (Expected 200 OK)
-            allowed_chat_payload = {
-                "model": "allowed-model",
-                "messages": [{"role": "user", "content": "hello from trigger"}],
-            }
+            # Step 8: Trigger Key calls allowed-model (Expected 200 OK)
             trigger_allowed_resp = await client.post(
                 "/chat/completions",
                 headers={"Authorization": f"Bearer {trigger_key}"},
@@ -234,16 +299,20 @@ async def run_reproduction(iterations: int = 5):
                     "w",
                 ) as f:
                     json.dump(allowed_chat_payload, f, indent=2)
+                trig_allow_body = trigger_allowed_resp.json()
+                trig_allow_body["status_code"] = trigger_allowed_status
                 with open(
                     os.path.join(WIRE_DIR, "trigger-key-allowed-response.json"),
                     "w",
                 ) as f:
-                    json.dump(trigger_allowed_resp.json(), f, indent=2)
+                    json.dump(trig_allow_body, f, indent=2)
 
             results_matrix.append(
                 {
                     "run": run_idx,
                     "control_key_forbidden_model_status": ctrl_status,
+                    "sentinel_key_forbidden_model_status": nd_forbidden_status,
+                    "sentinel_key_allowed_model_status": nd_allowed_status,
                     "trigger_key_forbidden_model_status": trigger_forbidden_status,
                     "trigger_key_allowed_model_status": trigger_allowed_status,
                 }
@@ -254,9 +323,14 @@ async def run_reproduction(iterations: int = 5):
     mock_server.shutdown()
 
     summary = {
+        "target_commit": "cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a",
+        "target_version": "1.108.0-dev / v1.106.6 release 61c6ab78393",
         "runs_completed": iterations,
         "results": results_matrix,
     }
+    with open(os.path.join(WIRE_DIR, "results.json"), "w") as f:
+        json.dump(summary, f, indent=2)
+
     print(json.dumps(summary, indent=2))
 
 

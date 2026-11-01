@@ -7394,14 +7394,20 @@ fn litellm_098_checker_rejects_an_allowed_model_that_was_not_served() {
 // models: [] bypasses all access-group model restrictions. The proxy evaluates
 // models: [] first, treats empty models as unrestricted (all_model_access = true),
 // and never enters the access_group fallback check.
+// In LiteLLM's permission model, access groups are additive grants rather than
+// subtractive restrictions; keys bound strictly to access groups must set
+// models: ["no-default-models"].
 
 #[test]
 fn litellm_access_group_empty_models_forbidden_model_bypassed_violation() {
     let req = fixture("transcripts/115/wire/trigger-key-forbidden-request.json");
     let resp = fixture("transcripts/115/wire/trigger-key-forbidden-response.json");
     let req_val: Value = serde_json::from_str(&req).expect("parse request");
+    let resp_val: Value = serde_json::from_str(&resp).expect("parse response");
     let requested_model = req_val["model"].as_str().expect("model");
-    let verdict = access_group_bounds_model_access(requested_model, &["allowed-model"], 200, &resp);
+    let status = u16::try_from(resp_val["status_code"].as_u64().unwrap_or(200)).unwrap_or(200);
+    let verdict =
+        access_group_bounds_model_access(requested_model, &["allowed-model"], status, &resp);
     assert!(
         matches!(verdict, Verdict::Violation(_)),
         "a key in an access group restricted to allowed-model serving forbidden-model with 200 must be a violation: {verdict:?}"
@@ -7411,8 +7417,10 @@ fn litellm_access_group_empty_models_forbidden_model_bypassed_violation() {
 #[test]
 fn litellm_access_group_control_key_rejected() {
     let resp = fixture("transcripts/115/wire/control-key-forbidden-response.json");
+    let resp_val: Value = serde_json::from_str(&resp).expect("parse response");
+    let status = u16::try_from(resp_val["status_code"].as_u64().unwrap_or(403)).unwrap_or(403);
     let verdict =
-        access_group_bounds_model_access("forbidden-model", &["allowed-model"], 403, &resp);
+        access_group_bounds_model_access("forbidden-model", &["allowed-model"], status, &resp);
     assert_eq!(
         verdict,
         Verdict::Conformant,
@@ -7421,9 +7429,40 @@ fn litellm_access_group_control_key_rejected() {
 }
 
 #[test]
+fn litellm_access_group_nodefault_sentinel_forbidden_model_rejected() {
+    let resp = fixture("transcripts/115/wire/nodefault-key-forbidden-response.json");
+    let resp_val: Value = serde_json::from_str(&resp).expect("parse response");
+    let status = u16::try_from(resp_val["status_code"].as_u64().unwrap_or(403)).unwrap_or(403);
+    let verdict =
+        access_group_bounds_model_access("forbidden-model", &["allowed-model"], status, &resp);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "nodefault sentinel key returning 403 for forbidden-model is conformant"
+    );
+}
+
+#[test]
+fn litellm_access_group_nodefault_sentinel_allowed_model_served() {
+    let resp = fixture("transcripts/115/wire/nodefault-key-allowed-response.json");
+    let resp_val: Value = serde_json::from_str(&resp).expect("parse response");
+    let status = u16::try_from(resp_val["status_code"].as_u64().unwrap_or(200)).unwrap_or(200);
+    let verdict =
+        access_group_bounds_model_access("allowed-model", &["allowed-model"], status, &resp);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "nodefault sentinel key serving allowed-model with 200 is conformant"
+    );
+}
+
+#[test]
 fn litellm_access_group_allowed_model_served() {
     let resp = fixture("transcripts/115/wire/trigger-key-allowed-response.json");
-    let verdict = access_group_bounds_model_access("allowed-model", &["allowed-model"], 200, &resp);
+    let resp_val: Value = serde_json::from_str(&resp).expect("parse response");
+    let status = u16::try_from(resp_val["status_code"].as_u64().unwrap_or(200)).unwrap_or(200);
+    let verdict =
+        access_group_bounds_model_access("allowed-model", &["allowed-model"], status, &resp);
     assert_eq!(
         verdict,
         Verdict::Conformant,
