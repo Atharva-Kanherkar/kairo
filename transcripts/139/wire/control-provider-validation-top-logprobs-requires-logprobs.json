@@ -1,0 +1,9 @@
+{
+  "status_code": 400,
+  "error_type": "invalid_request_error",
+  "error_message": "'top_logprobs' is only allowed when 'logprobs' is enabled",
+  "rejected_outbound_params": {
+    "top_logprobs": 2,
+    "logprobs": null
+  }
+}

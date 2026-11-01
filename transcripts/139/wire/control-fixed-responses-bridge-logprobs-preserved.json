@@ -1,0 +1,33 @@
+{
+  "endpoint": "/v1/responses",
+  "model": "vertex_ai/gemini-2.5-flash",
+  "request_top_logprobs": 2,
+  "bridged_chat_top_logprobs": 2,
+  "bridged_chat_logprobs": true,
+  "provider_returned_logprobs": true,
+  "response_has_logprobs": true,
+  "output_text": {
+    "type": "output_text",
+    "text": "Hello.",
+    "annotations": [],
+    "logprobs": [
+      {
+        "token": "Hello",
+        "logprob": -0.05,
+        "bytes": null,
+        "top_logprobs": [
+          {
+            "token": "Hello",
+            "logprob": -0.05,
+            "bytes": null
+          },
+          {
+            "token": "Hi",
+            "logprob": -3.2,
+            "bytes": null
+          }
+        ]
+      }
+    ]
+  }
+}

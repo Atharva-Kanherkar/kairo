@@ -1,0 +1,42 @@
+{
+  "iterations": 5,
+  "success_rate": "5/5",
+  "all_passed": true,
+  "runs": [
+    {
+      "run": 1,
+      "defect_unpatched_bridge_drops_logprobs": true,
+      "control_fixed_bridge_preserves_logprobs": true,
+      "control_responses_without_logprobs": true,
+      "control_provider_validation_rule": true
+    },
+    {
+      "run": 2,
+      "defect_unpatched_bridge_drops_logprobs": true,
+      "control_fixed_bridge_preserves_logprobs": true,
+      "control_responses_without_logprobs": true,
+      "control_provider_validation_rule": true
+    },
+    {
+      "run": 3,
+      "defect_unpatched_bridge_drops_logprobs": true,
+      "control_fixed_bridge_preserves_logprobs": true,
+      "control_responses_without_logprobs": true,
+      "control_provider_validation_rule": true
+    },
+    {
+      "run": 4,
+      "defect_unpatched_bridge_drops_logprobs": true,
+      "control_fixed_bridge_preserves_logprobs": true,
+      "control_responses_without_logprobs": true,
+      "control_provider_validation_rule": true
+    },
+    {
+      "run": 5,
+      "defect_unpatched_bridge_drops_logprobs": true,
+      "control_fixed_bridge_preserves_logprobs": true,
+      "control_responses_without_logprobs": true,
+      "control_provider_validation_rule": true
+    }
+  ]
+}
