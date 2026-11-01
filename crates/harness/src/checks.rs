@@ -7415,3 +7415,79 @@ mod responses_comparison_id_tests {
         ));
     }
 }
+
+/// Invariant: When an AI gateway bridges Anthropic Messages (/v1/messages) to a backend that supports
+/// the Responses API (such as chatgpt/ or OpenAI Responses bridge):
+/// 1. Outbound responses containing backend reasoning items (with encrypted content) must be preserved
+///    and translated into Anthropic thinking or redacted_thinking blocks with the litellm_encrypted_reasoning:
+///    signature so that the client agent loop can store and replay the reasoning state.
+/// 2. Inbound requests from the client replaying prior encrypted reasoning in assistant turns must be preserved
+///    and translated back into Responses API reasoning items rather than being stripped by the message adapter.
+#[allow(clippy::fn_params_excessive_bools)]
+pub fn anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+    backend_emitted_reasoning: bool,
+    outbound_thinking_block_present: bool,
+    inbound_client_replayed_reasoning: bool,
+    forwarded_input_has_reasoning_item: bool,
+) -> Verdict {
+    if backend_emitted_reasoning && !outbound_thinking_block_present {
+        return Verdict::Violation(
+            "outbound response translated to Anthropic format dropped encrypted reasoning item, preventing client from capturing reasoning state"
+                .into(),
+        );
+    }
+
+    if inbound_client_replayed_reasoning && !forwarded_input_has_reasoning_item {
+        return Verdict::Violation(
+            "inbound Anthropic request replaying encrypted reasoning was stripped by adapter, preventing backend from receiving prior reasoning context"
+                .into(),
+        );
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod anthropic_responses_bridge_reasoning_tests {
+    use super::{anthropic_messages_responses_bridge_preserves_encrypted_reasoning, Verdict};
+
+    #[test]
+    fn full_roundtrip_preserved_is_conformant() {
+        let verdict = anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+            true, true, // backend emitted reasoning -> outbound thinking block present
+            true, true, // client replayed reasoning -> forwarded input has reasoning item
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_reasoning_emitted_is_conformant() {
+        let verdict = anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+            false, false, false, false,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn outbound_reasoning_dropped_is_violation() {
+        let verdict = anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+            true, false, // backend emitted reasoning, but outbound thinking block dropped
+            false, false,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("dropped encrypted reasoning item")
+        ));
+    }
+
+    #[test]
+    fn inbound_replayed_reasoning_stripped_is_violation() {
+        let verdict = anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+            true, true, true, false, // replayed reasoning was stripped before reaching backend
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("replaying encrypted reasoning was stripped")
+        ));
+    }
+}

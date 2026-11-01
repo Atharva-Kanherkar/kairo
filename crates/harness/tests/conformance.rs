@@ -7,6 +7,7 @@
 
 use kairo::checks::{
     access_group_bounds_model_access, allowlist_bounds_served_model,
+    anthropic_messages_responses_bridge_preserves_encrypted_reasoning,
     anthropic_response_toolcall_stop_reason, anthropic_server_tools_forwarded,
     anthropic_stop_sequence_reported, anthropic_stream_block_lifecycle,
     anthropic_stream_guardrail_evaluates_all_text, anthropic_stream_safety_stop_reason,
@@ -8160,6 +8161,155 @@ fn litellm_responses_comparison_id_results_matrix_5_runs_reproduce_consistently(
             run["openai_would_reject_length"].as_bool(),
             Some(true),
             "run {run_num}: bug 2 length exceeds 64 chars"
+        );
+    }
+}
+
+#[test]
+fn litellm_chatgpt_messages_outbound_reasoning_dropped_wire() {
+    let wire_str = fixture("transcripts/123/wire/bug-outbound-reasoning-items-dropped.json");
+    let resp: Value = serde_json::from_str(&wire_str).expect("parse outbound response");
+
+    let content = resp["content"].as_array().expect("content blocks");
+    let has_thinking = content.iter().any(|b| {
+        let btype = b["type"].as_str().unwrap_or("");
+        btype == "thinking" || btype == "redacted_thinking"
+    });
+    assert!(
+        !has_thinking,
+        "outbound response dropped reasoning thinking block"
+    );
+
+    let has_tool_use = content
+        .iter()
+        .any(|b| b["type"].as_str() == Some("tool_use"));
+    assert!(has_tool_use, "tool_use block was preserved");
+
+    let verdict = anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+        true, // backend emitted reasoning item
+        has_thinking,
+        false,
+        false,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("dropped encrypted reasoning item")
+    ));
+}
+
+#[test]
+fn litellm_chatgpt_messages_outbound_reasoning_control_preserved_wire() {
+    let wire_str = fixture("transcripts/123/wire/control-outbound-reasoning-preserved.json");
+    let resp: Value = serde_json::from_str(&wire_str).expect("parse control response");
+
+    let content = resp["content"].as_array().expect("content blocks");
+    let thinking_block = content.iter().find(|b| {
+        let btype = b["type"].as_str().unwrap_or("");
+        btype == "thinking" || btype == "redacted_thinking"
+    });
+    assert!(
+        thinking_block.is_some(),
+        "control direct adapter preserves reasoning as redacted_thinking"
+    );
+
+    let block = thinking_block.unwrap();
+    let data = block["data"].as_str().unwrap_or("");
+    assert!(
+        data.starts_with("litellm_encrypted_reasoning:"),
+        "redacted_thinking carries encrypted reasoning signature"
+    );
+
+    let verdict = anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+        true, // backend emitted reasoning item
+        true, // outbound thinking block present
+        false, false,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_chatgpt_messages_inbound_reasoning_stripped_wire() {
+    let wire_str = fixture("transcripts/123/wire/bug-inbound-reasoning-stripped.json");
+    let req: Value = serde_json::from_str(&wire_str).expect("parse inbound request");
+
+    let items = req["input_items"].as_array().expect("input_items array");
+    let has_reasoning = items
+        .iter()
+        .any(|item| item["type"].as_str() == Some("reasoning"));
+    assert!(!has_reasoning, "inbound request stripped reasoning item");
+
+    let has_function_call = items
+        .iter()
+        .any(|item| item["type"].as_str() == Some("function_call"));
+    assert!(has_function_call, "function_call is present");
+
+    let verdict = anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+        true,
+        true,
+        true, // client replayed reasoning
+        has_reasoning,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("replaying encrypted reasoning was stripped")
+    ));
+}
+
+#[test]
+fn litellm_chatgpt_messages_inbound_reasoning_control_replayed_wire() {
+    let wire_str = fixture("transcripts/123/wire/control-inbound-reasoning-replayed.json");
+    let req: Value = serde_json::from_str(&wire_str).expect("parse control request");
+
+    let items = req["input_items"].as_array().expect("input_items array");
+    let reasoning_item = items
+        .iter()
+        .find(|item| item["type"].as_str() == Some("reasoning"));
+    assert!(
+        reasoning_item.is_some(),
+        "control direct adapter replayed reasoning item"
+    );
+
+    let item = reasoning_item.unwrap();
+    let enc = item["encrypted_content"].as_str().unwrap_or("");
+    assert!(
+        !enc.is_empty(),
+        "reasoning item has non-empty encrypted_content"
+    );
+
+    let verdict = anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+        true, true, true, true, // reasoning item preserved
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_chatgpt_messages_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/123/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["ctrl_outbound_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: control outbound reasoning must be preserved"
+        );
+        assert_eq!(
+            run["bug_outbound_dropped"].as_bool(),
+            Some(true),
+            "run {run_num}: bug outbound reasoning must be dropped (defect)"
+        );
+        assert_eq!(
+            run["ctrl_inbound_replayed"].as_bool(),
+            Some(true),
+            "run {run_num}: control inbound reasoning must be replayed"
+        );
+        assert_eq!(
+            run["bug_inbound_stripped"].as_bool(),
+            Some(true),
+            "run {run_num}: bug inbound reasoning must be stripped (defect)"
         );
     }
 }

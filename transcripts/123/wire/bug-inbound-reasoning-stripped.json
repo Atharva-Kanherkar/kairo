@@ -1,0 +1,31 @@
+{
+  "endpoint": "chatgpt.com/backend-api/codex/responses",
+  "input_items": [
+    {
+      "type": "message",
+      "role": "user",
+      "content": [
+        {
+          "type": "input_text",
+          "text": "Think about whether Madrid or Oslo is colder in January, then call get_weather."
+        }
+      ]
+    },
+    {
+      "type": "function_call",
+      "call_id": "call_44a2f3c095ab",
+      "name": "get_weather",
+      "arguments": "{\"city\": \"Oslo\"}"
+    },
+    {
+      "type": "function_call_output",
+      "call_id": "call_44a2f3c095ab",
+      "output": [
+        {
+          "type": "input_text",
+          "text": "-7 C, snow"
+        }
+      ]
+    }
+  ]
+}
