@@ -7697,3 +7697,71 @@ mod voyage_embeddings_env_api_base_tests {
         ));
     }
 }
+
+/// Invariant: When an AI gateway transforms chat messages for reasoning models (e.g. OpenAI/Azure o-series):
+/// 1. System prompts (`role: "system"` or `role: "developer"`) provided by the client must be preserved
+///    in the outbound payload for all models supporting system instructions (such as o1, o3, o4-mini, o3-mini).
+/// 2. The gateway must never silently demote a system prompt to `role: "user"`, which destroys the instruction
+///    hierarchy and leaves guardrails vulnerable to override by subsequent user turns.
+#[must_use]
+pub fn reasoning_model_system_prompt_preserved(
+    model: &str,
+    client_sent_system_message: bool,
+    outbound_system_role_preserved: bool,
+    outbound_roles: &[&str],
+) -> Verdict {
+    if client_sent_system_message {
+        if !outbound_system_role_preserved {
+            return Verdict::Violation(format!(
+                "model '{model}' silently demoted system prompt to user message: outbound roles {outbound_roles:?}"
+            ));
+        }
+
+        if let Some(first_role) = outbound_roles.first() {
+            if *first_role == "user" {
+                return Verdict::Violation(format!(
+                    "model '{model}' has user role for initial system prompt: outbound roles {outbound_roles:?}"
+                ));
+            }
+        }
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod reasoning_system_prompt_tests {
+    use super::{reasoning_model_system_prompt_preserved, Verdict};
+
+    #[test]
+    fn system_role_preserved_is_conformant() {
+        let verdict =
+            reasoning_model_system_prompt_preserved("o1", true, true, &["system", "user"]);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_system_message_sent_is_conformant() {
+        let verdict = reasoning_model_system_prompt_preserved("o3", false, false, &["user"]);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn system_demoted_to_user_is_violation() {
+        let verdict = reasoning_model_system_prompt_preserved("o3", true, false, &["user", "user"]);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("silently demoted system prompt to user message")
+        ));
+    }
+
+    #[test]
+    fn initial_role_user_when_system_sent_is_violation() {
+        let verdict =
+            reasoning_model_system_prompt_preserved("o4-mini", true, false, &["user", "user"]);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("silently demoted system prompt to user message")
+        ));
+    }
+}

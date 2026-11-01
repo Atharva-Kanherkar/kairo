@@ -1,0 +1,42 @@
+{
+  "iterations": 5,
+  "success_rate": "5/5",
+  "all_passed": true,
+  "runs": [
+    {
+      "bug_o3_demoted": true,
+      "bug_o4mini_demoted": true,
+      "bug_o3mini_demoted": true,
+      "ctrl_o1_preserved": true,
+      "ctrl_fixed_preserved": true
+    },
+    {
+      "bug_o3_demoted": true,
+      "bug_o4mini_demoted": true,
+      "bug_o3mini_demoted": true,
+      "ctrl_o1_preserved": true,
+      "ctrl_fixed_preserved": true
+    },
+    {
+      "bug_o3_demoted": true,
+      "bug_o4mini_demoted": true,
+      "bug_o3mini_demoted": true,
+      "ctrl_o1_preserved": true,
+      "ctrl_fixed_preserved": true
+    },
+    {
+      "bug_o3_demoted": true,
+      "bug_o4mini_demoted": true,
+      "bug_o3mini_demoted": true,
+      "ctrl_o1_preserved": true,
+      "ctrl_fixed_preserved": true
+    },
+    {
+      "bug_o3_demoted": true,
+      "bug_o4mini_demoted": true,
+      "bug_o3mini_demoted": true,
+      "ctrl_o1_preserved": true,
+      "ctrl_fixed_preserved": true
+    }
+  ]
+}
