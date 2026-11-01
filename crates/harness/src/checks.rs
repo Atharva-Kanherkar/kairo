@@ -8318,3 +8318,60 @@ mod responses_api_web_search_user_location_tests {
         assert_eq!(verdict, Verdict::Conformant);
     }
 }
+
+/// Invariant: When an AI gateway streams chat completion responses with MCP metadata:
+/// 1. The finish_reason chunk must surface MCP metadata (`delta.provider_specific_fields`)
+///    consistently across both synchronous and asynchronous stream consumers.
+/// 2. Requesting token usage via `stream_options.include_usage` must not suppress or drop
+///    MCP metadata from the final chunk.
+/// 3. Suppressing MCP metadata on synchronous streams breaks tool call execution and observability.
+pub fn sync_stream_mcp_metadata_preserved(
+    has_mcp_metadata: bool,
+    has_finish_chunk: bool,
+    has_provider_specific_fields: bool,
+) -> Verdict {
+    if !has_mcp_metadata || !has_finish_chunk {
+        return Verdict::Conformant;
+    }
+
+    if !has_provider_specific_fields {
+        return Verdict::Violation(
+            "stream suppressed MCP metadata ('delta.provider_specific_fields') on final chunk when stream_options.include_usage was requested".to_string(),
+        );
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod sync_stream_mcp_metadata_tests {
+    use super::*;
+
+    #[test]
+    fn mcp_metadata_preserved_is_conformant() {
+        let verdict = sync_stream_mcp_metadata_preserved(true, true, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn mcp_metadata_dropped_is_violation() {
+        let verdict = sync_stream_mcp_metadata_preserved(true, true, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("stream suppressed MCP metadata")
+        ));
+    }
+
+    #[test]
+    fn no_mcp_metadata_is_conformant() {
+        let verdict = sync_stream_mcp_metadata_preserved(false, true, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_finish_chunk_is_conformant() {
+        let verdict = sync_stream_mcp_metadata_preserved(true, false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}

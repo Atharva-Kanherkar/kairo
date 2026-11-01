@@ -1,0 +1,9 @@
+{
+  "stream_mode": "sync",
+  "stream_options": {
+    "include_usage": true
+  },
+  "has_mcp_metadata_in_hidden_params": true,
+  "finish_chunk_has_provider_specific_fields": false,
+  "provider_specific_fields": null
+}
