@@ -8532,3 +8532,65 @@ mod daily_spend_endpoint_tests {
         assert_eq!(verdict, Verdict::Conformant);
     }
 }
+
+/// Invariant: In an AI gateway adapting requests to provider backends:
+/// 1. For providers that require text-only instructions (such as GitHub Copilot chat completions),
+///    system messages passed as structured content blocks (`[{"type": "text", "text": "..."}]`)
+///    must be flattened into a single text string before forwarding.
+/// 2. Passing content as a list of dictionaries causes the backend to ignore system instructions,
+///    stripping safety, persona, and developer guidance.
+/// 3. Any `cache_control` markers must be promoted to the message level when flattening.
+pub fn github_copilot_system_message_flattened(
+    is_system_message: bool,
+    content_is_list: bool,
+    content_is_str: bool,
+) -> Verdict {
+    if !is_system_message {
+        return Verdict::Conformant;
+    }
+
+    if content_is_list && !content_is_str {
+        Verdict::Violation(
+            "github_copilot system message passed as unflattened list of content blocks, causing backend to ignore instructions".to_string(),
+        )
+    } else if content_is_str {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation(
+            "github_copilot system message content is neither string nor flattened".to_string(),
+        )
+    }
+}
+
+#[cfg(test)]
+mod github_copilot_system_message_tests {
+    use super::*;
+
+    #[test]
+    fn flattened_string_is_conformant() {
+        let verdict = github_copilot_system_message_flattened(true, false, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn unflattened_list_is_violation() {
+        let verdict = github_copilot_system_message_flattened(true, true, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("unflattened list of content blocks")
+        ));
+    }
+
+    #[test]
+    fn non_system_message_is_conformant() {
+        let verdict = github_copilot_system_message_flattened(false, true, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn plain_string_is_conformant() {
+        let verdict = github_copilot_system_message_flattened(true, false, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}

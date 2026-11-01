@@ -20,8 +20,9 @@ use kairo::checks::{
     extract_anthropic_request_tool_names, extract_anthropic_untrusted_sources,
     extract_responses_api_untrusted_sources, fake_stream_preserves_provider_logprobs,
     forwarded_body_preserves_values, gemini_inline_media_preserved_in_chat_response,
-    gemini_inline_media_preserved_in_chat_stream, google_genai_model_turn_tool_results_preserved,
-    id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
+    gemini_inline_media_preserved_in_chat_stream, github_copilot_system_message_flattened,
+    google_genai_model_turn_tool_results_preserved, id_conforms,
+    image_url_cache_key_case_sensitive, instruction_messages_preserved,
     invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
     json_schema_property_forwarded, jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
     mcp_unauthorized_token_must_not_mask_as_empty_tools, minimax_reasoning_effort_preserved,
@@ -10118,6 +10119,115 @@ fn litellm_anthropic_messages_endpoint_matrix_5_runs_reproduce_consistently() {
             run["control_aresponses_has_endpoint"].as_bool(),
             Some(true),
             "run {run_num}: control aresponses must have endpoint"
+        );
+    }
+}
+
+#[test]
+fn litellm_github_copilot_system_list_content_unflattened_reproduction() {
+    let wire_str =
+        fixture("transcripts/137/wire/bug-github-copilot-system-list-content-unflattened.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    let is_list = capture["content_is_list"].as_bool().unwrap_or(false);
+    let is_str = capture["content_is_str"].as_bool().unwrap_or(false);
+
+    assert!(
+        is_list,
+        "unpatched copilot transformation must leave content as list"
+    );
+    assert!(
+        !is_str,
+        "unpatched copilot transformation must not emit string content"
+    );
+
+    let verdict = github_copilot_system_message_flattened(true, is_list, is_str);
+    assert!(matches!(verdict, Verdict::Violation(_)));
+}
+
+#[test]
+fn litellm_github_copilot_plain_string_system_content_control() {
+    let wire_str = fixture("transcripts/137/wire/control-plain-string-system-content.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse plain control capture");
+
+    let is_list = capture["content_is_list"].as_bool().unwrap_or(false);
+    let is_str = capture["content_is_str"].as_bool().unwrap_or(false);
+
+    assert!(!is_list);
+    assert!(is_str);
+    assert_eq!(
+        capture["content"].as_str(),
+        Some("Always talk like a pirate. Ahoy!")
+    );
+
+    let verdict = github_copilot_system_message_flattened(true, is_list, is_str);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_github_copilot_fixed_system_list_content_flattened_control() {
+    let wire_str = fixture("transcripts/137/wire/control-fixed-system-list-content-flattened.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed control capture");
+
+    let is_list = capture["content_is_list"].as_bool().unwrap_or(false);
+    let is_str = capture["content_is_str"].as_bool().unwrap_or(false);
+
+    assert!(!is_list);
+    assert!(is_str);
+    assert_eq!(
+        capture["content"].as_str(),
+        Some("Always talk like a pirate. Ahoy!")
+    );
+
+    let verdict = github_copilot_system_message_flattened(true, is_list, is_str);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_github_copilot_cache_control_promoted_control() {
+    let wire_str = fixture("transcripts/137/wire/control-cache-control-promoted.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse cache control capture");
+
+    let is_list = capture["content_is_list"].as_bool().unwrap_or(false);
+    let is_str = capture["content_is_str"].as_bool().unwrap_or(false);
+
+    assert!(!is_list);
+    assert!(is_str);
+    assert_eq!(capture["content"].as_str(), Some("Context prompt."));
+    assert_eq!(capture["cache_control"]["type"].as_str(), Some("ephemeral"));
+
+    let verdict = github_copilot_system_message_flattened(true, is_list, is_str);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_github_copilot_system_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/137/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["defect_emits_unflattened_list"].as_bool(),
+            Some(true),
+            "run {run_num}: defect must reproduce unflattened list"
+        );
+        assert_eq!(
+            run["control_plain_string_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: plain string must be preserved"
+        );
+        assert_eq!(
+            run["control_fixed_flattens_list"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed transformation must flatten list"
+        );
+        assert_eq!(
+            run["control_promotes_cache_control"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed transformation must promote cache control"
         );
     }
 }
