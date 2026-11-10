@@ -1,0 +1,40 @@
+# Dynamo idle LoRA host-dispatch reproduction, 2026-11-11 local (UTC 2026-11-10T17:25Z)
+
+UTC 2026-11-10T17:25:48Z
+host: Darwin 25.5.0 arm64
+pinned commit: 3a524d0d70f98231fa7cbf86d745aa6b37915545
+current upstream main: 4b1a320423c05612a1c3a7ccaeeeaace47ada6f7 (no changes to the four files)
+cargo: cargo 1.96.0 (30a34c682 2026-05-25) (Homebrew)
+python: Python 3.12.13
+
+## Minimal case and active control
+$ cargo test -p dynamo-lora --test repro_inactive_pin -- --nocapture
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.27s
+running 2 tests
+idle adapter 'idle' -> worker 1 (hosts 'busy', not 'idle'); worker 10000 hosts 'idle' and was not dispatched
+active control -> worker 10000
+test idle_pin_dispatches_to_a_worker_that_does_not_host_the_adapter ... ok
+test active_placement_control_dispatches_to_the_host ... ok
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+## Dispatch-level soak, 2000 seeded clusters
+$ cargo test -p dynamo-lora --test soak_inactive_pin -- --nocapture --test-threads=1
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.21s
+running 2 tests
+test active_routes_dispatch_to_hosts_control ... active: trials=1887 host_only=1887 non_host=0
+ok
+test idle_pins_dispatch_to_non_hosts_in_a_soak ... idle: trials=1887 host_only=655 non_host=1232
+ok
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.71s
+
+## Capture records for the checker
+$ cargo test -p dynamo-lora --test inactive_pin_capture -- --nocapture
+{"body":{"case":"bug-inactive-pin","adapter":"idle","workers":[{"id":1,"loaded":["busy"]},{"id":10000,"loaded":["idle"]}],"route":{"is_active":false,"replica_set":[1]},"selected":[1]}}
+{"body":{"case":"control-active","adapter":"idle","workers":[{"id":1,"loaded":["busy"]},{"id":10000,"loaded":["idle"]}],"route":{"is_active":true,"replica_set":[10000]},"selected":[10000]}}
+
+## Worker boundary
+$ python3.12 worker_boundary.py
+worker does not host 'idle':
+  InvalidArgument: unknown model or LoRA adapter: 'idle'
+worker hosts 'idle':
+  LoRARequest(lora_name=idle, id=2)

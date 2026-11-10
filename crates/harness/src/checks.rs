@@ -7371,6 +7371,99 @@ pub fn responses_comparison_response_id_authorized_and_unwrapped(
     Verdict::Conformant
 }
 
+/// A LoRA dispatch must name a worker that already hosts the adapter. The
+/// legacy vLLM worker resolves the adapter by name and rejects a request for an
+/// adapter it does not host, so a free LoRA slot is not enough. When any worker
+/// in the capture hosts the adapter, every dispatched candidate must host it.
+///
+/// A capture record is `{adapter, workers: [{id, loaded}], route:
+/// {is_active, replica_set}, selected?}`. `selected` is the filter output; the
+/// route's `replica_set` is used when `selected` is absent.
+pub fn lora_dispatch_uses_loaded_hosts(jsonl: &str) -> Verdict {
+    let records = match capture_records(jsonl) {
+        Ok(records) => records,
+        Err(error) => return Verdict::Violation(format!("unparseable capture: {error}")),
+    };
+    for (idx, (_, record)) in records.iter().enumerate() {
+        let case = record
+            .get("case")
+            .and_then(Value::as_str)
+            .unwrap_or("unknown");
+        let Some(adapter) = record.get("adapter").and_then(Value::as_str) else {
+            return Verdict::Violation(format!("record {idx} ({case}): missing adapter"));
+        };
+        let Some(workers) = record.get("workers").and_then(Value::as_array) else {
+            return Verdict::Violation(format!("record {idx} ({case}): missing workers"));
+        };
+
+        let mut hosts: HashSet<u64> = HashSet::new();
+        for worker in workers {
+            let Some(id) = worker.get("id").and_then(Value::as_u64) else {
+                return Verdict::Violation(format!(
+                    "record {idx} ({case}): worker is missing an integer id: {worker}"
+                ));
+            };
+            let Some(loaded) = worker.get("loaded").and_then(Value::as_array) else {
+                return Verdict::Violation(format!(
+                    "record {idx} ({case}): worker {id} is missing its loaded list"
+                ));
+            };
+            if loaded.iter().any(|name| name.as_str() == Some(adapter)) {
+                hosts.insert(id);
+            }
+        }
+        if hosts.is_empty() {
+            // No worker can serve it, so there is no correct dispatch to require.
+            continue;
+        }
+
+        let Some(route) = record.get("route") else {
+            return Verdict::Violation(format!("record {idx} ({case}): missing route"));
+        };
+        let is_active = route
+            .get("is_active")
+            .and_then(Value::as_bool)
+            .unwrap_or(false);
+        let dispatched = if let Some(selected) = record.get("selected") {
+            selected
+        } else if let Some(replica_set) = route.get("replica_set") {
+            replica_set
+        } else {
+            return Verdict::Violation(format!(
+                "record {idx} ({case}): missing selected and replica_set"
+            ));
+        };
+        let Some(dispatched) = dispatched.as_array() else {
+            return Verdict::Violation(format!(
+                "record {idx} ({case}): dispatched workers are not an array"
+            ));
+        };
+        if dispatched.is_empty() {
+            return Verdict::Violation(format!(
+                "record {idx} ({case}): dispatch for adapter '{adapter}' is empty"
+            ));
+        }
+
+        let mut host_list: Vec<u64> = hosts.iter().copied().collect();
+        host_list.sort_unstable();
+        for worker in dispatched {
+            let Some(id) = worker.as_u64() else {
+                return Verdict::Violation(format!(
+                    "record {idx} ({case}): dispatched worker is not an integer: {worker}"
+                ));
+            };
+            if !hosts.contains(&id) {
+                return Verdict::Violation(format!(
+                    "record {idx} ({case}): {} dispatch for adapter '{adapter}' names worker \
+                     {id}, which does not host it; hosting workers: {host_list:?}",
+                    if is_active { "active" } else { "idle" }
+                ));
+            }
+        }
+    }
+    Verdict::Conformant
+}
+
 #[cfg(test)]
 mod responses_comparison_id_tests {
     use super::{responses_comparison_response_id_authorized_and_unwrapped, Verdict};

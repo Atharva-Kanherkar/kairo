@@ -24,7 +24,8 @@ use kairo::checks::{
     github_copilot_system_message_flattened, google_genai_model_turn_tool_results_preserved,
     id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
     invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
-    json_schema_property_forwarded, jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
+    json_schema_property_forwarded, jsonrpc_forwarded_request_has_id,
+    lora_dispatch_uses_loaded_hosts, mcp_tool_executes_once,
     mcp_unauthorized_token_must_not_mask_as_empty_tools, minimax_reasoning_effort_preserved,
     model_info_capture_identity, model_info_envelope_body, model_info_omits_api_base_secret,
     no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
@@ -10951,4 +10952,52 @@ fn litellm_gemini_logprobs_matrix_5_runs_reproduce_consistently() {
             "run {run_num}: logprobs only request must be clean"
         );
     }
+}
+
+// ---- bug 144: Dynamo idle LoRA pin ignores capacity and loaded copies ----
+
+#[test]
+fn dynamo_idle_lora_pin_unservable_violation() {
+    // Frozen bug: the controller pins the idle adapter to a worker that is at
+    // capacity with another adapter, while the adapter is loaded on a worker
+    // with a free slot. The router sends the request to the pinned worker.
+    let v = lora_dispatch_uses_loaded_hosts(&fixture(
+        "transcripts/144-dynamo-lora-inactive-pin/capture-inactive-pin.jsonl",
+    ));
+    match &v {
+        Verdict::Violation(message) => {
+            assert!(
+                message.contains("worker 1, which does not host it")
+                    && message.contains("adapter 'idle'"),
+                "the violation must name the pinned worker and the adapter: {message}"
+            );
+        }
+        Verdict::Conformant => {
+            panic!("an idle route to a worker that cannot serve the adapter must be caught: {v:?}")
+        }
+    }
+}
+
+#[test]
+fn dynamo_idle_lora_active_control_is_conformant() {
+    // The same cluster with the adapter active: the controller keeps it on the
+    // loaded, non-full worker, so the checker must accept that route.
+    let raw = fixture("transcripts/144-dynamo-lora-inactive-pin/capture-inactive-pin.jsonl");
+    let mut control = String::new();
+    for line in raw.lines().filter(|line| !line.trim().is_empty()) {
+        if line.contains("\"control-active\"") {
+            control.push_str(line);
+            control.push('\n');
+        }
+    }
+    assert!(
+        !control.is_empty(),
+        "the capture must contain the active control record"
+    );
+    let v = lora_dispatch_uses_loaded_hosts(&control);
+    assert_eq!(
+        v,
+        Verdict::Conformant,
+        "the active control must satisfy the invariant, got: {v:?}"
+    );
 }
