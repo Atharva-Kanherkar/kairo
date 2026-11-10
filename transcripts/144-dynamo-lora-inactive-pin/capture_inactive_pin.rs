@@ -74,8 +74,8 @@ fn record(case: &str, s: &Scenario) {
     );
     println!(
         "{{\"body\":{{\"case\":\"{case}\",\"adapter\":\"idle\",\"workers\":[\
-         {{\"id\":{},\"capacity\":1,\"loaded\":[\"busy\"]}},\
-         {{\"id\":{},\"capacity\":2,\"loaded\":[\"idle\"]}}],\
+         {{\"id\":{},\"loaded\":[\"busy\"]}},\
+         {{\"id\":{},\"loaded\":[\"idle\"]}}],\
          \"route\":{{\"is_active\":{},\"replica_set\":[{}]}},\
          \"selected\":[{}]}}}}",
         s.full.worker_id,

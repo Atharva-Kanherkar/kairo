@@ -1,2 +1,2 @@
-{"body":{"case":"bug-inactive-pin","adapter":"idle","workers":[{"id":1,"capacity":1,"loaded":["busy"]},{"id":10000,"capacity":2,"loaded":["idle"]}],"route":{"is_active":false,"replica_set":[1]},"selected":[1]}}
-{"body":{"case":"control-active","adapter":"idle","workers":[{"id":1,"capacity":1,"loaded":["busy"]},{"id":10000,"capacity":2,"loaded":["idle"]}],"route":{"is_active":true,"replica_set":[10000]},"selected":[10000]}}
+{"body":{"case":"bug-inactive-pin","adapter":"idle","workers":[{"id":1,"loaded":["busy"]},{"id":10000,"loaded":["idle"]}],"route":{"is_active":false,"replica_set":[1]},"selected":[1]}}
+{"body":{"case":"control-active","adapter":"idle","workers":[{"id":1,"loaded":["busy"]},{"id":10000,"loaded":["idle"]}],"route":{"is_active":true,"replica_set":[10000]},"selected":[10000]}}

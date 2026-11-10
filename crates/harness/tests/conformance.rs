@@ -25,7 +25,7 @@ use kairo::checks::{
     id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
     invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
     json_schema_property_forwarded, jsonrpc_forwarded_request_has_id,
-    lora_routes_are_provably_servable, mcp_tool_executes_once,
+    lora_dispatch_uses_loaded_hosts, mcp_tool_executes_once,
     mcp_unauthorized_token_must_not_mask_as_empty_tools, minimax_reasoning_effort_preserved,
     model_info_capture_identity, model_info_envelope_body, model_info_omits_api_base_secret,
     no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
@@ -10961,13 +10961,14 @@ fn dynamo_idle_lora_pin_unservable_violation() {
     // Frozen bug: the controller pins the idle adapter to a worker that is at
     // capacity with another adapter, while the adapter is loaded on a worker
     // with a free slot. The router sends the request to the pinned worker.
-    let v = lora_routes_are_provably_servable(&fixture(
+    let v = lora_dispatch_uses_loaded_hosts(&fixture(
         "transcripts/144-dynamo-lora-inactive-pin/capture-inactive-pin.jsonl",
     ));
     match &v {
         Verdict::Violation(message) => {
             assert!(
-                message.contains("worker 1, which") && message.contains("adapter 'idle'"),
+                message.contains("worker 1, which does not host it")
+                    && message.contains("adapter 'idle'"),
                 "the violation must name the pinned worker and the adapter: {message}"
             );
         }
@@ -10993,7 +10994,7 @@ fn dynamo_idle_lora_active_control_is_conformant() {
         !control.is_empty(),
         "the capture must contain the active control record"
     );
-    let v = lora_routes_are_provably_servable(&control);
+    let v = lora_dispatch_uses_loaded_hosts(&control);
     assert_eq!(
         v,
         Verdict::Conformant,

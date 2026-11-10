@@ -7371,18 +7371,15 @@ pub fn responses_comparison_response_id_authorized_and_unwrapped(
     Verdict::Conformant
 }
 
-/// A LoRA route must not name a worker that is provably unable to serve the
-/// adapter. A worker is treated as able when it already hosts the adapter
-/// (no new slot) or when it has a free LoRA slot for a lazy load. On the legacy
-/// vLLM path a free slot is only a load candidate and a non-host is rejected,
-/// so this is a lower bound: every route flagged here fails under either model,
-/// while some routes it accepts may still fail under the stricter host-only
-/// model. The capture records the stricter facts so a caller can re-check them.
+/// A LoRA dispatch must name a worker that already hosts the adapter. The
+/// legacy vLLM worker resolves the adapter by name and rejects a request for an
+/// adapter it does not host, so a free LoRA slot is not enough. When any worker
+/// in the capture hosts the adapter, every dispatched candidate must host it.
 ///
-/// A capture record is `{adapter, workers: [{id, capacity, loaded}], route:
-/// {is_active, replica_set}, selected?}`. `selected` is the filter's output and
-/// is checked too when present.
-pub fn lora_routes_are_provably_servable(jsonl: &str) -> Verdict {
+/// A capture record is `{adapter, workers: [{id, loaded}], route:
+/// {is_active, replica_set}, selected?}`. `selected` is the filter output; the
+/// route's `replica_set` is used when `selected` is absent.
+pub fn lora_dispatch_uses_loaded_hosts(jsonl: &str) -> Verdict {
     let records = match capture_records(jsonl) {
         Ok(records) => records,
         Err(error) => return Verdict::Violation(format!("unparseable capture: {error}")),
@@ -7399,16 +7396,11 @@ pub fn lora_routes_are_provably_servable(jsonl: &str) -> Verdict {
             return Verdict::Violation(format!("record {idx} ({case}): missing workers"));
         };
 
-        let mut servable: std::collections::HashMap<u64, bool> = std::collections::HashMap::new();
+        let mut hosts: HashSet<u64> = HashSet::new();
         for worker in workers {
             let Some(id) = worker.get("id").and_then(Value::as_u64) else {
                 return Verdict::Violation(format!(
                     "record {idx} ({case}): worker is missing an integer id: {worker}"
-                ));
-            };
-            let Some(capacity) = worker.get("capacity").and_then(Value::as_u64) else {
-                return Verdict::Violation(format!(
-                    "record {idx} ({case}): worker {id} is missing an integer capacity"
                 ));
             };
             let Some(loaded) = worker.get("loaded").and_then(Value::as_array) else {
@@ -7416,13 +7408,12 @@ pub fn lora_routes_are_provably_servable(jsonl: &str) -> Verdict {
                     "record {idx} ({case}): worker {id} is missing its loaded list"
                 ));
             };
-            let hosts = loaded.iter().any(|name| name.as_str() == Some(adapter));
-            let free_slot = (loaded.len() as u64) < capacity;
-            servable.insert(id, hosts || free_slot);
+            if loaded.iter().any(|name| name.as_str() == Some(adapter)) {
+                hosts.insert(id);
+            }
         }
-        let any_servable = servable.values().any(|can| *can);
-        if !any_servable {
-            // Nothing can serve it: there is no correct route to require.
+        if hosts.is_empty() {
+            // No worker can serve it, so there is no correct dispatch to require.
             continue;
         }
 
@@ -7433,52 +7424,40 @@ pub fn lora_routes_are_provably_servable(jsonl: &str) -> Verdict {
             .get("is_active")
             .and_then(Value::as_bool)
             .unwrap_or(false);
-        let Some(replica_set) = route.get("replica_set").and_then(Value::as_array) else {
+        let dispatched = if let Some(selected) = record.get("selected") {
+            selected
+        } else if let Some(replica_set) = route.get("replica_set") {
+            replica_set
+        } else {
             return Verdict::Violation(format!(
-                "record {idx} ({case}): route is missing replica_set"
+                "record {idx} ({case}): missing selected and replica_set"
             ));
         };
-        if replica_set.is_empty() {
+        let Some(dispatched) = dispatched.as_array() else {
             return Verdict::Violation(format!(
-                "record {idx} ({case}): route for adapter '{adapter}' is empty"
+                "record {idx} ({case}): dispatched workers are not an array"
+            ));
+        };
+        if dispatched.is_empty() {
+            return Verdict::Violation(format!(
+                "record {idx} ({case}): dispatch for adapter '{adapter}' is empty"
             ));
         }
-        for worker in replica_set {
+
+        let mut host_list: Vec<u64> = hosts.iter().copied().collect();
+        host_list.sort_unstable();
+        for worker in dispatched {
             let Some(id) = worker.as_u64() else {
                 return Verdict::Violation(format!(
-                    "record {idx} ({case}): route worker is not an integer: {worker}"
+                    "record {idx} ({case}): dispatched worker is not an integer: {worker}"
                 ));
             };
-            match servable.get(&id) {
-                Some(true) => {}
-                Some(false) => {
-                    return Verdict::Violation(format!(
-                        "record {idx} ({case}): {} route for adapter '{adapter}' names worker \
-                         {id}, which neither hosts the adapter nor has a free LoRA slot",
-                        if is_active { "active" } else { "idle" }
-                    ))
-                }
-                None => {
-                    return Verdict::Violation(format!(
-                        "record {idx} ({case}): route names worker {id}, which is not described"
-                    ))
-                }
-            }
-        }
-
-        if let Some(selected) = record.get("selected").and_then(Value::as_array) {
-            for worker in selected {
-                let Some(id) = worker.as_u64() else {
-                    return Verdict::Violation(format!(
-                        "record {idx} ({case}): selected worker is not an integer: {worker}"
-                    ));
-                };
-                if servable.get(&id) == Some(&false) {
-                    return Verdict::Violation(format!(
-                        "record {idx} ({case}): the filter selected worker {id} for adapter \
-                         '{adapter}', which neither hosts it nor has a free LoRA slot"
-                    ));
-                }
+            if !hosts.contains(&id) {
+                return Verdict::Violation(format!(
+                    "record {idx} ({case}): {} dispatch for adapter '{adapter}' names worker \
+                     {id}, which does not host it; hosting workers: {host_list:?}",
+                    if is_active { "active" } else { "idle" }
+                ));
             }
         }
     }

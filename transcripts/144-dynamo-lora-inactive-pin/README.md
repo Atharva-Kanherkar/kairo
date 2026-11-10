@@ -1,6 +1,6 @@
 # 144 transcript: Dynamo idle LoRA pin
 
-Target: `ai-dynamo/dynamo` at `3a524d0d70` (upstream `main`, 2026-11-10).
+Target: `ai-dynamo/dynamo` at `3a524d0d70` (upstream `main` on 2026-11-10; the four files are unchanged on current `main` `4b1a320423`).
 
 ## Run
 
@@ -23,16 +23,16 @@ The three Rust files are integration tests over the real `dynamo-lora` crate. Th
 
 ## Expected
 
-- `repro_inactive_pin`: idle adapter `idle` pins worker 1 (capacity 1, hosts `busy`), while worker 10000 hosts `idle` with a free slot; the active control routes to worker 10000.
-- `soak_inactive_pin`: idle 655 loaded, 703 free-only, 529 unservable of 1887; active 945 loaded, 942 free-only, 0 unservable.
+- `repro_inactive_pin`: idle adapter `idle` dispatches to worker 1, which hosts `busy` and not `idle`; worker 10000 hosts `idle` and is not dispatched. The active control dispatches to worker 10000.
+- `soak_inactive_pin`: idle 655 host-only, 1232 non-host of 1887; active 1887 host-only, 0 non-host.
 - `inactive_pin_capture`: two JSONL records, one bug and one control.
 - `worker_boundary`: `InvalidArgument: unknown model or LoRA adapter: 'idle'` on the worker without it, and a `LoRARequest` on the worker that hosts it.
 
 ## Files
 
-- `repro_inactive_pin.rs`, minimal case and controls.
-- `soak_inactive_pin.rs`, paired 2000-cluster soak.
+- `repro_inactive_pin.rs`, minimal case and active control.
+- `soak_inactive_pin.rs`, paired 2000-cluster soak at the filter's dispatch boundary.
 - `capture_inactive_pin.rs`, emits the two records.
 - `capture-inactive-pin.jsonl`, the recorded records.
 - `worker_boundary.py`, the worker-side rejection.
-- `run-2026-11-10.txt`, the full run output.
+- `run-2026-11-11.txt`, the full run output.

@@ -3,17 +3,20 @@
 
 //! Soak: the same random clusters, one adapter active and the same adapter idle.
 //!
-//! A worker can serve an adapter if it already hosts it (no new slot) or has a
-//! free slot for a lazy load. Any other route is unservable. The adapter is
-//! always loaded on at least one live worker, so a servable route always exists.
+//! The legacy vLLM worker resolves the adapter by name and rejects a request for
+//! an adapter it does not host. A dispatched route is therefore servable only
+//! when it names a worker that already hosts the adapter. The adapter is always
+//! loaded on at least one live worker in these trials, so a hosting worker
+//! always exists.
 //!
 //! Run from the Dynamo checkout at 3a524d0d70:
 //!   cargo test -p dynamo-lora --test soak_inactive_pin -- --nocapture
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 
 use dynamo_kv_router::protocols::WorkerWithDpRank;
+use dynamo_lora::filter::LoraFilter;
 use dynamo_lora::load_estimator::LoadEstimator;
 use dynamo_lora::{
     AllocationAlgorithmType, LoraAllocationConfig, LoraController, LoraInfo, LoraRoutingTable,
@@ -46,8 +49,9 @@ fn info(name: &str, cap: u32) -> LoraInfo {
     }
 }
 
-/// Build one cluster and return (loaded_here, free_here) for the victim route.
-fn run_trial(seed: u64, active: bool) -> Result<(bool, bool), String> {
+/// Build one cluster and return whether the filter's candidate set names only
+/// workers that host the adapter.
+fn run_trial(seed: u64, active: bool) -> Result<bool, String> {
     let mut rng = Rng(seed.wrapping_mul(0x9E37_79B9_7F4A_7C15) | 1);
     let worker_count = 2 + rng.below(6) as usize;
     let workers: Vec<WorkerWithDpRank> =
@@ -106,60 +110,61 @@ fn run_trial(seed: u64, active: bool) -> Result<(bool, bool), String> {
     if active != route.is_active {
         return Err("victim route has the wrong activity".to_string());
     }
-    let chosen = *route
-        .replica_set
-        .first()
-        .ok_or_else(|| "empty route".to_string())?;
 
-    let loaded_here = st.is_loaded(&victim, &chosen);
-    let free_here = st.free_slots(&chosen) > 0;
-
-    if st.get_loaded_workers(&victim).is_empty() {
+    let hosts: HashSet<u64> = st
+        .get_loaded_workers(&victim)
+        .iter()
+        .map(|w| w.worker_id)
+        .collect();
+    if hosts.is_empty() {
         return Err("adapter not loaded anywhere".to_string());
     }
 
-    Ok((loaded_here, free_here))
+    let worker_ids: Vec<u64> = workers.iter().map(|w| w.worker_id).collect();
+    let filter = LoraFilter::new(rt.clone(), st.clone());
+    let selected = filter.filter_worker_ids_for_lora(Some(&victim), &worker_ids);
+    if selected.is_empty() {
+        return Err("filter returned no candidates".to_string());
+    }
+
+    Ok(selected.iter().all(|id| hosts.contains(id)))
 }
 
-fn soak(active: bool) -> (u64, u64, u64, u64) {
+fn soak(active: bool) -> (u64, u64, u64) {
     let mut trials = 0u64;
-    let mut loaded = 0u64;
-    let mut free_only = 0u64;
-    let mut unservable = 0u64;
+    let mut host_only = 0u64;
+    let mut non_host = 0u64;
     for seed in 1..=2000u64 {
-        if let Ok((loaded_here, free_here)) = run_trial(seed, active) {
+        if let Ok(host_only_route) = run_trial(seed, active) {
             trials += 1;
-            if loaded_here {
-                loaded += 1;
-            } else if free_here {
-                free_only += 1;
+            if host_only_route {
+                host_only += 1;
             } else {
-                unservable += 1;
+                non_host += 1;
             }
         }
     }
-    (trials, loaded, free_only, unservable)
+    (trials, host_only, non_host)
 }
 
 #[test]
-fn idle_pins_are_unservable_in_a_soak() {
-    let (trials, loaded, free_only, unservable) = soak(false);
-    println!(
-        "idle: trials={trials} loaded={loaded} free_only={free_only} unservable={unservable}"
-    );
+fn idle_pins_dispatch_to_non_hosts_in_a_soak() {
+    let (trials, host_only, non_host) = soak(false);
+    println!("idle: trials={trials} host_only={host_only} non_host={non_host}");
     assert!(trials > 100);
     assert!(
-        unservable > 0,
-        "the blind idle pin must produce unservable routes in this soak"
+        non_host > 0,
+        "the blind idle pin must dispatch to non-hosts in this soak"
     );
 }
 
 #[test]
-fn active_routes_are_servable_control() {
-    let (trials, loaded, free_only, unservable) = soak(true);
-    println!(
-        "active: trials={trials} loaded={loaded} free_only={free_only} unservable={unservable}"
-    );
+fn active_routes_dispatch_to_hosts_control() {
+    let (trials, host_only, non_host) = soak(true);
+    println!("active: trials={trials} host_only={host_only} non_host={non_host}");
     assert!(trials > 100);
-    assert_eq!(unservable, 0, "the active path must never pick an unservable worker");
+    assert_eq!(
+        non_host, 0,
+        "the active path must dispatch to a worker that hosts the adapter"
+    );
 }
