@@ -1,0 +1,41 @@
+# Dynamo inactive LoRA pin reproduction, 2026-11-10
+
+UTC 2026-11-10T10:43:57Z
+host: Darwin 25.5.0 arm64
+commit: 3a524d0d70f98231fa7cbf86d745aa6b37915545
+cargo: cargo 1.96.0 (30a34c682 2026-05-25) (Homebrew)
+python: Python 3.12.13
+
+## Minimal case and controls
+$ cargo test -p dynamo-lora --test repro_inactive_pin -- --nocapture
+    Building [=======================> ] 597/598: repro_inactive_pin(test)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.54s
+running 2 tests
+active control -> worker 10000
+test active_placement_control_keeps_the_loaded_host ... ok
+idle adapter 'idle' -> worker 1 (capacity 1, hosts 'busy'); worker 10000 hosts 'idle' with a free slot
+slot-aware control (non-sticky) -> worker 10000
+test idle_pin_lands_on_a_full_worker_that_lacks_the_adapter ... ok
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+## Soak, 2000 seeded clusters
+$ cargo test -p dynamo-lora --test soak_inactive_pin -- --nocapture --test-threads=1
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.84s
+running 2 tests
+test active_routes_are_servable_control ... active: trials=1887 loaded=945 free_only=942 unservable=0
+ok
+test idle_pins_are_unservable_in_a_soak ... idle: trials=1887 loaded=655 free_only=703 unservable=529
+ok
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.14s
+
+## Capture records for the checker
+$ cargo test -p dynamo-lora --test inactive_pin_capture -- --nocapture
+{"body":{"case":"bug-inactive-pin","adapter":"idle","workers":[{"id":1,"capacity":1,"loaded":["busy"]},{"id":10000,"capacity":2,"loaded":["idle"]}],"route":{"is_active":false,"replica_set":[1]},"selected":[1]}}
+{"body":{"case":"control-active","adapter":"idle","workers":[{"id":1,"capacity":1,"loaded":["busy"]},{"id":10000,"capacity":2,"loaded":["idle"]}],"route":{"is_active":true,"replica_set":[10000]},"selected":[10000]}}
+
+## Worker boundary
+$ python3.12 worker_boundary.py
+worker does not host 'idle':
+  InvalidArgument: unknown model or LoRA adapter: 'idle'
+worker hosts 'idle':
+  LoRARequest(lora_name=idle, id=2)
