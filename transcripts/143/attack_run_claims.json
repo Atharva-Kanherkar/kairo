@@ -1,0 +1,37 @@
+[
+ {
+  "file": "attack_fresh1_callback.http",
+  "user_id": "u-admin2",
+  "user_role": "proxy_admin",
+  "user_email": "admin@corpdemohunt.com",
+  "key_redacted": "sk-ba0L6...[REDACTED]"
+ },
+ {
+  "file": "attack_fresh2_callback.http",
+  "user_id": "u-admin2",
+  "user_role": "proxy_admin",
+  "user_email": "admin@corpdemohunt.com",
+  "key_redacted": "sk-_fj6X...[REDACTED]"
+ },
+ {
+  "file": "attack_fresh3_callback.http",
+  "user_id": "u-admin2",
+  "user_role": "proxy_admin",
+  "user_email": "admin@corpdemohunt.com",
+  "key_redacted": "sk-KN--C...[REDACTED]"
+ },
+ {
+  "file": "attack_fresh4_callback.http",
+  "user_id": "u-admin2",
+  "user_role": "proxy_admin",
+  "user_email": "admin@corpdemohunt.com",
+  "key_redacted": "sk-1NR0g...[REDACTED]"
+ },
+ {
+  "file": "attack_fresh5_callback.http",
+  "user_id": "u-admin2",
+  "user_role": "proxy_admin",
+  "user_email": "admin@corpdemohunt.com",
+  "key_redacted": "sk-z3IXS...[REDACTED]"
+ }
+]

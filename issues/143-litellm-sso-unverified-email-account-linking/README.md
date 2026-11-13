@@ -77,7 +77,7 @@ proxy's OAuth state verification works and is not part of the defect.
 | Cell | IdP subject | Email claim | email_verified | Account matched | Session role | Admin routes |
 |---|---|---|---|---|---|---|
 | attack (x5) | `attacker-unverified-sub` | victim's email | `false` | victim `u-admin2` by email fallback | `proxy_admin` | 200 |
-| persisted (x2) | any subject | any email | `false` | victim by the stamped `sso_user_id` first | `proxy_admin` | 200 |
+| persisted (recorded: attack_persisted_callback.http) | the stamped subject, a nobody's email | `false` | victim by the stamped `sso_user_id` first | `proxy_admin` | 200 |
 | control (no match) | `control-fresh-sub` | nobody's email | `false` | none, new account created | `internal_user_viewer` | 403/401 |
 | control (fixed build) | attacker subject | victim's email | gated out | none | `internal_user_viewer` | 403/401 |
 
@@ -94,16 +94,22 @@ scratch master key, database password, every minted virtual key and every minted
 session JWT are replaced with marked placeholders; the JWT claims quoted below
 are decoded values of the recorded cookie.
 
-- `seed_user.http`: victim creation. `POST /user/new` with the master key,
-  `{"user_id":"u-admin2","user_email":"admin@corpdemohunt.com","user_role":"proxy_admin"}`,
-  200.
+- `seed_user.http`: victim creation, seed 1. `POST /user/new` with the master
+  key, `{"user_id":"u-admin","user_email":"admin@corpdemo.test","user_role":"proxy_admin"}`,
+  200. The attack victim is seed 2 (`u-admin2`, same role, email
+  `admin@corpdemohunt.com`); its creation is evidenced indirectly by
+  `attack_hop6_admin_read.http` (the admin user list contains it), by
+  `attack_hop7_victim_row.http`, and by the proxy debug log.
 - `attack_hop1_sso_start.http`: `GET /sso/key/generate`, 303, `Location` to the
   IdP authorize endpoint with `state=...`, `Set-Cookie: sso_state=...`.
 - `attack_hop2_fake_authorize.http`: the IdP redirect back to
   `/sso/callback?code=repro-code&state=...`.
-- `attack_hop3_callback.http` and `attack_run1..4_callback.http`: the callback
-  responses, 303 each, each setting the session cookie. Decoded claims of the
-  run-1 cookie:
+- `attack_fresh1..5_callback.http`: five further attack cells over HTTP, 303
+  each with a session cookie. The decoded claims of every minted session are
+  tabulated with keys redacted in `attack_run_claims.json` (all five:
+  `user_id: u-admin2`, `user_role: proxy_admin`, the victim's email, distinct
+  session keys). Earlier raw responses (`attack_run1..4_callback.http`) are
+  kept with their session cookies redacted inline.
 
 ```json
 {"user_id":"u-admin2","key":"sk-SCRATCH-REDACTED[session-2a]",
@@ -185,7 +191,8 @@ LiteLLM main `6abacd329b7`:
 
 - Date checked: 2026-11-13/14.
 - Checked: upstream default branch `6abacd329b7` (2026-11-13), published
-  advisories via the GitHub advisory API (19 for `BerriAI/litellm`), open issues
+  advisories via the GitHub advisory API (19 repo-published for
+  `BerriAI/litellm`, 45 including third-party submissions), open issues
   and PRs via `gh search`, and PR #37085's body and merge state.
 - Search terms: "email_verified", "unverified email", "sso account takeover",
   "sso impersonation", "email collision", "sso email", "fuzzy user", "sso email
