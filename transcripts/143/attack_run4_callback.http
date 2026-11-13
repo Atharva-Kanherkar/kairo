@@ -1,0 +1,10 @@
+HTTP/1.1 303 See Other
+date: Fri, 13 Nov 2026 17:34:04 GMT
+content-length: 0
+location: http://127.0.0.1:4100/ui/?login=success
+set-cookie: token=eyJREDACTED-JWT-HEADER.<JWT-payload-and-signature-REDACTED: claims decoded in writeup>; Path=/; SameSite=lax
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+
