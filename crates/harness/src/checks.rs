@@ -3301,8 +3301,7 @@ fn block_breakpoints(blocks: Option<&Value>) -> usize {
 fn json_list(value: Option<&Value>) -> &[Value] {
     value
         .and_then(Value::as_array)
-        .map(Vec::as_slice)
-        .unwrap_or_default()
+        .map_or(&[] as &[Value], |v| v.as_slice())
 }
 
 fn item_breakpoints(items: &[Value]) -> usize {
