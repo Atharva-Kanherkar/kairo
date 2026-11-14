@@ -1,8 +1,9 @@
 # 145, LiteLLM realtime client secrets keep executing model calls after their authorizing key is deleted, because the only expiry embedded in the token is whatever the upstream echoes back
 
-- **Upstream**: [BerriAI/litellm](https://github.com/BerriAI/litellm). No upstream
+- **Upstream**: [BerriAI/litellm](https://github.com/BerriAI/litellm). Open fix PR #51381 covers it; the original draft said no upstream
   issue or PR covers the revocation gap.
-- **Recorded as**: `novel`, wire evidence 5/5, control, and the code path pinned.
+- **Recorded as**: `duplicate-open` (corrected 2026-11-14 from `novel`, see
+  Upstream status), wire evidence 5/5, control, and the code path pinned.
 - **Tool under test**: LiteLLM at main `6abacd329b70dc668f69c705eb7118fbd639cd96`
   (upstream default branch, 2026-11-13), real proxy CLI + real PostgreSQL 16
   (Docker) + a local deterministic OpenAI-compatible upstream (also standing in
@@ -98,7 +99,11 @@ LiteLLM main `6abacd329b7`:
 - Checked: default branch `6abacd329b7`; searches "realtime client secret",
   "realtime/calls token", "realtime ephemeral" (issues and PRs); adjacent closed
   issues are model-resolution bugs, not the revocation gap.
-- Classification: **novel**.
+- Classification: **duplicate-open**, corrected 2026-11-14 from `novel`. Open
+  upstream PR [BerriAI/litellm#51381](https://github.com/BerriAI/litellm/pull/51381)
+  (created 2026-11-12) binds v2 realtime tokens to the hash of the minting key
+  and re-resolves that key on every `/v1/realtime/calls` request, so a deleted
+  or blocked key invalidates its outstanding tokens. Do not file a new report.
 
 ## Test
 
