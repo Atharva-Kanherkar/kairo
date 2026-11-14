@@ -1,0 +1,4 @@
+{
+  "status_code": 429,
+  "detail": "Rate limit exceeded for api_key: 7c91bdc2e9652f4df6723b322c69af6ad72e9e8f1ac478e8aa156cf60c08c5da. Limit type: max_parallel_requests. Current limit: 1, Remaining: 0. Limit resets at: 2026-10-31 10:12:42 UTC"
+}
