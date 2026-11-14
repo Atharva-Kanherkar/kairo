@@ -1,0 +1,33 @@
+### 1) anonymous POST /guardrails/register
+    HTTP/1.1 200 OK
+    date: Sat, 14 Nov 2026 06:41:29 GMT
+    content-length: 101
+    content-type: application/json
+    vary: Origin
+    x-frame-options: DENY
+    content-security-policy: frame-ancestors 'none'
+    x-content-type-options: nosniff
+    
+    {"client_id":"guardrails","client_secret":"dummy","redirect_uris":["http://127.0.0.1:4100/callback"]}
+### 2) master-key POST /guardrails/register
+    HTTP/1.1 200 OK
+    date: Sat, 14 Nov 2026 06:41:29 GMT
+    content-length: 101
+    content-type: application/json
+    vary: Origin
+    x-frame-options: DENY
+    content-security-policy: frame-ancestors 'none'
+    x-content-type-options: nosniff
+    
+    {"client_id":"guardrails","client_secret":"dummy","redirect_uris":["http://127.0.0.1:4100/callback"]}
+### 3) anonymous POST /anything/register
+    HTTP/1.1 200 OK
+    date: Sat, 14 Nov 2026 06:41:29 GMT
+    content-length: 99
+    content-type: application/json
+    vary: Origin
+    x-frame-options: DENY
+    content-security-policy: frame-ancestors 'none'
+    x-content-type-options: nosniff
+    
+    {"client_id":"anything","client_secret":"dummy","redirect_uris":["http://127.0.0.1:4100/callback"]}
