@@ -1,0 +1,16 @@
+{
+  "model": "github_copilot/gpt-4o",
+  "role": "assistant",
+  "content_is_list": true,
+  "content_is_str": false,
+  "content": [
+    {
+      "type": "text",
+      "text": "Always talk like a pirate."
+    },
+    {
+      "type": "text",
+      "text": " Ahoy!"
+    }
+  ]
+}

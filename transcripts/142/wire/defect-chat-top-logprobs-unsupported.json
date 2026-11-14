@@ -1,0 +1,28 @@
+{
+  "scenario": "defect_chat_top_logprobs_unsupported",
+  "client_request": {
+    "method": "POST",
+    "url": "https://gateway.local/v1/chat/completions",
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "model": "gemini/gemini-2.5-flash",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Return token logprobs"
+        }
+      ],
+      "logprobs": true,
+      "top_logprobs": 3
+    }
+  },
+  "gateway_response": {
+    "status_code": 400,
+    "error_type": "UnsupportedParamsError",
+    "error_message": "gemini does not support parameters: ['top_logprobs'], for model=gemini-2.5-flash."
+  },
+  "forwarded_to_provider": null,
+  "is_defect": true
+}

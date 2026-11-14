@@ -1,0 +1,6 @@
+{
+  "jsonrpc": "2.0",
+  "client_request_id": 100,
+  "method": "tools/list",
+  "params": {}
+}

@@ -1,0 +1,15 @@
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "_meta": {
+      "litellm.ai/server_outcomes": {
+        "test_server": {
+          "status": "auth_required",
+          "http_status": 401
+        }
+      }
+    },
+    "tools": []
+  }
+}

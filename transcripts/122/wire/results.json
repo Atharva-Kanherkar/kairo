@@ -1,0 +1,56 @@
+{
+  "runs_evaluated": 5,
+  "runs_reproduced": 5,
+  "results": [
+    {
+      "iteration": 1,
+      "ctrl1_blocked_403": true,
+      "bug1_allowed": true,
+      "ctrl2_decrypted": true,
+      "ctrl2_unwrapped_len": 55,
+      "bug2_still_encrypted": true,
+      "bug2_forwarded_len": 225,
+      "openai_would_reject_length": true
+    },
+    {
+      "iteration": 2,
+      "ctrl1_blocked_403": true,
+      "bug1_allowed": true,
+      "ctrl2_decrypted": true,
+      "ctrl2_unwrapped_len": 55,
+      "bug2_still_encrypted": true,
+      "bug2_forwarded_len": 225,
+      "openai_would_reject_length": true
+    },
+    {
+      "iteration": 3,
+      "ctrl1_blocked_403": true,
+      "bug1_allowed": true,
+      "ctrl2_decrypted": true,
+      "ctrl2_unwrapped_len": 55,
+      "bug2_still_encrypted": true,
+      "bug2_forwarded_len": 225,
+      "openai_would_reject_length": true
+    },
+    {
+      "iteration": 4,
+      "ctrl1_blocked_403": true,
+      "bug1_allowed": true,
+      "ctrl2_decrypted": true,
+      "ctrl2_unwrapped_len": 55,
+      "bug2_still_encrypted": true,
+      "bug2_forwarded_len": 225,
+      "openai_would_reject_length": true
+    },
+    {
+      "iteration": 5,
+      "ctrl1_blocked_403": true,
+      "bug1_allowed": true,
+      "ctrl2_decrypted": true,
+      "ctrl2_unwrapped_len": 55,
+      "bug2_still_encrypted": true,
+      "bug2_forwarded_len": 225,
+      "openai_would_reject_length": true
+    }
+  ]
+}

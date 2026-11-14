@@ -1,0 +1,5 @@
+{
+  "isolation_verified": true,
+  "custom_key_scoped_tenant_a": "tenant-d90da79614573a3e017ddbd4127a70cd:client-chosen-custom-key",
+  "custom_key_scoped_tenant_b": "tenant-0b2c137c4fc66c51e94a051eb04e06a8:client-chosen-custom-key"
+}

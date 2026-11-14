@@ -1,0 +1,7 @@
+{
+  "call_type": "acompletion",
+  "transaction_key": "user-corp-1_2026-11-02_sk-user-key_gpt-4o_openai_/chat/completions",
+  "endpoint": "/chat/completions",
+  "has_endpoint": true,
+  "ends_with_endpoint": true
+}

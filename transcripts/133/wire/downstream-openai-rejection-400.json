@@ -1,0 +1,9 @@
+{
+  "error": {
+    "message": "Unknown parameter: 'tools[0].user_location.approximate'.",
+    "type": "invalid_request_error",
+    "param": "tools[0].user_location.approximate",
+    "code": "unknown_parameter"
+  },
+  "status_code": 400
+}

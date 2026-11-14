@@ -1,0 +1,13 @@
+{
+  "status_code": 400,
+  "detail": {
+    "error": "Violated tool policy",
+    "blocked_tools": [
+      "database_exec"
+    ],
+    "untrusted_sources": [
+      "web_search"
+    ],
+    "message": "database_exec requires trusted input but conversation contains untrusted output from web_search."
+  }
+}

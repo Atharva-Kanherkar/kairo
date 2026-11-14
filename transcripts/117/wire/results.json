@@ -1,0 +1,57 @@
+{
+  "target_commit": "cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a",
+  "target_version": "1.108.0-dev / v1.106.6",
+  "runs_completed": 5,
+  "results": [
+    {
+      "run": 1,
+      "direct_upstream_status": 200,
+      "direct_upstream_has_signature": true,
+      "litellm_proxy_status": 200,
+      "litellm_proxy_has_signature": false,
+      "litellm_proxy_chunks_count": 3,
+      "next_turn_with_signature_status": 200,
+      "next_turn_missing_signature_status": 400
+    },
+    {
+      "run": 2,
+      "direct_upstream_status": 200,
+      "direct_upstream_has_signature": true,
+      "litellm_proxy_status": 200,
+      "litellm_proxy_has_signature": false,
+      "litellm_proxy_chunks_count": 3,
+      "next_turn_with_signature_status": 200,
+      "next_turn_missing_signature_status": 400
+    },
+    {
+      "run": 3,
+      "direct_upstream_status": 200,
+      "direct_upstream_has_signature": true,
+      "litellm_proxy_status": 200,
+      "litellm_proxy_has_signature": false,
+      "litellm_proxy_chunks_count": 3,
+      "next_turn_with_signature_status": 200,
+      "next_turn_missing_signature_status": 400
+    },
+    {
+      "run": 4,
+      "direct_upstream_status": 200,
+      "direct_upstream_has_signature": true,
+      "litellm_proxy_status": 200,
+      "litellm_proxy_has_signature": false,
+      "litellm_proxy_chunks_count": 3,
+      "next_turn_with_signature_status": 200,
+      "next_turn_missing_signature_status": 400
+    },
+    {
+      "run": 5,
+      "direct_upstream_status": 200,
+      "direct_upstream_has_signature": true,
+      "litellm_proxy_status": 200,
+      "litellm_proxy_has_signature": false,
+      "litellm_proxy_chunks_count": 3,
+      "next_turn_with_signature_status": 200,
+      "next_turn_missing_signature_status": 400
+    }
+  ]
+}

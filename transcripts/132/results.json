@@ -1,0 +1,37 @@
+{
+  "iterations": 5,
+  "success_rate": "5/5",
+  "all_passed": true,
+  "runs": [
+    {
+      "bug_cross_tenant_leak": true,
+      "control_fixed_tenant_isolated": true,
+      "control_forged_key_isolated": true,
+      "control_bare_sdk_preserved": true
+    },
+    {
+      "bug_cross_tenant_leak": true,
+      "control_fixed_tenant_isolated": true,
+      "control_forged_key_isolated": true,
+      "control_bare_sdk_preserved": true
+    },
+    {
+      "bug_cross_tenant_leak": true,
+      "control_fixed_tenant_isolated": true,
+      "control_forged_key_isolated": true,
+      "control_bare_sdk_preserved": true
+    },
+    {
+      "bug_cross_tenant_leak": true,
+      "control_fixed_tenant_isolated": true,
+      "control_forged_key_isolated": true,
+      "control_bare_sdk_preserved": true
+    },
+    {
+      "bug_cross_tenant_leak": true,
+      "control_fixed_tenant_isolated": true,
+      "control_forged_key_isolated": true,
+      "control_bare_sdk_preserved": true
+    }
+  ]
+}

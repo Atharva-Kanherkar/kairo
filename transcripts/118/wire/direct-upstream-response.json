@@ -1,0 +1,24 @@
+{
+  "jsonrpc": "2.0",
+  "id": 100,
+  "result": {
+    "status": "ok",
+    "tools": [
+      {
+        "name": "calculator",
+        "description": "Performs basic arithmetic operations",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "expr": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "expr"
+          ]
+        }
+      }
+    ]
+  }
+}

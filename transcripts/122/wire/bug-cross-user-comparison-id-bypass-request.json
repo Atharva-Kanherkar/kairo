@@ -1,0 +1,7 @@
+{
+  "model": "gpt-4o",
+  "input": "compare prompt cache",
+  "prompt_cache_options": {
+    "comparison_response_id": "resp_poOA5I25cAd8VM3xehhNYm0VqcPcpd4ORTozRDjMQ2-9Uo1mXcnXyTm-XLkEyoBYdQYJ4nwF3LtAz5UaFVMmJWmphdm4EaY5cJxl4ptqF2NzboQtC42CpDaWAt_YTEhLbE-vLjnPqKum09Gw-uU-k8W0-0bm4wff23UPaoiH2aKqdLif3X4_ClC0j2We506uYHPWWUNGqddcb91ObhpVugfofyha"
+  }
+}

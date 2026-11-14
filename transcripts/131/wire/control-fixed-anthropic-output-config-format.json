@@ -1,0 +1,29 @@
+{
+  "model": "claude-haiku-4-5",
+  "has_top_level_output_format": false,
+  "has_output_config": true,
+  "outbound_body_keys": [
+    "model",
+    "messages",
+    "json_mode",
+    "max_tokens",
+    "output_config"
+  ],
+  "output_config": {
+    "format": {
+      "type": "json_schema",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city"
+        ],
+        "additionalProperties": false
+      }
+    }
+  }
+}

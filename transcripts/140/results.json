@@ -1,0 +1,47 @@
+{
+  "finding": 140,
+  "name": "litellm-openrouter-stream-served-model-loss",
+  "target": "LiteLLM v1.109.0 (commit cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a)",
+  "upstream_pr": "https://github.com/BerriAI/litellm/pull/49498",
+  "upstream_issue": "https://github.com/BerriAI/litellm/issues/46095",
+  "upstream_commit": "36dbb228d94a3e180fee68862f1b20be7bc45ebd",
+  "total_runs": 5,
+  "reproduction_rate": "5/5 (100%)",
+  "runs": [
+    {
+      "run": 1,
+      "defect_unpatched_stream_loses_served_model": true,
+      "control_fixed_stream_preserves_served_model": true,
+      "control_direct_stream_preserves_model": true,
+      "control_nonstreaming_preserves_served_model": true
+    },
+    {
+      "run": 2,
+      "defect_unpatched_stream_loses_served_model": true,
+      "control_fixed_stream_preserves_served_model": true,
+      "control_direct_stream_preserves_model": true,
+      "control_nonstreaming_preserves_served_model": true
+    },
+    {
+      "run": 3,
+      "defect_unpatched_stream_loses_served_model": true,
+      "control_fixed_stream_preserves_served_model": true,
+      "control_direct_stream_preserves_model": true,
+      "control_nonstreaming_preserves_served_model": true
+    },
+    {
+      "run": 4,
+      "defect_unpatched_stream_loses_served_model": true,
+      "control_fixed_stream_preserves_served_model": true,
+      "control_direct_stream_preserves_model": true,
+      "control_nonstreaming_preserves_served_model": true
+    },
+    {
+      "run": 5,
+      "defect_unpatched_stream_loses_served_model": true,
+      "control_fixed_stream_preserves_served_model": true,
+      "control_direct_stream_preserves_model": true,
+      "control_nonstreaming_preserves_served_model": true
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "iterations": 5,
+  "success_rate": "5/5",
+  "all_passed": true,
+  "runs": [
+    {
+      "bug_keys_collide": true,
+      "bug_cross_backend_pollution": true,
+      "ctrl_same_endpoint_hit": true,
+      "ctrl_keys_separated": true,
+      "ctrl_direct_isolated": true
+    },
+    {
+      "bug_keys_collide": true,
+      "bug_cross_backend_pollution": true,
+      "ctrl_same_endpoint_hit": true,
+      "ctrl_keys_separated": true,
+      "ctrl_direct_isolated": true
+    },
+    {
+      "bug_keys_collide": true,
+      "bug_cross_backend_pollution": true,
+      "ctrl_same_endpoint_hit": true,
+      "ctrl_keys_separated": true,
+      "ctrl_direct_isolated": true
+    },
+    {
+      "bug_keys_collide": true,
+      "bug_cross_backend_pollution": true,
+      "ctrl_same_endpoint_hit": true,
+      "ctrl_keys_separated": true,
+      "ctrl_direct_isolated": true
+    },
+    {
+      "bug_keys_collide": true,
+      "bug_cross_backend_pollution": true,
+      "ctrl_same_endpoint_hit": true,
+      "ctrl_keys_separated": true,
+      "ctrl_direct_isolated": true
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+HTTP/1.1 200 OK
+date: Sun, 01 Nov 2026 06:58:23 GMT
+server: uvicorn
+cache-control: no-cache, no-transform
+connection: keep-alive
+content-type: text/event-stream
+x-accel-buffering: no
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+transfer-encoding: chunked
+
+event: message
+data: {"jsonrpc":"2.0","id":1,"result":{"_meta":{"litellm.ai/server_outcomes":{"test_server":{"status":"auth_required","http_status":401}}},"tools":[]}}
+

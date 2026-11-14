@@ -1,0 +1,43 @@
+{
+  "target_commit": "cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a",
+  "target_version": "1.108.0-dev / v1.106.6",
+  "upstream_issue": "https://github.com/BerriAI/litellm/issues/49449",
+  "runs_completed": 5,
+  "results": [
+    {
+      "run": 1,
+      "control_proxy_status": 400,
+      "control_blocked_guardrail": true,
+      "bug_proxy_status": 200,
+      "bug_bypassed_guardrail": true
+    },
+    {
+      "run": 2,
+      "control_proxy_status": 400,
+      "control_blocked_guardrail": true,
+      "bug_proxy_status": 200,
+      "bug_bypassed_guardrail": true
+    },
+    {
+      "run": 3,
+      "control_proxy_status": 400,
+      "control_blocked_guardrail": true,
+      "bug_proxy_status": 200,
+      "bug_bypassed_guardrail": true
+    },
+    {
+      "run": 4,
+      "control_proxy_status": 400,
+      "control_blocked_guardrail": true,
+      "bug_proxy_status": 200,
+      "bug_bypassed_guardrail": true
+    },
+    {
+      "run": 5,
+      "control_proxy_status": 400,
+      "control_blocked_guardrail": true,
+      "bug_proxy_status": 200,
+      "bug_bypassed_guardrail": true
+    }
+  ]
+}

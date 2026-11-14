@@ -1,0 +1,21 @@
+{
+  "test_case": "bug_outbound_tools_stripped",
+  "model": "nano-gpt/z-ai/glm-5.3-flash",
+  "drop_params": true,
+  "tools_passed": true,
+  "tools_in_outbound": false,
+  "tool_choice_in_outbound": false,
+  "forwarded_body_keys": [
+    "model",
+    "messages"
+  ],
+  "forwarded_outbound_body": {
+    "model": "z-ai/glm-5.3-flash",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the weather in Tokyo?"
+      }
+    ]
+  }
+}

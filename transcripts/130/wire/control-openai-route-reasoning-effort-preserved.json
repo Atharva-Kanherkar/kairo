@@ -1,0 +1,10 @@
+{
+  "model": "o1",
+  "input_non_default_params": {
+    "reasoning_effort": "low"
+  },
+  "mapped_outbound_params": {
+    "reasoning_effort": "low"
+  },
+  "reasoning_effort_preserved": true
+}

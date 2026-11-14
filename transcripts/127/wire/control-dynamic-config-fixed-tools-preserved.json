@@ -1,0 +1,8 @@
+{
+  "test_case": "control_dynamic_config_fixed_tools_preserved",
+  "provider": "nano-gpt",
+  "model": "z-ai/glm-5.3-flash",
+  "pr_48191_default_rule": "Preserve tool parameters for unmapped models on OpenAI-compatible JSON providers",
+  "resolved_supports_function_calling": true,
+  "tools_preserved": true
+}

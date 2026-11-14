@@ -1,0 +1,10 @@
+{
+  "model": "github_copilot/gpt-4o",
+  "role": "assistant",
+  "content_is_list": false,
+  "content_is_str": true,
+  "content": "Context prompt.",
+  "cache_control": {
+    "type": "ephemeral"
+  }
+}

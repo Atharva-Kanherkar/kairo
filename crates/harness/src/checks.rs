@@ -6310,6 +6310,2719 @@ mod served_model_within_key_allowlist_tests {
     }
 }
 
+/// Invariant (bug 115): a request for a model outside the key's assigned access
+/// group must be rejected (HTTP 403), never served (HTTP 200).
+pub fn access_group_bounds_model_access(
+    requested_model: &str,
+    access_group_allowed_models: &[&str],
+    status: u16,
+    response_json: &str,
+) -> Verdict {
+    let is_allowed = access_group_allowed_models.contains(&requested_model);
+    if is_allowed {
+        if status == 200 {
+            return Verdict::Conformant;
+        }
+        return Verdict::Violation(format!(
+            "requested model {requested_model:?} is inside the access group allowlist {access_group_allowed_models:?}, but was rejected with status {status}"
+        ));
+    }
+
+    // Disallowed model:
+    if status == 200 {
+        let resp: Value = match serde_json::from_str(response_json) {
+            Ok(v) => v,
+            Err(e) => return Verdict::Violation(format!("invalid response JSON: {e}")),
+        };
+        let served_model = resp
+            .get("model")
+            .and_then(Value::as_str)
+            .unwrap_or(requested_model);
+        return Verdict::Violation(format!(
+            "200 OK response served model {served_model:?}, which is outside the access group allowlist {access_group_allowed_models:?}"
+        ));
+    }
+
+    if status == 403 {
+        let resp: Value = match serde_json::from_str(response_json) {
+            Ok(v) => v,
+            Err(e) => return Verdict::Violation(format!("invalid response JSON: {e}")),
+        };
+        if resp.get("error").is_some()
+            || response_json.contains("key_model_access_denied")
+            || response_json.contains("not available for this API key")
+        {
+            return Verdict::Conformant;
+        }
+        return Verdict::Violation(format!(
+            "403 response missing error object: {response_json}"
+        ));
+    }
+
+    Verdict::Violation(format!(
+        "unexpected status {status} for disallowed model {requested_model:?}; authorization rejection must be HTTP 403"
+    ))
+}
+
+#[cfg(test)]
+mod access_group_bounds_model_access_tests {
+    use super::{access_group_bounds_model_access, Verdict};
+
+    #[test]
+    fn allowed_model_with_200_is_conformant() {
+        let resp = r#"{"model":"allowed-model","choices":[]}"#;
+        assert_eq!(
+            access_group_bounds_model_access("allowed-model", &["allowed-model"], 200, resp),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn allowed_model_rejected_is_violation() {
+        let resp = r#"{"error":"rejected"}"#;
+        assert!(matches!(
+            access_group_bounds_model_access("allowed-model", &["allowed-model"], 403, resp),
+            Verdict::Violation(msg) if msg.contains("rejected with status 403")
+        ));
+    }
+
+    #[test]
+    fn forbidden_model_with_403_is_conformant() {
+        let resp = r#"{"error":{"message":"key_model_access_denied"}}"#;
+        assert_eq!(
+            access_group_bounds_model_access("forbidden-model", &["allowed-model"], 403, resp),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn forbidden_model_served_with_200_is_violation() {
+        let resp = r#"{"model":"forbidden-model","choices":[]}"#;
+        assert!(matches!(
+            access_group_bounds_model_access("forbidden-model", &["allowed-model"], 200, resp),
+            Verdict::Violation(msg) if msg.contains("outside the access group allowlist")
+        ));
+    }
+
+    #[test]
+    fn forbidden_model_with_unexpected_non_403_is_violation() {
+        for bad_status in [201, 202, 500] {
+            let resp = r#"{"error":"internal failure"}"#;
+            assert!(matches!(
+                access_group_bounds_model_access(
+                    "forbidden-model",
+                    &["allowed-model"],
+                    bad_status,
+                    resp
+                ),
+                Verdict::Violation(msg) if msg.contains("authorization rejection must be HTTP 403")
+            ));
+        }
+    }
+
+    #[test]
+    fn invalid_json_on_200_violation_is_handled() {
+        assert!(matches!(
+            access_group_bounds_model_access(
+                "forbidden-model",
+                &["allowed-model"],
+                200,
+                "not json"
+            ),
+            Verdict::Violation(_)
+        ));
+    }
+}
+
+/// Invariant (bug 116): on a single-server MCP gateway route, when an upstream
+/// MCP server rejects a bearer token with HTTP 401 Unauthorized, the gateway
+/// must return HTTP 401 with a `WWW-Authenticate` header rather than returning
+/// HTTP 200 OK with an empty tool list (`"tools": []`) and an internal `_meta` outcome.
+///
+/// An HTTP 200 with empty tools misrepresents an upstream authentication failure
+/// as a successful connection to a zero-tool server. This violates RFC 6750
+/// and prevents MCP clients from triggering their OAuth token refresh flow.
+pub fn mcp_unauthorized_token_must_not_mask_as_empty_tools(
+    status: u16,
+    headers: &[(&str, &str)],
+    body_json: &str,
+) -> Verdict {
+    let body: Value = match serde_json::from_str(body_json) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("invalid JSON-RPC body: {e}")),
+    };
+
+    if status == 401 {
+        let has_www_authenticate = headers
+            .iter()
+            .any(|(k, v)| k.eq_ignore_ascii_case("www-authenticate") && !v.trim().is_empty());
+        if has_www_authenticate {
+            return Verdict::Conformant;
+        }
+        return Verdict::Violation(
+            "HTTP 401 response is missing a non-empty WWW-Authenticate challenge header"
+                .to_string(),
+        );
+    }
+
+    if status == 200 {
+        let empty_tools = body
+            .pointer("/result/tools")
+            .and_then(Value::as_array)
+            .is_some_and(Vec::is_empty);
+
+        let has_auth_required_outcome = body
+            .get("result")
+            .and_then(|r| r.get("_meta"))
+            .and_then(|m| m.get("litellm.ai/server_outcomes"))
+            .and_then(Value::as_object)
+            .is_some_and(|outcomes| {
+                outcomes.values().any(|o| {
+                    o.get("status").and_then(Value::as_str) == Some("auth_required")
+                        || o.get("http_status").and_then(Value::as_i64) == Some(401)
+                })
+            });
+
+        if empty_tools && has_auth_required_outcome {
+            return Verdict::Violation(
+                "gateway returned HTTP 200 OK with empty tools: [] masking an upstream 401 auth_required outcome; must return HTTP 401 with WWW-Authenticate"
+                    .to_string(),
+            );
+        }
+
+        if !empty_tools && body.pointer("/result/tools").is_some() {
+            return Verdict::Conformant;
+        }
+
+        if empty_tools && !has_auth_required_outcome {
+            return Verdict::Conformant;
+        }
+    }
+
+    Verdict::Violation(format!(
+        "unexpected status {status} for MCP response: {body_json}"
+    ))
+}
+
+#[cfg(test)]
+mod mcp_unauthorized_token_tests {
+    use super::{mcp_unauthorized_token_must_not_mask_as_empty_tools, Verdict};
+
+    #[test]
+    fn direct_upstream_401_challenge_is_conformant() {
+        let headers = [(
+            "WWW-Authenticate",
+            "Bearer error=\"invalid_token\", error_description=\"The access token expired\"",
+        )];
+        let body = r#"{"jsonrpc":"2.0","id":1,"error":{"code":-32000,"message":"Token expired"}}"#;
+        assert_eq!(
+            mcp_unauthorized_token_must_not_mask_as_empty_tools(401, &headers, body),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn upstream_401_without_challenge_header_is_violation() {
+        let body = r#"{"jsonrpc":"2.0","id":1,"error":{"code":-32000,"message":"Token expired"}}"#;
+        assert!(matches!(
+            mcp_unauthorized_token_must_not_mask_as_empty_tools(401, &[], body),
+            Verdict::Violation(msg) if msg.contains("missing a non-empty WWW-Authenticate")
+        ));
+    }
+
+    #[test]
+    fn masked_upstream_401_as_200_empty_tools_is_violation() {
+        let body = r#"{
+            "jsonrpc": "2.0",
+            "id": 1,
+            "result": {
+                "_meta": {
+                    "litellm.ai/server_outcomes": {
+                        "test_server": {
+                            "status": "auth_required",
+                            "http_status": 401
+                        }
+                    }
+                },
+                "tools": []
+            }
+        }"#;
+        assert!(matches!(
+            mcp_unauthorized_token_must_not_mask_as_empty_tools(200, &[], body),
+            Verdict::Violation(msg) if msg.contains("masking an upstream 401 auth_required outcome")
+        ));
+    }
+
+    #[test]
+    fn valid_token_200_with_tools_is_conformant() {
+        let body = r#"{
+            "jsonrpc": "2.0",
+            "id": 1,
+            "result": {
+                "_meta": {
+                    "litellm.ai/server_outcomes": {
+                        "test_server": {
+                            "status": "ok",
+                            "tool_count": 1
+                        }
+                    }
+                },
+                "tools": [
+                    {
+                        "name": "calculator",
+                        "description": "Performs math",
+                        "inputSchema": {"type": "object"}
+                    }
+                ]
+            }
+        }"#;
+        assert_eq!(
+            mcp_unauthorized_token_must_not_mask_as_empty_tools(200, &[], body),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn legit_empty_tools_without_auth_failure_is_conformant() {
+        let body = r#"{
+            "jsonrpc": "2.0",
+            "id": 1,
+            "result": {
+                "tools": []
+            }
+        }"#;
+        assert_eq!(
+            mcp_unauthorized_token_must_not_mask_as_empty_tools(200, &[], body),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn invalid_json_is_violation() {
+        assert!(matches!(
+            mcp_unauthorized_token_must_not_mask_as_empty_tools(200, &[], "not json"),
+            Verdict::Violation(msg) if msg.contains("invalid JSON-RPC body")
+        ));
+    }
+
+    #[test]
+    fn unexpected_status_is_violation() {
+        let body = r#"{"jsonrpc":"2.0","id":1,"error":{"code":-32603,"message":"Internal error"}}"#;
+        assert!(matches!(
+            mcp_unauthorized_token_must_not_mask_as_empty_tools(500, &[], body),
+            Verdict::Violation(msg) if msg.contains("unexpected status 500")
+        ));
+    }
+}
+
+/// Invariant: In an OpenRouter Chat Completions SSE stream containing reasoning blocks,
+/// chunks carrying `reasoning_details` thought signatures must not be dropped.
+///
+/// When streaming from reasoning models (e.g. Claude 3.7 / Sonnet 4.5, OpenAI o-series),
+/// the provider transmits thinking deltas followed by a closing chunk containing the
+/// cryptographic thought signature in `delta.reasoning_details`. Dropping signature-only
+/// chunks corrupts the assistant message history and causes subsequent turns to fail with
+/// HTTP 400 Bad Request.
+pub fn openrouter_stream_preserves_reasoning_details(sse_body: &str) -> Verdict {
+    let payloads = match strict_sse_payloads(sse_body) {
+        Ok(payloads) => payloads,
+        Err(bad) => return Verdict::Violation(format!("malformed SSE data: {bad}")),
+    };
+    if payloads.is_empty() {
+        return Verdict::Violation("stream carried no JSON data".into());
+    }
+
+    let mut has_reasoning = false;
+    let mut has_signature = false;
+
+    for payload in &payloads {
+        let Some(choices) = payload.get("choices").and_then(Value::as_array) else {
+            continue;
+        };
+        for choice in choices {
+            let Some(delta) = choice.get("delta").and_then(Value::as_object) else {
+                continue;
+            };
+
+            if delta.contains_key("reasoning")
+                || delta.contains_key("reasoning_content")
+                || delta.contains_key("reasoning_details")
+            {
+                has_reasoning = true;
+            }
+
+            if let Some(details) = delta.get("reasoning_details").and_then(Value::as_array) {
+                for item in details {
+                    if let Some(sig) = item.get("signature").and_then(Value::as_str) {
+                        if !sig.trim().is_empty() {
+                            has_signature = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if has_reasoning && !has_signature {
+        return Verdict::Violation(
+            "stream contains reasoning blocks but dropped the reasoning_details thought signature chunk"
+                .into(),
+        );
+    }
+
+    Verdict::Conformant
+}
+
+/// Invariant: A gateway forwarding an OpenRouter Chat Completions stream must forward all
+/// `reasoning_details` entries (including cryptographic signatures) emitted by the upstream provider.
+pub fn openrouter_stream_forwards_all_reasoning_details(
+    upstream_sse: &str,
+    client_sse: &str,
+) -> Verdict {
+    let upstream_payloads = match strict_sse_payloads(upstream_sse) {
+        Ok(p) => p,
+        Err(bad) => return Verdict::Violation(format!("malformed upstream SSE data: {bad}")),
+    };
+    let client_payloads = match strict_sse_payloads(client_sse) {
+        Ok(p) => p,
+        Err(bad) => return Verdict::Violation(format!("malformed client SSE data: {bad}")),
+    };
+
+    let extract_signatures = |payloads: &[Value]| -> Vec<String> {
+        let mut signatures = Vec::new();
+        for payload in payloads {
+            let Some(choices) = payload.get("choices").and_then(Value::as_array) else {
+                continue;
+            };
+            for choice in choices {
+                let Some(details) = choice
+                    .pointer("/delta/reasoning_details")
+                    .and_then(Value::as_array)
+                else {
+                    continue;
+                };
+                for item in details {
+                    if let Some(sig) = item.get("signature").and_then(Value::as_str) {
+                        if !sig.trim().is_empty() {
+                            signatures.push(sig.to_string());
+                        }
+                    }
+                }
+            }
+        }
+        signatures
+    };
+
+    let upstream_sigs = extract_signatures(&upstream_payloads);
+    let client_sigs = extract_signatures(&client_payloads);
+
+    for sig in &upstream_sigs {
+        if !client_sigs.contains(sig) {
+            return Verdict::Violation(format!(
+                "gateway dropped reasoning_details signature: {sig}"
+            ));
+        }
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod openrouter_reasoning_details_tests {
+    use super::{
+        openrouter_stream_forwards_all_reasoning_details,
+        openrouter_stream_preserves_reasoning_details, Verdict,
+    };
+
+    #[test]
+    fn stream_with_signature_is_conformant() {
+        let sse = "\
+data: {\"choices\":[{\"delta\":{\"reasoning\":\"thinking\",\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"thinking\"}]}}]}\n\n\
+data: {\"choices\":[{\"delta\":{\"reasoning_details\":[{\"type\":\"reasoning.text\",\"signature\":\"sig_123\"}]}}]}\n\n\
+data: {\"choices\":[{\"delta\":{\"content\":\"hello\"}}]}\n\n\
+data: [DONE]\n\n";
+        assert_eq!(
+            openrouter_stream_preserves_reasoning_details(sse),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn stream_missing_signature_is_violation() {
+        let sse = "\
+data: {\"choices\":[{\"delta\":{\"reasoning\":\"thinking\",\"reasoning_details\":[{\"type\":\"reasoning.text\",\"text\":\"thinking\"}]}}]}\n\n\
+data: {\"choices\":[{\"delta\":{\"content\":\"hello\"}}]}\n\n\
+data: [DONE]\n\n";
+        assert!(matches!(
+            openrouter_stream_preserves_reasoning_details(sse),
+            Verdict::Violation(msg) if msg.contains("dropped the reasoning_details thought signature")
+        ));
+    }
+
+    #[test]
+    fn plain_stream_without_reasoning_is_conformant() {
+        let sse = "\
+data: {\"choices\":[{\"delta\":{\"content\":\"hello world\"}}]}\n\n\
+data: [DONE]\n\n";
+        assert_eq!(
+            openrouter_stream_preserves_reasoning_details(sse),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn differential_forwarding_detects_dropped_signature() {
+        let upstream = "\
+data: {\"choices\":[{\"delta\":{\"reasoning_details\":[{\"type\":\"reasoning.text\",\"signature\":\"sig_xyz\"}]}}]}\n\n\
+data: [DONE]\n\n";
+        let client = "\
+data: {\"choices\":[{\"delta\":{\"content\":\"done\"}}]}\n\n\
+data: [DONE]\n\n";
+        assert!(matches!(
+            openrouter_stream_forwards_all_reasoning_details(upstream, client),
+            Verdict::Violation(msg) if msg.contains("gateway dropped reasoning_details signature: sig_xyz")
+        ));
+    }
+}
+
+/// Invariant: A gateway forwarding a JSON-RPC 2.0 request must preserve the client's `id`
+/// member in the forwarded request body. Stripping `id` turns the RPC call into a
+/// JSON-RPC 2.0 notification, preventing the server from returning a response.
+pub fn passthrough_request_preserves_jsonrpc_id(
+    client_body: &str,
+    forwarded_body: &str,
+) -> Verdict {
+    let client: Value = match serde_json::from_str(client_body) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("invalid client JSON: {e}")),
+    };
+    let forwarded: Value = match serde_json::from_str(forwarded_body) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("invalid forwarded JSON: {e}")),
+    };
+
+    let client_is_jsonrpc = client
+        .get("jsonrpc")
+        .and_then(Value::as_str)
+        .is_some_and(|v| v == "2.0");
+
+    if !client_is_jsonrpc {
+        return Verdict::Conformant;
+    }
+
+    if let Some(client_id) = client.get("id") {
+        let Some(forwarded_id) = forwarded.get("id") else {
+            return Verdict::Violation(format!(
+                "gateway stripped JSON-RPC id {client_id} from forwarded request, converting call to a notification"
+            ));
+        };
+        if client_id != forwarded_id {
+            return Verdict::Violation(format!(
+                "gateway altered JSON-RPC id from {client_id} to {forwarded_id}"
+            ));
+        }
+    }
+
+    Verdict::Conformant
+}
+
+/// Invariant: A forwarded JSON-RPC 2.0 method call must contain the `id` member.
+pub fn jsonrpc_forwarded_request_has_id(forwarded_body: &str) -> Verdict {
+    let body: Value = match serde_json::from_str(forwarded_body) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("invalid JSON: {e}")),
+    };
+    let is_jsonrpc = body
+        .get("jsonrpc")
+        .and_then(Value::as_str)
+        .is_some_and(|v| v == "2.0");
+    let has_method = body.get("method").and_then(Value::as_str).is_some();
+
+    if is_jsonrpc && has_method && body.get("id").is_none() {
+        return Verdict::Violation(
+            "forwarded JSON-RPC request is missing required id member".into(),
+        );
+    }
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod passthrough_jsonrpc_id_tests {
+    use super::{
+        jsonrpc_forwarded_request_has_id, passthrough_request_preserves_jsonrpc_id, Verdict,
+    };
+
+    #[test]
+    fn intact_id_is_conformant() {
+        let client = r#"{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}"#;
+        let forwarded = r#"{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}"#;
+        assert_eq!(
+            passthrough_request_preserves_jsonrpc_id(client, forwarded),
+            Verdict::Conformant
+        );
+        assert_eq!(
+            jsonrpc_forwarded_request_has_id(forwarded),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn stripped_id_is_violation() {
+        let client = r#"{"jsonrpc":"2.0","id":100,"method":"tools/list","params":{}}"#;
+        let forwarded = r#"{"jsonrpc":"2.0","method":"tools/list","params":{}}"#;
+        assert!(matches!(
+            passthrough_request_preserves_jsonrpc_id(client, forwarded),
+            Verdict::Violation(msg) if msg.contains("stripped JSON-RPC id 100")
+        ));
+        assert!(matches!(
+            jsonrpc_forwarded_request_has_id(forwarded),
+            Verdict::Violation(msg) if msg.contains("missing required id member")
+        ));
+    }
+
+    #[test]
+    fn non_jsonrpc_request_is_conformant() {
+        let client = r#"{"prompt":"hello"}"#;
+        let forwarded = r#"{"prompt":"hello"}"#;
+        assert_eq!(
+            passthrough_request_preserves_jsonrpc_id(client, forwarded),
+            Verdict::Conformant
+        );
+    }
+}
+
+/// Invariant: In an Anthropic Messages API request containing a tool execution failure,
+/// the `tool_result` content block must carry `is_error: true`.
+///
+/// When an MCP tool call fails during execution, omitting `is_error: true` misrepresents
+/// the execution error string as successful tool return data to Anthropic Claude,
+/// preventing error recovery and tool retries.
+pub fn anthropic_tool_result_preserves_is_error(forwarded_body: &str) -> Verdict {
+    let body: Value = match serde_json::from_str(forwarded_body) {
+        Ok(v) => v,
+        Err(e) => return Verdict::Violation(format!("invalid JSON body: {e}")),
+    };
+    let Some(messages) = body.get("messages").and_then(Value::as_array) else {
+        return Verdict::Violation("missing messages array".into());
+    };
+
+    let mut found_error_tool_result = false;
+    let mut has_is_error_true = false;
+
+    for msg in messages {
+        let Some(content) = msg.get("content").and_then(Value::as_array) else {
+            continue;
+        };
+        for block in content {
+            if block.get("type").and_then(Value::as_str) == Some("tool_result") {
+                let content_str = block.get("content").and_then(Value::as_str).unwrap_or("");
+                if content_str.contains("Error")
+                    || content_str.contains("error")
+                    || content_str.contains("failed")
+                    || content_str.contains("Exception")
+                {
+                    found_error_tool_result = true;
+                    if block.get("is_error").and_then(Value::as_bool) == Some(true) {
+                        has_is_error_true = true;
+                    }
+                }
+            }
+        }
+    }
+
+    if found_error_tool_result && !has_is_error_true {
+        return Verdict::Violation(
+            "tool_result contains tool execution failure text but is_error: true was dropped"
+                .into(),
+        );
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod anthropic_mcp_tool_result_tests {
+    use super::{anthropic_tool_result_preserves_is_error, Verdict};
+
+    #[test]
+    fn tool_result_with_is_error_true_is_conformant() {
+        let body = r#"{
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": "toolu_1",
+                            "content": "Database error: connection refused",
+                            "is_error": true
+                        }
+                    ]
+                }
+            ]
+        }"#;
+        assert_eq!(
+            anthropic_tool_result_preserves_is_error(body),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn tool_result_missing_is_error_on_failure_is_violation() {
+        let body = r#"{
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": "toolu_1",
+                            "content": "Error executing tool: Connection refused"
+                        }
+                    ]
+                }
+            ]
+        }"#;
+        assert!(matches!(
+            anthropic_tool_result_preserves_is_error(body),
+            Verdict::Violation(msg) if msg.contains("is_error: true was dropped")
+        ));
+    }
+
+    #[test]
+    fn successful_tool_result_without_is_error_is_conformant() {
+        let body = r#"{
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": "toolu_1",
+                            "content": "SELECT output: 42 rows"
+                        }
+                    ]
+                }
+            ]
+        }"#;
+        assert_eq!(
+            anthropic_tool_result_preserves_is_error(body),
+            Verdict::Conformant
+        );
+    }
+}
+
+/// Invariant: When an AI gateway applies content moderation or guardrails to an SSE stream,
+/// the guardrail evaluation must scan all text content across transport chunk boundaries.
+///
+/// If an SSE event (e.g. `content_block_delta` with `text_delta`) is fragmented across
+/// transport read chunks, a conforming gateway must reassemble the complete SSE event
+/// before evaluation. Fragmented transport chunks must not cause prohibited content
+/// to be skipped or silently delivered to the client.
+pub fn anthropic_stream_guardrail_evaluates_all_text(
+    stream_chunks: &[&str],
+    blocked_patterns: &[&str],
+    gateway_allowed_stream: bool,
+) -> Verdict {
+    // Correct SSE frame reassembly: join chunks and split by double newline
+    let reassembled_bytes = stream_chunks.join("");
+    let events = reassembled_bytes.split("\n\n");
+
+    let mut full_text = String::new();
+    for event in events {
+        for line in event.lines() {
+            let line = line.trim();
+            if let Some(data_str) = line.strip_prefix("data:") {
+                let data_str = data_str.trim();
+                if let Ok(val) = serde_json::from_str::<Value>(data_str) {
+                    if val.get("type").and_then(Value::as_str) == Some("content_block_delta") {
+                        if let Some(delta) = val.get("delta") {
+                            if delta.get("type").and_then(Value::as_str) == Some("text_delta") {
+                                if let Some(txt) = delta.get("text").and_then(Value::as_str) {
+                                    full_text.push_str(txt);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    let mut contains_blocked = false;
+    for pattern in blocked_patterns {
+        if full_text.contains(pattern) {
+            contains_blocked = true;
+            break;
+        }
+    }
+
+    if contains_blocked && gateway_allowed_stream {
+        return Verdict::Violation(
+            "stream contains prohibited content that bypassed guardrail due to fragmented SSE chunking"
+                .into(),
+        );
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod anthropic_streaming_guardrail_tests {
+    use super::{anthropic_stream_guardrail_evaluates_all_text, Verdict};
+
+    #[test]
+    fn unfragmented_stream_with_blocked_pattern_blocked_by_gateway_is_conformant() {
+        let chunk = "event: content_block_delta\ndata: {\"type\": \"content_block_delta\", \"index\": 0, \"delta\": {\"type\": \"text_delta\", \"text\": \"Secret: BLOCKED_TOKEN\"}}\n\n";
+        let verdict =
+            anthropic_stream_guardrail_evaluates_all_text(&[chunk], &["BLOCKED_TOKEN"], false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn fragmented_chunks_bypassing_guardrail_is_violation() {
+        let chunk1 = "event: content_block_delta\ndata: {\"type\": \"content_block_delta\", \"index\": 0, \"delta\": {\"type\": \"text_delta\", \"text\": \"Secret: BLO";
+        let chunk2 = "CKED_TOKEN\"}}\n\n";
+        let verdict = anthropic_stream_guardrail_evaluates_all_text(
+            &[chunk1, chunk2],
+            &["BLOCKED_TOKEN"],
+            true,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("bypassed guardrail due to fragmented SSE chunking")
+        ));
+    }
+
+    #[test]
+    fn clean_stream_allowed_by_gateway_is_conformant() {
+        let chunk1 = "event: content_block_delta\ndata: {\"type\": \"content_block_delta\", \"index\": 0, \"delta\": {\"type\": \"text_delta\", \"text\": \"Hello world\"}}\n\n";
+        let verdict =
+            anthropic_stream_guardrail_evaluates_all_text(&[chunk1], &["BLOCKED_TOKEN"], true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}
+
+/// Invariant: When an AI gateway enforces tool policies (input_policy="trusted" | "blocked" | "untrusted"
+/// and output_policy="untrusted" | "trusted"):
+/// 1. Any request or response specifying a tool with input_policy="blocked" must be rejected,
+///    even when mixed with other valid custom tools or when formatted as provider-native tools.
+/// 2. Any response invoking a tool with input_policy="trusted" must be rejected if the conversation
+///    contains outputs from tools with output_policy="untrusted", regardless of request dialect
+///    (OpenAI Chat Completions, Anthropic Messages, or OpenAI Responses API).
+pub fn tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+    request_tools: &[&str],
+    prior_untrusted_sources: &[&str],
+    response_invoked_tools: &[&str],
+    blocked_tool_set: &[&str],
+    trusted_tool_set: &[&str],
+    gateway_blocked: bool,
+) -> Verdict {
+    let blocked_set: HashSet<&str> = blocked_tool_set.iter().copied().collect();
+    let trusted_set: HashSet<&str> = trusted_tool_set.iter().copied().collect();
+
+    // Stage 1 check: request contains blocked tool
+    for tool in request_tools {
+        if blocked_set.contains(tool) && !gateway_blocked {
+            return Verdict::Violation(format!(
+                "request tool '{tool}' has input_policy='blocked' but was allowed past Stage 1 guardrail"
+            ));
+        }
+    }
+
+    // Stage 1/2 check: response invokes blocked tool
+    for tool in response_invoked_tools {
+        if blocked_set.contains(tool) && !gateway_blocked {
+            return Verdict::Violation(format!(
+                "response invoked tool '{tool}' has input_policy='blocked' but was allowed past guardrail"
+            ));
+        }
+    }
+
+    // Stage 2 check: response invokes trusted tool following untrusted tool output
+    if !prior_untrusted_sources.is_empty() {
+        for tool in response_invoked_tools {
+            if trusted_set.contains(tool) && !gateway_blocked {
+                return Verdict::Violation(format!(
+                    "tool '{tool}' requires trusted input but conversation contains untrusted output from [{sources}], violating trust chain",
+                    sources = prior_untrusted_sources.join(", ")
+                ));
+            }
+        }
+    }
+
+    Verdict::Conformant
+}
+
+/// Helper to extract tool names from Anthropic request JSON
+pub fn extract_anthropic_request_tool_names(val: &Value) -> Vec<String> {
+    let mut names = Vec::new();
+    if let Some(tools) = val.get("tools").and_then(Value::as_array) {
+        for tool in tools {
+            if let Some(name) = tool.get("name").and_then(Value::as_str) {
+                names.push(name.to_string());
+            }
+        }
+    }
+    names
+}
+
+/// Helper to extract untrusted tool sources from an Anthropic message sequence given untrusted tool registry names
+pub fn extract_anthropic_untrusted_sources(
+    messages: &[Value],
+    untrusted_tools: &[&str],
+) -> Vec<String> {
+    let untrusted_set: HashSet<&str> = untrusted_tools.iter().copied().collect();
+    let mut tool_use_to_name: BTreeMap<String, String> = BTreeMap::new();
+    let mut untrusted_sources: Vec<String> = Vec::new();
+
+    for msg in messages {
+        let role = msg.get("role").and_then(Value::as_str).unwrap_or("");
+        if let Some(content) = msg.get("content").and_then(Value::as_array) {
+            for block in content {
+                let block_type = block.get("type").and_then(Value::as_str).unwrap_or("");
+                if role == "assistant" && block_type == "tool_use" {
+                    if let (Some(id), Some(name)) = (
+                        block.get("id").and_then(Value::as_str),
+                        block.get("name").and_then(Value::as_str),
+                    ) {
+                        tool_use_to_name.insert(id.to_string(), name.to_string());
+                    }
+                } else if role == "user" && block_type == "tool_result" {
+                    if let Some(tool_use_id) = block.get("tool_use_id").and_then(Value::as_str) {
+                        if let Some(name) = tool_use_to_name.get(tool_use_id) {
+                            if untrusted_set.contains(name.as_str())
+                                && !untrusted_sources.contains(name)
+                            {
+                                untrusted_sources.push(name.clone());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    untrusted_sources
+}
+
+/// Helper to extract untrusted tool sources from an OpenAI Responses API input array
+pub fn extract_responses_api_untrusted_sources(
+    input: &[Value],
+    untrusted_tools: &[&str],
+) -> Vec<String> {
+    let untrusted_set: HashSet<&str> = untrusted_tools.iter().copied().collect();
+    let mut call_to_name: BTreeMap<String, String> = BTreeMap::new();
+    let mut untrusted_sources: Vec<String> = Vec::new();
+
+    for item in input {
+        let item_type = item.get("type").and_then(Value::as_str).unwrap_or("");
+        if item_type == "function_call" {
+            if let (Some(call_id), Some(name)) = (
+                item.get("call_id").and_then(Value::as_str),
+                item.get("name").and_then(Value::as_str),
+            ) {
+                call_to_name.insert(call_id.to_string(), name.to_string());
+            }
+        } else if item_type == "function_call_output" {
+            if let Some(call_id) = item.get("call_id").and_then(Value::as_str) {
+                if let Some(name) = call_to_name.get(call_id) {
+                    if untrusted_set.contains(name.as_str()) && !untrusted_sources.contains(name) {
+                        untrusted_sources.push(name.clone());
+                    }
+                }
+            }
+        }
+    }
+    untrusted_sources
+}
+
+#[cfg(test)]
+mod tool_policy_guardrail_tests {
+    use super::{
+        extract_anthropic_request_tool_names, extract_anthropic_untrusted_sources,
+        extract_responses_api_untrusted_sources,
+        tool_policy_guardrail_enforces_trust_chain_and_blocked_tools, Verdict,
+    };
+    use serde_json::json;
+
+    #[test]
+    fn blocked_tool_allowed_is_violation() {
+        let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+            &["bash"],
+            &[],
+            &[],
+            &["bash"],
+            &["database_exec"],
+            false,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("request tool 'bash' has input_policy='blocked'")
+        ));
+    }
+
+    #[test]
+    fn blocked_tool_rejected_is_conformant() {
+        let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+            &["bash"],
+            &[],
+            &[],
+            &["bash"],
+            &["database_exec"],
+            true,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn trusted_tool_after_untrusted_source_allowed_is_violation() {
+        let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+            &[],
+            &["web_search"],
+            &["database_exec"],
+            &["bash"],
+            &["database_exec"],
+            false,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("violating trust chain")
+        ));
+    }
+
+    #[test]
+    fn trusted_tool_after_untrusted_source_blocked_is_conformant() {
+        let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+            &[],
+            &["web_search"],
+            &["database_exec"],
+            &["bash"],
+            &["database_exec"],
+            true,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn anthropic_helpers_extract_tool_names_and_untrusted_sources() {
+        let req = json!({
+            "tools": [
+                {"type": "bash_20250124", "name": "bash"},
+                {"name": "ping", "input_schema": {"type": "object"}}
+            ],
+            "messages": [
+                {
+                    "role": "assistant",
+                    "content": [{"type": "tool_use", "id": "tu_1", "name": "web_search"}]
+                },
+                {
+                    "role": "user",
+                    "content": [{"type": "tool_result", "tool_use_id": "tu_1", "content": "data"}]
+                }
+            ]
+        });
+
+        let names = extract_anthropic_request_tool_names(&req);
+        assert_eq!(names, vec!["bash".to_string(), "ping".to_string()]);
+
+        let msgs = req["messages"].as_array().unwrap();
+        let sources = extract_anthropic_untrusted_sources(msgs, &["web_search"]);
+        assert_eq!(sources, vec!["web_search".to_string()]);
+    }
+
+    #[test]
+    fn responses_api_helper_extracts_untrusted_sources() {
+        let input = json!([
+            {"type": "function_call", "call_id": "fc_1", "name": "web_search"},
+            {"type": "function_call_output", "call_id": "fc_1", "output": "tainted"}
+        ]);
+
+        let items = input.as_array().unwrap();
+        let sources = extract_responses_api_untrusted_sources(items, &["web_search"]);
+        assert_eq!(sources, vec!["web_search".to_string()]);
+    }
+}
+
+/// Invariant: When an AI gateway manages encrypted response IDs for session continuity and tenant isolation
+/// on OpenAI Responses API endpoints (/v1/responses):
+/// 1. The proxy must enforce tenant ownership on all referenced response IDs, including
+///    `prompt_cache_options.comparison_response_id`, blocking cross-tenant references with HTTP 403.
+/// 2. The proxy must unwrap and decrypt proxy-encrypted response IDs before forwarding requests to the
+///    upstream provider, ensuring `comparison_response_id` satisfies the provider's 64-character length limit.
+pub fn responses_comparison_response_id_authorized_and_unwrapped(
+    caller_owns_response_id: bool,
+    gateway_blocked_cross_tenant: bool,
+    forwarded_id_length: usize,
+    provider_max_id_length: usize,
+) -> Verdict {
+    if !caller_owns_response_id && !gateway_blocked_cross_tenant {
+        return Verdict::Violation(
+            "cross-tenant response ID access in comparison_response_id bypassed proxy ownership check"
+                .into(),
+        );
+    }
+
+    if forwarded_id_length > provider_max_id_length {
+        return Verdict::Violation(format!(
+            "comparison_response_id length {forwarded_id_length} exceeds provider maximum length {provider_max_id_length} due to unstripped proxy encryption"
+        ));
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod responses_comparison_id_tests {
+    use super::{responses_comparison_response_id_authorized_and_unwrapped, Verdict};
+
+    #[test]
+    fn cross_tenant_access_blocked_and_unwrapped_is_conformant() {
+        let verdict = responses_comparison_response_id_authorized_and_unwrapped(
+            false, true, // blocked with 403
+            55, 64,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn cross_tenant_access_allowed_is_violation() {
+        let verdict = responses_comparison_response_id_authorized_and_unwrapped(
+            false, false, // bypassed 403
+            55, 64,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("bypassed proxy ownership check")
+        ));
+    }
+
+    #[test]
+    fn legitimate_owner_with_unwrapped_id_is_conformant() {
+        let verdict =
+            responses_comparison_response_id_authorized_and_unwrapped(true, false, 55, 64);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn legitimate_owner_with_bloated_encrypted_id_is_violation() {
+        let verdict = responses_comparison_response_id_authorized_and_unwrapped(
+            true, false, 225, // encrypted proxy string
+            64,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("exceeds provider maximum length 64")
+        ));
+    }
+}
+
+/// Invariant: When an AI gateway bridges Anthropic Messages (/v1/messages) to a backend that supports
+/// the Responses API (such as chatgpt/ or OpenAI Responses bridge):
+/// 1. Outbound responses containing backend reasoning items (with encrypted content) must be preserved
+///    and translated into Anthropic thinking or redacted_thinking blocks with the litellm_encrypted_reasoning:
+///    signature so that the client agent loop can store and replay the reasoning state.
+/// 2. Inbound requests from the client replaying prior encrypted reasoning in assistant turns must be preserved
+///    and translated back into Responses API reasoning items rather than being stripped by the message adapter.
+#[allow(clippy::fn_params_excessive_bools)]
+pub fn anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+    backend_emitted_reasoning: bool,
+    outbound_thinking_block_present: bool,
+    inbound_client_replayed_reasoning: bool,
+    forwarded_input_has_reasoning_item: bool,
+) -> Verdict {
+    if backend_emitted_reasoning && !outbound_thinking_block_present {
+        return Verdict::Violation(
+            "outbound response translated to Anthropic format dropped encrypted reasoning item, preventing client from capturing reasoning state"
+                .into(),
+        );
+    }
+
+    if inbound_client_replayed_reasoning && !forwarded_input_has_reasoning_item {
+        return Verdict::Violation(
+            "inbound Anthropic request replaying encrypted reasoning was stripped by adapter, preventing backend from receiving prior reasoning context"
+                .into(),
+        );
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod anthropic_responses_bridge_reasoning_tests {
+    use super::{anthropic_messages_responses_bridge_preserves_encrypted_reasoning, Verdict};
+
+    #[test]
+    fn full_roundtrip_preserved_is_conformant() {
+        let verdict = anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+            true, true, // backend emitted reasoning -> outbound thinking block present
+            true, true, // client replayed reasoning -> forwarded input has reasoning item
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_reasoning_emitted_is_conformant() {
+        let verdict = anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+            false, false, false, false,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn outbound_reasoning_dropped_is_violation() {
+        let verdict = anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+            true, false, // backend emitted reasoning, but outbound thinking block dropped
+            false, false,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("dropped encrypted reasoning item")
+        ));
+    }
+
+    #[test]
+    fn inbound_replayed_reasoning_stripped_is_violation() {
+        let verdict = anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+            true, true, true, false, // replayed reasoning was stripped before reaching backend
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("replaying encrypted reasoning was stripped")
+        ));
+    }
+}
+
+/// Invariant: When an AI gateway provides response caching across multiple backend deployments:
+/// 1. Cache key generation must incorporate destination connection routing parameters (including `api_base`
+///    and `api_key` tenant credentials) so that requests routed to different backends or tenants do not collide.
+/// 2. Two requests differing in target destination or tenant credential must never produce identical cache keys.
+/// 3. Cached responses from one backend deployment must never be served as a cache hit to a request targeting
+///    a different backend deployment.
+#[must_use]
+pub fn response_cache_keys_differentiate_destinations(
+    destination_a: &str,
+    destination_b: &str,
+    cache_key_a: &str,
+    cache_key_b: &str,
+    served_response_content: &str,
+    expected_destination_content: &str,
+    is_cache_hit: bool,
+) -> Verdict {
+    let destinations_differ = destination_a != destination_b;
+    let keys_collide = cache_key_a == cache_key_b;
+
+    if destinations_differ && keys_collide {
+        return Verdict::Violation(format!(
+            "cache key collision between distinct destinations '{destination_a}' and '{destination_b}': shared key '{cache_key_a}' omits destination connection parameters"
+        ));
+    }
+
+    if destinations_differ
+        && is_cache_hit
+        && served_response_content != expected_destination_content
+    {
+        return Verdict::Violation(format!(
+            "cross-destination cache pollution: request to '{destination_b}' was served cached response from '{destination_a}'"
+        ));
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod response_cache_destination_tests {
+    use super::{response_cache_keys_differentiate_destinations, Verdict};
+
+    #[test]
+    fn distinct_destinations_with_separated_keys_is_conformant() {
+        let verdict = response_cache_keys_differentiate_destinations(
+            "https://backend-a.example.com",
+            "https://backend-b.example.com",
+            "key-a-1111",
+            "key-b-2222",
+            "Backend B response",
+            "Backend B response",
+            false,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn same_destination_cache_hit_is_conformant() {
+        let verdict = response_cache_keys_differentiate_destinations(
+            "https://backend-a.example.com",
+            "https://backend-a.example.com",
+            "key-a-1111",
+            "key-a-1111",
+            "Backend A response",
+            "Backend A response",
+            true,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn distinct_destinations_with_colliding_keys_is_violation() {
+        let verdict = response_cache_keys_differentiate_destinations(
+            "https://backend-a.example.com",
+            "https://backend-b.example.com",
+            "shared-key-1111",
+            "shared-key-1111",
+            "Backend A response",
+            "Backend B response",
+            true,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("cache key collision between distinct destinations")
+        ));
+    }
+
+    #[test]
+    fn distinct_tenants_with_colliding_keys_is_violation() {
+        let verdict = response_cache_keys_differentiate_destinations(
+            "tenant-alpha-token-1111",
+            "tenant-beta-token-2222",
+            "shared-key-1111",
+            "shared-key-1111",
+            "Tenant Alpha sensitive data",
+            "Tenant Beta sensitive data",
+            true,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("cache key collision between distinct destinations")
+        ));
+    }
+
+    #[test]
+    fn cross_destination_cache_pollution_is_violation() {
+        let verdict = response_cache_keys_differentiate_destinations(
+            "https://backend-a.example.com",
+            "https://backend-b.example.com",
+            "key-a",
+            "key-b",
+            "Backend A response",
+            "Backend B response",
+            true,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("cross-destination cache pollution")
+        ));
+    }
+}
+
+/// Invariant: When an AI gateway client or SDK integrates with a provider supporting a custom base URL
+/// configured through the environment (e.g. `VOYAGE_API_BASE`):
+/// 1. Outbound requests without an explicit `api_base` kwarg must route to the configured environment base URL
+///    rather than falling back to public default vendor endpoints.
+/// 2. Outbound embedding, contextual embedding, and multimodal embedding URLs must resolve to the configured gateway host.
+/// 3. Outbound requests must never bypass the configured gateway and leak sensitive payloads to public endpoints.
+#[must_use]
+pub fn voyage_embeddings_honor_environment_api_base(
+    configured_env_base: Option<&str>,
+    resolved_target_url: &str,
+    requests_received_by_gateway: usize,
+    expected_requests: usize,
+) -> Verdict {
+    if let Some(env_base) = configured_env_base {
+        if !resolved_target_url.starts_with(env_base) {
+            return Verdict::Violation(format!(
+                "outbound embedding URL '{resolved_target_url}' bypassed configured environment base '{env_base}', routing to public vendor host"
+            ));
+        }
+
+        if requests_received_by_gateway < expected_requests {
+            return Verdict::Violation(format!(
+                "configured gateway at '{env_base}' received {requests_received_by_gateway} of {expected_requests} expected requests; outbound request bypassed gateway"
+            ));
+        }
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod voyage_embeddings_env_api_base_tests {
+    use super::{voyage_embeddings_honor_environment_api_base, Verdict};
+
+    #[test]
+    fn env_base_honored_and_gateway_reached_is_conformant() {
+        let verdict = voyage_embeddings_honor_environment_api_base(
+            Some("http://127.0.0.1:9988/v1"),
+            "http://127.0.0.1:9988/v1/embeddings",
+            1,
+            1,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_env_base_configured_is_conformant() {
+        let verdict = voyage_embeddings_honor_environment_api_base(
+            None,
+            "https://api.voyageai.com/v1/embeddings",
+            0,
+            0,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn env_base_configured_but_url_points_to_public_host_is_violation() {
+        let verdict = voyage_embeddings_honor_environment_api_base(
+            Some("http://127.0.0.1:9988/v1"),
+            "https://api.voyageai.com/v1/embeddings",
+            0,
+            1,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("bypassed configured environment base")
+        ));
+    }
+
+    #[test]
+    fn env_base_url_matches_but_zero_requests_reached_gateway_is_violation() {
+        let verdict = voyage_embeddings_honor_environment_api_base(
+            Some("http://127.0.0.1:9988/v1"),
+            "http://127.0.0.1:9988/v1/embeddings",
+            0,
+            1,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("received 0 of 1 expected requests")
+        ));
+    }
+}
+
+/// Invariant: When an AI gateway transforms chat messages for reasoning models (e.g. OpenAI/Azure o-series):
+/// 1. System prompts (`role: "system"` or `role: "developer"`) provided by the client must be preserved
+///    in the outbound payload for all models supporting system instructions (such as o1, o3, o4-mini, o3-mini).
+/// 2. The gateway must never silently demote a system prompt to `role: "user"`, which destroys the instruction
+///    hierarchy and leaves guardrails vulnerable to override by subsequent user turns.
+#[must_use]
+pub fn reasoning_model_system_prompt_preserved(
+    model: &str,
+    client_sent_system_message: bool,
+    outbound_system_role_preserved: bool,
+    outbound_roles: &[&str],
+) -> Verdict {
+    if client_sent_system_message {
+        if !outbound_system_role_preserved {
+            return Verdict::Violation(format!(
+                "model '{model}' silently demoted system prompt to user message: outbound roles {outbound_roles:?}"
+            ));
+        }
+
+        if let Some(first_role) = outbound_roles.first() {
+            if *first_role == "user" {
+                return Verdict::Violation(format!(
+                    "model '{model}' has user role for initial system prompt: outbound roles {outbound_roles:?}"
+                ));
+            }
+        }
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod reasoning_system_prompt_tests {
+    use super::{reasoning_model_system_prompt_preserved, Verdict};
+
+    #[test]
+    fn system_role_preserved_is_conformant() {
+        let verdict =
+            reasoning_model_system_prompt_preserved("o1", true, true, &["system", "user"]);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_system_message_sent_is_conformant() {
+        let verdict = reasoning_model_system_prompt_preserved("o3", false, false, &["user"]);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn system_demoted_to_user_is_violation() {
+        let verdict = reasoning_model_system_prompt_preserved("o3", true, false, &["user", "user"]);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("silently demoted system prompt to user message")
+        ));
+    }
+
+    #[test]
+    fn initial_role_user_when_system_sent_is_violation() {
+        let verdict =
+            reasoning_model_system_prompt_preserved("o4-mini", true, false, &["user", "user"]);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("silently demoted system prompt to user message")
+        ));
+    }
+}
+
+/// Invariant: When an AI gateway routes chat completion requests with function tools to an OpenAI-compatible provider:
+/// 1. Tool parameters (`tools`, `tool_choice`, etc.) must not be rejected or silently stripped
+///    merely because the requested model is not pre-registered in the gateway's pricing/context catalog.
+/// 2. If the client passes `tools` and `tool_choice`, and function calling is not explicitly disabled by the provider or model,
+///    the outbound request must preserve the tool parameters.
+pub fn openai_compatible_unmapped_model_tools_preserved(
+    provider: &str,
+    model: &str,
+    tools_passed: bool,
+    error_raised: bool,
+    unsupported_params: &[&str],
+    outbound_has_tools: bool,
+) -> Verdict {
+    if !tools_passed {
+        return Verdict::Conformant;
+    }
+
+    if error_raised
+        && unsupported_params
+            .iter()
+            .any(|&p| p == "tools" || p == "tool_choice")
+    {
+        return Verdict::Violation(format!(
+            "gateway rejected valid tool parameters for unmapped model '{model}' on provider '{provider}': {unsupported_params:?}"
+        ));
+    }
+
+    if !outbound_has_tools {
+        return Verdict::Violation(format!(
+            "gateway silently stripped tool parameters from outbound request for unmapped model '{model}' on provider '{provider}'"
+        ));
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod openai_compatible_unmapped_model_tools_tests {
+    use super::*;
+
+    #[test]
+    fn tools_preserved_in_outbound_is_conformant() {
+        let verdict = openai_compatible_unmapped_model_tools_preserved(
+            "nano-gpt",
+            "z-ai/glm-5.3-flash",
+            true,
+            false,
+            &[],
+            true,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_tools_passed_is_conformant() {
+        let verdict = openai_compatible_unmapped_model_tools_preserved(
+            "nano-gpt",
+            "z-ai/glm-5.3-flash",
+            false,
+            false,
+            &[],
+            false,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn error_raised_for_tools_is_violation() {
+        let verdict = openai_compatible_unmapped_model_tools_preserved(
+            "nano-gpt",
+            "z-ai/glm-5.3-flash",
+            true,
+            true,
+            &["tools", "tool_choice"],
+            false,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("rejected valid tool parameters for unmapped model")
+        ));
+    }
+
+    #[test]
+    fn outbound_missing_tools_is_violation() {
+        let verdict = openai_compatible_unmapped_model_tools_preserved(
+            "nano-gpt",
+            "z-ai/glm-5.3-flash",
+            true,
+            false,
+            &[],
+            false,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg) if msg.contains("silently stripped tool parameters from outbound request")
+        ));
+    }
+}
+
+/// Invariant: When an AI gateway replays an upstream provider completion as a stream (fake stream):
+/// 1. If the client requested token probabilities (`logprobs: true`), and the upstream provider returned
+///    complete `logprobs` metadata on choices, the replayed streaming chunks must preserve the token probabilities.
+/// 2. The gateway must not silently drop `logprobs` or set choice `logprobs` to `null` during stream conversion.
+pub fn fake_stream_preserves_provider_logprobs(
+    provider: &str,
+    model: &str,
+    requested_logprobs: bool,
+    provider_had_logprobs: bool,
+    chunk_has_logprobs: bool,
+) -> Verdict {
+    if !requested_logprobs {
+        return Verdict::Conformant;
+    }
+
+    if provider_had_logprobs && !chunk_has_logprobs {
+        return Verdict::Violation(format!(
+            "gateway dropped requested token log probabilities in fake stream chunks for model '{model}' on provider '{provider}'"
+        ));
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod fake_stream_logprobs_tests {
+    use super::*;
+
+    #[test]
+    fn chunk_with_logprobs_is_conformant() {
+        let verdict =
+            fake_stream_preserves_provider_logprobs("groq", "llama3-8b-8192", true, true, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn logprobs_not_requested_is_conformant() {
+        let verdict =
+            fake_stream_preserves_provider_logprobs("groq", "llama3-8b-8192", false, false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn chunk_missing_logprobs_when_provider_had_logprobs_is_violation() {
+        let verdict =
+            fake_stream_preserves_provider_logprobs("groq", "llama3-8b-8192", true, true, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("dropped requested token log probabilities in fake stream chunks")
+        ));
+    }
+
+    #[test]
+    fn provider_had_no_logprobs_missing_in_chunk_is_conformant() {
+        let verdict =
+            fake_stream_preserves_provider_logprobs("groq", "llama3-8b-8192", true, false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}
+
+/// Invariant: When an AI gateway translates Google GenAI `generateContent` multi-turn conversation
+/// contents to OpenAI/Claude chat completion messages:
+/// 1. If a turn (whether `role: "user"` or `role: "model"`) contains a tool execution response
+///    (`functionResponse` or `function_response`), the gateway must emit a corresponding `role: "tool"`
+///    message with the matching `tool_call_id` and serialized response content.
+/// 2. The gateway must not drop the tool response or replace the turn with an empty assistant message
+///    (`role: "assistant", content: null`), which leaves the preceding tool call unanswered and causes
+///    downstream providers (such as Claude or OpenAI) to reject subsequent requests with HTTP 400.
+pub fn google_genai_model_turn_tool_results_preserved(
+    adapter: &str,
+    target_model: &str,
+    turn_role: &str,
+    has_tool_response: bool,
+    emitted_tool_message: bool,
+    emitted_empty_assistant: bool,
+) -> Verdict {
+    if !has_tool_response {
+        return Verdict::Conformant;
+    }
+
+    if !emitted_tool_message && emitted_empty_assistant {
+        return Verdict::Violation(format!(
+            "adapter '{adapter}' dropped tool response in '{turn_role}' turn and emitted empty assistant message for target model '{target_model}'"
+        ));
+    }
+
+    if !emitted_tool_message {
+        return Verdict::Violation(format!(
+            "adapter '{adapter}' omitted tool message for functionResponse in '{turn_role}' turn for target model '{target_model}'"
+        ));
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod google_genai_model_turn_tool_results_tests {
+    use super::*;
+
+    #[test]
+    fn tool_message_emitted_is_conformant() {
+        let verdict = google_genai_model_turn_tool_results_preserved(
+            "google_genai",
+            "gpt-4.1",
+            "model",
+            true,
+            true,
+            false,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_tool_response_is_conformant() {
+        let verdict = google_genai_model_turn_tool_results_preserved(
+            "google_genai",
+            "gpt-4.1",
+            "model",
+            false,
+            false,
+            false,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn model_turn_dropped_tool_response_empty_assistant_is_violation() {
+        let verdict = google_genai_model_turn_tool_results_preserved(
+            "google_genai",
+            "gpt-4.1",
+            "model",
+            true,
+            false,
+            true,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("dropped tool response in 'model' turn and emitted empty assistant message")
+        ));
+    }
+
+    #[test]
+    fn tool_message_omitted_without_empty_assistant_is_violation() {
+        let verdict = google_genai_model_turn_tool_results_preserved(
+            "google_genai",
+            "gpt-4.1",
+            "model",
+            true,
+            false,
+            false,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("omitted tool message for functionResponse in 'model' turn")
+        ));
+    }
+}
+
+/// Invariant: When an AI gateway maps OpenAI chat completion parameters for MiniMax models
+/// (such as `minimax/MiniMax-M3.1-Flash`):
+/// 1. If the client specifies a reasoning effort level (`reasoning_effort: "low"`, `"medium"`, `"high"`, `"max"`),
+///    the gateway must forward `reasoning_effort` in the outbound request parameters.
+/// 2. The gateway must not silently drop `reasoning_effort` from the outbound request when mapping parameters.
+pub fn minimax_reasoning_effort_preserved(
+    provider: &str,
+    model: &str,
+    requested_effort: Option<&str>,
+    outbound_has_effort: bool,
+) -> Verdict {
+    let Some(effort) = requested_effort else {
+        return Verdict::Conformant;
+    };
+
+    if !outbound_has_effort {
+        return Verdict::Violation(format!(
+            "provider '{provider}' dropped requested reasoning_effort '{effort}' from outbound request for model '{model}'"
+        ));
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod minimax_reasoning_effort_tests {
+    use super::*;
+
+    #[test]
+    fn reasoning_effort_preserved_is_conformant() {
+        let verdict = minimax_reasoning_effort_preserved(
+            "minimax",
+            "minimax/MiniMax-M3.1-Flash",
+            Some("low"),
+            true,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_reasoning_effort_requested_is_conformant() {
+        let verdict = minimax_reasoning_effort_preserved(
+            "minimax",
+            "minimax/MiniMax-M3.1-Flash",
+            None,
+            false,
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn reasoning_effort_dropped_is_violation() {
+        let verdict = minimax_reasoning_effort_preserved(
+            "minimax",
+            "minimax/MiniMax-M3.1-Flash",
+            Some("low"),
+            false,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("dropped requested reasoning_effort 'low'")
+        ));
+    }
+
+    #[test]
+    fn high_reasoning_effort_dropped_is_violation() {
+        let verdict = minimax_reasoning_effort_preserved(
+            "minimax",
+            "minimax/MiniMax-M3.1-Flash",
+            Some("high"),
+            false,
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("dropped requested reasoning_effort 'high'")
+        ));
+    }
+}
+
+/// Invariant: When an AI gateway transforms chat completion requests with structured output
+/// (`response_format` JSON schema) for Anthropic Claude models:
+/// 1. The gateway must place the schema format under `output_config.format` rather than emitting
+///    it as a deprecated top-level `output_format` parameter.
+/// 2. Anthropic-compatible backends (Bedrock, Vertex AI, Anthropic-compatible proxies) ignore
+///    top-level `output_format` without error, causing silent loss of schema enforcement and returning
+///    unconstrained text instead of validated JSON.
+pub fn anthropic_structured_output_config_format(
+    model: &str,
+    has_structured_output: bool,
+    has_top_level_output_format: bool,
+    has_output_config_format: bool,
+) -> Verdict {
+    if !has_structured_output {
+        return Verdict::Conformant;
+    }
+
+    if has_top_level_output_format && !has_output_config_format {
+        return Verdict::Violation(format!(
+            "gateway emitted structured output as top-level 'output_format' instead of 'output_config.format' for model '{model}'"
+        ));
+    }
+
+    if !has_output_config_format {
+        return Verdict::Violation(format!(
+            "gateway omitted structured output format from 'output_config.format' for model '{model}'"
+        ));
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod anthropic_structured_output_tests {
+    use super::*;
+
+    #[test]
+    fn output_config_format_is_conformant() {
+        let verdict =
+            anthropic_structured_output_config_format("claude-haiku-4-5", true, false, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_structured_output_is_conformant() {
+        let verdict =
+            anthropic_structured_output_config_format("claude-haiku-4-5", false, false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn top_level_output_format_is_violation() {
+        let verdict =
+            anthropic_structured_output_config_format("claude-haiku-4-5", true, true, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("emitted structured output as top-level 'output_format'")
+        ));
+    }
+
+    #[test]
+    fn omitted_output_config_format_is_violation() {
+        let verdict =
+            anthropic_structured_output_config_format("claude-haiku-4-5", true, false, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("omitted structured output format from 'output_config.format'")
+        ));
+    }
+}
+
+/// Invariant: When an AI gateway caches exact-match completion responses:
+/// 1. Cache entries must be isolated per tenant (virtual key, team, organization).
+/// 2. Requests from distinct tenants with distinct credentials must never share identical cache keys
+///    or retrieve completions cached for another tenant.
+/// 3. Cross-tenant cache hits constitute a critical data leakage vulnerability.
+pub fn response_cache_tenant_isolation(
+    primary_tenant_key: &str,
+    querying_tenant_key: &str,
+    tenant_b_received_cached_response: bool,
+) -> Verdict {
+    if primary_tenant_key == querying_tenant_key {
+        return Verdict::Violation(format!(
+            "cache keys are identical across distinct tenants ('{primary_tenant_key}'), enabling cross-tenant cache sharing"
+        ));
+    }
+
+    if tenant_b_received_cached_response {
+        return Verdict::Violation(
+            "tenant B retrieved cached response generated for tenant A, leaking private cross-tenant data".to_string(),
+        );
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod response_cache_tenant_isolation_tests {
+    use super::*;
+
+    #[test]
+    fn distinct_keys_no_leak_is_conformant() {
+        let verdict =
+            response_cache_tenant_isolation("tenant-a:key-123", "tenant-b:key-123", false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn identical_keys_is_violation() {
+        let verdict = response_cache_tenant_isolation("unscoped-key-123", "unscoped-key-123", true);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("cache keys are identical across distinct tenants")
+        ));
+    }
+
+    #[test]
+    fn cross_tenant_leak_is_violation() {
+        let verdict = response_cache_tenant_isolation("tenant-a:key-123", "tenant-b:key-123", true);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("tenant B retrieved cached response generated for tenant A")
+        ));
+    }
+
+    #[test]
+    fn custom_scoped_keys_isolated_is_conformant() {
+        let verdict =
+            response_cache_tenant_isolation("tenant-a:custom-key", "tenant-b:custom-key", false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}
+
+/// Invariant: When an AI gateway bridges Chat Completions requests with `web_search_options`
+/// containing `user_location` to the OpenAI Responses API (`/v1/responses`):
+/// 1. The gateway must flatten `user_location` into `{"type": "approximate", "country": "...", "city": "..."}`.
+/// 2. It must not forward the nested `approximate` object from Chat Completions (`tools[...].user_location.approximate`).
+/// 3. Backends reject nested `approximate` with HTTP 400 Bad Request (`Unknown parameter: 'tools[0].user_location.approximate'`).
+#[allow(clippy::fn_params_excessive_bools)]
+pub fn responses_api_web_search_user_location_flat(
+    has_web_search_tool: bool,
+    has_user_location: bool,
+    has_nested_approximate: bool,
+    has_flat_country_or_city: bool,
+) -> Verdict {
+    if !has_web_search_tool || !has_user_location {
+        return Verdict::Conformant;
+    }
+
+    if has_nested_approximate {
+        return Verdict::Violation(
+            "gateway forwarded nested 'user_location.approximate' object to Responses API instead of flattening location fields, causing HTTP 400 rejection".to_string(),
+        );
+    }
+
+    if !has_flat_country_or_city {
+        return Verdict::Violation(
+            "gateway omitted location fields from flattened Responses API 'user_location'"
+                .to_string(),
+        );
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod responses_api_web_search_user_location_tests {
+    use super::*;
+
+    #[test]
+    fn flat_user_location_is_conformant() {
+        let verdict = responses_api_web_search_user_location_flat(true, true, false, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn nested_approximate_is_violation() {
+        let verdict = responses_api_web_search_user_location_flat(true, true, true, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("forwarded nested 'user_location.approximate' object")
+        ));
+    }
+
+    #[test]
+    fn missing_flat_fields_is_violation() {
+        let verdict = responses_api_web_search_user_location_flat(true, true, false, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("omitted location fields from flattened Responses API")
+        ));
+    }
+
+    #[test]
+    fn no_web_search_is_conformant() {
+        let verdict = responses_api_web_search_user_location_flat(false, false, false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_user_location_is_conformant() {
+        let verdict = responses_api_web_search_user_location_flat(true, false, false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}
+
+/// Invariant: When an AI gateway streams chat completion responses with MCP metadata:
+/// 1. The finish_reason chunk must surface MCP metadata (`delta.provider_specific_fields`)
+///    consistently across both synchronous and asynchronous stream consumers.
+/// 2. Requesting token usage via `stream_options.include_usage` must not suppress or drop
+///    MCP metadata from the final chunk.
+/// 3. Suppressing MCP metadata on synchronous streams breaks tool call execution and observability.
+pub fn sync_stream_mcp_metadata_preserved(
+    has_mcp_metadata: bool,
+    has_finish_chunk: bool,
+    has_provider_specific_fields: bool,
+) -> Verdict {
+    if !has_mcp_metadata || !has_finish_chunk {
+        return Verdict::Conformant;
+    }
+
+    if !has_provider_specific_fields {
+        return Verdict::Violation(
+            "stream suppressed MCP metadata ('delta.provider_specific_fields') on final chunk when stream_options.include_usage was requested".to_string(),
+        );
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod sync_stream_mcp_metadata_tests {
+    use super::*;
+
+    #[test]
+    fn mcp_metadata_preserved_is_conformant() {
+        let verdict = sync_stream_mcp_metadata_preserved(true, true, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn mcp_metadata_dropped_is_violation() {
+        let verdict = sync_stream_mcp_metadata_preserved(true, true, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("stream suppressed MCP metadata")
+        ));
+    }
+
+    #[test]
+    fn no_mcp_metadata_is_conformant() {
+        let verdict = sync_stream_mcp_metadata_preserved(false, true, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn no_finish_chunk_is_conformant() {
+        let verdict = sync_stream_mcp_metadata_preserved(true, false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}
+
+/// Invariant: When an AI gateway wraps streaming chat completions in an asynchronous iterator:
+/// 1. The stream handler must record `completion_start_time` on the first chunk so that
+///    time-to-first-token (TTFT) metrics accurately reflect first-token latency rather than
+///    degrading to full stream duration.
+/// 2. When the provider returns token usage on the final chunk without `stream_options.include_usage`,
+///    the stream handler must record usage into hidden parameters (`_hidden_params["usage"]`)
+///    for downstream spend tracking and telemetry.
+/// 3. Parity must be preserved regardless of whether the underlying stream is an async-iterable
+///    or a synchronous iterator (e.g. AWS Bedrock boto3 stream).
+pub fn async_stream_ttft_and_hidden_usage_preserved(
+    stream_mode: &str,
+    has_completion_start_time: bool,
+    has_hidden_usage: bool,
+) -> Verdict {
+    if stream_mode != "async" {
+        return Verdict::Conformant;
+    }
+
+    if !has_completion_start_time {
+        return Verdict::Violation(
+            "async stream failed to record completion_start_time on first chunk, corrupting TTFT metric".to_string(),
+        );
+    }
+
+    if !has_hidden_usage {
+        return Verdict::Violation(
+            "async stream failed to populate hidden-params usage on final chunk, losing spend tracking data".to_string(),
+        );
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod async_stream_ttft_and_hidden_usage_tests {
+    use super::*;
+
+    #[test]
+    fn ttft_and_usage_preserved_is_conformant() {
+        let verdict = async_stream_ttft_and_hidden_usage_preserved("async", true, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn missing_ttft_is_violation() {
+        let verdict = async_stream_ttft_and_hidden_usage_preserved("async", false, true);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("corrupting TTFT metric")
+        ));
+    }
+
+    #[test]
+    fn missing_hidden_usage_is_violation() {
+        let verdict = async_stream_ttft_and_hidden_usage_preserved("async", true, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("losing spend tracking data")
+        ));
+    }
+
+    #[test]
+    fn non_async_mode_is_conformant() {
+        let verdict = async_stream_ttft_and_hidden_usage_preserved("sync", false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}
+
+/// Invariant: In an AI gateway routing requests across heterogeneous LLM endpoints:
+/// 1. Every routed call type must map to its canonical endpoint path (e.g. `anthropic_messages` -> `"/messages"`).
+/// 2. Aggregated spend records, daily user/team/tag spend queues, and database rows must carry the resolved endpoint string rather than `null`.
+/// 3. When an endpoint is omitted from `ROUTE_ENDPOINT_MAPPING`, spend rows lose endpoint attribution, preventing operators from tracking per-endpoint activity and billing for `/v1/messages` calls.
+pub fn daily_spend_endpoint_attributed(
+    call_type: &str,
+    endpoint: Option<&str>,
+    transaction_key: &str,
+) -> Verdict {
+    if call_type == "anthropic_messages" {
+        match endpoint {
+            Some("/messages") => {
+                if transaction_key.ends_with("_/messages") {
+                    Verdict::Conformant
+                } else {
+                    Verdict::Violation(
+                        "transaction key did not append canonical endpoint '/messages'".to_string(),
+                    )
+                }
+            }
+            Some(other) => Verdict::Violation(
+                format!("anthropic_messages mapped to unexpected endpoint '{other}' instead of '/messages'"),
+            ),
+            None => Verdict::Violation(
+                "anthropic_messages call type missing from endpoint mapping, leaving spend row endpoint as null".to_string(),
+            ),
+        }
+    } else if endpoint.is_none() {
+        Verdict::Violation(format!("call type '{call_type}' has null endpoint"))
+    } else {
+        Verdict::Conformant
+    }
+}
+
+#[cfg(test)]
+mod daily_spend_endpoint_tests {
+    use super::*;
+
+    #[test]
+    fn anthropic_messages_attributed_is_conformant() {
+        let verdict = daily_spend_endpoint_attributed(
+            "anthropic_messages",
+            Some("/messages"),
+            "user_date_key_claude_anthropic_/messages",
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn anthropic_messages_missing_endpoint_is_violation() {
+        let verdict = daily_spend_endpoint_attributed(
+            "anthropic_messages",
+            None,
+            "user_date_key_claude_anthropic_",
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("missing from endpoint mapping")
+        ));
+    }
+
+    #[test]
+    fn anthropic_messages_wrong_endpoint_is_violation() {
+        let verdict = daily_spend_endpoint_attributed(
+            "anthropic_messages",
+            Some("/chat/completions"),
+            "user_date_key_claude_anthropic_/chat/completions",
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("unexpected endpoint")
+        ));
+    }
+
+    #[test]
+    fn chat_completions_attributed_is_conformant() {
+        let verdict = daily_spend_endpoint_attributed(
+            "acompletion",
+            Some("/chat/completions"),
+            "user_date_key_gpt4o_openai_/chat/completions",
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}
+
+/// Invariant: In an AI gateway adapting requests to provider backends:
+/// 1. For providers that require text-only instructions (such as GitHub Copilot chat completions),
+///    system messages passed as structured content blocks (`[{"type": "text", "text": "..."}]`)
+///    must be flattened into a single text string before forwarding.
+/// 2. Passing content as a list of dictionaries causes the backend to ignore system instructions,
+///    stripping safety, persona, and developer guidance.
+/// 3. Any `cache_control` markers must be promoted to the message level when flattening.
+pub fn github_copilot_system_message_flattened(
+    is_system_message: bool,
+    content_is_list: bool,
+    content_is_str: bool,
+) -> Verdict {
+    if !is_system_message {
+        return Verdict::Conformant;
+    }
+
+    if content_is_list && !content_is_str {
+        Verdict::Violation(
+            "github_copilot system message passed as unflattened list of content blocks, causing backend to ignore instructions".to_string(),
+        )
+    } else if content_is_str {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation(
+            "github_copilot system message content is neither string nor flattened".to_string(),
+        )
+    }
+}
+
+#[cfg(test)]
+mod github_copilot_system_message_tests {
+    use super::*;
+
+    #[test]
+    fn flattened_string_is_conformant() {
+        let verdict = github_copilot_system_message_flattened(true, false, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn unflattened_list_is_violation() {
+        let verdict = github_copilot_system_message_flattened(true, true, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("unflattened list of content blocks")
+        ));
+    }
+
+    #[test]
+    fn non_system_message_is_conformant() {
+        let verdict = github_copilot_system_message_flattened(false, true, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn plain_string_is_conformant() {
+        let verdict = github_copilot_system_message_flattened(true, false, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}
+
+/// Invariant: In an AI gateway proxy:
+/// 1. For unpriced models or deployments where pricing is unknown or unconfigured (`price_known == false`),
+///    the gateway must omit response cost headers (`x-litellm-response-cost`), rather than emitting
+///    `x-litellm-response-cost: 0.0`.
+/// 2. Emitting zero cost on unpriced deployments falsely advertises that the request was free of charge,
+///    misleading billing scrapers, client SDKs, and tenant accounting systems.
+/// 3. For priced models (`price_known == true` and `cost > 0`), the cost header must be present.
+/// 4. For explicitly free models (`price_known == true` and `cost == 0`), emitting zero cost is conformant.
+pub fn unpriced_response_cost_header_omitted(
+    price_known: bool,
+    cost_header_present: bool,
+) -> Verdict {
+    if !price_known {
+        if cost_header_present {
+            Verdict::Violation(
+                "unpriced deployment emitted cost header instead of omitting it, falsely claiming request was free".to_string(),
+            )
+        } else {
+            Verdict::Conformant
+        }
+    } else if !cost_header_present {
+        Verdict::Violation("priced deployment omitted response cost header".to_string())
+    } else {
+        Verdict::Conformant
+    }
+}
+
+#[cfg(test)]
+mod unpriced_response_cost_header_tests {
+    use super::*;
+
+    #[test]
+    fn unpriced_with_header_is_violation() {
+        let verdict = unpriced_response_cost_header_omitted(false, true);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("falsely claiming request was free")
+        ));
+    }
+
+    #[test]
+    fn unpriced_omitted_header_is_conformant() {
+        let verdict = unpriced_response_cost_header_omitted(false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn priced_with_header_is_conformant() {
+        let verdict = unpriced_response_cost_header_omitted(true, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn explicitly_free_with_header_is_conformant() {
+        let verdict = unpriced_response_cost_header_omitted(true, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn priced_missing_header_is_violation() {
+        let verdict = unpriced_response_cost_header_omitted(true, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("priced deployment omitted response cost header")
+        ));
+    }
+}
+
+/// Invariant: In an AI gateway bridging `/v1/responses` to Chat Completions:
+/// 1. When a client requests `top_logprobs`, the gateway must bridge `top_logprobs` and
+///    set `logprobs: true` on the outbound chat completions request.
+/// 2. Outbound requests forwarding `top_logprobs` without `logprobs: true` cause HTTP 400
+///    rejections at upstream providers like OpenAI and Vertex Gemini.
+/// 3. When the provider returns token logprobs in `choices[0].logprobs`, the bridge must
+///    map them into `output_text.logprobs` in the responses API output.
+/// 4. Dropping token logprobs on return translation or omitting `logprobs: true` is a violation.
+pub fn responses_bridge_logprobs_preserved(
+    requested_top_logprobs: Option<u64>,
+    bridged_top_logprobs: Option<u64>,
+    bridged_logprobs: Option<bool>,
+    provider_returned_logprobs: bool,
+    response_has_logprobs: bool,
+) -> Verdict {
+    if requested_top_logprobs.is_some() {
+        if provider_returned_logprobs && !response_has_logprobs {
+            return Verdict::Violation(
+                "LiteLLM responses bridge dropped chat completion choice logprobs from output_text"
+                    .to_string(),
+            );
+        }
+        if bridged_top_logprobs.is_some() && bridged_logprobs != Some(true) {
+            return Verdict::Violation(
+                "LiteLLM responses bridge forwarded top_logprobs without setting logprobs: true"
+                    .to_string(),
+            );
+        }
+        if bridged_top_logprobs.is_none() && bridged_logprobs.is_none() && !response_has_logprobs {
+            return Verdict::Violation(
+                "LiteLLM responses bridge dropped top_logprobs and choice logprobs on chat bridge"
+                    .to_string(),
+            );
+        }
+    } else if provider_returned_logprobs && !response_has_logprobs {
+        return Verdict::Violation(
+            "LiteLLM responses bridge dropped chat completion choice logprobs from output_text"
+                .to_string(),
+        );
+    }
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod responses_bridge_logprobs_tests {
+    use super::*;
+
+    #[test]
+    fn dropped_logprobs_on_response_is_violation() {
+        let verdict = responses_bridge_logprobs_preserved(Some(2), None, None, true, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("dropped chat completion choice logprobs")
+        ));
+    }
+
+    #[test]
+    fn fixed_preserved_logprobs_is_conformant() {
+        let verdict = responses_bridge_logprobs_preserved(Some(2), Some(2), Some(true), true, true);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn unrequested_logprobs_omitted_is_conformant() {
+        let verdict = responses_bridge_logprobs_preserved(None, None, None, false, false);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn top_logprobs_without_logprobs_is_violation() {
+        let verdict = responses_bridge_logprobs_preserved(Some(2), Some(2), None, false, false);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("forwarded top_logprobs without setting logprobs: true")
+        ));
+    }
+}
+
+/// Check that when streaming an OpenRouter router model (e.g. `openrouter/auto`),
+/// the stream wrapper preserves the actual provider-served model identity
+/// reported by OpenRouter across stream chunks and the assembled response.
+pub fn openrouter_stream_served_model_preserved(
+    requested_model: &str,
+    provider_served_model: &str,
+    emitted_chunk_models: &[String],
+    assembled_response_model: Option<&str>,
+) -> Verdict {
+    let requested_bare = requested_model
+        .strip_prefix("openrouter/")
+        .unwrap_or(requested_model);
+
+    if requested_bare == provider_served_model {
+        // Direct model case
+        if assembled_response_model != Some(provider_served_model)
+            && assembled_response_model != Some(requested_model)
+        {
+            return Verdict::Violation(format!(
+                "LiteLLM OpenRouter direct stream assembled model '{assembled_response_model:?}' does not match requested model '{requested_model}'",
+            ));
+        }
+    } else {
+        // Router model case (e.g. openrouter/auto resolving to openai/gpt-4o-mini)
+        if assembled_response_model == Some(requested_bare)
+            || assembled_response_model == Some(requested_model)
+        {
+            return Verdict::Violation(
+                "LiteLLM CustomStreamWrapper overwrote provider served model with requested router alias on assembled response"
+                    .to_string(),
+            );
+        }
+
+        let any_served = emitted_chunk_models
+            .iter()
+            .any(|m| m == provider_served_model);
+        let all_requested = emitted_chunk_models
+            .iter()
+            .all(|m| m == requested_bare || m == requested_model);
+
+        if all_requested && !any_served {
+            return Verdict::Violation(
+                "LiteLLM CustomStreamWrapper overwrote provider served model with requested router alias across all stream chunks"
+                    .to_string(),
+            );
+        }
+
+        if assembled_response_model != Some(provider_served_model) {
+            return Verdict::Violation(format!(
+                "LiteLLM OpenRouter stream assembled response model '{assembled_response_model:?}' does not match provider served model '{provider_served_model}'",
+            ));
+        }
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod openrouter_stream_served_model_tests {
+    use super::*;
+
+    #[test]
+    fn overwritten_auto_model_is_violation() {
+        let chunk_models = vec!["auto".to_string(), "auto".to_string()];
+        let verdict = openrouter_stream_served_model_preserved(
+            "openrouter/auto",
+            "openai/gpt-4o-mini",
+            &chunk_models,
+            Some("auto"),
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("overwrote provider served model with requested router alias")
+        ));
+    }
+
+    #[test]
+    fn preserved_served_model_is_conformant() {
+        let chunk_models = vec![
+            "auto".to_string(),
+            "openai/gpt-4o-mini".to_string(),
+            "openai/gpt-4o-mini".to_string(),
+        ];
+        let verdict = openrouter_stream_served_model_preserved(
+            "openrouter/auto",
+            "openai/gpt-4o-mini",
+            &chunk_models,
+            Some("openai/gpt-4o-mini"),
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn direct_model_is_conformant() {
+        let chunk_models = vec![
+            "openai/gpt-4o-mini".to_string(),
+            "openai/gpt-4o-mini".to_string(),
+        ];
+        let verdict = openrouter_stream_served_model_preserved(
+            "openrouter/openai/gpt-4o-mini",
+            "openai/gpt-4o-mini",
+            &chunk_models,
+            Some("openai/gpt-4o-mini"),
+        );
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn mismatched_assembled_model_is_violation() {
+        let chunk_models = vec!["openai/gpt-4o-mini".to_string()];
+        let verdict = openrouter_stream_served_model_preserved(
+            "openrouter/auto",
+            "openai/gpt-4o-mini",
+            &chunk_models,
+            Some("anthropic/claude-3-haiku"),
+        );
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("does not match provider served model")
+        ));
+    }
+}
+
+/// Check that LiteLLM maps Cohere v2 non-streaming finish_reason to the standard
+/// OpenAI Chat Completions dialect rather than hardcoding "stop".
+pub fn cohere_v2_finish_reason_mapped(
+    provider_finish_reason: &str,
+    has_tool_calls: bool,
+    response_finish_reason: Option<&str>,
+) -> Verdict {
+    let expected = match provider_finish_reason {
+        "TOOL_CALL" => "tool_calls",
+        "MAX_TOKENS" => "length",
+        "COMPLETE" | "STOP_SEQUENCE" => "stop",
+        other => other,
+    };
+
+    match response_finish_reason {
+        Some(actual) if actual == expected => Verdict::Conformant,
+        Some("stop") if provider_finish_reason == "TOOL_CALL" && has_tool_calls => {
+            Verdict::Violation(
+                "LiteLLM Cohere v2 non-streaming response returned finish_reason 'stop' instead of 'tool_calls' on tool call"
+                    .to_string(),
+            )
+        }
+        Some("stop") if provider_finish_reason == "MAX_TOKENS" => {
+            Verdict::Violation(
+                "LiteLLM Cohere v2 non-streaming response returned finish_reason 'stop' instead of 'length' on MAX_TOKENS truncation"
+                    .to_string(),
+            )
+        }
+        Some(actual) => Verdict::Violation(format!(
+            "LiteLLM Cohere v2 non-streaming response returned finish_reason '{actual}' but expected '{expected}' for provider finish_reason '{provider_finish_reason}'"
+        )),
+        None => Verdict::Violation(
+            "LiteLLM Cohere v2 non-streaming response omitted finish_reason".to_string(),
+        ),
+    }
+}
+
+#[cfg(test)]
+mod cohere_v2_finish_reason_tests {
+    use super::*;
+
+    #[test]
+    fn tool_call_mapped_to_stop_is_violation() {
+        let verdict = cohere_v2_finish_reason_mapped("TOOL_CALL", true, Some("stop"));
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("returned finish_reason 'stop' instead of 'tool_calls'")
+        ));
+    }
+
+    #[test]
+    fn max_tokens_mapped_to_stop_is_violation() {
+        let verdict = cohere_v2_finish_reason_mapped("MAX_TOKENS", false, Some("stop"));
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("returned finish_reason 'stop' instead of 'length'")
+        ));
+    }
+
+    #[test]
+    fn tool_call_mapped_to_tool_calls_is_conformant() {
+        let verdict = cohere_v2_finish_reason_mapped("TOOL_CALL", true, Some("tool_calls"));
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn complete_mapped_to_stop_is_conformant() {
+        let verdict = cohere_v2_finish_reason_mapped("COMPLETE", false, Some("stop"));
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}
+
+pub fn gemini_logprobs_params_mapped(
+    client_requested_top_logprobs: bool,
+    is_google_ai_studio_route: bool,
+    gateway_supports_top_logprobs: bool,
+    forwarded_logprobs_count: Option<i64>,
+    forwarded_response_logprobs: Option<bool>,
+) -> Verdict {
+    if client_requested_top_logprobs && is_google_ai_studio_route && !gateway_supports_top_logprobs
+    {
+        return Verdict::Violation(
+            "LiteLLM Google AI Studio config omitted 'top_logprobs' from supported params, rejecting valid client request"
+                .to_string(),
+        );
+    }
+
+    if let Some(count) = forwarded_logprobs_count {
+        if count > 0 && forwarded_response_logprobs != Some(true) {
+            return Verdict::Violation(format!(
+                "LiteLLM Gemini request forwarded generationConfig.logprobs={count} without responseLogprobs=true, violating Google GenAI spec"
+            ));
+        }
+    }
+
+    Verdict::Conformant
+}
+
+#[cfg(test)]
+mod gemini_logprobs_tests {
+    use super::*;
+
+    #[test]
+    fn unsupported_top_logprobs_is_violation() {
+        let verdict = gemini_logprobs_params_mapped(true, true, false, None, None);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("omitted 'top_logprobs' from supported params")
+        ));
+    }
+
+    #[test]
+    fn logprobs_without_response_logprobs_is_violation() {
+        let verdict = gemini_logprobs_params_mapped(true, false, true, Some(3), None);
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("without responseLogprobs=true")
+        ));
+    }
+
+    #[test]
+    fn logprobs_with_false_response_logprobs_is_violation() {
+        let verdict = gemini_logprobs_params_mapped(true, false, true, Some(3), Some(false));
+        assert!(matches!(
+            verdict,
+            Verdict::Violation(msg)
+                if msg.contains("without responseLogprobs=true")
+        ));
+    }
+
+    #[test]
+    fn fully_mapped_logprobs_is_conformant() {
+        let verdict = gemini_logprobs_params_mapped(true, true, true, Some(3), Some(true));
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn baseline_no_logprobs_is_conformant() {
+        let verdict = gemini_logprobs_params_mapped(false, true, true, None, None);
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+
+    #[test]
+    fn logprobs_only_without_count_is_conformant() {
+        let verdict = gemini_logprobs_params_mapped(false, true, true, None, Some(true));
+        assert_eq!(verdict, Verdict::Conformant);
+    }
+}
+
 /// Invariant (bug 114): when a proxy operator creates or updates a team with
 /// `max_parallel_requests`, the proxy must preserve and return that concurrency
 /// limit rather than silently dropping it to null.
