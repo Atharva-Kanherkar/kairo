@@ -1,0 +1,13 @@
+### 1) mint key
+POST /key/generate -> 200 key=sk-h9bCz...[REDACTED]
+
+### 2) client secret
+POST /realtime/client_secrets -> 200 value=j9hWcVkQ...[REDACTED] expires_at=None
+
+### 3) delete key
+POST /key/delete -> 200
+
+### 4) orphaned call
+POST /realtime/calls Bearer j9hWcVkQ...[REDACTED]
+HTTP/1.1 200
+{"id": "chatcmpl-canary", "object": "chat.completion", "created": 1, "model": "gpt-4o", "choices": [{"index": 0, "message": {"role": "assistant", "content": "MOCK-CANARY-OK"}, "finish_reason": "stop"}
