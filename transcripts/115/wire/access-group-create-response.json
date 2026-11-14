@@ -1,0 +1,22 @@
+{
+  "access_group_id": "fa5cbfd9-1034-4308-bcc5-6f4a10f68508",
+  "access_group_name": "ag-restricted-run1-fead46",
+  "description": null,
+  "access_model_names": [
+    "allowed-model"
+  ],
+  "access_mcp_server_ids": [],
+  "mcp_tool_permissions": null,
+  "access_agent_ids": [],
+  "access_skill_names": [],
+  "assigned_team_ids": [],
+  "assigned_key_ids": [],
+  "access_mcp_servers": [],
+  "access_agents": [],
+  "assigned_teams": [],
+  "assigned_keys": [],
+  "created_at": "2026-11-01T06:40:13.514000Z",
+  "created_by": "default_user_id",
+  "updated_at": "2026-11-01T06:40:13.514000Z",
+  "updated_by": "default_user_id"
+}

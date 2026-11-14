@@ -1,0 +1,8 @@
+{
+  "model": "gpt-4o-mini",
+  "isolation_verified": true,
+  "keys_identical_across_tenants": false,
+  "tenant_a_scoped_key": "tenant-d90da79614573a3e017ddbd4127a70cd:4c49545ace70b535bb2aa15df3b563203f9e453cd0dd0378c70f9a5f699c2301",
+  "tenant_b_scoped_key": "tenant-0b2c137c4fc66c51e94a051eb04e06a8:4c49545ace70b535bb2aa15df3b563203f9e453cd0dd0378c70f9a5f699c2301",
+  "tenant_b_received_payload": null
+}

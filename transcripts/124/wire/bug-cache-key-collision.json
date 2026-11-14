@@ -1,0 +1,28 @@
+{
+  "request_prompt": [
+    {
+      "role": "user",
+      "content": "What is the system health report and metrics?"
+    }
+  ],
+  "backend_a": {
+    "api_base": "https://cluster-alpha.internal.net/v1",
+    "model": "gpt-4o",
+    "cache_key": "a77d5dcdb8985f7c1ac2f4b463aa7dc9d58c79de93f2f7ce1bd2fc3ce28ffb26"
+  },
+  "backend_b": {
+    "api_base": "https://cluster-beta.internal.net/v1",
+    "model": "gpt-4o",
+    "cache_key": "a77d5dcdb8985f7c1ac2f4b463aa7dc9d58c79de93f2f7ce1bd2fc3ce28ffb26"
+  },
+  "cache_keys_identical": true,
+  "tenant_alpha": {
+    "api_key": "sk-tenant-alpha-token-1111",
+    "cache_key": "a77d5dcdb8985f7c1ac2f4b463aa7dc9d58c79de93f2f7ce1bd2fc3ce28ffb26"
+  },
+  "tenant_beta": {
+    "api_key": "sk-tenant-beta-token-2222",
+    "cache_key": "a77d5dcdb8985f7c1ac2f4b463aa7dc9d58c79de93f2f7ce1bd2fc3ce28ffb26"
+  },
+  "tenant_keys_identical": true
+}

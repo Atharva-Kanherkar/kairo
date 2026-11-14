@@ -1,0 +1,29 @@
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Query database run 1"
+    }
+  ],
+  "max_tokens": 100,
+  "model": "claude-3-7-sonnet",
+  "stream": false,
+  "tools": [
+    {
+      "name": "test_db-query_db",
+      "description": "Execute a SQL query against the database",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "sql": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sql"
+        ]
+      },
+      "type": "custom"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "test_case": "bug_streaming_fake_stream_drops_logprobs",
+  "model": "groq/llama3-8b-8192",
+  "request_flags": {
+    "stream": true,
+    "logprobs": true,
+    "response_format": {
+      "type": "json_object"
+    }
+  },
+  "upstream_returned_logprobs": true,
+  "chunk_count": 2,
+  "chunk_choice_logprobs": null,
+  "first_chunk": {
+    "id": "chatcmpl-fake-stream-logprobs",
+    "created": 1793524954,
+    "model": "llama3-8b-8192",
+    "object": "chat.completion.chunk",
+    "system_fingerprint": null,
+    "choices": [
+      {
+        "finish_reason": null,
+        "index": 0,
+        "delta": {
+          "provider_specific_fields": null,
+          "content": "{\"city\": \"Paris\"}",
+          "role": "assistant",
+          "function_call": null,
+          "tool_calls": null,
+          "audio": null
+        },
+        "logprobs": null
+      }
+    ],
+    "provider_specific_fields": null,
+    "citations": null
+  }
+}

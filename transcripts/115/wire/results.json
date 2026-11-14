@@ -1,0 +1,47 @@
+{
+  "target_commit": "cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a",
+  "target_version": "1.108.0-dev / v1.106.6 release 61c6ab78393",
+  "runs_completed": 5,
+  "results": [
+    {
+      "run": 1,
+      "control_key_forbidden_model_status": 403,
+      "sentinel_key_forbidden_model_status": 403,
+      "sentinel_key_allowed_model_status": 200,
+      "trigger_key_forbidden_model_status": 200,
+      "trigger_key_allowed_model_status": 200
+    },
+    {
+      "run": 2,
+      "control_key_forbidden_model_status": 403,
+      "sentinel_key_forbidden_model_status": 403,
+      "sentinel_key_allowed_model_status": 200,
+      "trigger_key_forbidden_model_status": 200,
+      "trigger_key_allowed_model_status": 200
+    },
+    {
+      "run": 3,
+      "control_key_forbidden_model_status": 403,
+      "sentinel_key_forbidden_model_status": 403,
+      "sentinel_key_allowed_model_status": 200,
+      "trigger_key_forbidden_model_status": 200,
+      "trigger_key_allowed_model_status": 200
+    },
+    {
+      "run": 4,
+      "control_key_forbidden_model_status": 403,
+      "sentinel_key_forbidden_model_status": 403,
+      "sentinel_key_allowed_model_status": 200,
+      "trigger_key_forbidden_model_status": 200,
+      "trigger_key_allowed_model_status": 200
+    },
+    {
+      "run": 5,
+      "control_key_forbidden_model_status": 403,
+      "sentinel_key_forbidden_model_status": 403,
+      "sentinel_key_allowed_model_status": 200,
+      "trigger_key_forbidden_model_status": 200,
+      "trigger_key_allowed_model_status": 200
+    }
+  ]
+}

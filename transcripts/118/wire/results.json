@@ -1,0 +1,57 @@
+{
+  "target_commit": "cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a",
+  "target_version": "1.108.0-dev / v1.106.6",
+  "runs_completed": 5,
+  "results": [
+    {
+      "run": 1,
+      "client_request_id": 100,
+      "direct_upstream_status": 200,
+      "direct_upstream_received_has_id": true,
+      "direct_upstream_response_matched_id": true,
+      "proxy_forwarded_to_upstream_has_id": false,
+      "proxy_response_status": 204,
+      "control_non_colliding_key_preserved": true
+    },
+    {
+      "run": 2,
+      "client_request_id": 200,
+      "direct_upstream_status": 200,
+      "direct_upstream_received_has_id": true,
+      "direct_upstream_response_matched_id": true,
+      "proxy_forwarded_to_upstream_has_id": false,
+      "proxy_response_status": 204,
+      "control_non_colliding_key_preserved": true
+    },
+    {
+      "run": 3,
+      "client_request_id": 300,
+      "direct_upstream_status": 200,
+      "direct_upstream_received_has_id": true,
+      "direct_upstream_response_matched_id": true,
+      "proxy_forwarded_to_upstream_has_id": false,
+      "proxy_response_status": 204,
+      "control_non_colliding_key_preserved": true
+    },
+    {
+      "run": 4,
+      "client_request_id": 400,
+      "direct_upstream_status": 200,
+      "direct_upstream_received_has_id": true,
+      "direct_upstream_response_matched_id": true,
+      "proxy_forwarded_to_upstream_has_id": false,
+      "proxy_response_status": 204,
+      "control_non_colliding_key_preserved": true
+    },
+    {
+      "run": 5,
+      "client_request_id": 500,
+      "direct_upstream_status": 200,
+      "direct_upstream_received_has_id": true,
+      "direct_upstream_response_matched_id": true,
+      "proxy_forwarded_to_upstream_has_id": false,
+      "proxy_response_status": 204,
+      "control_non_colliding_key_preserved": true
+    }
+  ]
+}

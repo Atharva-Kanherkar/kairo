@@ -1,0 +1,10 @@
+{
+  "status_code": 400,
+  "detail": {
+    "error": "Violated tool policy",
+    "blocked_tools": [
+      "bash"
+    ],
+    "message": "Tool(s) ['bash'] are blocked by policy."
+  }
+}

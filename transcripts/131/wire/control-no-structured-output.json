@@ -1,0 +1,5 @@
+{
+  "model": "claude-haiku-4-5",
+  "has_top_level_output_format": false,
+  "has_output_config": false
+}

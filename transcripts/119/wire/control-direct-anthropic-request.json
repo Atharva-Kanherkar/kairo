@@ -1,0 +1,34 @@
+{
+  "model": "claude-3-7-sonnet",
+  "max_tokens": 100,
+  "messages": [
+    {
+      "role": "user",
+      "content": "Query database"
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "type": "tool_use",
+          "id": "toolu_control_01",
+          "name": "query_db",
+          "input": {
+            "sql": "SELECT 1;"
+          }
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "tool_result",
+          "tool_use_id": "toolu_control_01",
+          "content": "Database connection error: Connection refused on port 5432",
+          "is_error": true
+        }
+      ]
+    }
+  ]
+}

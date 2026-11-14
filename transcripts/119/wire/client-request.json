@@ -1,0 +1,17 @@
+{
+  "model": "claude-3-7-sonnet",
+  "max_tokens": 100,
+  "messages": [
+    {
+      "role": "user",
+      "content": "Query database run 1"
+    }
+  ],
+  "tools": [
+    {
+      "type": "mcp",
+      "server_url": "litellm_proxy/test_db",
+      "require_approval": "never"
+    }
+  ]
+}

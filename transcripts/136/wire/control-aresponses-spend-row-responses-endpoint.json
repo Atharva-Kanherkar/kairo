@@ -1,0 +1,7 @@
+{
+  "call_type": "aresponses",
+  "transaction_key": "user-corp-1_2026-11-02_sk-user-key_gpt-5.6-sol_openai_/responses",
+  "endpoint": "/responses",
+  "has_endpoint": true,
+  "ends_with_endpoint": true
+}

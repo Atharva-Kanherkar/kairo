@@ -1,0 +1,42 @@
+{
+  "iterations": 5,
+  "success_rate": "5/5",
+  "all_passed": true,
+  "runs": [
+    {
+      "run": 1,
+      "defect_emits_unflattened_list": true,
+      "control_plain_string_preserved": true,
+      "control_fixed_flattens_list": true,
+      "control_promotes_cache_control": true
+    },
+    {
+      "run": 2,
+      "defect_emits_unflattened_list": true,
+      "control_plain_string_preserved": true,
+      "control_fixed_flattens_list": true,
+      "control_promotes_cache_control": true
+    },
+    {
+      "run": 3,
+      "defect_emits_unflattened_list": true,
+      "control_plain_string_preserved": true,
+      "control_fixed_flattens_list": true,
+      "control_promotes_cache_control": true
+    },
+    {
+      "run": 4,
+      "defect_emits_unflattened_list": true,
+      "control_plain_string_preserved": true,
+      "control_fixed_flattens_list": true,
+      "control_promotes_cache_control": true
+    },
+    {
+      "run": 5,
+      "defect_emits_unflattened_list": true,
+      "control_plain_string_preserved": true,
+      "control_fixed_flattens_list": true,
+      "control_promotes_cache_control": true
+    }
+  ]
+}

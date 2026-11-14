@@ -1,0 +1,28 @@
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "_meta": {
+      "litellm.ai/server_outcomes": {
+        "test_server": {
+          "status": "ok",
+          "tool_count": 1
+        }
+      }
+    },
+    "tools": [
+      {
+        "description": "Performs basic math",
+        "inputSchema": {
+          "properties": {
+            "expr": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "name": "test_server-calculator"
+      }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "stream_mode": "async",
+  "stream_options": {
+    "include_usage": true
+  },
+  "finish_chunk_has_provider_specific_fields": true,
+  "provider_specific_fields": {
+    "mcp_tool_calls": [
+      {
+        "name": "lookup_fox",
+        "arguments": "{}"
+      }
+    ]
+  }
+}

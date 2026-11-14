@@ -1,0 +1,46 @@
+{
+  "runs_evaluated": 5,
+  "runs_reproduced": 5,
+  "results": [
+    {
+      "iteration": 1,
+      "openai_control_blocked": true,
+      "anthropic_stage2_allowed": true,
+      "responses_stage2_allowed": true,
+      "stage1_control_blocked": true,
+      "stage1_mixed_allowed": true
+    },
+    {
+      "iteration": 2,
+      "openai_control_blocked": true,
+      "anthropic_stage2_allowed": true,
+      "responses_stage2_allowed": true,
+      "stage1_control_blocked": true,
+      "stage1_mixed_allowed": true
+    },
+    {
+      "iteration": 3,
+      "openai_control_blocked": true,
+      "anthropic_stage2_allowed": true,
+      "responses_stage2_allowed": true,
+      "stage1_control_blocked": true,
+      "stage1_mixed_allowed": true
+    },
+    {
+      "iteration": 4,
+      "openai_control_blocked": true,
+      "anthropic_stage2_allowed": true,
+      "responses_stage2_allowed": true,
+      "stage1_control_blocked": true,
+      "stage1_mixed_allowed": true
+    },
+    {
+      "iteration": 5,
+      "openai_control_blocked": true,
+      "anthropic_stage2_allowed": true,
+      "responses_stage2_allowed": true,
+      "stage1_control_blocked": true,
+      "stage1_mixed_allowed": true
+    }
+  ]
+}

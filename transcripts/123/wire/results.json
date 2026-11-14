@@ -1,0 +1,37 @@
+{
+  "iterations": 5,
+  "success_rate": "5/5",
+  "all_passed": true,
+  "runs": [
+    {
+      "ctrl_outbound_preserved": true,
+      "bug_outbound_dropped": true,
+      "ctrl_inbound_replayed": true,
+      "bug_inbound_stripped": true
+    },
+    {
+      "ctrl_outbound_preserved": true,
+      "bug_outbound_dropped": true,
+      "ctrl_inbound_replayed": true,
+      "bug_inbound_stripped": true
+    },
+    {
+      "ctrl_outbound_preserved": true,
+      "bug_outbound_dropped": true,
+      "ctrl_inbound_replayed": true,
+      "bug_inbound_stripped": true
+    },
+    {
+      "ctrl_outbound_preserved": true,
+      "bug_outbound_dropped": true,
+      "ctrl_inbound_replayed": true,
+      "bug_inbound_stripped": true
+    },
+    {
+      "ctrl_outbound_preserved": true,
+      "bug_outbound_dropped": true,
+      "ctrl_inbound_replayed": true,
+      "bug_inbound_stripped": true
+    }
+  ]
+}

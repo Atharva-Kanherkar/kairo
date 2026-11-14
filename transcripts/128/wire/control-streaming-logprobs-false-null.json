@@ -1,0 +1,9 @@
+{
+  "test_case": "control_streaming_logprobs_false_null",
+  "model": "groq/llama3-8b-8192",
+  "request_flags": {
+    "stream": true,
+    "logprobs": false
+  },
+  "chunk_choice_logprobs": null
+}

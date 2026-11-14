@@ -1,0 +1,9 @@
+{
+  "status_code": 400,
+  "error": {
+    "message": "Invalid 'prompt_cache_options.comparison_response_id': string too long. Expected a string with maximum length 64, but got a string with length 225 instead.",
+    "type": "invalid_request_error",
+    "param": "prompt_cache_options.comparison_response_id",
+    "code": "string_above_max_length"
+  }
+}

@@ -6,31 +6,50 @@
 //! violating the invariant, this test flips and tells us.
 
 use kairo::checks::{
-    allowlist_bounds_served_model, anthropic_response_toolcall_stop_reason,
-    anthropic_server_tools_forwarded, anthropic_stop_sequence_reported,
-    anthropic_stream_block_lifecycle, anthropic_stream_safety_stop_reason,
-    anthropic_tool_choice_any_mapped_to_required, anthropic_toolcall_stop_reason, capture_records,
+    access_group_bounds_model_access, allowlist_bounds_served_model,
+    anthropic_messages_responses_bridge_preserves_encrypted_reasoning,
+    anthropic_response_toolcall_stop_reason, anthropic_server_tools_forwarded,
+    anthropic_stop_sequence_reported, anthropic_stream_block_lifecycle,
+    anthropic_stream_guardrail_evaluates_all_text, anthropic_stream_safety_stop_reason,
+    anthropic_structured_output_config_format, anthropic_tool_choice_any_mapped_to_required,
+    anthropic_tool_result_preserves_is_error, anthropic_toolcall_stop_reason,
+    async_stream_ttft_and_hidden_usage_preserved, capture_records,
     client_cache_breakpoints_reach_provider, codex_namespace_only_applies_to_namespaced_tools,
-    content_filter_preserved, document_body_forwarded, endpoint_response_family_preserved,
-    executed_tool_results_preserved, forwarded_body_preserves_values,
-    gemini_inline_media_preserved_in_chat_response, gemini_inline_media_preserved_in_chat_stream,
+    cohere_v2_finish_reason_mapped, content_filter_preserved, daily_spend_endpoint_attributed,
+    document_body_forwarded, endpoint_response_family_preserved, executed_tool_results_preserved,
+    extract_anthropic_request_tool_names, extract_anthropic_untrusted_sources,
+    extract_responses_api_untrusted_sources, fake_stream_preserves_provider_logprobs,
+    forwarded_body_preserves_values, gemini_inline_media_preserved_in_chat_response,
+    gemini_inline_media_preserved_in_chat_stream, gemini_logprobs_params_mapped,
+    github_copilot_system_message_flattened, google_genai_model_turn_tool_results_preserved,
     id_conforms, image_url_cache_key_case_sensitive, instruction_messages_preserved,
     invalid_credential_rejected_before_upstream, is_error_forwarded, json_schema_forwarded,
-    json_schema_property_forwarded, mcp_tool_executes_once, model_info_capture_identity,
-    model_info_envelope_body, model_info_omits_api_base_secret, no_empty_text_alongside_tool_use,
-    no_indexerror_leak, no_invented_cache_control, no_phantom_null_output_text,
-    non_text_block_not_json_dumped, ogx_adaptive_thinking_loss, openai_stream_finish_reason,
+    json_schema_property_forwarded, jsonrpc_forwarded_request_has_id, mcp_tool_executes_once,
+    mcp_unauthorized_token_must_not_mask_as_empty_tools, minimax_reasoning_effort_preserved,
+    model_info_capture_identity, model_info_envelope_body, model_info_omits_api_base_secret,
+    no_empty_text_alongside_tool_use, no_indexerror_leak, no_invented_cache_control,
+    no_phantom_null_output_text, non_text_block_not_json_dumped, ogx_adaptive_thinking_loss,
+    openai_compatible_unmapped_model_tools_preserved, openai_stream_finish_reason,
     openai_stream_toolcall_type_never_null, openai_toolcall_id_charset,
-    outbound_request_omits_secret, parallel_tool_disable_preserved, provider_request_id_preserved,
-    reasoning_text_order_preserved, refusal_text_preserved, registration_resolvable_by_both_paths,
-    replayed_calls_keep_returned_namespace, response_content_not_empty,
+    openrouter_stream_forwards_all_reasoning_details,
+    openrouter_stream_preserves_reasoning_details, openrouter_stream_served_model_preserved,
+    outbound_request_omits_secret, parallel_tool_disable_preserved,
+    passthrough_request_preserves_jsonrpc_id, provider_request_id_preserved,
+    reasoning_model_system_prompt_preserved, reasoning_text_order_preserved,
+    refusal_text_preserved, registration_resolvable_by_both_paths,
+    replayed_calls_keep_returned_namespace, response_cache_keys_differentiate_destinations,
+    response_cache_tenant_isolation, response_content_not_empty,
     response_conversation_preserves_history, response_omits_secret,
+    responses_api_web_search_user_location_flat, responses_bridge_logprobs_preserved,
+    responses_comparison_response_id_authorized_and_unwrapped,
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
     responses_single_lifecycle, served_model_within_key_allowlist, stop_sequence_forwarded,
-    thinking_not_leaked_as_visible_text, thinking_text_forwarded,
+    sync_stream_mcp_metadata_preserved, thinking_not_leaked_as_visible_text,
+    thinking_text_forwarded, tool_policy_guardrail_enforces_trust_chain_and_blocked_tools,
     tool_result_images_reach_provider, tool_strict_forwarded, toolcall_id_restored_upstream,
-    truncation_preserved, upstream_bearer_is, upstream_omits_header_value,
+    truncation_preserved, unpriced_response_cost_header_omitted, upstream_bearer_is,
+    upstream_omits_header_value, voyage_embeddings_honor_environment_api_base,
     worker_loss_stays_invisible, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
     JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT, REPLAYED_CALL_NAMESPACE_CHANGED,
     TOOL_RESULT_IMAGE_DROPPED,
@@ -7467,4 +7486,3552 @@ fn litellm_098_checker_rejects_an_allowed_model_that_was_not_served() {
         matches!(verdict, Verdict::Violation(_)),
         "an allowed model with no upstream call must be caught: {verdict:?}"
     );
+}
+
+// ---- 115: LiteLLM key with empty models bypasses access group restrictions ----
+//
+// Captured with transcripts/115/rig against litellm main cfe0100e. A key assigned
+// to an access group with access_model_names: ["allowed-model"] and native
+// models: [] bypasses all access-group model restrictions. The proxy evaluates
+// models: [] first, treats empty models as unrestricted (all_model_access = true),
+// and never enters the access_group fallback check.
+// In LiteLLM's permission model, access groups are additive grants rather than
+// subtractive restrictions; keys bound strictly to access groups must set
+// models: ["no-default-models"].
+
+#[test]
+fn litellm_access_group_empty_models_forbidden_model_bypassed_violation() {
+    let req = fixture("transcripts/115/wire/trigger-key-forbidden-request.json");
+    let resp = fixture("transcripts/115/wire/trigger-key-forbidden-response.json");
+    let req_val: Value = serde_json::from_str(&req).expect("parse request");
+    let resp_val: Value = serde_json::from_str(&resp).expect("parse response");
+    let requested_model = req_val["model"].as_str().expect("model");
+    let status = u16::try_from(resp_val["status_code"].as_u64().unwrap_or(200)).unwrap_or(200);
+    let verdict =
+        access_group_bounds_model_access(requested_model, &["allowed-model"], status, &resp);
+    assert!(
+        matches!(verdict, Verdict::Violation(_)),
+        "a key in an access group restricted to allowed-model serving forbidden-model with 200 must be a violation: {verdict:?}"
+    );
+}
+
+#[test]
+fn litellm_access_group_control_key_rejected() {
+    let resp = fixture("transcripts/115/wire/control-key-forbidden-response.json");
+    let resp_val: Value = serde_json::from_str(&resp).expect("parse response");
+    let status = u16::try_from(resp_val["status_code"].as_u64().unwrap_or(403)).unwrap_or(403);
+    let verdict =
+        access_group_bounds_model_access("forbidden-model", &["allowed-model"], status, &resp);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "control key returning 403 for forbidden-model is conformant"
+    );
+}
+
+#[test]
+fn litellm_access_group_nodefault_sentinel_forbidden_model_rejected() {
+    let resp = fixture("transcripts/115/wire/nodefault-key-forbidden-response.json");
+    let resp_val: Value = serde_json::from_str(&resp).expect("parse response");
+    let status = u16::try_from(resp_val["status_code"].as_u64().unwrap_or(403)).unwrap_or(403);
+    let verdict =
+        access_group_bounds_model_access("forbidden-model", &["allowed-model"], status, &resp);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "nodefault sentinel key returning 403 for forbidden-model is conformant"
+    );
+}
+
+#[test]
+fn litellm_access_group_nodefault_sentinel_allowed_model_served() {
+    let resp = fixture("transcripts/115/wire/nodefault-key-allowed-response.json");
+    let resp_val: Value = serde_json::from_str(&resp).expect("parse response");
+    let status = u16::try_from(resp_val["status_code"].as_u64().unwrap_or(200)).unwrap_or(200);
+    let verdict =
+        access_group_bounds_model_access("allowed-model", &["allowed-model"], status, &resp);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "nodefault sentinel key serving allowed-model with 200 is conformant"
+    );
+}
+
+#[test]
+fn litellm_access_group_allowed_model_served() {
+    let resp = fixture("transcripts/115/wire/trigger-key-allowed-response.json");
+    let resp_val: Value = serde_json::from_str(&resp).expect("parse response");
+    let status = u16::try_from(resp_val["status_code"].as_u64().unwrap_or(200)).unwrap_or(200);
+    let verdict =
+        access_group_bounds_model_access("allowed-model", &["allowed-model"], status, &resp);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "allowed model served with 200 is conformant"
+    );
+}
+
+// --- Finding 116: LiteLLM MCP true_passthrough expired OAuth token 401 masked as 200 empty tools ---
+// When an MCP server is configured with auth_type: "true_passthrough", an expired
+// or invalid bearer token rejected by the upstream with HTTP 401 is swallowed
+// by the gateway into HTTP 200 OK with empty tools: [], preventing standard MCP
+// clients from triggering OAuth token refresh.
+
+#[test]
+fn litellm_mcp_passthrough_expired_token_masked_as_empty_tools_is_violation() {
+    let resp = fixture("transcripts/116/wire/litellm-expired-response.json");
+    let verdict = mcp_unauthorized_token_must_not_mask_as_empty_tools(200, &[], &resp);
+    assert!(
+        matches!(verdict, Verdict::Violation(_)),
+        "LiteLLM returning 200 with empty tools: [] and auth_required server outcome must be a violation: {verdict:?}"
+    );
+}
+
+#[test]
+fn litellm_mcp_direct_upstream_401_challenge_is_conformant() {
+    let resp = fixture("transcripts/116/wire/direct-upstream-expired-response.json");
+    let headers = [(
+        "WWW-Authenticate",
+        "Bearer error=\"invalid_token\", error_description=\"The access token expired\"",
+    )];
+    let verdict = mcp_unauthorized_token_must_not_mask_as_empty_tools(401, &headers, &resp);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "direct upstream returning 401 with WWW-Authenticate header is conformant"
+    );
+}
+
+#[test]
+fn litellm_mcp_valid_token_tools_is_conformant() {
+    let resp = fixture("transcripts/116/wire/litellm-valid-response.json");
+    let verdict = mcp_unauthorized_token_must_not_mask_as_empty_tools(200, &[], &resp);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "LiteLLM returning 200 with available tools is conformant"
+    );
+}
+
+#[test]
+fn litellm_mcp_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/116/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["results"].as_array().expect("results array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["direct_upstream_valid_status"].as_u64(),
+            Some(200),
+            "run {run_num}: direct upstream valid status must be 200"
+        );
+        assert_eq!(
+            run["direct_upstream_expired_status"].as_u64(),
+            Some(401),
+            "run {run_num}: direct upstream expired status must be 401"
+        );
+        assert!(
+            run["direct_upstream_expired_www_authenticate"]
+                .as_str()
+                .unwrap_or("")
+                .contains("invalid_token"),
+            "run {run_num}: direct upstream expired must return WWW-Authenticate challenge"
+        );
+        assert_eq!(
+            run["litellm_valid_status"].as_u64(),
+            Some(200),
+            "run {run_num}: LiteLLM valid status must be 200"
+        );
+        assert_eq!(
+            run["litellm_valid_tool_count"].as_u64(),
+            Some(1),
+            "run {run_num}: LiteLLM valid tool count must be 1"
+        );
+        assert_eq!(
+            run["litellm_expired_status"].as_u64(),
+            Some(200),
+            "run {run_num}: LiteLLM expired status must be 200 (defect)"
+        );
+        assert_eq!(
+            run["litellm_expired_tool_count"].as_u64(),
+            Some(0),
+            "run {run_num}: LiteLLM expired tool count must be 0 (defect)"
+        );
+        assert_eq!(
+            run["litellm_expired_server_outcome"]["status"].as_str(),
+            Some("auth_required"),
+            "run {run_num}: LiteLLM server outcome must report auth_required"
+        );
+    }
+}
+
+#[test]
+fn litellm_openrouter_streaming_signature_dropped_is_violation() {
+    let proxy_stream = fixture("transcripts/117/wire/litellm-proxy-stream-response.txt");
+    let verdict = openrouter_stream_preserves_reasoning_details(&proxy_stream);
+    assert!(
+        matches!(verdict, Verdict::Violation(msg) if msg.contains("dropped the reasoning_details thought signature")),
+        "LiteLLM proxy stream dropping thought signature must be a violation"
+    );
+
+    let upstream_stream = fixture("transcripts/117/wire/direct-upstream-stream-response.txt");
+    let fwd_verdict =
+        openrouter_stream_forwards_all_reasoning_details(&upstream_stream, &proxy_stream);
+    assert!(
+        matches!(fwd_verdict, Verdict::Violation(msg) if msg.contains("gateway dropped reasoning_details signature")),
+        "differential comparison between upstream and proxy must flag dropped signature"
+    );
+}
+
+#[test]
+fn litellm_openrouter_direct_upstream_preserves_signature_is_conformant() {
+    let upstream_stream = fixture("transcripts/117/wire/direct-upstream-stream-response.txt");
+    let verdict = openrouter_stream_preserves_reasoning_details(&upstream_stream);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "direct upstream stream preserving thought signature must be conformant"
+    );
+}
+
+#[test]
+fn litellm_openrouter_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/117/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["results"].as_array().expect("results array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["direct_upstream_status"].as_u64(),
+            Some(200),
+            "run {run_num}: direct upstream status must be 200"
+        );
+        assert_eq!(
+            run["direct_upstream_has_signature"].as_bool(),
+            Some(true),
+            "run {run_num}: direct upstream must have signature"
+        );
+        assert_eq!(
+            run["litellm_proxy_status"].as_u64(),
+            Some(200),
+            "run {run_num}: LiteLLM proxy status must be 200"
+        );
+        assert_eq!(
+            run["litellm_proxy_has_signature"].as_bool(),
+            Some(false),
+            "run {run_num}: LiteLLM proxy must drop signature (defect)"
+        );
+        assert_eq!(
+            run["next_turn_with_signature_status"].as_u64(),
+            Some(200),
+            "run {run_num}: next turn with signature must succeed with 200"
+        );
+        assert_eq!(
+            run["next_turn_missing_signature_status"].as_u64(),
+            Some(400),
+            "run {run_num}: next turn missing signature must fail with 400"
+        );
+    }
+}
+
+#[test]
+fn litellm_passthrough_jsonrpc_id_stripped_is_violation() {
+    let client_req = fixture("transcripts/118/wire/client-proxy-request.json");
+    let forwarded_req = fixture("transcripts/118/wire/upstream-received-from-proxy.json");
+
+    let verdict = passthrough_request_preserves_jsonrpc_id(&client_req, &forwarded_req);
+    assert!(
+        matches!(verdict, Verdict::Violation(msg) if msg.contains("gateway stripped JSON-RPC id")),
+        "stripping JSON-RPC id on pass-through route must be a violation"
+    );
+
+    let single_verdict = jsonrpc_forwarded_request_has_id(&forwarded_req);
+    assert!(
+        matches!(single_verdict, Verdict::Violation(msg) if msg.contains("missing required id member")),
+        "forwarded request missing id must be a violation"
+    );
+}
+
+#[test]
+fn litellm_passthrough_direct_upstream_preserves_id_is_conformant() {
+    let client_req = fixture("transcripts/118/wire/client-proxy-request.json");
+    let direct_req = fixture("transcripts/118/wire/direct-upstream-request.json");
+
+    let verdict = passthrough_request_preserves_jsonrpc_id(&client_req, &direct_req);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "direct upstream preserving id must be conformant"
+    );
+
+    let single_verdict = jsonrpc_forwarded_request_has_id(&direct_req);
+    assert_eq!(
+        single_verdict,
+        Verdict::Conformant,
+        "direct request with id must be conformant"
+    );
+}
+
+#[test]
+fn litellm_passthrough_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/118/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["results"].as_array().expect("results array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["direct_upstream_status"].as_u64(),
+            Some(200),
+            "run {run_num}: direct upstream status must be 200"
+        );
+        assert_eq!(
+            run["direct_upstream_received_has_id"].as_bool(),
+            Some(true),
+            "run {run_num}: direct upstream must receive id"
+        );
+        assert_eq!(
+            run["direct_upstream_response_matched_id"].as_bool(),
+            Some(true),
+            "run {run_num}: direct upstream must echo matching id"
+        );
+        assert_eq!(
+            run["proxy_forwarded_to_upstream_has_id"].as_bool(),
+            Some(false),
+            "run {run_num}: LiteLLM proxy must drop id (defect)"
+        );
+        assert_eq!(
+            run["proxy_response_status"].as_u64(),
+            Some(204),
+            "run {run_num}: proxy response status must be 204 No Content notification"
+        );
+        assert_eq!(
+            run["control_non_colliding_key_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: non-colliding key must be preserved"
+        );
+    }
+}
+
+#[test]
+fn litellm_anthropic_mcp_tool_result_drops_is_error_is_violation() {
+    let turn2_req = fixture("transcripts/119/wire/anthropic-turn2-forwarded-request.json");
+    let verdict = anthropic_tool_result_preserves_is_error(&turn2_req);
+    assert!(
+        matches!(verdict, Verdict::Violation(msg) if msg.contains("is_error: true was dropped")),
+        "dropping is_error: true on tool failure must be a violation"
+    );
+}
+
+#[test]
+fn litellm_anthropic_mcp_control_preserves_is_error_is_conformant() {
+    let control_req = fixture("transcripts/119/wire/control-direct-anthropic-request.json");
+    let verdict = anthropic_tool_result_preserves_is_error(&control_req);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "Anthropic request with is_error: true must be conformant"
+    );
+}
+
+#[test]
+fn litellm_anthropic_mcp_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/119/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["results"].as_array().expect("results array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["proxy_status"].as_u64(),
+            Some(200),
+            "run {run_num}: proxy status must be 200"
+        );
+        assert_eq!(
+            run["turn2_forwarded_has_tool_result"].as_bool(),
+            Some(true),
+            "run {run_num}: Turn 2 must have tool_result"
+        );
+        assert_eq!(
+            run["turn2_forwarded_is_error_present"].as_bool(),
+            Some(false),
+            "run {run_num}: LiteLLM must drop is_error (defect)"
+        );
+        assert_eq!(
+            run["control_direct_is_error_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: direct control must preserve is_error"
+        );
+    }
+}
+
+#[test]
+fn litellm_anthropic_streaming_guardrail_fragmented_stream_bypasses_filter_is_violation() {
+    let raw_stream = fixture("transcripts/120/wire/upstream-sse-stream.txt");
+    let blocked_token = "BLOCKED_SECRET_TOKEN_49449";
+    // Simulate transport fragmentation splitting the text_delta SSE event
+    let idx = raw_stream.find(blocked_token).expect("find blocked token") + 6;
+    let chunk1 = &raw_stream[..idx];
+    let chunk2 = &raw_stream[idx..];
+
+    // In the defect case, LiteLLM allowed the stream (gateway_allowed_stream = true)
+    let verdict =
+        anthropic_stream_guardrail_evaluates_all_text(&[chunk1, chunk2], &[blocked_token], true);
+    assert!(
+        matches!(verdict, Verdict::Violation(msg) if msg.contains("bypassed guardrail due to fragmented SSE chunking")),
+        "prohibited stream permitted by gateway due to SSE chunk fragmentation must be a violation"
+    );
+}
+
+#[test]
+fn litellm_anthropic_streaming_guardrail_whole_stream_blocked_is_conformant() {
+    let raw_stream = fixture("transcripts/120/wire/upstream-sse-stream.txt");
+    let blocked_token = "BLOCKED_SECRET_TOKEN_49449";
+
+    // In the control case, LiteLLM blocked the stream (gateway_allowed_stream = false)
+    let verdict =
+        anthropic_stream_guardrail_evaluates_all_text(&[&raw_stream], &[blocked_token], false);
+    assert_eq!(
+        verdict,
+        Verdict::Conformant,
+        "gateway blocking prohibited stream is conformant"
+    );
+}
+
+#[test]
+fn litellm_anthropic_streaming_guardrail_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/120/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["results"].as_array().expect("results array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["control_proxy_status"].as_u64(),
+            Some(400),
+            "run {run_num}: control proxy status must be 400"
+        );
+        assert_eq!(
+            run["control_blocked_guardrail"].as_bool(),
+            Some(true),
+            "run {run_num}: control must block with guardrail"
+        );
+        assert_eq!(
+            run["bug_proxy_status"].as_u64(),
+            Some(200),
+            "run {run_num}: bug proxy status must be 200"
+        );
+        assert_eq!(
+            run["bug_bypassed_guardrail"].as_bool(),
+            Some(true),
+            "run {run_num}: bug must bypass guardrail (defect)"
+        );
+    }
+}
+
+#[test]
+fn litellm_tool_policy_guardrail_openai_chat_control_is_conformant() {
+    let req_str = fixture("transcripts/121/wire/control-openai-chat-request.json");
+    let resp_str = fixture("transcripts/121/wire/control-openai-chat-response.json");
+    let _req: Value = serde_json::from_str(&req_str).expect("parse request");
+    let resp: Value = serde_json::from_str(&resp_str).expect("parse response");
+
+    let status_code = resp["status_code"].as_u64().expect("status_code");
+    assert_eq!(status_code, 400, "control must reject with 400");
+
+    let gateway_blocked = status_code == 400;
+    let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+        &[],
+        &["web_search"],
+        &["database_exec"],
+        &["bash"],
+        &["database_exec"],
+        gateway_blocked,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_tool_policy_guardrail_anthropic_stage2_trust_chain_bypass_is_violation() {
+    let req_str = fixture("transcripts/121/wire/bug-anthropic-stage2-request.json");
+    let resp_str = fixture("transcripts/121/wire/bug-anthropic-stage2-response.json");
+    let req: Value = serde_json::from_str(&req_str).expect("parse request");
+    let resp: Value = serde_json::from_str(&resp_str).expect("parse response");
+
+    let msgs = req["messages"].as_array().expect("messages");
+    let untrusted_sources = extract_anthropic_untrusted_sources(msgs, &["web_search"]);
+    assert_eq!(untrusted_sources, vec!["web_search".to_string()]);
+
+    let status_code = resp["status_code"].as_u64().expect("status_code");
+    assert_eq!(status_code, 200, "bug allows request with 200");
+
+    let gateway_blocked = status_code == 400;
+    let untrusted_sources_refs: Vec<&str> = untrusted_sources.iter().map(String::as_str).collect();
+
+    let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+        &[],
+        &untrusted_sources_refs,
+        &["database_exec"],
+        &["bash"],
+        &["database_exec"],
+        gateway_blocked,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("violating trust chain")
+    ));
+}
+
+#[test]
+fn litellm_tool_policy_guardrail_responses_api_stage2_trust_chain_bypass_is_violation() {
+    let req_str = fixture("transcripts/121/wire/bug-responses-stage2-request.json");
+    let resp_str = fixture("transcripts/121/wire/bug-responses-stage2-response.json");
+    let req: Value = serde_json::from_str(&req_str).expect("parse request");
+    let resp: Value = serde_json::from_str(&resp_str).expect("parse response");
+
+    let input = req["input"].as_array().expect("input");
+    let untrusted_sources = extract_responses_api_untrusted_sources(input, &["web_search"]);
+    assert_eq!(untrusted_sources, vec!["web_search".to_string()]);
+
+    let status_code = resp["status_code"].as_u64().expect("status_code");
+    assert_eq!(status_code, 200, "bug allows request with 200");
+
+    let gateway_blocked = status_code == 400;
+    let untrusted_sources_refs: Vec<&str> = untrusted_sources.iter().map(String::as_str).collect();
+
+    let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+        &[],
+        &untrusted_sources_refs,
+        &["database_exec"],
+        &["bash"],
+        &["database_exec"],
+        gateway_blocked,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("violating trust chain")
+    ));
+}
+
+#[test]
+fn litellm_tool_policy_guardrail_anthropic_stage1_control_is_conformant() {
+    let req_str = fixture("transcripts/121/wire/control-anthropic-stage1-request.json");
+    let resp_str = fixture("transcripts/121/wire/control-anthropic-stage1-response.json");
+    let req: Value = serde_json::from_str(&req_str).expect("parse request");
+    let resp: Value = serde_json::from_str(&resp_str).expect("parse response");
+
+    let tool_names = extract_anthropic_request_tool_names(&req);
+    assert_eq!(tool_names, vec!["bash".to_string()]);
+
+    let status_code = resp["status_code"].as_u64().expect("status_code");
+    assert_eq!(status_code, 400, "control blocks with 400");
+
+    let gateway_blocked = status_code == 400;
+    let tool_refs: Vec<&str> = tool_names.iter().map(String::as_str).collect();
+    let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+        &tool_refs,
+        &[],
+        &[],
+        &["bash"],
+        &["database_exec"],
+        gateway_blocked,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_tool_policy_guardrail_anthropic_stage1_mixed_blocked_tool_bypass_is_violation() {
+    let req_str = fixture("transcripts/121/wire/bug-anthropic-stage1-mixed-request.json");
+    let resp_str = fixture("transcripts/121/wire/bug-anthropic-stage1-mixed-response.json");
+    let req: Value = serde_json::from_str(&req_str).expect("parse request");
+    let resp: Value = serde_json::from_str(&resp_str).expect("parse response");
+
+    let tool_names = extract_anthropic_request_tool_names(&req);
+    assert_eq!(tool_names, vec!["bash".to_string(), "ping".to_string()]);
+
+    let status_code = resp["status_code"].as_u64().expect("status_code");
+    assert_eq!(status_code, 200, "bug allows request with 200");
+
+    let gateway_blocked = status_code == 400;
+    let tool_refs: Vec<&str> = tool_names.iter().map(String::as_str).collect();
+    let verdict = tool_policy_guardrail_enforces_trust_chain_and_blocked_tools(
+        &tool_refs,
+        &[],
+        &[],
+        &["bash"],
+        &["database_exec"],
+        gateway_blocked,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("request tool 'bash' has input_policy='blocked'")
+    ));
+}
+
+#[test]
+fn litellm_tool_policy_guardrail_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/121/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["results"].as_array().expect("results array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["openai_control_blocked"].as_bool(),
+            Some(true),
+            "run {run_num}: openai control must be blocked"
+        );
+        assert_eq!(
+            run["anthropic_stage2_allowed"].as_bool(),
+            Some(true),
+            "run {run_num}: anthropic stage 2 must be allowed (defect)"
+        );
+        assert_eq!(
+            run["responses_stage2_allowed"].as_bool(),
+            Some(true),
+            "run {run_num}: responses api stage 2 must be allowed (defect)"
+        );
+        assert_eq!(
+            run["stage1_control_blocked"].as_bool(),
+            Some(true),
+            "run {run_num}: stage 1 control must be blocked"
+        );
+        assert_eq!(
+            run["stage1_mixed_allowed"].as_bool(),
+            Some(true),
+            "run {run_num}: stage 1 mixed must be allowed (defect)"
+        );
+    }
+}
+
+#[test]
+fn litellm_responses_cross_user_previous_id_blocked_is_conformant() {
+    let req_str = fixture("transcripts/122/wire/control-cross-user-previous-id-request.json");
+    let resp_str = fixture("transcripts/122/wire/control-cross-user-previous-id-response.json");
+    let _req: Value = serde_json::from_str(&req_str).expect("parse request");
+    let resp: Value = serde_json::from_str(&resp_str).expect("parse response");
+
+    let status_code = resp["status_code"].as_u64().expect("status_code");
+    assert_eq!(
+        status_code, 403,
+        "cross-tenant access must be blocked with 403"
+    );
+
+    let gateway_blocked = status_code == 403;
+    let verdict = responses_comparison_response_id_authorized_and_unwrapped(
+        false, // caller does not own response
+        gateway_blocked,
+        55,
+        64,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_responses_cross_user_comparison_id_bypass_is_violation() {
+    let req_str = fixture("transcripts/122/wire/bug-cross-user-comparison-id-bypass-request.json");
+    let resp_str =
+        fixture("transcripts/122/wire/bug-cross-user-comparison-id-bypass-response.json");
+    let _req: Value = serde_json::from_str(&req_str).expect("parse request");
+    let resp: Value = serde_json::from_str(&resp_str).expect("parse response");
+
+    let status_code = resp["status_code"].as_u64().expect("status_code");
+    assert_eq!(
+        status_code, 200,
+        "cross-tenant comparison id bypassed 403 check"
+    );
+
+    let gateway_blocked = status_code == 403;
+    let verdict = responses_comparison_response_id_authorized_and_unwrapped(
+        false, // caller does not own response
+        gateway_blocked,
+        55,
+        64,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("bypassed proxy ownership check")
+    ));
+}
+
+#[test]
+fn litellm_responses_legitimate_previous_id_unwrapped_is_conformant() {
+    let req_str = fixture("transcripts/122/wire/control-legitimate-previous-id-request.json");
+    let req: Value = serde_json::from_str(&req_str).expect("parse request");
+
+    let prev_id = req["previous_response_id"]
+        .as_str()
+        .expect("previous_response_id");
+    let prev_len = prev_id.len();
+    assert_eq!(
+        prev_len, 55,
+        "legitimate previous_response_id must be unwrapped to 55 chars"
+    );
+
+    let verdict = responses_comparison_response_id_authorized_and_unwrapped(
+        true, // caller owns response
+        false, prev_len, 64,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_responses_bloated_comparison_id_forwarded_is_violation() {
+    let req_str = fixture("transcripts/122/wire/bug-forwarded-comparison-id-bloated-request.json");
+    let resp_str =
+        fixture("transcripts/122/wire/bug-forwarded-comparison-id-bloated-response.json");
+    let req: Value = serde_json::from_str(&req_str).expect("parse request");
+    let resp: Value = serde_json::from_str(&resp_str).expect("parse response");
+
+    let comp_id = req["prompt_cache_options"]["comparison_response_id"]
+        .as_str()
+        .expect("comparison_response_id");
+    let comp_len = comp_id.len();
+    assert!(
+        comp_len > 64,
+        "comparison_response_id was not unwrapped and exceeds 64 chars"
+    );
+
+    let status_code = resp["status_code"].as_u64().expect("status_code");
+    assert_eq!(
+        status_code, 400,
+        "upstream rejected bloated comparison_response_id with 400"
+    );
+
+    let verdict = responses_comparison_response_id_authorized_and_unwrapped(
+        true, // caller owns response
+        false, comp_len, 64,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("exceeds provider maximum length 64")
+    ));
+}
+
+#[test]
+fn litellm_responses_comparison_id_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/122/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["results"].as_array().expect("results array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["ctrl1_blocked_403"].as_bool(),
+            Some(true),
+            "run {run_num}: control 1 must be blocked with 403"
+        );
+        assert_eq!(
+            run["bug1_allowed"].as_bool(),
+            Some(true),
+            "run {run_num}: bug 1 must allow cross-tenant comparison id (defect)"
+        );
+        assert_eq!(
+            run["ctrl2_decrypted"].as_bool(),
+            Some(true),
+            "run {run_num}: control 2 must be decrypted"
+        );
+        assert_eq!(
+            run["ctrl2_unwrapped_len"].as_u64(),
+            Some(55),
+            "run {run_num}: control 2 length must be 55"
+        );
+        assert_eq!(
+            run["bug2_still_encrypted"].as_bool(),
+            Some(true),
+            "run {run_num}: bug 2 must still be encrypted (defect)"
+        );
+        assert_eq!(
+            run["openai_would_reject_length"].as_bool(),
+            Some(true),
+            "run {run_num}: bug 2 length exceeds 64 chars"
+        );
+    }
+}
+
+#[test]
+fn litellm_chatgpt_messages_outbound_reasoning_dropped_wire() {
+    let wire_str = fixture("transcripts/123/wire/bug-outbound-reasoning-items-dropped.json");
+    let resp: Value = serde_json::from_str(&wire_str).expect("parse outbound response");
+
+    let content = resp["content"].as_array().expect("content blocks");
+    let has_thinking = content.iter().any(|b| {
+        let btype = b["type"].as_str().unwrap_or("");
+        btype == "thinking" || btype == "redacted_thinking"
+    });
+    assert!(
+        !has_thinking,
+        "outbound response dropped reasoning thinking block"
+    );
+
+    let has_tool_use = content
+        .iter()
+        .any(|b| b["type"].as_str() == Some("tool_use"));
+    assert!(has_tool_use, "tool_use block was preserved");
+
+    let verdict = anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+        true, // backend emitted reasoning item
+        has_thinking,
+        false,
+        false,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("dropped encrypted reasoning item")
+    ));
+}
+
+#[test]
+fn litellm_chatgpt_messages_outbound_reasoning_control_preserved_wire() {
+    let wire_str = fixture("transcripts/123/wire/control-outbound-reasoning-preserved.json");
+    let resp: Value = serde_json::from_str(&wire_str).expect("parse control response");
+
+    let content = resp["content"].as_array().expect("content blocks");
+    let thinking_block = content.iter().find(|b| {
+        let btype = b["type"].as_str().unwrap_or("");
+        btype == "thinking" || btype == "redacted_thinking"
+    });
+    assert!(
+        thinking_block.is_some(),
+        "control direct adapter preserves reasoning as redacted_thinking"
+    );
+
+    let block = thinking_block.unwrap();
+    let data = block["data"].as_str().unwrap_or("");
+    assert!(
+        data.starts_with("litellm_encrypted_reasoning:"),
+        "redacted_thinking carries encrypted reasoning signature"
+    );
+
+    let verdict = anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+        true, // backend emitted reasoning item
+        true, // outbound thinking block present
+        false, false,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_chatgpt_messages_inbound_reasoning_stripped_wire() {
+    let wire_str = fixture("transcripts/123/wire/bug-inbound-reasoning-stripped.json");
+    let req: Value = serde_json::from_str(&wire_str).expect("parse inbound request");
+
+    let items = req["input_items"].as_array().expect("input_items array");
+    let has_reasoning = items
+        .iter()
+        .any(|item| item["type"].as_str() == Some("reasoning"));
+    assert!(!has_reasoning, "inbound request stripped reasoning item");
+
+    let has_function_call = items
+        .iter()
+        .any(|item| item["type"].as_str() == Some("function_call"));
+    assert!(has_function_call, "function_call is present");
+
+    let verdict = anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+        true,
+        true,
+        true, // client replayed reasoning
+        has_reasoning,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("replaying encrypted reasoning was stripped")
+    ));
+}
+
+#[test]
+fn litellm_chatgpt_messages_inbound_reasoning_control_replayed_wire() {
+    let wire_str = fixture("transcripts/123/wire/control-inbound-reasoning-replayed.json");
+    let req: Value = serde_json::from_str(&wire_str).expect("parse control request");
+
+    let items = req["input_items"].as_array().expect("input_items array");
+    let reasoning_item = items
+        .iter()
+        .find(|item| item["type"].as_str() == Some("reasoning"));
+    assert!(
+        reasoning_item.is_some(),
+        "control direct adapter replayed reasoning item"
+    );
+
+    let item = reasoning_item.unwrap();
+    let enc = item["encrypted_content"].as_str().unwrap_or("");
+    assert!(
+        !enc.is_empty(),
+        "reasoning item has non-empty encrypted_content"
+    );
+
+    let verdict = anthropic_messages_responses_bridge_preserves_encrypted_reasoning(
+        true, true, true, true, // reasoning item preserved
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_chatgpt_messages_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/123/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["ctrl_outbound_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: control outbound reasoning must be preserved"
+        );
+        assert_eq!(
+            run["bug_outbound_dropped"].as_bool(),
+            Some(true),
+            "run {run_num}: bug outbound reasoning must be dropped (defect)"
+        );
+        assert_eq!(
+            run["ctrl_inbound_replayed"].as_bool(),
+            Some(true),
+            "run {run_num}: control inbound reasoning must be replayed"
+        );
+        assert_eq!(
+            run["bug_inbound_stripped"].as_bool(),
+            Some(true),
+            "run {run_num}: bug inbound reasoning must be stripped (defect)"
+        );
+    }
+}
+
+// ---- bug 124: LiteLLM response cache ignores api_base and api_key connection params ----
+
+#[test]
+fn litellm_cache_key_collision_ignores_destination_connection_params() {
+    let wire_str = fixture("transcripts/124/wire/bug-cache-key-collision.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse cache key capture");
+
+    let base_a = capture["backend_a"]["api_base"].as_str().unwrap();
+    let base_b = capture["backend_b"]["api_base"].as_str().unwrap();
+    let key_a = capture["backend_a"]["cache_key"].as_str().unwrap();
+    let key_b = capture["backend_b"]["cache_key"].as_str().unwrap();
+
+    assert_ne!(base_a, base_b, "destinations must be distinct");
+    assert_eq!(
+        key_a, key_b,
+        "cache keys for distinct api_base destinations collide"
+    );
+
+    let tenant_key_1 = capture["tenant_alpha"]["cache_key"].as_str().unwrap();
+    let tenant_key_2 = capture["tenant_beta"]["cache_key"].as_str().unwrap();
+    assert_eq!(
+        tenant_key_1, tenant_key_2,
+        "cache keys for distinct tenant api_keys collide"
+    );
+
+    let verdict = response_cache_keys_differentiate_destinations(
+        base_a,
+        base_b,
+        key_a,
+        key_b,
+        "Cluster Alpha Status",
+        "Cluster Beta Status",
+        true,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("cache key collision between distinct destinations")
+    ));
+}
+
+#[test]
+fn litellm_cache_cross_backend_response_pollution_detected() {
+    let wire_str = fixture("transcripts/124/wire/bug-cross-backend-cache-pollution.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse pollution capture");
+
+    let step2 = &capture["step_2_polluted_backend_b"];
+    assert_eq!(
+        step2["leak_detected"].as_bool(),
+        Some(true),
+        "leak detected: backend B received cached response from backend A"
+    );
+    assert_eq!(
+        step2["cache_hit"].as_bool(),
+        Some(true),
+        "polluted call was served as a cache hit"
+    );
+
+    let served_content = step2["returned_content"].as_str().unwrap();
+    let verdict = response_cache_keys_differentiate_destinations(
+        "https://cluster-alpha.internal.net/v1",
+        "https://cluster-beta.internal.net/v1",
+        "a77d5dcdb8985f7c1ac2f4b463aa7dc9d58c79de93f2f7ce1bd2fc3ce28ffb26",
+        "a77d5dcdb8985f7c1ac2f4b463aa7dc9d58c79de93f2f7ce1bd2fc3ce28ffb26",
+        served_content,
+        "Cluster Beta Status: DEGRADED. Private cluster-b IP: 10.200.2.9",
+        true,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("cache key collision between distinct destinations")
+    ));
+}
+
+#[test]
+fn litellm_cache_key_separation_control_wire() {
+    let wire_str = fixture("transcripts/124/wire/control-cache-key-separation.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse control separation");
+
+    assert_eq!(
+        capture["keys_separated"].as_bool(),
+        Some(true),
+        "control keyed connection parameters must separate cache keys"
+    );
+
+    let base_a = capture["backend_a_keyed"]["api_base"].as_str().unwrap();
+    let base_b = capture["backend_b_keyed"]["api_base"].as_str().unwrap();
+    let key_a = capture["backend_a_keyed"]["distinct_cache_key"]
+        .as_str()
+        .unwrap();
+    let key_b = capture["backend_b_keyed"]["distinct_cache_key"]
+        .as_str()
+        .unwrap();
+
+    assert_ne!(
+        key_a, key_b,
+        "keyed connection params produce distinct keys"
+    );
+
+    let verdict = response_cache_keys_differentiate_destinations(
+        base_a,
+        base_b,
+        key_a,
+        key_b,
+        "Cluster Beta Status",
+        "Cluster Beta Status",
+        false,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_cache_uncached_isolation_control_wire() {
+    let wire_str = fixture("transcripts/124/wire/control-un-cached-isolation.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse control uncached");
+
+    assert_eq!(
+        capture["isolated"].as_bool(),
+        Some(true),
+        "un-cached calls must isolate distinct backend responses"
+    );
+
+    let base_a = capture["backend_a_direct"]["api_base"].as_str().unwrap();
+    let base_b = capture["backend_b_direct"]["api_base"].as_str().unwrap();
+    let content_b = capture["backend_b_direct"]["content"].as_str().unwrap();
+
+    let verdict = response_cache_keys_differentiate_destinations(
+        base_a, base_b, "key-a", "key-b", content_b, content_b, false,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_cache_same_endpoint_cache_hit_control_wire() {
+    let wire_str = fixture("transcripts/124/wire/control-same-endpoint-cache-hit.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse control hit");
+
+    assert_eq!(
+        capture["cache_hit"].as_bool(),
+        Some(true),
+        "repeated call to same endpoint must hit cache"
+    );
+
+    let target = capture["target_api_base"].as_str().unwrap();
+    let cached = capture["cached_content"].as_str().unwrap();
+
+    let verdict = response_cache_keys_differentiate_destinations(
+        target, target, "key-a", "key-a", cached, cached, true,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_cache_destination_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/124/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_keys_collide"].as_bool(),
+            Some(true),
+            "run {run_num}: bug keys must collide across distinct api_base destinations"
+        );
+        assert_eq!(
+            run["bug_cross_backend_pollution"].as_bool(),
+            Some(true),
+            "run {run_num}: backend B must receive cached response from backend A (defect)"
+        );
+        assert_eq!(
+            run["ctrl_same_endpoint_hit"].as_bool(),
+            Some(true),
+            "run {run_num}: control same-endpoint repeat must hit cache"
+        );
+        assert_eq!(
+            run["ctrl_keys_separated"].as_bool(),
+            Some(true),
+            "run {run_num}: control keys must be separated when connection params are keyed"
+        );
+        assert_eq!(
+            run["ctrl_direct_isolated"].as_bool(),
+            Some(true),
+            "run {run_num}: control direct un-cached calls must be isolated"
+        );
+    }
+}
+
+// ---- bug 125: LiteLLM voyage/ embeddings ignore VOYAGE_API_BASE ----
+
+#[test]
+fn litellm_voyage_embeddings_ignore_env_api_base_wire() {
+    let wire_str = fixture("transcripts/125/wire/bug-outbound-bypasses-gateway.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire");
+
+    let env_base = capture["configured_env"]["VOYAGE_API_BASE"]
+        .as_str()
+        .unwrap();
+    let requests_received =
+        usize::try_from(capture["gateway_requests_received"].as_u64().unwrap()).unwrap();
+    let standard_url = capture["resolved_urls_without_explicit_kwarg"]["standard_embedding"]
+        .as_str()
+        .unwrap();
+
+    assert_eq!(requests_received, 0, "gateway received 0 requests");
+    assert!(
+        standard_url.contains("api.voyageai.com"),
+        "URL bypassed gateway to public voyageai.com"
+    );
+
+    let verdict = voyage_embeddings_honor_environment_api_base(Some(env_base), standard_url, 0, 1);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("bypassed configured environment base")
+    ));
+}
+
+#[test]
+fn litellm_voyage_embeddings_explicit_api_base_control_wire() {
+    let wire_str = fixture("transcripts/125/wire/control-explicit-api-base-reaches-gateway.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse control explicit api_base");
+
+    assert_eq!(
+        capture["success"].as_bool(),
+        Some(true),
+        "explicit api_base call must succeed"
+    );
+
+    let path = capture["gateway_received_request"]["path"]
+        .as_str()
+        .unwrap();
+    assert_eq!(
+        path, "/v1/embeddings",
+        "gateway received embeddings request"
+    );
+
+    let verdict = voyage_embeddings_honor_environment_api_base(
+        Some("http://127.0.0.1:9988/v1"),
+        "http://127.0.0.1:9988/v1/embeddings",
+        1,
+        1,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_voyage_embeddings_resolver_routes_all_configs_control_wire() {
+    let wire_str = fixture("transcripts/125/wire/control-resolver-routes-all-configs.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse control resolver wire");
+
+    assert_eq!(
+        capture["all_target_internal_gateway"].as_bool(),
+        Some(true),
+        "all configs must route to internal gateway"
+    );
+
+    let std_url = capture["standard_embedding_url"].as_str().unwrap();
+    let ctx_url = capture["contextual_embedding_url"].as_str().unwrap();
+    let multi_url = capture["multimodal_embedding_url"].as_str().unwrap();
+
+    let env_base = "http://127.0.0.1:9988/v1";
+    assert_eq!(
+        voyage_embeddings_honor_environment_api_base(Some(env_base), std_url, 1, 1),
+        Verdict::Conformant
+    );
+    assert_eq!(
+        voyage_embeddings_honor_environment_api_base(Some(env_base), ctx_url, 1, 1),
+        Verdict::Conformant
+    );
+    assert_eq!(
+        voyage_embeddings_honor_environment_api_base(Some(env_base), multi_url, 1, 1),
+        Verdict::Conformant
+    );
+}
+
+#[test]
+fn litellm_voyage_embeddings_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/125/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_resolvers_ignore_env"].as_bool(),
+            Some(true),
+            "run {run_num}: bug resolvers must ignore VOYAGE_API_BASE"
+        );
+        assert_eq!(
+            run["bug_gateway_bypassed"].as_bool(),
+            Some(true),
+            "run {run_num}: bug gateway must be bypassed (0 requests)"
+        );
+        assert_eq!(
+            run["ctrl_gateway_reached"].as_bool(),
+            Some(true),
+            "run {run_num}: control request with explicit api_base must reach gateway"
+        );
+        assert_eq!(
+            run["ctrl_resolvers_route_to_gateway"].as_bool(),
+            Some(true),
+            "run {run_num}: control resolver must route all 3 configs to gateway"
+        );
+    }
+}
+
+// ---- bug 126: LiteLLM o-series system prompt demoted to user on o3, o4-mini, o3-mini ----
+
+#[test]
+fn litellm_o3_system_prompt_demoted_to_user_wire() {
+    let wire_str = fixture("transcripts/126/wire/bug-outbound-o3-system-demoted.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse o3 bug wire");
+
+    assert_eq!(
+        capture["system_prompt_demoted_to_user"].as_bool(),
+        Some(true),
+        "o3 must demote system prompt to user"
+    );
+
+    let roles: Vec<&str> = capture["forwarded_roles"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|r| r.as_str().unwrap())
+        .collect();
+    assert_eq!(roles, vec!["user", "user"], "both roles forwarded as user");
+
+    let verdict = reasoning_model_system_prompt_preserved("o3", true, false, &roles);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("silently demoted system prompt to user message")
+    ));
+}
+
+#[test]
+fn litellm_o4mini_system_prompt_demoted_to_user_wire() {
+    let wire_str = fixture("transcripts/126/wire/bug-outbound-o4mini-system-demoted.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse o4-mini bug wire");
+
+    assert_eq!(
+        capture["system_prompt_demoted_to_user"].as_bool(),
+        Some(true),
+        "o4-mini must demote system prompt to user"
+    );
+
+    let roles: Vec<&str> = capture["forwarded_roles"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|r| r.as_str().unwrap())
+        .collect();
+    assert_eq!(roles, vec!["user", "user"]);
+
+    let verdict = reasoning_model_system_prompt_preserved("o4-mini", true, false, &roles);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("silently demoted system prompt to user message")
+    ));
+}
+
+#[test]
+fn litellm_o3mini_system_prompt_demoted_to_user_wire() {
+    let wire_str = fixture("transcripts/126/wire/bug-outbound-o3mini-system-demoted.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse o3-mini bug wire");
+
+    assert_eq!(
+        capture["system_prompt_demoted_to_user"].as_bool(),
+        Some(true),
+        "o3-mini must demote system prompt to user"
+    );
+
+    let roles: Vec<&str> = capture["forwarded_roles"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|r| r.as_str().unwrap())
+        .collect();
+    assert_eq!(roles, vec!["user", "user"]);
+
+    let verdict = reasoning_model_system_prompt_preserved("o3-mini", true, false, &roles);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("silently demoted system prompt to user message")
+    ));
+}
+
+#[test]
+fn litellm_o1_system_prompt_control_preserved_wire() {
+    let wire_str = fixture("transcripts/126/wire/control-outbound-o1-system-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse o1 control wire");
+
+    assert_eq!(
+        capture["system_prompt_preserved"].as_bool(),
+        Some(true),
+        "o1 must preserve system prompt"
+    );
+
+    let roles: Vec<&str> = capture["forwarded_roles"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|r| r.as_str().unwrap())
+        .collect();
+    assert_eq!(roles, vec!["system", "user"]);
+
+    let verdict = reasoning_model_system_prompt_preserved("o1", true, true, &roles);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_o_series_fixed_system_prompt_control_wire() {
+    let wire_str = fixture("transcripts/126/wire/control-outbound-fixed-system-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed control wire");
+
+    assert_eq!(
+        capture["system_prompt_preserved"].as_bool(),
+        Some(true),
+        "fixed model configuration must preserve system prompt"
+    );
+
+    let roles: Vec<&str> = capture["forwarded_roles"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|r| r.as_str().unwrap())
+        .collect();
+    assert_eq!(roles, vec!["system", "user"]);
+
+    let verdict = reasoning_model_system_prompt_preserved("openai/o3-fixed", true, true, &roles);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_o_series_system_prompt_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/126/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_o3_demoted"].as_bool(),
+            Some(true),
+            "run {run_num}: o3 system prompt must be demoted"
+        );
+        assert_eq!(
+            run["bug_o4mini_demoted"].as_bool(),
+            Some(true),
+            "run {run_num}: o4-mini system prompt must be demoted"
+        );
+        assert_eq!(
+            run["bug_o3mini_demoted"].as_bool(),
+            Some(true),
+            "run {run_num}: o3-mini system prompt must be demoted"
+        );
+        assert_eq!(
+            run["ctrl_o1_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: o1 system prompt must be preserved"
+        );
+        assert_eq!(
+            run["ctrl_fixed_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed configuration system prompt must be preserved"
+        );
+    }
+}
+
+// ---- bug 127: LiteLLM JSON-defined openai-like providers lose tools by default on unmapped models ----
+
+#[test]
+fn litellm_json_provider_unmapped_model_unsupported_params_error_wire() {
+    let wire_str = fixture("transcripts/127/wire/bug-unsupported-params-error.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse error bug wire");
+
+    assert_eq!(
+        capture["error_raised"].as_bool(),
+        Some(true),
+        "unmapped model must raise error when drop_params is false"
+    );
+
+    let unsupp: Vec<&str> = capture["error_details"]["unsupported_parameters"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|p| p.as_str().unwrap())
+        .collect();
+    assert!(unsupp.contains(&"tools"));
+
+    let verdict = openai_compatible_unmapped_model_tools_preserved(
+        "nano-gpt",
+        "z-ai/glm-5.3-flash",
+        true,
+        true,
+        &unsupp,
+        false,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("rejected valid tool parameters for unmapped model")
+    ));
+}
+
+#[test]
+fn litellm_json_provider_unmapped_model_tools_stripped_wire() {
+    let wire_str = fixture("transcripts/127/wire/bug-outbound-tools-stripped.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse stripped tools bug wire");
+
+    assert_eq!(
+        capture["tools_in_outbound"].as_bool(),
+        Some(false),
+        "outbound request must have tools stripped when drop_params is true"
+    );
+    assert_eq!(
+        capture["tool_choice_in_outbound"].as_bool(),
+        Some(false),
+        "outbound request must have tool_choice stripped"
+    );
+
+    let body_keys: Vec<&str> = capture["forwarded_body_keys"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|k| k.as_str().unwrap())
+        .collect();
+    assert!(!body_keys.contains(&"tools"));
+    assert!(!body_keys.contains(&"tool_choice"));
+
+    let verdict = openai_compatible_unmapped_model_tools_preserved(
+        "nano-gpt",
+        "z-ai/glm-5.3-flash",
+        true,
+        false,
+        &[],
+        false,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg) if msg.contains("silently stripped tool parameters from outbound request")
+    ));
+}
+
+#[test]
+fn litellm_json_provider_openai_route_tools_preserved_control_wire() {
+    let wire_str =
+        fixture("transcripts/127/wire/control-outbound-openai-route-tools-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse openai route control wire");
+
+    assert_eq!(
+        capture["tools_in_outbound"].as_bool(),
+        Some(true),
+        "openai route control must preserve tools in outbound"
+    );
+    assert_eq!(
+        capture["tool_choice_in_outbound"].as_bool(),
+        Some(true),
+        "openai route control must preserve tool_choice in outbound"
+    );
+
+    let body_keys: Vec<&str> = capture["forwarded_body_keys"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|k| k.as_str().unwrap())
+        .collect();
+    assert!(body_keys.contains(&"tools"));
+    assert!(body_keys.contains(&"tool_choice"));
+
+    let verdict = openai_compatible_unmapped_model_tools_preserved(
+        "openai",
+        "z-ai/glm-5.3-flash",
+        true,
+        false,
+        &[],
+        true,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_json_provider_mapped_model_tools_preserved_control_wire() {
+    let wire_str =
+        fixture("transcripts/127/wire/control-outbound-mapped-model-tools-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse mapped model control wire");
+
+    assert_eq!(
+        capture["tools_in_outbound"].as_bool(),
+        Some(true),
+        "mapped model control must preserve tools in outbound"
+    );
+    assert_eq!(
+        capture["tool_choice_in_outbound"].as_bool(),
+        Some(true),
+        "mapped model control must preserve tool_choice in outbound"
+    );
+
+    let verdict = openai_compatible_unmapped_model_tools_preserved(
+        "nano-gpt",
+        "nano-gpt/mapped-glm-model",
+        true,
+        false,
+        &[],
+        true,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_json_provider_dynamic_config_fixed_tools_preserved_control_wire() {
+    let wire_str =
+        fixture("transcripts/127/wire/control-dynamic-config-fixed-tools-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse dynamic config fixed wire");
+
+    assert_eq!(
+        capture["resolved_supports_function_calling"].as_bool(),
+        Some(true),
+        "fixed dynamic config must resolve supports_function_calling to true for unmapped model"
+    );
+    assert_eq!(
+        capture["tools_preserved"].as_bool(),
+        Some(true),
+        "fixed dynamic config must preserve tools"
+    );
+
+    let verdict = openai_compatible_unmapped_model_tools_preserved(
+        "nano-gpt",
+        "z-ai/glm-5.3-flash",
+        true,
+        false,
+        &[],
+        true,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_json_provider_unmapped_model_tools_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/127/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_error_raised"].as_bool(),
+            Some(true),
+            "run {run_num}: error must be raised when drop_params is false"
+        );
+        assert_eq!(
+            run["bug_tools_stripped"].as_bool(),
+            Some(true),
+            "run {run_num}: tools must be stripped when drop_params is true"
+        );
+        assert_eq!(
+            run["ctrl_openai_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: openai route must preserve tools"
+        );
+        assert_eq!(
+            run["ctrl_mapped_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: mapped model must preserve tools"
+        );
+        assert_eq!(
+            run["ctrl_fixed_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed configuration must preserve tools"
+        );
+    }
+}
+
+// ---- bug 128: LiteLLM provider fake streams drop requested logprobs ----
+
+#[test]
+fn litellm_fake_stream_drops_logprobs_wire() {
+    let wire_str = fixture("transcripts/128/wire/bug-streaming-logprobs-dropped.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire");
+
+    assert_eq!(
+        capture["upstream_returned_logprobs"].as_bool(),
+        Some(true),
+        "upstream provider returned logprobs"
+    );
+    assert!(
+        capture["chunk_choice_logprobs"].is_null(),
+        "first streaming chunk choice must drop logprobs"
+    );
+
+    let verdict = fake_stream_preserves_provider_logprobs(
+        "groq",
+        "llama3-8b-8192",
+        true,
+        true,
+        !capture["chunk_choice_logprobs"].is_null(),
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("dropped requested token log probabilities in fake stream chunks")
+    ));
+}
+
+#[test]
+fn litellm_fake_stream_sync_control_wire() {
+    let wire_str = fixture("transcripts/128/wire/control-sync-logprobs-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse sync control wire");
+
+    assert!(
+        !capture["response_choice_logprobs"].is_null(),
+        "sync response must preserve logprobs"
+    );
+    let first_token = capture["response_choice_logprobs"]["content"][0]["token"]
+        .as_str()
+        .expect("token string");
+    assert_eq!(first_token, "Paris");
+
+    let verdict =
+        fake_stream_preserves_provider_logprobs("groq", "llama3-8b-8192", true, true, true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_fake_stream_fixed_control_wire() {
+    let wire_str =
+        fixture("transcripts/128/wire/control-fixed-fake-stream-logprobs-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed control wire");
+
+    assert_eq!(
+        capture["matches_sync_response"].as_bool(),
+        Some(true),
+        "fixed stream chunk logprobs must match sync response"
+    );
+    assert!(
+        !capture["chunk_choice_logprobs"].is_null(),
+        "fixed stream chunk choice must contain logprobs"
+    );
+
+    let verdict =
+        fake_stream_preserves_provider_logprobs("groq", "llama3-8b-8192", true, true, true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_fake_stream_logprobs_false_control_wire() {
+    let wire_str = fixture("transcripts/128/wire/control-streaming-logprobs-false-null.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse logprobs false control wire");
+
+    assert!(
+        capture["chunk_choice_logprobs"].is_null(),
+        "when logprobs=false, logprobs must be null"
+    );
+
+    let verdict =
+        fake_stream_preserves_provider_logprobs("groq", "llama3-8b-8192", false, false, false);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_fake_stream_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/128/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_logprobs_dropped"].as_bool(),
+            Some(true),
+            "run {run_num}: fake stream must drop logprobs"
+        );
+        assert_eq!(
+            run["ctrl_sync_logprobs_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: sync response must preserve logprobs"
+        );
+        assert_eq!(
+            run["ctrl_fixed_logprobs_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed stream conversion must preserve logprobs"
+        );
+        assert_eq!(
+            run["ctrl_no_logprobs_null"].as_bool(),
+            Some(true),
+            "run {run_num}: logprobs=false must be null"
+        );
+    }
+}
+
+#[test]
+fn litellm_google_genai_model_turn_tool_result_dropped_reproduction() {
+    let wire_str = fixture("transcripts/129/wire/bug-model-turn-tool-response-dropped.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    assert_eq!(
+        capture["tool_response_dropped"].as_bool(),
+        Some(true),
+        "tool response in model turn must be dropped"
+    );
+    assert_eq!(
+        capture["turn_2_role"].as_str(),
+        Some("assistant"),
+        "dropped tool response must be converted to assistant message"
+    );
+    assert!(
+        capture["turn_2_content"].is_null(),
+        "empty assistant turn must have null content"
+    );
+
+    let msgs = capture["translated_messages"]
+        .as_array()
+        .expect("translated messages array");
+    let has_tool = msgs.iter().any(|m| m["role"].as_str() == Some("tool"));
+    assert!(
+        !has_tool,
+        "translated messages must not contain tool message"
+    );
+
+    let verdict = google_genai_model_turn_tool_results_preserved(
+        "google_genai",
+        "gpt-4.1",
+        "model",
+        true,
+        false,
+        true,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("dropped tool response in 'model' turn and emitted empty assistant message")
+    ));
+}
+
+#[test]
+fn litellm_google_genai_user_turn_tool_result_preserved_control() {
+    let wire_str = fixture("transcripts/129/wire/control-user-turn-tool-response-preserved.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse user turn control wire capture");
+
+    assert_eq!(
+        capture["tool_response_preserved"].as_bool(),
+        Some(true),
+        "user turn tool response must be preserved"
+    );
+    assert_eq!(
+        capture["turn_2_role"].as_str(),
+        Some("tool"),
+        "user turn tool response must produce role=tool"
+    );
+    assert_eq!(
+        capture["turn_2_tool_call_id"].as_str(),
+        Some("call_view_file"),
+        "tool_call_id must match called function"
+    );
+
+    let verdict = google_genai_model_turn_tool_results_preserved(
+        "google_genai",
+        "gpt-4.1",
+        "user",
+        true,
+        true,
+        false,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_google_genai_fixed_model_turn_tool_result_preserved_control() {
+    let wire_str =
+        fixture("transcripts/129/wire/control-fixed-model-turn-tool-response-preserved.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse fixed model turn control wire capture");
+
+    assert_eq!(
+        capture["tool_response_preserved"].as_bool(),
+        Some(true),
+        "fixed model turn tool response must be preserved"
+    );
+    assert_eq!(
+        capture["turn_2_role"].as_str(),
+        Some("tool"),
+        "fixed model turn must produce role=tool"
+    );
+    assert_eq!(
+        capture["turn_2_tool_call_id"].as_str(),
+        Some("call_view_file"),
+        "fixed model turn tool_call_id must match"
+    );
+
+    let verdict = google_genai_model_turn_tool_results_preserved(
+        "google_genai",
+        "gpt-4.1",
+        "model",
+        true,
+        true,
+        false,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_google_genai_model_turn_tool_call_preserved_control() {
+    let wire_str = fixture("transcripts/129/wire/control-model-turn-tool-call-preserved.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse model turn tool call control wire capture");
+
+    assert_eq!(
+        capture["turn_1_role"].as_str(),
+        Some("assistant"),
+        "model turn tool call must produce role=assistant"
+    );
+    assert_eq!(
+        capture["turn_1_tool_calls"][0]["function"]["name"].as_str(),
+        Some("view_file"),
+        "tool call name must be preserved"
+    );
+
+    let verdict = google_genai_model_turn_tool_results_preserved(
+        "google_genai",
+        "gpt-4.1",
+        "model",
+        false,
+        false,
+        false,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_google_genai_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/129/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_model_turn_drops_tool_response"].as_bool(),
+            Some(true),
+            "run {run_num}: model turn must drop tool response"
+        );
+        assert_eq!(
+            run["control_user_turn_preserves_tool_response"].as_bool(),
+            Some(true),
+            "run {run_num}: user turn must preserve tool response"
+        );
+        assert_eq!(
+            run["control_fixed_model_turn_preserves_tool_response"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed model turn must preserve tool response"
+        );
+        assert_eq!(
+            run["control_model_turn_call_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: model turn tool call must be preserved"
+        );
+    }
+}
+
+#[test]
+fn litellm_minimax_drops_reasoning_effort_wire_reproduction() {
+    let wire_str = fixture("transcripts/130/wire/bug-minimax-reasoning-effort-dropped.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    assert_eq!(
+        capture["reasoning_effort_dropped"].as_bool(),
+        Some(true),
+        "reasoning_effort must be dropped from mapped params"
+    );
+    assert_eq!(
+        capture["supported_params_contains_reasoning_effort"].as_bool(),
+        Some(false),
+        "minimax supported_params must omit reasoning_effort"
+    );
+    assert!(
+        capture["mapped_outbound_params"]["reasoning_effort"].is_null(),
+        "outbound params must not contain reasoning_effort"
+    );
+
+    let verdict = minimax_reasoning_effort_preserved(
+        "minimax",
+        "minimax/MiniMax-M3.1-Flash",
+        Some("low"),
+        false,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("dropped requested reasoning_effort 'low'")
+    ));
+}
+
+#[test]
+fn litellm_minimax_fixed_reasoning_effort_preserved_control() {
+    let wire_str =
+        fixture("transcripts/130/wire/control-fixed-minimax-reasoning-effort-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed control wire capture");
+
+    assert_eq!(
+        capture["reasoning_effort_preserved"].as_bool(),
+        Some(true),
+        "fixed config must preserve reasoning_effort"
+    );
+    assert_eq!(
+        capture["mapped_outbound_params"]["reasoning_effort"].as_str(),
+        Some("low"),
+        "mapped reasoning_effort must be low"
+    );
+
+    let verdict = minimax_reasoning_effort_preserved(
+        "minimax",
+        "minimax/MiniMax-M3.1-Flash",
+        Some("low"),
+        true,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_minimax_oseries_route_reasoning_effort_control() {
+    let wire_str =
+        fixture("transcripts/130/wire/control-openai-route-reasoning-effort-preserved.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse openai route control wire capture");
+
+    assert_eq!(
+        capture["reasoning_effort_preserved"].as_bool(),
+        Some(true),
+        "o-series config must preserve reasoning_effort"
+    );
+    assert_eq!(
+        capture["mapped_outbound_params"]["reasoning_effort"].as_str(),
+        Some("low"),
+        "mapped reasoning_effort must be low"
+    );
+
+    let verdict = minimax_reasoning_effort_preserved("openai", "o1", Some("low"), true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_minimax_high_effort_preserved_control() {
+    let wire_str = fixture("transcripts/130/wire/control-high-effort-preserved.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse high effort control wire capture");
+
+    assert_eq!(
+        capture["reasoning_effort_preserved"].as_bool(),
+        Some(true),
+        "fixed config must preserve high reasoning_effort"
+    );
+    assert_eq!(
+        capture["mapped_outbound_params"]["reasoning_effort"].as_str(),
+        Some("high"),
+        "mapped reasoning_effort must be high"
+    );
+
+    let verdict = minimax_reasoning_effort_preserved(
+        "minimax",
+        "minimax/MiniMax-M3.1-Flash",
+        Some("high"),
+        true,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_minimax_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/130/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_reasoning_effort_dropped"].as_bool(),
+            Some(true),
+            "run {run_num}: reasoning_effort must be dropped"
+        );
+        assert_eq!(
+            run["control_fixed_reasoning_effort_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed config must preserve reasoning_effort"
+        );
+        assert_eq!(
+            run["control_oseries_route_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: o-series config must preserve reasoning_effort"
+        );
+        assert_eq!(
+            run["control_high_effort_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: high effort must be preserved"
+        );
+    }
+}
+
+#[test]
+fn litellm_anthropic_structured_output_top_level_format_wire_reproduction() {
+    let wire_str = fixture("transcripts/131/wire/bug-anthropic-top-level-output-format.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    assert_eq!(
+        capture["has_top_level_output_format"].as_bool(),
+        Some(true),
+        "structured output must be emitted as top-level output_format"
+    );
+    assert_eq!(
+        capture["has_output_config"].as_bool(),
+        Some(false),
+        "output_config must not be present"
+    );
+
+    let verdict = anthropic_structured_output_config_format("claude-haiku-4-5", true, true, false);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("emitted structured output as top-level 'output_format' instead of 'output_config.format'")
+    ));
+}
+
+#[test]
+fn litellm_anthropic_fixed_output_config_format_preserved_control() {
+    let wire_str =
+        fixture("transcripts/131/wire/control-fixed-anthropic-output-config-format.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed control wire capture");
+
+    assert_eq!(
+        capture["has_top_level_output_format"].as_bool(),
+        Some(false),
+        "fixed config must not have top-level output_format"
+    );
+    assert_eq!(
+        capture["has_output_config"].as_bool(),
+        Some(true),
+        "fixed config must have output_config"
+    );
+    assert_eq!(
+        capture["output_config"]["format"]["type"].as_str(),
+        Some("json_schema"),
+        "output_config.format must have type json_schema"
+    );
+
+    let verdict = anthropic_structured_output_config_format("claude-haiku-4-5", true, false, true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_anthropic_output_config_beside_effort_control() {
+    let wire_str = fixture("transcripts/131/wire/control-output-config-beside-effort.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse effort control wire capture");
+
+    assert_eq!(
+        capture["has_top_level_output_format"].as_bool(),
+        Some(false),
+        "must not have top-level output_format"
+    );
+    assert_eq!(
+        capture["output_config"]["effort"].as_str(),
+        Some("low"),
+        "effort must be preserved in output_config"
+    );
+    assert_eq!(
+        capture["output_config"]["format"]["type"].as_str(),
+        Some("json_schema"),
+        "format must be nested under output_config"
+    );
+
+    let verdict = anthropic_structured_output_config_format("claude-haiku-4-5", true, false, true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_anthropic_no_structured_output_control() {
+    let wire_str = fixture("transcripts/131/wire/control-no-structured-output.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse plain wire capture");
+
+    assert_eq!(
+        capture["has_top_level_output_format"].as_bool(),
+        Some(false),
+        "plain request must not have top-level output_format"
+    );
+    assert_eq!(
+        capture["has_output_config"].as_bool(),
+        Some(false),
+        "plain request must not have output_config"
+    );
+
+    let verdict =
+        anthropic_structured_output_config_format("claude-haiku-4-5", false, false, false);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_anthropic_structured_output_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/131/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_output_format_top_level"].as_bool(),
+            Some(true),
+            "run {run_num}: output_format must be at top level"
+        );
+        assert_eq!(
+            run["control_fixed_output_config_format"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed config must have output_config.format"
+        );
+        assert_eq!(
+            run["control_beside_effort_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: effort must be preserved beside format"
+        );
+        assert_eq!(
+            run["control_plain_no_format"].as_bool(),
+            Some(true),
+            "run {run_num}: plain request must have no format"
+        );
+    }
+}
+
+#[test]
+fn litellm_exact_cache_cross_tenant_leak_wire_reproduction() {
+    let wire_str = fixture("transcripts/132/wire/bug-cross-tenant-cache-leak.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    assert_eq!(
+        capture["leak_detected"].as_bool(),
+        Some(true),
+        "leak must be detected"
+    );
+    assert_eq!(
+        capture["keys_identical_across_tenants"].as_bool(),
+        Some(true),
+        "cache keys must be identical across distinct tenants"
+    );
+    assert!(
+        capture["tenant_b_received_payload"].is_object(),
+        "tenant B must have received tenant A's cached response"
+    );
+
+    let key_a = capture["tenant_a_cache_key"].as_str().unwrap();
+    let key_b = capture["tenant_b_cache_key"].as_str().unwrap();
+    let verdict = response_cache_tenant_isolation(key_a, key_b, true);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("cache keys are identical across distinct tenants")
+    ));
+}
+
+#[test]
+fn litellm_exact_cache_fixed_tenant_isolation_control() {
+    let wire_str = fixture("transcripts/132/wire/control-fixed-tenant-cache-isolation.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed control wire capture");
+
+    assert_eq!(
+        capture["isolation_verified"].as_bool(),
+        Some(true),
+        "isolation must be verified"
+    );
+    assert_eq!(
+        capture["keys_identical_across_tenants"].as_bool(),
+        Some(false),
+        "scoped keys must not match across tenants"
+    );
+    assert!(
+        capture["tenant_b_received_payload"].is_null(),
+        "tenant B must receive null from cache"
+    );
+
+    let key_a = capture["tenant_a_scoped_key"].as_str().unwrap();
+    let key_b = capture["tenant_b_scoped_key"].as_str().unwrap();
+    let verdict = response_cache_tenant_isolation(key_a, key_b, false);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_exact_cache_forged_custom_key_isolated_control() {
+    let wire_str = fixture("transcripts/132/wire/control-forged-custom-cache-key-isolated.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse forged control wire capture");
+
+    let key_a = capture["custom_key_scoped_tenant_a"].as_str().unwrap();
+    let key_b = capture["custom_key_scoped_tenant_b"].as_str().unwrap();
+    assert_ne!(
+        key_a, key_b,
+        "custom keys must be scoped with distinct tenant digests"
+    );
+
+    let verdict = response_cache_tenant_isolation(key_a, key_b, false);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_exact_cache_bare_sdk_key_preserved_control() {
+    let wire_str = fixture("transcripts/132/wire/control-bare-sdk-key-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bare wire capture");
+
+    assert_eq!(
+        capture["bare_key_matches"].as_bool(),
+        Some(true),
+        "bare sdk key must match unpatched key exactly"
+    );
+    assert_eq!(
+        capture["has_tenant_prefix"].as_bool(),
+        Some(false),
+        "bare sdk key must not have tenant prefix"
+    );
+}
+
+#[test]
+fn litellm_exact_cache_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/132/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_cross_tenant_leak"].as_bool(),
+            Some(true),
+            "run {run_num}: bug cross tenant leak must reproduce"
+        );
+        assert_eq!(
+            run["control_fixed_tenant_isolated"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed tenant cache must be isolated"
+        );
+        assert_eq!(
+            run["control_forged_key_isolated"].as_bool(),
+            Some(true),
+            "run {run_num}: forged custom key must be isolated"
+        );
+        assert_eq!(
+            run["control_bare_sdk_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: bare sdk key must be preserved"
+        );
+    }
+}
+
+#[test]
+fn litellm_responses_nested_user_location_wire_reproduction() {
+    let wire_str = fixture("transcripts/133/wire/bug-responses-nested-user-location.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    assert_eq!(
+        capture["has_web_search_tool"].as_bool(),
+        Some(true),
+        "must have web search tool"
+    );
+    assert_eq!(
+        capture["has_nested_approximate"].as_bool(),
+        Some(true),
+        "must have nested approximate object"
+    );
+    assert_eq!(
+        capture["user_location_is_flat"].as_bool(),
+        Some(false),
+        "user_location must not be flat"
+    );
+
+    let verdict = responses_api_web_search_user_location_flat(true, true, true, false);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("forwarded nested 'user_location.approximate' object")
+    ));
+}
+
+#[test]
+fn litellm_responses_fixed_flat_user_location_control() {
+    let wire_str = fixture("transcripts/133/wire/control-fixed-responses-flat-user-location.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed wire capture");
+
+    assert_eq!(
+        capture["has_web_search_tool"].as_bool(),
+        Some(true),
+        "must have web search tool"
+    );
+    assert_eq!(
+        capture["has_nested_approximate"].as_bool(),
+        Some(false),
+        "must not have nested approximate object"
+    );
+    assert_eq!(
+        capture["user_location_is_flat"].as_bool(),
+        Some(true),
+        "user_location must be flat"
+    );
+
+    let verdict = responses_api_web_search_user_location_flat(true, true, false, true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_responses_web_search_no_location_control() {
+    let wire_str = fixture("transcripts/133/wire/control-web-search-no-location.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse no location capture");
+
+    let tools = capture["tools"].as_array().expect("tools array");
+    assert_eq!(tools.len(), 1, "must have 1 tool");
+    assert_eq!(tools[0]["type"].as_str(), Some("web_search"));
+    assert!(tools[0]["user_location"].is_null());
+
+    let verdict = responses_api_web_search_user_location_flat(true, false, false, false);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_responses_plain_no_web_search_control() {
+    let wire_str = fixture("transcripts/133/wire/control-plain-request-no-web-search.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse plain capture");
+
+    assert_eq!(capture["has_tools"].as_bool(), Some(false));
+
+    let verdict = responses_api_web_search_user_location_flat(false, false, false, false);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_responses_user_location_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/133/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_nested_location"].as_bool(),
+            Some(true),
+            "run {run_num}: nested location defect must reproduce"
+        );
+        assert_eq!(
+            run["control_flat_location"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed flat location must be conformant"
+        );
+        assert_eq!(
+            run["control_no_location"].as_bool(),
+            Some(true),
+            "run {run_num}: no location control must be conformant"
+        );
+        assert_eq!(
+            run["control_plain_no_web_search"].as_bool(),
+            Some(true),
+            "run {run_num}: plain request control must be conformant"
+        );
+    }
+}
+
+#[test]
+fn litellm_sync_stream_mcp_metadata_dropped_wire_reproduction() {
+    let wire_str = fixture("transcripts/134/wire/bug-sync-stream-mcp-metadata-dropped.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    assert_eq!(
+        capture["finish_chunk_has_provider_specific_fields"].as_bool(),
+        Some(false),
+        "finish chunk must not have provider_specific_fields in unpatched sync stream"
+    );
+    assert!(
+        capture["provider_specific_fields"].is_null(),
+        "provider_specific_fields must be null"
+    );
+
+    let verdict = sync_stream_mcp_metadata_preserved(true, true, false);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("stream suppressed MCP metadata")
+    ));
+}
+
+#[test]
+fn litellm_async_stream_mcp_metadata_preserved_control() {
+    let wire_str = fixture("transcripts/134/wire/control-async-stream-mcp-metadata-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse async wire capture");
+
+    assert_eq!(
+        capture["finish_chunk_has_provider_specific_fields"].as_bool(),
+        Some(true),
+        "finish chunk must preserve provider_specific_fields in async stream"
+    );
+    assert!(
+        capture["provider_specific_fields"]["mcp_tool_calls"].is_array(),
+        "mcp_tool_calls must be present"
+    );
+
+    let verdict = sync_stream_mcp_metadata_preserved(true, true, true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_fixed_sync_stream_mcp_metadata_preserved_control() {
+    let wire_str =
+        fixture("transcripts/134/wire/control-fixed-sync-stream-mcp-metadata-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed sync capture");
+
+    assert_eq!(
+        capture["finish_chunk_has_provider_specific_fields"].as_bool(),
+        Some(true),
+        "fixed sync stream must preserve provider_specific_fields"
+    );
+
+    let verdict = sync_stream_mcp_metadata_preserved(true, true, true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_sync_stream_no_options_preserved_control() {
+    let wire_str = fixture("transcripts/134/wire/control-sync-stream-no-options-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse plain sync capture");
+
+    assert_eq!(
+        capture["finish_chunk_has_provider_specific_fields"].as_bool(),
+        Some(true),
+        "plain sync stream must preserve provider_specific_fields"
+    );
+
+    let verdict = sync_stream_mcp_metadata_preserved(true, true, true);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_sync_stream_mcp_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/134/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["bug_sync_dropped_metadata"].as_bool(),
+            Some(true),
+            "run {run_num}: sync dropped metadata must reproduce"
+        );
+        assert_eq!(
+            run["control_async_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: async stream must preserve metadata"
+        );
+        assert_eq!(
+            run["control_fixed_sync_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed sync stream must preserve metadata"
+        );
+        assert_eq!(
+            run["control_plain_sync_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: plain sync stream must preserve metadata"
+        );
+    }
+}
+
+#[test]
+fn litellm_sync_iterator_under_anext_ttft_and_usage_lost_reproduction() {
+    let wire_str =
+        fixture("transcripts/135/wire/bug-sync-iterator-under-anext-ttft-and-usage-lost.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    let stream_mode = capture["stream_mode"].as_str().unwrap_or("");
+    let has_ttft = capture["has_completion_start_time"]
+        .as_bool()
+        .unwrap_or(false);
+    let has_hidden_usage = capture["has_hidden_usage"].as_bool().unwrap_or(false);
+
+    assert!(
+        !has_ttft,
+        "unpatched sync iterator must skip completion_start_time"
+    );
+    assert!(
+        !has_hidden_usage,
+        "unpatched sync iterator must skip hidden-params usage"
+    );
+
+    let verdict =
+        async_stream_ttft_and_hidden_usage_preserved(stream_mode, has_ttft, has_hidden_usage);
+    assert!(matches!(verdict, Verdict::Violation(_)));
+}
+
+#[test]
+fn litellm_async_iterator_under_anext_ttft_and_usage_preserved_control() {
+    let wire_str = fixture(
+        "transcripts/135/wire/control-async-iterator-under-anext-ttft-and-usage-preserved.json",
+    );
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse async control capture");
+
+    let stream_mode = capture["stream_mode"].as_str().unwrap_or("");
+    let has_ttft = capture["has_completion_start_time"]
+        .as_bool()
+        .unwrap_or(false);
+    let has_hidden_usage = capture["has_hidden_usage"].as_bool().unwrap_or(false);
+
+    assert!(has_ttft, "async iterator must record completion_start_time");
+    assert!(
+        has_hidden_usage,
+        "async iterator must populate hidden-params usage"
+    );
+
+    let verdict =
+        async_stream_ttft_and_hidden_usage_preserved(stream_mode, has_ttft, has_hidden_usage);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_fixed_sync_iterator_under_anext_preserved_control() {
+    let wire_str =
+        fixture("transcripts/135/wire/control-fixed-sync-iterator-under-anext-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed control capture");
+
+    let stream_mode = capture["stream_mode"].as_str().unwrap_or("");
+    let has_ttft = capture["has_completion_start_time"]
+        .as_bool()
+        .unwrap_or(false);
+    let has_hidden_usage = capture["has_hidden_usage"].as_bool().unwrap_or(false);
+
+    assert!(
+        has_ttft,
+        "fixed sync iterator must record completion_start_time"
+    );
+    assert!(
+        has_hidden_usage,
+        "fixed sync iterator must populate hidden-params usage"
+    );
+
+    let verdict =
+        async_stream_ttft_and_hidden_usage_preserved(stream_mode, has_ttft, has_hidden_usage);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_sync_iterator_include_usage_delivered_control() {
+    let wire_str =
+        fixture("transcripts/135/wire/control-sync-iterator-include-usage-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse include_usage capture");
+
+    assert_eq!(
+        capture["finish_chunk_has_usage"].as_bool(),
+        Some(false),
+        "finish chunk must not carry top-level usage when include_usage was requested"
+    );
+    assert_eq!(
+        capture["usage_chunk_has_usage"].as_bool(),
+        Some(true),
+        "usage chunk must carry usage"
+    );
+    assert_eq!(
+        capture["usage_chunk_total_tokens"].as_i64(),
+        Some(15),
+        "usage chunk total tokens must equal 15"
+    );
+}
+
+#[test]
+fn litellm_async_noniterable_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/135/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["defect_sync_under_anext_missing_ttft_and_usage"].as_bool(),
+            Some(true),
+            "run {run_num}: defect must reproduce missing TTFT and usage"
+        );
+        assert_eq!(
+            run["control_async_iterable_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: control async iterable must preserve TTFT and usage"
+        );
+        assert_eq!(
+            run["control_fixed_sync_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: control fixed sync must preserve TTFT and usage"
+        );
+        assert_eq!(
+            run["control_include_usage_delivered"].as_bool(),
+            Some(true),
+            "run {run_num}: control include usage must deliver usage chunk"
+        );
+    }
+}
+
+#[test]
+fn litellm_anthropic_messages_missing_endpoint_spend_row_reproduction() {
+    let wire_str =
+        fixture("transcripts/136/wire/bug-anthropic-messages-spend-row-missing-endpoint.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    let call_type = capture["call_type"].as_str().unwrap_or("");
+    let endpoint = capture["endpoint"].as_str();
+    let transaction_key = capture["transaction_key"].as_str().unwrap_or("");
+
+    assert_eq!(capture["has_endpoint"].as_bool(), Some(false));
+    assert!(endpoint.is_none());
+
+    let verdict = daily_spend_endpoint_attributed(call_type, endpoint, transaction_key);
+    assert!(matches!(verdict, Verdict::Violation(_)));
+}
+
+#[test]
+fn litellm_acompletion_chat_endpoint_spend_row_control() {
+    let wire_str = fixture("transcripts/136/wire/control-acompletion-spend-row-chat-endpoint.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse chat control capture");
+
+    let call_type = capture["call_type"].as_str().unwrap_or("");
+    let endpoint = capture["endpoint"].as_str();
+    let transaction_key = capture["transaction_key"].as_str().unwrap_or("");
+
+    assert_eq!(endpoint, Some("/chat/completions"));
+    assert_eq!(capture["ends_with_endpoint"].as_bool(), Some(true));
+
+    let verdict = daily_spend_endpoint_attributed(call_type, endpoint, transaction_key);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_fixed_anthropic_messages_messages_endpoint_control() {
+    let wire_str = fixture(
+        "transcripts/136/wire/control-fixed-anthropic-messages-spend-row-messages-endpoint.json",
+    );
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed control capture");
+
+    let call_type = capture["call_type"].as_str().unwrap_or("");
+    let endpoint = capture["endpoint"].as_str();
+    let transaction_key = capture["transaction_key"].as_str().unwrap_or("");
+
+    assert_eq!(endpoint, Some("/messages"));
+    assert_eq!(capture["ends_with_endpoint"].as_bool(), Some(true));
+
+    let verdict = daily_spend_endpoint_attributed(call_type, endpoint, transaction_key);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_aresponses_responses_endpoint_spend_row_control() {
+    let wire_str =
+        fixture("transcripts/136/wire/control-aresponses-spend-row-responses-endpoint.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse responses control capture");
+
+    let call_type = capture["call_type"].as_str().unwrap_or("");
+    let endpoint = capture["endpoint"].as_str();
+    let transaction_key = capture["transaction_key"].as_str().unwrap_or("");
+
+    assert_eq!(endpoint, Some("/responses"));
+    assert_eq!(capture["ends_with_endpoint"].as_bool(), Some(true));
+
+    let verdict = daily_spend_endpoint_attributed(call_type, endpoint, transaction_key);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_anthropic_messages_endpoint_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/136/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["defect_anthropic_messages_missing_endpoint"].as_bool(),
+            Some(true),
+            "run {run_num}: defect must reproduce missing endpoint"
+        );
+        assert_eq!(
+            run["control_acompletion_has_endpoint"].as_bool(),
+            Some(true),
+            "run {run_num}: control acompletion must have endpoint"
+        );
+        assert_eq!(
+            run["control_fixed_anthropic_has_endpoint"].as_bool(),
+            Some(true),
+            "run {run_num}: control fixed anthropic must have endpoint"
+        );
+        assert_eq!(
+            run["control_aresponses_has_endpoint"].as_bool(),
+            Some(true),
+            "run {run_num}: control aresponses must have endpoint"
+        );
+    }
+}
+
+#[test]
+fn litellm_github_copilot_system_list_content_unflattened_reproduction() {
+    let wire_str =
+        fixture("transcripts/137/wire/bug-github-copilot-system-list-content-unflattened.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    let is_list = capture["content_is_list"].as_bool().unwrap_or(false);
+    let is_str = capture["content_is_str"].as_bool().unwrap_or(false);
+
+    assert!(
+        is_list,
+        "unpatched copilot transformation must leave content as list"
+    );
+    assert!(
+        !is_str,
+        "unpatched copilot transformation must not emit string content"
+    );
+
+    let verdict = github_copilot_system_message_flattened(true, is_list, is_str);
+    assert!(matches!(verdict, Verdict::Violation(_)));
+}
+
+#[test]
+fn litellm_github_copilot_plain_string_system_content_control() {
+    let wire_str = fixture("transcripts/137/wire/control-plain-string-system-content.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse plain control capture");
+
+    let is_list = capture["content_is_list"].as_bool().unwrap_or(false);
+    let is_str = capture["content_is_str"].as_bool().unwrap_or(false);
+
+    assert!(!is_list);
+    assert!(is_str);
+    assert_eq!(
+        capture["content"].as_str(),
+        Some("Always talk like a pirate. Ahoy!")
+    );
+
+    let verdict = github_copilot_system_message_flattened(true, is_list, is_str);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_github_copilot_fixed_system_list_content_flattened_control() {
+    let wire_str = fixture("transcripts/137/wire/control-fixed-system-list-content-flattened.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed control capture");
+
+    let is_list = capture["content_is_list"].as_bool().unwrap_or(false);
+    let is_str = capture["content_is_str"].as_bool().unwrap_or(false);
+
+    assert!(!is_list);
+    assert!(is_str);
+    assert_eq!(
+        capture["content"].as_str(),
+        Some("Always talk like a pirate. Ahoy!")
+    );
+
+    let verdict = github_copilot_system_message_flattened(true, is_list, is_str);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_github_copilot_cache_control_promoted_control() {
+    let wire_str = fixture("transcripts/137/wire/control-cache-control-promoted.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse cache control capture");
+
+    let is_list = capture["content_is_list"].as_bool().unwrap_or(false);
+    let is_str = capture["content_is_str"].as_bool().unwrap_or(false);
+
+    assert!(!is_list);
+    assert!(is_str);
+    assert_eq!(capture["content"].as_str(), Some("Context prompt."));
+    assert_eq!(capture["cache_control"]["type"].as_str(), Some("ephemeral"));
+
+    let verdict = github_copilot_system_message_flattened(true, is_list, is_str);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_github_copilot_system_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/137/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["defect_emits_unflattened_list"].as_bool(),
+            Some(true),
+            "run {run_num}: defect must reproduce unflattened list"
+        );
+        assert_eq!(
+            run["control_plain_string_preserved"].as_bool(),
+            Some(true),
+            "run {run_num}: plain string must be preserved"
+        );
+        assert_eq!(
+            run["control_fixed_flattens_list"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed transformation must flatten list"
+        );
+        assert_eq!(
+            run["control_promotes_cache_control"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed transformation must promote cache control"
+        );
+    }
+}
+
+#[test]
+fn litellm_unpriced_response_cost_header_present_reproduction() {
+    let wire_str = fixture("transcripts/138/wire/bug-unpriced-response-cost-header-present.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    let price_known = capture["price_known"].as_bool().unwrap_or(true);
+    let cost_header_present = capture["cost_header_present"].as_bool().unwrap_or(false);
+
+    assert!(!price_known);
+    assert!(cost_header_present);
+    assert_eq!(
+        capture["response_cost_header"].as_str(),
+        Some("0.0"),
+        "unpatched unpriced response must emit 0.0 cost header"
+    );
+
+    let verdict = unpriced_response_cost_header_omitted(price_known, cost_header_present);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("falsely claiming request was free")
+    ));
+}
+
+#[test]
+fn litellm_unpriced_fixed_response_cost_header_omitted_control() {
+    let wire_str =
+        fixture("transcripts/138/wire/control-fixed-unpriced-response-cost-header-omitted.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed wire capture");
+
+    let price_known = capture["price_known"].as_bool().unwrap_or(true);
+    let cost_header_present = capture["cost_header_present"].as_bool().unwrap_or(true);
+
+    assert!(!price_known);
+    assert!(!cost_header_present);
+    assert!(capture["response_cost_header"].is_null());
+
+    let verdict = unpriced_response_cost_header_omitted(price_known, cost_header_present);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_priced_model_response_cost_header_control() {
+    let wire_str = fixture("transcripts/138/wire/control-priced-model-response-cost-header.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse priced wire capture");
+
+    let price_known = capture["price_known"].as_bool().unwrap_or(false);
+    let cost_header_present = capture["cost_header_present"].as_bool().unwrap_or(false);
+
+    assert!(price_known);
+    assert!(cost_header_present);
+    assert_eq!(
+        capture["response_cost_header"].as_str(),
+        Some("0.015"),
+        "priced model response must report positive cost header"
+    );
+
+    let verdict = unpriced_response_cost_header_omitted(price_known, cost_header_present);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_free_model_response_cost_header_control() {
+    let wire_str = fixture("transcripts/138/wire/control-free-model-response-cost-header.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse free wire capture");
+
+    let price_known = capture["price_known"].as_bool().unwrap_or(false);
+    let cost_header_present = capture["cost_header_present"].as_bool().unwrap_or(false);
+
+    assert!(price_known);
+    assert!(cost_header_present);
+    assert_eq!(
+        capture["response_cost_header"].as_str(),
+        Some("0.0"),
+        "explicitly free model legitimately reports 0.0 cost header"
+    );
+
+    let verdict = unpriced_response_cost_header_omitted(price_known, cost_header_present);
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_unpriced_response_cost_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/138/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["defect_unpriced_emits_zero_header"].as_bool(),
+            Some(true),
+            "run {run_num}: unpriced defect must emit zero cost header"
+        );
+        assert_eq!(
+            run["control_priced_emits_positive_header"].as_bool(),
+            Some(true),
+            "run {run_num}: priced model must emit positive cost header"
+        );
+        assert_eq!(
+            run["control_free_emits_zero_header"].as_bool(),
+            Some(true),
+            "run {run_num}: free model must emit zero cost header"
+        );
+        assert_eq!(
+            run["control_fixed_unpriced_omits_header"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed unpriced model must omit cost header"
+        );
+    }
+}
+
+// ---- bug 139: LiteLLM responses bridge drops logprobs across chat completions bridge ----
+
+#[test]
+fn litellm_responses_bridge_logprobs_dropped_reproduction() {
+    let wire_str = fixture("transcripts/139/wire/bug-responses-bridge-logprobs-dropped.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse bug wire capture");
+
+    let req_top = capture["request_top_logprobs"].as_u64();
+    let bridged_top = capture["bridged_chat_top_logprobs"].as_u64();
+    let bridged_lp = capture["bridged_chat_logprobs"].as_bool();
+    let provider_ret = capture["provider_returned_logprobs"]
+        .as_bool()
+        .unwrap_or(false);
+    let resp_lp = capture["response_has_logprobs"].as_bool().unwrap_or(true);
+
+    assert_eq!(req_top, Some(2));
+    assert!(provider_ret);
+    assert!(!resp_lp);
+    assert!(capture["output_text"]["logprobs"].is_null());
+
+    let verdict = responses_bridge_logprobs_preserved(
+        req_top,
+        bridged_top,
+        bridged_lp,
+        provider_ret,
+        resp_lp,
+    );
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("dropped chat completion choice logprobs")
+    ));
+}
+
+#[test]
+fn litellm_fixed_responses_bridge_logprobs_preserved_control() {
+    let wire_str =
+        fixture("transcripts/139/wire/control-fixed-responses-bridge-logprobs-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse control fixed wire capture");
+
+    let req_top = capture["request_top_logprobs"].as_u64();
+    let bridged_top = capture["bridged_chat_top_logprobs"].as_u64();
+    let bridged_lp = capture["bridged_chat_logprobs"].as_bool();
+    let provider_ret = capture["provider_returned_logprobs"]
+        .as_bool()
+        .unwrap_or(false);
+    let resp_lp = capture["response_has_logprobs"].as_bool().unwrap_or(false);
+
+    assert_eq!(req_top, Some(2));
+    assert_eq!(bridged_top, Some(2));
+    assert_eq!(bridged_lp, Some(true));
+    assert!(provider_ret);
+    assert!(resp_lp);
+    assert!(capture["output_text"]["logprobs"].is_array());
+
+    let verdict = responses_bridge_logprobs_preserved(
+        req_top,
+        bridged_top,
+        bridged_lp,
+        provider_ret,
+        resp_lp,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_responses_without_logprobs_control() {
+    let wire_str = fixture("transcripts/139/wire/control-responses-without-logprobs.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse normal responses capture");
+
+    let req_top = capture["request_top_logprobs"].as_u64();
+    let bridged_top = capture["bridged_chat_top_logprobs"].as_u64();
+    let bridged_lp = capture["bridged_chat_logprobs"].as_bool();
+    let provider_ret = capture["provider_returned_logprobs"]
+        .as_bool()
+        .unwrap_or(false);
+    let resp_lp = capture["response_has_logprobs"].as_bool().unwrap_or(false);
+
+    assert!(req_top.is_none());
+    assert!(bridged_top.is_none());
+    assert!(bridged_lp.is_none());
+    assert!(!provider_ret);
+    assert!(!resp_lp);
+
+    let verdict = responses_bridge_logprobs_preserved(
+        req_top,
+        bridged_top,
+        bridged_lp,
+        provider_ret,
+        resp_lp,
+    );
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_provider_validation_top_logprobs_requires_logprobs_control() {
+    let wire_str = fixture(
+        "transcripts/139/wire/control-provider-validation-top-logprobs-requires-logprobs.json",
+    );
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse provider validation capture");
+
+    assert_eq!(capture["status_code"].as_u64(), Some(400));
+    assert_eq!(
+        capture["error_type"].as_str(),
+        Some("invalid_request_error")
+    );
+    assert!(capture["error_message"]
+        .as_str()
+        .unwrap_or("")
+        .contains("'top_logprobs' is only allowed when 'logprobs' is enabled"));
+
+    let top_lp = capture["rejected_outbound_params"]["top_logprobs"].as_u64();
+    let lp = capture["rejected_outbound_params"]["logprobs"].as_bool();
+    let verdict = responses_bridge_logprobs_preserved(top_lp, top_lp, lp, false, false);
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("forwarded top_logprobs without setting logprobs: true")
+    ));
+}
+
+#[test]
+fn litellm_responses_bridge_logprobs_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/139/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["defect_unpatched_bridge_drops_logprobs"].as_bool(),
+            Some(true),
+            "run {run_num}: defect must drop logprobs"
+        );
+        assert_eq!(
+            run["control_fixed_bridge_preserves_logprobs"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed bridge must preserve logprobs"
+        );
+        assert_eq!(
+            run["control_responses_without_logprobs"].as_bool(),
+            Some(true),
+            "run {run_num}: unrequested logprobs must be omitted"
+        );
+        assert_eq!(
+            run["control_provider_validation_rule"].as_bool(),
+            Some(true),
+            "run {run_num}: provider validation rule must reject top_logprobs without logprobs"
+        );
+    }
+}
+
+#[test]
+fn litellm_openrouter_stream_served_model_dropped_reproduction() {
+    let wire_str = fixture("transcripts/140/wire/bug-stream-served-model-lost.json");
+    let capture: Value =
+        serde_json::from_str(&wire_str).expect("parse stream served model capture");
+
+    assert_eq!(capture["served_model_lost"].as_bool(), Some(true));
+    assert_eq!(capture["requested_model"].as_str(), Some("openrouter/auto"));
+    assert_eq!(
+        capture["provider_served_model"].as_str(),
+        Some("openai/gpt-4o-mini")
+    );
+    assert_eq!(capture["assembled_response_model"].as_str(), Some("auto"));
+
+    let chunk_models: Vec<String> = capture["emitted_chunk_models"]
+        .as_array()
+        .expect("chunk models")
+        .iter()
+        .map(|v| v.as_str().unwrap().to_string())
+        .collect();
+
+    let verdict = openrouter_stream_served_model_preserved(
+        capture["requested_model"].as_str().unwrap(),
+        capture["provider_served_model"].as_str().unwrap(),
+        &chunk_models,
+        capture["assembled_response_model"].as_str(),
+    );
+
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("overwrote provider served model with requested router alias")
+    ));
+}
+
+#[test]
+fn litellm_fixed_openrouter_stream_served_model_preserved_control() {
+    let wire_str = fixture("transcripts/140/wire/control-fixed-stream-served-model-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed capture");
+
+    assert_eq!(capture["served_model_preserved"].as_bool(), Some(true));
+    assert_eq!(
+        capture["assembled_response_model"].as_str(),
+        Some("openai/gpt-4o-mini")
+    );
+
+    let chunk_models: Vec<String> = capture["emitted_chunk_models"]
+        .as_array()
+        .expect("chunk models")
+        .iter()
+        .map(|v| v.as_str().unwrap().to_string())
+        .collect();
+
+    let verdict = openrouter_stream_served_model_preserved(
+        capture["requested_model"].as_str().unwrap(),
+        capture["provider_served_model"].as_str().unwrap(),
+        &chunk_models,
+        capture["assembled_response_model"].as_str(),
+    );
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_openrouter_direct_stream_model_control() {
+    let wire_str = fixture("transcripts/140/wire/control-direct-stream-model.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse direct capture");
+
+    assert_eq!(capture["direct_model_preserved"].as_bool(), Some(true));
+    assert_eq!(
+        capture["assembled_response_model"].as_str(),
+        Some("openai/gpt-4o-mini")
+    );
+
+    let chunk_models: Vec<String> = capture["emitted_chunk_models"]
+        .as_array()
+        .expect("chunk models")
+        .iter()
+        .map(|v| v.as_str().unwrap().to_string())
+        .collect();
+
+    let verdict = openrouter_stream_served_model_preserved(
+        capture["requested_model"].as_str().unwrap(),
+        capture["provider_served_model"].as_str().unwrap(),
+        &chunk_models,
+        capture["assembled_response_model"].as_str(),
+    );
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_openrouter_nonstreaming_served_model_preserved_control() {
+    let wire_str = fixture("transcripts/140/wire/control-nonstreaming-served-model-preserved.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse nonstreaming capture");
+
+    assert_eq!(
+        capture["nonstreaming_served_model_preserved"].as_bool(),
+        Some(true)
+    );
+    assert_eq!(
+        capture["response_model"].as_str(),
+        Some("openai/gpt-4o-mini")
+    );
+}
+
+#[test]
+fn litellm_openrouter_stream_served_model_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/140/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["defect_unpatched_stream_loses_served_model"].as_bool(),
+            Some(true),
+            "run {run_num}: unpatched stream must lose served model"
+        );
+        assert_eq!(
+            run["control_fixed_stream_preserves_served_model"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed stream must preserve served model"
+        );
+        assert_eq!(
+            run["control_direct_stream_preserves_model"].as_bool(),
+            Some(true),
+            "run {run_num}: direct stream must preserve model"
+        );
+        assert_eq!(
+            run["control_nonstreaming_preserves_served_model"].as_bool(),
+            Some(true),
+            "run {run_num}: nonstreaming completion must preserve served model"
+        );
+    }
+}
+
+#[test]
+fn litellm_cohere_v2_tool_call_finish_reason_stop_reproduction() {
+    let wire_str = fixture("transcripts/141/wire/bug-cohere-v2-tool-call-finish-reason-stop.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse tool call capture");
+
+    assert_eq!(
+        capture["provider_finish_reason"].as_str(),
+        Some("TOOL_CALL")
+    );
+    assert_eq!(capture["has_tool_calls"].as_bool(), Some(true));
+    assert_eq!(capture["response_finish_reason"].as_str(), Some("stop"));
+
+    let verdict = cohere_v2_finish_reason_mapped(
+        capture["provider_finish_reason"].as_str().unwrap(),
+        capture["has_tool_calls"].as_bool().unwrap(),
+        capture["response_finish_reason"].as_str(),
+    );
+
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("returned finish_reason 'stop' instead of 'tool_calls'")
+    ));
+}
+
+#[test]
+fn litellm_cohere_v2_max_tokens_finish_reason_stop_reproduction() {
+    let wire_str = fixture("transcripts/141/wire/bug-cohere-v2-max-tokens-finish-reason-stop.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse max tokens capture");
+
+    assert_eq!(
+        capture["provider_finish_reason"].as_str(),
+        Some("MAX_TOKENS")
+    );
+    assert_eq!(capture["response_finish_reason"].as_str(), Some("stop"));
+
+    let verdict = cohere_v2_finish_reason_mapped(
+        capture["provider_finish_reason"].as_str().unwrap(),
+        capture["has_tool_calls"].as_bool().unwrap(),
+        capture["response_finish_reason"].as_str(),
+    );
+
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("returned finish_reason 'stop' instead of 'length'")
+    ));
+}
+
+#[test]
+fn litellm_fixed_cohere_v2_tool_calls_control() {
+    let wire_str = fixture("transcripts/141/wire/control-fixed-cohere-v2-tool-calls.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed tool call capture");
+
+    assert_eq!(
+        capture["provider_finish_reason"].as_str(),
+        Some("TOOL_CALL")
+    );
+    assert_eq!(capture["has_tool_calls"].as_bool(), Some(true));
+    assert_eq!(
+        capture["response_finish_reason"].as_str(),
+        Some("tool_calls")
+    );
+
+    let verdict = cohere_v2_finish_reason_mapped(
+        capture["provider_finish_reason"].as_str().unwrap(),
+        capture["has_tool_calls"].as_bool().unwrap(),
+        capture["response_finish_reason"].as_str(),
+    );
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_fixed_cohere_v2_max_tokens_control() {
+    let wire_str = fixture("transcripts/141/wire/control-fixed-cohere-v2-max-tokens.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse fixed max tokens capture");
+
+    assert_eq!(
+        capture["provider_finish_reason"].as_str(),
+        Some("MAX_TOKENS")
+    );
+    assert_eq!(capture["response_finish_reason"].as_str(), Some("length"));
+
+    let verdict = cohere_v2_finish_reason_mapped(
+        capture["provider_finish_reason"].as_str().unwrap(),
+        capture["has_tool_calls"].as_bool().unwrap(),
+        capture["response_finish_reason"].as_str(),
+    );
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_cohere_v2_complete_control() {
+    let wire_str = fixture("transcripts/141/wire/control-cohere-v2-complete.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse complete capture");
+
+    assert_eq!(capture["provider_finish_reason"].as_str(), Some("COMPLETE"));
+    assert_eq!(capture["response_finish_reason"].as_str(), Some("stop"));
+
+    let verdict = cohere_v2_finish_reason_mapped(
+        capture["provider_finish_reason"].as_str().unwrap(),
+        capture["has_tool_calls"].as_bool().unwrap(),
+        capture["response_finish_reason"].as_str(),
+    );
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_cohere_v2_finish_reason_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/141/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["defect_unpatched_tool_call_reports_stop"].as_bool(),
+            Some(true),
+            "run {run_num}: defect TOOL_CALL must report stop"
+        );
+        assert_eq!(
+            run["defect_unpatched_max_tokens_reports_stop"].as_bool(),
+            Some(true),
+            "run {run_num}: defect MAX_TOKENS must report stop"
+        );
+        assert_eq!(
+            run["control_fixed_tool_call_reports_tool_calls"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed TOOL_CALL must report tool_calls"
+        );
+        assert_eq!(
+            run["control_fixed_max_tokens_reports_length"].as_bool(),
+            Some(true),
+            "run {run_num}: fixed MAX_TOKENS must report length"
+        );
+        assert_eq!(
+            run["control_complete_reports_stop"].as_bool(),
+            Some(true),
+            "run {run_num}: COMPLETE must report stop"
+        );
+        assert_eq!(
+            run["control_stop_sequence_reports_stop"].as_bool(),
+            Some(true),
+            "run {run_num}: STOP_SEQUENCE must report stop"
+        );
+    }
+}
+
+// ---- bug 142: LiteLLM Gemini top_logprobs translation defects ----
+
+#[test]
+fn litellm_gemini_chat_top_logprobs_unsupported_reproduction() {
+    let wire_str = fixture("transcripts/142/wire/defect-chat-top-logprobs-unsupported.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse capture");
+
+    let model = capture["client_request"]["body"]["model"].as_str().unwrap();
+    let is_google_ai_studio = model.starts_with("gemini/");
+    let has_top_logprobs = capture["client_request"]["body"]["top_logprobs"].is_number();
+    let gateway_supported = false; // unpatched GoogleAIStudioGeminiConfig omits top_logprobs
+
+    let verdict = gemini_logprobs_params_mapped(
+        has_top_logprobs,
+        is_google_ai_studio,
+        gateway_supported,
+        None,
+        None,
+    );
+
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("omitted 'top_logprobs' from supported params")
+    ));
+}
+
+#[test]
+fn litellm_gemini_top_logprobs_missing_response_logprobs_reproduction() {
+    let wire_str =
+        fixture("transcripts/142/wire/defect-top-logprobs-missing-response-logprobs.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse capture");
+
+    let has_response_logprobs = capture["has_response_logprobs"].as_bool().unwrap();
+    let logprobs_count = capture["logprobs_count"].as_i64();
+
+    let verdict = gemini_logprobs_params_mapped(
+        true,
+        true,
+        true,
+        logprobs_count,
+        Some(has_response_logprobs),
+    );
+
+    assert!(matches!(
+        verdict,
+        Verdict::Violation(msg)
+            if msg.contains("without responseLogprobs=true")
+    ));
+}
+
+#[test]
+fn litellm_gemini_chat_top_logprobs_patched_control() {
+    let wire_str = fixture("transcripts/142/wire/control-chat-top-logprobs-patched.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse capture");
+
+    let has_response_logprobs = capture["has_response_logprobs"].as_bool().unwrap();
+    let logprobs_count = capture["logprobs_count"].as_i64();
+
+    let verdict = gemini_logprobs_params_mapped(
+        true,
+        true,
+        true,
+        logprobs_count,
+        Some(has_response_logprobs),
+    );
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_gemini_top_logprobs_sets_response_logprobs_control() {
+    let wire_str = fixture("transcripts/142/wire/control-top-logprobs-sets-response-logprobs.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse capture");
+
+    let has_response_logprobs = capture["has_response_logprobs"].as_bool().unwrap();
+    let logprobs_count = capture["logprobs_count"].as_i64();
+
+    let verdict = gemini_logprobs_params_mapped(
+        true,
+        true,
+        true,
+        logprobs_count,
+        Some(has_response_logprobs),
+    );
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_gemini_baseline_no_logprobs_control() {
+    let wire_str = fixture("transcripts/142/wire/control-baseline-no-logprobs.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse capture");
+
+    let logprobs_count = capture["logprobs_count"].as_i64();
+
+    let verdict = gemini_logprobs_params_mapped(false, true, true, logprobs_count, None);
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_gemini_logprobs_only_control() {
+    let wire_str = fixture("transcripts/142/wire/control-logprobs-only.json");
+    let capture: Value = serde_json::from_str(&wire_str).expect("parse capture");
+
+    let has_response_logprobs = capture["has_response_logprobs"].as_bool().unwrap();
+    let logprobs_count = capture["logprobs_count"].as_i64();
+
+    let verdict = gemini_logprobs_params_mapped(
+        false,
+        true,
+        true,
+        logprobs_count,
+        Some(has_response_logprobs),
+    );
+
+    assert_eq!(verdict, Verdict::Conformant);
+}
+
+#[test]
+fn litellm_gemini_logprobs_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/142/wire/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse matrix");
+    let runs = matrix["runs"].as_array().expect("runs array");
+    assert_eq!(runs.len(), 5, "must have completed 5 runs");
+
+    for (idx, run) in runs.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            run["defect_chat_top_logprobs_rejected"].as_bool(),
+            Some(true),
+            "run {run_num}: defect chat top_logprobs must be rejected"
+        );
+        assert_eq!(
+            run["defect_top_logprobs_missing_response_logprobs"].as_bool(),
+            Some(true),
+            "run {run_num}: defect top_logprobs must omit responseLogprobs"
+        );
+        assert_eq!(
+            run["control_chat_top_logprobs_patched_success"].as_bool(),
+            Some(true),
+            "run {run_num}: control chat top_logprobs patched must succeed"
+        );
+        assert_eq!(
+            run["control_top_logprobs_sets_response_logprobs"].as_bool(),
+            Some(true),
+            "run {run_num}: control top_logprobs must set responseLogprobs"
+        );
+        assert_eq!(
+            run["control_baseline_no_logprobs_clean"].as_bool(),
+            Some(true),
+            "run {run_num}: baseline request must be clean"
+        );
+        assert_eq!(
+            run["control_logprobs_only_clean"].as_bool(),
+            Some(true),
+            "run {run_num}: logprobs only request must be clean"
+        );
+    }
 }

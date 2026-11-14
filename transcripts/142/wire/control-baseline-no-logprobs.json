@@ -1,0 +1,41 @@
+{
+  "scenario": "control_baseline_no_logprobs",
+  "client_request": {
+    "method": "POST",
+    "url": "https://gateway.local/v1/chat/completions",
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "model": "gemini/gemini-2.5-flash",
+      "messages": [
+        {
+          "role": "user",
+          "content": "Hello"
+        }
+      ]
+    }
+  },
+  "gateway_forwarded_to_provider": {
+    "method": "POST",
+    "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+    "headers": {
+      "content-type": "application/json"
+    },
+    "body": {
+      "contents": [
+        {
+          "role": "user",
+          "parts": [
+            {
+              "text": "Hello"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "has_response_logprobs": false,
+  "logprobs_count": null,
+  "is_defect": false
+}

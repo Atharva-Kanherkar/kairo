@@ -1,0 +1,4 @@
+{
+  "status_code": 403,
+  "detail": "Forbidden. The response id is not associated with the user, who this key belongs to. To disable this security feature, set general_settings::disable_responses_id_security to True in the config.yaml file."
+}

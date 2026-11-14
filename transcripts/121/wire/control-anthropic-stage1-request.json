@@ -1,0 +1,31 @@
+{
+  "model": "claude-3-5-sonnet-20241022",
+  "tools": [
+    {
+      "type": "bash_20250124",
+      "name": "bash"
+    }
+  ],
+  "messages": [
+    {
+      "role": "user",
+      "content": "execute command"
+    }
+  ],
+  "user_api_key_request_route": "/v1/messages",
+  "metadata": {
+    "standard_logging_guardrail_information": [
+      {
+        "guardrail_name": null,
+        "guardrail_provider": null,
+        "guardrail_mode": null,
+        "guardrail_response": "400: {'error': 'Violated tool policy', 'blocked_tools': ['bash'], 'message': \"Tool(s) ['bash'] are blocked by policy.\"}",
+        "guardrail_status": "guardrail_intervened",
+        "start_time": 1793520875.748339,
+        "end_time": 1793520876.019477,
+        "duration": 0.271139,
+        "masked_entity_count": null
+      }
+    ]
+  }
+}

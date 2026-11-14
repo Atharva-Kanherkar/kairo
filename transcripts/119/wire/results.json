@@ -1,0 +1,47 @@
+{
+  "target_commit": "cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a",
+  "target_version": "1.108.0-dev / v1.106.6",
+  "runs_completed": 5,
+  "results": [
+    {
+      "run": 1,
+      "proxy_status": 200,
+      "turn2_forwarded_has_tool_result": true,
+      "turn2_forwarded_is_error_present": false,
+      "turn2_forwarded_is_error_value": null,
+      "control_direct_is_error_preserved": true
+    },
+    {
+      "run": 2,
+      "proxy_status": 200,
+      "turn2_forwarded_has_tool_result": true,
+      "turn2_forwarded_is_error_present": false,
+      "turn2_forwarded_is_error_value": null,
+      "control_direct_is_error_preserved": true
+    },
+    {
+      "run": 3,
+      "proxy_status": 200,
+      "turn2_forwarded_has_tool_result": true,
+      "turn2_forwarded_is_error_present": false,
+      "turn2_forwarded_is_error_value": null,
+      "control_direct_is_error_preserved": true
+    },
+    {
+      "run": 4,
+      "proxy_status": 200,
+      "turn2_forwarded_has_tool_result": true,
+      "turn2_forwarded_is_error_present": false,
+      "turn2_forwarded_is_error_value": null,
+      "control_direct_is_error_preserved": true
+    },
+    {
+      "run": 5,
+      "proxy_status": 200,
+      "turn2_forwarded_has_tool_result": true,
+      "turn2_forwarded_is_error_present": false,
+      "turn2_forwarded_is_error_value": null,
+      "control_direct_is_error_preserved": true
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "finding": 141,
+  "name": "litellm-cohere-v2-nonstream-finish-reason",
+  "target": "LiteLLM v1.109.0 (commit cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a)",
+  "upstream_pr": "https://github.com/BerriAI/litellm/pull/49529",
+  "upstream_ticket": "LIT-9731",
+  "total_runs": 5,
+  "reproduction_rate": "5/5 (100%)",
+  "runs": [
+    {
+      "run": 1,
+      "defect_unpatched_tool_call_reports_stop": true,
+      "defect_unpatched_max_tokens_reports_stop": true,
+      "control_fixed_tool_call_reports_tool_calls": true,
+      "control_fixed_max_tokens_reports_length": true,
+      "control_complete_reports_stop": true,
+      "control_stop_sequence_reports_stop": true
+    },
+    {
+      "run": 2,
+      "defect_unpatched_tool_call_reports_stop": true,
+      "defect_unpatched_max_tokens_reports_stop": true,
+      "control_fixed_tool_call_reports_tool_calls": true,
+      "control_fixed_max_tokens_reports_length": true,
+      "control_complete_reports_stop": true,
+      "control_stop_sequence_reports_stop": true
+    },
+    {
+      "run": 3,
+      "defect_unpatched_tool_call_reports_stop": true,
+      "defect_unpatched_max_tokens_reports_stop": true,
+      "control_fixed_tool_call_reports_tool_calls": true,
+      "control_fixed_max_tokens_reports_length": true,
+      "control_complete_reports_stop": true,
+      "control_stop_sequence_reports_stop": true
+    },
+    {
+      "run": 4,
+      "defect_unpatched_tool_call_reports_stop": true,
+      "defect_unpatched_max_tokens_reports_stop": true,
+      "control_fixed_tool_call_reports_tool_calls": true,
+      "control_fixed_max_tokens_reports_length": true,
+      "control_complete_reports_stop": true,
+      "control_stop_sequence_reports_stop": true
+    },
+    {
+      "run": 5,
+      "defect_unpatched_tool_call_reports_stop": true,
+      "defect_unpatched_max_tokens_reports_stop": true,
+      "control_fixed_tool_call_reports_tool_calls": true,
+      "control_fixed_max_tokens_reports_length": true,
+      "control_complete_reports_stop": true,
+      "control_stop_sequence_reports_stop": true
+    }
+  ]
+}

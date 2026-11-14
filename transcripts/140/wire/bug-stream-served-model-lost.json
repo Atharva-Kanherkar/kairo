@@ -1,0 +1,16 @@
+{
+  "description": "LiteLLM CustomStreamWrapper overwrites OpenRouter served model with requested router alias",
+  "target": "LiteLLM v1.109.0 (commit cfe0100e1fca613e7b1af27dd1fe4807ca4d1d1a)",
+  "raw_upstream_sse_bytes": "data: {\"id\":\"gen-openrouter-stream-001\",\"created\":1730000000,\"model\":null,\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"gen-openrouter-stream-001\",\"created\":1730000000,\"model\":\"openai/gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"Hello \"},\"finish_reason\":null}],\"usage\":{\"prompt_tokens\":5,\"completion_tokens\":2,\"total_tokens\":7}}\n\ndata: {\"id\":\"gen-openrouter-stream-001\",\"created\":1730000000,\"model\":\"openai/gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"world!\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"gen-openrouter-stream-001\",\"created\":1730000000,\"model\":\"\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+  "requested_model": "openrouter/auto",
+  "provider_served_model": "openai/gpt-4o-mini",
+  "emitted_chunk_models": [
+    "auto",
+    "auto",
+    "auto",
+    "auto"
+  ],
+  "assembled_response_model": "auto",
+  "assembled_content": "Hello world!",
+  "served_model_lost": true
+}

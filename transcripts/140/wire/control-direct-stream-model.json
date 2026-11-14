@@ -1,0 +1,15 @@
+{
+  "description": "Control: direct OpenRouter stream where requested model matches served model",
+  "target": "LiteLLM v1.109.0",
+  "raw_upstream_sse_bytes": "data: {\"id\":\"gen-openrouter-stream-002\",\"created\":1730000000,\"model\":\"openai/gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"gen-openrouter-stream-002\",\"created\":1730000000,\"model\":\"openai/gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"Direct response\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"gen-openrouter-stream-002\",\"created\":1730000000,\"model\":\"openai/gpt-4o-mini\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n",
+  "requested_model": "openrouter/openai/gpt-4o-mini",
+  "provider_served_model": "openai/gpt-4o-mini",
+  "emitted_chunk_models": [
+    "openai/gpt-4o-mini",
+    "openai/gpt-4o-mini",
+    "openai/gpt-4o-mini"
+  ],
+  "assembled_response_model": "openai/gpt-4o-mini",
+  "assembled_content": "Direct response",
+  "direct_model_preserved": true
+}

@@ -1,0 +1,13 @@
+{
+  "turn_1_role": "assistant",
+  "turn_1_tool_calls": [
+    {
+      "id": "call_view_file",
+      "type": "function",
+      "function": {
+        "name": "view_file",
+        "arguments": "{\"path\": \"/tmp/a.py\"}"
+      }
+    }
+  ]
+}
