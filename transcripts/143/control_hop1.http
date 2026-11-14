@@ -1,0 +1,10 @@
+HTTP/1.1 303 See Other
+date: Fri, 13 Nov 2026 17:33:40 GMT
+content-length: 0
+location: http://127.0.0.1:9600/authorize?response_type=code&client_id=litellm-hunt-client&redirect_uri=http%3A%2F%2F127.0.0.1%3A4100%2Fsso%2Fcallback&scope=openid+email+profile&state=27acdfec4b14405e87dc0fbcf5987183
+set-cookie: sso_state=27acdfec4b14405e87dc0fbcf5987183; HttpOnly; Path=/; SameSite=lax
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+

@@ -1,0 +1,10 @@
+POST /v1alpha/models/premium-model:generateContent?key=fake-gemini-master-key HTTP/1.1
+Host: 127.0.0.1:4927
+Accept: */*
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+User-Agent: litellm/1.108.0
+Content-Length: 54
+Content-Type: application/json
+
+{"contents":[{"role":"user","parts":[{"text":"hi"}]}]}
