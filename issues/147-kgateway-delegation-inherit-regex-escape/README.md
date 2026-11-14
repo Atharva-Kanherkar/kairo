@@ -16,8 +16,8 @@ route's, so a route-level RBAC policy on the admin route is bypassed.
   Classification `duplicate-open` as of 2026-11-14. The issue's Additional
   Context already names the inherit branch and `path.Join`. The open fix,
   [#14949](https://github.com/kgateway-dev/kgateway/pull/14949), changes only
-  `IsDelegatedRouteMatch`; it does not touch the inherit branch, and applying
-  it leaves this reproduction unchanged.
+  the non-inherit path check; it adds helper functions and tests but does not
+  touch the inherit branch, and applying it leaves this reproduction unchanged.
 - **Target type**: open source, run locally.
 - **Tested commit**: `74f2e098d85f1b3d6825b3a12bbacab82e606cb3` (main, 2026-11-13).
 - **Client dialect**: Gateway API HTTPRoute.
@@ -28,7 +28,9 @@ route's, so a route-level RBAC policy on the admin route is bypassed.
 - **Relevant configuration**: the delegation parent uses `PathPrefix /team1`;
   the child names `delegation.kgateway.dev/inherit-parent-matcher: "true"` and a
   `RegularExpression` path; a separate platform route uses `PathPrefix /admin`
-  with a route-level RBAC TrafficPolicy. No other non-default settings.
+  with a route-level RBAC TrafficPolicy. The invariant test sets
+  `EnableAuthMetadata=true` as the standard translator harness does; it does not
+  affect delegation or RBAC translation. No other non-default settings.
 
 ## What breaks
 
@@ -56,10 +58,11 @@ Conditions: a delegated child HTTPRoute in a namespace that owns it, the
 need to use a wildcard delegation; the tenant can set the annotation and the
 regex on a route the parent already delegates to.
 
-Measured versus inferred: the merged match, the route order, the child's missing
-RBAC config, and the Envoy routing are **measured** 5 of 5. The exact credential
-exposure depends on what the admin route carries and is **inferred** from the
-routing and policy attachment.
+Measured versus inferred: the translator invariant is **measured** 5 of 5. The
+merged match, the route order, the child's missing RBAC config, and the Envoy
+routing are shown in one xDS snapshot and one minimal Envoy run. The exact
+credential exposure depends on what the admin route carries and is **inferred**
+from the routing and policy attachment.
 
 ## Evidence
 
@@ -171,10 +174,12 @@ KAIRO_REPRO_DIR="$KAIRO147" \
   -count=5 -v   # passes 5 of 5
 ```
 
-The checker asserts the protocol invariant, not the fixture: every programmed
-match for a delegated child must stay inside the parent's `/team1` prefix. The
-control changes only the annotation, so the failure is attributed to the inherit
-branch rather than to the regex input or the harness.
+The checker is a targeted regression test over the programmed route for
+`a/zz-child` and three admin canaries, not a general regex-containment proof.
+It asserts the protocol invariant for this input: the delegated child must not
+match `/admin`, `/admin/`, or `/admin/secret`, all outside the parent's `/team1`
+prefix. The control changes only the annotation, so the failure is attributed
+to the inherit branch rather than to the regex input or the harness.
 
 No Rust harness checker is added. The kairo harness models LLM wire transcripts,
 not Envoy xDS; the Go test is the executable invariant and runs against the
@@ -187,9 +192,11 @@ Searched on 2026-11-14: `inherit-parent-matcher`, `MergeParentChildRouteMatch`,
 `/admin` delegation, and the exact route names. [#14869](https://github.com/kgateway-dev/kgateway/issues/14869)
 is open and its Additional Context already describes this branch and the
 `/x|/admin.*` variant. [#14949](https://github.com/kgateway-dev/kgateway/pull/14949)
-is open and does not cover the inherit branch. This is a duplicate with
-independent evidence and a new payload (`../admin(?:/.*)?`), not a novel
-finding.
+is open and does not cover the inherit branch. [#13792](https://github.com/kgateway-dev/kgateway/issues/13792)
+and closed PR [#14329](https://github.com/kgateway-dev/kgateway/pull/14329) cover
+a regex parent under matcher inheritance, which is a different case. This is a
+duplicate with independent evidence and a new payload (`../admin(?:/.*)?`), not
+a novel finding.
 
 ## Why this is a bug, not a hardening note
 
@@ -210,8 +217,8 @@ finding.
 
 - The translator harness does not validate HTTPRoute against the Gateway API
   CRD. The CRD itself allows `RegularExpression` values; its `/../` and `/..`
-  rules are conditional on `Exact` and `PathPrefix`. A real API server admission,
-  controller, and Envoy run was not performed.
+  rules are conditional on `Exact` and `PathPrefix`. A full API server
+  admission, controller, and generated-data-plane Envoy run was not performed.
 - The Envoy check uses the two emitted matches in a minimal config, not the full
   generated data plane with the RBAC filter chain. The RBAC bypass is shown in
   the xDS output, where the child route has no RBAC config, and follows from the
