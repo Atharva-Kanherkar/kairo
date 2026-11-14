@@ -45,8 +45,9 @@ use kairo::checks::{
     responses_fallback_not_spliced_after_delivery, responses_fallback_preserves_delivered_indexes,
     responses_no_restart_after_output, responses_refusal_semantics_preserved,
     responses_single_lifecycle, served_model_within_key_allowlist, stop_sequence_forwarded,
-    sync_stream_mcp_metadata_preserved, thinking_not_leaked_as_visible_text,
-    thinking_text_forwarded, tool_policy_guardrail_enforces_trust_chain_and_blocked_tools,
+    sync_stream_mcp_metadata_preserved, team_preserves_max_parallel_requests,
+    thinking_not_leaked_as_visible_text, thinking_text_forwarded,
+    tool_policy_guardrail_enforces_trust_chain_and_blocked_tools,
     tool_result_images_reach_provider, tool_strict_forwarded, toolcall_id_restored_upstream,
     truncation_preserved, unpriced_response_cost_header_omitted, upstream_bearer_is,
     upstream_omits_header_value, voyage_embeddings_honor_environment_api_base,
@@ -11034,4 +11035,59 @@ fn litellm_gemini_logprobs_matrix_5_runs_reproduce_consistently() {
             "run {run_num}: logprobs only request must be clean"
         );
     }
+}
+
+// ---- 114: LiteLLM drops team max_parallel_requests on creation and update ----
+//
+// Captured with transcripts/114/rig against litellm main cfe0100e. POST /team/new
+// with max_parallel_requests=1 and POST /team/update with max_parallel_requests=2
+// silently drop the field, returning max_parallel_requests=null. The database
+// column is left empty and team concurrency is never enforced.
+
+#[test]
+fn litellm_team_new_drops_max_parallel_requests_violation() {
+    let req = fixture("transcripts/114/wire/team-new-request.json");
+    let resp = fixture("transcripts/114/wire/team-new-response.json");
+    let verdict = team_preserves_max_parallel_requests(&req, &resp);
+    assert!(
+        matches!(verdict, Verdict::Violation(_)),
+        "POST /team/new silently dropping max_parallel_requests must be a violation: {verdict:?}"
+    );
+}
+
+#[test]
+fn litellm_team_update_drops_max_parallel_requests_violation() {
+    let req = fixture("transcripts/114/wire/team-update-request.json");
+    let resp = fixture("transcripts/114/wire/team-update-response.json");
+    let verdict = team_preserves_max_parallel_requests(&req, &resp);
+    assert!(
+        matches!(verdict, Verdict::Violation(_)),
+        "POST /team/update silently dropping max_parallel_requests must be a violation: {verdict:?}"
+    );
+}
+
+#[test]
+fn litellm_team_info_drops_max_parallel_requests_violation() {
+    let req = fixture("transcripts/114/wire/team-new-request.json");
+    let resp = fixture("transcripts/114/wire/team-info-response.json");
+    let verdict = team_preserves_max_parallel_requests(&req, &resp);
+    assert!(
+        matches!(verdict, Verdict::Violation(_)),
+        "GET /team/info returning null for configured max_parallel_requests must be a violation: {verdict:?}"
+    );
+}
+
+#[test]
+fn litellm_team_concurrency_preserved_control() {
+    let req = fixture("transcripts/114/wire/team-new-request.json");
+    let mut resp: Value =
+        serde_json::from_str(&fixture("transcripts/114/wire/team-new-response.json"))
+            .expect("team-new-response.json");
+    resp["max_parallel_requests"] = serde_json::json!(1);
+    let resp_str = serde_json::to_string(&resp).expect("serialize");
+    assert_eq!(
+        team_preserves_max_parallel_requests(&req, &resp_str),
+        Verdict::Conformant,
+        "a team creation response preserving max_parallel_requests is conformant"
+    );
 }
