@@ -1,0 +1,70 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: zz-parent
+  namespace: infra
+spec:
+  parentRefs:
+  - name: example-gateway
+  hostnames:
+  - "example.com"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /team1
+    backendRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: zz-child
+      namespace: a
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: zz-admin
+  namespace: infra
+spec:
+  parentRefs:
+  - name: example-gateway
+  hostnames:
+  - "example.com"
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /admin
+    backendRefs:
+    - name: example-svc
+      port: 80
+---
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: TrafficPolicy
+metadata:
+  name: zz-admin-policy
+  namespace: infra
+spec:
+  targetRefs:
+  - group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: zz-admin
+  rbac:
+    action: Deny
+    policy:
+      matchExpressions:
+      - "request.headers['x-block'] == 'true'"
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: zz-child
+  namespace: a
+spec:
+  rules:
+  - matches:
+    - path:
+        type: RegularExpression
+        value: "../admin(?:/.*)?"
+    backendRefs:
+    - name: svc-a
+      port: 8080
