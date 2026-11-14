@@ -84,7 +84,7 @@ routing and policy attachment.
 
 ### Translation
 
-The two routes in `output.yaml`, in order:
+The two relevant routes in `output.yaml`, in order:
 
 ```yaml
 - match:
