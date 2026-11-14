@@ -256,7 +256,9 @@ pub fn anthropic_stream_block_lifecycle(sse: &str) -> Verdict {
 
     for (id, count) in &tool_blocks {
         if *count > 1 {
-            let fragments = partials.get(id).map(|v| v.join("")).unwrap_or_default();
+            let fragments = partials
+                .get(id)
+                .map_or_else(String::default, |v| v.join(""));
             let runs = partials.get(id).map_or(0, Vec::len);
             offenders.push(format!(
                 "tool call {id:?} was split across {count} tool_use blocks ({runs} separate \
@@ -3236,8 +3238,7 @@ fn client_cache_breakpoints(request: &Value) -> usize {
     let messages = request
         .get("messages")
         .and_then(Value::as_array)
-        .map(Vec::as_slice)
-        .unwrap_or_default();
+        .map_or(&[] as &[Value], |v| v.as_slice());
     let in_messages: usize = messages
         .iter()
         .map(|message| {
@@ -3301,8 +3302,7 @@ fn block_breakpoints(blocks: Option<&Value>) -> usize {
 fn json_list(value: Option<&Value>) -> &[Value] {
     value
         .and_then(Value::as_array)
-        .map(Vec::as_slice)
-        .unwrap_or_default()
+        .map_or(&[] as &[Value], |v| v.as_slice())
 }
 
 fn item_breakpoints(items: &[Value]) -> usize {

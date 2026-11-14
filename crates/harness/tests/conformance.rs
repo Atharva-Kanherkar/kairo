@@ -3767,8 +3767,9 @@ fn issue_085_consumer(mode: &str, openai: &str, consumer: &Value) -> Result<(), 
     let calls: Vec<&str> = consumer
         .get("completed_tool_call_ids")
         .and_then(Value::as_array)
-        .map(|ids| ids.iter().filter_map(Value::as_str).collect())
-        .unwrap_or_default();
+        .map_or(Vec::<&str>::new(), |ids| {
+            ids.iter().filter_map(Value::as_str).collect()
+        });
     let has_error = !matches!(consumer.get("error"), None | Some(Value::Null));
     let error_type = consumer.pointer("/error/type").and_then(Value::as_str);
     let no_final = matches!(consumer.get("final_response"), None | Some(Value::Null));
@@ -4118,7 +4119,7 @@ fn issue_085_tool_outputs(request: &Value) -> Vec<String> {
     request
         .get("input")
         .and_then(Value::as_array)
-        .map(|items| {
+        .map_or(Vec::<String>::new(), |items| {
             items
                 .iter()
                 .filter(|item| {
@@ -4128,7 +4129,6 @@ fn issue_085_tool_outputs(request: &Value) -> Vec<String> {
                 .map(str::to_owned)
                 .collect()
         })
-        .unwrap_or_default()
 }
 
 fn validate_issue_085_codex(
@@ -6968,8 +6968,9 @@ fn issue_110_text(response: &str) -> String {
     if let Ok(message) = serde_json::from_str::<Value>(response) {
         return message["content"]
             .as_array()
-            .map(|blocks| blocks.iter().filter_map(|b| b["text"].as_str()).collect())
-            .unwrap_or_default();
+            .map_or_else(String::default, |blocks| {
+                blocks.iter().filter_map(|b| b["text"].as_str()).collect()
+            });
     }
     response
         .lines()
