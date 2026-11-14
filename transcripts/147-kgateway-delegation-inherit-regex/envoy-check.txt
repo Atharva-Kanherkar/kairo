@@ -1,0 +1,4 @@
+/admin         -> tenant status=200
+/admin/        -> tenant status=200
+/admin/secret  -> tenant status=200
+/team1/x       ->  status=404

@@ -1,0 +1,877 @@
+=== RUN   TestKairo147DelegationChildMatchStaysInsideParent
+=== RUN   TestKairo147DelegationChildMatchStaysInsideParent/control-no-inherit-annotation
+2026-11-14T09:13:00.686354Z	info	sync complete	name=Namespaces attempt=2 time=2.3355ms
+2026-11-14T09:13:00.686414Z	info	krt	Namespaces synced	owner=Namespaces
+2026-11-14T09:13:00.686361Z	info	sync complete	name=discovery namespace filter attempt=2 time=2.305333ms
+2026-11-14T09:13:00.687028Z	info	sync complete	name=SystemNamespaceNetwork attempt=1 time=102.667µs
+2026-11-14T09:13:00.687057Z	info	sync complete	name=SystemNamespaceNetwork attempt=1 time=125ns
+2026-11-14T09:13:00.688334Z	info	sync complete	name=Namespaces attempt=1 time=292ns
+2026-11-14T09:13:00.688361Z	info	krt	Namespaces synced	owner=Namespaces
+2026-11-14T09:13:00.688487Z	info	sync complete	name=Namespaces handler attempt=2 time=2.028541ms
+2026-11-14T09:13:00.688524Z	info	krt	NamespacesMetadata synced (uid 3)	owner=NamespacesMetadata
+2026-11-14T09:13:00.688600Z	info	krt	SystemNamespaceNetwork synced (uid 14)	owner=SystemNamespaceNetwork
+2026-11-14T09:13:00.690409Z	info	sync complete	name=Namespaces handler attempt=2 time=2.01675ms
+2026-11-14T09:13:00.690436Z	info	krt	NamespacesMetadata synced (uid 43)	owner=NamespacesMetadata
+2026-11-14T09:13:00.691039Z	info	cluster "fake" kube client started
+2026-11-14T09:13:00.691118Z	info	CRD authorizationpolicies.security.istio.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691205Z	info	CRD backendconfigpolicies.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691209Z	info	CRD backends.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691219Z	info	CRD backendtlspolicies.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691237Z	info	CRD directresponses.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691241Z	info	CRD gatewayclasses.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691242Z	info	CRD gatewayextensions.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691244Z	info	CRD gatewayparameters.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691247Z	info	CRD gateways.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691252Z	info	CRD grpcroutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691272Z	info	CRD httproutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691285Z	info	CRD listenerpolicies.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691288Z	info	CRD listenersets.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691292Z	info	CRD pods. is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691294Z	info	CRD referencegrants.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691302Z	info	CRD serviceentries.networking.istio.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691306Z	info	CRD services. is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691332Z	info	CRD tcproutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691342Z	info	CRD tlsroutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691345Z	info	CRD trafficpolicies.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691348Z	info	CRD workloadentries.networking.istio.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691353Z	info	CRD xlistenersets.gateway.networking.x-k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.691804Z	info	sync complete	name=TLSRouteV1 attempt=2 time=2.092875ms
+2026-11-14T09:13:00.691815Z	info	krt	TLSRouteV1 synced	owner=TLSRouteV1
+2026-11-14T09:13:00.691840Z	info	sync complete	name=TCPRouteV1 attempt=2 time=2.197583ms
+2026-11-14T09:13:00.691859Z	info	krt	TCPRouteV1 synced	owner=TCPRouteV1
+2026-11-14T09:13:00.693006Z	info	sync complete	name=Secrets attempt=3 time=6.421209ms
+2026-11-14T09:13:00.693020Z	info	krt	Secrets synced	owner=Secrets
+2026-11-14T09:13:00.693092Z	info	sync complete	name=crd watcher attempt=2 time=2.060667ms
+2026-11-14T09:13:00.693125Z	info	controllers	starting	controller=crd watcher
+2026-11-14T09:13:00.693250Z	info	backendconfigpolicies.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.693242Z	info	sync complete	name=Pods attempt=3 time=6.269375ms
+2026-11-14T09:13:00.693258Z	info	krt	Pods synced	owner=Pods
+2026-11-14T09:13:00.693259Z	info	backends.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.693262Z	info	sync complete	name=Services attempt=3 time=6.502667ms
+2026-11-14T09:13:00.693271Z	info	krt	Services synced	owner=Services
+2026-11-14T09:13:00.693283Z	info	sync complete	name=ConfigMaps attempt=3 time=6.510583ms
+2026-11-14T09:13:00.693287Z	info	krt	ConfigMaps synced	owner=ConfigMaps
+2026-11-14T09:13:00.693383Z	info	sync complete	name=Nodes attempt=3 time=6.423667ms
+2026-11-14T09:13:00.693395Z	info	krt	Nodes synced	owner=Nodes
+2026-11-14T09:13:00.693730Z	info	backendtlspolicies.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.693748Z	info	directresponses.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.693757Z	info	gatewayextensions.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.693768Z	info	gateways.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.693793Z	info	grpcroutes.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.693806Z	info	httproutes.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.693819Z	info	listenerpolicies.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.693829Z	info	listenersets.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.693874Z	info	sync complete	name=TLSRouteV1 handler attempt=2 time=2.0365ms
+2026-11-14T09:13:00.693892Z	info	krt	TLSRouteV1ToV1Alpha2 synced (uid 69)	owner=TLSRouteV1ToV1Alpha2
+2026-11-14T09:13:00.693897Z	info	sync complete	name=TCPRouteV1 handler attempt=2 time=2.020333ms
+2026-11-14T09:13:00.693905Z	info	krt	TCPRouteV1ToV1Alpha2 synced (uid 67)	owner=TCPRouteV1ToV1Alpha2
+2026-11-14T09:13:00.693932Z	info	krt	routes-tls-routes-with-policy synced (uid 84)	owner=routes-tls-routes-with-policy
+2026-11-14T09:13:00.693959Z	info	krt	routes-tcp-routes-with-policy synced (uid 83)	owner=routes-tcp-routes-with-policy
+2026-11-14T09:13:00.694057Z	info	sync complete	name=EndpointSlices attempt=3 time=6.315709ms
+2026-11-14T09:13:00.694089Z	info	sync complete	name=DirectResponse attempt=3 time=6.395583ms
+2026-11-14T09:13:00.694098Z	info	krt	DirectResponse synced	owner=DirectResponse
+2026-11-14T09:13:00.694098Z	info	krt	EndpointSlices synced	owner=EndpointSlices
+2026-11-14T09:13:00.694226Z	info	referencegrants.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.694244Z	info	trafficpolicies.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.694342Z	info	sync complete	name=BackendConfigPolicy attempt=3 time=6.045917ms
+2026-11-14T09:13:00.694343Z	info	sync complete	name=KubePromotedListenerSets attempt=3 time=6.012375ms
+2026-11-14T09:13:00.694350Z	info	krt	BackendConfigPolicy synced	owner=BackendConfigPolicy
+2026-11-14T09:13:00.694352Z	info	krt	KubePromotedListenerSets synced	owner=KubePromotedListenerSets
+2026-11-14T09:13:00.694371Z	info	sync complete	name=ListenerPolicy attempt=3 time=6.079084ms
+2026-11-14T09:13:00.694381Z	info	krt	ListenerPolicy synced	owner=ListenerPolicy
+2026-11-14T09:13:00.694362Z	info	sync complete	name=KubeGateways attempt=3 time=6.025458ms
+2026-11-14T09:13:00.694395Z	info	krt	KubeGateways synced	owner=KubeGateways
+2026-11-14T09:13:00.694358Z	info	sync complete	name=KubeGatewayClasses attempt=3 time=6.03125ms
+2026-11-14T09:13:00.694426Z	info	sync complete	name=KubeLegacyXListenerSets attempt=3 time=6.075042ms
+2026-11-14T09:13:00.694441Z	info	krt	KubeLegacyXListenerSets synced	owner=KubeLegacyXListenerSets
+2026-11-14T09:13:00.694368Z	info	sync complete	name=BackendTLSPolicy attempt=3 time=6.088917ms
+2026-11-14T09:13:00.694446Z	info	krt	BackendTLSPolicy synced	owner=BackendTLSPolicy
+2026-11-14T09:13:00.694365Z	info	sync complete	name=KubePromotedListenerSets handler attempt=1 time=459ns
+2026-11-14T09:13:00.694445Z	info	krt	KubeGatewayClasses synced	owner=KubeGatewayClasses
+2026-11-14T09:13:00.695160Z	info	sync complete	name=Secrets handler attempt=2 time=2.110125ms
+2026-11-14T09:13:00.695185Z	info	krt	secrets synced (uid 5)	owner=secrets
+2026-11-14T09:13:00.695300Z	info	sync complete	name=Services handler attempt=2 time=2.017416ms
+2026-11-14T09:13:00.695413Z	info	sync complete	name=Pods handler attempt=2 time=2.019875ms
+2026-11-14T09:13:00.695428Z	info	krt	WrappedPod synced (uid 19)	owner=WrappedPod
+2026-11-14T09:13:00.695427Z	info	sync complete	name=Pods handler attempt=2 time=2.015541ms
+2026-11-14T09:13:00.695443Z	info	krt	AugmentPod synced (uid 18)	owner=AugmentPod
+2026-11-14T09:13:00.695434Z	info	sync complete	name=Nodes handler attempt=2 time=2.02075ms
+2026-11-14T09:13:00.695456Z	info	krt	Collection[*v1.Node,krtcollections.NodeMetadata] synced (uid 17)	owner=Collection[*v1.Node,krtcollections.NodeMetadata]
+2026-11-14T09:13:00.695672Z	info	krt	KubernetesServiceBackends synced (uid 32)	owner=KubernetesServiceBackends
+2026-11-14T09:13:00.695895Z	info	sync complete	name=GRPCRoute attempt=3 time=6.0625ms
+2026-11-14T09:13:00.696024Z	info	krt	GRPCRoute synced	owner=GRPCRoute
+2026-11-14T09:13:00.696120Z	info	sync complete	name=DirectResponse handler attempt=2 time=2.007167ms
+2026-11-14T09:13:00.696139Z	info	krt	Collection[*kgateway.DirectResponse,ir.PolicyWrapper] synced (uid 30)	owner=Collection[*kgateway.DirectResponse,ir.PolicyWrapper]
+2026-11-14T09:13:00.696153Z	info	krt	DirectResponse.gateway.kgateway.dev-policiesByTargetRef synced (uid 53)	owner=DirectResponse.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.696289Z	info	sync complete	name=HTTPRoute attempt=3 time=6.664167ms
+2026-11-14T09:13:00.696364Z	info	krt	HTTPRoute synced	owner=HTTPRoute
+2026-11-14T09:13:00.696377Z	info	sync complete	name=BackendConfigPolicy handler attempt=2 time=2.016417ms
+2026-11-14T09:13:00.696393Z	info	krt	Collection[*kgateway.BackendConfigPolicy,ir.PolicyWrapper] synced (uid 40)	owner=Collection[*kgateway.BackendConfigPolicy,ir.PolicyWrapper]
+2026-11-14T09:13:00.696412Z	info	krt	BackendConfigPolicy.gateway.kgateway.dev-policiesByTargetRef synced (uid 49)	owner=BackendConfigPolicy.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.696408Z	info	sync complete	name=KubeGateways handler attempt=2 time=2.002083ms
+2026-11-14T09:13:00.696416Z	info	sync complete	name=KubeGateways handler attempt=2 time=2.004417ms
+2026-11-14T09:13:00.696460Z	info	krt	GatewaySpecs synced (uid 63)	owner=GatewaySpecs
+2026-11-14T09:13:00.696454Z	info	sync complete	name=ListenerPolicy handler attempt=2 time=2.060458ms
+2026-11-14T09:13:00.696469Z	info	krt	ListenerPolicyWrapper synced (uid 36)	owner=ListenerPolicyWrapper
+2026-11-14T09:13:00.696473Z	info	sync complete	name=BackendTLSPolicy handler attempt=2 time=2.014666ms
+2026-11-14T09:13:00.696483Z	info	krt	Collection[*v1.BackendTLSPolicy,ir.PolicyWrapper] synced (uid 38)	owner=Collection[*v1.BackendTLSPolicy,ir.PolicyWrapper]
+2026-11-14T09:13:00.696488Z	info	krt	ListenerPolicy.gateway.kgateway.dev-policiesByTargetRef synced (uid 55)	owner=ListenerPolicy.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.696493Z	info	sync complete	name=KubeLegacyXListenerSets handler attempt=2 time=2.036292ms
+2026-11-14T09:13:00.696506Z	info	krt	KubeLegacyXListenerSetsConverted synced (uid 47)	owner=KubeLegacyXListenerSetsConverted
+2026-11-14T09:13:00.696499Z	info	krt	BackendTLSPolicy.gateway.networking.k8s.io-policiesByTargetRef synced (uid 57)	owner=BackendTLSPolicy.gateway.networking.k8s.io-policiesByTargetRef
+2026-11-14T09:13:00.696519Z	info	krt	KubeListenerSets synced
+2026-11-14T09:13:00.696537Z	info	krt	ListenerSetIRs synced (uid 61)	owner=ListenerSetIRs
+2026-11-14T09:13:00.696598Z	info	krt	Collection[ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 71)	owner=Collection[ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.696626Z	info	krt	Collection[*ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 72)	owner=Collection[*ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.697528Z	info	sync complete	name=crd watcher attempt=3 time=6.471125ms
+2026-11-14T09:13:00.697926Z	info	sync complete	name=EndpointSlices handler attempt=2 time=2.055333ms
+2026-11-14T09:13:00.698033Z	info	krt	K8sEndpoints synced (uid 34)	owner=K8sEndpoints
+2026-11-14T09:13:00.698048Z	info	sync complete	name=GRPCRoute handler attempt=2 time=2.004959ms
+2026-11-14T09:13:00.698069Z	info	krt	routes-grpc-routes-with-policy synced (uid 82)	owner=routes-grpc-routes-with-policy
+2026-11-14T09:13:00.698073Z	info	krt	EndpointIRs synced
+2026-11-14T09:13:00.698468Z	info	sync complete	name=KubeGatewayClasses handler attempt=2 time=2.009083ms
+2026-11-14T09:13:00.698461Z	info	sync complete	name=HTTPRoute handler attempt=2 time=2.06275ms
+2026-11-14T09:13:00.698506Z	info	krt	Collection[*v1.Gateway,ir.GatewayForDeployer] synced (uid 60)	owner=Collection[*v1.Gateway,ir.GatewayForDeployer]
+2026-11-14T09:13:00.698539Z	info	sync complete	name=KubeGatewayClasses handler attempt=2 time=2.01575ms
+2026-11-14T09:13:00.701325Z	info	sync complete	name=RefGrants attempt=4 time=14.669958ms
+2026-11-14T09:13:00.701342Z	info	krt	RefGrants synced	owner=RefGrants
+2026-11-14T09:13:00.701329Z	info	sync complete	name=GatewayExtension attempt=4 time=14.50625ms
+2026-11-14T09:13:00.701345Z	info	krt	GatewayExtension synced	owner=GatewayExtension
+2026-11-14T09:13:00.701411Z	info	sync complete	name=Backends attempt=4 time=14.184959ms
+2026-11-14T09:13:00.701418Z	info	krt	Backends synced	owner=Backends
+2026-11-14T09:13:00.701496Z	info	sync complete	name=TrafficPolicy attempt=4 time=14.083625ms
+2026-11-14T09:13:00.701502Z	info	krt	TrafficPolicy synced	owner=TrafficPolicy
+2026-11-14T09:13:00.703603Z	info	sync complete	name=Backends handler attempt=2 time=2.177333ms
+2026-11-14T09:13:00.703618Z	info	sync complete	name=TrafficPolicy handler attempt=2 time=2.090375ms
+2026-11-14T09:13:00.703643Z	info	krt	Collection[*ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 76)	owner=Collection[*ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.703620Z	info	krt	Collection[*kgateway.Backend,ir.BackendObjectIR] synced (uid 21)	owner=Collection[*kgateway.Backend,ir.BackendObjectIR]
+2026-11-14T09:13:00.703608Z	info	sync complete	name=GatewayExtension handler attempt=2 time=2.245708ms
+2026-11-14T09:13:00.703688Z	info	krt	Collection[*kgateway.GatewayExtension,ir.GatewayExtension] synced (uid 12)	owner=Collection[*kgateway.GatewayExtension,ir.GatewayExtension]
+2026-11-14T09:13:00.703634Z	info	krt	Collection[ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 75)	owner=Collection[ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.703758Z	info	krt	Collection[ir.GatewayExtension,trafficpolicy.TrafficPolicyGatewayExtensionIR] synced (uid 27)	owner=Collection[ir.GatewayExtension,trafficpolicy.TrafficPolicyGatewayExtensionIR]
+2026-11-14T09:13:00.704833Z	info	krt	TrafficPolicyWrapper synced (uid 28)	owner=TrafficPolicyWrapper
+2026-11-14T09:13:00.704876Z	info	krt	TrafficPolicy.gateway.kgateway.dev-policiesByTargetRef synced (uid 51)	owner=TrafficPolicy.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.705004Z	info	krt	http-routes-with-policy synced (uid 80)	owner=http-routes-with-policy
+2026-11-14T09:13:00.705003Z	info	krt	gateways synced (uid 64)	owner=gateways
+2026-11-14T09:13:00.705114Z	info	krt	routes-http-routes-with-policy synced (uid 81)	owner=routes-http-routes-with-policy
+2026-11-14T09:13:00.705157Z	info	krt	all-routes-with-policy synced
+2026-11-14T09:13:00.707292Z	info	sync complete	name=routes attempt=2 time=2.280542ms
+2026-11-14T09:13:00.707331Z	info	sync complete	name=extensions attempt=1 time=22.666µs
+2026-11-14T09:13:00.707366Z	info	sync complete	name=commoncol attempt=1 time=29.792µs
+2026-11-14T09:13:00.707389Z	info	sync complete	name=translator attempt=1 time=16.333µs
+2026-11-14T09:13:00.707393Z	info	sync complete	name=backends attempt=1 time=500ns
+2026-11-14T09:13:00.707397Z	info	sync complete	name=endpoints attempt=1 time=291ns
+2026-11-14T09:13:00.707465Z	info	krt	FinalBackends synced
+2026-11-14T09:13:00.708425Z	info	krt	BaseEnvoyClusters synced (uid 90)	owner=BaseEnvoyClusters
+2026-11-14T09:13:00.708493Z	info	krt	ClusterResources synced (uid 91)	owner=ClusterResources
+2026-11-14T09:13:00.708511Z	info	krt	BackendStatusClustersPerClient synced (uid 93)	owner=BackendStatusClustersPerClient
+2026-11-14T09:13:00.708548Z	info	krt	BackendStatusClustersBase synced (uid 92)	owner=BackendStatusClustersBase
+2026-11-14T09:13:00.708559Z	info	krt	BackendStatusClusters synced
+2026-11-14T09:13:00.709820Z	info	controllers	stopped	controller=crd watcher
+2026-11-14T09:13:00.709835Z	info	Stopping CRD watcher
+    zz_kairo147_invariant_test.go:58: programmed route "listener~80~example_com-route-0-httproute-zz-parent-infra-0-0-matcher-0" match=path_separated_prefix:"/team1"
+    zz_kairo147_invariant_test.go:58: programmed route "listener~80~example_com-route-1-httproute-zz-admin-infra-0-0-matcher-0" match=path_separated_prefix:"/admin"
+--- PASS: TestKairo147DelegationChildMatchStaysInsideParent (0.21s)
+    --- PASS: TestKairo147DelegationChildMatchStaysInsideParent/control-no-inherit-annotation (0.21s)
+=== RUN   TestKairo147DelegationChildMatchStaysInsideParent
+=== RUN   TestKairo147DelegationChildMatchStaysInsideParent/control-no-inherit-annotation
+2026-11-14T09:13:00.732552Z	info	sync complete	name=discovery namespace filter attempt=2 time=2.250458ms
+2026-11-14T09:13:00.732541Z	info	sync complete	name=Namespaces attempt=2 time=2.229083ms
+2026-11-14T09:13:00.732632Z	info	krt	Namespaces synced	owner=Namespaces
+2026-11-14T09:13:00.732652Z	info	sync complete	name=SystemNamespaceNetwork attempt=1 time=2.875µs
+2026-11-14T09:13:00.732675Z	info	sync complete	name=SystemNamespaceNetwork attempt=1 time=208ns
+2026-11-14T09:13:00.732764Z	info	sync complete	name=Namespaces attempt=1 time=250ns
+2026-11-14T09:13:00.732783Z	info	krt	Namespaces synced	owner=Namespaces
+2026-11-14T09:13:00.733163Z	info	cluster "fake" kube client started
+2026-11-14T09:13:00.733311Z	info	CRD authorizationpolicies.security.istio.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733335Z	info	CRD backendconfigpolicies.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733339Z	info	CRD backends.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733352Z	info	CRD backendtlspolicies.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733360Z	info	CRD directresponses.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733364Z	info	CRD gatewayclasses.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733366Z	info	CRD gatewayextensions.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733368Z	info	CRD gatewayparameters.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733370Z	info	CRD gateways.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733376Z	info	CRD grpcroutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733378Z	info	CRD httproutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733381Z	info	CRD listenerpolicies.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733386Z	info	CRD listenersets.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733389Z	info	CRD pods. is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733390Z	info	CRD referencegrants.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733394Z	info	CRD serviceentries.networking.istio.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733397Z	info	CRD services. is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733401Z	info	CRD tcproutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733404Z	info	CRD tlsroutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733407Z	info	CRD trafficpolicies.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733408Z	info	CRD workloadentries.networking.istio.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.733411Z	info	CRD xlistenersets.gateway.networking.x-k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.734905Z	info	sync complete	name=EndpointSlices attempt=2 time=2.195125ms
+2026-11-14T09:13:00.734915Z	info	sync complete	name=KubeLegacyXListenerSets attempt=2 time=2.116833ms
+2026-11-14T09:13:00.734923Z	info	krt	EndpointSlices synced	owner=EndpointSlices
+2026-11-14T09:13:00.734906Z	info	sync complete	name=Nodes attempt=2 time=2.244875ms
+2026-11-14T09:13:00.734926Z	info	krt	KubeLegacyXListenerSets synced	owner=KubeLegacyXListenerSets
+2026-11-14T09:13:00.734928Z	info	krt	Nodes synced	owner=Nodes
+2026-11-14T09:13:00.734920Z	info	sync complete	name=Namespaces handler attempt=2 time=2.214708ms
+2026-11-14T09:13:00.734936Z	info	krt	NamespacesMetadata synced (uid 96)	owner=NamespacesMetadata
+2026-11-14T09:13:00.734937Z	info	sync complete	name=Secrets attempt=2 time=2.306375ms
+2026-11-14T09:13:00.734951Z	info	krt	Secrets synced	owner=Secrets
+2026-11-14T09:13:00.734953Z	info	sync complete	name=Namespaces handler attempt=2 time=2.1565ms
+2026-11-14T09:13:00.734957Z	info	krt	SystemNamespaceNetwork synced (uid 107)	owner=SystemNamespaceNetwork
+2026-11-14T09:13:00.734960Z	info	krt	NamespacesMetadata synced (uid 136)	owner=NamespacesMetadata
+2026-11-14T09:13:00.734944Z	info	sync complete	name=ConfigMaps attempt=2 time=2.305417ms
+2026-11-14T09:13:00.734964Z	info	krt	ConfigMaps synced	owner=ConfigMaps
+2026-11-14T09:13:00.734945Z	info	sync complete	name=Services attempt=2 time=2.300833ms
+2026-11-14T09:13:00.734962Z	info	sync complete	name=KubeGatewayClasses attempt=2 time=2.205875ms
+2026-11-14T09:13:00.734966Z	info	krt	Services synced	owner=Services
+2026-11-14T09:13:00.734967Z	info	krt	KubeGatewayClasses synced	owner=KubeGatewayClasses
+2026-11-14T09:13:00.734959Z	info	sync complete	name=Pods attempt=2 time=2.308708ms
+2026-11-14T09:13:00.734971Z	info	krt	Pods synced	owner=Pods
+2026-11-14T09:13:00.734975Z	info	sync complete	name=TCPRouteV1 attempt=2 time=2.00875ms
+2026-11-14T09:13:00.734979Z	info	krt	TCPRouteV1 synced	owner=TCPRouteV1
+2026-11-14T09:13:00.735004Z	info	sync complete	name=TLSRouteV1 attempt=2 time=2.013625ms
+2026-11-14T09:13:00.735023Z	info	krt	TLSRouteV1 synced	owner=TLSRouteV1
+2026-11-14T09:13:00.735191Z	info	sync complete	name=crd watcher attempt=2 time=2.021625ms
+2026-11-14T09:13:00.735202Z	info	controllers	starting	controller=crd watcher
+2026-11-14T09:13:00.735247Z	info	backendconfigpolicies.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.735258Z	info	backends.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.735272Z	info	backendtlspolicies.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.735283Z	info	directresponses.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.735291Z	info	gatewayextensions.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.735303Z	info	gateways.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.735317Z	info	grpcroutes.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.735332Z	info	httproutes.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.735346Z	info	listenerpolicies.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.735356Z	info	listenersets.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.735370Z	info	referencegrants.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.735384Z	info	trafficpolicies.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.737156Z	info	sync complete	name=Nodes handler attempt=2 time=2.214166ms
+2026-11-14T09:13:00.737164Z	info	sync complete	name=Pods handler attempt=2 time=2.181125ms
+2026-11-14T09:13:00.737149Z	info	sync complete	name=TLSRouteV1 handler attempt=2 time=2.106834ms
+2026-11-14T09:13:00.737170Z	info	sync complete	name=Pods handler attempt=2 time=2.191083ms
+2026-11-14T09:13:00.737178Z	info	sync complete	name=Secrets handler attempt=2 time=2.2085ms
+2026-11-14T09:13:00.737180Z	info	krt	TLSRouteV1ToV1Alpha2 synced (uid 162)	owner=TLSRouteV1ToV1Alpha2
+2026-11-14T09:13:00.737178Z	info	krt	AugmentPod synced (uid 111)	owner=AugmentPod
+2026-11-14T09:13:00.737185Z	info	krt	secrets synced (uid 98)	owner=secrets
+2026-11-14T09:13:00.737176Z	info	krt	Collection[*v1.Node,krtcollections.NodeMetadata] synced (uid 110)	owner=Collection[*v1.Node,krtcollections.NodeMetadata]
+2026-11-14T09:13:00.737171Z	info	sync complete	name=Services handler attempt=2 time=2.192292ms
+2026-11-14T09:13:00.737194Z	info	sync complete	name=KubeLegacyXListenerSets handler attempt=2 time=2.253959ms
+2026-11-14T09:13:00.737191Z	info	sync complete	name=TCPRouteV1 handler attempt=2 time=2.206208ms
+2026-11-14T09:13:00.737185Z	info	krt	WrappedPod synced (uid 112)	owner=WrappedPod
+2026-11-14T09:13:00.737201Z	info	krt	KubeLegacyXListenerSetsConverted synced (uid 140)	owner=KubeLegacyXListenerSetsConverted
+2026-11-14T09:13:00.737207Z	info	krt	TCPRouteV1ToV1Alpha2 synced (uid 160)	owner=TCPRouteV1ToV1Alpha2
+2026-11-14T09:13:00.737217Z	info	krt	routes-tcp-routes-with-policy synced (uid 176)	owner=routes-tcp-routes-with-policy
+2026-11-14T09:13:00.737224Z	info	krt	routes-tls-routes-with-policy synced (uid 177)	owner=routes-tls-routes-with-policy
+2026-11-14T09:13:00.737245Z	info	krt	KubernetesServiceBackends synced (uid 125)	owner=KubernetesServiceBackends
+2026-11-14T09:13:00.739132Z	info	sync complete	name=BackendTLSPolicy attempt=3 time=6.401666ms
+2026-11-14T09:13:00.739141Z	info	krt	BackendTLSPolicy synced	owner=BackendTLSPolicy
+2026-11-14T09:13:00.739126Z	info	sync complete	name=ListenerPolicy attempt=3 time=6.396458ms
+2026-11-14T09:13:00.739144Z	info	sync complete	name=DirectResponse attempt=3 time=6.437875ms
+2026-11-14T09:13:00.739146Z	info	sync complete	name=HTTPRoute attempt=3 time=6.19325ms
+2026-11-14T09:13:00.739150Z	info	krt	DirectResponse synced	owner=DirectResponse
+2026-11-14T09:13:00.739151Z	info	krt	HTTPRoute synced	owner=HTTPRoute
+2026-11-14T09:13:00.739149Z	info	krt	ListenerPolicy synced	owner=ListenerPolicy
+2026-11-14T09:13:00.739154Z	info	sync complete	name=RefGrants attempt=3 time=6.512916ms
+2026-11-14T09:13:00.739159Z	info	krt	RefGrants synced	owner=RefGrants
+2026-11-14T09:13:00.739138Z	info	sync complete	name=TrafficPolicy attempt=3 time=6.44725ms
+2026-11-14T09:13:00.739167Z	info	krt	TrafficPolicy synced	owner=TrafficPolicy
+2026-11-14T09:13:00.739162Z	info	sync complete	name=BackendConfigPolicy attempt=3 time=6.415ms
+2026-11-14T09:13:00.739175Z	info	sync complete	name=Backends attempt=3 time=6.500833ms
+2026-11-14T09:13:00.739179Z	info	sync complete	name=KubeGateways attempt=3 time=6.404959ms
+2026-11-14T09:13:00.739186Z	info	krt	Backends synced	owner=Backends
+2026-11-14T09:13:00.739188Z	info	krt	KubeGateways synced	owner=KubeGateways
+2026-11-14T09:13:00.739188Z	info	sync complete	name=KubePromotedListenerSets attempt=3 time=6.397375ms
+2026-11-14T09:13:00.739192Z	info	krt	KubePromotedListenerSets synced	owner=KubePromotedListenerSets
+2026-11-14T09:13:00.739182Z	info	krt	BackendConfigPolicy synced	owner=BackendConfigPolicy
+2026-11-14T09:13:00.739183Z	info	sync complete	name=GatewayExtension attempt=3 time=6.535542ms
+2026-11-14T09:13:00.739207Z	info	krt	GatewayExtension synced	owner=GatewayExtension
+2026-11-14T09:13:00.739196Z	info	sync complete	name=KubePromotedListenerSets handler attempt=1 time=834ns
+2026-11-14T09:13:00.739175Z	info	sync complete	name=GRPCRoute attempt=3 time=6.127041ms
+2026-11-14T09:13:00.739220Z	info	sync complete	name=crd watcher attempt=3 time=6.053458ms
+2026-11-14T09:13:00.739222Z	info	krt	GRPCRoute synced	owner=GRPCRoute
+2026-11-14T09:13:00.739220Z	info	krt	KubeListenerSets synced
+2026-11-14T09:13:00.739233Z	info	krt	ListenerSetIRs synced (uid 154)	owner=ListenerSetIRs
+2026-11-14T09:13:00.739367Z	info	sync complete	name=EndpointSlices handler attempt=2 time=2.029959ms
+2026-11-14T09:13:00.739419Z	info	krt	K8sEndpoints synced (uid 127)	owner=K8sEndpoints
+2026-11-14T09:13:00.739431Z	info	krt	EndpointIRs synced
+2026-11-14T09:13:00.741409Z	info	sync complete	name=BackendConfigPolicy handler attempt=2 time=2.178625ms
+2026-11-14T09:13:00.741415Z	info	sync complete	name=HTTPRoute handler attempt=2 time=2.200041ms
+2026-11-14T09:13:00.741421Z	info	krt	Collection[*kgateway.BackendConfigPolicy,ir.PolicyWrapper] synced (uid 133)	owner=Collection[*kgateway.BackendConfigPolicy,ir.PolicyWrapper]
+2026-11-14T09:13:00.741408Z	info	sync complete	name=TrafficPolicy handler attempt=2 time=2.222541ms
+2026-11-14T09:13:00.741420Z	info	sync complete	name=DirectResponse handler attempt=2 time=2.256459ms
+2026-11-14T09:13:00.741434Z	info	krt	BackendConfigPolicy.gateway.kgateway.dev-policiesByTargetRef synced (uid 146)	owner=BackendConfigPolicy.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.741434Z	info	krt	Collection[*kgateway.DirectResponse,ir.PolicyWrapper] synced (uid 123)	owner=Collection[*kgateway.DirectResponse,ir.PolicyWrapper]
+2026-11-14T09:13:00.741439Z	info	sync complete	name=GatewayExtension handler attempt=2 time=2.222041ms
+2026-11-14T09:13:00.741440Z	info	sync complete	name=GRPCRoute handler attempt=2 time=2.205583ms
+2026-11-14T09:13:00.741444Z	info	sync complete	name=KubeGateways handler attempt=2 time=2.236166ms
+2026-11-14T09:13:00.741448Z	info	krt	routes-grpc-routes-with-policy synced (uid 175)	owner=routes-grpc-routes-with-policy
+2026-11-14T09:13:00.741450Z	info	krt	Collection[ir.GatewayExtension,trafficpolicy.TrafficPolicyGatewayExtensionIR] synced (uid 120)	owner=Collection[ir.GatewayExtension,trafficpolicy.TrafficPolicyGatewayExtensionIR]
+2026-11-14T09:13:00.741454Z	info	sync complete	name=KubeGateways handler attempt=2 time=2.237833ms
+2026-11-14T09:13:00.741459Z	info	sync complete	name=BackendTLSPolicy handler attempt=2 time=2.289ms
+2026-11-14T09:13:00.741463Z	info	krt	Collection[*v1.BackendTLSPolicy,ir.PolicyWrapper] synced (uid 131)	owner=Collection[*v1.BackendTLSPolicy,ir.PolicyWrapper]
+2026-11-14T09:13:00.741465Z	info	krt	GatewaySpecs synced (uid 156)	owner=GatewaySpecs
+2026-11-14T09:13:00.741464Z	info	sync complete	name=ListenerPolicy handler attempt=2 time=2.291166ms
+2026-11-14T09:13:00.741469Z	info	krt	ListenerPolicyWrapper synced (uid 129)	owner=ListenerPolicyWrapper
+2026-11-14T09:13:00.741469Z	info	krt	BackendTLSPolicy.gateway.networking.k8s.io-policiesByTargetRef synced (uid 144)	owner=BackendTLSPolicy.gateway.networking.k8s.io-policiesByTargetRef
+2026-11-14T09:13:00.741444Z	info	krt	Collection[*kgateway.GatewayExtension,ir.GatewayExtension] synced (uid 105)	owner=Collection[*kgateway.GatewayExtension,ir.GatewayExtension]
+2026-11-14T09:13:00.741484Z	info	krt	ListenerPolicy.gateway.kgateway.dev-policiesByTargetRef synced (uid 142)	owner=ListenerPolicy.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.741495Z	info	krt	Collection[ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 168)	owner=Collection[ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.741498Z	info	sync complete	name=Backends handler attempt=2 time=2.300791ms
+2026-11-14T09:13:00.741504Z	info	krt	Collection[*kgateway.Backend,ir.BackendObjectIR] synced (uid 114)	owner=Collection[*kgateway.Backend,ir.BackendObjectIR]
+2026-11-14T09:13:00.741509Z	info	krt	Collection[ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 164)	owner=Collection[ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.741510Z	info	krt	Collection[*ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 169)	owner=Collection[*ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.741515Z	info	krt	Collection[*ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 165)	owner=Collection[*ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.741520Z	info	krt	DirectResponse.gateway.kgateway.dev-policiesByTargetRef synced (uid 150)	owner=DirectResponse.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.741655Z	info	krt	TrafficPolicyWrapper synced (uid 121)	owner=TrafficPolicyWrapper
+2026-11-14T09:13:00.741685Z	info	krt	TrafficPolicy.gateway.kgateway.dev-policiesByTargetRef synced (uid 148)	owner=TrafficPolicy.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.741774Z	info	krt	http-routes-with-policy synced (uid 173)	owner=http-routes-with-policy
+2026-11-14T09:13:00.741808Z	info	krt	routes-http-routes-with-policy synced (uid 174)	owner=routes-http-routes-with-policy
+2026-11-14T09:13:00.741826Z	info	krt	all-routes-with-policy synced
+2026-11-14T09:13:00.743722Z	info	sync complete	name=KubeGatewayClasses handler attempt=2 time=2.257417ms
+2026-11-14T09:13:00.743735Z	info	sync complete	name=KubeGatewayClasses handler attempt=2 time=2.245542ms
+2026-11-14T09:13:00.743777Z	info	krt	Collection[*v1.Gateway,ir.GatewayForDeployer] synced (uid 153)	owner=Collection[*v1.Gateway,ir.GatewayForDeployer]
+2026-11-14T09:13:00.743812Z	info	krt	gateways synced (uid 157)	owner=gateways
+2026-11-14T09:13:00.743832Z	info	sync complete	name=routes attempt=1 time=5.375µs
+2026-11-14T09:13:00.743837Z	info	sync complete	name=extensions attempt=1 time=2.875µs
+2026-11-14T09:13:00.743842Z	info	sync complete	name=commoncol attempt=1 time=2.708µs
+2026-11-14T09:13:00.743845Z	info	sync complete	name=translator attempt=1 time=1.584µs
+2026-11-14T09:13:00.743846Z	info	sync complete	name=backends attempt=1 time=167ns
+2026-11-14T09:13:00.743848Z	info	sync complete	name=endpoints attempt=1 time=208ns
+2026-11-14T09:13:00.743900Z	info	krt	FinalBackends synced
+2026-11-14T09:13:00.743973Z	info	krt	BaseEnvoyClusters synced (uid 183)	owner=BaseEnvoyClusters
+2026-11-14T09:13:00.743998Z	info	krt	ClusterResources synced (uid 184)	owner=ClusterResources
+2026-11-14T09:13:00.744025Z	info	krt	BackendStatusClustersPerClient synced (uid 186)	owner=BackendStatusClustersPerClient
+2026-11-14T09:13:00.744027Z	info	krt	BackendStatusClustersBase synced (uid 185)	owner=BackendStatusClustersBase
+2026-11-14T09:13:00.744035Z	info	krt	BackendStatusClusters synced
+2026-11-14T09:13:00.744348Z	info	controllers	stopped	controller=crd watcher
+2026-11-14T09:13:00.744378Z	info	Stopping CRD watcher
+    zz_kairo147_invariant_test.go:58: programmed route "listener~80~example_com-route-0-httproute-zz-parent-infra-0-0-matcher-0" match=path_separated_prefix:"/team1"
+    zz_kairo147_invariant_test.go:58: programmed route "listener~80~example_com-route-1-httproute-zz-admin-infra-0-0-matcher-0" match=path_separated_prefix:"/admin"
+--- PASS: TestKairo147DelegationChildMatchStaysInsideParent (0.03s)
+    --- PASS: TestKairo147DelegationChildMatchStaysInsideParent/control-no-inherit-annotation (0.03s)
+=== RUN   TestKairo147DelegationChildMatchStaysInsideParent
+=== RUN   TestKairo147DelegationChildMatchStaysInsideParent/control-no-inherit-annotation
+2026-11-14T09:13:00.763058Z	info	sync complete	name=discovery namespace filter attempt=2 time=2.161709ms
+2026-11-14T09:13:00.763073Z	info	sync complete	name=Namespaces attempt=2 time=2.164417ms
+2026-11-14T09:13:00.763115Z	info	krt	Namespaces synced	owner=Namespaces
+2026-11-14T09:13:00.763163Z	info	sync complete	name=SystemNamespaceNetwork attempt=1 time=5.833µs
+2026-11-14T09:13:00.763184Z	info	sync complete	name=SystemNamespaceNetwork attempt=1 time=125ns
+2026-11-14T09:13:00.763273Z	info	sync complete	name=Namespaces attempt=1 time=291ns
+2026-11-14T09:13:00.763302Z	info	krt	Namespaces synced	owner=Namespaces
+2026-11-14T09:13:00.763658Z	info	cluster "fake" kube client started
+2026-11-14T09:13:00.763822Z	info	CRD authorizationpolicies.security.istio.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763848Z	info	CRD backendconfigpolicies.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763853Z	info	CRD backends.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763866Z	info	CRD backendtlspolicies.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763870Z	info	CRD directresponses.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763874Z	info	CRD gatewayclasses.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763875Z	info	CRD gatewayextensions.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763877Z	info	CRD gatewayparameters.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763878Z	info	CRD gateways.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763886Z	info	CRD grpcroutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763895Z	info	CRD httproutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763905Z	info	CRD listenerpolicies.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763908Z	info	CRD listenersets.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763913Z	info	CRD pods. is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763916Z	info	CRD referencegrants.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763919Z	info	CRD serviceentries.networking.istio.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763922Z	info	CRD services. is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763930Z	info	CRD tcproutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763933Z	info	CRD tlsroutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763936Z	info	CRD trafficpolicies.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763939Z	info	CRD workloadentries.networking.istio.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.763953Z	info	CRD xlistenersets.gateway.networking.x-k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.765394Z	info	sync complete	name=Secrets attempt=2 time=2.25575ms
+2026-11-14T09:13:00.765406Z	info	krt	Secrets synced	owner=Secrets
+2026-11-14T09:13:00.765394Z	info	sync complete	name=ConfigMaps attempt=2 time=2.246167ms
+2026-11-14T09:13:00.765416Z	info	sync complete	name=KubeGatewayClasses attempt=2 time=2.133792ms
+2026-11-14T09:13:00.765451Z	info	krt	KubeGatewayClasses synced	owner=KubeGatewayClasses
+2026-11-14T09:13:00.765418Z	info	krt	ConfigMaps synced	owner=ConfigMaps
+2026-11-14T09:13:00.765418Z	info	sync complete	name=Namespaces handler attempt=2 time=2.106125ms
+2026-11-14T09:13:00.765423Z	info	sync complete	name=KubeLegacyXListenerSets attempt=2 time=2.125417ms
+2026-11-14T09:13:00.765459Z	info	krt	KubeLegacyXListenerSets synced	owner=KubeLegacyXListenerSets
+2026-11-14T09:13:00.765429Z	info	sync complete	name=Pods attempt=2 time=2.27875ms
+2026-11-14T09:13:00.765467Z	info	krt	Pods synced	owner=Pods
+2026-11-14T09:13:00.765432Z	info	sync complete	name=Services attempt=2 time=2.3005ms
+2026-11-14T09:13:00.765473Z	info	krt	Services synced	owner=Services
+2026-11-14T09:13:00.765437Z	info	sync complete	name=Nodes attempt=2 time=2.28425ms
+2026-11-14T09:13:00.765480Z	info	krt	Nodes synced	owner=Nodes
+2026-11-14T09:13:00.765430Z	info	sync complete	name=Namespaces handler attempt=2 time=2.278125ms
+2026-11-14T09:13:00.765424Z	info	sync complete	name=EndpointSlices attempt=2 time=2.20325ms
+2026-11-14T09:13:00.765518Z	info	krt	EndpointSlices synced	owner=EndpointSlices
+2026-11-14T09:13:00.765457Z	info	krt	NamespacesMetadata synced (uid 229)	owner=NamespacesMetadata
+2026-11-14T09:13:00.765500Z	info	krt	NamespacesMetadata synced (uid 189)	owner=NamespacesMetadata
+2026-11-14T09:13:00.765529Z	info	krt	SystemNamespaceNetwork synced (uid 200)	owner=SystemNamespaceNetwork
+2026-11-14T09:13:00.765529Z	info	sync complete	name=TLSRouteV1 attempt=2 time=2.017416ms
+2026-11-14T09:13:00.765535Z	info	krt	TLSRouteV1 synced	owner=TLSRouteV1
+2026-11-14T09:13:00.765533Z	info	sync complete	name=TCPRouteV1 attempt=2 time=2.025875ms
+2026-11-14T09:13:00.765539Z	info	krt	TCPRouteV1 synced	owner=TCPRouteV1
+2026-11-14T09:13:00.765685Z	info	sync complete	name=crd watcher attempt=2 time=2.020375ms
+2026-11-14T09:13:00.765690Z	info	controllers	starting	controller=crd watcher
+2026-11-14T09:13:00.765727Z	info	backendconfigpolicies.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.765773Z	info	backends.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.765805Z	info	backendtlspolicies.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.765868Z	info	directresponses.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.765887Z	info	gatewayextensions.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.765964Z	info	gateways.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.766026Z	info	grpcroutes.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.766046Z	info	httproutes.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.766060Z	info	listenerpolicies.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.766068Z	info	listenersets.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.766887Z	info	referencegrants.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.766918Z	info	trafficpolicies.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.767463Z	info	sync complete	name=Secrets handler attempt=2 time=2.032375ms
+2026-11-14T09:13:00.767491Z	info	sync complete	name=Services handler attempt=2 time=2.010333ms
+2026-11-14T09:13:00.767476Z	info	krt	secrets synced (uid 191)	owner=secrets
+2026-11-14T09:13:00.767491Z	info	sync complete	name=Pods handler attempt=2 time=2.010083ms
+2026-11-14T09:13:00.767502Z	info	sync complete	name=KubeLegacyXListenerSets handler attempt=2 time=2.03175ms
+2026-11-14T09:13:00.767510Z	info	krt	AugmentPod synced (uid 204)	owner=AugmentPod
+2026-11-14T09:13:00.767509Z	info	krt	KubeLegacyXListenerSetsConverted synced (uid 233)	owner=KubeLegacyXListenerSetsConverted
+2026-11-14T09:13:00.767519Z	info	krt	KubernetesServiceBackends synced (uid 218)	owner=KubernetesServiceBackends
+2026-11-14T09:13:00.767522Z	info	sync complete	name=Nodes handler attempt=2 time=2.023667ms
+2026-11-14T09:13:00.767530Z	info	krt	Collection[*v1.Node,krtcollections.NodeMetadata] synced (uid 203)	owner=Collection[*v1.Node,krtcollections.NodeMetadata]
+2026-11-14T09:13:00.767574Z	info	sync complete	name=TLSRouteV1 handler attempt=2 time=2.026292ms
+2026-11-14T09:13:00.767580Z	info	krt	TLSRouteV1ToV1Alpha2 synced (uid 255)	owner=TLSRouteV1ToV1Alpha2
+2026-11-14T09:13:00.767578Z	info	sync complete	name=Pods handler attempt=2 time=2.056333ms
+2026-11-14T09:13:00.767600Z	info	krt	WrappedPod synced (uid 205)	owner=WrappedPod
+2026-11-14T09:13:00.767609Z	info	krt	routes-tls-routes-with-policy synced (uid 270)	owner=routes-tls-routes-with-policy
+2026-11-14T09:13:00.767576Z	info	sync complete	name=TCPRouteV1 handler attempt=2 time=2.02775ms
+2026-11-14T09:13:00.767637Z	info	krt	TCPRouteV1ToV1Alpha2 synced (uid 253)	owner=TCPRouteV1ToV1Alpha2
+2026-11-14T09:13:00.767664Z	info	krt	routes-tcp-routes-with-policy synced (uid 269)	owner=routes-tcp-routes-with-policy
+2026-11-14T09:13:00.769669Z	info	sync complete	name=GRPCRoute attempt=3 time=6.086125ms
+2026-11-14T09:13:00.769694Z	info	krt	GRPCRoute synced	owner=GRPCRoute
+2026-11-14T09:13:00.769694Z	info	sync complete	name=ListenerPolicy attempt=3 time=6.467375ms
+2026-11-14T09:13:00.769695Z	info	sync complete	name=RefGrants attempt=3 time=6.552542ms
+2026-11-14T09:13:00.769704Z	info	krt	ListenerPolicy synced	owner=ListenerPolicy
+2026-11-14T09:13:00.769707Z	info	krt	RefGrants synced	owner=RefGrants
+2026-11-14T09:13:00.769682Z	info	sync complete	name=EndpointSlices handler attempt=2 time=2.047459ms
+2026-11-14T09:13:00.769711Z	info	sync complete	name=KubeGateways attempt=3 time=6.428583ms
+2026-11-14T09:13:00.769704Z	info	sync complete	name=BackendConfigPolicy attempt=3 time=6.458458ms
+2026-11-14T09:13:00.769674Z	info	sync complete	name=GatewayExtension attempt=3 time=6.525125ms
+2026-11-14T09:13:00.769719Z	info	krt	BackendConfigPolicy synced	owner=BackendConfigPolicy
+2026-11-14T09:13:00.769723Z	info	krt	GatewayExtension synced	owner=GatewayExtension
+2026-11-14T09:13:00.769666Z	info	sync complete	name=HTTPRoute attempt=3 time=6.170375ms
+2026-11-14T09:13:00.769732Z	info	krt	HTTPRoute synced	owner=HTTPRoute
+2026-11-14T09:13:00.769716Z	info	krt	KubeGateways synced	owner=KubeGateways
+2026-11-14T09:13:00.769752Z	info	sync complete	name=Backends attempt=3 time=6.582042ms
+2026-11-14T09:13:00.769757Z	info	krt	Backends synced	owner=Backends
+2026-11-14T09:13:00.769757Z	info	sync complete	name=DirectResponse attempt=3 time=6.551875ms
+2026-11-14T09:13:00.769757Z	info	sync complete	name=KubePromotedListenerSets attempt=3 time=6.456542ms
+2026-11-14T09:13:00.769764Z	info	krt	DirectResponse synced	owner=DirectResponse
+2026-11-14T09:13:00.769782Z	info	krt	K8sEndpoints synced (uid 220)	owner=K8sEndpoints
+2026-11-14T09:13:00.769767Z	info	krt	KubePromotedListenerSets synced	owner=KubePromotedListenerSets
+2026-11-14T09:13:00.769770Z	info	sync complete	name=crd watcher attempt=3 time=6.100625ms
+2026-11-14T09:13:00.769844Z	info	sync complete	name=ListenerPolicy handler attempt=1 time=334ns
+2026-11-14T09:13:00.769828Z	info	sync complete	name=KubePromotedListenerSets handler attempt=1 time=417ns
+2026-11-14T09:13:00.769860Z	info	krt	KubeListenerSets synced
+2026-11-14T09:13:00.769756Z	info	sync complete	name=BackendTLSPolicy attempt=3 time=6.514541ms
+2026-11-14T09:13:00.769870Z	info	krt	BackendTLSPolicy synced	owner=BackendTLSPolicy
+2026-11-14T09:13:00.769872Z	info	krt	ListenerSetIRs synced (uid 247)	owner=ListenerSetIRs
+2026-11-14T09:13:00.769864Z	info	krt	ListenerPolicy.gateway.kgateway.dev-policiesByTargetRef synced (uid 241)	owner=ListenerPolicy.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.769854Z	info	krt	ListenerPolicyWrapper synced (uid 222)	owner=ListenerPolicyWrapper
+2026-11-14T09:13:00.769854Z	info	krt	EndpointIRs synced
+2026-11-14T09:13:00.769839Z	info	sync complete	name=TrafficPolicy attempt=3 time=6.651125ms
+2026-11-14T09:13:00.769911Z	info	krt	TrafficPolicy synced	owner=TrafficPolicy
+2026-11-14T09:13:00.771970Z	info	sync complete	name=GatewayExtension handler attempt=2 time=2.214917ms
+2026-11-14T09:13:00.771983Z	info	krt	Collection[*kgateway.GatewayExtension,ir.GatewayExtension] synced (uid 198)	owner=Collection[*kgateway.GatewayExtension,ir.GatewayExtension]
+2026-11-14T09:13:00.771994Z	info	krt	Collection[ir.GatewayExtension,trafficpolicy.TrafficPolicyGatewayExtensionIR] synced (uid 213)	owner=Collection[ir.GatewayExtension,trafficpolicy.TrafficPolicyGatewayExtensionIR]
+2026-11-14T09:13:00.771991Z	info	sync complete	name=TrafficPolicy handler attempt=2 time=2.059416ms
+2026-11-14T09:13:00.772001Z	info	sync complete	name=Backends handler attempt=2 time=2.237125ms
+2026-11-14T09:13:00.772005Z	info	sync complete	name=HTTPRoute handler attempt=2 time=2.263625ms
+2026-11-14T09:13:00.772013Z	info	krt	Collection[*kgateway.Backend,ir.BackendObjectIR] synced (uid 207)	owner=Collection[*kgateway.Backend,ir.BackendObjectIR]
+2026-11-14T09:13:00.772021Z	info	krt	Collection[ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 257)	owner=Collection[ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.772028Z	info	krt	Collection[*ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 258)	owner=Collection[*ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.771981Z	info	sync complete	name=GRPCRoute handler attempt=2 time=2.26175ms
+2026-11-14T09:13:00.772036Z	info	krt	routes-grpc-routes-with-policy synced (uid 268)	owner=routes-grpc-routes-with-policy
+2026-11-14T09:13:00.772042Z	info	sync complete	name=BackendConfigPolicy handler attempt=2 time=2.289541ms
+2026-11-14T09:13:00.772047Z	info	krt	Collection[*kgateway.BackendConfigPolicy,ir.PolicyWrapper] synced (uid 226)	owner=Collection[*kgateway.BackendConfigPolicy,ir.PolicyWrapper]
+2026-11-14T09:13:00.772042Z	info	sync complete	name=DirectResponse handler attempt=2 time=2.27075ms
+2026-11-14T09:13:00.772048Z	info	sync complete	name=KubeGateways handler attempt=2 time=2.319333ms
+2026-11-14T09:13:00.772056Z	info	krt	Collection[*kgateway.DirectResponse,ir.PolicyWrapper] synced (uid 216)	owner=Collection[*kgateway.DirectResponse,ir.PolicyWrapper]
+2026-11-14T09:13:00.772054Z	info	krt	BackendConfigPolicy.gateway.kgateway.dev-policiesByTargetRef synced (uid 235)	owner=BackendConfigPolicy.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.772075Z	info	krt	DirectResponse.gateway.kgateway.dev-policiesByTargetRef synced (uid 239)	owner=DirectResponse.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.772083Z	info	sync complete	name=BackendTLSPolicy handler attempt=2 time=2.197208ms
+2026-11-14T09:13:00.772094Z	info	krt	Collection[*v1.BackendTLSPolicy,ir.PolicyWrapper] synced (uid 224)	owner=Collection[*v1.BackendTLSPolicy,ir.PolicyWrapper]
+2026-11-14T09:13:00.772104Z	info	krt	BackendTLSPolicy.gateway.networking.k8s.io-policiesByTargetRef synced (uid 243)	owner=BackendTLSPolicy.gateway.networking.k8s.io-policiesByTargetRef
+2026-11-14T09:13:00.772031Z	info	sync complete	name=KubeGateways handler attempt=2 time=2.283042ms
+2026-11-14T09:13:00.772145Z	info	krt	GatewaySpecs synced (uid 249)	owner=GatewaySpecs
+2026-11-14T09:13:00.772155Z	info	krt	Collection[ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 261)	owner=Collection[ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.772198Z	info	krt	Collection[*ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 262)	owner=Collection[*ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.772244Z	info	krt	TrafficPolicyWrapper synced (uid 214)	owner=TrafficPolicyWrapper
+2026-11-14T09:13:00.772276Z	info	krt	TrafficPolicy.gateway.kgateway.dev-policiesByTargetRef synced (uid 237)	owner=TrafficPolicy.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.772326Z	info	krt	http-routes-with-policy synced (uid 266)	owner=http-routes-with-policy
+2026-11-14T09:13:00.772351Z	info	krt	routes-http-routes-with-policy synced (uid 267)	owner=routes-http-routes-with-policy
+2026-11-14T09:13:00.772365Z	info	krt	all-routes-with-policy synced
+2026-11-14T09:13:00.774358Z	info	sync complete	name=KubeGatewayClasses handler attempt=2 time=2.278625ms
+2026-11-14T09:13:00.774355Z	info	sync complete	name=KubeGatewayClasses handler attempt=2 time=2.146542ms
+2026-11-14T09:13:00.774406Z	info	krt	Collection[*v1.Gateway,ir.GatewayForDeployer] synced (uid 246)	owner=Collection[*v1.Gateway,ir.GatewayForDeployer]
+2026-11-14T09:13:00.774493Z	info	krt	gateways synced (uid 250)	owner=gateways
+2026-11-14T09:13:00.774524Z	info	sync complete	name=routes attempt=1 time=6.25µs
+2026-11-14T09:13:00.774536Z	info	sync complete	name=extensions attempt=1 time=4µs
+2026-11-14T09:13:00.774544Z	info	sync complete	name=commoncol attempt=1 time=4.667µs
+2026-11-14T09:13:00.774550Z	info	sync complete	name=translator attempt=1 time=3.041µs
+2026-11-14T09:13:00.774554Z	info	sync complete	name=backends attempt=1 time=416ns
+2026-11-14T09:13:00.774557Z	info	sync complete	name=endpoints attempt=1 time=416ns
+2026-11-14T09:13:00.774597Z	info	krt	FinalBackends synced
+2026-11-14T09:13:00.774736Z	info	krt	BaseEnvoyClusters synced (uid 276)	owner=BaseEnvoyClusters
+2026-11-14T09:13:00.774776Z	info	krt	ClusterResources synced (uid 277)	owner=ClusterResources
+2026-11-14T09:13:00.774797Z	info	krt	BackendStatusClustersPerClient synced (uid 279)	owner=BackendStatusClustersPerClient
+2026-11-14T09:13:00.774812Z	info	krt	BackendStatusClustersBase synced (uid 278)	owner=BackendStatusClustersBase
+2026-11-14T09:13:00.774825Z	info	krt	BackendStatusClusters synced
+2026-11-14T09:13:00.775115Z	info	controllers	stopped	controller=crd watcher
+2026-11-14T09:13:00.775123Z	info	Stopping CRD watcher
+    zz_kairo147_invariant_test.go:58: programmed route "listener~80~example_com-route-0-httproute-zz-parent-infra-0-0-matcher-0" match=path_separated_prefix:"/team1"
+    zz_kairo147_invariant_test.go:58: programmed route "listener~80~example_com-route-1-httproute-zz-admin-infra-0-0-matcher-0" match=path_separated_prefix:"/admin"
+--- PASS: TestKairo147DelegationChildMatchStaysInsideParent (0.03s)
+    --- PASS: TestKairo147DelegationChildMatchStaysInsideParent/control-no-inherit-annotation (0.03s)
+=== RUN   TestKairo147DelegationChildMatchStaysInsideParent
+=== RUN   TestKairo147DelegationChildMatchStaysInsideParent/control-no-inherit-annotation
+2026-11-14T09:13:00.796512Z	info	sync complete	name=discovery namespace filter attempt=2 time=2.275166ms
+2026-11-14T09:13:00.796503Z	info	sync complete	name=Namespaces attempt=2 time=2.277084ms
+2026-11-14T09:13:00.796561Z	info	krt	Namespaces synced	owner=Namespaces
+2026-11-14T09:13:00.796602Z	info	sync complete	name=SystemNamespaceNetwork attempt=1 time=4.041µs
+2026-11-14T09:13:00.796630Z	info	sync complete	name=SystemNamespaceNetwork attempt=1 time=83ns
+2026-11-14T09:13:00.796707Z	info	sync complete	name=Namespaces attempt=1 time=209ns
+2026-11-14T09:13:00.796734Z	info	krt	Namespaces synced	owner=Namespaces
+2026-11-14T09:13:00.797077Z	info	cluster "fake" kube client started
+2026-11-14T09:13:00.797213Z	info	CRD authorizationpolicies.security.istio.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797234Z	info	CRD backendconfigpolicies.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797238Z	info	CRD backends.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797252Z	info	CRD backendtlspolicies.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797258Z	info	CRD directresponses.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797265Z	info	CRD gatewayclasses.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797268Z	info	CRD gatewayextensions.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797270Z	info	CRD gatewayparameters.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797272Z	info	CRD gateways.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797283Z	info	CRD grpcroutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797289Z	info	CRD httproutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797291Z	info	CRD listenerpolicies.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797293Z	info	CRD listenersets.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797299Z	info	CRD pods. is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797310Z	info	CRD referencegrants.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797318Z	info	CRD serviceentries.networking.istio.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797324Z	info	CRD services. is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797334Z	info	CRD tcproutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797344Z	info	CRD tlsroutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797347Z	info	CRD trafficpolicies.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797351Z	info	CRD workloadentries.networking.istio.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.797354Z	info	CRD xlistenersets.gateway.networking.x-k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.798819Z	info	sync complete	name=Pods attempt=2 time=2.211458ms
+2026-11-14T09:13:00.798835Z	info	krt	Pods synced	owner=Pods
+2026-11-14T09:13:00.798829Z	info	sync complete	name=Namespaces handler attempt=2 time=2.078667ms
+2026-11-14T09:13:00.798840Z	info	sync complete	name=Services attempt=2 time=2.227208ms
+2026-11-14T09:13:00.798852Z	info	krt	Services synced	owner=Services
+2026-11-14T09:13:00.798852Z	info	krt	NamespacesMetadata synced (uid 322)	owner=NamespacesMetadata
+2026-11-14T09:13:00.798867Z	info	sync complete	name=Pods handler attempt=1 time=333ns
+2026-11-14T09:13:00.798850Z	info	sync complete	name=KubeLegacyXListenerSets attempt=2 time=2.112459ms
+2026-11-14T09:13:00.798879Z	info	krt	AugmentPod synced (uid 297)	owner=AugmentPod
+2026-11-14T09:13:00.798879Z	info	krt	KubeLegacyXListenerSets synced	owner=KubeLegacyXListenerSets
+2026-11-14T09:13:00.798880Z	info	sync complete	name=Secrets attempt=2 time=2.305958ms
+2026-11-14T09:13:00.798891Z	info	krt	Secrets synced	owner=Secrets
+2026-11-14T09:13:00.798891Z	info	sync complete	name=ConfigMaps attempt=2 time=2.302625ms
+2026-11-14T09:13:00.798901Z	info	krt	ConfigMaps synced	owner=ConfigMaps
+2026-11-14T09:13:00.798895Z	info	sync complete	name=Namespaces handler attempt=2 time=2.306542ms
+2026-11-14T09:13:00.798896Z	info	sync complete	name=KubeGatewayClasses attempt=2 time=2.190625ms
+2026-11-14T09:13:00.798907Z	info	sync complete	name=EndpointSlices attempt=2 time=2.238583ms
+2026-11-14T09:13:00.798912Z	info	krt	KubeGatewayClasses synced	owner=KubeGatewayClasses
+2026-11-14T09:13:00.798914Z	info	krt	EndpointSlices synced	owner=EndpointSlices
+2026-11-14T09:13:00.798908Z	info	krt	NamespacesMetadata synced (uid 282)	owner=NamespacesMetadata
+2026-11-14T09:13:00.798904Z	info	sync complete	name=Nodes attempt=2 time=2.294042ms
+2026-11-14T09:13:00.798940Z	info	sync complete	name=TCPRouteV1 attempt=2 time=2.010708ms
+2026-11-14T09:13:00.798949Z	info	krt	TCPRouteV1 synced	owner=TCPRouteV1
+2026-11-14T09:13:00.798965Z	info	sync complete	name=TLSRouteV1 attempt=2 time=2.014125ms
+2026-11-14T09:13:00.798931Z	info	krt	SystemNamespaceNetwork synced (uid 293)	owner=SystemNamespaceNetwork
+2026-11-14T09:13:00.798975Z	info	krt	TLSRouteV1 synced	owner=TLSRouteV1
+2026-11-14T09:13:00.798983Z	info	krt	Nodes synced	owner=Nodes
+2026-11-14T09:13:00.799099Z	info	sync complete	name=crd watcher attempt=2 time=2.015417ms
+2026-11-14T09:13:00.799113Z	info	controllers	starting	controller=crd watcher
+2026-11-14T09:13:00.799151Z	info	backendconfigpolicies.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.799189Z	info	backends.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.799215Z	info	backendtlspolicies.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.799225Z	info	directresponses.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.799235Z	info	gatewayextensions.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.799246Z	info	gateways.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.799260Z	info	grpcroutes.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.799274Z	info	httproutes.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.799286Z	info	listenerpolicies.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.799294Z	info	listenersets.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.799307Z	info	referencegrants.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.799320Z	info	trafficpolicies.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.801113Z	info	sync complete	name=Nodes handler attempt=2 time=2.11275ms
+2026-11-14T09:13:00.801131Z	info	sync complete	name=Secrets handler attempt=2 time=2.212667ms
+2026-11-14T09:13:00.801148Z	info	krt	secrets synced (uid 284)	owner=secrets
+2026-11-14T09:13:00.801127Z	info	sync complete	name=TCPRouteV1 handler attempt=2 time=2.1645ms
+2026-11-14T09:13:00.801145Z	info	sync complete	name=Services handler attempt=2 time=2.274125ms
+2026-11-14T09:13:00.801154Z	info	krt	TCPRouteV1ToV1Alpha2 synced (uid 346)	owner=TCPRouteV1ToV1Alpha2
+2026-11-14T09:13:00.801165Z	info	sync complete	name=TLSRouteV1 handler attempt=2 time=2.178625ms
+2026-11-14T09:13:00.801140Z	info	krt	Collection[*v1.Node,krtcollections.NodeMetadata] synced (uid 296)	owner=Collection[*v1.Node,krtcollections.NodeMetadata]
+2026-11-14T09:13:00.801175Z	info	krt	TLSRouteV1ToV1Alpha2 synced (uid 348)	owner=TLSRouteV1ToV1Alpha2
+2026-11-14T09:13:00.801182Z	info	krt	routes-tcp-routes-with-policy synced (uid 362)	owner=routes-tcp-routes-with-policy
+2026-11-14T09:13:00.801184Z	info	krt	routes-tls-routes-with-policy synced (uid 363)	owner=routes-tls-routes-with-policy
+2026-11-14T09:13:00.801185Z	info	krt	KubernetesServiceBackends synced (uid 311)	owner=KubernetesServiceBackends
+2026-11-14T09:13:00.801194Z	info	sync complete	name=KubeLegacyXListenerSets handler attempt=2 time=2.29525ms
+2026-11-14T09:13:00.801215Z	info	krt	KubeLegacyXListenerSetsConverted synced (uid 326)	owner=KubeLegacyXListenerSetsConverted
+2026-11-14T09:13:00.801210Z	info	sync complete	name=Pods handler attempt=2 time=2.31875ms
+2026-11-14T09:13:00.801220Z	info	krt	WrappedPod synced (uid 298)	owner=WrappedPod
+2026-11-14T09:13:00.803034Z	info	sync complete	name=HTTPRoute attempt=3 time=6.126125ms
+2026-11-14T09:13:00.803043Z	info	sync complete	name=TrafficPolicy attempt=3 time=6.399209ms
+2026-11-14T09:13:00.803051Z	info	krt	HTTPRoute synced	owner=HTTPRoute
+2026-11-14T09:13:00.803053Z	info	krt	TrafficPolicy synced	owner=TrafficPolicy
+2026-11-14T09:13:00.803048Z	info	sync complete	name=BackendConfigPolicy attempt=3 time=6.358625ms
+2026-11-14T09:13:00.803056Z	info	sync complete	name=BackendTLSPolicy attempt=3 time=6.37575ms
+2026-11-14T09:13:00.803063Z	info	krt	BackendConfigPolicy synced	owner=BackendConfigPolicy
+2026-11-14T09:13:00.803065Z	info	krt	BackendTLSPolicy synced	owner=BackendTLSPolicy
+2026-11-14T09:13:00.803037Z	info	sync complete	name=ListenerPolicy attempt=3 time=6.362333ms
+2026-11-14T09:13:00.803081Z	info	krt	ListenerPolicy synced	owner=ListenerPolicy
+2026-11-14T09:13:00.803081Z	info	sync complete	name=KubePromotedListenerSets attempt=3 time=6.346ms
+2026-11-14T09:13:00.803089Z	info	krt	KubePromotedListenerSets synced	owner=KubePromotedListenerSets
+2026-11-14T09:13:00.803095Z	info	sync complete	name=KubePromotedListenerSets handler attempt=1 time=792ns
+2026-11-14T09:13:00.803108Z	info	krt	KubeListenerSets synced
+2026-11-14T09:13:00.803104Z	info	sync complete	name=RefGrants attempt=3 time=6.526917ms
+2026-11-14T09:13:00.803111Z	info	krt	RefGrants synced	owner=RefGrants
+2026-11-14T09:13:00.803115Z	info	sync complete	name=Backends attempt=3 time=6.489541ms
+2026-11-14T09:13:00.803123Z	info	krt	Backends synced	owner=Backends
+2026-11-14T09:13:00.803126Z	info	sync complete	name=DirectResponse attempt=3 time=6.477042ms
+2026-11-14T09:13:00.803135Z	info	krt	DirectResponse synced	owner=DirectResponse
+2026-11-14T09:13:00.803138Z	info	krt	ListenerSetIRs synced (uid 340)	owner=ListenerSetIRs
+2026-11-14T09:13:00.803141Z	info	sync complete	name=crd watcher attempt=3 time=6.058583ms
+2026-11-14T09:13:00.803142Z	info	sync complete	name=GRPCRoute attempt=3 time=6.141625ms
+2026-11-14T09:13:00.803151Z	info	krt	GRPCRoute synced	owner=GRPCRoute
+2026-11-14T09:13:00.803151Z	info	sync complete	name=GatewayExtension attempt=3 time=6.557625ms
+2026-11-14T09:13:00.803158Z	info	krt	GatewayExtension synced	owner=GatewayExtension
+2026-11-14T09:13:00.803144Z	info	sync complete	name=KubeGateways attempt=3 time=6.431833ms
+2026-11-14T09:13:00.803164Z	info	krt	KubeGateways synced	owner=KubeGateways
+2026-11-14T09:13:00.803300Z	info	sync complete	name=EndpointSlices handler attempt=2 time=2.02325ms
+2026-11-14T09:13:00.803386Z	info	krt	K8sEndpoints synced (uid 313)	owner=K8sEndpoints
+2026-11-14T09:13:00.803410Z	info	krt	EndpointIRs synced
+2026-11-14T09:13:00.805315Z	info	sync complete	name=GRPCRoute handler attempt=2 time=2.140125ms
+2026-11-14T09:13:00.805323Z	info	sync complete	name=BackendTLSPolicy handler attempt=2 time=2.24575ms
+2026-11-14T09:13:00.805339Z	info	krt	routes-grpc-routes-with-policy synced (uid 361)	owner=routes-grpc-routes-with-policy
+2026-11-14T09:13:00.805340Z	info	krt	Collection[*v1.BackendTLSPolicy,ir.PolicyWrapper] synced (uid 317)	owner=Collection[*v1.BackendTLSPolicy,ir.PolicyWrapper]
+2026-11-14T09:13:00.805337Z	info	sync complete	name=KubeGateways handler attempt=2 time=2.1585ms
+2026-11-14T09:13:00.805366Z	info	sync complete	name=Backends handler attempt=2 time=2.229834ms
+2026-11-14T09:13:00.805393Z	info	krt	GatewaySpecs synced (uid 342)	owner=GatewaySpecs
+2026-11-14T09:13:00.805395Z	info	krt	Collection[*kgateway.Backend,ir.BackendObjectIR] synced (uid 300)	owner=Collection[*kgateway.Backend,ir.BackendObjectIR]
+2026-11-14T09:13:00.805410Z	info	krt	Collection[ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 350)	owner=Collection[ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.805370Z	info	sync complete	name=HTTPRoute handler attempt=2 time=2.205125ms
+2026-11-14T09:13:00.805423Z	info	krt	Collection[*ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 351)	owner=Collection[*ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.805349Z	info	sync complete	name=GatewayExtension handler attempt=2 time=2.1725ms
+2026-11-14T09:13:00.805351Z	info	sync complete	name=TrafficPolicy handler attempt=2 time=2.272792ms
+2026-11-14T09:13:00.805362Z	info	sync complete	name=ListenerPolicy handler attempt=2 time=2.263875ms
+2026-11-14T09:13:00.805363Z	info	sync complete	name=BackendConfigPolicy handler attempt=2 time=2.285625ms
+2026-11-14T09:13:00.805363Z	info	sync complete	name=KubeGateways handler attempt=2 time=2.178625ms
+2026-11-14T09:13:00.805359Z	info	sync complete	name=DirectResponse handler attempt=2 time=2.201458ms
+2026-11-14T09:13:00.805462Z	info	krt	ListenerPolicy.gateway.kgateway.dev-policiesByTargetRef synced (uid 334)	owner=ListenerPolicy.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.805465Z	info	krt	Collection[*kgateway.DirectResponse,ir.PolicyWrapper] synced (uid 309)	owner=Collection[*kgateway.DirectResponse,ir.PolicyWrapper]
+2026-11-14T09:13:00.805354Z	info	krt	BackendTLSPolicy.gateway.networking.k8s.io-policiesByTargetRef synced (uid 336)	owner=BackendTLSPolicy.gateway.networking.k8s.io-policiesByTargetRef
+2026-11-14T09:13:00.805432Z	info	krt	Collection[*kgateway.GatewayExtension,ir.GatewayExtension] synced (uid 291)	owner=Collection[*kgateway.GatewayExtension,ir.GatewayExtension]
+2026-11-14T09:13:00.805444Z	info	krt	ListenerPolicyWrapper synced (uid 315)	owner=ListenerPolicyWrapper
+2026-11-14T09:13:00.805445Z	info	krt	Collection[*kgateway.BackendConfigPolicy,ir.PolicyWrapper] synced (uid 319)	owner=Collection[*kgateway.BackendConfigPolicy,ir.PolicyWrapper]
+2026-11-14T09:13:00.805447Z	info	krt	Collection[ir.GatewayExtension,trafficpolicy.TrafficPolicyGatewayExtensionIR] synced (uid 306)	owner=Collection[ir.GatewayExtension,trafficpolicy.TrafficPolicyGatewayExtensionIR]
+2026-11-14T09:13:00.805483Z	info	krt	DirectResponse.gateway.kgateway.dev-policiesByTargetRef synced (uid 332)	owner=DirectResponse.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.805487Z	info	krt	BackendConfigPolicy.gateway.kgateway.dev-policiesByTargetRef synced (uid 328)	owner=BackendConfigPolicy.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.805557Z	info	krt	Collection[ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 354)	owner=Collection[ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.805577Z	info	krt	Collection[*ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 355)	owner=Collection[*ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.805660Z	info	krt	TrafficPolicyWrapper synced (uid 307)	owner=TrafficPolicyWrapper
+2026-11-14T09:13:00.805692Z	info	krt	TrafficPolicy.gateway.kgateway.dev-policiesByTargetRef synced (uid 330)	owner=TrafficPolicy.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.805756Z	info	krt	http-routes-with-policy synced (uid 359)	owner=http-routes-with-policy
+2026-11-14T09:13:00.805804Z	info	krt	routes-http-routes-with-policy synced (uid 360)	owner=routes-http-routes-with-policy
+2026-11-14T09:13:00.805835Z	info	krt	all-routes-with-policy synced
+2026-11-14T09:13:00.807714Z	info	sync complete	name=KubeGatewayClasses handler attempt=2 time=2.24225ms
+2026-11-14T09:13:00.807739Z	info	krt	Collection[*v1.Gateway,ir.GatewayForDeployer] synced (uid 339)	owner=Collection[*v1.Gateway,ir.GatewayForDeployer]
+2026-11-14T09:13:00.807706Z	info	sync complete	name=KubeGatewayClasses handler attempt=2 time=2.283666ms
+2026-11-14T09:13:00.807791Z	info	krt	gateways synced (uid 343)	owner=gateways
+2026-11-14T09:13:00.807807Z	info	sync complete	name=routes attempt=1 time=8.25µs
+2026-11-14T09:13:00.807823Z	info	sync complete	name=extensions attempt=1 time=3.875µs
+2026-11-14T09:13:00.807831Z	info	sync complete	name=commoncol attempt=1 time=4.959µs
+2026-11-14T09:13:00.807840Z	info	sync complete	name=translator attempt=1 time=3.334µs
+2026-11-14T09:13:00.807843Z	info	sync complete	name=backends attempt=1 time=416ns
+2026-11-14T09:13:00.807846Z	info	sync complete	name=endpoints attempt=1 time=416ns
+2026-11-14T09:13:00.807910Z	info	krt	FinalBackends synced
+2026-11-14T09:13:00.807973Z	info	krt	BaseEnvoyClusters synced (uid 369)	owner=BaseEnvoyClusters
+2026-11-14T09:13:00.808000Z	info	krt	ClusterResources synced (uid 370)	owner=ClusterResources
+2026-11-14T09:13:00.808040Z	info	krt	BackendStatusClustersPerClient synced (uid 372)	owner=BackendStatusClustersPerClient
+2026-11-14T09:13:00.808054Z	info	krt	BackendStatusClustersBase synced (uid 371)	owner=BackendStatusClustersBase
+2026-11-14T09:13:00.808071Z	info	krt	BackendStatusClusters synced
+2026-11-14T09:13:00.808361Z	info	controllers	stopped	controller=crd watcher
+2026-11-14T09:13:00.808370Z	info	Stopping CRD watcher
+    zz_kairo147_invariant_test.go:58: programmed route "listener~80~example_com-route-0-httproute-zz-parent-infra-0-0-matcher-0" match=path_separated_prefix:"/team1"
+    zz_kairo147_invariant_test.go:58: programmed route "listener~80~example_com-route-1-httproute-zz-admin-infra-0-0-matcher-0" match=path_separated_prefix:"/admin"
+--- PASS: TestKairo147DelegationChildMatchStaysInsideParent (0.03s)
+    --- PASS: TestKairo147DelegationChildMatchStaysInsideParent/control-no-inherit-annotation (0.03s)
+=== RUN   TestKairo147DelegationChildMatchStaysInsideParent
+=== RUN   TestKairo147DelegationChildMatchStaysInsideParent/control-no-inherit-annotation
+2026-11-14T09:13:00.828900Z	info	sync complete	name=discovery namespace filter attempt=2 time=2.282334ms
+2026-11-14T09:13:00.828893Z	info	sync complete	name=Namespaces attempt=2 time=2.2785ms
+2026-11-14T09:13:00.828989Z	info	krt	Namespaces synced	owner=Namespaces
+2026-11-14T09:13:00.828994Z	info	sync complete	name=SystemNamespaceNetwork attempt=1 time=4.25µs
+2026-11-14T09:13:00.829056Z	info	sync complete	name=SystemNamespaceNetwork attempt=1 time=83ns
+2026-11-14T09:13:00.829186Z	info	sync complete	name=Namespaces attempt=1 time=209ns
+2026-11-14T09:13:00.829192Z	info	krt	Namespaces synced	owner=Namespaces
+2026-11-14T09:13:00.829457Z	info	cluster "fake" kube client started
+2026-11-14T09:13:00.829613Z	info	CRD authorizationpolicies.security.istio.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829629Z	info	CRD backendconfigpolicies.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829632Z	info	CRD backends.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829644Z	info	CRD backendtlspolicies.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829647Z	info	CRD directresponses.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829654Z	info	CRD gatewayclasses.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829668Z	info	CRD gatewayextensions.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829671Z	info	CRD gatewayparameters.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829672Z	info	CRD gateways.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829677Z	info	CRD grpcroutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829681Z	info	CRD httproutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829683Z	info	CRD listenerpolicies.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829684Z	info	CRD listenersets.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829708Z	info	CRD pods. is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829717Z	info	CRD referencegrants.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829721Z	info	CRD serviceentries.networking.istio.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829725Z	info	CRD services. is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829731Z	info	CRD tcproutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829741Z	info	CRD tlsroutes.gateway.networking.k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829756Z	info	CRD trafficpolicies.gateway.kgateway.dev is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829758Z	info	CRD workloadentries.networking.istio.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.829758Z	info	CRD xlistenersets.gateway.networking.x-k8s.io is not at ignore list, adding to CRD watcher
+2026-11-14T09:13:00.831228Z	info	sync complete	name=KubeLegacyXListenerSets attempt=2 time=2.010292ms
+2026-11-14T09:13:00.831248Z	info	krt	KubeLegacyXListenerSets synced	owner=KubeLegacyXListenerSets
+2026-11-14T09:13:00.831230Z	info	sync complete	name=KubeGatewayClasses attempt=2 time=2.050167ms
+2026-11-14T09:13:00.831269Z	info	krt	KubeGatewayClasses synced	owner=KubeGatewayClasses
+2026-11-14T09:13:00.831244Z	info	sync complete	name=Namespaces handler attempt=2 time=2.203334ms
+2026-11-14T09:13:00.831269Z	info	sync complete	name=Services attempt=2 time=2.294708ms
+2026-11-14T09:13:00.831280Z	info	krt	NamespacesMetadata synced (uid 375)	owner=NamespacesMetadata
+2026-11-14T09:13:00.831281Z	info	krt	Services synced	owner=Services
+2026-11-14T09:13:00.831306Z	info	krt	SystemNamespaceNetwork synced (uid 386)	owner=SystemNamespaceNetwork
+2026-11-14T09:13:00.831312Z	info	sync complete	name=Namespaces handler attempt=2 time=2.112834ms
+2026-11-14T09:13:00.831322Z	info	krt	NamespacesMetadata synced (uid 415)	owner=NamespacesMetadata
+2026-11-14T09:13:00.831340Z	info	sync complete	name=TCPRouteV1 attempt=2 time=2.010583ms
+2026-11-14T09:13:00.831348Z	info	krt	TCPRouteV1 synced	owner=TCPRouteV1
+2026-11-14T09:13:00.831347Z	info	sync complete	name=Nodes attempt=2 time=2.337917ms
+2026-11-14T09:13:00.831360Z	info	krt	Nodes synced	owner=Nodes
+2026-11-14T09:13:00.831359Z	info	sync complete	name=Pods attempt=2 time=2.354875ms
+2026-11-14T09:13:00.831365Z	info	krt	Pods synced	owner=Pods
+2026-11-14T09:13:00.831364Z	info	sync complete	name=ConfigMaps attempt=2 time=2.389875ms
+2026-11-14T09:13:00.831373Z	info	krt	ConfigMaps synced	owner=ConfigMaps
+2026-11-14T09:13:00.831351Z	info	sync complete	name=EndpointSlices attempt=2 time=2.229708ms
+2026-11-14T09:13:00.831376Z	info	krt	EndpointSlices synced	owner=EndpointSlices
+2026-11-14T09:13:00.831378Z	info	sync complete	name=Secrets attempt=2 time=2.414875ms
+2026-11-14T09:13:00.831380Z	info	sync complete	name=TLSRouteV1 attempt=2 time=2.034417ms
+2026-11-14T09:13:00.831397Z	info	krt	TLSRouteV1 synced	owner=TLSRouteV1
+2026-11-14T09:13:00.831383Z	info	krt	Secrets synced	owner=Secrets
+2026-11-14T09:13:00.831506Z	info	sync complete	name=crd watcher attempt=2 time=2.012458ms
+2026-11-14T09:13:00.831524Z	info	controllers	starting	controller=crd watcher
+2026-11-14T09:13:00.831599Z	info	backendconfigpolicies.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.831612Z	info	backends.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.831632Z	info	backendtlspolicies.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.831641Z	info	directresponses.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.831665Z	info	gatewayextensions.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.831682Z	info	gateways.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.831690Z	info	grpcroutes.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.831698Z	info	httproutes.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.831704Z	info	listenerpolicies.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.831709Z	info	listenersets.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.831726Z	info	referencegrants.gateway.networking.k8s.io is now ready, building client
+2026-11-14T09:13:00.831764Z	info	trafficpolicies.gateway.kgateway.dev is now ready, building client
+2026-11-14T09:13:00.833590Z	info	sync complete	name=TLSRouteV1 handler attempt=2 time=2.176ms
+2026-11-14T09:13:00.833658Z	info	krt	TLSRouteV1ToV1Alpha2 synced (uid 441)	owner=TLSRouteV1ToV1Alpha2
+2026-11-14T09:13:00.833653Z	info	sync complete	name=Pods handler attempt=2 time=2.281375ms
+2026-11-14T09:13:00.833656Z	info	sync complete	name=Services handler attempt=2 time=2.347084ms
+2026-11-14T09:13:00.833670Z	info	krt	AugmentPod synced (uid 390)	owner=AugmentPod
+2026-11-14T09:13:00.833612Z	info	sync complete	name=TCPRouteV1 handler attempt=2 time=2.25475ms
+2026-11-14T09:13:00.833676Z	info	krt	TCPRouteV1ToV1Alpha2 synced (uid 439)	owner=TCPRouteV1ToV1Alpha2
+2026-11-14T09:13:00.833602Z	info	sync complete	name=Secrets handler attempt=2 time=2.213166ms
+2026-11-14T09:13:00.833686Z	info	krt	secrets synced (uid 377)	owner=secrets
+2026-11-14T09:13:00.833684Z	info	krt	routes-tls-routes-with-policy synced (uid 456)	owner=routes-tls-routes-with-policy
+2026-11-14T09:13:00.833707Z	info	sync complete	name=Pods handler attempt=2 time=2.330209ms
+2026-11-14T09:13:00.833716Z	info	krt	routes-tcp-routes-with-policy synced (uid 455)	owner=routes-tcp-routes-with-policy
+2026-11-14T09:13:00.833720Z	info	krt	WrappedPod synced (uid 391)	owner=WrappedPod
+2026-11-14T09:13:00.833725Z	info	krt	KubernetesServiceBackends synced (uid 404)	owner=KubernetesServiceBackends
+2026-11-14T09:13:00.833729Z	info	sync complete	name=Nodes handler attempt=2 time=2.356708ms
+2026-11-14T09:13:00.833740Z	info	sync complete	name=KubeLegacyXListenerSets handler attempt=2 time=2.400334ms
+2026-11-14T09:13:00.833744Z	info	krt	Collection[*v1.Node,krtcollections.NodeMetadata] synced (uid 389)	owner=Collection[*v1.Node,krtcollections.NodeMetadata]
+2026-11-14T09:13:00.833747Z	info	krt	KubeLegacyXListenerSetsConverted synced (uid 419)	owner=KubeLegacyXListenerSetsConverted
+2026-11-14T09:13:00.835425Z	info	sync complete	name=GRPCRoute attempt=3 time=6.049541ms
+2026-11-14T09:13:00.835459Z	info	krt	GRPCRoute synced	owner=GRPCRoute
+2026-11-14T09:13:00.835468Z	info	sync complete	name=RefGrants attempt=3 time=6.494917ms
+2026-11-14T09:13:00.835479Z	info	sync complete	name=HTTPRoute attempt=3 time=6.152334ms
+2026-11-14T09:13:00.835496Z	info	krt	HTTPRoute synced	owner=HTTPRoute
+2026-11-14T09:13:00.835505Z	info	krt	RefGrants synced	owner=RefGrants
+2026-11-14T09:13:00.835481Z	info	sync complete	name=crd watcher attempt=3 time=6.021125ms
+2026-11-14T09:13:00.835435Z	info	sync complete	name=BackendConfigPolicy attempt=3 time=6.276917ms
+2026-11-14T09:13:00.835526Z	info	krt	BackendConfigPolicy synced	owner=BackendConfigPolicy
+2026-11-14T09:13:00.835530Z	info	sync complete	name=DirectResponse attempt=3 time=6.421458ms
+2026-11-14T09:13:00.835537Z	info	krt	DirectResponse synced	owner=DirectResponse
+2026-11-14T09:13:00.835532Z	info	sync complete	name=KubePromotedListenerSets attempt=3 time=6.316375ms
+2026-11-14T09:13:00.835544Z	info	krt	KubePromotedListenerSets synced	owner=KubePromotedListenerSets
+2026-11-14T09:13:00.835552Z	info	sync complete	name=Backends attempt=3 time=6.482875ms
+2026-11-14T09:13:00.835558Z	info	krt	Backends synced	owner=Backends
+2026-11-14T09:13:00.835551Z	info	sync complete	name=GatewayExtension attempt=3 time=6.572708ms
+2026-11-14T09:13:00.835550Z	info	sync complete	name=TrafficPolicy attempt=3 time=6.459916ms
+2026-11-14T09:13:00.835563Z	info	krt	GatewayExtension synced	owner=GatewayExtension
+2026-11-14T09:13:00.835563Z	info	sync complete	name=ListenerPolicy attempt=3 time=6.420792ms
+2026-11-14T09:13:00.835568Z	info	krt	ListenerPolicy synced	owner=ListenerPolicy
+2026-11-14T09:13:00.835565Z	info	krt	TrafficPolicy synced	owner=TrafficPolicy
+2026-11-14T09:13:00.835552Z	info	sync complete	name=KubePromotedListenerSets handler attempt=1 time=1.083µs
+2026-11-14T09:13:00.835575Z	info	krt	KubeListenerSets synced
+2026-11-14T09:13:00.835567Z	info	sync complete	name=BackendTLSPolicy attempt=3 time=6.415125ms
+2026-11-14T09:13:00.835580Z	info	krt	BackendTLSPolicy synced	owner=BackendTLSPolicy
+2026-11-14T09:13:00.835577Z	info	sync complete	name=KubeGateways attempt=3 time=6.363583ms
+2026-11-14T09:13:00.835583Z	info	krt	KubeGateways synced	owner=KubeGateways
+2026-11-14T09:13:00.835591Z	info	krt	ListenerSetIRs synced (uid 433)	owner=ListenerSetIRs
+2026-11-14T09:13:00.835928Z	info	sync complete	name=EndpointSlices handler attempt=2 time=2.0515ms
+2026-11-14T09:13:00.835991Z	info	krt	K8sEndpoints synced (uid 406)	owner=K8sEndpoints
+2026-11-14T09:13:00.836013Z	info	krt	EndpointIRs synced
+2026-11-14T09:13:00.837671Z	info	sync complete	name=KubeGateways handler attempt=2 time=2.073583ms
+2026-11-14T09:13:00.837828Z	info	krt	GatewaySpecs synced (uid 435)	owner=GatewaySpecs
+2026-11-14T09:13:00.837717Z	info	sync complete	name=GatewayExtension handler attempt=2 time=2.137792ms
+2026-11-14T09:13:00.837856Z	info	krt	Collection[*kgateway.GatewayExtension,ir.GatewayExtension] synced (uid 384)	owner=Collection[*kgateway.GatewayExtension,ir.GatewayExtension]
+2026-11-14T09:13:00.837871Z	info	krt	Collection[ir.GatewayExtension,trafficpolicy.TrafficPolicyGatewayExtensionIR] synced (uid 399)	owner=Collection[ir.GatewayExtension,trafficpolicy.TrafficPolicyGatewayExtensionIR]
+2026-11-14T09:13:00.837725Z	info	sync complete	name=KubeGateways handler attempt=2 time=2.134916ms
+2026-11-14T09:13:00.837735Z	info	sync complete	name=BackendTLSPolicy handler attempt=2 time=2.15025ms
+2026-11-14T09:13:00.837892Z	info	krt	Collection[*v1.BackendTLSPolicy,ir.PolicyWrapper] synced (uid 410)	owner=Collection[*v1.BackendTLSPolicy,ir.PolicyWrapper]
+2026-11-14T09:13:00.837745Z	info	sync complete	name=GRPCRoute handler attempt=2 time=2.268209ms
+2026-11-14T09:13:00.837903Z	info	krt	routes-grpc-routes-with-policy synced (uid 454)	owner=routes-grpc-routes-with-policy
+2026-11-14T09:13:00.837906Z	info	krt	BackendTLSPolicy.gateway.networking.k8s.io-policiesByTargetRef synced (uid 421)	owner=BackendTLSPolicy.gateway.networking.k8s.io-policiesByTargetRef
+2026-11-14T09:13:00.837750Z	info	sync complete	name=DirectResponse handler attempt=2 time=2.200833ms
+2026-11-14T09:13:00.837765Z	info	sync complete	name=Backends handler attempt=2 time=2.20125ms
+2026-11-14T09:13:00.837772Z	info	sync complete	name=TrafficPolicy handler attempt=2 time=2.18925ms
+2026-11-14T09:13:00.837925Z	info	krt	Collection[*kgateway.Backend,ir.BackendObjectIR] synced (uid 393)	owner=Collection[*kgateway.Backend,ir.BackendObjectIR]
+2026-11-14T09:13:00.837775Z	info	sync complete	name=HTTPRoute handler attempt=2 time=2.269625ms
+2026-11-14T09:13:00.837706Z	info	sync complete	name=ListenerPolicy handler attempt=2 time=2.113125ms
+2026-11-14T09:13:00.837949Z	info	krt	ListenerPolicyWrapper synced (uid 408)	owner=ListenerPolicyWrapper
+2026-11-14T09:13:00.837781Z	info	sync complete	name=BackendConfigPolicy handler attempt=2 time=2.244958ms
+2026-11-14T09:13:00.837956Z	info	krt	Collection[*kgateway.BackendConfigPolicy,ir.PolicyWrapper] synced (uid 412)	owner=Collection[*kgateway.BackendConfigPolicy,ir.PolicyWrapper]
+2026-11-14T09:13:00.837958Z	info	krt	Collection[*ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 444)	owner=Collection[*ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.837919Z	info	krt	Collection[*kgateway.DirectResponse,ir.PolicyWrapper] synced (uid 402)	owner=Collection[*kgateway.DirectResponse,ir.PolicyWrapper]
+2026-11-14T09:13:00.837941Z	info	krt	Collection[ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 443)	owner=Collection[ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.837977Z	info	krt	ListenerPolicy.gateway.kgateway.dev-policiesByTargetRef synced (uid 429)	owner=ListenerPolicy.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.837981Z	info	krt	BackendConfigPolicy.gateway.kgateway.dev-policiesByTargetRef synced (uid 423)	owner=BackendConfigPolicy.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.838009Z	info	krt	Collection[ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 447)	owner=Collection[ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.838008Z	info	krt	DirectResponse.gateway.kgateway.dev-policiesByTargetRef synced (uid 427)	owner=DirectResponse.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.838039Z	info	krt	Collection[*ir.BackendObjectIR,*ir.BackendObjectIR] synced (uid 448)	owner=Collection[*ir.BackendObjectIR,*ir.BackendObjectIR]
+2026-11-14T09:13:00.838145Z	info	krt	TrafficPolicyWrapper synced (uid 400)	owner=TrafficPolicyWrapper
+2026-11-14T09:13:00.838176Z	info	krt	TrafficPolicy.gateway.kgateway.dev-policiesByTargetRef synced (uid 425)	owner=TrafficPolicy.gateway.kgateway.dev-policiesByTargetRef
+2026-11-14T09:13:00.838287Z	info	krt	http-routes-with-policy synced (uid 452)	owner=http-routes-with-policy
+2026-11-14T09:13:00.838317Z	info	krt	routes-http-routes-with-policy synced (uid 453)	owner=routes-http-routes-with-policy
+2026-11-14T09:13:00.838349Z	info	krt	all-routes-with-policy synced
+2026-11-14T09:13:00.840172Z	info	sync complete	name=KubeGatewayClasses handler attempt=2 time=2.263792ms
+2026-11-14T09:13:00.840165Z	info	sync complete	name=KubeGatewayClasses handler attempt=2 time=2.245375ms
+2026-11-14T09:13:00.840229Z	info	krt	Collection[*v1.Gateway,ir.GatewayForDeployer] synced (uid 432)	owner=Collection[*v1.Gateway,ir.GatewayForDeployer]
+2026-11-14T09:13:00.840328Z	info	krt	gateways synced (uid 436)	owner=gateways
+2026-11-14T09:13:00.840349Z	info	sync complete	name=routes attempt=1 time=4.75µs
+2026-11-14T09:13:00.840356Z	info	sync complete	name=extensions attempt=1 time=3.459µs
+2026-11-14T09:13:00.840360Z	info	sync complete	name=commoncol attempt=1 time=2.75µs
+2026-11-14T09:13:00.840364Z	info	sync complete	name=translator attempt=1 time=1.584µs
+2026-11-14T09:13:00.840366Z	info	sync complete	name=backends attempt=1 time=167ns
+2026-11-14T09:13:00.840368Z	info	sync complete	name=endpoints attempt=1 time=250ns
+2026-11-14T09:13:00.840409Z	info	krt	FinalBackends synced
+2026-11-14T09:13:00.840474Z	info	krt	BaseEnvoyClusters synced (uid 462)	owner=BaseEnvoyClusters
+2026-11-14T09:13:00.840500Z	info	krt	ClusterResources synced (uid 463)	owner=ClusterResources
+2026-11-14T09:13:00.840516Z	info	krt	BackendStatusClustersPerClient synced (uid 465)	owner=BackendStatusClustersPerClient
+2026-11-14T09:13:00.840545Z	info	krt	BackendStatusClustersBase synced (uid 464)	owner=BackendStatusClustersBase
+2026-11-14T09:13:00.840554Z	info	krt	BackendStatusClusters synced
+2026-11-14T09:13:00.840913Z	info	controllers	stopped	controller=crd watcher
+2026-11-14T09:13:00.840924Z	info	Stopping CRD watcher
+    zz_kairo147_invariant_test.go:58: programmed route "listener~80~example_com-route-0-httproute-zz-parent-infra-0-0-matcher-0" match=path_separated_prefix:"/team1"
+    zz_kairo147_invariant_test.go:58: programmed route "listener~80~example_com-route-1-httproute-zz-admin-infra-0-0-matcher-0" match=path_separated_prefix:"/admin"
+--- PASS: TestKairo147DelegationChildMatchStaysInsideParent (0.03s)
+    --- PASS: TestKairo147DelegationChildMatchStaysInsideParent/control-no-inherit-annotation (0.03s)
+PASS
+ok  	github.com/kgateway-dev/kgateway/v2/pkg/kgateway/translator/gateway	1.399s

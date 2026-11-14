@@ -39,6 +39,7 @@ GATEWAYS = (
     ("nixl", "NIXL"),
     ("ogx", "OGX"),
     ("agentgateway", "agentgateway"),
+    ("kgateway", "kgateway"),
     ("llm-d", "llm-d Router"),
     ("vllm", "vLLM"),
 )

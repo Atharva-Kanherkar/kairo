@@ -1,0 +1,5 @@
+target: kgateway-dev/kgateway
+commit: 74f2e098d85f1b3d6825b3a12bbacab82e606cb3 (main, 2026-11-13)
+go: go1.27.4 darwin/arm64
+envoy: envoyproxy/envoy:v1.39.1 (sha256:57e14a549d7bd43c8d3f6d03e8cfa653e037d4b38e133acd9b54f38c524401b4)
+reproduced: 2026-11-14

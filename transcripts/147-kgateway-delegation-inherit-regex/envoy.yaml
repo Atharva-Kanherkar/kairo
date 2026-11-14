@@ -1,0 +1,37 @@
+static_resources:
+  listeners:
+  - name: kairo147_ingress
+    address:
+      socket_address:
+        address: 0.0.0.0
+        port_value: 10000
+    filter_chains:
+    - filters:
+      - name: envoy.filters.network.http_connection_manager
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+          stat_prefix: kairo147
+          route_config:
+            name: kairo147_routes
+            virtual_hosts:
+            - name: example_com
+              domains:
+              - "example.com"
+              routes:
+              - match:
+                  safe_regex:
+                    regex: "/admin(?:/.*)?"
+                direct_response:
+                  status: 200
+                  body:
+                    inline_string: "tenant"
+              - match:
+                  path_separated_prefix: "/admin"
+                direct_response:
+                  status: 200
+                  body:
+                    inline_string: "admin"
+          http_filters:
+          - name: envoy.filters.http.router
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
