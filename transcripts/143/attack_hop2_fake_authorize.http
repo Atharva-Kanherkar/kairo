@@ -1,0 +1,6 @@
+HTTP/1.0 302 Found
+Server: BaseHTTP/0.6 Python/3.12.13
+Date: Fri, 13 Nov 2026 17:24:42 GMT
+Location: http://127.0.0.1:4100/sso/callback?code=repro-code&state=3756a2d9c2af446d839d466f0caded66
+Content-Length: 0
+

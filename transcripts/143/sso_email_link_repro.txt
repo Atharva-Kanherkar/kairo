@@ -1,0 +1,24 @@
+== ATTACK: SSO login with an unverified email equal to an existing user's email
+matched victim row:      True
+stamped attacker sso id: True
+session key minted as:   u-admin
+inherited role:          proxy_admin
+ATTACK RESULT: SUCCEEDED
+
+== CONTROL A: same login, no row matches that email (real fuzzy lookup only)
+fuzzy lookup returned: None
+
+== CONTROL B: the one-line fix (require IdP-verified email before email fallback)
+with the gate, no victim row is returned: True
+
+OVERALL: PASS - email fallback links accounts without email verification
+ATTACK RESULT: SUCCEEDED
+OVERALL: PASS - email fallback links accounts without email verification
+ATTACK RESULT: SUCCEEDED
+OVERALL: PASS - email fallback links accounts without email verification
+ATTACK RESULT: SUCCEEDED
+OVERALL: PASS - email fallback links accounts without email verification
+ATTACK RESULT: SUCCEEDED
+OVERALL: PASS - email fallback links accounts without email verification
+ATTACK RESULT: SUCCEEDED
+OVERALL: PASS - email fallback links accounts without email verification
