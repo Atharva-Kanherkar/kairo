@@ -1,0 +1,7 @@
+POST /anything/register HTTP/1.1
+Host: 127.0.0.1:4109
+Connection: close
+Content-Type: application/json
+Content-Length: 2
+
+{}

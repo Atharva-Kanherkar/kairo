@@ -1,0 +1,11 @@
+HTTP/1.1 200 OK
+date: Sat, 14 Nov 2026 08:12:31 GMT
+content-length: 181
+content-type: application/json
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+Connection: close
+
+{"guardrail_id":"5231e3dd-a55f-4d92-9abe-7e01546f964b","guardrail_name":"order-mcp-first-1794643952235671000","status":"pending_review","submitted_at":"2026-11-14T08:12:32.306000Z"}

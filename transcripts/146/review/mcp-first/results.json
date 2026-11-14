@@ -1,0 +1,38 @@
+{
+  "label": "mcp-first",
+  "first_request": "/anything/register",
+  "first": {
+    "status": 200,
+    "body": "{\"client_id\":\"anything\",\"client_secret\":\"dummy\",\"redirect_uris\":[\"http://127.0.0.1:4109/callback\"]}"
+  },
+  "anonymous": [
+    {
+      "status": 401,
+      "body": "{\"error\":{\"message\":\"Authentication Error, No api key passed in.\",\"type\":\"auth_error\",\"param\":null,\"code\":\"401\"}}"
+    },
+    {
+      "status": 401,
+      "body": "{\"error\":{\"message\":\"Authentication Error, No api key passed in.\",\"type\":\"auth_error\",\"param\":null,\"code\":\"401\"}}"
+    },
+    {
+      "status": 401,
+      "body": "{\"error\":{\"message\":\"Authentication Error, No api key passed in.\",\"type\":\"auth_error\",\"param\":null,\"code\":\"401\"}}"
+    },
+    {
+      "status": 401,
+      "body": "{\"error\":{\"message\":\"Authentication Error, No api key passed in.\",\"type\":\"auth_error\",\"param\":null,\"code\":\"401\"}}"
+    },
+    {
+      "status": 401,
+      "body": "{\"error\":{\"message\":\"Authentication Error, No api key passed in.\",\"type\":\"auth_error\",\"param\":null,\"code\":\"401\"}}"
+    }
+  ],
+  "master": {
+    "status": 200,
+    "body": "{\"guardrail_id\":\"5231e3dd-a55f-4d92-9abe-7e01546f964b\",\"guardrail_name\":\"order-mcp-first-1794643952235671000\",\"status\":\"pending_review\",\"submitted_at\":\"2026-11-14T08:12:32.306000Z\"}"
+  },
+  "mcp_after": {
+    "status": 200,
+    "body": "{\"client_id\":\"anything\",\"client_secret\":\"dummy\",\"redirect_uris\":[\"http://127.0.0.1:4109/callback\"]}"
+  }
+}

@@ -1,0 +1,7 @@
+POST /guardrails/register HTTP/1.1
+Host: 127.0.0.1:4109
+Connection: close
+Content-Type: application/json
+Content-Length: 198
+
+{"guardrail_name":"order-mcp-first-1794643952235671000","team_id":"review-team","litellm_params":{"guardrail":"generic_guardrail_api","mode":"pre_call","api_base":"http://127.0.0.1:9559/guardrail"}}

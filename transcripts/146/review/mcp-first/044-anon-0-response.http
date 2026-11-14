@@ -1,0 +1,11 @@
+HTTP/1.1 401 Unauthorized
+date: Sat, 14 Nov 2026 08:12:31 GMT
+content-length: 113
+content-type: application/json
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+Connection: close
+
+{"error":{"message":"Authentication Error, No api key passed in.","type":"auth_error","param":null,"code":"401"}}

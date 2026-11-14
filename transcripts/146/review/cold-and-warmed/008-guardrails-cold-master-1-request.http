@@ -1,0 +1,8 @@
+POST /guardrails/register HTTP/1.1
+Host: 127.0.0.1:4109
+Connection: close
+Authorization: Bearer [REDACTED:credential]
+Content-Type: application/json
+Content-Length: 179
+
+{"guardrail_name":"review-guardrail","team_id":"review-team","litellm_params":{"guardrail":"generic_guardrail_api","mode":"pre_call","api_base":"http://127.0.0.1:9559/guardrail"}}

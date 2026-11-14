@@ -1,0 +1,11 @@
+HTTP/1.1 200 OK
+date: Sat, 14 Nov 2026 08:12:31 GMT
+content-length: 99
+content-type: application/json
+vary: Origin
+x-frame-options: DENY
+content-security-policy: frame-ancestors 'none'
+x-content-type-options: nosniff
+Connection: close
+
+{"client_id":"anything","client_secret":"dummy","redirect_uris":["http://127.0.0.1:4109/callback"]}
