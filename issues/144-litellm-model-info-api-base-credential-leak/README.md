@@ -1,18 +1,26 @@
-# 144, LiteLLM /model/info returns the deployment's api_base unmasked to internal users, so credentials embedded in the base URL (SAS tokens, query-string keys) leave the admin boundary
+# 144, LiteLLM /model/info returns the deployment's api_base unmasked to internal users: hardening, not a bug
+
+**Verdict: false positive as a bug. Relabeled `hardening` on 2026-11-14 and kept
+as an honest negative. The bytes reproduce; the trigger is not supported usage.
+Reported upstream as a hardening request:
+[BerriAI/litellm#51810](https://github.com/BerriAI/litellm/issues/51810). See
+"Why this is not a bug".**
 
 - **Upstream**: [BerriAI/litellm](https://github.com/BerriAI/litellm). No upstream
   issue or PR covers it; the sibling disclosure class on `/health` was reported
   and fixed by the maintainers (api_base became admin-only there), and the proxy
   itself strips query parameters from `api_base` in its own response headers
   because of "risk of leaking sensitive info".
-- **Recorded as**: `novel`, with wire evidence, controls, and a fixed-build
-  control. Not filed upstream.
+- **Recorded as**: `novel` hardening request, with wire evidence, controls, and a
+  fixed-build control. Filed upstream as
+  [BerriAI/litellm#51810](https://github.com/BerriAI/litellm/issues/51810)
+  (feature request, 2026-11-14).
 - **Tool under test**: LiteLLM at main `6abacd329b70dc668f69c705eb7118fbd639cd96`
   (upstream default branch, 2026-11-13), run through the real proxy CLI with a
   real PostgreSQL 16 database (Docker, scratch) and a local deterministic
   OpenAI-compatible upstream. Python 3.12.13.
 - **Reproduced**: 2026-11-14, local. 5 of 5 over HTTP.
-- **Label**: `bug` (authenticated credential disclosure; P2 in LiteLLM's policy).
+- **Label**: `hardening` after review (the original draft said `bug`).
 
 ## What breaks
 
@@ -95,6 +103,10 @@ LiteLLM main `6abacd329b7`:
 
 ## Bug or not
 
+Original analysis, kept for the record. The "supported usage" and "Label"
+bullets are superseded by "Why this is not a bug" below: no LiteLLM doc or
+example puts a `?key=` credential in `api_base`.
+
 - **Expected behavior**: api_key masking on these endpoints is intended and
   present; api_base visibility for internal users is a deliberate choice for the
   PATH only (the dashboard shows deployments' base URLs to admins). Embedding a
@@ -117,7 +129,36 @@ LiteLLM main `6abacd329b7`:
   keep full api_base visibility for proxy admins (the
   `is_full_admin` branch already exists in `_redact_general_setting_value` for
   the settings surface).
-- **Label**: `bug`.
+- **Label**: `hardening` after review (the original draft said `bug`).
+
+## Why this is not a bug
+
+The independent review reproduced the bytes (5/5 on each of the three routes)
+and first accepted the finding. A follow-up check of the bug-or-not gate on
+2026-11-14 reversed that.
+
+- The trigger is not supported usage. It needs an operator to put a credential
+  inside `api_base`, a non-secret field. No LiteLLM documentation, example, or
+  config in the repository does that (searched `api_base` with `?key=`, `?sig=`,
+  `?code=`, `?token=`, and `user:pass@` userinfo). `AGENTS.md` classes a secret in
+  a non-secret field as operator misuse, and LiteLLM's `SECURITY.md` lists
+  misconfiguration-dependent attacks as known non-issues.
+- The tested layout does not even work for traffic. With the `openai/` provider,
+  a query string in `api_base` breaks the request URL: the review's capture
+  upstream received `POST /v1/?cred=CANARY-SECRET-ABCDchat/completions` and the
+  gateway call returned 400. An operator would not run this configuration.
+- What remains is a reasonable hardening ask. LiteLLM already hides `api_base`
+  from non-admins on `/health`
+  ([#40765](https://github.com/BerriAI/litellm/pull/40765),
+  `ADMIN_ONLY_HEALTH_DISPLAY_PARAMS`) and strips its query string from the
+  `x-litellm-model-api-base` header. Applying the same rule to the model-info
+  listings is consistent, so it was filed upstream as a feature request, not a
+  vulnerability report.
+- Severity if it were reached: authenticated (LiteLLM P2), minor information
+  disclosure (LiteLLM's Low tier), no bounty eligibility.
+
+What would reopen it as a bug: a documented or default LiteLLM setup that
+places a credential in `api_base`, then shown leaking to a non-admin caller.
 
 ## Upstream status
 
@@ -127,7 +168,9 @@ LiteLLM main `6abacd329b7`:
 - Search terms used: "model/info api_base", "api_base leak", "api_base mask",
   plus the /health sibling's advisory history.
 - Issues and PRs searched: none cover the model-info api_base disclosure.
-- Classification: **novel**.
+- Classification: **novel** as a hardening request, filed as
+  [BerriAI/litellm#51810](https://github.com/BerriAI/litellm/issues/51810) on
+  2026-11-14.
 
 ## Test
 
