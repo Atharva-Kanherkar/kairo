@@ -1,0 +1,45 @@
+POST /v1/files?provider=openai HTTP/1.1
+Host: 127.0.0.1:64676
+Content-Type: multipart/form-data; boundary=----BifrostReproBoundary148
+Content-Length: 306
+x-bf-vk: <VK_TENANT_A>
+Connection: close
+
+------BifrostReproBoundary148
+Content-Disposition: form-data; name="purpose"
+
+user_data
+------BifrostReproBoundary148
+Content-Disposition: form-data; name="file"; filename="tenant-a-secret.pdf"
+Content-Type: application/pdf
+
+CANARY_TENANT_A_PRIVATE_FILE_BYTES_148
+------BifrostReproBoundary148--
+HTTP/1.1 200 OK
+Server: fasthttp
+Date: Mon, 23 Nov 2026 08:02:24 GMT
+Content-Type: application/json
+Content-Length: 372
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID, X-Bifrost-View-As, X-Bifrost-Setup-Token, MCP-Protocol-Version, Mcp-Session-Id, Mcp-Method, Mcp-Name, Last-Event-ID
+Access-Control-Max-Age: 86400
+Access-Control-Expose-Headers: x-bifrost-request-id, x-bifrost-trace-id, x-request-id, x-bifrost-provider, x-bifrost-original-model, x-bifrost-resolved-model, x-bifrost-fallback-index, x-bifrost-request-type, x-bifrost-upstream-latency-ms, x-bifrost-routing-info-provider, x-bifrost-routing-info-model, x-bifrost-routing-info-key, x-bifrost-routing-info-alias-model-id, x-bifrost-routing-info-alias-model-name, x-bifrost-routing-info-alias-model-family, x-bifrost-routing-info-is-fallback, x-bifrost-routing-info-primary-provider, x-bifrost-routing-info-primary-model, x-bifrost-routing-info-server-side-fallback-model, x-bifrost-routing-info-requested-provider, x-bifrost-routing-info-requested-model, x-bifrost-cache-hit, x-bifrost-cache-id, x-bifrost-cache-hit-type, x-bifrost-cache-hit-latency-ms, x-bifrost-cache-requested-provider, x-bifrost-cache-requested-model, x-bifrost-cache-similarity, x-bifrost-cache-threshold, x-bifrost-cache-provider-used, x-bifrost-cache-model-used, x-bifrost-cache-input-tokens, x-bifrost-latency-ms, x-bifrost-pricing-request-type, x-bifrost-converted-request-type, x-bifrost-dropped-compat-params, x-bifrost-dropped-unsupported-tools, x-bifrost-passthrough-path, x-bifrost-error-type, x-bifrost-retry-after-ms, mcp-session-id
+Vary: Origin
+X-Bifrost-Request-Id: 7cf4de92-743c-40ad-9a48-6c755aa826f5
+X-Request-Id: 7cf4de92-743c-40ad-9a48-6c755aa826f5
+X-Bifrost-Trace-Id: 676a1dc9923447fab823de5ef8c982d4
+X-Bifrost-Provider: openai
+X-Bifrost-Request-Type: file_upload
+X-Bifrost-Routing-Info-Provider: openai
+X-Bifrost-Routing-Info-Key: shared-openai-key
+X-Bifrost-Routing-Info-Requested-Provider: openai
+X-Bifrost-Upstream-Latency-Ms: 0.461
+Connection: close
+
+{"id":"file-tenant-a-secret-148","object":"file","bytes":38,"created_at":1790000000,"filename":"tenant-a-secret.pdf","purpose":"user_data","storage_backend":"api","extra_fields":{"request_type":"file_upload","routing_info":{"provider":"openai","key":"shared-openai-key","requested_provider":"openai"},"provider":"openai","latency":0,"upstream_latency":0,"chunk_index":0}}

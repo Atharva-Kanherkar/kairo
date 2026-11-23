@@ -9140,3 +9140,263 @@ mod team_preserves_max_parallel_requests_tests {
         ));
     }
 }
+
+/// Split a concatenated HTTP/1.1 request+response transcript into
+/// `(request_line, request_headers, request_body, response_status)`.
+fn split_http_client_exchange(raw: &str) -> Result<(&str, &str, &str, u16), String> {
+    let (req_head, rest) = raw
+        .split_once("\r\n\r\n")
+        .or_else(|| raw.split_once("\n\n"))
+        .ok_or_else(|| "missing HTTP request header terminator".to_string())?;
+    let mut head_lines = req_head.lines();
+    let request_line = head_lines
+        .next()
+        .ok_or_else(|| "empty HTTP request head".to_string())?;
+    let resp_offset = rest
+        .find("HTTP/1.1 ")
+        .ok_or_else(|| "missing HTTP/1.1 response status line".to_string())?;
+    let req_body = &rest[..resp_offset];
+    let resp_raw = &rest[resp_offset..];
+    let status_line = resp_raw
+        .lines()
+        .next()
+        .ok_or_else(|| "empty HTTP response".to_string())?;
+    let status = status_line
+        .split_whitespace()
+        .nth(1)
+        .and_then(|s| s.parse::<u16>().ok())
+        .ok_or_else(|| format!("invalid HTTP response status line: {status_line}"))?;
+    Ok((request_line, req_head, req_body, status))
+}
+
+fn extract_block_file_id(block: &Value) -> Option<&str> {
+    block
+        .get("file_id")
+        .and_then(Value::as_str)
+        .or_else(|| block.pointer("/source/file_id").and_then(Value::as_str))
+        .or_else(|| block.pointer("/file/file_id").and_then(Value::as_str))
+        .filter(|s| !s.is_empty())
+}
+
+/// Extract every provider `file_id` referenced in an HTTP request path or JSON body
+/// across OpenAI Files, OpenAI Responses (user messages and tool outputs),
+/// Anthropic Messages (user messages and `tool_result` blocks), and OpenAI Chat.
+fn extract_referenced_file_ids(request_line: &str, req_body: &str) -> Result<Vec<String>, String> {
+    let mut ids = Vec::new();
+    let mut push_id = |candidate: &str| {
+        if !candidate.is_empty() && !ids.iter().any(|existing| existing == candidate) {
+            ids.push(candidate.to_string());
+        }
+    };
+
+    if let Some(target) = request_line.split_whitespace().nth(1) {
+        let path = target.split('?').next().unwrap_or(target);
+        if let Some(rest) = path.strip_prefix("/v1/files/") {
+            let file_id = rest.split('/').next().unwrap_or(rest);
+            push_id(file_id);
+        }
+    }
+
+    if !req_body.trim().is_empty() {
+        let parsed: Value = serde_json::from_str(req_body)
+            .map_err(|e| format!("invalid client request JSON: {e}"))?;
+
+        if let Some(input_items) = parsed.get("input").and_then(Value::as_array) {
+            for item in input_items {
+                if let Some(content_blocks) = item.get("content").and_then(Value::as_array) {
+                    for block in content_blocks {
+                        if let Some(fid) = extract_block_file_id(block) {
+                            push_id(fid);
+                        }
+                    }
+                }
+                if let Some(output) = item.get("output") {
+                    if let Some(output_blocks) = output.as_array() {
+                        for block in output_blocks {
+                            if let Some(fid) = extract_block_file_id(block) {
+                                push_id(fid);
+                            }
+                        }
+                    } else if output.is_object() {
+                        if let Some(fid) = extract_block_file_id(output) {
+                            push_id(fid);
+                        }
+                    }
+                }
+            }
+        }
+
+        if let Some(messages) = parsed.get("messages").and_then(Value::as_array) {
+            for msg in messages {
+                if let Some(content_blocks) = msg.get("content").and_then(Value::as_array) {
+                    for block in content_blocks {
+                        if let Some(fid) = extract_block_file_id(block) {
+                            push_id(fid);
+                        }
+                        if block.get("type").and_then(Value::as_str) == Some("tool_result") {
+                            if let Some(nested) = block.get("content").and_then(Value::as_array) {
+                                for sub in nested {
+                                    if let Some(fid) = extract_block_file_id(sub) {
+                                        push_id(fid);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(ids)
+}
+
+/// Invariant (bug 148): when a gateway enforces virtual-key object ownership on
+/// shared provider credentials, a virtual key must not be able to access or
+/// forward a provider `file_id` owned by another virtual key through any
+/// request position, including tool outputs (`function_call_output`,
+/// `custom_tool_call_output`, `computer_call_output`, and Anthropic `tool_result`).
+pub fn virtual_key_file_ownership_enforced_across_tool_outputs(
+    client_exchange: &str,
+    upstream_exchange: Option<&str>,
+    file_owners: &[(&str, &str)],
+) -> Verdict {
+    let (request_line, req_head, req_body, status) =
+        match split_http_client_exchange(client_exchange) {
+            Ok(parts) => parts,
+            Err(e) => return Verdict::Violation(e),
+        };
+
+    let caller_vk = req_head
+        .lines()
+        .find_map(|line| {
+            let (name, val) = line.split_once(':')?;
+            if name.trim().eq_ignore_ascii_case("x-bf-vk") {
+                Some(val.trim())
+            } else {
+                None
+            }
+        })
+        .unwrap_or("");
+
+    if caller_vk.is_empty() {
+        return Verdict::Violation("client request is missing x-bf-vk header".to_string());
+    }
+
+    let referenced_ids = match extract_referenced_file_ids(request_line, req_body) {
+        Ok(ids) => ids,
+        Err(e) => return Verdict::Violation(e),
+    };
+
+    let unauthorized: Vec<(&str, &str)> = referenced_ids
+        .iter()
+        .filter_map(|fid| {
+            file_owners
+                .iter()
+                .find(|(owned_id, _)| owned_id == fid)
+                .and_then(|(owned_id, owner_vk)| {
+                    if *owner_vk == caller_vk {
+                        None
+                    } else {
+                        Some((*owned_id, *owner_vk))
+                    }
+                })
+        })
+        .collect();
+
+    if let Some((foreign_file_id, owner_vk)) = unauthorized.first() {
+        let forwarded_upstream = upstream_exchange
+            .is_some_and(|up| !up.trim().is_empty() && up.contains(foreign_file_id));
+        if (200..300).contains(&status) || forwarded_upstream {
+            return Verdict::Violation(format!(
+                "virtual key '{caller_vk}' referenced file '{foreign_file_id}' owned by '{owner_vk}', \
+                 but gateway returned HTTP {status} (forwarded_upstream={forwarded_upstream})"
+            ));
+        }
+        return Verdict::Conformant;
+    }
+
+    if (200..300).contains(&status) {
+        Verdict::Conformant
+    } else {
+        Verdict::Violation(format!(
+            "authorized virtual key '{caller_vk}' was rejected with HTTP {status}"
+        ))
+    }
+}
+
+#[cfg(test)]
+mod virtual_key_file_ownership_enforced_across_tool_outputs_tests {
+    use super::{virtual_key_file_ownership_enforced_across_tool_outputs, Verdict};
+
+    const OWNERS: &[(&str, &str)] = &[("file-tenant-a-secret-148", "<VK_TENANT_A>")];
+
+    #[test]
+    fn cross_vk_user_message_rejected_404_is_conformant() {
+        let exchange = concat!(
+            "POST /v1/responses HTTP/1.1\r\n",
+            "Host: 127.0.0.1:8080\r\n",
+            "x-bf-vk: <VK_TENANT_B>\r\n\r\n",
+            r#"{"model":"openai/gpt-4o-mini","input":[{"type":"message","role":"user","content":[{"type":"input_file","file_id":"file-tenant-a-secret-148"}]}]}"#,
+            "HTTP/1.1 404 Not Found\r\n\r\n",
+            r#"{"type":"access_blocked","status_code":404}"#
+        );
+        assert_eq!(
+            virtual_key_file_ownership_enforced_across_tool_outputs(exchange, None, OWNERS),
+            Verdict::Conformant
+        );
+    }
+
+    #[test]
+    fn cross_vk_function_call_output_forwarded_200_is_violation() {
+        let exchange = concat!(
+            "POST /v1/responses HTTP/1.1\r\n",
+            "Host: 127.0.0.1:8080\r\n",
+            "x-bf-vk: <VK_TENANT_B>\r\n\r\n",
+            r#"{"model":"openai/gpt-4o-mini","input":[{"type":"function_call_output","call_id":"call_1","output":[{"type":"input_file","file_id":"file-tenant-a-secret-148"}]}]}"#,
+            "HTTP/1.1 200 OK\r\n\r\n",
+            r#"{"id":"resp_1","status":"completed"}"#
+        );
+        let upstream = concat!(
+            "POST /v1/responses HTTP/1.1\r\n\r\n",
+            r#"{"model":"gpt-4o-mini","input":[{"type":"function_call_output","call_id":"call_1","output":[{"type":"input_file","file_id":"file-tenant-a-secret-148"}]}]}"#
+        );
+        assert!(matches!(
+            virtual_key_file_ownership_enforced_across_tool_outputs(exchange, Some(upstream), OWNERS),
+            Verdict::Violation(msg)
+                if msg.contains("file-tenant-a-secret-148") && msg.contains("forwarded_upstream=true")
+        ));
+    }
+
+    #[test]
+    fn cross_vk_anthropic_tool_result_forwarded_200_is_violation() {
+        let exchange = concat!(
+            "POST /anthropic/v1/messages HTTP/1.1\r\n",
+            "Host: 127.0.0.1:8080\r\n",
+            "x-bf-vk: <VK_TENANT_B>\r\n\r\n",
+            r#"{"model":"openai/gpt-4o-mini","messages":[{"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_1","content":[{"type":"document","source":{"type":"file","file_id":"file-tenant-a-secret-148"}}]}]}]}"#,
+            "HTTP/1.1 200 OK\r\n\r\n",
+            r#"{"id":"msg_1","type":"message"}"#
+        );
+        assert!(matches!(
+            virtual_key_file_ownership_enforced_across_tool_outputs(exchange, None, OWNERS),
+            Verdict::Violation(msg) if msg.contains("HTTP 200")
+        ));
+    }
+
+    #[test]
+    fn owner_vk_tool_output_allowed_200_is_conformant() {
+        let exchange = concat!(
+            "POST /v1/responses HTTP/1.1\r\n",
+            "Host: 127.0.0.1:8080\r\n",
+            "x-bf-vk: <VK_TENANT_A>\r\n\r\n",
+            r#"{"model":"openai/gpt-4o-mini","input":[{"type":"function_call_output","call_id":"call_1","output":[{"type":"input_file","file_id":"file-tenant-a-secret-148"}]}]}"#,
+            "HTTP/1.1 200 OK\r\n\r\n",
+            r#"{"id":"resp_1","status":"completed"}"#
+        );
+        assert_eq!(
+            virtual_key_file_ownership_enforced_across_tool_outputs(exchange, None, OWNERS),
+            Verdict::Conformant
+        );
+    }
+}

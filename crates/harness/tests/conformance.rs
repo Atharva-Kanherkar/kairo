@@ -50,10 +50,10 @@ use kairo::checks::{
     tool_policy_guardrail_enforces_trust_chain_and_blocked_tools,
     tool_result_images_reach_provider, tool_strict_forwarded, toolcall_id_restored_upstream,
     truncation_preserved, unpriced_response_cost_header_omitted, upstream_bearer_is,
-    upstream_omits_header_value, voyage_embeddings_honor_environment_api_base,
-    worker_loss_stays_invisible, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
-    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT, REPLAYED_CALL_NAMESPACE_CHANGED,
-    TOOL_RESULT_IMAGE_DROPPED,
+    upstream_omits_header_value, virtual_key_file_ownership_enforced_across_tool_outputs,
+    voyage_embeddings_honor_environment_api_base, worker_loss_stays_invisible, FunctionToolFormat,
+    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    REPLAYED_CALL_NAMESPACE_CHANGED, TOOL_RESULT_IMAGE_DROPPED,
 };
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -11091,4 +11091,145 @@ fn litellm_team_concurrency_preserved_control() {
         Verdict::Conformant,
         "a team creation response preserving max_parallel_requests is conformant"
     );
+}
+
+// ---- 148: Bifrost cross-virtual-key provider file ownership bypass via tool outputs ----
+
+const ISSUE_148_FILE_OWNERS: &[(&str, &str)] = &[("file-tenant-a-secret-148", "<VK_TENANT_A>")];
+
+#[test]
+fn bifrost_148_responses_function_call_output_bypasses_vk_file_ownership() {
+    let client = fixture("transcripts/148/attack-responses-function-call-output.http");
+    let upstream = fixture("transcripts/148/attack-responses-function-call-output-upstream.http");
+    let verdict = virtual_key_file_ownership_enforced_across_tool_outputs(
+        &client,
+        Some(&upstream),
+        ISSUE_148_FILE_OWNERS,
+    );
+    assert!(
+        matches!(
+            &verdict,
+            Verdict::Violation(msg)
+                if msg.contains("file-tenant-a-secret-148")
+                    && msg.contains("HTTP 200")
+                    && msg.contains("forwarded_upstream=true")
+        ),
+        "expected cross-VK function_call_output file reference to be flagged as violation: {verdict:?}"
+    );
+}
+
+#[test]
+fn bifrost_148_responses_computer_call_output_bypasses_vk_file_ownership() {
+    let client = fixture("transcripts/148/attack-responses-computer-call-output.http");
+    let upstream = fixture("transcripts/148/attack-responses-computer-call-output-upstream.http");
+    let verdict = virtual_key_file_ownership_enforced_across_tool_outputs(
+        &client,
+        Some(&upstream),
+        ISSUE_148_FILE_OWNERS,
+    );
+    assert!(
+        matches!(
+            &verdict,
+            Verdict::Violation(msg)
+                if msg.contains("file-tenant-a-secret-148")
+                    && msg.contains("HTTP 200")
+                    && msg.contains("forwarded_upstream=true")
+        ),
+        "expected cross-VK computer_call_output file reference to be flagged as violation: {verdict:?}"
+    );
+}
+
+#[test]
+fn bifrost_148_anthropic_tool_result_bypasses_vk_file_ownership() {
+    let client = fixture("transcripts/148/attack-anthropic-tool-result.http");
+    let upstream = fixture("transcripts/148/attack-anthropic-tool-result-upstream.http");
+    let verdict = virtual_key_file_ownership_enforced_across_tool_outputs(
+        &client,
+        Some(&upstream),
+        ISSUE_148_FILE_OWNERS,
+    );
+    assert!(
+        matches!(
+            &verdict,
+            Verdict::Violation(msg)
+                if msg.contains("file-tenant-a-secret-148")
+                    && msg.contains("HTTP 200")
+                    && msg.contains("forwarded_upstream=true")
+        ),
+        "expected cross-VK Anthropic tool_result file reference to be flagged as violation: {verdict:?}"
+    );
+}
+
+#[test]
+fn bifrost_148_cross_vk_user_message_and_direct_file_controls_are_conformant() {
+    for rel in [
+        "transcripts/148/control-direct-file-retrieve.http",
+        "transcripts/148/control-responses-user-message.http",
+        "transcripts/148/control-anthropic-user-message.http",
+        "transcripts/148/control-owner-tool-output.http",
+    ] {
+        let client = fixture(rel);
+        let verdict = virtual_key_file_ownership_enforced_across_tool_outputs(
+            &client,
+            None,
+            ISSUE_148_FILE_OWNERS,
+        );
+        assert_eq!(
+            verdict,
+            Verdict::Conformant,
+            "{rel} must be conformant, got {verdict:?}"
+        );
+    }
+}
+
+#[test]
+fn bifrost_148_results_matrix_5_runs_reproduce_consistently() {
+    let matrix_str = fixture("transcripts/148/results.json");
+    let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results.json");
+    assert_eq!(matrix["complete"].as_bool(), Some(true));
+    assert_eq!(
+        matrix["target"]["binary_vcs_modified"].as_bool(),
+        Some(false)
+    );
+    let trials = matrix["trials"].as_array().expect("trials array");
+    assert_eq!(trials.len(), 5, "must have completed 5 trials");
+
+    for (idx, row) in trials.iter().enumerate() {
+        let run_num = idx + 1;
+        assert_eq!(
+            row["control_direct_file_retrieve_status"].as_u64(),
+            Some(404),
+            "trial {run_num}: direct file retrieve must be rejected with 404"
+        );
+        assert_eq!(
+            row["control_responses_user_message_status"].as_u64(),
+            Some(404),
+            "trial {run_num}: Responses user message must be rejected with 404"
+        );
+        assert_eq!(
+            row["control_anthropic_user_message_status"].as_u64(),
+            Some(404),
+            "trial {run_num}: Anthropic user message must be rejected with 404"
+        );
+        assert_eq!(
+            row["control_owner_tool_output_status"].as_u64(),
+            Some(200),
+            "trial {run_num}: owner tool output must succeed with 200"
+        );
+        assert_eq!(
+            row["attack_responses_function_call_output_status"].as_u64(),
+            Some(200),
+            "trial {run_num}: cross-VK function_call_output defect must return 200"
+        );
+        assert_eq!(
+            row["attack_responses_computer_call_output_status"].as_u64(),
+            Some(200),
+            "trial {run_num}: cross-VK computer_call_output defect must return 200"
+        );
+        assert_eq!(
+            row["attack_anthropic_tool_result_status"].as_u64(),
+            Some(200),
+            "trial {run_num}: cross-VK Anthropic tool_result defect must return 200"
+        );
+    }
 }

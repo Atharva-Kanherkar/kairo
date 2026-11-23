@@ -1,0 +1,39 @@
+POST /v1/responses HTTP/1.1
+Host: 127.0.0.1:64676
+Content-Type: application/json
+Content-Length: 239
+x-bf-vk: <VK_TENANT_B>
+Connection: close
+
+{"model":"openai/gpt-4o-mini","input":[{"type":"message","role":"user","content":"Take a screenshot."},{"type":"computer_call_output","call_id":"call_comp_148","output":{"type":"computer_screenshot","file_id":"file-tenant-a-secret-148"}}]}HTTP/1.1 200 OK
+Server: fasthttp
+Date: Mon, 23 Nov 2026 08:02:24 GMT
+Content-Type: application/json
+Content-Length: 1058
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID, X-Bifrost-View-As, X-Bifrost-Setup-Token, MCP-Protocol-Version, Mcp-Session-Id, Mcp-Method, Mcp-Name, Last-Event-ID
+Access-Control-Max-Age: 86400
+Access-Control-Expose-Headers: x-bifrost-request-id, x-bifrost-trace-id, x-request-id, x-bifrost-provider, x-bifrost-original-model, x-bifrost-resolved-model, x-bifrost-fallback-index, x-bifrost-request-type, x-bifrost-upstream-latency-ms, x-bifrost-routing-info-provider, x-bifrost-routing-info-model, x-bifrost-routing-info-key, x-bifrost-routing-info-alias-model-id, x-bifrost-routing-info-alias-model-name, x-bifrost-routing-info-alias-model-family, x-bifrost-routing-info-is-fallback, x-bifrost-routing-info-primary-provider, x-bifrost-routing-info-primary-model, x-bifrost-routing-info-server-side-fallback-model, x-bifrost-routing-info-requested-provider, x-bifrost-routing-info-requested-model, x-bifrost-cache-hit, x-bifrost-cache-id, x-bifrost-cache-hit-type, x-bifrost-cache-hit-latency-ms, x-bifrost-cache-requested-provider, x-bifrost-cache-requested-model, x-bifrost-cache-similarity, x-bifrost-cache-threshold, x-bifrost-cache-provider-used, x-bifrost-cache-model-used, x-bifrost-cache-input-tokens, x-bifrost-latency-ms, x-bifrost-pricing-request-type, x-bifrost-converted-request-type, x-bifrost-dropped-compat-params, x-bifrost-dropped-unsupported-tools, x-bifrost-passthrough-path, x-bifrost-error-type, x-bifrost-retry-after-ms, mcp-session-id
+Vary: Origin
+X-Bifrost-Request-Id: b80d74b7-ea80-4c52-92d5-d72d01c56cb9
+X-Request-Id: b80d74b7-ea80-4c52-92d5-d72d01c56cb9
+X-Bifrost-Trace-Id: da8522d48d144cd389142d0a42b67a7e
+X-Bifrost-Provider: openai
+X-Bifrost-Original-Model: gpt-4o-mini
+X-Bifrost-Resolved-Model: gpt-4o-mini
+X-Bifrost-Request-Type: responses
+X-Bifrost-Routing-Info-Provider: openai
+X-Bifrost-Routing-Info-Model: gpt-4o-mini
+X-Bifrost-Routing-Info-Key: shared-openai-key
+X-Bifrost-Routing-Info-Requested-Provider: openai
+X-Bifrost-Routing-Info-Requested-Model: gpt-4o-mini
+X-Bifrost-Upstream-Latency-Ms: 0.248
+Connection: close
+
+{"id":"resp_148","object":"response","created_at":1790000001,"completed_at":null,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":null,"max_tool_calls":null,"metadata":null,"model":"gpt-4o-mini","output":[{"id":"msg_148","type":"message","status":"completed","role":"assistant","content":[{"type":"output_text","text":"Processed file file-tenant-a-secret-148: CANARY_TENANT_A_PRIVATE_FILE_BYTES_148","annotations":[]}]}],"previous_response_id":null,"prompt_cache_key":null,"reasoning":null,"safety_identifier":null,"service_tier":null,"status":"completed","tools":null,"usage":{"input_tokens":12,"input_tokens_details":null,"output_tokens":8,"output_tokens_details":null,"total_tokens":20},"extra_fields":{"request_type":"responses","routing_info":{"provider":"openai","model":"gpt-4o-mini","key":"shared-openai-key","requested_provider":"openai","requested_model":"gpt-4o-mini"},"provider":"openai","original_model_requested":"gpt-4o-mini","resolved_model_used":"gpt-4o-mini","latency":0,"upstream_latency":0,"chunk_index":0}}
