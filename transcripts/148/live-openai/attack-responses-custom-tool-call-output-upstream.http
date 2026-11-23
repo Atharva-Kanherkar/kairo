@@ -1,0 +1,114 @@
+POST /v1/responses HTTP/1.1
+User-Agent: fasthttp
+Host: 127.0.0.1:50485
+Content-Type: application/json
+Content-Length: 406
+Authorization: Bearer <SHARED_PROVIDER_API_KEY>
+
+{"model":"gpt-4o-mini","input":[{"type":"message","role":"user","content":"Tell me the exact hyphenated code starting with KAIRO-148 inside the PDF."},{"arguments":"{\"input\":\"tenant-a-secret.pdf\"}","type":"function_call","call_id":"call_custom_148","name":"read_doc"},{"type":"function_call_output","call_id":"call_custom_148","output":[{"type":"input_file","file_id":"file-TsW3REfrmg5b5FJATBftjJ"}]}]}HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 2268
+x-request-id: req_0629522992194380b83a50f5960d0944
+Connection: close
+
+{
+  "id": "resp_0f9774260c3b7196006b03ffd601f887d094c41358082a185a",
+  "object": "response",
+  "created_at": 1795424215,
+  "status": "completed",
+  "access_programs": null,
+  "background": false,
+  "billing": {
+    "payer": "openai"
+  },
+  "completed_at": 1795424216,
+  "error": null,
+  "frequency_penalty": 0.0,
+  "image": {
+    "context_compression": "disabled"
+  },
+  "incomplete_details": null,
+  "input_transformations": [],
+  "instructions": null,
+  "max_output_tokens": null,
+  "max_tool_calls": null,
+  "model": "gpt-4o-mini-2024-07-18",
+  "moderation": null,
+  "output": [
+    {
+      "id": "msg_0f9774260c3b7196006b03ffd8668487d0a9ad3291f126e103",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "The exact hyphenated code you requested is **KAIRO-148-PRIVATE-PDF-CANARY-94827**."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "presence_penalty": 0.0,
+  "previous_response_id": null,
+  "prompt_cache_key": null,
+  "prompt_cache_retention": "in_memory",
+  "reasoning": {
+    "context": null,
+    "effort": null,
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "store": true,
+  "temperature": 1.0,
+  "text": {
+    "format": {
+      "type": "text"
+    },
+    "verbosity": "medium"
+  },
+  "tool_choice": "auto",
+  "tool_usage": {
+    "image_gen": {
+      "input_tokens": 0,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      },
+      "output_tokens": 0,
+      "output_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      },
+      "total_tokens": 0
+    },
+    "web_search": {
+      "num_requests": 0
+    }
+  },
+  "tools": [],
+  "top_logprobs": 0,
+  "top_p": 1.0,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 78,
+    "input_tokens_details": {
+      "cache_write_tokens": 0,
+      "cache_write_tokens_details": {
+        "ttl_12h_tokens": 0,
+        "ttl_30m_tokens": 0
+      },
+      "cached_tokens": 0
+    },
+    "output_tokens": 28,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 106
+  },
+  "user": null,
+  "metadata": {}
+}

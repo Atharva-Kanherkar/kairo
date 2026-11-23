@@ -1,0 +1,39 @@
+POST /v1/responses HTTP/1.1
+Host: 127.0.0.1:50484
+Content-Type: application/json
+Content-Length: 367
+x-bf-vk: <VK_TENANT_B>
+Connection: close
+
+{"model":"openai/gpt-4o-mini","input":[{"type":"message","role":"user","content":"Tell me the exact hyphenated code starting with KAIRO-148 inside the PDF."},{"type":"function_call","call_id":"call_148","name":"fetch_doc","arguments":"{}"},{"type":"function_call_output","call_id":"call_148","output":[{"type":"input_file","file_id":"file-TsW3REfrmg5b5FJATBftjJ"}]}]}HTTP/1.1 200 OK
+Server: fasthttp
+Date: Mon, 23 Nov 2026 08:56:53 GMT
+Content-Type: application/json
+Content-Length: 1919
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Content-Security-Policy: frame-ancestors 'none'
+Permissions-Policy: camera=(), microphone=(), geolocation=()
+Access-Control-Allow-Origin: 
+Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD
+Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-Stainless-Timeout, X-Api-Key, X-OpenAI-Agents-SDK, X-Operation-ID, X-Bifrost-View-As, X-Bifrost-Setup-Token, MCP-Protocol-Version, Mcp-Session-Id, Mcp-Method, Mcp-Name, Last-Event-ID
+Access-Control-Max-Age: 86400
+Access-Control-Expose-Headers: x-bifrost-request-id, x-bifrost-trace-id, x-request-id, x-bifrost-provider, x-bifrost-original-model, x-bifrost-resolved-model, x-bifrost-fallback-index, x-bifrost-request-type, x-bifrost-upstream-latency-ms, x-bifrost-routing-info-provider, x-bifrost-routing-info-model, x-bifrost-routing-info-key, x-bifrost-routing-info-alias-model-id, x-bifrost-routing-info-alias-model-name, x-bifrost-routing-info-alias-model-family, x-bifrost-routing-info-is-fallback, x-bifrost-routing-info-primary-provider, x-bifrost-routing-info-primary-model, x-bifrost-routing-info-server-side-fallback-model, x-bifrost-routing-info-requested-provider, x-bifrost-routing-info-requested-model, x-bifrost-cache-hit, x-bifrost-cache-id, x-bifrost-cache-hit-type, x-bifrost-cache-hit-latency-ms, x-bifrost-cache-requested-provider, x-bifrost-cache-requested-model, x-bifrost-cache-similarity, x-bifrost-cache-threshold, x-bifrost-cache-provider-used, x-bifrost-cache-model-used, x-bifrost-cache-input-tokens, x-bifrost-latency-ms, x-bifrost-pricing-request-type, x-bifrost-converted-request-type, x-bifrost-dropped-compat-params, x-bifrost-dropped-unsupported-tools, x-bifrost-passthrough-path, x-bifrost-error-type, x-bifrost-retry-after-ms, mcp-session-id
+Vary: Origin
+X-Bifrost-Request-Id: 6a99f6e5-7553-41cf-b50f-b1f3afc46da0
+X-Request-Id: req_6d9fc9dba26c4abd94d6443b8186f66d
+X-Bifrost-Trace-Id: b0fdbb49c1a94c379846541f5f13fafb
+X-Bifrost-Provider: openai
+X-Bifrost-Original-Model: gpt-4o-mini
+X-Bifrost-Resolved-Model: gpt-4o-mini
+X-Bifrost-Request-Type: responses
+X-Bifrost-Routing-Info-Provider: openai
+X-Bifrost-Routing-Info-Model: gpt-4o-mini
+X-Bifrost-Routing-Info-Key: shared-openai-key
+X-Bifrost-Routing-Info-Requested-Provider: openai
+X-Bifrost-Routing-Info-Requested-Model: gpt-4o-mini
+X-Bifrost-Upstream-Latency-Ms: 3902.528
+Connection: close
+
+{"id":"resp_028735fe438192c4006b03ffd21fe887d0abb94c778b77aaf5","object":"response","background":false,"created_at":1795424212,"completed_at":1795424213,"error":null,"incomplete_details":null,"instructions":null,"max_output_tokens":null,"max_tool_calls":null,"metadata":{},"model":"gpt-4o-mini-2024-07-18","output":[{"id":"msg_028735fe438192c4006b03ffd4c33887d0a94be9bf488f4ac7","type":"message","status":"completed","role":"assistant","content":[{"type":"output_text","text":"The exact hyphenated code you requested is **KAIRO-148-PRIVATE-PDF-CANARY-94827**.","annotations":[],"logprobs":[]}]}],"parallel_tool_calls":true,"previous_response_id":null,"prompt_cache_key":null,"prompt_cache_retention":"in_memory","presence_penalty":0,"frequency_penalty":0,"reasoning":{"effort":null,"summary":null},"safety_identifier":null,"service_tier":"default","status":"completed","store":true,"temperature":1,"text":{"format":{"type":"text"},"verbosity":"medium"},"top_logprobs":0,"top_p":1,"tool_choice":"auto","tools":[],"truncation":"disabled","usage":{"input_tokens":71,"input_tokens_details":{"cached_read_tokens":0,"cached_write_tokens":0,"cached_tokens":0,"cache_write_tokens":0},"output_tokens":28,"output_tokens_details":{"reasoning_tokens":0},"total_tokens":99},"tool_usage":{"web_search":{"num_requests":0},"image_gen":{"input_tokens":0,"input_tokens_details":{"image_tokens":0,"text_tokens":0},"output_tokens":0,"output_tokens_details":{"image_tokens":0,"text_tokens":0},"total_tokens":0}},"extra_fields":{"request_type":"responses","routing_info":{"provider":"openai","model":"gpt-4o-mini","key":"shared-openai-key","requested_provider":"openai","requested_model":"gpt-4o-mini"},"provider":"openai","original_model_requested":"gpt-4o-mini","resolved_model_used":"gpt-4o-mini","latency":3902,"upstream_latency":3902,"chunk_index":0,"provider_response_headers":{"X-Request-Id":"req_6d9fc9dba26c4abd94d6443b8186f66d"}}}

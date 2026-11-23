@@ -50,10 +50,10 @@ use kairo::checks::{
     tool_policy_guardrail_enforces_trust_chain_and_blocked_tools,
     tool_result_images_reach_provider, tool_strict_forwarded, toolcall_id_restored_upstream,
     truncation_preserved, unpriced_response_cost_header_omitted, upstream_bearer_is,
-    upstream_omits_header_value, voyage_embeddings_honor_environment_api_base,
-    worker_loss_stays_invisible, FunctionToolFormat, Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE,
-    JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT, REPLAYED_CALL_NAMESPACE_CHANGED,
-    TOOL_RESULT_IMAGE_DROPPED,
+    upstream_omits_header_value, virtual_key_file_ownership_enforced_across_tool_outputs,
+    voyage_embeddings_honor_environment_api_base, worker_loss_stays_invisible, FunctionToolFormat,
+    Verdict, EMPTY_TEXT_ALONGSIDE_TOOL_USE, JSON_SCHEMA_ABSENT, JSON_SCHEMA_PROPERTY_ABSENT,
+    REPLAYED_CALL_NAMESPACE_CHANGED, TOOL_RESULT_IMAGE_DROPPED,
 };
 use serde_json::Value;
 use std::collections::BTreeMap;
@@ -11091,4 +11091,285 @@ fn litellm_team_concurrency_preserved_control() {
         Verdict::Conformant,
         "a team creation response preserving max_parallel_requests is conformant"
     );
+}
+
+// ---- 148: Bifrost cross-virtual-key provider file ownership bypass via tool outputs ----
+
+const ISSUE_148_FILE_OWNERS: &[(&str, &str)] = &[("file-tenant-a-secret-148", "<VK_TENANT_A>")];
+const ISSUE_148_LIVE_FILE_OWNERS: &[(&str, &str)] =
+    &[("file-TsW3REfrmg5b5FJATBftjJ", "<VK_TENANT_A>")];
+const ISSUE_148_PDF_CANARY: &str = "KAIRO-148-PRIVATE-PDF-CANARY-94827";
+
+#[test]
+fn bifrost_148_responses_function_call_output_bypasses_vk_file_ownership() {
+    let client = fixture("transcripts/148/attack-responses-function-call-output.http");
+    let upstream = fixture("transcripts/148/attack-responses-function-call-output-upstream.http");
+    assert!(
+        client.contains(ISSUE_148_PDF_CANARY),
+        "Tenant B must receive Tenant A's extracted PDF canary"
+    );
+    let verdict = virtual_key_file_ownership_enforced_across_tool_outputs(
+        &client,
+        Some(&upstream),
+        ISSUE_148_FILE_OWNERS,
+    );
+    assert!(
+        matches!(
+            &verdict,
+            Verdict::Violation(msg)
+                if msg.contains("file-tenant-a-secret-148")
+                    && msg.contains("HTTP 200")
+                    && msg.contains("forwarded_upstream=true")
+        ),
+        "expected cross-VK function_call_output file reference to be flagged as violation: {verdict:?}"
+    );
+}
+
+#[test]
+fn bifrost_148_responses_custom_tool_call_output_bypasses_vk_file_ownership() {
+    let client = fixture("transcripts/148/attack-responses-custom-tool-call-output.http");
+    let upstream =
+        fixture("transcripts/148/attack-responses-custom-tool-call-output-upstream.http");
+    assert!(
+        client.contains(ISSUE_148_PDF_CANARY),
+        "Tenant B must receive Tenant A's extracted PDF canary"
+    );
+    let verdict = virtual_key_file_ownership_enforced_across_tool_outputs(
+        &client,
+        Some(&upstream),
+        ISSUE_148_FILE_OWNERS,
+    );
+    assert!(
+        matches!(
+            &verdict,
+            Verdict::Violation(msg)
+                if msg.contains("file-tenant-a-secret-148")
+                    && msg.contains("HTTP 200")
+                    && msg.contains("forwarded_upstream=true")
+        ),
+        "expected cross-VK custom_tool_call_output file reference to be flagged as violation: {verdict:?}"
+    );
+}
+
+#[test]
+fn bifrost_148_anthropic_tool_result_bypasses_vk_file_ownership() {
+    let client = fixture("transcripts/148/attack-anthropic-tool-result.http");
+    let upstream = fixture("transcripts/148/attack-anthropic-tool-result-upstream.http");
+    assert!(
+        client.contains(ISSUE_148_PDF_CANARY),
+        "Tenant B must receive Tenant A's extracted PDF canary"
+    );
+    let verdict = virtual_key_file_ownership_enforced_across_tool_outputs(
+        &client,
+        Some(&upstream),
+        ISSUE_148_FILE_OWNERS,
+    );
+    assert!(
+        matches!(
+            &verdict,
+            Verdict::Violation(msg)
+                if msg.contains("file-tenant-a-secret-148")
+                    && msg.contains("HTTP 200")
+                    && msg.contains("forwarded_upstream=true")
+        ),
+        "expected cross-VK Anthropic tool_result file reference to be flagged as violation: {verdict:?}"
+    );
+}
+
+#[test]
+fn bifrost_148_cross_vk_user_message_and_direct_file_controls_are_conformant() {
+    for rel in [
+        "transcripts/148/control-direct-file-retrieve.http",
+        "transcripts/148/control-responses-user-message.http",
+        "transcripts/148/control-anthropic-user-message.http",
+        "transcripts/148/control-no-file-reference.http",
+    ] {
+        let client = fixture(rel);
+        assert!(
+            !client.contains(ISSUE_148_PDF_CANARY),
+            "{rel} must not disclose Tenant A's PDF canary"
+        );
+        let verdict = virtual_key_file_ownership_enforced_across_tool_outputs(
+            &client,
+            None,
+            ISSUE_148_FILE_OWNERS,
+        );
+        assert_eq!(
+            verdict,
+            Verdict::Conformant,
+            "{rel} must be conformant, got {verdict:?}"
+        );
+    }
+
+    let owner_client = fixture("transcripts/148/control-owner-tool-output.http");
+    assert!(
+        owner_client.contains(ISSUE_148_PDF_CANARY),
+        "owner tool output control must receive its own PDF canary"
+    );
+    assert_eq!(
+        virtual_key_file_ownership_enforced_across_tool_outputs(
+            &owner_client,
+            None,
+            ISSUE_148_FILE_OWNERS,
+        ),
+        Verdict::Conformant
+    );
+}
+
+#[test]
+fn bifrost_148_live_openai_provider_discloses_pdf_across_all_three_tool_outputs() {
+    for (client_rel, upstream_rel) in [
+        (
+            "transcripts/148/live-openai/attack-responses-function-call-output.http",
+            "transcripts/148/live-openai/attack-responses-function-call-output-upstream.http",
+        ),
+        (
+            "transcripts/148/live-openai/attack-responses-custom-tool-call-output.http",
+            "transcripts/148/live-openai/attack-responses-custom-tool-call-output-upstream.http",
+        ),
+        (
+            "transcripts/148/live-openai/attack-anthropic-tool-result.http",
+            "transcripts/148/live-openai/attack-anthropic-tool-result-upstream.http",
+        ),
+    ] {
+        let client = fixture(client_rel);
+        let upstream = fixture(upstream_rel);
+        assert!(
+            client.contains(ISSUE_148_PDF_CANARY),
+            "{client_rel} must contain Tenant A's PDF canary read by live OpenAI"
+        );
+        assert!(
+            upstream.contains("gpt-4o-mini-2024-07-18"),
+            "{upstream_rel} must record live OpenAI model completion"
+        );
+        let verdict = virtual_key_file_ownership_enforced_across_tool_outputs(
+            &client,
+            Some(&upstream),
+            ISSUE_148_LIVE_FILE_OWNERS,
+        );
+        assert!(
+            matches!(
+                &verdict,
+                Verdict::Violation(msg)
+                    if msg.contains("file-TsW3REfrmg5b5FJATBftjJ")
+                        && msg.contains("HTTP 200")
+                        && msg.contains("forwarded_upstream=true")
+            ),
+            "{client_rel} must be flagged as violation: {verdict:?}"
+        );
+    }
+
+    for rel in [
+        "transcripts/148/live-openai/control-direct-file-retrieve.http",
+        "transcripts/148/live-openai/control-responses-user-message.http",
+        "transcripts/148/live-openai/control-anthropic-user-message.http",
+        "transcripts/148/live-openai/control-no-file-reference.http",
+    ] {
+        let client = fixture(rel);
+        assert!(
+            !client.contains(ISSUE_148_PDF_CANARY),
+            "{rel} must not disclose Tenant A's PDF canary"
+        );
+        assert_eq!(
+            virtual_key_file_ownership_enforced_across_tool_outputs(
+                &client,
+                None,
+                ISSUE_148_LIVE_FILE_OWNERS,
+            ),
+            Verdict::Conformant,
+            "{rel} must be conformant"
+        );
+    }
+}
+
+#[test]
+fn bifrost_148_results_matrix_5_runs_reproduce_consistently() {
+    for matrix_path in [
+        "transcripts/148/results.json",
+        "transcripts/148/live-openai/results.json",
+    ] {
+        let matrix_str = fixture(matrix_path);
+        let matrix: Value = serde_json::from_str(&matrix_str).expect("parse results.json");
+        assert_eq!(matrix["complete"].as_bool(), Some(true), "{matrix_path}");
+        assert_eq!(
+            matrix["target"]["binary_vcs_modified"].as_bool(),
+            Some(false),
+            "{matrix_path}"
+        );
+        let trials = matrix["trials"].as_array().expect("trials array");
+        assert_eq!(
+            trials.len(),
+            5,
+            "{matrix_path}: must have completed 5 trials"
+        );
+
+        for (idx, row) in trials.iter().enumerate() {
+            let run_num = idx + 1;
+            assert_eq!(
+                row["control_direct_file_retrieve_status"].as_u64(),
+                Some(404),
+                "{matrix_path} trial {run_num}: direct file retrieve must be rejected with 404"
+            );
+            assert_eq!(
+                row["control_responses_user_message_status"].as_u64(),
+                Some(404),
+                "{matrix_path} trial {run_num}: Responses user message must be rejected with 404"
+            );
+            assert_eq!(
+                row["control_anthropic_user_message_status"].as_u64(),
+                Some(404),
+                "{matrix_path} trial {run_num}: Anthropic user message must be rejected with 404"
+            );
+            assert_eq!(
+                row["control_no_file_reference_status"].as_u64(),
+                Some(200),
+                "{matrix_path} trial {run_num}: no-file-reference control must return 200"
+            );
+            assert_eq!(
+                row["control_no_file_reference_canary_disclosed"].as_bool(),
+                Some(false),
+                "{matrix_path} trial {run_num}: no-file-reference control must not disclose canary"
+            );
+            assert_eq!(
+                row["control_owner_tool_output_status"].as_u64(),
+                Some(200),
+                "{matrix_path} trial {run_num}: owner tool output must succeed with 200"
+            );
+            assert_eq!(
+                row["control_owner_tool_output_canary_disclosed"].as_bool(),
+                Some(true),
+                "{matrix_path} trial {run_num}: owner tool output must disclose owner canary"
+            );
+            assert_eq!(
+                row["attack_responses_function_call_output_status"].as_u64(),
+                Some(200),
+                "{matrix_path} trial {run_num}: cross-VK function_call_output defect must return 200"
+            );
+            assert_eq!(
+                row["attack_responses_function_call_output_canary_disclosed"].as_bool(),
+                Some(true),
+                "{matrix_path} trial {run_num}: cross-VK function_call_output must disclose canary"
+            );
+            assert_eq!(
+                row["attack_responses_custom_tool_call_output_status"].as_u64(),
+                Some(200),
+                "{matrix_path} trial {run_num}: cross-VK custom_tool_call_output defect must return 200"
+            );
+            assert_eq!(
+                row["attack_responses_custom_tool_call_output_canary_disclosed"].as_bool(),
+                Some(true),
+                "{matrix_path} trial {run_num}: cross-VK custom_tool_call_output must disclose canary"
+            );
+            assert_eq!(
+                row["attack_anthropic_tool_result_status"].as_u64(),
+                Some(200),
+                "{matrix_path} trial {run_num}: cross-VK Anthropic tool_result defect must return 200"
+            );
+            assert_eq!(
+                row["attack_anthropic_tool_result_canary_disclosed"].as_bool(),
+                Some(true),
+                "{matrix_path} trial {run_num}: cross-VK Anthropic tool_result must disclose canary"
+            );
+        }
+    }
 }
