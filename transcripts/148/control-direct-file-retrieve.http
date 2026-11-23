@@ -1,11 +1,11 @@
 GET /v1/files/file-tenant-a-secret-148?provider=openai HTTP/1.1
-Host: 127.0.0.1:64676
+Host: 127.0.0.1:65122
 x-bf-vk: <VK_TENANT_B>
 Connection: close
 
 HTTP/1.1 404 Not Found
 Server: fasthttp
-Date: Mon, 23 Nov 2026 08:02:24 GMT
+Date: Mon, 23 Nov 2026 08:52:46 GMT
 Content-Type: application/json
 Content-Length: 219
 X-Frame-Options: DENY
@@ -19,9 +19,9 @@ Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-S
 Access-Control-Max-Age: 86400
 Access-Control-Expose-Headers: x-bifrost-request-id, x-bifrost-trace-id, x-request-id, x-bifrost-provider, x-bifrost-original-model, x-bifrost-resolved-model, x-bifrost-fallback-index, x-bifrost-request-type, x-bifrost-upstream-latency-ms, x-bifrost-routing-info-provider, x-bifrost-routing-info-model, x-bifrost-routing-info-key, x-bifrost-routing-info-alias-model-id, x-bifrost-routing-info-alias-model-name, x-bifrost-routing-info-alias-model-family, x-bifrost-routing-info-is-fallback, x-bifrost-routing-info-primary-provider, x-bifrost-routing-info-primary-model, x-bifrost-routing-info-server-side-fallback-model, x-bifrost-routing-info-requested-provider, x-bifrost-routing-info-requested-model, x-bifrost-cache-hit, x-bifrost-cache-id, x-bifrost-cache-hit-type, x-bifrost-cache-hit-latency-ms, x-bifrost-cache-requested-provider, x-bifrost-cache-requested-model, x-bifrost-cache-similarity, x-bifrost-cache-threshold, x-bifrost-cache-provider-used, x-bifrost-cache-model-used, x-bifrost-cache-input-tokens, x-bifrost-latency-ms, x-bifrost-pricing-request-type, x-bifrost-converted-request-type, x-bifrost-dropped-compat-params, x-bifrost-dropped-unsupported-tools, x-bifrost-passthrough-path, x-bifrost-error-type, x-bifrost-retry-after-ms, mcp-session-id
 Vary: Origin
-X-Bifrost-Request-Id: 7f4dd24e-d791-42f8-a61d-3d7cc9f22104
-X-Request-Id: 7f4dd24e-d791-42f8-a61d-3d7cc9f22104
-X-Bifrost-Trace-Id: cba111b527f84633a6dff1551917a4f4
+X-Bifrost-Request-Id: d2cba0df-f38f-488b-a4f0-aedf0f77ae35
+X-Request-Id: d2cba0df-f38f-488b-a4f0-aedf0f77ae35
+X-Bifrost-Trace-Id: f9b1876ee0d342828343ef047e530b9b
 X-Bifrost-Provider: openai
 X-Bifrost-Request-Type: file_retrieve
 Connection: close

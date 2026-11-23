@@ -1,22 +1,23 @@
 {
   "complete": true,
   "date_checked": "2026-11-23",
+  "live_openai": false,
   "runs": 5,
   "secrets": "synthetic canaries only; no real provider credential was used",
   "summary": {
     "attack_anthropic_tool_result_bypassed_200": 5,
-    "attack_responses_computer_call_output_bypassed_200": 5,
+    "attack_responses_custom_tool_call_output_bypassed_200": 5,
     "attack_responses_function_call_output_bypassed_200": 5,
     "control_anthropic_user_message_blocked_404": 5,
     "control_direct_file_retrieve_blocked_404": 5,
+    "control_no_file_reference_canary_absent_200": 5,
     "control_owner_tool_output_allowed_200": 5,
     "control_responses_user_message_blocked_404": 5
   },
   "target": {
     "backend_dialects": [
       "OpenAI Files",
-      "OpenAI Responses",
-      "OpenAI Chat Completions"
+      "OpenAI Responses"
     ],
     "binary_vcs_modified": false,
     "binary_vcs_revision": "783c682951a1c4d6a07a677779e0becab8bbbe2c",
@@ -37,59 +38,90 @@
     "enforce_auth_on_inference": true,
     "enforce_vk_object_ownership": true,
     "model": "openai/gpt-4o-mini",
-    "provider": "openai (deterministic local capture upstream)",
+    "provider": "openai (stateful PDF-parsing capture upstream)",
     "repository": "https://github.com/maximhq/bifrost"
   },
   "trials": [
     {
+      "attack_anthropic_tool_result_canary_disclosed": true,
       "attack_anthropic_tool_result_status": 200,
-      "attack_responses_computer_call_output_status": 200,
+      "attack_responses_custom_tool_call_output_canary_disclosed": true,
+      "attack_responses_custom_tool_call_output_status": 200,
+      "attack_responses_function_call_output_canary_disclosed": true,
       "attack_responses_function_call_output_status": 200,
       "control_anthropic_user_message_status": 404,
       "control_direct_file_retrieve_status": 404,
+      "control_no_file_reference_canary_disclosed": false,
+      "control_no_file_reference_status": 200,
+      "control_owner_tool_output_canary_disclosed": true,
       "control_owner_tool_output_status": 200,
       "control_responses_user_message_status": 404,
       "trial": 1
     },
     {
+      "attack_anthropic_tool_result_canary_disclosed": true,
       "attack_anthropic_tool_result_status": 200,
-      "attack_responses_computer_call_output_status": 200,
+      "attack_responses_custom_tool_call_output_canary_disclosed": true,
+      "attack_responses_custom_tool_call_output_status": 200,
+      "attack_responses_function_call_output_canary_disclosed": true,
       "attack_responses_function_call_output_status": 200,
       "control_anthropic_user_message_status": 404,
       "control_direct_file_retrieve_status": 404,
+      "control_no_file_reference_canary_disclosed": false,
+      "control_no_file_reference_status": 200,
+      "control_owner_tool_output_canary_disclosed": true,
       "control_owner_tool_output_status": 200,
       "control_responses_user_message_status": 404,
       "trial": 2
     },
     {
+      "attack_anthropic_tool_result_canary_disclosed": true,
       "attack_anthropic_tool_result_status": 200,
-      "attack_responses_computer_call_output_status": 200,
+      "attack_responses_custom_tool_call_output_canary_disclosed": true,
+      "attack_responses_custom_tool_call_output_status": 200,
+      "attack_responses_function_call_output_canary_disclosed": true,
       "attack_responses_function_call_output_status": 200,
       "control_anthropic_user_message_status": 404,
       "control_direct_file_retrieve_status": 404,
+      "control_no_file_reference_canary_disclosed": false,
+      "control_no_file_reference_status": 200,
+      "control_owner_tool_output_canary_disclosed": true,
       "control_owner_tool_output_status": 200,
       "control_responses_user_message_status": 404,
       "trial": 3
     },
     {
+      "attack_anthropic_tool_result_canary_disclosed": true,
       "attack_anthropic_tool_result_status": 200,
-      "attack_responses_computer_call_output_status": 200,
+      "attack_responses_custom_tool_call_output_canary_disclosed": true,
+      "attack_responses_custom_tool_call_output_status": 200,
+      "attack_responses_function_call_output_canary_disclosed": true,
       "attack_responses_function_call_output_status": 200,
       "control_anthropic_user_message_status": 404,
       "control_direct_file_retrieve_status": 404,
+      "control_no_file_reference_canary_disclosed": false,
+      "control_no_file_reference_status": 200,
+      "control_owner_tool_output_canary_disclosed": true,
       "control_owner_tool_output_status": 200,
       "control_responses_user_message_status": 404,
       "trial": 4
     },
     {
+      "attack_anthropic_tool_result_canary_disclosed": true,
       "attack_anthropic_tool_result_status": 200,
-      "attack_responses_computer_call_output_status": 200,
+      "attack_responses_custom_tool_call_output_canary_disclosed": true,
+      "attack_responses_custom_tool_call_output_status": 200,
+      "attack_responses_function_call_output_canary_disclosed": true,
       "attack_responses_function_call_output_status": 200,
       "control_anthropic_user_message_status": 404,
       "control_direct_file_retrieve_status": 404,
+      "control_no_file_reference_canary_disclosed": false,
+      "control_no_file_reference_status": 200,
+      "control_owner_tool_output_canary_disclosed": true,
       "control_owner_tool_output_status": 200,
       "control_responses_user_message_status": 404,
       "trial": 5
     }
-  ]
+  ],
+  "uploaded_file_id": "file-tenant-a-secret-148"
 }

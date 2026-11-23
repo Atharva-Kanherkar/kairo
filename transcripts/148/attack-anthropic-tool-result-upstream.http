@@ -1,13 +1,13 @@
 POST /v1/responses HTTP/1.1
 User-Agent: fasthttp
-Host: 127.0.0.1:64677
+Host: 127.0.0.1:65123
 Content-Type: application/json
-Content-Length: 419
+Content-Length: 474
 Authorization: Bearer <SHARED_PROVIDER_API_KEY>
 
-{"model":"gpt-4o-mini","max_output_tokens":64,"input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"Read the document."}]},{"arguments":"{}","id":"fc_4a779f577a46fcdafcaace226c2e6191f63fb38dc5bc8d7436","type":"function_call","call_id":"toolu_148","name":"fetch_doc"},{"type":"function_call_output","call_id":"toolu_148","output":[{"type":"input_file","file_id":"file-tenant-a-secret-148"}]}]}HTTP/1.1 200 OK
+{"model":"gpt-4o-mini","max_output_tokens":64,"input":[{"type":"message","role":"user","content":[{"type":"input_text","text":"Tell me the exact hyphenated code starting with KAIRO-148 inside the PDF."}]},{"arguments":"{}","id":"fc_72dc9a4c344143030f4806a978c53c813065cd23e7a67d558e","type":"function_call","call_id":"toolu_148","name":"fetch_doc"},{"type":"function_call_output","call_id":"toolu_148","output":[{"type":"input_file","file_id":"file-tenant-a-secret-148"}]}]}HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 394
+Content-Length: 380
 Connection: close
 
-{"id":"resp_148","object":"response","created_at":1790000001,"status":"completed","model":"gpt-4o-mini","output":[{"id":"msg_148","type":"message","status":"completed","role":"assistant","content":[{"type":"output_text","text":"Processed file file-tenant-a-secret-148: CANARY_TENANT_A_PRIVATE_FILE_BYTES_148","annotations":[]}]}],"usage":{"input_tokens":12,"output_tokens":8,"total_tokens":20}}
+{"id":"resp_148","object":"response","created_at":1790000001,"status":"completed","model":"gpt-4o-mini","output":[{"id":"msg_148","type":"message","status":"completed","role":"assistant","content":[{"type":"output_text","text":"Resolved uploaded PDF content: KAIRO-148-PRIVATE-PDF-CANARY-94827","annotations":[]}]}],"usage":{"input_tokens":12,"output_tokens":8,"total_tokens":20}}

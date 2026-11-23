@@ -1,13 +1,13 @@
 POST /anthropic/v1/messages HTTP/1.1
-Host: 127.0.0.1:64676
+Host: 127.0.0.1:65122
 Content-Type: application/json
-Content-Length: 215
+Content-Length: 268
 x-bf-vk: <VK_TENANT_B>
 Connection: close
 
-{"model":"openai/gpt-4o-mini","max_tokens":64,"messages":[{"role":"user","content":[{"type":"document","source":{"type":"file","file_id":"file-tenant-a-secret-148"}},{"type":"text","text":"Summarize this file."}]}]}HTTP/1.1 404 Not Found
+{"model":"openai/gpt-4o-mini","max_tokens":64,"messages":[{"role":"user","content":[{"type":"document","source":{"type":"file","file_id":"file-tenant-a-secret-148"}},{"type":"text","text":"Tell me the exact hyphenated code starting with KAIRO-148 inside the PDF."}]}]}HTTP/1.1 404 Not Found
 Server: fasthttp
-Date: Mon, 23 Nov 2026 08:02:24 GMT
+Date: Mon, 23 Nov 2026 08:52:46 GMT
 Content-Type: application/json
 Content-Length: 105
 X-Frame-Options: DENY
@@ -21,9 +21,9 @@ Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-S
 Access-Control-Max-Age: 86400
 Access-Control-Expose-Headers: x-bifrost-request-id, x-bifrost-trace-id, x-request-id, x-bifrost-provider, x-bifrost-original-model, x-bifrost-resolved-model, x-bifrost-fallback-index, x-bifrost-request-type, x-bifrost-upstream-latency-ms, x-bifrost-routing-info-provider, x-bifrost-routing-info-model, x-bifrost-routing-info-key, x-bifrost-routing-info-alias-model-id, x-bifrost-routing-info-alias-model-name, x-bifrost-routing-info-alias-model-family, x-bifrost-routing-info-is-fallback, x-bifrost-routing-info-primary-provider, x-bifrost-routing-info-primary-model, x-bifrost-routing-info-server-side-fallback-model, x-bifrost-routing-info-requested-provider, x-bifrost-routing-info-requested-model, x-bifrost-cache-hit, x-bifrost-cache-id, x-bifrost-cache-hit-type, x-bifrost-cache-hit-latency-ms, x-bifrost-cache-requested-provider, x-bifrost-cache-requested-model, x-bifrost-cache-similarity, x-bifrost-cache-threshold, x-bifrost-cache-provider-used, x-bifrost-cache-model-used, x-bifrost-cache-input-tokens, x-bifrost-latency-ms, x-bifrost-pricing-request-type, x-bifrost-converted-request-type, x-bifrost-dropped-compat-params, x-bifrost-dropped-unsupported-tools, x-bifrost-passthrough-path, x-bifrost-error-type, x-bifrost-retry-after-ms, mcp-session-id
 Vary: Origin
-X-Bifrost-Request-Id: 40e6c1cd-9146-4127-b4ad-ef94b7baef7f
-X-Request-Id: 40e6c1cd-9146-4127-b4ad-ef94b7baef7f
-X-Bifrost-Trace-Id: 4034742280824616b73ebc13f71530d5
+X-Bifrost-Request-Id: 86c49abf-1ea9-4c91-b9dd-dae7296d8b55
+X-Request-Id: 86c49abf-1ea9-4c91-b9dd-dae7296d8b55
+X-Bifrost-Trace-Id: ef5ba4b6485a41c28e4711394d62e45a
 X-Bifrost-Provider: openai
 X-Bifrost-Original-Model: gpt-4o-mini
 X-Bifrost-Resolved-Model: gpt-4o-mini

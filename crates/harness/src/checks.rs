@@ -9304,13 +9304,23 @@ pub fn virtual_key_file_ownership_enforced_across_tool_outputs(
         })
         .collect();
 
-    if let Some((foreign_file_id, owner_vk)) = unauthorized.first() {
-        let forwarded_upstream = upstream_exchange
-            .is_some_and(|up| !up.trim().is_empty() && up.contains(foreign_file_id));
-        if (200..300).contains(&status) || forwarded_upstream {
+    if !unauthorized.is_empty() {
+        for (foreign_file_id, owner_vk) in &unauthorized {
+            let forwarded_upstream = upstream_exchange
+                .is_some_and(|up| !up.trim().is_empty() && up.contains(foreign_file_id));
+            if forwarded_upstream {
+                return Verdict::Violation(format!(
+                    "virtual key '{caller_vk}' referenced file '{foreign_file_id}' owned by '{owner_vk}', \
+                     and gateway forwarded '{foreign_file_id}' upstream (HTTP {status}, forwarded_upstream=true)"
+                ));
+            }
+        }
+        let any_upstream_call = upstream_exchange.is_some_and(|up| !up.trim().is_empty());
+        if (200..300).contains(&status) || any_upstream_call {
+            let (foreign_file_id, owner_vk) = unauthorized[0];
             return Verdict::Violation(format!(
                 "virtual key '{caller_vk}' referenced file '{foreign_file_id}' owned by '{owner_vk}', \
-                 but gateway returned HTTP {status} (forwarded_upstream={forwarded_upstream})"
+                 but gateway returned HTTP {status} (forwarded_upstream={any_upstream_call})"
             ));
         }
         return Verdict::Conformant;
@@ -9398,5 +9408,31 @@ mod virtual_key_file_ownership_enforced_across_tool_outputs_tests {
             virtual_key_file_ownership_enforced_across_tool_outputs(exchange, None, OWNERS),
             Verdict::Conformant
         );
+    }
+
+    #[test]
+    fn multiple_foreign_files_with_400_and_second_file_forwarded_upstream_is_violation() {
+        let owners = &[("file-a", "<VK_TENANT_A>"), ("file-c", "<VK_TENANT_C>")];
+        let exchange = concat!(
+            "POST /v1/responses HTTP/1.1\r\n",
+            "Host: 127.0.0.1:8080\r\n",
+            "x-bf-vk: <VK_TENANT_B>\r\n\r\n",
+            r#"{"model":"openai/gpt-4o-mini","input":[{"type":"function_call_output","call_id":"call_1","output":[{"type":"input_file","file_id":"file-a"},{"type":"input_file","file_id":"file-c"}]}]}"#,
+            "HTTP/1.1 400 Bad Request\r\n\r\n",
+            r#"{"error":{"message":"upstream error"}}"#
+        );
+        let upstream = concat!(
+            "POST /v1/responses HTTP/1.1\r\n\r\n",
+            r#"{"model":"gpt-4o-mini","input":[{"type":"function_call_output","call_id":"call_1","output":[{"type":"input_file","file_id":"file-c"}]}]}"#
+        );
+        assert!(matches!(
+            virtual_key_file_ownership_enforced_across_tool_outputs(
+                exchange,
+                Some(upstream),
+                owners
+            ),
+            Verdict::Violation(msg)
+                if msg.contains("file-c") && msg.contains("forwarded_upstream=true")
+        ));
     }
 }
